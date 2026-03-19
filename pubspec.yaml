@@ -1,0 +1,45 @@
+name: kuber
+description: "Kuber — local-first expense manager"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Local database
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.5
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # Theming
+  dynamic_color: ^1.7.0
+  google_fonts: ^6.2.1
+
+  # Utilities
+  intl: ^0.20.2
+  shared_preferences: ^2.5.3
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.13
+  isar_generator: ^3.1.0+1
+
+flutter:
+  uses-material-design: true

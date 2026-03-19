@@ -1,0 +1,1248 @@
+import 'dart:math';
+
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../categories/data/category.dart';
+import '../../categories/providers/category_provider.dart';
+import '../../transactions/data/transaction.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../providers/analytics_provider.dart';
+
+// ---------------------------------------------------------------------------
+// Private data classes
+// ---------------------------------------------------------------------------
+
+class _Bucket {
+  final String label;
+  double income;
+  double expense;
+  _Bucket(this.label, {this.income = 0, this.expense = 0});
+}
+
+class _CatTotal {
+  final Category category;
+  final double expense;
+  final double percentage;
+  const _CatTotal(this.category, this.expense, this.percentage);
+}
+
+// ---------------------------------------------------------------------------
+// Analytics Screen
+// ---------------------------------------------------------------------------
+
+class AnalyticsScreen extends ConsumerStatefulWidget {
+  const AnalyticsScreen({super.key});
+
+  @override
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  AnalyticsPeriod _period = AnalyticsPeriod.month;
+  int? _selectedTrendBarIndex;
+  int? _selectedDonutSliceIndex;
+
+  // ---- bucket helpers -----------------------------------------------------
+
+  List<_Bucket> _buildBuckets(List<Transaction> txns) {
+    final now = DateTime.now();
+    switch (_period) {
+      case AnalyticsPeriod.week:
+        final buckets = List.generate(7, (i) {
+          final d = now.subtract(Duration(days: 6 - i));
+          return _Bucket(DateFormat.E().format(d));
+        });
+        for (final t in txns) {
+          final diff = now.difference(t.createdAt).inDays;
+          if (diff < 0 || diff > 6) continue;
+          final idx = 6 - diff;
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
+
+      case AnalyticsPeriod.month:
+        final buckets = List.generate(5, (i) => _Bucket('W${i + 1}'));
+        for (final t in txns) {
+          final week = ((t.createdAt.day - 1) / 7).floor();
+          final idx = week.clamp(0, 4);
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
+
+      case AnalyticsPeriod.threeMonths:
+        final buckets = List.generate(3, (i) {
+          final m = DateTime(now.year, now.month - 2 + i, 1);
+          return _Bucket(DateFormat.MMM().format(m));
+        });
+        for (final t in txns) {
+          final monthDiff = (now.year - t.createdAt.year) * 12 +
+              now.month -
+              t.createdAt.month;
+          final idx = 2 - monthDiff;
+          if (idx < 0 || idx > 2) continue;
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
+
+      case AnalyticsPeriod.year:
+        final buckets = List.generate(12, (i) {
+          final m = DateTime(now.year, i + 1, 1);
+          return _Bucket(DateFormat.MMM().format(m));
+        });
+        for (final t in txns) {
+          if (t.createdAt.year != now.year) continue;
+          final idx = t.createdAt.month - 1;
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
+    }
+  }
+
+  int _periodDays() {
+    final now = DateTime.now();
+    switch (_period) {
+      case AnalyticsPeriod.week:
+        return 7;
+      case AnalyticsPeriod.month:
+        return now.day;
+      case AnalyticsPeriod.threeMonths:
+        return now
+            .difference(DateTime(now.year, now.month - 2, 1))
+            .inDays
+            .clamp(1, 92);
+      case AnalyticsPeriod.year:
+        return now.difference(DateTime(now.year, 1, 1)).inDays.clamp(1, 366);
+    }
+  }
+
+  // ---- format helpers -----------------------------------------------------
+
+  String _formatAmount(double v) {
+    if (v >= 100000) {
+      return '₹${(v / 1000).toStringAsFixed(0)}K';
+    }
+    return '₹${v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)}';
+  }
+
+  String _formatPercent(double v) => '${v.toStringAsFixed(1)}%';
+
+  // ---- build --------------------------------------------------------------
+
+  @override
+  Widget build(BuildContext context) {
+    final periodTxns = ref.watch(analyticsTransactionsProvider(_period));
+    final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
+    final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    // If empty, show empty state
+    if (periodTxns.isEmpty) {
+      return const Scaffold(
+        appBar: KuberAppBar(),
+        body: EmptyState(
+          icon: Icons.bar_chart,
+          title: 'No data',
+          subtitle: 'Add transactions to see analytics',
+        ),
+      );
+    }
+
+    // Totals
+    double totalIncome = 0, totalExpense = 0;
+    for (final t in periodTxns) {
+      if (t.type == 'income') {
+        totalIncome += t.amount;
+      } else {
+        totalExpense += t.amount;
+      }
+    }
+    final netAmount = totalIncome - totalExpense;
+
+    // Buckets
+    final buckets = _buildBuckets(periodTxns);
+
+    // Category totals (expense only)
+    final catMap = <int, double>{};
+    for (final t in periodTxns) {
+      if (t.type != 'expense') continue;
+      final catId = int.tryParse(t.categoryId) ?? -1;
+      catMap[catId] = (catMap[catId] ?? 0) + t.amount;
+    }
+    final catTotals = catMap.entries
+        .where((e) => categoryMap.containsKey(e.key))
+        .map((e) => _CatTotal(
+              categoryMap[e.key]!,
+              e.value,
+              totalExpense > 0 ? e.value / totalExpense * 100 : 0,
+            ))
+        .toList()
+      ..sort((a, b) => b.expense.compareTo(a.expense));
+
+    // Monthly comparison (independent of period)
+    final now = DateTime.now();
+    final thisMonthStart = DateTime(now.year, now.month, 1);
+    final lastMonthStart = DateTime(now.year, now.month - 1, 1);
+    double thisMonthIncome = 0,
+        thisMonthExpense = 0,
+        lastMonthIncome = 0,
+        lastMonthExpense = 0;
+    for (final t in allTxns) {
+      if (!t.createdAt.isBefore(thisMonthStart)) {
+        if (t.type == 'income') {
+          thisMonthIncome += t.amount;
+        } else {
+          thisMonthExpense += t.amount;
+        }
+      } else if (!t.createdAt.isBefore(lastMonthStart)) {
+        if (t.type == 'income') {
+          lastMonthIncome += t.amount;
+        } else {
+          lastMonthExpense += t.amount;
+        }
+      }
+    }
+
+    // Key stats
+    final days = _periodDays();
+    final avgDaily = totalExpense / days;
+    final largestExpense = periodTxns
+        .where((t) => t.type == 'expense')
+        .fold<double>(0, (prev, t) => max(prev, t.amount));
+    final savingsRate =
+        totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100).clamp(0, 100) : 0.0;
+
+    // Top 5 biggest transactions
+    final biggest = List<Transaction>.from(periodTxns)
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+    final top5 = biggest.take(5).toList();
+
+    return Scaffold(
+      appBar: const KuberAppBar(),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: KuberSpacing.sm),
+
+            // [A] Period selector
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: AnalyticsPeriod.values.map((p) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: KuberSpacing.sm),
+                    child: _PeriodChip(
+                      label: _periodLabel(p),
+                      selected: _period == p,
+                      onTap: () => setState(() {
+                        _period = p;
+                        _selectedTrendBarIndex = null;
+                        _selectedDonutSliceIndex = null;
+                      }),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [B] Summary Card
+            _buildSummaryCard(
+                colorScheme, textTheme, totalIncome, totalExpense, netAmount),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [C] Spending Trend
+            _AnalyticsCard(
+              title: 'Spending Trend',
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: _buildTrendChart(buckets, colorScheme),
+                  ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: _selectedTrendBarIndex != null &&
+                            _selectedTrendBarIndex! < buckets.length
+                        ? _TrendDetailPanel(
+                            bucket: buckets[_selectedTrendBarIndex!],
+                            formatAmount: _formatAmount,
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [D] Spending by Category (donut)
+            if (catTotals.isNotEmpty) ...[
+              _AnalyticsCard(
+                title: 'Spending by Category',
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 220,
+                      child: _buildDonutChart(catTotals, colorScheme),
+                    ),
+                    const SizedBox(height: KuberSpacing.sm),
+                    Wrap(
+                      spacing: KuberSpacing.lg,
+                      runSpacing: KuberSpacing.xs,
+                      children: catTotals.take(6).map((ct) {
+                        final color = harmonizeCategory(
+                            context, Color(ct.category.colorValue));
+                        return _ChartLegend(color: color, label: ct.category.name);
+                      }).toList(),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: _selectedDonutSliceIndex != null &&
+                              _selectedDonutSliceIndex! < catTotals.length
+                          ? _DonutDetailPanel(
+                              catTotal: catTotals[_selectedDonutSliceIndex!],
+                              transactions: periodTxns,
+                              formatAmount: _formatAmount,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.lg),
+            ],
+
+            // [E] Top Categories
+            if (catTotals.isNotEmpty) ...[
+              _AnalyticsCard(
+                title: 'Top Categories',
+                child: Column(
+                  children: catTotals.take(5).map((ct) {
+                    final color = harmonizeCategory(
+                        context, Color(ct.category.colorValue));
+                    return Padding(
+                      padding:
+                          const EdgeInsets.only(bottom: KuberSpacing.md),
+                      child: Row(
+                        children: [
+                          CategoryIcon.circle(
+                            icon:
+                                IconMapper.fromString(ct.category.icon),
+                            rawColor: color,
+                            size: 36,
+                          ),
+                          const SizedBox(width: KuberSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      ct.category.name,
+                                      style: textTheme.bodyMedium,
+                                    ),
+                                    Text(
+                                      _formatAmount(ct.expense),
+                                      style: textTheme.bodyMedium
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: KuberSpacing.xs),
+                                ClipRRect(
+                                  borderRadius:
+                                      BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: catTotals.first.expense > 0
+                                        ? ct.expense /
+                                            catTotals.first.expense
+                                        : 0,
+                                    backgroundColor:
+                                        color.withValues(alpha: 0.15),
+                                    color: color,
+                                    minHeight: 6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.lg),
+            ],
+
+            // [F] Monthly Comparison
+            _AnalyticsCard(
+              title: 'Monthly Comparison',
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _MonthComparisonColumn(
+                      label: DateFormat.MMM().format(lastMonthStart),
+                      income: lastMonthIncome,
+                      expense: lastMonthExpense,
+                      formatAmount: _formatAmount,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 100,
+                    color: KuberColors.divider,
+                  ),
+                  Expanded(
+                    child: _MonthComparisonColumn(
+                      label: DateFormat.MMM().format(thisMonthStart),
+                      income: thisMonthIncome,
+                      expense: thisMonthExpense,
+                      formatAmount: _formatAmount,
+                      isCurrent: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [G] Highlights (2x2 grid)
+            _AnalyticsCard(
+              title: 'Highlights',
+              child: GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: KuberSpacing.md,
+                crossAxisSpacing: KuberSpacing.md,
+                childAspectRatio: 1.5,
+                children: [
+                  _StatTile(
+                    label: 'Avg. Daily',
+                    value: _formatAmount(avgDaily),
+                    icon: Icons.calendar_today,
+                    color: colorScheme.primary,
+                  ),
+                  _StatTile(
+                    label: 'Largest',
+                    value: _formatAmount(largestExpense),
+                    icon: Icons.arrow_upward,
+                    color: colorScheme.error,
+                  ),
+                  _StatTile(
+                    label: 'Savings Rate',
+                    value: _formatPercent(savingsRate),
+                    icon: Icons.savings,
+                    color: colorScheme.tertiary,
+                  ),
+                  _StatTile(
+                    label: 'Transactions',
+                    value: '${periodTxns.length}',
+                    icon: Icons.receipt_long,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [H] Biggest Transactions
+            _AnalyticsCard(
+              title: 'Biggest Transactions',
+              child: Column(
+                children: List.generate(top5.length, (i) {
+                  final t = top5[i];
+                  final cat = categoryMap[int.tryParse(t.categoryId)];
+                  final isExpense = t.type == 'expense';
+                  final rankColor =
+                      i == 0 ? colorScheme.primary : colorScheme.onSurfaceVariant;
+                  return Padding(
+                    padding:
+                        const EdgeInsets.only(bottom: KuberSpacing.md),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: rankColor.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '#${i + 1}',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: rankColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        if (cat != null)
+                          CategoryIcon.circle(
+                            icon: IconMapper.fromString(cat.icon),
+                            rawColor: harmonizeCategory(
+                                context, Color(cat.colorValue)),
+                            size: 36,
+                          ),
+                        const SizedBox(width: KuberSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t.name,
+                                style: textTheme.bodyMedium,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (cat != null)
+                                Text(
+                                  cat.name,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${isExpense ? '-' : '+'}${_formatAmount(t.amount)}',
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isExpense
+                                ? colorScheme.error
+                                : colorScheme.tertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+            const SizedBox(height: 100),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---- summary card -------------------------------------------------------
+
+  Widget _buildSummaryCard(ColorScheme cs, TextTheme tt, double income,
+      double expense, double net) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [KuberColors.gradientStart, KuberColors.gradientEnd],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _SummaryTile(
+                  label: 'Income',
+                  amount: _formatAmount(income),
+                  color: KuberColors.income,
+                  icon: Icons.arrow_downward,
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: _SummaryTile(
+                  label: 'Expense',
+                  amount: _formatAmount(expense),
+                  color: KuberColors.expense,
+                  icon: Icons.arrow_upward,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.md),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+                vertical: KuberSpacing.sm, horizontal: KuberSpacing.md),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Net: ',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: net >= 0 ? KuberColors.income : KuberColors.expense,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---- trend chart --------------------------------------------------------
+
+  Widget _buildTrendChart(List<_Bucket> buckets, ColorScheme cs) {
+    final maxVal = buckets.fold<double>(
+        0, (m, b) => max(m, max(b.income, b.expense)));
+
+    return BarChart(
+      BarChartData(
+        maxY: maxVal * 1.2,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            tooltipRoundedRadius: 8,
+            getTooltipItem: (_, __, rod, ___) => null,
+          ),
+          touchCallback: (event, response) {
+            if (event is FlTapUpEvent && response?.spot != null) {
+              final idx = response!.spot!.touchedBarGroupIndex;
+              setState(() {
+                _selectedTrendBarIndex =
+                    _selectedTrendBarIndex == idx ? null : idx;
+              });
+            }
+          },
+        ),
+        titlesData: FlTitlesData(
+          leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              getTitlesWidget: (val, _) {
+                final idx = val.toInt();
+                if (idx < 0 || idx >= buckets.length) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    buckets[idx].label,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      color: KuberColors.textSecondary,
+                    ),
+                  ),
+                );
+              },
+              reservedSize: 24,
+            ),
+          ),
+        ),
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        barGroups: List.generate(buckets.length, (i) {
+          final b = buckets[i];
+          final isSelected =
+              _selectedTrendBarIndex == null || _selectedTrendBarIndex == i;
+          final alpha = isSelected ? 1.0 : 0.45;
+          return BarChartGroupData(
+            x: i,
+            barRods: [
+              BarChartRodData(
+                toY: b.income,
+                color: cs.primary.withValues(alpha: alpha),
+                width: 8,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              BarChartRodData(
+                toY: b.expense,
+                color: cs.error.withValues(alpha: alpha),
+                width: 8,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  // ---- donut chart --------------------------------------------------------
+
+  Widget _buildDonutChart(List<_CatTotal> cats, ColorScheme cs) {
+    return PieChart(
+      PieChartData(
+        sectionsSpace: 2,
+        centerSpaceRadius: 40,
+        pieTouchData: PieTouchData(
+          touchCallback: (event, response) {
+            if (event is FlTapUpEvent && response?.touchedSection != null) {
+              final idx =
+                  response!.touchedSection!.touchedSectionIndex;
+              if (idx < 0) return;
+              setState(() {
+                _selectedDonutSliceIndex =
+                    _selectedDonutSliceIndex == idx ? null : idx;
+              });
+            }
+          },
+        ),
+        sections: List.generate(cats.length, (i) {
+          final ct = cats[i];
+          final isSelected = _selectedDonutSliceIndex == i;
+          final color =
+              harmonizeCategory(context, Color(ct.category.colorValue));
+          return PieChartSectionData(
+            value: ct.expense,
+            color: color,
+            radius: isSelected ? 60 : 50,
+            title: isSelected ? ct.category.name : '',
+            titleStyle: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            badgeWidget: isSelected
+                ? null
+                : null,
+          );
+        }),
+      ),
+    );
+  }
+
+  // ---- period label -------------------------------------------------------
+
+  String _periodLabel(AnalyticsPeriod p) {
+    switch (p) {
+      case AnalyticsPeriod.week:
+        return 'Week';
+      case AnalyticsPeriod.month:
+        return 'Month';
+      case AnalyticsPeriod.threeMonths:
+        return '3 Months';
+      case AnalyticsPeriod.year:
+        return 'Year';
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Private widgets
+// ---------------------------------------------------------------------------
+
+class _PeriodChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _PeriodChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.lg, vertical: KuberSpacing.sm),
+        decoration: BoxDecoration(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.2)
+              : KuberColors.card,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? cs.primary : KuberColors.divider,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            color: selected ? cs.primary : KuberColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AnalyticsCard extends StatelessWidget {
+  final String title;
+  final Widget? trailing;
+  final Widget child;
+
+  const _AnalyticsCard({
+    required this.title,
+    this.trailing,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: KuberColors.card,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              if (trailing != null) trailing!,
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.md),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartLegend extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _ChartLegend({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: KuberSpacing.xs),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            color: KuberColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryTile extends StatelessWidget {
+  final String label;
+  final String amount;
+  final Color color;
+  final IconData icon;
+
+  const _SummaryTile({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 14),
+              const SizedBox(width: KuberSpacing.xs),
+              Text(
+                label,
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white70,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            amount,
+            style: GoogleFonts.plusJakartaSans(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrendDetailPanel extends StatelessWidget {
+  final _Bucket bucket;
+  final String Function(double) formatAmount;
+
+  const _TrendDetailPanel({
+    required this.bucket,
+    required this.formatAmount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final net = bucket.income - bucket.expense;
+    final maxVal = max(bucket.income, bucket.expense).clamp(1.0, double.infinity);
+    return Padding(
+      padding: const EdgeInsets.only(top: KuberSpacing.md),
+      child: Column(
+        children: [
+          _DetailBar(
+            label: 'Income',
+            amount: formatAmount(bucket.income),
+            ratio: bucket.income / maxVal,
+            color: KuberColors.income,
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          _DetailBar(
+            label: 'Expense',
+            amount: formatAmount(bucket.expense),
+            ratio: bucket.expense / maxVal,
+            color: KuberColors.expense,
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Net',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: KuberColors.textSecondary,
+                ),
+              ),
+              Text(
+                '${net >= 0 ? '+' : ''}${formatAmount(net)}',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: net >= 0 ? KuberColors.income : KuberColors.expense,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailBar extends StatelessWidget {
+  final String label;
+  final String amount;
+  final double ratio;
+  final Color color;
+
+  const _DetailBar({
+    required this.label,
+    required this.amount,
+    required this.ratio,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                color: KuberColors.textSecondary,
+              ),
+            ),
+            Text(
+              amount,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: KuberSpacing.xs),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(3),
+          child: LinearProgressIndicator(
+            value: ratio.clamp(0, 1),
+            backgroundColor: color.withValues(alpha: 0.15),
+            color: color,
+            minHeight: 5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DonutDetailPanel extends StatelessWidget {
+  final _CatTotal catTotal;
+  final List<Transaction> transactions;
+  final String Function(double) formatAmount;
+
+  const _DonutDetailPanel({
+    required this.catTotal,
+    required this.transactions,
+    required this.formatAmount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final catIdStr = catTotal.category.id.toString();
+    final catTxns =
+        transactions.where((t) => t.categoryId == catIdStr).toList();
+    final income =
+        catTxns.where((t) => t.type == 'income').fold<double>(0, (s, t) => s + t.amount);
+    final expense =
+        catTxns.where((t) => t.type == 'expense').fold<double>(0, (s, t) => s + t.amount);
+    final maxVal = max(income, expense).clamp(1.0, double.infinity);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: KuberSpacing.md),
+      child: Column(
+        children: [
+          _DetailBar(
+            label: 'Income',
+            amount: formatAmount(income),
+            ratio: income / maxVal,
+            color: KuberColors.income,
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          _DetailBar(
+            label: 'Expense',
+            amount: formatAmount(expense),
+            ratio: expense / maxVal,
+            color: KuberColors.expense,
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Transactions',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: KuberColors.textSecondary,
+                ),
+              ),
+              Text(
+                '${catTxns.length}',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: KuberColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MonthComparisonColumn extends StatelessWidget {
+  final String label;
+  final double income;
+  final double expense;
+  final String Function(double) formatAmount;
+  final bool isCurrent;
+
+  const _MonthComparisonColumn({
+    required this.label,
+    required this.income,
+    required this.expense,
+    required this.formatAmount,
+    this.isCurrent = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final net = income - expense;
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isCurrent ? cs.primary : KuberColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          Text(
+            formatAmount(income),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: KuberColors.income,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            formatAmount(expense),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: KuberColors.expense,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpacing.sm, vertical: KuberSpacing.xs),
+            decoration: BoxDecoration(
+              color: (net >= 0 ? KuberColors.income : KuberColors.expense)
+                  .withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '${net >= 0 ? '+' : ''}${formatAmount(net)}',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: net >= 0 ? KuberColors.income : KuberColors.expense,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.md),
+      decoration: BoxDecoration(
+        color: KuberColors.cardLight,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const Spacer(),
+          Text(
+            value,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: KuberColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              color: KuberColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
