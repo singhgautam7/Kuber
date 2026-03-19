@@ -23,7 +23,7 @@ dependencies:
 
   # Theming
   dynamic_color: ^1.7.0
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.2
 
   # Utilities
   intl: ^0.20.2
