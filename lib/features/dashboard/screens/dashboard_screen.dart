@@ -415,7 +415,7 @@ class _WeeklyChartState extends State<_WeeklyChart> {
             _ChartLegendDot(color: KuberColors.expense, label: 'Exp'),
           ],
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpacing.xl),
         Container(
           height: 240,
           padding: const EdgeInsets.all(KuberSpacing.lg),
@@ -443,7 +443,7 @@ class _WeeklyChartState extends State<_WeeklyChart> {
                 },
                 touchTooltipData: BarTouchTooltipData(
                   getTooltipColor: (_) => KuberColors.cardLight,
-                  tooltipRoundedRadius: 8,
+                  tooltipBorderRadius: BorderRadius.circular(8),
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     if (rodIndex != 0) return null;
                     final d = days[group.x.toInt()];

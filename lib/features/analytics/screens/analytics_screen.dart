@@ -47,7 +47,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  AnalyticsPeriod _period = AnalyticsPeriod.month;
+  AnalyticsPeriod _period = AnalyticsPeriod.today;
   int? _selectedTrendBarIndex;
   int? _selectedDonutSliceIndex;
   int _biggestTab = 0; // 0 = expense, 1 = income
@@ -58,12 +58,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final now = DateTime.now();
     switch (_period) {
       case AnalyticsPeriod.today:
-        final buckets = List.generate(8, (i) {
-          final hour = i * 3;
-          return _Bucket('${hour.toString().padLeft(2, '0')}:00');
-        });
+        // 5 named time-of-day slots
+        final slotLabels = ['Dawn', 'Morning', 'Noon', 'Evening', 'Night'];
+        final buckets = slotLabels.map((l) => _Bucket(l)).toList();
         for (final t in txns) {
-          final idx = (t.createdAt.hour / 3).floor().clamp(0, 7);
+          final h = t.createdAt.hour;
+          int idx;
+          if (h < 6) {
+            idx = 0; // Dawn 00-05
+          } else if (h < 11) {
+            idx = 1; // Morning 06-10
+          } else if (h < 14) {
+            idx = 2; // Noon 11-13
+          } else if (h < 19) {
+            idx = 3; // Evening 14-18
+          } else {
+            idx = 4; // Night 19-23
+          }
           if (t.type == 'income') {
             buckets[idx].income += t.amount;
           } else {
@@ -139,8 +150,28 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         return buckets;
 
       case AnalyticsPeriod.all:
+        // Show last 12 months, latest month at the right
+        final buckets = List.generate(12, (i) {
+          final m = DateTime(now.year, now.month - 11 + i, 1);
+          return _Bucket(DateFormat('MMM yy').format(m));
+        });
+        final firstMonth = DateTime(now.year, now.month - 11, 1);
+        for (final t in txns) {
+          if (t.createdAt.isBefore(firstMonth)) continue;
+          final idx = (t.createdAt.year - firstMonth.year) * 12 +
+              t.createdAt.month -
+              firstMonth.month;
+          if (idx < 0 || idx >= buckets.length) continue;
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
+
       case AnalyticsPeriod.custom:
-        // Group by month
+        // Group by month across custom range
         if (txns.isEmpty) return [];
         final sorted = List<Transaction>.from(txns)
           ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
@@ -150,22 +181,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             last.month -
             first.month +
             1;
-        final buckets = List.generate(monthCount, (i) {
+        final cBuckets = List.generate(monthCount, (i) {
           final m = DateTime(first.year, first.month + i, 1);
-          return _Bucket(DateFormat.MMM().format(m));
+          return _Bucket(DateFormat('MMM yy').format(m));
         });
         for (final t in txns) {
           final idx = (t.createdAt.year - first.year) * 12 +
               t.createdAt.month -
               first.month;
-          if (idx < 0 || idx >= buckets.length) continue;
+          if (idx < 0 || idx >= cBuckets.length) continue;
           if (t.type == 'income') {
-            buckets[idx].income += t.amount;
+            cBuckets[idx].income += t.amount;
           } else {
-            buckets[idx].expense += t.amount;
+            cBuckets[idx].expense += t.amount;
           }
         }
-        return buckets;
+        return cBuckets;
     }
   }
 
@@ -209,6 +240,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   String _formatPercent(double v) => '${v.toStringAsFixed(1)}%';
 
+  String _formatYAxis(double value) {
+    if (value >= 10000000) {
+      final cr = value / 10000000;
+      return '₹${cr.toStringAsFixed(cr.truncateToDouble() == cr ? 0 : 1)}Cr';
+    }
+    if (value >= 100000) {
+      final l = value / 100000;
+      return '₹${l.toStringAsFixed(l.truncateToDouble() == l ? 0 : 1)}L';
+    }
+    if (value >= 1000) {
+      final k = value / 1000;
+      return '₹${k.toStringAsFixed(k.truncateToDouble() == k ? 0 : 1)}k';
+    }
+    return '₹${value.toInt()}';
+  }
+
   // ---- build --------------------------------------------------------------
 
   @override
@@ -219,23 +266,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    // If empty, show empty state
-    if (periodTxns.isEmpty) {
-      return Scaffold(
-        body: Column(
-          children: [
-            const KuberAppBar(title: 'Analytics'),
-            const Expanded(
-              child: EmptyState(
-                icon: Icons.bar_chart,
-                title: 'No data',
-                subtitle: 'Add transactions to see analytics',
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final isEmpty = periodTxns.isEmpty;
 
     // Totals
     double totalIncome = 0, totalExpense = 0;
@@ -331,6 +362,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
             ),
             const SizedBox(height: KuberSpacing.lg),
+
+            // If no data for this period, show inline empty state
+            if (isEmpty) ...[
+              const SizedBox(height: KuberSpacing.xl),
+              const EmptyState(
+                icon: Icons.bar_chart,
+                title: 'No data',
+                subtitle: 'No transactions found for this period',
+              ),
+            ] else ...[
 
             // [B] Summary Card
             _buildSummaryCard(
@@ -623,6 +664,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
 
             const SizedBox(height: 100),
+            ], // end else (has data)
           ],
         ),
       ),
@@ -742,7 +784,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         maxY: maxVal * 1.2,
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
-            tooltipRoundedRadius: 8,
+            tooltipBorderRadius: BorderRadius.circular(8),
             getTooltipItem: (_, _, rod, _) => null,
           ),
           touchCallback: (event, response) {
@@ -756,8 +798,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           },
         ),
         titlesData: FlTitlesData(
-          leftTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              interval: maxVal > 0 ? (maxVal * 1.2 / 3).ceilToDouble() : 1.0,
+              getTitlesWidget: (value, meta) {
+                if (value == 0) return const SizedBox.shrink();
+                return Text(
+                  _formatYAxis(value),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10,
+                    color: KuberColors.textSecondary,
+                  ),
+                );
+              },
+            ),
+          ),
           topTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false)),
           rightTitles: const AxisTitles(
@@ -797,14 +854,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             barRods: [
               BarChartRodData(
                 toY: b.income,
-                color: cs.primary.withValues(alpha: alpha),
-                width: 8,
+                color: KuberColors.income.withValues(alpha: alpha),
+                width: 14,
                 borderRadius: BorderRadius.circular(4),
               ),
               BarChartRodData(
                 toY: b.expense,
                 color: cs.error.withValues(alpha: alpha),
-                width: 8,
+                width: 14,
                 borderRadius: BorderRadius.circular(4),
               ),
             ],
@@ -1064,10 +1121,10 @@ class _AnalyticsCard extends StatelessWidget {
                 title,
                 style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
-              ?trailing,
+              if (trailing != null) trailing!,
             ],
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpacing.xl),
           child,
         ],
       ),
