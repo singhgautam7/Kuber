@@ -103,7 +103,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon:
                 Icon(Icons.receipt_long_rounded, color: KuberColors.primary),
-            label: 'History',
+            label: 'Transactions',
           ),
           NavigationDestination(
             icon: Icon(Icons.bar_chart_outlined),

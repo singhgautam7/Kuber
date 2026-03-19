@@ -1,4 +1,4 @@
-package com.example.kuber
+package com.grs.kuber
 
 import io.flutter.embedding.android.FlutterActivity
 

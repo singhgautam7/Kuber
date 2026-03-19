@@ -3,42 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/account_helpers.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../widgets/account_form_sheet.dart';
 
-IconData _accountIcon(String type) {
-  switch (type.toLowerCase()) {
-    case 'bank':
-      return Icons.account_balance_rounded;
-    case 'card':
-      return Icons.credit_card_rounded;
-    case 'upi':
-      return Icons.phone_android_rounded;
-    case 'cash':
-      return Icons.payments_rounded;
-    default:
-      return Icons.account_balance_wallet_rounded;
-  }
-}
 
-Color _accountColor(String type) {
-  switch (type.toLowerCase()) {
-    case 'bank':
-      return const Color(0xFF5C6BC0); // indigo
-    case 'card':
-      return const Color(0xFFAB47BC); // purple/mauve
-    case 'upi':
-      return const Color(0xFFFF7043); // deep orange
-    case 'cash':
-      return const Color(0xFF66BB6A); // green
-    default:
-      return KuberColors.textSecondary;
-  }
-}
 
 String _accountTypeLabel(Account account) {
   if (account.isCreditCard) return 'CREDIT CARD';
@@ -57,13 +29,11 @@ String _accountTypeLabel(Account account) {
 }
 
 IconData _resolveIcon(Account account) {
-  if (account.icon != null) return IconMapper.fromString(account.icon!);
-  return _accountIcon(account.type);
+  return resolveAccountIcon(account);
 }
 
 Color _resolveColor(Account account) {
-  if (account.colorValue != null) return Color(account.colorValue!);
-  return _accountColor(account.type);
+  return resolveAccountColor(account);
 }
 
 void _openAccountSheet(BuildContext context, {Account? account}) {
@@ -87,18 +57,6 @@ class AccountsScreen extends ConsumerWidget {
     final accountsAsync = ref.watch(accountListProvider);
 
     return Scaffold(
-      appBar: KuberAppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.more_vert_rounded,
-              color: KuberColors.textSecondary,
-            ),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
       body: accountsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -139,6 +97,11 @@ class _AccountsBody extends ConsumerWidget {
 
     return CustomScrollView(
       slivers: [
+        // App bar
+        const SliverToBoxAdapter(
+          child: KuberAppBar(title: 'Accounts'),
+        ),
+
         // Page header
         SliverToBoxAdapter(
           child: Padding(
@@ -151,7 +114,7 @@ class _AccountsBody extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Managed\nAccounts',
+                        'Manage\nAccounts',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,

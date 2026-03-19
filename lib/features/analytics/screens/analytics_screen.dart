@@ -15,7 +15,6 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
-import '../../transactions/providers/transaction_provider.dart';
 import '../providers/analytics_provider.dart';
 
 // ---------------------------------------------------------------------------
@@ -24,9 +23,9 @@ import '../providers/analytics_provider.dart';
 
 class _Bucket {
   final String label;
-  double income;
-  double expense;
-  _Bucket(this.label, {this.income = 0, this.expense = 0});
+  double income = 0;
+  double expense = 0;
+  _Bucket(this.label);
 }
 
 class _CatTotal {
@@ -51,12 +50,28 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   AnalyticsPeriod _period = AnalyticsPeriod.month;
   int? _selectedTrendBarIndex;
   int? _selectedDonutSliceIndex;
+  int _biggestTab = 0; // 0 = expense, 1 = income
 
   // ---- bucket helpers -----------------------------------------------------
 
   List<_Bucket> _buildBuckets(List<Transaction> txns) {
     final now = DateTime.now();
     switch (_period) {
+      case AnalyticsPeriod.today:
+        final buckets = List.generate(8, (i) {
+          final hour = i * 3;
+          return _Bucket('${hour.toString().padLeft(2, '0')}:00');
+        });
+        for (final t in txns) {
+          final idx = (t.createdAt.hour / 3).floor().clamp(0, 7);
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
+
       case AnalyticsPeriod.week:
         final buckets = List.generate(7, (i) {
           final d = now.subtract(Duration(days: 6 - i));
@@ -75,6 +90,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         return buckets;
 
       case AnalyticsPeriod.month:
+      case AnalyticsPeriod.lastMonth:
         final buckets = List.generate(5, (i) => _Bucket('W${i + 1}'));
         for (final t in txns) {
           final week = ((t.createdAt.day - 1) / 7).floor();
@@ -121,16 +137,53 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           }
         }
         return buckets;
+
+      case AnalyticsPeriod.all:
+      case AnalyticsPeriod.custom:
+        // Group by month
+        if (txns.isEmpty) return [];
+        final sorted = List<Transaction>.from(txns)
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        final first = sorted.first.createdAt;
+        final last = sorted.last.createdAt;
+        final monthCount = (last.year - first.year) * 12 +
+            last.month -
+            first.month +
+            1;
+        final buckets = List.generate(monthCount, (i) {
+          final m = DateTime(first.year, first.month + i, 1);
+          return _Bucket(DateFormat.MMM().format(m));
+        });
+        for (final t in txns) {
+          final idx = (t.createdAt.year - first.year) * 12 +
+              t.createdAt.month -
+              first.month;
+          if (idx < 0 || idx >= buckets.length) continue;
+          if (t.type == 'income') {
+            buckets[idx].income += t.amount;
+          } else {
+            buckets[idx].expense += t.amount;
+          }
+        }
+        return buckets;
     }
   }
 
   int _periodDays() {
     final now = DateTime.now();
     switch (_period) {
+      case AnalyticsPeriod.all:
+        return max(now.difference(DateTime(now.year - 1, now.month, now.day)).inDays, 1);
+      case AnalyticsPeriod.today:
+        return 1;
       case AnalyticsPeriod.week:
         return 7;
       case AnalyticsPeriod.month:
         return now.day;
+      case AnalyticsPeriod.lastMonth:
+        final lastMonthStart = DateTime(now.year, now.month - 1, 1);
+        final thisMonthStart = DateTime(now.year, now.month, 1);
+        return thisMonthStart.difference(lastMonthStart).inDays;
       case AnalyticsPeriod.threeMonths:
         return now
             .difference(DateTime(now.year, now.month - 2, 1))
@@ -138,6 +191,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             .clamp(1, 92);
       case AnalyticsPeriod.year:
         return now.difference(DateTime(now.year, 1, 1)).inDays.clamp(1, 366);
+      case AnalyticsPeriod.custom:
+        final range = ref.read(customDateRangeProvider);
+        if (range == null) return 1;
+        return range.end.difference(range.start).inDays.clamp(1, 3650);
     }
   }
 
@@ -157,7 +214,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final periodTxns = ref.watch(analyticsTransactionsProvider(_period));
-    final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -165,12 +221,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
     // If empty, show empty state
     if (periodTxns.isEmpty) {
-      return const Scaffold(
-        appBar: KuberAppBar(),
-        body: EmptyState(
-          icon: Icons.bar_chart,
-          title: 'No data',
-          subtitle: 'Add transactions to see analytics',
+      return Scaffold(
+        body: Column(
+          children: [
+            const KuberAppBar(title: 'Analytics'),
+            const Expanded(
+              child: EmptyState(
+                icon: Icons.bar_chart,
+                title: 'No data',
+                subtitle: 'Add transactions to see analytics',
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -206,51 +268,35 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         .toList()
       ..sort((a, b) => b.expense.compareTo(a.expense));
 
-    // Monthly comparison (independent of period)
-    final now = DateTime.now();
-    final thisMonthStart = DateTime(now.year, now.month, 1);
-    final lastMonthStart = DateTime(now.year, now.month - 1, 1);
-    double thisMonthIncome = 0,
-        thisMonthExpense = 0,
-        lastMonthIncome = 0,
-        lastMonthExpense = 0;
-    for (final t in allTxns) {
-      if (!t.createdAt.isBefore(thisMonthStart)) {
-        if (t.type == 'income') {
-          thisMonthIncome += t.amount;
-        } else {
-          thisMonthExpense += t.amount;
-        }
-      } else if (!t.createdAt.isBefore(lastMonthStart)) {
-        if (t.type == 'income') {
-          lastMonthIncome += t.amount;
-        } else {
-          lastMonthExpense += t.amount;
-        }
-      }
-    }
-
     // Key stats
     final days = _periodDays();
     final avgDaily = totalExpense / days;
     final largestExpense = periodTxns
         .where((t) => t.type == 'expense')
         .fold<double>(0, (prev, t) => max(prev, t.amount));
+    final largestIncome = periodTxns
+        .where((t) => t.type == 'income')
+        .fold<double>(0, (prev, t) => max(prev, t.amount));
+    final expenseRatio =
+        totalIncome > 0 ? (totalExpense / totalIncome * 100) : 0.0;
     final savingsRate =
-        totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100).clamp(0, 100) : 0.0;
+        totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome * 100).clamp(0.0, 100.0) : 0.0;
 
-    // Top 5 biggest transactions
-    final biggest = List<Transaction>.from(periodTxns)
+    // Top 5 biggest transactions (filtered by tab)
+    final biggestType = _biggestTab == 0 ? 'expense' : 'income';
+    final biggest = periodTxns
+        .where((t) => t.type == biggestType)
+        .toList()
       ..sort((a, b) => b.amount.compareTo(a.amount));
     final top5 = biggest.take(5).toList();
 
     return Scaffold(
-      appBar: const KuberAppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const KuberAppBar(title: 'Analytics'),
             const SizedBox(height: KuberSpacing.sm),
 
             // [A] Period selector
@@ -258,17 +304,28 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: AnalyticsPeriod.values.map((p) {
+                  final isCustomActive = p == AnalyticsPeriod.custom &&
+                      _period == AnalyticsPeriod.custom;
+                  final label = isCustomActive
+                      ? _customRangeLabel()
+                      : _periodLabel(p);
                   return Padding(
                     padding: const EdgeInsets.only(right: KuberSpacing.sm),
-                    child: _PeriodChip(
-                      label: _periodLabel(p),
-                      selected: _period == p,
-                      onTap: () => setState(() {
-                        _period = p;
-                        _selectedTrendBarIndex = null;
-                        _selectedDonutSliceIndex = null;
-                      }),
-                    ),
+                    child: p == AnalyticsPeriod.custom
+                        ? _CustomRangeChip(
+                            label: label,
+                            selected: _period == p,
+                            onTap: () => _pickCustomRange(),
+                          )
+                        : _PeriodChip(
+                            label: label,
+                            selected: _period == p,
+                            onTap: () => setState(() {
+                              _period = p;
+                              _selectedTrendBarIndex = null;
+                              _selectedDonutSliceIndex = null;
+                            }),
+                          ),
                   );
                 }).toList(),
               ),
@@ -412,39 +469,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               const SizedBox(height: KuberSpacing.lg),
             ],
 
-            // [F] Monthly Comparison
-            _AnalyticsCard(
-              title: 'Monthly Comparison',
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _MonthComparisonColumn(
-                      label: DateFormat.MMM().format(lastMonthStart),
-                      income: lastMonthIncome,
-                      expense: lastMonthExpense,
-                      formatAmount: _formatAmount,
-                    ),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 100,
-                    color: KuberColors.divider,
-                  ),
-                  Expanded(
-                    child: _MonthComparisonColumn(
-                      label: DateFormat.MMM().format(thisMonthStart),
-                      income: thisMonthIncome,
-                      expense: thisMonthExpense,
-                      formatAmount: _formatAmount,
-                      isCurrent: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.lg),
-
-            // [G] Highlights (2x2 grid)
+            // [G] Highlights (2x3 grid)
             _AnalyticsCard(
               title: 'Highlights',
               child: GridView.count(
@@ -462,10 +487,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     color: colorScheme.primary,
                   ),
                   _StatTile(
-                    label: 'Largest',
+                    label: 'Largest Expense',
                     value: _formatAmount(largestExpense),
-                    icon: Icons.arrow_upward,
+                    icon: Icons.trending_down,
                     color: colorScheme.error,
+                  ),
+                  _StatTile(
+                    label: 'Largest Income',
+                    value: _formatAmount(largestIncome),
+                    icon: Icons.trending_up,
+                    color: colorScheme.tertiary,
+                  ),
+                  _StatTile(
+                    label: 'Expense Ratio',
+                    value: _formatPercent(expenseRatio),
+                    icon: Icons.pie_chart,
+                    color: colorScheme.primary,
                   ),
                   _StatTile(
                     label: 'Savings Rate',
@@ -487,77 +524,102 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             // [H] Biggest Transactions
             _AnalyticsCard(
               title: 'Biggest Transactions',
-              child: Column(
-                children: List.generate(top5.length, (i) {
-                  final t = top5[i];
-                  final cat = categoryMap[int.tryParse(t.categoryId)];
-                  final isExpense = t.type == 'expense';
-                  final rankColor =
-                      i == 0 ? colorScheme.primary : colorScheme.onSurfaceVariant;
-                  return Padding(
-                    padding:
-                        const EdgeInsets.only(bottom: KuberSpacing.md),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: rankColor.withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '#${i + 1}',
-                            style: textTheme.labelSmall?.copyWith(
-                              color: rankColor,
-                              fontWeight: FontWeight.w700,
-                            ),
+              trailing: _TabToggle(
+                labels: const ['Expense', 'Income'],
+                selected: _biggestTab,
+                onChanged: (i) => setState(() => _biggestTab = i),
+              ),
+              child: top5.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: KuberSpacing.xl),
+                      child: Center(
+                        child: Text(
+                          'No $biggestType transactions',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: KuberColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(width: KuberSpacing.md),
-                        if (cat != null)
-                          CategoryIcon.circle(
-                            icon: IconMapper.fromString(cat.icon),
-                            rawColor: harmonizeCategory(
-                                context, Color(cat.colorValue)),
-                            size: 36,
-                          ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                    )
+                  : Column(
+                      children: List.generate(top5.length, (i) {
+                        final t = top5[i];
+                        final cat =
+                            categoryMap[int.tryParse(t.categoryId)];
+                        final isExpense = t.type == 'expense';
+                        final rankColor = i == 0
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant;
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              bottom: KuberSpacing.md),
+                          child: Row(
                             children: [
-                              Text(
-                                t.name,
-                                style: textTheme.bodyMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (cat != null)
-                                Text(
-                                  cat.name,
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color:
+                                      rankColor.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '#${i + 1}',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: rankColor,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
+                              ),
+                              const SizedBox(width: KuberSpacing.md),
+                              if (cat != null)
+                                CategoryIcon.circle(
+                                  icon:
+                                      IconMapper.fromString(cat.icon),
+                                  rawColor: harmonizeCategory(context,
+                                      Color(cat.colorValue)),
+                                  size: 36,
+                                ),
+                              const SizedBox(width: KuberSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t.name,
+                                      style: textTheme.bodyMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (cat != null)
+                                      Text(
+                                        cat.name,
+                                        style: textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                '${isExpense ? '-' : '+'}${_formatAmount(t.amount)}',
+                                style: textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isExpense
+                                      ? colorScheme.error
+                                      : colorScheme.tertiary,
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                        Text(
-                          '${isExpense ? '-' : '+'}${_formatAmount(t.amount)}',
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: isExpense
-                                ? colorScheme.error
-                                : colorScheme.tertiary,
-                          ),
-                        ),
-                      ],
+                        );
+                      }),
                     ),
-                  );
-                }),
-              ),
             ),
 
             const SizedBox(height: 100),
@@ -567,6 +629,37 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     );
   }
 
+  // ---- custom range helpers -----------------------------------------------
+
+  Future<void> _pickCustomRange() async {
+    final now = DateTime.now();
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: ref.read(customDateRangeProvider) ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 30)),
+            end: now,
+          ),
+    );
+    if (range != null) {
+      ref.read(customDateRangeProvider.notifier).state = range;
+      setState(() {
+        _period = AnalyticsPeriod.custom;
+        _selectedTrendBarIndex = null;
+        _selectedDonutSliceIndex = null;
+      });
+    }
+  }
+
+  String _customRangeLabel() {
+    final range = ref.read(customDateRangeProvider);
+    if (range == null) return 'Custom Range';
+    final fmt = DateFormat('MMM d');
+    return '${fmt.format(range.start)} - ${fmt.format(range.end)}';
+  }
+
   // ---- summary card -------------------------------------------------------
 
   Widget _buildSummaryCard(ColorScheme cs, TextTheme tt, double income,
@@ -574,11 +667,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [KuberColors.gradientStart, KuberColors.gradientEnd],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: KuberColors.card,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(KuberSpacing.lg),
@@ -611,7 +700,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             padding: const EdgeInsets.symmetric(
                 vertical: KuberSpacing.sm, horizontal: KuberSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: KuberColors.cardLight,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -620,7 +709,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 Text(
                   'Net: ',
                   style: GoogleFonts.plusJakartaSans(
-                    color: Colors.white70,
+                    color: KuberColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
@@ -643,6 +732,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   // ---- trend chart --------------------------------------------------------
 
   Widget _buildTrendChart(List<_Bucket> buckets, ColorScheme cs) {
+    if (buckets.isEmpty) return const SizedBox.shrink();
+
     final maxVal = buckets.fold<double>(
         0, (m, b) => max(m, max(b.income, b.expense)));
 
@@ -652,7 +743,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
             tooltipRoundedRadius: 8,
-            getTooltipItem: (_, __, rod, ___) => null,
+            getTooltipItem: (_, _, rod, _) => null,
           ),
           touchCallback: (event, response) {
             if (event is FlTapUpEvent && response?.spot != null) {
@@ -771,14 +862,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   String _periodLabel(AnalyticsPeriod p) {
     switch (p) {
+      case AnalyticsPeriod.all:
+        return 'All';
+      case AnalyticsPeriod.today:
+        return 'Today';
       case AnalyticsPeriod.week:
         return 'Week';
       case AnalyticsPeriod.month:
         return 'Month';
+      case AnalyticsPeriod.lastMonth:
+        return 'Last Month';
       case AnalyticsPeriod.threeMonths:
         return '3 Months';
       case AnalyticsPeriod.year:
         return 'Year';
+      case AnalyticsPeriod.custom:
+        return 'Custom Range';
     }
   }
 }
@@ -829,6 +928,111 @@ class _PeriodChip extends StatelessWidget {
   }
 }
 
+class _CustomRangeChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _CustomRangeChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.lg, vertical: KuberSpacing.sm),
+        decoration: BoxDecoration(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.2)
+              : KuberColors.card,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? cs.primary : KuberColors.divider,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.date_range,
+              size: 14,
+              color: selected ? cs.primary : KuberColors.textSecondary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: selected ? cs.primary : KuberColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TabToggle extends StatelessWidget {
+  final List<String> labels;
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  const _TabToggle({
+    required this.labels,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: KuberColors.cardLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(labels.length, (i) {
+          final isSelected = selected == i;
+          return GestureDetector(
+            onTap: () => onChanged(i),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.md, vertical: KuberSpacing.xs),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? cs.primary.withValues(alpha: 0.2)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                labels[i],
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? cs.primary : KuberColors.textSecondary,
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
 class _AnalyticsCard extends StatelessWidget {
   final String title;
   final Widget? trailing;
@@ -860,7 +1064,7 @@ class _AnalyticsCard extends StatelessWidget {
                 title,
                 style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
           const SizedBox(height: KuberSpacing.md),
@@ -918,7 +1122,7 @@ class _SummaryTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: KuberColors.cardLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -931,7 +1135,7 @@ class _SummaryTile extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white70,
+                  color: KuberColors.textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -941,7 +1145,7 @@ class _SummaryTile extends StatelessWidget {
           Text(
             amount,
             style: GoogleFonts.plusJakartaSans(
-              color: Colors.white,
+              color: KuberColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -1120,77 +1324,6 @@ class _DonutDetailPanel extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MonthComparisonColumn extends StatelessWidget {
-  final String label;
-  final double income;
-  final double expense;
-  final String Function(double) formatAmount;
-  final bool isCurrent;
-
-  const _MonthComparisonColumn({
-    required this.label,
-    required this.income,
-    required this.expense,
-    required this.formatAmount,
-    this.isCurrent = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final net = income - expense;
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
-      child: Column(
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isCurrent ? cs.primary : KuberColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Text(
-            formatAmount(income),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: KuberColors.income,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xs),
-          Text(
-            formatAmount(expense),
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              color: KuberColors.expense,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.sm, vertical: KuberSpacing.xs),
-            decoration: BoxDecoration(
-              color: (net >= 0 ? KuberColors.income : KuberColors.expense)
-                  .withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '${net >= 0 ? '+' : ''}${formatAmount(net)}',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: net >= 0 ? KuberColors.income : KuberColors.expense,
-              ),
-            ),
           ),
         ],
       ),

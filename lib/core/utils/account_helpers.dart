@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../features/accounts/data/account.dart';
+import 'icon_mapper.dart';
+
 IconData accountIcon(String type) {
   return switch (type) {
     'bank' => Icons.account_balance,
@@ -18,4 +21,14 @@ Color accountColor(String type) {
     'cash' => Colors.grey,
     _ => Colors.teal,
   };
+}
+
+Color resolveAccountColor(Account account) {
+  if (account.colorValue != null) return Color(account.colorValue!);
+  return accountColor(account.type);
+}
+
+IconData resolveAccountIcon(Account account) {
+  if (account.icon != null) return IconMapper.fromString(account.icon!);
+  return accountIcon(account.type);
 }

@@ -27,17 +27,15 @@ class DashboardScreen extends ConsumerWidget {
     final categoryMapAsync = ref.watch(categoryMapProvider);
 
     return Scaffold(
-      appBar: const KuberAppBar(),
-      body: SafeArea(
-        top: false,
-        child: ListView(
-          padding: const EdgeInsets.only(
-            left: KuberSpacing.lg,
-            right: KuberSpacing.lg,
-            bottom: 100,
-          ),
-          children: [
-            const SizedBox(height: KuberSpacing.lg),
+      body: ListView(
+        padding: const EdgeInsets.only(
+          left: KuberSpacing.lg,
+          right: KuberSpacing.lg,
+          bottom: 100,
+        ),
+        children: [
+          const KuberAppBar(),
+          const SizedBox(height: KuberSpacing.lg),
 
             // [A] Balance Hero Card
             summaryAsync.when(
@@ -87,7 +85,7 @@ class DashboardScreen extends ConsumerWidget {
                           final account = accounts[i];
                           final balanceAsync =
                               ref.watch(accountBalanceProvider(account.id));
-                          final acctColor = accountColor(account.type);
+                          final acctColor = resolveAccountColor(account);
                           final cardWidth =
                               (MediaQuery.of(context).size.width -
                                       2 * KuberSpacing.lg -
@@ -120,7 +118,7 @@ class DashboardScreen extends ConsumerWidget {
                                               BorderRadius.circular(10),
                                         ),
                                         child: Icon(
-                                          accountIcon(account.type),
+                                          resolveAccountIcon(account),
                                           size: 18,
                                           color: acctColor,
                                         ),
@@ -229,7 +227,6 @@ class DashboardScreen extends ConsumerWidget {
               },
             ),
           ],
-        ),
       ),
     );
   }

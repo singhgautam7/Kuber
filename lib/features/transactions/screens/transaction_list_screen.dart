@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -24,10 +25,31 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   String _searchQuery = '';
   String _selectedFilter = 'all';
 
+  // Advanced filter state
+  DateTimeRange? _dateRange;
+  String? _typeFilter;
+  Set<int> _selectedAccountIds = {};
+  Set<int> _selectedCategoryIds = {};
+
+  bool get _hasAdvancedFilters =>
+      _dateRange != null ||
+      _typeFilter != null ||
+      _selectedAccountIds.isNotEmpty ||
+      _selectedCategoryIds.isNotEmpty;
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _clearAdvancedFilters() {
+    setState(() {
+      _dateRange = null;
+      _typeFilter = null;
+      _selectedAccountIds = {};
+      _selectedCategoryIds = {};
+    });
   }
 
   List<Transaction> _applyFilters(List<Transaction> transactions) {
@@ -39,7 +61,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       filtered = filtered.where((t) => t.name.toLowerCase().contains(query)).toList();
     }
 
-    // Type filter
+    // Simple type filter (from chips)
     switch (_selectedFilter) {
       case 'expense':
         filtered = filtered.where((t) => t.type == 'expense').toList();
@@ -54,6 +76,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 t.createdAt.year == now.year && t.createdAt.month == now.month)
             .toList();
         break;
+    }
+
+    // Advanced filters
+    if (_dateRange != null) {
+      filtered = filtered.where((t) =>
+          !t.createdAt.isBefore(_dateRange!.start) &&
+          t.createdAt.isBefore(_dateRange!.end.add(const Duration(days: 1)))).toList();
+    }
+
+    if (_typeFilter != null) {
+      filtered = filtered.where((t) => t.type == _typeFilter).toList();
+    }
+
+    if (_selectedAccountIds.isNotEmpty) {
+      filtered = filtered.where((t) =>
+          _selectedAccountIds.contains(int.tryParse(t.accountId))).toList();
+    }
+
+    if (_selectedCategoryIds.isNotEmpty) {
+      filtered = filtered.where((t) =>
+          _selectedCategoryIds.contains(int.tryParse(t.categoryId))).toList();
     }
 
     return filtered;
@@ -118,128 +161,194 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
   }
 
+  void _openAdvancedFilters() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: KuberColors.surfaceCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => _AdvancedFilterSheet(
+        dateRange: _dateRange,
+        typeFilter: _typeFilter,
+        selectedAccountIds: _selectedAccountIds,
+        selectedCategoryIds: _selectedCategoryIds,
+        searchQuery: _searchQuery,
+        onApply: (dateRange, typeFilter, accountIds, categoryIds, searchQuery) {
+          setState(() {
+            _dateRange = dateRange;
+            _typeFilter = typeFilter;
+            _selectedAccountIds = accountIds;
+            _selectedCategoryIds = categoryIds;
+            if (searchQuery != _searchQuery) {
+              _searchQuery = searchQuery;
+              _searchController.text = searchQuery;
+            }
+          });
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final transactionsAsync = ref.watch(transactionListProvider);
 
     return Scaffold(
-      appBar: const KuberAppBar(),
-      body: Column(
-        children: [
+      body: CustomScrollView(
+        slivers: [
+          // App bar
+          const SliverToBoxAdapter(
+            child: KuberAppBar(title: 'Transactions'),
+          ),
+
           // Search bar
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.sm,
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => setState(() => _searchQuery = value),
-              style: GoogleFonts.plusJakartaSans(
-                color: KuberColors.textPrimary,
-                fontSize: 14,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpacing.lg,
+                vertical: KuberSpacing.sm,
               ),
-              decoration: InputDecoration(
-                hintText: 'Search transactions...',
-                hintStyle: GoogleFonts.plusJakartaSans(
-                  color: KuberColors.textMuted,
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => setState(() => _searchQuery = value),
+                style: GoogleFonts.plusJakartaSans(
+                  color: KuberColors.textPrimary,
                   fontSize: 14,
                 ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: KuberColors.textMuted,
-                  size: 20,
-                ),
-                suffixIcon: const Icon(
-                  Icons.mic_outlined,
-                  color: KuberColors.textMuted,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: KuberColors.surfaceElement,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
-                  vertical: KuberSpacing.md,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide:
-                      const BorderSide(color: KuberColors.primary, width: 1.5),
+                decoration: InputDecoration(
+                  hintText: 'Search transactions...',
+                  hintStyle: GoogleFonts.plusJakartaSans(
+                    color: KuberColors.textMuted,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: KuberColors.textMuted,
+                    size: 20,
+                  ),
+                  suffixIcon: const Icon(
+                    Icons.mic_outlined,
+                    color: KuberColors.textMuted,
+                    size: 20,
+                  ),
+                  filled: true,
+                  fillColor: KuberColors.surfaceElement,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpacing.lg,
+                    vertical: KuberSpacing.md,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide:
+                        const BorderSide(color: KuberColors.primary, width: 1.5),
+                  ),
                 ),
               ),
             ),
           ),
 
           // Filter chips
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.xs,
-            ),
-            child: Row(
-              children: [
-                _FilterChip(
-                  label: 'All',
-                  isSelected: _selectedFilter == 'all',
-                  onTap: () => setState(() => _selectedFilter = 'all'),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpacing.lg,
+                vertical: KuberSpacing.xs,
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    if (_hasAdvancedFilters) ...[
+                      _FilterChip(
+                        label: 'Clear Filters',
+                        icon: Icons.close,
+                        isSelected: false,
+                        isHighlighted: true,
+                        onTap: _clearAdvancedFilters,
+                      ),
+                      const SizedBox(width: KuberSpacing.sm),
+                    ],
+                    _FilterChip(
+                      label: 'All',
+                      isSelected: _selectedFilter == 'all',
+                      onTap: () => setState(() => _selectedFilter = 'all'),
+                    ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    _FilterChip(
+                      label: 'Expenses',
+                      icon: Icons.arrow_downward,
+                      isSelected: _selectedFilter == 'expense',
+                      onTap: () => setState(() => _selectedFilter = 'expense'),
+                    ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    _FilterChip(
+                      label: 'Income',
+                      icon: Icons.arrow_upward,
+                      isSelected: _selectedFilter == 'income',
+                      onTap: () => setState(() => _selectedFilter = 'income'),
+                    ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    _FilterChip(
+                      label: 'This Month',
+                      isSelected: _selectedFilter == 'this_month',
+                      onTap: () => setState(() => _selectedFilter = 'this_month'),
+                    ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    _AdvancedFilterButton(
+                      hasFilters: _hasAdvancedFilters,
+                      onTap: _openAdvancedFilters,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: KuberSpacing.sm),
-                _FilterChip(
-                  label: 'Expenses',
-                  icon: Icons.arrow_downward,
-                  isSelected: _selectedFilter == 'expense',
-                  onTap: () => setState(() => _selectedFilter = 'expense'),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                _FilterChip(
-                  label: 'Income',
-                  icon: Icons.arrow_upward,
-                  isSelected: _selectedFilter == 'income',
-                  onTap: () => setState(() => _selectedFilter = 'income'),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                _FilterChip(
-                  label: 'This Month',
-                  isSelected: _selectedFilter == 'this_month',
-                  onTap: () => setState(() => _selectedFilter = 'this_month'),
-                ),
-              ],
+              ),
             ),
           ),
 
-          const SizedBox(height: KuberSpacing.sm),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: KuberSpacing.sm),
+          ),
 
           // Transaction list
-          Expanded(
-            child: transactionsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (transactions) {
-                final filtered = _applyFilters(transactions);
+          transactionsAsync.when(
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => SliverFillRemaining(
+              child: Center(child: Text('Error: $e')),
+            ),
+            data: (transactions) {
+              final filtered = _applyFilters(transactions);
 
-                if (filtered.isEmpty) {
-                  return _EmptyState(
+              if (filtered.isEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _EmptyState(
                     hasTransactions: transactions.isNotEmpty,
                     onAdd: () => context.push('/add-transaction'),
-                  );
-                }
-
-                final groups = _groupByDate(filtered);
-
-                return ListView.builder(
-                  padding: const EdgeInsets.only(
-                    bottom: 80,
-                    left: KuberSpacing.lg,
-                    right: KuberSpacing.lg,
                   ),
+                );
+              }
+
+              final groups = _groupByDate(filtered);
+
+              return SliverPadding(
+                padding: const EdgeInsets.only(
+                  bottom: 80,
+                  left: KuberSpacing.lg,
+                  right: KuberSpacing.lg,
+                ),
+                sliver: SliverList.builder(
                   itemCount: groups.length * 2,
                   itemBuilder: (context, index) {
                     final groupIndex = index ~/ 2;
@@ -259,9 +368,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       );
                     }
                   },
-                );
-              },
-            ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -275,12 +384,14 @@ class _FilterChip extends StatelessWidget {
   final String label;
   final IconData? icon;
   final bool isSelected;
+  final bool isHighlighted;
   final VoidCallback onTap;
 
   const _FilterChip({
     required this.label,
     this.icon,
     required this.isSelected,
+    this.isHighlighted = false,
     required this.onTap,
   });
 
@@ -297,7 +408,9 @@ class _FilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? KuberColors.primary
-              : KuberColors.surfaceElement,
+              : isHighlighted
+                  ? KuberColors.expense.withValues(alpha: 0.15)
+                  : KuberColors.surfaceElement,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -307,7 +420,11 @@ class _FilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: isSelected ? Colors.white : KuberColors.textSecondary,
+                color: isSelected
+                    ? Colors.white
+                    : isHighlighted
+                        ? KuberColors.expense
+                        : KuberColors.textSecondary,
               ),
               const SizedBox(width: 4),
             ],
@@ -316,7 +433,62 @@ class _FilterChip extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? Colors.white : KuberColors.textSecondary,
+                color: isSelected
+                    ? Colors.white
+                    : isHighlighted
+                        ? KuberColors.expense
+                        : KuberColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AdvancedFilterButton extends StatelessWidget {
+  final bool hasFilters;
+  final VoidCallback onTap;
+
+  const _AdvancedFilterButton({
+    required this.hasFilters,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpacing.md,
+          vertical: KuberSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: hasFilters
+              ? KuberColors.primary.withValues(alpha: 0.15)
+              : KuberColors.surfaceElement,
+          borderRadius: BorderRadius.circular(10),
+          border: hasFilters
+              ? Border.all(color: KuberColors.primary, width: 1)
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.tune,
+              size: 14,
+              color: hasFilters ? KuberColors.primary : KuberColors.textSecondary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              'Advanced',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: hasFilters ? FontWeight.w600 : FontWeight.w400,
+                color: hasFilters ? KuberColors.primary : KuberColors.textSecondary,
               ),
             ),
           ],
@@ -646,4 +818,376 @@ class _DateGroup {
     required this.dayTotal,
     required this.transactions,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Advanced Filter Bottom Sheet
+// ---------------------------------------------------------------------------
+
+class _AdvancedFilterSheet extends ConsumerStatefulWidget {
+  final DateTimeRange? dateRange;
+  final String? typeFilter;
+  final Set<int> selectedAccountIds;
+  final Set<int> selectedCategoryIds;
+  final String searchQuery;
+  final void Function(
+    DateTimeRange? dateRange,
+    String? typeFilter,
+    Set<int> accountIds,
+    Set<int> categoryIds,
+    String searchQuery,
+  ) onApply;
+
+  const _AdvancedFilterSheet({
+    required this.dateRange,
+    required this.typeFilter,
+    required this.selectedAccountIds,
+    required this.selectedCategoryIds,
+    required this.searchQuery,
+    required this.onApply,
+  });
+
+  @override
+  ConsumerState<_AdvancedFilterSheet> createState() =>
+      _AdvancedFilterSheetState();
+}
+
+class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
+  late DateTimeRange? _dateRange;
+  late String? _typeFilter;
+  late Set<int> _accountIds;
+  late Set<int> _categoryIds;
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateRange = widget.dateRange;
+    _typeFilter = widget.typeFilter;
+    _accountIds = Set.from(widget.selectedAccountIds);
+    _categoryIds = Set.from(widget.selectedCategoryIds);
+    _searchController = TextEditingController(text: widget.searchQuery);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _reset() {
+    setState(() {
+      _dateRange = null;
+      _typeFilter = null;
+      _accountIds = {};
+      _categoryIds = {};
+      _searchController.clear();
+    });
+  }
+
+  Future<void> _pickDateRange() async {
+    final now = DateTime.now();
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: _dateRange ??
+          DateTimeRange(
+            start: now.subtract(const Duration(days: 30)),
+            end: now,
+          ),
+    );
+    if (range != null) {
+      setState(() => _dateRange = range);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
+    final categories = ref.watch(categoryListProvider).valueOrNull ?? [];
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(KuberSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: KuberColors.textMuted.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // Title + Reset
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Advanced Filters',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                TextButton(
+                  onPressed: _reset,
+                  child: Text(
+                    'Reset',
+                    style: GoogleFonts.plusJakartaSans(
+                      color: KuberColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // Date Range
+            Text('Date Range', style: textTheme.labelLarge),
+            const SizedBox(height: KuberSpacing.sm),
+            GestureDetector(
+              onTap: _pickDateRange,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.lg,
+                  vertical: KuberSpacing.md,
+                ),
+                decoration: BoxDecoration(
+                  color: KuberColors.surfaceElement,
+                  borderRadius: BorderRadius.circular(12),
+                  border: _dateRange != null
+                      ? Border.all(color: KuberColors.primary, width: 1)
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.date_range,
+                        size: 18, color: KuberColors.textSecondary),
+                    const SizedBox(width: KuberSpacing.sm),
+                    Text(
+                      _dateRange != null
+                          ? '${DateFormat('MMM d, y').format(_dateRange!.start)} - ${DateFormat('MMM d, y').format(_dateRange!.end)}'
+                          : 'Select date range',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        color: _dateRange != null
+                            ? KuberColors.textPrimary
+                            : KuberColors.textMuted,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_dateRange != null)
+                      GestureDetector(
+                        onTap: () => setState(() => _dateRange = null),
+                        child: const Icon(Icons.close,
+                            size: 16, color: KuberColors.textSecondary),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // Type
+            Text('Type', style: textTheme.labelLarge),
+            const SizedBox(height: KuberSpacing.sm),
+            Row(
+              children: [
+                _SheetChip(
+                  label: 'All',
+                  isSelected: _typeFilter == null,
+                  onTap: () => setState(() => _typeFilter = null),
+                ),
+                const SizedBox(width: KuberSpacing.sm),
+                _SheetChip(
+                  label: 'Income',
+                  isSelected: _typeFilter == 'income',
+                  onTap: () => setState(() => _typeFilter = 'income'),
+                ),
+                const SizedBox(width: KuberSpacing.sm),
+                _SheetChip(
+                  label: 'Expense',
+                  isSelected: _typeFilter == 'expense',
+                  onTap: () => setState(() => _typeFilter = 'expense'),
+                ),
+              ],
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // Accounts
+            if (accounts.isNotEmpty) ...[
+              Text('Accounts', style: textTheme.labelLarge),
+              const SizedBox(height: KuberSpacing.sm),
+              Wrap(
+                spacing: KuberSpacing.sm,
+                runSpacing: KuberSpacing.sm,
+                children: accounts.map((a) {
+                  final selected = _accountIds.contains(a.id);
+                  return _SheetChip(
+                    label: a.name,
+                    isSelected: selected,
+                    onTap: () {
+                      setState(() {
+                        if (selected) {
+                          _accountIds.remove(a.id);
+                        } else {
+                          _accountIds.add(a.id);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: KuberSpacing.lg),
+            ],
+
+            // Categories
+            if (categories.isNotEmpty) ...[
+              Text('Categories', style: textTheme.labelLarge),
+              const SizedBox(height: KuberSpacing.sm),
+              Wrap(
+                spacing: KuberSpacing.sm,
+                runSpacing: KuberSpacing.sm,
+                children: categories.map((c) {
+                  final selected = _categoryIds.contains(c.id);
+                  return _SheetChip(
+                    label: c.name,
+                    isSelected: selected,
+                    onTap: () {
+                      setState(() {
+                        if (selected) {
+                          _categoryIds.remove(c.id);
+                        } else {
+                          _categoryIds.add(c.id);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: KuberSpacing.lg),
+            ],
+
+            // Search
+            Text('Search', style: textTheme.labelLarge),
+            const SizedBox(height: KuberSpacing.sm),
+            TextField(
+              controller: _searchController,
+              style: GoogleFonts.plusJakartaSans(
+                color: KuberColors.textPrimary,
+                fontSize: 14,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Search by name...',
+                hintStyle: GoogleFonts.plusJakartaSans(
+                  color: KuberColors.textMuted,
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: KuberColors.surfaceElement,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.lg,
+                  vertical: KuberSpacing.md,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.xl),
+
+            // Apply button
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {
+                  widget.onApply(
+                    _dateRange,
+                    _typeFilter,
+                    _accountIds,
+                    _categoryIds,
+                    _searchController.text,
+                  );
+                  Navigator.pop(context);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: KuberColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  'Apply Filters',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _SheetChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpacing.md,
+          vertical: KuberSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? KuberColors.primary.withValues(alpha: 0.15)
+              : KuberColors.surfaceElement,
+          borderRadius: BorderRadius.circular(10),
+          border: isSelected
+              ? Border.all(color: KuberColors.primary, width: 1)
+              : null,
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? KuberColors.primary : KuberColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
 }
