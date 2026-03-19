@@ -383,9 +383,29 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: 'Spending Trend',
               child: Column(
                 children: [
-                  SizedBox(
-                    height: 200,
-                    child: _buildTrendChart(buckets, colorScheme),
+                  Builder(
+                    builder: (context) {
+                      final needsScroll = buckets.length > 7;
+                      final chartWidth = needsScroll
+                          ? buckets.length * 60.0
+                          : null; // null = fill parent
+                      final chart = SizedBox(
+                        height: 200,
+                        width: chartWidth,
+                        child: _buildTrendChart(buckets, colorScheme),
+                      );
+                      if (needsScroll) {
+                        return SizedBox(
+                          height: 200,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            reverse: true, // start from the latest month
+                            child: chart,
+                          ),
+                        );
+                      }
+                      return chart;
+                    },
                   ),
                   AnimatedSize(
                     duration: const Duration(milliseconds: 300),
@@ -1121,6 +1141,7 @@ class _AnalyticsCard extends StatelessWidget {
                 title,
                 style: tt.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
+              // ignore: use_null_aware_elements
               if (trailing != null) trailing!,
             ],
           ),

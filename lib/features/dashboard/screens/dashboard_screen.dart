@@ -276,7 +276,7 @@ class _BalanceHeroCard extends StatelessWidget {
                 child: _BalanceTile(
                   label: 'Income',
                   amount: summary.totalIncome,
-                  icon: Icons.arrow_downward,
+                  icon: Icons.arrow_downward_rounded,
                   iconColor: KuberColors.income,
                 ),
               ),
@@ -285,7 +285,7 @@ class _BalanceHeroCard extends StatelessWidget {
                 child: _BalanceTile(
                   label: 'Expense',
                   amount: summary.totalExpense,
-                  icon: Icons.arrow_upward,
+                  icon: Icons.arrow_upward_rounded,
                   iconColor: KuberColors.expense,
                 ),
               ),
@@ -326,10 +326,10 @@ class _BalanceTile extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
+               color: Colors.black.withValues(alpha: 0.25),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 16),
+            child: Icon(icon, color: iconColor, size: 18),
           ),
           const SizedBox(width: KuberSpacing.sm),
           Expanded(
