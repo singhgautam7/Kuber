@@ -71,6 +71,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       case 'income':
         filtered = filtered.where((t) => t.type == 'income').toList();
         break;
+      case 'transfer':
+        filtered = filtered.where((t) => t.type == 'transfer').toList();
+        break;
       case 'this_month':
         final now = DateTime.now();
         filtered = filtered
@@ -120,6 +123,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       double dayTotal = 0;
       for (final t in txns) {
+        if (t.type == 'transfer') continue;
         dayTotal += t.type == 'income' ? t.amount : -t.amount;
       }
 
@@ -293,6 +297,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       onTap: () {
                         if (_selectedFilter == 'income') return;
                         setState(() => _selectedFilter = 'income');
+                      },
+                    ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    _KuberFilterChip(
+                      label: 'Transfers',
+                      selected: _selectedFilter == 'transfer',
+                      onTap: () {
+                        if (_selectedFilter == 'transfer') return;
+                        setState(() => _selectedFilter = 'transfer');
                       },
                     ),
                     const SizedBox(width: KuberSpacing.sm),
@@ -546,6 +559,7 @@ class _TransactionRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
+    final isTransfer = transaction.type == 'transfer';
 
     final category = categoriesAsync.whenOrNull(
       data: (cats) {
@@ -571,17 +585,41 @@ class _TransactionRow extends ConsumerWidget {
       },
     );
 
-    final isIncome = transaction.type == 'income';
-    final amountColor = isIncome ? KuberColors.income : KuberColors.expense;
-    final amountPrefix = isIncome ? '+' : '-';
-    final iconData = category != null
-        ? IconMapper.fromString(category.icon)
-        : Icons.category;
-    final iconColor =
-        category != null ? Color(category.colorValue) : KuberColors.primary;
+    // Transfer-specific: look up FROM and TO accounts
+    String? fromName;
+    String? toName;
+    if (isTransfer) {
+      final accs = accountsAsync.valueOrNull ?? [];
+      fromName = accs
+          .where((a) => a.id.toString() == transaction.fromAccountId)
+          .firstOrNull
+          ?.name;
+      toName = accs
+          .where((a) => a.id.toString() == transaction.toAccountId)
+          .firstOrNull
+          ?.name;
+    }
 
-    final categoryName = category?.name ?? 'Unknown';
-    final accountName = account?.name ?? 'Unknown';
+    final isIncome = transaction.type == 'income';
+    final amountColor = isTransfer
+        ? KuberColors.textPrimary
+        : (isIncome ? KuberColors.income : KuberColors.expense);
+    final amountPrefix = isTransfer ? '' : (isIncome ? '+' : '-');
+    final iconData = isTransfer
+        ? Icons.swap_horiz_rounded
+        : (category != null
+            ? IconMapper.fromString(category.icon)
+            : Icons.category);
+    final iconColor = isTransfer
+        ? const Color(0xFF78909C)
+        : (category != null ? Color(category.colorValue) : KuberColors.primary);
+
+    final displayName = isTransfer
+        ? '${fromName ?? "Unknown"} → ${toName ?? "Unknown"}'
+        : transaction.name;
+    final subtitle = isTransfer
+        ? 'Transfer · ${toName ?? "Unknown"}'
+        : '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
 
     return Dismissible(
       key: ValueKey(transaction.id),
@@ -634,7 +672,7 @@ class _TransactionRow extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      transaction.name,
+                      displayName,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -645,7 +683,7 @@ class _TransactionRow extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$categoryName · $accountName',
+                      subtitle,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
@@ -975,6 +1013,12 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   label: 'Expense',
                   isSelected: _typeFilter == 'expense',
                   onTap: () => setState(() => _typeFilter = 'expense'),
+                ),
+                const SizedBox(width: KuberSpacing.sm),
+                _SheetChip(
+                  label: 'Transfer',
+                  isSelected: _typeFilter == 'transfer',
+                  onTap: () => setState(() => _typeFilter = 'transfer'),
                 ),
               ],
             ),

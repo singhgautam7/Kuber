@@ -199,10 +199,22 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.xl),
 
             // [D] Recent Transactions
-            Text('Recent Transactions',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                )),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Recent Transactions',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    )),
+                TextButton(
+                  onPressed: () => context.go('/transactions'),
+                  child: Text('View All',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.primary,
+                      )),
+                ),
+              ],
+            ),
             const SizedBox(height: KuberSpacing.md),
             recentAsync.when(
               loading: () =>
@@ -295,7 +307,7 @@ class _BalanceHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: KuberSpacing.sm),
           Text(
-            CurrencyFormatter.format(summary.net),
+            '${summary.net < 0 ? '-' : ''}${CurrencyFormatter.format(summary.net)}',
             style: textTheme.headlineLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,

@@ -23,6 +23,7 @@ class KuberColors {
   static const expense = Color(0xFFEF5350);
   static const gradientStart = Color(0xFF1565C0);
   static const gradientEnd = Color(0xFF0D47A1);
+  static const neutral = Colors.amber;
 
   // Aliases for semantic usage
   static const surfaceElement = cardLight;

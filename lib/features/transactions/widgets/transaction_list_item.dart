@@ -41,36 +41,33 @@ class TransactionListItem extends ConsumerWidget {
             ? IconMapper.fromString(category.icon)
             : Icons.category;
 
-        return Dismissible(
-          key: ValueKey(transaction.id),
-          direction: DismissDirection.endToStart,
-          onDismissed: (_) => onDismissed?.call(),
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: KuberSpacing.xl),
-            margin: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.xs,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(Icons.delete, color: colorScheme.onErrorContainer),
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.lg,
+            vertical: KuberSpacing.xs,
           ),
-          child: GestureDetector(
-            onTap: onTap,
-            child: Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.lg,
-                vertical: KuberSpacing.xs,
-              ),
-              padding: const EdgeInsets.all(KuberSpacing.lg),
+          child: Dismissible(
+            key: ValueKey(transaction.id),
+            direction: DismissDirection.endToStart,
+            onDismissed: (_) => onDismissed?.call(),
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: KuberSpacing.xl),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainer,
+                color: colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
+              child: Icon(Icons.delete, color: colorScheme.onErrorContainer),
+            ),
+            child: GestureDetector(
+              onTap: onTap,
+              child: Container(
+                padding: const EdgeInsets.all(KuberSpacing.lg),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
                 children: [
                   // Category icon
                   Container(
@@ -113,6 +110,7 @@ class TransactionListItem extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
           ),
         );
       },

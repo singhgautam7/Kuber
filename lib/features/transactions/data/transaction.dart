@@ -8,7 +8,7 @@ class Transaction {
 
   late String name;
   late double amount;
-  late String type; // 'income' | 'expense'
+  late String type; // 'income' | 'expense' | 'transfer'
 
   @Index()
   late String categoryId;
@@ -17,6 +17,9 @@ class Transaction {
   late String accountId;
 
   String? notes;
+
+  String? fromAccountId; // only set when type == 'transfer'
+  String? toAccountId;   // only set when type == 'transfer'
 
   @Index()
   late DateTime createdAt;
