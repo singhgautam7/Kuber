@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/breakpoints.dart';
+import '../../features/accounts/providers/account_provider.dart';
+import 'kuber_nav_bar.dart';
 
 class AppScaffold extends ConsumerStatefulWidget {
   final Widget child;
@@ -29,11 +31,21 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     context.go(_routes[index]);
   }
 
+  void _onAddTapped() {
+    if (_currentIndex == 3) {
+      // On Accounts tab → trigger add-account sheet
+      ref.read(triggerAddAccountProvider.notifier).state = true;
+    } else {
+      context.push('/add-transaction');
+    }
+  }
+
   double get _slideDirection =>
       _currentIndex > _previousIndex ? 1.0 : -1.0;
 
   @override
   Widget build(BuildContext context) {
+    // Sync tab index from route
     final location = GoRouterState.of(context).uri.path;
     final routeIndex = _routes.indexOf(location);
     if (routeIndex != -1 && routeIndex != _currentIndex) {
@@ -47,77 +59,59 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
       });
     }
 
+    final width = MediaQuery.of(context).size.width;
+    final isWide = width >= KuberBreakpoints.smallTablet;
+
+    final animatedContent = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 280),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final slideIn = Tween<Offset>(
+          begin: Offset(_slideDirection, 0),
+          end: Offset.zero,
+        ).animate(animation);
+
+        return SlideTransition(
+          position: slideIn,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: KeyedSubtree(
+        key: ValueKey(_currentIndex),
+        child: widget.child,
+      ),
+    );
+
+    if (isWide) {
+      // Large tablet / desktop → side rail
+      return Scaffold(
+        backgroundColor: KuberColors.background,
+        body: Row(
+          children: [
+            KuberNavRail(
+              currentIndex: _currentIndex,
+              onTabTapped: _onTabTapped,
+              onAddTapped: _onAddTapped,
+            ),
+            Expanded(child: animatedContent),
+          ],
+        ),
+      );
+    }
+
+    // Phone / small tablet → glassmorphic bottom bar
     return Scaffold(
       backgroundColor: KuberColors.background,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) {
-          final slideIn = Tween<Offset>(
-            begin: Offset(_slideDirection, 0),
-            end: Offset.zero,
-          ).animate(animation);
-
-          return SlideTransition(
-            position: slideIn,
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-          );
-        },
-        child: KeyedSubtree(
-          key: ValueKey(_currentIndex),
-          child: widget.child,
-        ),
-      ),
-      floatingActionButton: _currentIndex != 3
-          ? FloatingActionButton.extended(
-              onPressed: () => context.push('/add-transaction'),
-              backgroundColor: KuberColors.primary,
-              foregroundColor: Colors.white,
-              icon: const Icon(Icons.add_rounded),
-              label: Text(
-                'Add',
-                style: GoogleFonts.plusJakartaSans(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: _onTabTapped,
-        backgroundColor: KuberColors.surfaceCard,
-        indicatorColor: KuberColors.primary.withValues(alpha: 0.15),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded, color: KuberColors.primary),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon:
-                Icon(Icons.receipt_long_rounded, color: KuberColors.primary),
-            label: 'Transactions',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon:
-                Icon(Icons.bar_chart_rounded, color: KuberColors.primary),
-            label: 'Analytics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: Icon(Icons.account_balance_wallet_rounded,
-                color: KuberColors.primary),
-            label: 'Accounts',
-          ),
-        ],
+      extendBody: true,
+      body: animatedContent,
+      bottomNavigationBar: KuberBottomNavBar(
+        currentIndex: _currentIndex,
+        onTabTapped: _onTabTapped,
+        onAddTapped: _onAddTapped,
       ),
     );
   }

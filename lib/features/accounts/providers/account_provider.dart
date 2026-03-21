@@ -9,6 +9,9 @@ import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
 import '../data/account_repository.dart';
 
+/// Set to true from AppScaffold to trigger the account form sheet on the Accounts tab.
+final triggerAddAccountProvider = StateProvider<bool>((ref) => false);
+
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository(ref.watch(isarProvider));
 });

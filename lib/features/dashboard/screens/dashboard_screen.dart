@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/transaction_list_item.dart';
@@ -28,10 +29,10 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       body: ListView(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           left: KuberSpacing.lg,
           right: KuberSpacing.lg,
-          bottom: 100,
+          bottom: navBarBottomPadding(context),
         ),
         children: [
           const KuberAppBar(),

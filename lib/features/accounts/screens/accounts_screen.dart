@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../data/account.dart';
@@ -64,6 +65,14 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountListProvider);
+
+    // Listen for add-account trigger from nav bar
+    ref.listen<bool>(triggerAddAccountProvider, (_, triggered) {
+      if (triggered) {
+        ref.read(triggerAddAccountProvider.notifier).state = false;
+        _openAccountSheet(context);
+      }
+    });
 
     return Scaffold(
       body: accountsAsync.when(
@@ -195,8 +204,8 @@ class _AccountsBody extends ConsumerWidget {
           ),
 
         // Bottom padding
-        const SliverToBoxAdapter(
-          child: SizedBox(height: 24),
+        SliverToBoxAdapter(
+          child: SizedBox(height: navBarBottomPadding(context)),
         ),
       ],
     );

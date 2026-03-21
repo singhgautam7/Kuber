@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
@@ -694,7 +695,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     ),
             ),
 
-            const SizedBox(height: 100),
+            SizedBox(height: navBarBottomPadding(context)),
             ], // end else (has data)
           ],
         ),
