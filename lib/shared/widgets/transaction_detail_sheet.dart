@@ -46,9 +46,10 @@ void showTransactionDetailSheet(
 /// Deletes the transaction and shows an undo snackbar.
 void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction t) {
   ref.read(transactionListProvider.notifier).delete(t.id);
+  final label = t.type == 'transfer' ? 'Deleted transfer' : 'Deleted "${t.name}"';
   showTimedSnackBar(
     context,
-    message: 'Deleted "${t.name}"',
+    message: label,
     duration: const Duration(seconds: 5),
     action: SnackBarAction(
       label: 'Undo',
@@ -59,6 +60,8 @@ void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction 
           ..type = t.type
           ..categoryId = t.categoryId
           ..accountId = t.accountId
+          ..fromAccountId = t.fromAccountId
+          ..toAccountId = t.toAccountId
           ..notes = t.notes
           ..createdAt = t.createdAt
           ..updatedAt = t.updatedAt
@@ -85,6 +88,7 @@ class TransactionDetailSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
+    final isTransfer = transaction.type == 'transfer';
 
     final category = categoriesAsync.whenOrNull(
       data: (cats) {
@@ -110,16 +114,39 @@ class TransactionDetailSheet extends ConsumerWidget {
       },
     );
 
+    // Transfer-specific lookups
+    String? fromAccountName;
+    String? toAccountName;
+    if (isTransfer) {
+      final accs = accountsAsync.valueOrNull ?? [];
+      fromAccountName = accs
+          .where((a) => a.id.toString() == transaction.fromAccountId)
+          .firstOrNull
+          ?.name;
+      toAccountName = accs
+          .where((a) => a.id.toString() == transaction.toAccountId)
+          .firstOrNull
+          ?.name;
+    }
+
     final isIncome = transaction.type == 'income';
-    final amountColor = isIncome ? KuberColors.income : KuberColors.expense;
-    final amountPrefix = isIncome ? '+₹' : '−₹';
-    final iconData = category != null
-        ? IconMapper.fromString(category.icon)
-        : Icons.category;
-    final iconColor =
-        category != null ? Color(category.colorValue) : KuberColors.primary;
+    final amountColor = isTransfer
+        ? KuberColors.textPrimary
+        : (isIncome ? KuberColors.income : KuberColors.expense);
+    final amountPrefix = isTransfer ? '₹' : (isIncome ? '+₹' : '−₹');
+    final iconData = isTransfer
+        ? Icons.swap_horiz_rounded
+        : (category != null
+            ? IconMapper.fromString(category.icon)
+            : Icons.category);
+    final iconColor = isTransfer
+        ? const Color(0xFF78909C)
+        : (category != null ? Color(category.colorValue) : KuberColors.primary);
     final categoryName = category?.name ?? 'Unknown';
     final accountName = account?.name ?? 'Unknown';
+    final displayName = isTransfer
+        ? '${fromAccountName ?? "Unknown"} → ${toAccountName ?? "Unknown"}'
+        : transaction.name;
 
     final dateLabel =
         '${DateFormatter.groupHeader(transaction.createdAt)}, ${DateFormat('d MMM').format(transaction.createdAt)} • ${DateFormatter.time(transaction.createdAt)}';
@@ -141,17 +168,28 @@ class TransactionDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // Category icon
-            CategoryIcon.circle(
-              icon: iconData,
-              rawColor: iconColor,
-              size: 64,
-            ),
+            // Icon
+            if (isTransfer)
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(iconData, size: 30, color: iconColor),
+              )
+            else
+              CategoryIcon.circle(
+                icon: iconData,
+                rawColor: iconColor,
+                size: 64,
+              ),
             const SizedBox(height: KuberSpacing.lg),
 
             // Transaction name
             Text(
-              transaction.name,
+              displayName,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -185,50 +223,79 @@ class TransactionDetailSheet extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.xl),
 
             // Detail rows
-            // Category
-            DetailRow(
-              icon: Icons.category_rounded,
-              label: 'Category',
-              trailing: Text(
-                categoryName,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: KuberColors.primary,
+            if (isTransfer) ...[
+              // From Account
+              DetailRow(
+                icon: Icons.arrow_upward_rounded,
+                label: 'From Account',
+                trailing: Text(
+                  fromAccountName ?? 'Unknown',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: KuberColors.textPrimary,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-
-            // Account
-            DetailRow(
-              icon: Icons.account_balance_wallet_outlined,
-              label: 'Account',
-              trailing: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    accountName,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: KuberColors.textPrimary,
-                    ),
+              const SizedBox(height: KuberSpacing.sm),
+              // To Account
+              DetailRow(
+                icon: Icons.arrow_downward_rounded,
+                label: 'To Account',
+                trailing: Text(
+                  toAccountName ?? 'Unknown',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: KuberColors.textPrimary,
                   ),
-                  if (account?.last4Digits != null &&
-                      account!.last4Digits!.isNotEmpty)
+                ),
+              ),
+            ] else ...[
+              // Category
+              DetailRow(
+                icon: Icons.category_rounded,
+                label: 'Category',
+                trailing: Text(
+                  categoryName,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: KuberColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.sm),
+              // Account
+              DetailRow(
+                icon: Icons.account_balance_wallet_outlined,
+                label: 'Account',
+                trailing: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      'ENDING IN ${account.last4Digits}',
+                      accountName,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: KuberColors.textMuted,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: KuberColors.textPrimary,
                       ),
                     ),
-                ],
+                    if (account?.last4Digits != null &&
+                        account!.last4Digits!.isNotEmpty)
+                      Text(
+                        'ENDING IN ${account.last4Digits}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: KuberColors.textMuted,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
+            ],
 
             // Notes
             if (transaction.notes != null &&

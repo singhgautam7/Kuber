@@ -16,7 +16,7 @@ final analyticsTransactionsProvider =
   DateTime? to;
   switch (period) {
     case AnalyticsPeriod.all:
-      return all;
+      return all.where((t) => t.type != 'transfer').toList();
     case AnalyticsPeriod.today:
       from = DateTime(now.year, now.month, now.day);
     case AnalyticsPeriod.week:
@@ -32,11 +32,12 @@ final analyticsTransactionsProvider =
       from = DateTime(now.year, 1, 1);
     case AnalyticsPeriod.custom:
       final range = ref.watch(customDateRangeProvider);
-      if (range == null) return all;
+      if (range == null) return all.where((t) => t.type != 'transfer').toList();
       from = range.start;
       to = range.end.add(const Duration(days: 1));
   }
   return all.where((t) {
+    if (t.type == 'transfer') return false;
     if (from != null && t.createdAt.isBefore(from)) return false;
     if (to != null && !t.createdAt.isBefore(to)) return false;
     return true;

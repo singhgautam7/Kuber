@@ -9,11 +9,13 @@ import '../../accounts/providers/account_provider.dart';
 class AccountPickerSheet extends ConsumerWidget {
   final int? selectedAccountId;
   final ValueChanged<int> onSelected;
+  final int? excludeAccountId;
 
   const AccountPickerSheet({
     super.key,
     required this.selectedAccountId,
     required this.onSelected,
+    this.excludeAccountId,
   });
 
   @override
@@ -85,7 +87,10 @@ class AccountPickerSheet extends ConsumerWidget {
               error: (e, _) => Center(
                 child: Text('Error: $e'),
               ),
-              data: (accs) {
+              data: (allAccs) {
+                final accs = excludeAccountId != null
+                    ? allAccs.where((a) => a.id != excludeAccountId).toList()
+                    : allAccs;
                 if (accs.isEmpty) {
                   return Center(
                     child: Text(

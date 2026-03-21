@@ -1,6 +1,8 @@
 import 'package:isar/isar.dart';
 
 import '../../../core/database/base_repository.dart';
+import '../../../core/utils/transfer_helpers.dart';
+import '../../accounts/data/account.dart';
 import 'transaction.dart';
 
 class TransactionRepository extends BaseRepository<Transaction> {
@@ -61,5 +63,130 @@ class TransactionRepository extends BaseRepository<Transaction> {
     final start = DateTime(year, month);
     final end = DateTime(year, month + 1);
     return getByDateRange(start, end);
+  }
+
+  Future<void> saveTransfer({
+    required String fromAccountId,
+    required String toAccountId,
+    required double amount,
+    required DateTime createdAt,
+    String? notes,
+    bool fromIsCreditCard = false,
+  }) async {
+    if (fromAccountId == toAccountId) {
+      throw ArgumentError('FROM and TO accounts must be different');
+    }
+    if (amount <= 0) {
+      throw ArgumentError('Amount must be greater than 0');
+    }
+
+    // Check balance for non-credit-card FROM accounts
+    if (!fromIsCreditCard) {
+      final balance = await _computeBalance(fromAccountId);
+      if (balance < amount) {
+        throw InsufficientBalanceException(
+          available: balance,
+          required_: amount,
+        );
+      }
+    }
+
+    final t = Transaction()
+      ..name = ''
+      ..nameLower = ''
+      ..amount = amount
+      ..type = 'transfer'
+      ..categoryId = ''
+      ..accountId = fromAccountId
+      ..fromAccountId = fromAccountId
+      ..toAccountId = toAccountId
+      ..notes = notes
+      ..createdAt = createdAt
+      ..updatedAt = DateTime.now();
+
+    await isar.writeTxn(() => isar.transactions.put(t));
+  }
+
+  Future<void> updateTransfer({
+    required int id,
+    required String fromAccountId,
+    required String toAccountId,
+    required double amount,
+    required DateTime createdAt,
+    String? notes,
+    bool fromIsCreditCard = false,
+  }) async {
+    if (fromAccountId == toAccountId) {
+      throw ArgumentError('FROM and TO accounts must be different');
+    }
+    if (amount <= 0) {
+      throw ArgumentError('Amount must be greater than 0');
+    }
+
+    final existing = await isar.transactions.get(id);
+    if (existing == null) {
+      throw ArgumentError('Transaction not found');
+    }
+
+    // Check balance for non-credit-card FROM accounts (exclude current transfer amount)
+    if (!fromIsCreditCard) {
+      final balance = await _computeBalance(fromAccountId, excludeTransactionId: id);
+      if (balance < amount) {
+        throw InsufficientBalanceException(
+          available: balance,
+          required_: amount,
+        );
+      }
+    }
+
+    existing
+      ..name = ''
+      ..nameLower = ''
+      ..amount = amount
+      ..type = 'transfer'
+      ..categoryId = ''
+      ..accountId = fromAccountId
+      ..fromAccountId = fromAccountId
+      ..toAccountId = toAccountId
+      ..notes = notes
+      ..createdAt = createdAt
+      ..updatedAt = DateTime.now();
+
+    await isar.writeTxn(() => isar.transactions.put(existing));
+  }
+
+  Future<double> _computeBalance(String accountId, {int? excludeTransactionId}) async {
+    final accountObj = await isar.accounts.get(int.parse(accountId));
+    if (accountObj == null) return 0.0;
+
+    final regularTxns = await isar.transactions
+        .filter()
+        .accountIdEqualTo(accountId)
+        .typeNotEqualTo('transfer')
+        .findAll();
+
+    final transferTxns = await isar.transactions
+        .filter()
+        .typeEqualTo('transfer')
+        .group((q) => q
+            .fromAccountIdEqualTo(accountId)
+            .or()
+            .toAccountIdEqualTo(accountId))
+        .findAll();
+
+    double balance = accountObj.initialBalance;
+
+    for (final t in regularTxns) {
+      if (excludeTransactionId != null && t.id == excludeTransactionId) continue;
+      balance += t.type == 'income' ? t.amount : -t.amount;
+    }
+
+    for (final t in transferTxns) {
+      if (excludeTransactionId != null && t.id == excludeTransactionId) continue;
+      if (t.fromAccountId == accountId) balance -= t.amount;
+      if (t.toAccountId == accountId) balance += t.amount;
+    }
+
+    return accountObj.isCreditCard ? -balance : balance;
   }
 }

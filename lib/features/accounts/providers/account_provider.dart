@@ -50,16 +50,34 @@ final accountBalanceProvider =
   final account = await isar.accounts.get(accountId);
   if (account == null) return 0.0;
 
-  final transactions = await isar.transactions
+  final accountIdStr = accountId.toString();
+
+  // Regular income/expense
+  final regularTxns = await isar.transactions
       .filter()
-      .accountIdEqualTo(accountId.toString())
+      .accountIdEqualTo(accountIdStr)
+      .typeNotEqualTo('transfer')
       .findAll();
 
-  final balance = account.initialBalance +
-      transactions.fold<double>(0.0, (sum, t) =>
+  // Transfers involving this account
+  final transferTxns = await isar.transactions
+      .filter()
+      .typeEqualTo('transfer')
+      .group((q) => q
+          .fromAccountIdEqualTo(accountIdStr)
+          .or()
+          .toAccountIdEqualTo(accountIdStr))
+      .findAll();
+
+  double balance = account.initialBalance +
+      regularTxns.fold<double>(0.0, (sum, t) =>
           t.type == 'income' ? sum + t.amount : sum - t.amount);
 
-  // Credit card flag checking (credit card limit utilization remains type-specific by using the explicit db field)
+  for (final t in transferTxns) {
+    if (t.fromAccountId == accountIdStr) balance -= t.amount;
+    if (t.toAccountId == accountIdStr) balance += t.amount;
+  }
+
   final isCreditCard = account.isCreditCard;
   return isCreditCard ? -balance : balance;
 });

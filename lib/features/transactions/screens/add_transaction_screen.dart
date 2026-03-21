@@ -8,6 +8,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/transfer_helpers.dart';
+import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../data/transaction.dart';
@@ -36,17 +38,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   String _type = 'expense';
   int? _selectedCategoryId;
   int? _selectedAccountId;
+  int? _selectedFromAccountId;
+  int? _selectedToAccountId;
   DateTime _selectedDate = DateTime.now();
   bool _suppressSuggestions = false;
 
   bool get _isEditing => widget.transaction != null;
 
   bool get _isValid =>
+      _type == 'transfer' ? _isTransferValid : (
       _nameController.text.trim().isNotEmpty &&
       _amountController.text.trim().isNotEmpty &&
       (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
       _selectedCategoryId != null &&
-      _selectedAccountId != null;
+      _selectedAccountId != null);
+
+  bool get _isTransferValid =>
+      (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
+      _selectedFromAccountId != null &&
+      _selectedToAccountId != null &&
+      _selectedFromAccountId != _selectedToAccountId;
 
   @override
   void initState() {
@@ -60,6 +71,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _selectedCategoryId = int.tryParse(t.categoryId);
       _selectedAccountId = int.tryParse(t.accountId);
       _selectedDate = t.createdAt;
+      if (t.type == 'transfer') {
+        _selectedFromAccountId = int.tryParse(t.fromAccountId ?? '');
+        _selectedToAccountId = int.tryParse(t.toAccountId ?? '');
+      }
     }
     _nameController.addListener(_onFieldChanged);
     _amountController.addListener(_onFieldChanged);
@@ -80,6 +95,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Color get _typeColor {
     final cs = Theme.of(context).colorScheme;
+    if (_type == 'transfer') return cs.primary;
     return _type == 'income' ? cs.tertiary : cs.error;
   }
 
@@ -98,7 +114,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit Transaction' : 'Add Transaction',
+          _isEditing
+              ? (_type == 'transfer' ? 'Edit Transfer' : 'Edit Transaction')
+              : (_type == 'transfer' ? 'New Transfer' : 'Add Transaction'),
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -119,18 +137,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   _TransactionTypeSelector(
                     selected: _type,
                     onSelected: (selected) {
-                      if (selected == 'transfer') {
-                        showTimedSnackBar(
-                          context,
-                          message: 'Transfer coming soon',
-                          duration: const Duration(seconds: 2),
-                        );
-                        return;
-                      }
                       setState(() => _type = selected);
                     },
                   ),
                   const SizedBox(height: KuberSpacing.xl),
+
+                  if (_type == 'transfer')
+                    _buildTransferForm(colorScheme, textTheme, accounts)
+                  else ...[
 
                   // [B] Name field with autocomplete suggestions
                   RawAutocomplete<Transaction>(
@@ -541,6 +555,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                   ),
                   const SizedBox(height: KuberSpacing.xl),
+                  ], // end else (non-transfer)
                 ],
               ),
             ),
@@ -577,7 +592,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: Text(_isEditing ? 'Update Transaction' : 'Save Transaction'),
+                child: Text(_isEditing
+                    ? (_type == 'transfer' ? 'Update Transfer' : 'Update Transaction')
+                    : (_type == 'transfer' ? 'Save Transfer' : 'Save Transaction')),
               ),
             ),
           ),
@@ -696,6 +713,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _save() async {
+    if (_type == 'transfer') {
+      await _saveTransfer();
+      return;
+    }
+
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
     if (name.isEmpty || amount == null || amount <= 0) return;
@@ -736,6 +758,457 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       context,
       message: _isEditing ? 'Transaction updated' : 'Transaction saved',
       duration: const Duration(seconds: 2),
+    );
+  }
+
+  Future<void> _saveTransfer() async {
+    final amount = double.tryParse(_amountController.text.trim());
+    if (amount == null || amount <= 0) return;
+    if (_selectedFromAccountId == null || _selectedToAccountId == null) return;
+    if (_selectedFromAccountId == _selectedToAccountId) return;
+
+    final accounts = ref.read(accountListProvider).valueOrNull ?? [];
+    final fromAccount = accounts
+        .where((a) => a.id == _selectedFromAccountId)
+        .firstOrNull;
+    final fromIsCreditCard = fromAccount?.isCreditCard ?? false;
+
+    final notes = _notesController.text.trim().isEmpty
+        ? null
+        : _notesController.text.trim();
+
+    try {
+      if (_isEditing) {
+        await ref.read(transactionListProvider.notifier).updateTransfer(
+          id: widget.transaction!.id,
+          fromAccountId: _selectedFromAccountId.toString(),
+          toAccountId: _selectedToAccountId.toString(),
+          amount: amount,
+          createdAt: _selectedDate,
+          notes: notes,
+          fromIsCreditCard: fromIsCreditCard,
+        );
+      } else {
+        await ref.read(transactionListProvider.notifier).saveTransfer(
+          fromAccountId: _selectedFromAccountId.toString(),
+          toAccountId: _selectedToAccountId.toString(),
+          amount: amount,
+          createdAt: _selectedDate,
+          notes: notes,
+          fromIsCreditCard: fromIsCreditCard,
+        );
+      }
+    } on InsufficientBalanceException catch (e) {
+      if (mounted) {
+        showTimedSnackBar(
+          context,
+          message: 'Insufficient balance: ₹${e.available.toStringAsFixed(2)} available',
+        );
+      }
+      return;
+    } catch (e) {
+      if (mounted) {
+        showTimedSnackBar(
+          context,
+          message: 'Failed to save: $e',
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    context.pop();
+    showTimedSnackBar(
+      context,
+      message: _isEditing ? 'Transfer updated' : 'Transfer saved',
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  Widget _buildTransferForm(
+    ColorScheme colorScheme,
+    TextTheme textTheme,
+    AsyncValue<List<Account>> accounts,
+  ) {
+    final accs = accounts.valueOrNull ?? [];
+    final fromAccount = _selectedFromAccountId != null
+        ? accs.where((a) => a.id == _selectedFromAccountId).firstOrNull
+        : null;
+    final toAccount = _selectedToAccountId != null
+        ? accs.where((a) => a.id == _selectedToAccountId).firstOrNull
+        : null;
+
+    // Determine transfer subtype
+    TransferSubtype? subtype;
+    if (fromAccount != null && toAccount != null) {
+      subtype = getTransferSubtype(fromAccount, toAccount);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Amount display
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xxl),
+          alignment: Alignment.center,
+          child: IntrinsicWidth(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  '₹',
+                  style: textTheme.headlineLarge?.copyWith(
+                    color: KuberColors.textSecondary,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 36,
+                  ),
+                ),
+                const SizedBox(width: KuberSpacing.xs),
+                Flexible(
+                  child: IntrinsicWidth(
+                    child: TextField(
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d{0,2}'),
+                        ),
+                      ],
+                      textAlign: TextAlign.center,
+                      style: textTheme.displaySmall?.copyWith(
+                        color: KuberColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 48,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '0',
+                        hintStyle: textTheme.displaySmall?.copyWith(
+                          color: KuberColors.textMuted.withValues(alpha: 0.3),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 48,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        filled: false,
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+
+        // Quick chips
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [50, 100, 500, 1000].map((amount) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.xs),
+              child: GestureDetector(
+                onTap: () {
+                  final current =
+                      double.tryParse(_amountController.text.trim()) ?? 0;
+                  final newAmount = current + amount;
+                  _amountController.text =
+                      newAmount.truncateToDouble() == newAmount
+                          ? newAmount.toInt().toString()
+                          : newAmount.toStringAsFixed(2);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '+$amount',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: KuberSpacing.lg),
+
+        // Subtype badge
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: subtype != null && subtype != TransferSubtype.normalTransfer
+              ? Container(
+                  key: ValueKey(subtype),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpacing.md,
+                    vertical: KuberSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    transferSubtypeLabel(subtype),
+                    style: textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey('empty')),
+        ),
+        if (subtype != null && subtype != TransferSubtype.normalTransfer)
+          const SizedBox(height: KuberSpacing.lg),
+
+        // FROM Account tile
+        _TransferAccountTile(
+          label: 'FROM ACCOUNT',
+          account: fromAccount,
+          onTap: () => _showTransferAccountPicker(
+            isFrom: true,
+            excludeId: _selectedToAccountId,
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+
+        // Swap button
+        Center(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                final temp = _selectedFromAccountId;
+                _selectedFromAccountId = _selectedToAccountId;
+                _selectedToAccountId = temp;
+              });
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.swap_vert_rounded,
+                color: colorScheme.onPrimary,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+
+        // TO Account tile
+        _TransferAccountTile(
+          label: 'TO ACCOUNT',
+          account: toAccount,
+          onTap: () => _showTransferAccountPicker(
+            isFrom: false,
+            excludeId: _selectedFromAccountId,
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.md),
+
+        // Date & Time
+        InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _pickDate,
+          child: Container(
+            padding: const EdgeInsets.all(KuberSpacing.lg),
+            decoration: BoxDecoration(
+              color: KuberColors.surfaceElement,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: KuberColors.surfaceDivider),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.calendar_today,
+                    size: 18,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: KuberSpacing.md),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'DATE & TIME',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: KuberColors.textMuted,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDate(_selectedDate),
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: KuberColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.chevron_right,
+                  color: KuberColors.textMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.md),
+
+        // Notes
+        TextField(
+          controller: _notesController,
+          maxLines: 2,
+          style: textTheme.bodyMedium?.copyWith(
+            color: KuberColors.textPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Add a note (optional)',
+            hintStyle: textTheme.bodyMedium?.copyWith(
+              color: KuberColors.textMuted,
+            ),
+            prefixIcon: const Icon(
+              Icons.note_outlined,
+              color: KuberColors.textSecondary,
+            ),
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.xl),
+      ],
+    );
+  }
+
+  void _showTransferAccountPicker({
+    required bool isFrom,
+    int? excludeId,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: KuberColors.surfaceCard,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => AccountPickerSheet(
+        selectedAccountId:
+            isFrom ? _selectedFromAccountId : _selectedToAccountId,
+        excludeAccountId: excludeId,
+        onSelected: (id) {
+          setState(() {
+            if (isFrom) {
+              _selectedFromAccountId = id;
+            } else {
+              _selectedToAccountId = id;
+            }
+          });
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+}
+
+class _TransferAccountTile extends StatelessWidget {
+  final String label;
+  final Account? account;
+  final VoidCallback onTap;
+
+  const _TransferAccountTile({
+    required this.label,
+    required this.account,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final color = account != null
+        ? resolveAccountColor(account!)
+        : KuberColors.textMuted;
+    final icon = account != null
+        ? resolveAccountIcon(account!)
+        : Icons.account_balance_wallet_outlined;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(KuberSpacing.lg),
+        decoration: BoxDecoration(
+          color: KuberColors.surfaceElement,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: KuberColors.surfaceDivider),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 22, color: color),
+            ),
+            const SizedBox(width: KuberSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: textTheme.labelSmall?.copyWith(
+                      color: KuberColors.textMuted,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    account?.name ?? 'Select Account',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: account != null
+                          ? KuberColors.textPrimary
+                          : KuberColors.textMuted,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: KuberColors.textMuted,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

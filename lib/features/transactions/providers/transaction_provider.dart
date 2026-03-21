@@ -40,6 +40,46 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     await ref.read(transactionRepositoryProvider).restore(t);
     ref.invalidateSelf();
   }
+
+  Future<void> saveTransfer({
+    required String fromAccountId,
+    required String toAccountId,
+    required double amount,
+    required DateTime createdAt,
+    String? notes,
+    bool fromIsCreditCard = false,
+  }) async {
+    await ref.read(transactionRepositoryProvider).saveTransfer(
+      fromAccountId: fromAccountId,
+      toAccountId: toAccountId,
+      amount: amount,
+      createdAt: createdAt,
+      notes: notes,
+      fromIsCreditCard: fromIsCreditCard,
+    );
+    ref.invalidateSelf();
+  }
+
+  Future<void> updateTransfer({
+    required int id,
+    required String fromAccountId,
+    required String toAccountId,
+    required double amount,
+    required DateTime createdAt,
+    String? notes,
+    bool fromIsCreditCard = false,
+  }) async {
+    await ref.read(transactionRepositoryProvider).updateTransfer(
+      id: id,
+      fromAccountId: fromAccountId,
+      toAccountId: toAccountId,
+      amount: amount,
+      createdAt: createdAt,
+      notes: notes,
+      fromIsCreditCard: fromIsCreditCard,
+    );
+    ref.invalidateSelf();
+  }
 }
 
 final monthlyTransactionsProvider =
