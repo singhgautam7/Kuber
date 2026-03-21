@@ -284,60 +284,40 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       ),
                       const SizedBox(width: KuberSpacing.sm),
                     ],
-                    FilterChip(
-                      label: const Text('All'),
+                    _KuberFilterChip(
+                      label: 'All',
                       selected: _selectedFilter == 'all',
-                      onSelected: (val) {
+                      onTap: () {
                         if (_selectedFilter == 'all') return;
                         setState(() => _selectedFilter = 'all');
                       },
-                      labelStyle: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: _selectedFilter == 'all' ? FontWeight.w600 : FontWeight.w400,
-                        color: _selectedFilter == 'all' ? KuberColors.primary : KuberColors.textSecondary,
-                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    FilterChip(
-                      label: const Text('Expenses'),
+                    _KuberFilterChip(
+                      label: 'Expenses',
                       selected: _selectedFilter == 'expense',
-                      onSelected: (val) {
+                      onTap: () {
                         if (_selectedFilter == 'expense') return;
                         setState(() => _selectedFilter = 'expense');
                       },
-                      labelStyle: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: _selectedFilter == 'expense' ? FontWeight.w600 : FontWeight.w400,
-                        color: _selectedFilter == 'expense' ? KuberColors.primary : KuberColors.textSecondary,
-                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    FilterChip(
-                      label: const Text('Income'),
+                    _KuberFilterChip(
+                      label: 'Income',
                       selected: _selectedFilter == 'income',
-                      onSelected: (val) {
+                      onTap: () {
                         if (_selectedFilter == 'income') return;
                         setState(() => _selectedFilter = 'income');
                       },
-                      labelStyle: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: _selectedFilter == 'income' ? FontWeight.w600 : FontWeight.w400,
-                        color: _selectedFilter == 'income' ? KuberColors.primary : KuberColors.textSecondary,
-                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    FilterChip(
-                      label: const Text('This Month'),
+                    _KuberFilterChip(
+                      label: 'This Month',
                       selected: _selectedFilter == 'this_month',
-                      onSelected: (val) {
+                      onTap: () {
                         if (_selectedFilter == 'this_month') return;
                         setState(() => _selectedFilter = 'this_month');
                       },
-                      labelStyle: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: _selectedFilter == 'this_month' ? FontWeight.w600 : FontWeight.w400,
-                        color: _selectedFilter == 'this_month' ? KuberColors.primary : KuberColors.textSecondary,
-                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
                     _AdvancedFilterButton(
@@ -1112,6 +1092,45 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
             ),
             const SizedBox(height: KuberSpacing.lg),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _KuberFilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _KuberFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? KuberColors.primary.withValues(alpha: 0.18)
+              : KuberColors.surfaceElement,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+            color: selected ? KuberColors.primary : KuberColors.textSecondary,
+          ),
         ),
       ),
     );

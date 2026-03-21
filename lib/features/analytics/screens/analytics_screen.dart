@@ -350,39 +350,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
                   return Padding(
                     padding: const EdgeInsets.only(right: KuberSpacing.sm),
-                    child: isCustom
-                        ? FilterChip.elevated(
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.date_range, size: 14,
-                                  color: isSelected ? KuberColors.primary : KuberColors.textSecondary),
-                                const SizedBox(width: 4),
-                                Text(label),
-                              ],
-                            ),
-                            selected: isSelected,
-                            onSelected: (_) => _pickCustomRange(),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? KuberColors.primary.withValues(alpha: 0.5)
-                                  : KuberColors.surfaceDivider,
-                            ),
-                            backgroundColor: KuberColors.surfaceElement,
-                            selectedColor: KuberColors.primary.withValues(alpha: 0.12),
-                            labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: isSelected ? KuberColors.primary : KuberColors.textSecondary,
-                            ),
-                            elevation: 0,
-                            pressElevation: 1,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          )
-                        : FilterChip(
-                            label: Text(label),
-                            selected: isSelected,
-                            onSelected: (val) {
+                    child: _KuberFilterChip(
+                      label: label,
+                      selected: isSelected,
+                      onTap: isCustom
+                          ? () => _pickCustomRange()
+                          : () {
                               if (_period == p) return;
                               setState(() {
                                 _period = p;
@@ -390,12 +363,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 _selectedDonutSliceIndex = null;
                               });
                             },
-                            labelStyle: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                              color: isSelected ? KuberColors.primary : KuberColors.textSecondary,
-                            ),
-                          ),
+                      icon: isCustom
+                          ? Icon(Icons.date_range, size: 14,
+                              color: isSelected ? KuberColors.primary : KuberColors.textSecondary)
+                          : null,
+                    ),
                   );
                 }).toList(),
               ),
@@ -1001,6 +973,56 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 // ---------------------------------------------------------------------------
 // Private widgets
 // ---------------------------------------------------------------------------
+
+class _KuberFilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final Widget? icon;
+
+  const _KuberFilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: selected
+              ? KuberColors.primary.withValues(alpha: 0.18)
+              : KuberColors.surfaceElement,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              icon!,
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                color: selected ? KuberColors.primary : KuberColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _TabToggle extends StatelessWidget {
   final List<String> labels;

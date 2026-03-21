@@ -115,27 +115,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   const SizedBox(height: KuberSpacing.lg),
 
                   // [A] Type segmented button
-                  SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(
-                        value: 'expense',
-                        label: Text('Expense'),
-                        icon: Icon(Icons.arrow_upward, size: 18),
-                      ),
-                      ButtonSegment(
-                        value: 'income',
-                        label: Text('Income'),
-                        icon: Icon(Icons.arrow_downward, size: 18),
-                      ),
-                      ButtonSegment(
-                        value: 'transfer',
-                        label: Text('Transfer'),
-                        icon: Icon(Icons.swap_horiz, size: 18),
-                      ),
-                    ],
-                    selected: {_type},
-                    onSelectionChanged: (v) {
-                      final selected = v.first;
+                  _TransactionTypeSelector(
+                    selected: _type,
+                    onSelected: (selected) {
                       if (selected == 'transfer') {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -147,23 +129,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       }
                       setState(() => _type = selected);
                     },
-                    style: ButtonStyle(
-                      backgroundColor:
-                          WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return _typeColor.withValues(alpha: 0.15);
-                        }
-                        return KuberColors.surfaceElement;
-                      }),
-                      foregroundColor:
-                          WidgetStateProperty.resolveWith((states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return _typeColor;
-                        }
-                        return KuberColors.textSecondary;
-                      }),
-                      side: WidgetStateProperty.all(BorderSide.none),
-                    ),
                   ),
                   const SizedBox(height: KuberSpacing.xl),
 
@@ -395,6 +360,49 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(height: KuberSpacing.sm),
+
+                  // Quick-add amount chips
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [50, 100, 500, 1000].map((amount) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.xs,
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            final current = double.tryParse(
+                                  _amountController.text.trim(),
+                                ) ??
+                                0;
+                            final newAmount = current + amount;
+                            _amountController.text =
+                                newAmount.truncateToDouble() == newAmount
+                                    ? newAmount.toInt().toString()
+                                    : newAmount.toStringAsFixed(2);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _typeColor.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '+$amount',
+                              style: textTheme.labelMedium?.copyWith(
+                                color: _typeColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                   const SizedBox(height: KuberSpacing.lg),
 
@@ -789,6 +797,63 @@ class _SelectorTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TransactionTypeSelector extends StatelessWidget {
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  const _TransactionTypeSelector({
+    required this.selected,
+    required this.onSelected,
+  });
+
+  static const _types = ['expense', 'income', 'transfer'];
+  static const _labels = ['Expense', 'Income', 'Transfer'];
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: KuberColors.surfaceElement,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: KuberColors.surfaceDivider),
+      ),
+      child: Row(
+        children: List.generate(_types.length, (i) {
+          final isSelected = _types[i] == selected;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onSelected(_types[i]),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  color: isSelected ? colorScheme.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  _labels[i],
+                  style: textTheme.labelLarge?.copyWith(
+                    color: isSelected
+                        ? colorScheme.onPrimary
+                        : KuberColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
