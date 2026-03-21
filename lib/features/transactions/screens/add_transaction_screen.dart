@@ -47,7 +47,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   bool get _isValid =>
       _type == 'transfer' ? _isTransferValid : (
-      _nameController.text.trim().isNotEmpty &&
       _amountController.text.trim().isNotEmpty &&
       (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
       _selectedCategoryId != null &&
@@ -720,7 +719,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    if (name.isEmpty || amount == null || amount <= 0) return;
+    if (amount == null || amount <= 0) return;
     if (_selectedCategoryId == null || _selectedAccountId == null) return;
 
     final t = _isEditing ? widget.transaction! : Transaction();
@@ -844,9 +843,54 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       subtype = getTransferSubtype(fromAccount, toAccount);
     }
 
+    Color bgColor;
+    Color txtColor;
+    if (subtype == TransferSubtype.creditCardPayment) {
+      bgColor = KuberColors.income.withValues(alpha: 0.15);
+      txtColor = KuberColors.income;
+    } else if (subtype == TransferSubtype.creditCardWithdrawal) {
+      bgColor = KuberColors.expense.withValues(alpha: 0.15);
+      txtColor = KuberColors.expense;
+    } else if (subtype == TransferSubtype.creditCardTransfer) {
+      bgColor = KuberColors.neutral.withValues(alpha: 0.15);
+      txtColor = KuberColors.neutral;
+    } else {
+      bgColor = colorScheme.primaryContainer;
+      txtColor = colorScheme.onPrimaryContainer;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Subtype badge
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: subtype != null && subtype != TransferSubtype.normalTransfer
+              ? Container(
+                  key: ValueKey(subtype),
+                  margin: const EdgeInsets.only(top: KuberSpacing.xl),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpacing.md,
+                    vertical: KuberSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    transferSubtypeLabel(subtype),
+                    style: textTheme.labelMedium?.copyWith(
+                      color: txtColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey('empty')),
+        ),
+        if (subtype != null && subtype != TransferSubtype.normalTransfer)
+          const SizedBox(height: KuberSpacing.sm),
+
         // Amount display
         Container(
           padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xxl),
@@ -945,34 +989,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           }).toList(),
         ),
         const SizedBox(height: KuberSpacing.lg),
-
-        // Subtype badge
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          child: subtype != null && subtype != TransferSubtype.normalTransfer
-              ? Container(
-                  key: ValueKey(subtype),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.md,
-                    vertical: KuberSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    transferSubtypeLabel(subtype),
-                    style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : const SizedBox.shrink(key: ValueKey('empty')),
-        ),
-        if (subtype != null && subtype != TransferSubtype.normalTransfer)
-          const SizedBox(height: KuberSpacing.lg),
 
         // FROM Account tile
         _TransferAccountTile(

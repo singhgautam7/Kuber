@@ -10,6 +10,7 @@ import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'suggestion_list.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 
 class AddTransactionSheet extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -271,16 +272,12 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   void _save() {
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    if (name.isEmpty || amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid name and amount')),
-      );
+    if (amount == null || amount <= 0) {
+      showTimedSnackBar(context, message: 'Please enter a valid amount');
       return;
     }
     if (_selectedCategoryId == null || _selectedAccountId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category and account')),
-      );
+      showTimedSnackBar(context, message: 'Please select a category and account');
       return;
     }
 

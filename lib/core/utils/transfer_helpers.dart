@@ -23,11 +23,11 @@ String transferSubtypeLabel(TransferSubtype subtype) {
     case TransferSubtype.normalTransfer:
       return 'Transfer';
     case TransferSubtype.creditCardPayment:
-      return 'Card Payment';
+      return 'Credit Card Payment';
     case TransferSubtype.creditCardWithdrawal:
-      return 'Card Withdrawal';
+      return 'Credit Card Withdrawal';
     case TransferSubtype.creditCardTransfer:
-      return 'Card Transfer';
+      return 'Credit Card Transfer';
   }
 }
 

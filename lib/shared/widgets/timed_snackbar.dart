@@ -13,7 +13,23 @@ void showTimedSnackBar(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(message),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Text(message),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 1.0, end: 0.0),
