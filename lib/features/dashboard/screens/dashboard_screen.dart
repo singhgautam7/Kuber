@@ -295,7 +295,7 @@ class _BalanceHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: KuberSpacing.sm),
           Text(
-            CurrencyFormatter.format(summary.net),
+            '${summary.net < 0 ? '-' : ''}${CurrencyFormatter.format(summary.net)}',
             style: textTheme.headlineLarge?.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.w700,

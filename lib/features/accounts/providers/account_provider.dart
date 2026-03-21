@@ -56,7 +56,8 @@ final accountBalanceProvider =
   final regularTxns = await isar.transactions
       .filter()
       .accountIdEqualTo(accountIdStr)
-      .typeNotEqualTo('transfer')
+      .not()
+      .typeEqualTo('transfer')
       .findAll();
 
   // Transfers involving this account

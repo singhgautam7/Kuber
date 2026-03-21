@@ -162,7 +162,8 @@ class TransactionRepository extends BaseRepository<Transaction> {
     final regularTxns = await isar.transactions
         .filter()
         .accountIdEqualTo(accountId)
-        .typeNotEqualTo('transfer')
+        .not()
+        .typeEqualTo('transfer')
         .findAll();
 
     final transferTxns = await isar.transactions
