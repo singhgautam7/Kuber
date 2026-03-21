@@ -43,7 +43,156 @@ const kuberNavItems = [
   ),
 ];
 
-// Removed KuberBottomNavBar, _NavTab, and _AddButton in favor of standard NavigationBar
+// ---------------------------------------------------------------------------
+// Bottom nav bar (phone / small tablet)
+// ---------------------------------------------------------------------------
+
+class KuberBottomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTabTapped;
+  final VoidCallback onAddTapped;
+
+  const KuberBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTabTapped,
+    required this.onAddTapped,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 8,
+        right: 8,
+        bottom: safeBottom + 8,
+      ),
+      child: Row(
+        children: [
+          // Solid pill with nav tabs
+          Expanded(
+            child: Container(
+              height: 64,
+              decoration: BoxDecoration(
+                color: KuberColors.surfaceCard,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: KuberColors.border,
+                  width: 1,
+                ),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: List.generate(kuberNavItems.length, (i) {
+                  return Expanded(
+                    child: _NavTab(
+                      item: kuberNavItems[i],
+                      isActive: i == currentIndex,
+                      onTap: () => onTabTapped(i),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ),
+
+          // Gap between pill and add button
+          const SizedBox(width: 10),
+
+          // Standalone add button
+          _AddButton(onTap: onAddTapped),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Individual nav tab
+// ---------------------------------------------------------------------------
+
+class _NavTab extends StatelessWidget {
+  final KuberNavItem item;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavTab({
+    required this.item,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isActive ? item.activeIcon : item.icon,
+              size: 22,
+              color: isActive
+                  ? KuberColors.primary
+                  : KuberColors.textSecondary,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              item.label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                color: isActive
+                    ? KuberColors.primary
+                    : KuberColors.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Circular add (+) button — solid primary, no glow
+// ---------------------------------------------------------------------------
+
+class _AddButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AddButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
+      },
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: const BoxDecoration(
+          color: KuberColors.primary,
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.add_rounded,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Side navigation rail (large tablet / desktop ≥ 840dp)

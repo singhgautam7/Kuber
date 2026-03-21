@@ -29,13 +29,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   // Advanced filter state
   DateTimeRange? _dateRange;
-  String? _typeFilter;
+  Set<String> _selectedTypes = {};
   Set<int> _selectedAccountIds = {};
   Set<int> _selectedCategoryIds = {};
 
   bool get _hasAdvancedFilters =>
       _dateRange != null ||
-      _typeFilter != null ||
+      _selectedTypes.isNotEmpty ||
       _selectedAccountIds.isNotEmpty ||
       _selectedCategoryIds.isNotEmpty;
 
@@ -48,7 +48,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   void _clearAdvancedFilters() {
     setState(() {
       _dateRange = null;
-      _typeFilter = null;
+      _selectedTypes = {};
       _selectedAccountIds = {};
       _selectedCategoryIds = {};
     });
@@ -90,8 +90,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           t.createdAt.isBefore(_dateRange!.end.add(const Duration(days: 1)))).toList();
     }
 
-    if (_typeFilter != null) {
-      filtered = filtered.where((t) => t.type == _typeFilter).toList();
+    if (_selectedTypes.isNotEmpty) {
+      filtered = filtered.where((t) => _selectedTypes.contains(t.type)).toList();
     }
 
     if (_selectedAccountIds.isNotEmpty) {
@@ -161,14 +161,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ),
       builder: (_) => _AdvancedFilterSheet(
         dateRange: _dateRange,
-        typeFilter: _typeFilter,
+        selectedTypes: _selectedTypes,
         selectedAccountIds: _selectedAccountIds,
         selectedCategoryIds: _selectedCategoryIds,
         searchQuery: _searchQuery,
-        onApply: (dateRange, typeFilter, accountIds, categoryIds, searchQuery) {
+        onApply: (dateRange, types, accountIds, categoryIds, searchQuery) {
           setState(() {
             _dateRange = dateRange;
-            _typeFilter = typeFilter;
+            _selectedTypes = types;
             _selectedAccountIds = accountIds;
             _selectedCategoryIds = categoryIds;
             if (searchQuery != _searchQuery) {
@@ -297,15 +297,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       onTap: () {
                         if (_selectedFilter == 'income') return;
                         setState(() => _selectedFilter = 'income');
-                      },
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    _KuberFilterChip(
-                      label: 'Transfers',
-                      selected: _selectedFilter == 'transfer',
-                      onTap: () {
-                        if (_selectedFilter == 'transfer') return;
-                        setState(() => _selectedFilter = 'transfer');
                       },
                     ),
                     const SizedBox(width: KuberSpacing.sm),
@@ -596,7 +587,7 @@ class _TransactionRow extends ConsumerWidget {
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
         ? KuberColors.textPrimary
-        : (isIncome ? KuberColors.income : KuberColors.expense);
+        : (isIncome ? KuberColors.income : KuberColors.textPrimary);
     final amountPrefix = isTransfer ? '' : (isIncome ? '+' : '-');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
@@ -809,13 +800,13 @@ class _DateGroup {
 
 class _AdvancedFilterSheet extends ConsumerStatefulWidget {
   final DateTimeRange? dateRange;
-  final String? typeFilter;
+  final Set<String> selectedTypes;
   final Set<int> selectedAccountIds;
   final Set<int> selectedCategoryIds;
   final String searchQuery;
   final void Function(
     DateTimeRange? dateRange,
-    String? typeFilter,
+    Set<String> types,
     Set<int> accountIds,
     Set<int> categoryIds,
     String searchQuery,
@@ -823,7 +814,7 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
 
   const _AdvancedFilterSheet({
     required this.dateRange,
-    required this.typeFilter,
+    required this.selectedTypes,
     required this.selectedAccountIds,
     required this.selectedCategoryIds,
     required this.searchQuery,
@@ -837,7 +828,7 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
 
 class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   late DateTimeRange? _dateRange;
-  late String? _typeFilter;
+  late Set<String> _selectedTypes;
   late Set<int> _accountIds;
   late Set<int> _categoryIds;
   late TextEditingController _searchController;
@@ -846,7 +837,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   void initState() {
     super.initState();
     _dateRange = widget.dateRange;
-    _typeFilter = widget.typeFilter;
+    _selectedTypes = Set.from(widget.selectedTypes);
     _accountIds = Set.from(widget.selectedAccountIds);
     _categoryIds = Set.from(widget.selectedCategoryIds);
     _searchController = TextEditingController(text: widget.searchQuery);
@@ -861,7 +852,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   void _reset() {
     setState(() {
       _dateRange = null;
-      _typeFilter = null;
+      _selectedTypes = {};
       _accountIds = {};
       _categoryIds = {};
       _searchController.clear();
@@ -991,27 +982,45 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
             Row(
               children: [
                 _SheetChip(
-                  label: 'All',
-                  isSelected: _typeFilter == null,
-                  onTap: () => setState(() => _typeFilter = null),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                _SheetChip(
                   label: 'Income',
-                  isSelected: _typeFilter == 'income',
-                  onTap: () => setState(() => _typeFilter = 'income'),
+                  isSelected: _selectedTypes.contains('income'),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains('income')) {
+                        _selectedTypes.remove('income');
+                      } else {
+                        _selectedTypes.add('income');
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(width: KuberSpacing.sm),
                 _SheetChip(
                   label: 'Expense',
-                  isSelected: _typeFilter == 'expense',
-                  onTap: () => setState(() => _typeFilter = 'expense'),
+                  isSelected: _selectedTypes.contains('expense'),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains('expense')) {
+                        _selectedTypes.remove('expense');
+                      } else {
+                        _selectedTypes.add('expense');
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(width: KuberSpacing.sm),
                 _SheetChip(
                   label: 'Transfer',
-                  isSelected: _typeFilter == 'transfer',
-                  onTap: () => setState(() => _typeFilter = 'transfer'),
+                  isSelected: _selectedTypes.contains('transfer'),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains('transfer')) {
+                        _selectedTypes.remove('transfer');
+                      } else {
+                        _selectedTypes.add('transfer');
+                      }
+                    });
+                  },
                 ),
               ],
             ),
@@ -1107,7 +1116,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                 onPressed: () {
                   widget.onApply(
                     _dateRange,
-                    _typeFilter,
+                    _selectedTypes,
                     _accountIds,
                     _categoryIds,
                     _searchController.text,

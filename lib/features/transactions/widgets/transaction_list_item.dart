@@ -103,7 +103,7 @@ class TransactionListItem extends ConsumerWidget {
                     '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
                     style: textTheme.titleMedium?.copyWith(
                       color:
-                          isIncome ? colorScheme.tertiary : colorScheme.error,
+                          isIncome ? colorScheme.tertiary : KuberColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

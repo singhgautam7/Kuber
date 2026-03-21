@@ -20,7 +20,8 @@ class KuberRadius {
 class KuberColors {
   // Backgrounds
   static const background = Color(0xFF000000);
-  static const surfaceCard = Color(0xFF09090B);
+  // static const surfaceCard = Color(0xFF09090B);
+  static const surfaceCard = Color(0xFF0D0D10);
   static const surfaceMuted = Color(0xFF18181B);
 
   // Borders
@@ -92,11 +93,26 @@ class AppTheme {
         backgroundColor: KuberColors.surfaceCard,
         indicatorColor: KuberColors.primarySubtle,
         surfaceTintColor: Colors.transparent,
-        labelTextStyle: WidgetStatePropertyAll(
-          textTheme.labelSmall?.copyWith(
-            color: KuberColors.textSecondary,
-          ),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: KuberColors.primary);
+          }
+          return const IconThemeData(color: KuberColors.textSecondary);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return textTheme.labelSmall?.copyWith(
+              color: KuberColors.primary,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return textTheme.labelSmall?.copyWith(
+            color: KuberColors.textSecondary,
+          );
+        }),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
