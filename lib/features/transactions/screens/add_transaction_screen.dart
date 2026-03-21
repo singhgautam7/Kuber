@@ -693,7 +693,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _nameFocusNode.unfocus();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
     if (name.isEmpty || amount == null || amount <= 0) return;
@@ -709,17 +709,25 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ? null
         : _notesController.text.trim();
     t.nameLower = name.toLowerCase();
-    if (!_isEditing) {
-      t.createdAt = _selectedDate;
-    }
+    t.createdAt = _selectedDate;
     t.updatedAt = DateTime.now();
 
-    if (_isEditing) {
-      ref.read(transactionListProvider.notifier).updateTransaction(t);
-    } else {
-      ref.read(transactionListProvider.notifier).add(t);
+    try {
+      if (_isEditing) {
+        await ref.read(transactionListProvider.notifier).updateTransaction(t);
+      } else {
+        await ref.read(transactionListProvider.notifier).add(t);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+      return;
     }
 
+    if (!mounted) return;
     context.pop();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

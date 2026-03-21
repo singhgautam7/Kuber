@@ -105,7 +105,7 @@ class _AccountsBody extends ConsumerWidget {
       final balance = balanceAsync.valueOrNull ?? a.initialBalance;
       balanceMap[a.id] = balance;
 
-      if (a.isCreditCard) {
+      if (a.isCreditCard && a.type != 'cash') {
         if (balance > 0) totalDebt += balance; // positive utilized = debt
       } else {
         totalAssets += balance;
@@ -220,7 +220,7 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCreditCard = account.isCreditCard;
+    final isCreditCard = account.isCreditCard && account.type != 'cash';
     final balanceLabel = isCreditCard ? 'Credit Utilized' : 'Available Balance';
     final balanceColor =
         (isCreditCard && balance > 0) ? KuberColors.expense : KuberColors.textPrimary;

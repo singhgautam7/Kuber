@@ -14,12 +14,14 @@ class DashboardTransactionItem extends StatelessWidget {
   final Transaction transaction;
   final Category? category;
   final String? accountName;
+  final VoidCallback? onTap;
 
   const DashboardTransactionItem({
     super.key,
     required this.transaction,
     this.category,
     this.accountName,
+    this.onTap,
   });
 
   @override
@@ -34,7 +36,10 @@ class DashboardTransactionItem extends StatelessWidget {
         ? IconMapper.fromString(category!.icon)
         : Icons.category;
 
-    return Padding(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
       padding: const EdgeInsets.symmetric(
         vertical: KuberSpacing.sm,
       ),
@@ -79,6 +84,7 @@ class DashboardTransactionItem extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

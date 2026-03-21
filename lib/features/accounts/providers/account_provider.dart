@@ -55,27 +55,17 @@ final accountBalanceProvider =
       .accountIdEqualTo(accountId.toString())
       .findAll();
 
-  if (account.isCreditCard) {
-    // Credit utilized: starts at initial, expenses increase, income (payments) decrease
-    double utilized = account.initialBalance;
-    for (final t in transactions) {
-      if (t.type == 'expense') {
-        utilized += t.amount;
-      } else {
-        utilized -= t.amount;
-      }
+  // Single formula: income adds, expenses subtract — for ALL account types
+  double balance = account.initialBalance;
+  for (final t in transactions) {
+    if (t.type == 'income') {
+      balance += t.amount;
+    } else {
+      balance -= t.amount;
     }
-    return utilized; // positive = you owe this much
-  } else {
-    // Regular: starts at initial, income increases, expenses decrease
-    double balance = account.initialBalance;
-    for (final t in transactions) {
-      if (t.type == 'income') {
-        balance += t.amount;
-      } else {
-        balance -= t.amount;
-      }
-    }
-    return balance;
   }
+
+  // Only treat as credit card if explicitly marked AND type is not 'cash'
+  final isCreditCard = account.isCreditCard && account.type != 'cash';
+  return isCreditCard ? -balance : balance;
 });

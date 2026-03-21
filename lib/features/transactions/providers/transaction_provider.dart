@@ -40,6 +40,8 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
 final monthlyTransactionsProvider =
     FutureProvider.family<List<Transaction>, ({int year, int month})>(
   (ref, params) {
+    // Re-fetch when transactions are added/edited/deleted
+    ref.watch(transactionListProvider);
     final repo = ref.watch(transactionRepositoryProvider);
     return repo.getByMonth(params.year, params.month);
   },

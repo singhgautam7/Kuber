@@ -109,7 +109,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     account
       ..name = name
       ..type = _selectedType == 'credit' ? 'bank' : _selectedType
-      ..isCreditCard = _isCreditCard
+      ..isCreditCard = _isCreditCard && _selectedType != 'cash'
       ..icon = _selectedIcon
       ..colorValue = _selectedColor
       ..initialBalance = double.tryParse(_balanceController.text) ?? 0.0

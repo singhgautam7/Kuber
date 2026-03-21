@@ -9,6 +9,7 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/transaction_list_item.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -228,6 +229,11 @@ class DashboardScreen extends ConsumerWidget {
                         return DashboardTransactionItem(
                           transaction: t,
                           category: cat,
+                          onTap: () => showTransactionDetailSheet(
+                            context,
+                            ref,
+                            t,
+                          ),
                         );
                       }).toList(),
                     ),
