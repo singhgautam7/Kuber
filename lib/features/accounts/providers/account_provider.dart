@@ -66,6 +66,6 @@ final accountBalanceProvider =
   }
 
   // Only treat as credit card if explicitly marked AND type is not 'cash'
-  final isCreditCard = account.isCreditCard && account.type != 'cash';
+  final isCreditCard = account.isCreditCard;
   return isCreditCard ? -balance : balance;
 });
