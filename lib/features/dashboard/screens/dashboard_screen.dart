@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -98,10 +100,10 @@ class DashboardScreen extends ConsumerWidget {
                             child: Container(
                               padding: const EdgeInsets.all(KuberSpacing.lg),
                               decoration: BoxDecoration(
-                                color: KuberColors.card,
-                                borderRadius: BorderRadius.circular(16),
+                                color: KuberColors.surfaceCard,
+                                borderRadius: BorderRadius.circular(KuberRadius.md),
                                 border: Border.all(
-                                  color: KuberColors.divider,
+                                  color: KuberColors.border,
                                   width: 0.5,
                                 ),
                               ),
@@ -117,7 +119,7 @@ class DashboardScreen extends ConsumerWidget {
                                           color: acctColor
                                               .withValues(alpha: 0.15),
                                           borderRadius:
-                                              BorderRadius.circular(10),
+                                              BorderRadius.circular(8),
                                         ),
                                         child: Icon(
                                           resolveAccountIcon(account),
@@ -225,8 +227,8 @@ class DashboardScreen extends ConsumerWidget {
                   return Container(
                     padding: const EdgeInsets.all(KuberSpacing.xl),
                     decoration: BoxDecoration(
-                      color: KuberColors.card,
-                      borderRadius: BorderRadius.circular(16),
+                      color: KuberColors.surfaceCard,
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
                     child: Center(
                       child: Text(
@@ -244,8 +246,8 @@ class DashboardScreen extends ConsumerWidget {
                     vertical: KuberSpacing.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: KuberColors.card,
-                    borderRadius: BorderRadius.circular(16),
+                    color: KuberColors.surfaceCard,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   child: categoryMapAsync.when(
                     loading: () => const SizedBox.shrink(),
@@ -289,12 +291,9 @@ class _BalanceHeroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.xl),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [KuberColors.gradientStart, KuberColors.gradientEnd],
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: KuberColors.surfaceCard,
+        border: Border.all(color: KuberColors.border),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -362,7 +361,7 @@ class _BalanceTile extends StatelessWidget {
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Row(
         children: [
@@ -432,138 +431,166 @@ class _WeeklyChartState extends State<_WeeklyChart> {
     final hasData = days.any((d) => d.income > 0 || d.expense > 0);
     if (!hasData) return const SizedBox.shrink();
 
-    final maxVal = days.fold<double>(0, (prev, d) {
-      final m = d.income > d.expense ? d.income : d.expense;
-      return m > prev ? m : prev;
-    });
+    final maxVal = days.fold<double>(
+        0, (prev, d) => max(prev, max(d.income, d.expense)));
 
     final yInterval = maxVal > 0 ? (maxVal * 1.2 / 3).ceilToDouble() : 1.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Text('Last 7 Days',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                )),
-            const SizedBox(width: KuberSpacing.xs),
-            // Text('(Income vs Expense)',
-            //     style: textTheme.labelSmall?.copyWith(
-            //       color: colorScheme.onSurfaceVariant,
-            //     )),
-            const Spacer(),
-            _ChartLegendDot(color: KuberColors.income, label: 'Inc'),
-            const SizedBox(width: KuberSpacing.md),
-            _ChartLegendDot(color: KuberColors.expense, label: 'Exp'),
-          ],
-        ),
-        const SizedBox(height: KuberSpacing.xl),
         Container(
-          height: 240,
           padding: const EdgeInsets.all(KuberSpacing.lg),
           decoration: BoxDecoration(
-            color: KuberColors.card,
-            borderRadius: BorderRadius.circular(16),
+            color: KuberColors.surfaceCard,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
           ),
-          child: BarChart(
-            BarChartData(
-              alignment: BarChartAlignment.spaceAround,
-              maxY: maxVal * 1.2,
-              barTouchData: BarTouchData(
-                enabled: true,
-                touchCallback: (event, response) {
-                  if (event is! FlTapUpEvent) return;
-                  setState(() {
-                    if (response == null || response.spot == null) {
-                      _touchedIndex = -1;
-                    } else {
-                      final tapped =
-                          response.spot!.touchedBarGroupIndex;
-                      _touchedIndex =
-                          tapped == _touchedIndex ? -1 : tapped;
-                    }
-                  });
-                },
-                touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) => Colors.transparent,
-                  tooltipPadding: EdgeInsets.zero,
-                  getTooltipItem: (_, _, _, _) => null,
-                ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Text('Last 7 Days',
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      )),
+                  const Spacer(),
+                  _ChartLegendDot(color: KuberColors.income, label: 'Inc'),
+                  const SizedBox(width: KuberSpacing.md),
+                  _ChartLegendDot(color: KuberColors.expense, label: 'Exp'),
+                ],
               ),
-              titlesData: FlTitlesData(
-                show: true,
-                topTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles:
-                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 40,
-                    interval: yInterval,
-                    getTitlesWidget: (value, meta) {
-                      return Text(
-                        _formatYAxis(value),
-                        style: textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: 10,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      final idx = value.toInt();
-                      if (idx < 0 || idx >= days.length) {
-                        return const SizedBox.shrink();
-                      }
-                      final isTouched = idx == _touchedIndex;
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          DateFormat('d MMM').format(days[idx].date),
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: isTouched
-                                ? FontWeight.w700
-                                : FontWeight.normal,
-                            fontSize: 9,
+              const SizedBox(height: KuberSpacing.lg),
+              SizedBox(
+                height: 200,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final slotWidth = constraints.maxWidth / days.length;
+                    final barWidth = (slotWidth * 0.35).clamp(10.0, 22.0);
+                    return BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: maxVal * 1.2,
+                        barTouchData: BarTouchData(
+                          enabled: true,
+                          touchCallback: (event, response) {
+                            if (event is! FlTapUpEvent) return;
+                            setState(() {
+                              if (response == null || response.spot == null) {
+                                _touchedIndex = -1;
+                              } else {
+                                final tapped =
+                                    response.spot!.touchedBarGroupIndex;
+                                _touchedIndex =
+                                    tapped == _touchedIndex ? -1 : tapped;
+                              }
+                            });
+                          },
+                          touchTooltipData: BarTouchTooltipData(
+                            getTooltipColor: (_) => Colors.transparent,
+                            tooltipPadding: EdgeInsets.zero,
+                            getTooltipItem: (_, _, _, _) => null,
                           ),
                         ),
-                      );
-                    },
-                  ),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          topTitles:
+                              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles:
+                              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: yInterval,
+                              getTitlesWidget: (value, meta) {
+                                return Text(
+                                  _formatYAxis(value),
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                    fontSize: 10,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 36,
+                              getTitlesWidget: (value, meta) {
+                                final idx = value.toInt();
+                                if (idx < 0 || idx >= days.length) {
+                                  return const SizedBox.shrink();
+                                }
+                                final isToday = idx == days.length - 1;
+                                final isTouched = idx == _touchedIndex;
+                                final highlight = isToday || isTouched;
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        DateFormat('d').format(days[idx].date),
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: highlight
+                                              ? Colors.white
+                                              : colorScheme.onSurfaceVariant,
+                                          fontWeight: highlight
+                                              ? FontWeight.w700
+                                              : FontWeight.normal,
+                                          fontSize: 10,
+                                        ),
+                                      ),
+                                      Text(
+                                        DateFormat('MMM').format(days[idx].date).toUpperCase(),
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: highlight
+                                              ? Colors.white
+                                              : KuberColors.textSecondary,
+                                          fontWeight: highlight
+                                              ? FontWeight.w700
+                                              : FontWeight.normal,
+                                          fontSize: 8,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        gridData: const FlGridData(show: false),
+                        borderData: FlBorderData(show: false),
+                        barGroups: days.asMap().entries.map((entry) {
+                          final i = entry.key;
+                          final d = entry.value;
+                          return BarChartGroupData(
+                            x: i,
+                            barsSpace: 3,
+                            barRods: [
+                              BarChartRodData(
+                                toY: d.income,
+                                color: KuberColors.income,
+                                width: barWidth,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                              BarChartRodData(
+                                toY: d.expense,
+                                color: KuberColors.expense,
+                                width: barWidth,
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
                 ),
               ),
-              gridData: const FlGridData(show: false),
-              borderData: FlBorderData(show: false),
-              barGroups: days.asMap().entries.map((entry) {
-                final i = entry.key;
-                final d = entry.value;
-                return BarChartGroupData(
-                  x: i,
-                  barRods: [
-                    BarChartRodData(
-                      toY: d.income,
-                      color: KuberColors.income,
-                      width: 14,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    BarChartRodData(
-                      toY: d.expense,
-                      color: KuberColors.expense,
-                      width: 14,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
+            ],
           ),
         ),
         AnimatedSize(
@@ -602,8 +629,8 @@ class _WeeklyDetailPanel extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.md),
         decoration: BoxDecoration(
-          color: KuberColors.card,
-          borderRadius: BorderRadius.circular(12),
+          color: KuberColors.surfaceCard,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -691,7 +718,7 @@ class _WeeklyDetailBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: ratio.clamp(0.0, 1.0),
             minHeight: 4,
-            backgroundColor: KuberColors.surfaceElement,
+            backgroundColor: KuberColors.surfaceMuted,
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ),

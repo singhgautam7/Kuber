@@ -141,7 +141,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textMuted,
+                color: KuberColors.textSecondary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -150,7 +150,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
             // Title
             Text(
               _isEditing ? 'Edit Account' : 'Add Account',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: KuberColors.textPrimary,
@@ -162,10 +162,10 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
             TextField(
               controller: _nameController,
               style:
-                  GoogleFonts.plusJakartaSans(color: KuberColors.textPrimary),
+                  GoogleFonts.inter(color: KuberColors.textPrimary),
               decoration: InputDecoration(
                 labelText: _selectedType == 'credit' ? 'Credit Card Name' : 'Cash or Bank Name',
-                labelStyle: GoogleFonts.plusJakartaSans(
+                labelStyle: GoogleFonts.inter(
                     color: KuberColors.textSecondary),
               ),
             ),
@@ -176,7 +176,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Icon',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: KuberColors.textSecondary,
@@ -201,7 +201,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                       decoration: BoxDecoration(
                         color: isSelected
                             ? KuberColors.primary.withValues(alpha: 0.15)
-                            : KuberColors.surfaceElement,
+                            : KuberColors.surfaceMuted,
                         shape: BoxShape.circle,
                         border: isSelected
                             ? Border.all(
@@ -227,7 +227,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Color',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: KuberColors.textSecondary,
@@ -294,18 +294,18 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                   maxLength: 4,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       color: KuberColors.textPrimary),
                   decoration: InputDecoration(
                     labelText: 'Last 4 digits',
                     helperText:
                         'Just to help you identify your account — stored only on your device',
                     helperMaxLines: 2,
-                    labelStyle: GoogleFonts.plusJakartaSans(
+                    labelStyle: GoogleFonts.inter(
                         color: KuberColors.textSecondary),
-                    helperStyle: GoogleFonts.plusJakartaSans(
+                    helperStyle: GoogleFonts.inter(
                       fontSize: 11,
-                      color: KuberColors.textMuted,
+                      color: KuberColors.textSecondary,
                     ),
                   ),
                 ),
@@ -320,14 +320,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                 ],
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     color: KuberColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Initial Balance',
                   prefixText: '₹ ',
-                  prefixStyle: GoogleFonts.plusJakartaSans(
+                  prefixStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
-                  labelStyle: GoogleFonts.plusJakartaSans(
+                  labelStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
                 ),
               )
@@ -339,14 +339,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                 ],
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     color: KuberColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Credit Utilized',
                   prefixText: '₹ ',
-                  prefixStyle: GoogleFonts.plusJakartaSans(
+                  prefixStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
-                  labelStyle: GoogleFonts.plusJakartaSans(
+                  labelStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
                 ),
               ),
@@ -355,14 +355,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 controller: _limitController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                     color: KuberColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Total Limit',
                   prefixText: '₹ ',
-                  prefixStyle: GoogleFonts.plusJakartaSans(
+                  prefixStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
-                  labelStyle: GoogleFonts.plusJakartaSans(
+                  labelStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
                 ),
               ),
@@ -378,12 +378,12 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 style: FilledButton.styleFrom(
                   backgroundColor: KuberColors.primary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                 ),
                 child: Text(
                   'Save Account',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -415,8 +415,8 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 ? (disabled
                     ? KuberColors.primary.withValues(alpha: 0.08)
                     : KuberColors.primary.withValues(alpha: 0.15))
-                : KuberColors.surfaceElement,
-            borderRadius: BorderRadius.circular(12),
+                : KuberColors.surfaceMuted,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
             border: selected
                 ? Border.all(
                     color: KuberColors.primary
@@ -438,7 +438,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 const SizedBox(height: 4),
                 Text(
                   label,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     color: selected

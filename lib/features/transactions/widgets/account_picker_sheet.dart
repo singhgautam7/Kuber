@@ -39,7 +39,7 @@ class AccountPickerSheet extends ConsumerWidget {
               width: 32,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textMuted,
+                color: KuberColors.textSecondary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -166,17 +166,17 @@ class _AccountTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(KuberRadius.md),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.md),
         decoration: BoxDecoration(
           color: selected
               ? color.withValues(alpha: 0.1)
-              : KuberColors.surfaceElement,
-          borderRadius: BorderRadius.circular(16),
+              : KuberColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(
-            color: selected ? color : KuberColors.surfaceDivider,
+            color: selected ? color : KuberColors.border,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -187,7 +187,7 @@ class _AccountTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, size: 22, color: color),
             ),
@@ -219,7 +219,7 @@ class _AccountTile extends StatelessWidget {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: KuberColors.textMuted,
+                  color: KuberColors.textSecondary,
                 ),
               ),
               error: (_, _) => const SizedBox.shrink(),
@@ -256,7 +256,7 @@ class _AddAccountButton extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(KuberRadius.md),
       onTap: () {
         Navigator.pop(context);
         GoRouter.of(context).go('/accounts');
@@ -264,9 +264,9 @@ class _AddAccountButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.md),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(
-            color: KuberColors.surfaceDivider,
+            color: KuberColors.border,
             style: BorderStyle.solid,
           ),
         ),

@@ -78,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen>
                   height: 88,
                   decoration: BoxDecoration(
                     color: KuberColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   child: const Icon(
                     Icons.account_balance_wallet_outlined,
@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
                 const SizedBox(height: KuberSpacing.lg),
                 Text(
                   'Kuber',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
                     color: KuberColors.primary,
@@ -98,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen>
                 const SizedBox(height: KuberSpacing.sm),
                 Text(
                   'Your personal financial log',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                     color: KuberColors.textSecondary,

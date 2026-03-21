@@ -45,7 +45,7 @@ class DashboardTransactionItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CategoryIcon.circle(
+          CategoryIcon.square(
             icon: icon,
             rawColor: rawColor,
             size: 44,

@@ -486,7 +486,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           const EdgeInsets.only(bottom: KuberSpacing.md),
                       child: Row(
                         children: [
-                          CategoryIcon.circle(
+                          CategoryIcon.square(
                             icon:
                                 IconMapper.fromString(ct.category.icon),
                             rawColor: color,
@@ -551,7 +551,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: KuberSpacing.md,
                 crossAxisSpacing: KuberSpacing.md,
-                childAspectRatio: 1.5,
+                childAspectRatio: 2.6,
                 children: [
                   _StatTile(
                     label: 'Avg. Daily',
@@ -648,7 +648,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               ),
                               const SizedBox(width: KuberSpacing.md),
                               if (cat != null)
-                                CategoryIcon.circle(
+                                CategoryIcon.square(
                                   icon:
                                       IconMapper.fromString(cat.icon),
                                   rawColor: harmonizeCategory(context,
@@ -741,8 +741,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: KuberColors.card,
-        borderRadius: BorderRadius.circular(16),
+        color: KuberColors.surfaceCard,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       padding: const EdgeInsets.all(KuberSpacing.lg),
       child: Column(
@@ -774,22 +774,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             padding: const EdgeInsets.symmetric(
                 vertical: KuberSpacing.sm, horizontal: KuberSpacing.md),
             decoration: BoxDecoration(
-              color: KuberColors.cardLight,
-              borderRadius: BorderRadius.circular(12),
+              color: KuberColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Net: ',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: KuberColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: net >= 0 ? KuberColors.income : KuberColors.expense,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -839,7 +839,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 if (value == 0) return const SizedBox.shrink();
                 return Text(
                   _formatYAxis(value),
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 10,
                     color: KuberColors.textSecondary,
                   ),
@@ -863,7 +863,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
                     buckets[idx].label,
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 10,
                       color: KuberColors.textSecondary,
                     ),
@@ -883,18 +883,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           final alpha = isSelected ? 1.0 : 0.45;
           return BarChartGroupData(
             x: i,
+            barsSpace: 3,
             barRods: [
               BarChartRodData(
                 toY: b.income,
                 color: KuberColors.income.withValues(alpha: alpha),
-                width: 14,
-                borderRadius: BorderRadius.circular(4),
+                width: 17,
+                borderRadius: BorderRadius.circular(3),
               ),
               BarChartRodData(
                 toY: b.expense,
-                color: cs.error.withValues(alpha: alpha),
-                width: 14,
-                borderRadius: BorderRadius.circular(4),
+                color: KuberColors.expense.withValues(alpha: alpha),
+                width: 17,
+                borderRadius: BorderRadius.circular(3),
               ),
             ],
           );
@@ -933,7 +934,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             color: color,
             radius: isSelected ? 60 : 50,
             title: isSelected ? ct.category.name : '',
-            titleStyle: GoogleFonts.plusJakartaSans(
+            titleStyle: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -1000,7 +1001,7 @@ class _KuberFilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? KuberColors.primary.withValues(alpha: 0.18)
-              : KuberColors.surfaceElement,
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -1012,7 +1013,7 @@ class _KuberFilterChip extends StatelessWidget {
             ],
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                 color: selected ? KuberColors.primary : KuberColors.textSecondary,
@@ -1041,7 +1042,7 @@ class _TabToggle extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: KuberColors.cardLight,
+        color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -1062,7 +1063,7 @@ class _TabToggle extends StatelessWidget {
               ),
               child: Text(
                 labels[i],
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight:
                       isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -1095,8 +1096,8 @@ class _AnalyticsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(KuberSpacing.lg),
       decoration: BoxDecoration(
-        color: KuberColors.card,
-        borderRadius: BorderRadius.circular(16),
+        color: KuberColors.surfaceCard,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1139,7 +1140,7 @@ class _ChartLegend extends StatelessWidget {
         const SizedBox(width: KuberSpacing.xs),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 11,
             color: KuberColors.textSecondary,
           ),
@@ -1167,8 +1168,8 @@ class _SummaryTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
-        color: KuberColors.cardLight,
-        borderRadius: BorderRadius.circular(12),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1179,7 +1180,7 @@ class _SummaryTile extends StatelessWidget {
               const SizedBox(width: KuberSpacing.xs),
               Text(
                 label,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: KuberColors.textSecondary,
                   fontSize: 12,
                 ),
@@ -1189,7 +1190,7 @@ class _SummaryTile extends StatelessWidget {
           const SizedBox(height: KuberSpacing.xs),
           Text(
             amount,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               color: KuberColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -1237,14 +1238,14 @@ class _TrendDetailPanel extends StatelessWidget {
             children: [
               Text(
                 'Net',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: KuberColors.textSecondary,
                 ),
               ),
               Text(
                 '${net >= 0 ? '+' : ''}${formatAmount(net)}',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: net >= 0 ? KuberColors.income : KuberColors.expense,
@@ -1280,14 +1281,14 @@ class _DetailBar extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 color: KuberColors.textSecondary,
               ),
             ),
             Text(
               amount,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: color,
@@ -1355,14 +1356,14 @@ class _DonutDetailPanel extends StatelessWidget {
             children: [
               Text(
                 'Transactions',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: KuberColors.textSecondary,
                 ),
               ),
               Text(
                 '${catTxns.length}',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: KuberColors.textPrimary,
@@ -1394,8 +1395,8 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
-        color: KuberColors.cardLight,
-        borderRadius: BorderRadius.circular(12),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1405,7 +1406,7 @@ class _StatTile extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: KuberColors.textPrimary,
@@ -1414,7 +1415,7 @@ class _StatTile extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 11,
               color: KuberColors.textSecondary,
             ),
