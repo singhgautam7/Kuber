@@ -55,17 +55,11 @@ final accountBalanceProvider =
       .accountIdEqualTo(accountId.toString())
       .findAll();
 
-  // Single formula: income adds, expenses subtract — for ALL account types
-  double balance = account.initialBalance;
-  for (final t in transactions) {
-    if (t.type == 'income') {
-      balance += t.amount;
-    } else {
-      balance -= t.amount;
-    }
-  }
+  final balance = account.initialBalance +
+      transactions.fold<double>(0.0, (sum, t) =>
+          t.type == 'income' ? sum + t.amount : sum - t.amount);
 
-  // Only treat as credit card if explicitly marked AND type is not 'cash'
+  // Credit card flag checking (credit card limit utilization remains type-specific by using the explicit db field)
   final isCreditCard = account.isCreditCard;
   return isCreditCard ? -balance : balance;
 });

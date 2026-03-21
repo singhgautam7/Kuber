@@ -27,6 +27,11 @@ class TransactionRepository extends BaseRepository<Transaction> {
     await isar.writeTxn(() => isar.transactions.delete(id));
   }
 
+  Future<void> restore(Transaction t) async {
+    t.nameLower = t.name.toLowerCase();
+    await isar.writeTxn(() => isar.transactions.put(t));
+  }
+
   Future<List<Transaction>> getSuggestions(String query) async {
     if (query.isEmpty) return [];
 

@@ -113,11 +113,13 @@ class AccountPickerSheet extends ConsumerWidget {
 
                     return _AccountTile(
                       name: acc.name,
-                      type: acc.type,
+                      type: acc.isCreditCard ? 'CREDIT CARD' : acc.type.toUpperCase(),
                       icon: accountIcon(acc.type),
                       color: color,
                       selected: selected,
                       balance: ref.watch(accountBalanceProvider(acc.id)),
+                      isCreditCard: acc.isCreditCard,
+                      creditLimit: acc.creditLimit,
                       onTap: () => onSelected(acc.id),
                     );
                   },
@@ -138,6 +140,8 @@ class _AccountTile extends StatelessWidget {
   final Color color;
   final bool selected;
   final AsyncValue<double> balance;
+  final bool isCreditCard;
+  final double? creditLimit;
   final VoidCallback onTap;
 
   const _AccountTile({
@@ -147,6 +151,8 @@ class _AccountTile extends StatelessWidget {
     required this.color,
     required this.selected,
     required this.balance,
+    this.isCreditCard = false,
+    this.creditLimit,
     required this.onTap,
   });
 
@@ -193,7 +199,7 @@ class _AccountTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    type.toUpperCase(),
+                    type,
                     style: textTheme.labelSmall?.copyWith(
                       color: KuberColors.textSecondary,
                       letterSpacing: 0.8,
@@ -212,12 +218,17 @@ class _AccountTile extends StatelessWidget {
                 ),
               ),
               error: (_, _) => const SizedBox.shrink(),
-              data: (bal) => Text(
-                '₹${bal.toStringAsFixed(0)}',
-                style: textTheme.bodyMedium?.copyWith(
-                  color: KuberColors.textSecondary,
-                ),
-              ),
+              data: (bal) {
+                final display = isCreditCard && creditLimit != null
+                    ? '₹${bal.abs().toStringAsFixed(0)} / ₹${creditLimit!.toStringAsFixed(0)}'
+                    : '₹${bal.abs().toStringAsFixed(0)}';
+                return Text(
+                  display,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: KuberColors.textSecondary,
+                  ),
+                );
+              },
             ),
             if (selected) ...[
               const SizedBox(width: KuberSpacing.sm),

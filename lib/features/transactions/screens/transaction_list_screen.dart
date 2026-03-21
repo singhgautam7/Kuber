@@ -148,6 +148,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   void _openAdvancedFilters() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
@@ -363,6 +364,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         transactions: group.transactions,
                         onDelete: _deleteWithUndo,
                         onTap: (t) => _showTransactionDetail(t),
+                        onEdit: (t) => context.push('/add-transaction', extra: t),
                       );
                     }
                   },
@@ -486,11 +488,13 @@ class _DayCard extends StatelessWidget {
   final List<Transaction> transactions;
   final void Function(Transaction) onDelete;
   final void Function(Transaction) onTap;
+  final void Function(Transaction) onEdit;
 
   const _DayCard({
     required this.transactions,
     required this.onDelete,
     required this.onTap,
+    required this.onEdit,
   });
 
   @override
@@ -516,6 +520,7 @@ class _DayCard extends StatelessWidget {
               transaction: transactions[i],
               onDelete: () => onDelete(transactions[i]),
               onTap: () => onTap(transactions[i]),
+              onEdit: () => onEdit(transactions[i]),
             ),
           ],
         ],
@@ -528,11 +533,13 @@ class _TransactionRow extends ConsumerWidget {
   final Transaction transaction;
   final VoidCallback onDelete;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
 
   const _TransactionRow({
     required this.transaction,
     required this.onDelete,
     required this.onTap,
+    required this.onEdit,
   });
 
   @override
@@ -578,20 +585,34 @@ class _TransactionRow extends ConsumerWidget {
 
     return Dismissible(
       key: ValueKey(transaction.id),
-      direction: DismissDirection.endToStart,
+      direction: DismissDirection.horizontal,
       background: Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: KuberSpacing.xl),
+        decoration: BoxDecoration(
+          color: KuberColors.primary.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Icon(Icons.edit_outlined, color: KuberColors.primary),
+      ),
+      secondaryBackground: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: KuberSpacing.xl),
         decoration: BoxDecoration(
           color: KuberColors.expense.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Icon(
-          Icons.delete_outline,
-          color: KuberColors.expense,
-        ),
+        child: const Icon(Icons.delete_outline, color: KuberColors.expense),
       ),
-      onDismissed: (_) => onDelete(),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          onDelete();
+          return true;
+        } else {
+          onEdit();
+          return false;
+        }
+      },
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20),

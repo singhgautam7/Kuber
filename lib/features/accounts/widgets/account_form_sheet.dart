@@ -79,9 +79,9 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
       text: a?.creditLimit?.toStringAsFixed(0) ?? '',
     );
     _last4Controller = TextEditingController(text: a?.last4Digits ?? '');
-    _selectedType = a?.type ?? 'cash';
-    // Normalize old 'card'/'upi' types for editing
-    if (_selectedType == 'card' || _selectedType == 'upi') {
+    _selectedType = a?.type ?? 'bank';
+    // Normalize old 'card'/'upi'/'cash' types for editing
+    if (_selectedType == 'card' || _selectedType == 'upi' || _selectedType == 'cash') {
       _selectedType = 'bank';
     }
     // If editing a credit card, show 'credit' type
@@ -109,7 +109,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     account
       ..name = name
       ..type = _selectedType == 'credit' ? 'bank' : _selectedType
-      ..isCreditCard = _isCreditCard && _selectedType != 'cash'
+      ..isCreditCard = _isCreditCard
       ..icon = _selectedIcon
       ..colorValue = _selectedColor
       ..initialBalance = double.tryParse(_balanceController.text) ?? 0.0
@@ -164,7 +164,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               style:
                   GoogleFonts.plusJakartaSans(color: KuberColors.textPrimary),
               decoration: InputDecoration(
-                labelText: 'Account Name',
+                labelText: _selectedType == 'credit' ? 'Credit Card Name' : 'Cash or Bank Name',
                 labelStyle: GoogleFonts.plusJakartaSans(
                     color: KuberColors.textSecondary),
               ),
@@ -278,12 +278,9 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
             // Type selector
             Row(
               children: [
-                _buildTypeChip('cash', Icons.payments_rounded, 'Cash'),
+                _buildTypeChip('bank', Icons.account_balance_rounded, 'Bank / Cash'),
                 const SizedBox(width: 8),
-                _buildTypeChip('bank', Icons.account_balance_rounded, 'Bank'),
-                const SizedBox(width: 8),
-                _buildTypeChip(
-                    'credit', Icons.credit_card_rounded, 'Credit Card'),
+                _buildTypeChip('credit', Icons.credit_card_rounded, 'Credit Card'),
               ],
             ),
             const SizedBox(height: 16),
@@ -409,7 +406,6 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
             ? null
             : () => setState(() {
                   _selectedType = type;
-                  if (type == 'cash') _last4Controller.clear();
                 }),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),

@@ -145,12 +145,29 @@ class DashboardScreen extends ConsumerWidget {
                                         style: textTheme.titleMedium),
                                     error: (e, _) => Text('-',
                                         style: textTheme.titleMedium),
-                                    data: (balance) => Text(
-                                      CurrencyFormatter.format(balance),
-                                      style: textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
+                                    data: (balance) {
+                                      final Color? balanceColor;
+                                      if (account.isCreditCard) {
+                                        balanceColor = balance > 0
+                                            ? KuberColors.expense
+                                            : balance < 0
+                                                ? KuberColors.income
+                                                : null;
+                                      } else {
+                                        balanceColor = balance < 0
+                                            ? KuberColors.expense
+                                            : null;
+                                      }
+                                      final prefix = balance < 0 ? '-' : '';
+                                      return Text(
+                                        '$prefix${CurrencyFormatter.format(balance)}',
+                                        style:
+                                            textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: balanceColor,
+                                        ),
+                                      );
+                                    },
                                   ),
                                   if (account.last4Digits != null)
                                     Text(

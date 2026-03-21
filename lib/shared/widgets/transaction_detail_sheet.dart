@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/breakpoints.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/icon_mapper.dart';
 import '../../features/accounts/providers/account_provider.dart';
@@ -13,6 +12,7 @@ import '../../features/categories/providers/category_provider.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/providers/transaction_provider.dart';
 import 'category_icon.dart';
+import 'timed_snackbar.dart';
 
 /// Shows the transaction detail bottom sheet with edit/delete actions.
 void showTransactionDetailSheet(
@@ -22,6 +22,7 @@ void showTransactionDetailSheet(
 ) {
   showModalBottomSheet(
     context: context,
+    useRootNavigator: true,
     backgroundColor: KuberColors.surfaceCard,
     isScrollControlled: true,
     useSafeArea: true,
@@ -31,11 +32,11 @@ void showTransactionDetailSheet(
     builder: (_) => TransactionDetailSheet(
       transaction: t,
       onEdit: () {
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         context.push('/add-transaction', extra: t);
       },
       onDelete: () {
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         deleteTransactionWithUndo(context, ref, t);
       },
     ),
@@ -45,26 +46,25 @@ void showTransactionDetailSheet(
 /// Deletes the transaction and shows an undo snackbar.
 void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction t) {
   ref.read(transactionListProvider.notifier).delete(t.id);
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('Deleted "${t.name}"'),
-      duration: const Duration(seconds: 4),
-      action: SnackBarAction(
-        label: 'Undo',
-        onPressed: () {
-          final restored = Transaction()
-            ..name = t.name
-            ..amount = t.amount
-            ..type = t.type
-            ..categoryId = t.categoryId
-            ..accountId = t.accountId
-            ..notes = t.notes
-            ..createdAt = t.createdAt
-            ..updatedAt = t.updatedAt
-            ..nameLower = t.nameLower;
-          ref.read(transactionListProvider.notifier).add(restored);
-        },
-      ),
+  showTimedSnackBar(
+    context,
+    message: 'Deleted "${t.name}"',
+    duration: const Duration(seconds: 5),
+    action: SnackBarAction(
+      label: 'Undo',
+      onPressed: () {
+        final restored = Transaction()
+          ..name = t.name
+          ..amount = t.amount
+          ..type = t.type
+          ..categoryId = t.categoryId
+          ..accountId = t.accountId
+          ..notes = t.notes
+          ..createdAt = t.createdAt
+          ..updatedAt = t.updatedAt
+          ..nameLower = t.nameLower;
+        ref.read(transactionListProvider.notifier).restore(restored);
+      },
     ),
   );
 }
@@ -292,7 +292,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 foregroundColor: KuberColors.expense,
               ),
             ),
-            SizedBox(height: navBarBottomPadding(context)),
+
           ],
         ),
       ),

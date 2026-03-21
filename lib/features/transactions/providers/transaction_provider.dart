@@ -35,6 +35,11 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     await ref.read(transactionRepositoryProvider).delete(id);
     ref.invalidateSelf();
   }
+
+  Future<void> restore(Transaction t) async {
+    await ref.read(transactionRepositoryProvider).restore(t);
+    ref.invalidateSelf();
+  }
 }
 
 final monthlyTransactionsProvider =

@@ -7,7 +7,7 @@ class Account {
   Id id = Isar.autoIncrement;
 
   late String name;
-  late String type; // 'cash' | 'bank'
+  late String type; // 'bank'
   double initialBalance = 0.0; // for CC: initial credit utilized
   double? creditLimit; // total credit limit (CC only)
   bool isCreditCard = false; // explicit toggle

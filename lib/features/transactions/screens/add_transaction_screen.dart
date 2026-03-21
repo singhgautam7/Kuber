@@ -13,6 +13,7 @@ import '../../categories/providers/category_provider.dart';
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/account_picker_sheet.dart';
 import '../widgets/category_picker_sheet.dart';
 
@@ -119,11 +120,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     selected: _type,
                     onSelected: (selected) {
                       if (selected == 'transfer') {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Transfer coming soon'),
-                            duration: Duration(seconds: 1),
-                          ),
+                        showTimedSnackBar(
+                          context,
+                          message: 'Transfer coming soon',
+                          duration: const Duration(seconds: 2),
                         );
                         return;
                       }
@@ -617,6 +617,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   void _showCategoryPicker() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
@@ -637,6 +638,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   void _showAccountPicker() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
@@ -690,7 +692,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _notesController.text = suggestion.notes ?? '';
     });
     ref.read(suggestionQueryProvider.notifier).state = '';
-    _nameFocusNode.unfocus();
+    _nameFocusNode.requestFocus();
   }
 
   Future<void> _save() async {
@@ -720,8 +722,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save: $e')),
+        showTimedSnackBar(
+          context,
+          message: 'Failed to save: $e',
         );
       }
       return;
@@ -729,13 +732,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     if (!mounted) return;
     context.pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isEditing ? 'Transaction updated' : 'Transaction saved',
-        ),
-        duration: const Duration(seconds: 2),
-      ),
+    showTimedSnackBar(
+      context,
+      message: _isEditing ? 'Transaction updated' : 'Transaction saved',
+      duration: const Duration(seconds: 2),
     );
   }
 }

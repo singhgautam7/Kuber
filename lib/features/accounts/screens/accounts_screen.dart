@@ -20,11 +20,7 @@ String _accountTypeLabel(Account account) {
   } else {
     switch (account.type.toLowerCase()) {
       case 'bank':
-        label = 'BANK ACCOUNT';
-      case 'upi':
-        label = 'UPI';
-      case 'cash':
-        label = 'CASH';
+        label = 'BANK/CASH';
       case 'card':
         label = 'CREDIT CARD';
       default:
@@ -49,6 +45,7 @@ Color _resolveColor(Account account) {
 void _openAccountSheet(BuildContext context, {Account? account}) {
   showModalBottomSheet(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: KuberColors.surfaceCard,
@@ -105,7 +102,7 @@ class _AccountsBody extends ConsumerWidget {
       final balance = balanceAsync.valueOrNull ?? a.initialBalance;
       balanceMap[a.id] = balance;
 
-      if (a.isCreditCard && a.type != 'cash') {
+      if (a.isCreditCard) {
         if (balance > 0) totalDebt += balance; // positive utilized = debt
       } else {
         totalAssets += balance;
@@ -220,10 +217,18 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCreditCard = account.isCreditCard && account.type != 'cash';
+    final isCreditCard = account.isCreditCard;
     final balanceLabel = isCreditCard ? 'Credit Utilized' : 'Available Balance';
-    final balanceColor =
-        (isCreditCard && balance > 0) ? KuberColors.expense : KuberColors.textPrimary;
+    final Color balanceColor;
+    if (isCreditCard) {
+      balanceColor = balance > 0
+          ? KuberColors.expense
+          : balance < 0
+              ? KuberColors.income
+              : KuberColors.textPrimary;
+    } else {
+      balanceColor = balance < 0 ? KuberColors.expense : KuberColors.textPrimary;
+    }
     final accentColor = _resolveColor(account);
 
     return Container(
@@ -290,7 +295,7 @@ class _AccountCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '₹${balance.abs().toStringAsFixed(2)}',
+                '${balance < 0 ? '-' : ''}₹${balance.abs().toStringAsFixed(2)}',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
@@ -434,11 +439,11 @@ class _NetWorthCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '₹${netWorth.toStringAsFixed(2)}',
+            '${netWorth < 0 ? '-' : ''}₹${netWorth.abs().toStringAsFixed(2)}',
             style: GoogleFonts.plusJakartaSans(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: KuberColors.primary,
+              color: netWorth < 0 ? KuberColors.expense : KuberColors.primary,
               letterSpacing: -0.5,
             ),
           ),

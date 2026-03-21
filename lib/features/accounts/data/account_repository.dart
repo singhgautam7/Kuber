@@ -29,7 +29,7 @@ class AccountRepository extends BaseRepository<Account> {
     final defaults = [
       Account()
         ..name = 'Cash'
-        ..type = 'cash'
+        ..type = 'bank'
         ..icon = 'payments'
         ..colorValue = 0xFF66BB6A,
       Account()
