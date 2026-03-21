@@ -620,6 +620,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         onSelected: (id) {
           setState(() => _selectedCategoryId = id);
           Navigator.pop(context);
+          _nameFocusNode.unfocus();
         },
       ),
     );
@@ -639,6 +640,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         onSelected: (id) {
           setState(() => _selectedAccountId = id);
           Navigator.pop(context);
+          _nameFocusNode.unfocus();
         },
       ),
     );

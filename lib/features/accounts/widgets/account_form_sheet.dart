@@ -59,12 +59,13 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
   late final TextEditingController _nameController;
   late final TextEditingController _balanceController;
   late final TextEditingController _limitController;
+  late final TextEditingController _last4Controller;
   late String _selectedType;
-  late bool _isCreditCard;
   String? _selectedIcon;
   int? _selectedColor;
 
   bool get _isEditing => widget.account != null;
+  bool get _isCreditCard => _selectedType == 'credit';
 
   @override
   void initState() {
@@ -77,14 +78,18 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     _limitController = TextEditingController(
       text: a?.creditLimit?.toStringAsFixed(0) ?? '',
     );
+    _last4Controller = TextEditingController(text: a?.last4Digits ?? '');
     _selectedType = a?.type ?? 'cash';
     // Normalize old 'card'/'upi' types for editing
     if (_selectedType == 'card' || _selectedType == 'upi') {
       _selectedType = 'bank';
     }
-    _isCreditCard = a?.isCreditCard ?? false;
-    _selectedIcon = a?.icon;
-    _selectedColor = a?.colorValue;
+    // If editing a credit card, show 'credit' type
+    if (a?.isCreditCard == true) {
+      _selectedType = 'credit';
+    }
+    _selectedIcon = a?.icon ?? _accountIcons[0];
+    _selectedColor = a?.colorValue ?? _accountColors[0];
   }
 
   @override
@@ -92,6 +97,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     _nameController.dispose();
     _balanceController.dispose();
     _limitController.dispose();
+    _last4Controller.dispose();
     super.dispose();
   }
 
@@ -102,13 +108,16 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     final account = widget.account ?? Account();
     account
       ..name = name
-      ..type = _selectedType
+      ..type = _selectedType == 'credit' ? 'bank' : _selectedType
       ..isCreditCard = _isCreditCard
       ..icon = _selectedIcon
       ..colorValue = _selectedColor
       ..initialBalance = double.tryParse(_balanceController.text) ?? 0.0
       ..creditLimit =
-          _isCreditCard ? double.tryParse(_limitController.text) : null;
+          _isCreditCard ? double.tryParse(_limitController.text) : null
+      ..last4Digits = _last4Controller.text.isNotEmpty
+          ? _last4Controller.text
+          : null;
 
     ref.read(accountListProvider.notifier).add(account);
     Navigator.pop(context);
@@ -266,49 +275,44 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
             ),
             const SizedBox(height: 20),
 
-            // Type selector — only Cash and Bank
+            // Type selector
             Row(
               children: [
                 _buildTypeChip('cash', Icons.payments_rounded, 'Cash'),
                 const SizedBox(width: 8),
                 _buildTypeChip('bank', Icons.account_balance_rounded, 'Bank'),
+                const SizedBox(width: 8),
+                _buildTypeChip(
+                    'credit', Icons.credit_card_rounded, 'Credit Card'),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // Credit card toggle
-            Container(
-              decoration: BoxDecoration(
-                color: KuberColors.surfaceElement,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SwitchListTile(
-                title: Text(
-                  'Credit Card',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: KuberColors.textPrimary,
-                  ),
-                ),
-                subtitle: Text(
-                  'Track credit utilized instead of balance',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    color: KuberColors.textSecondary,
-                  ),
-                ),
-                value: _isCreditCard,
-                activeThumbColor: KuberColors.primary,
-                onChanged: (val) => setState(() => _isCreditCard = val),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
+
+            // Last 4 digits (bank/credit only)
+            if (_selectedType == 'bank' || _selectedType == 'credit')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: TextField(
+                  controller: _last4Controller,
+                  maxLength: 4,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  style: GoogleFonts.plusJakartaSans(
+                      color: KuberColors.textPrimary),
+                  decoration: InputDecoration(
+                    labelText: 'Last 4 digits',
+                    helperText:
+                        'Just to help you identify your account — stored only on your device',
+                    helperMaxLines: 2,
+                    labelStyle: GoogleFonts.plusJakartaSans(
+                        color: KuberColors.textSecondary),
+                    helperStyle: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: KuberColors.textMuted,
+                    ),
+                  ),
+                ),
+              ),
 
             // Balance / Credit fields
             if (!_isCreditCard)
@@ -398,43 +402,56 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
 
   Widget _buildTypeChip(String type, IconData icon, String label) {
     final selected = _selectedType == type;
+    final disabled = _isEditing;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _selectedType = type),
+        onTap: disabled
+            ? null
+            : () => setState(() {
+                  _selectedType = type;
+                  if (type == 'cash') _last4Controller.clear();
+                }),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: selected
-                ? KuberColors.primary.withValues(alpha: 0.15)
+                ? (disabled
+                    ? KuberColors.primary.withValues(alpha: 0.08)
+                    : KuberColors.primary.withValues(alpha: 0.15))
                 : KuberColors.surfaceElement,
             borderRadius: BorderRadius.circular(12),
             border: selected
                 ? Border.all(
-                    color: KuberColors.primary.withValues(alpha: 0.4))
+                    color: KuberColors.primary
+                        .withValues(alpha: disabled ? 0.2 : 0.4))
                 : null,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color:
-                    selected ? KuberColors.primary : KuberColors.textSecondary,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+          child: Opacity(
+            opacity: disabled && !selected ? 0.4 : 1.0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
                   color: selected
                       ? KuberColors.primary
                       : KuberColors.textSecondary,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    color: selected
+                        ? KuberColors.primary
+                        : KuberColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

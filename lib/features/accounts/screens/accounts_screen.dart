@@ -13,19 +13,28 @@ import '../widgets/account_form_sheet.dart';
 
 
 String _accountTypeLabel(Account account) {
-  if (account.isCreditCard) return 'CREDIT CARD';
-  switch (account.type.toLowerCase()) {
-    case 'bank':
-      return 'BANK ACCOUNT';
-    case 'upi':
-      return 'UPI';
-    case 'cash':
-      return 'CASH';
-    case 'card':
-      return 'CREDIT CARD';
-    default:
-      return account.type.toUpperCase();
+  String label;
+  if (account.isCreditCard) {
+    label = 'CREDIT CARD';
+  } else {
+    switch (account.type.toLowerCase()) {
+      case 'bank':
+        label = 'BANK ACCOUNT';
+      case 'upi':
+        label = 'UPI';
+      case 'cash':
+        label = 'CASH';
+      case 'card':
+        label = 'CREDIT CARD';
+      default:
+        label = account.type.toUpperCase();
+    }
   }
+  if (account.last4Digits != null &&
+      (account.isCreditCard || account.type.toLowerCase() == 'bank')) {
+    label += ' • **** ${account.last4Digits}';
+  }
+  return label;
 }
 
 IconData _resolveIcon(Account account) {

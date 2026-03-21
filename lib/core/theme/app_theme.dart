@@ -65,6 +65,7 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: colorScheme,
       textTheme: textTheme,
+      splashFactory: NoSplash.splashFactory,
       scaffoldBackgroundColor: KuberColors.background,
       cardTheme: CardThemeData(
         color: KuberColors.card,
@@ -117,6 +118,21 @@ class AppTheme {
         contentTextStyle: textTheme.bodyMedium?.copyWith(
           color: KuberColors.textPrimary,
         ),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: KuberColors.surfaceElement,
+        side: BorderSide.none,
+        selectedColor: KuberColors.primary.withValues(alpha: 0.18),
+        checkmarkColor: KuberColors.primary,
+        showCheckmark: false,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          color: KuberColors.textSecondary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       ),
     );
   }

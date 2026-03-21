@@ -137,7 +137,7 @@ class DashboardScreen extends ConsumerWidget {
                                       ),
                                     ],
                                   ),
-                                  const Spacer(),
+                                  const SizedBox(height: KuberSpacing.sm),
                                   balanceAsync.when(
                                     loading: () => Text('...',
                                         style: textTheme.titleMedium),
@@ -150,6 +150,14 @@ class DashboardScreen extends ConsumerWidget {
                                       ),
                                     ),
                                   ),
+                                  if (account.last4Digits != null)
+                                    Text(
+                                      '**** ${account.last4Digits}',
+                                      style: textTheme.labelSmall?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  const Spacer(),
                                 ],
                               ),
                             ),
@@ -405,10 +413,10 @@ class _WeeklyChartState extends State<_WeeklyChart> {
                   fontWeight: FontWeight.w600,
                 )),
             const SizedBox(width: KuberSpacing.xs),
-            Text('(Income vs Expense)',
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                )),
+            // Text('(Income vs Expense)',
+            //     style: textTheme.labelSmall?.copyWith(
+            //       color: colorScheme.onSurfaceVariant,
+            //     )),
             const Spacer(),
             _ChartLegendDot(color: KuberColors.income, label: 'Inc'),
             const SizedBox(width: KuberSpacing.md),
@@ -430,30 +438,22 @@ class _WeeklyChartState extends State<_WeeklyChart> {
               barTouchData: BarTouchData(
                 enabled: true,
                 touchCallback: (event, response) {
+                  if (event is! FlTapUpEvent) return;
                   setState(() {
-                    if (response == null ||
-                        response.spot == null ||
-                        !event.isInterestedForInteractions) {
+                    if (response == null || response.spot == null) {
                       _touchedIndex = -1;
                     } else {
-                      _touchedIndex =
+                      final tapped =
                           response.spot!.touchedBarGroupIndex;
+                      _touchedIndex =
+                          tapped == _touchedIndex ? -1 : tapped;
                     }
                   });
                 },
                 touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (_) => KuberColors.cardLight,
-                  tooltipBorderRadius: BorderRadius.circular(8),
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    if (rodIndex != 0) return null;
-                    final d = days[group.x.toInt()];
-                    return BarTooltipItem(
-                      'Inc: ${CurrencyFormatter.format(d.income)}\nExp: ${CurrencyFormatter.format(d.expense)}',
-                      textTheme.labelSmall!.copyWith(
-                        color: KuberColors.textPrimary,
-                      ),
-                    );
-                  },
+                  getTooltipColor: (_) => Colors.transparent,
+                  tooltipPadding: EdgeInsets.zero,
+                  getTooltipItem: (_, _, _, _) => null,
                 ),
               ),
               titlesData: FlTitlesData(
@@ -528,6 +528,135 @@ class _WeeklyChartState extends State<_WeeklyChart> {
                 );
               }).toList(),
             ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: _touchedIndex >= 0 && _touchedIndex < days.length
+              ? _WeeklyDetailPanel(day: days[_touchedIndex])
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+}
+
+class _WeeklyDetailPanel extends StatelessWidget {
+  final DaySummary day;
+
+  const _WeeklyDetailPanel({required this.day});
+
+  String _formatAmount(double v) {
+    if (v >= 100000) {
+      return '₹${(v / 1000).toStringAsFixed(0)}K';
+    }
+    return '₹${v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final net = day.income - day.expense;
+    final maxVal = (day.income > day.expense ? day.income : day.expense)
+        .clamp(1.0, double.infinity);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: KuberSpacing.md),
+      child: Container(
+        padding: const EdgeInsets.all(KuberSpacing.md),
+        decoration: BoxDecoration(
+          color: KuberColors.card,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              DateFormat('EEEE, d MMM').format(day.date),
+              style: textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.sm),
+            _WeeklyDetailBar(
+              label: 'Income',
+              amount: _formatAmount(day.income),
+              ratio: day.income / maxVal,
+              color: KuberColors.income,
+            ),
+            const SizedBox(height: KuberSpacing.xs),
+            _WeeklyDetailBar(
+              label: 'Expense',
+              amount: _formatAmount(day.expense),
+              ratio: day.expense / maxVal,
+              color: KuberColors.expense,
+            ),
+            const SizedBox(height: KuberSpacing.xs),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Net',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: KuberColors.textSecondary,
+                  ),
+                ),
+                Text(
+                  '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: net >= 0 ? KuberColors.income : KuberColors.expense,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeeklyDetailBar extends StatelessWidget {
+  final String label;
+  final String amount;
+  final double ratio;
+  final Color color;
+
+  const _WeeklyDetailBar({
+    required this.label,
+    required this.amount,
+    required this.ratio,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label,
+                style: textTheme.labelSmall
+                    ?.copyWith(color: KuberColors.textSecondary)),
+            Text(amount,
+                style: textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                )),
+          ],
+        ),
+        const SizedBox(height: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: ratio.clamp(0.0, 1.0),
+            minHeight: 4,
+            backgroundColor: KuberColors.surfaceElement,
+            valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
       ],

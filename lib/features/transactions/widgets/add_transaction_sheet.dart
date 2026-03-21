@@ -167,8 +167,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                       size: 18,
                       color: selected ? colorScheme.onPrimaryContainer : harmonized,
                     ),
-                    onSelected: (_) =>
-                        setState(() => _selectedCategoryId = c.id),
+                    onSelected: (_) {
+                      setState(() => _selectedCategoryId = c.id);
+                      FocusScope.of(context).unfocus();
+                    },
                   );
                 }).toList(),
               ),
@@ -191,7 +193,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                           child: Text(a.name),
                         ))
                     .toList(),
-                onChanged: (v) => setState(() => _selectedAccountId = v),
+                onChanged: (v) {
+                  setState(() => _selectedAccountId = v);
+                  FocusScope.of(context).unfocus();
+                },
               ),
             ),
             const SizedBox(height: KuberSpacing.md),

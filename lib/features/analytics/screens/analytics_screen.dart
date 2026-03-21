@@ -134,13 +134,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         return buckets;
 
       case AnalyticsPeriod.year:
-        final buckets = List.generate(12, (i) {
-          final m = DateTime(now.year, i + 1, 1);
-          return _Bucket(DateFormat.MMM().format(m));
-        });
+        // 4 quarterly buckets for the current year
+        final buckets = List.generate(4, (i) => _Bucket('Q${i + 1}'));
         for (final t in txns) {
           if (t.createdAt.year != now.year) continue;
-          final idx = t.createdAt.month - 1;
+          final idx = ((t.createdAt.month - 1) / 3).floor();
           if (t.type == 'income') {
             buckets[idx].income += t.amount;
           } else {
@@ -150,22 +148,30 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         return buckets;
 
       case AnalyticsPeriod.all:
-        // Show last 12 months, latest month at the right
-        final buckets = List.generate(12, (i) {
-          final m = DateTime(now.year, now.month - 11 + i, 1);
-          return _Bucket(DateFormat('MMM yy').format(m));
+        // Last 4 quarters
+        final buckets = List.generate(4, (i) {
+          final qOffset = 3 - i; // 3, 2, 1, 0
+          final qStartMonth = now.month - qOffset * 3;
+          final qStart = DateTime(now.year, qStartMonth, 1);
+          final label = "${DateFormat.MMM().format(qStart)}'${DateFormat('yy').format(qStart)}";
+          return _Bucket(label);
         });
-        final firstMonth = DateTime(now.year, now.month - 11, 1);
         for (final t in txns) {
-          if (t.createdAt.isBefore(firstMonth)) continue;
-          final idx = (t.createdAt.year - firstMonth.year) * 12 +
-              t.createdAt.month -
-              firstMonth.month;
-          if (idx < 0 || idx >= buckets.length) continue;
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
+          // Determine which quarter bucket this transaction falls into
+          bool placed = false;
+          for (int i = 0; i < 4 && !placed; i++) {
+            final qOffset = 3 - i;
+            final qStartMonth = now.month - qOffset * 3;
+            final qStart = DateTime(now.year, qStartMonth, 1);
+            final qEnd = DateTime(now.year, qStartMonth + 3, 1);
+            if (!t.createdAt.isBefore(qStart) && t.createdAt.isBefore(qEnd)) {
+              if (t.type == 'income') {
+                buckets[i].income += t.amount;
+              } else {
+                buckets[i].expense += t.amount;
+              }
+              placed = true;
+            }
           }
         }
         return buckets;
@@ -335,27 +341,60 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: AnalyticsPeriod.values.map((p) {
-                  final isCustomActive = p == AnalyticsPeriod.custom &&
-                      _period == AnalyticsPeriod.custom;
+                  final isCustom = p == AnalyticsPeriod.custom;
+                  final isCustomActive = isCustom && _period == AnalyticsPeriod.custom;
                   final label = isCustomActive
                       ? _customRangeLabel()
                       : _periodLabel(p);
+                  final isSelected = _period == p;
+
                   return Padding(
                     padding: const EdgeInsets.only(right: KuberSpacing.sm),
-                    child: p == AnalyticsPeriod.custom
-                        ? _CustomRangeChip(
-                            label: label,
-                            selected: _period == p,
-                            onTap: () => _pickCustomRange(),
+                    child: isCustom
+                        ? FilterChip.elevated(
+                            label: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.date_range, size: 14,
+                                  color: isSelected ? KuberColors.primary : KuberColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Text(label),
+                              ],
+                            ),
+                            selected: isSelected,
+                            onSelected: (_) => _pickCustomRange(),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? KuberColors.primary.withValues(alpha: 0.5)
+                                  : KuberColors.surfaceDivider,
+                            ),
+                            backgroundColor: KuberColors.surfaceElement,
+                            selectedColor: KuberColors.primary.withValues(alpha: 0.12),
+                            labelStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: isSelected ? KuberColors.primary : KuberColors.textSecondary,
+                            ),
+                            elevation: 0,
+                            pressElevation: 1,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           )
-                        : _PeriodChip(
-                            label: label,
-                            selected: _period == p,
-                            onTap: () => setState(() {
-                              _period = p;
-                              _selectedTrendBarIndex = null;
-                              _selectedDonutSliceIndex = null;
-                            }),
+                        : FilterChip(
+                            label: Text(label),
+                            selected: isSelected,
+                            onSelected: (val) {
+                              if (_period == p) return;
+                              setState(() {
+                                _period = p;
+                                _selectedTrendBarIndex = null;
+                                _selectedDonutSliceIndex = null;
+                              });
+                            },
+                            labelStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: isSelected ? KuberColors.primary : KuberColors.textSecondary,
+                            ),
                           ),
                   );
                 }).toList(),
@@ -962,101 +1001,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 // ---------------------------------------------------------------------------
 // Private widgets
 // ---------------------------------------------------------------------------
-
-class _PeriodChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _PeriodChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg, vertical: KuberSpacing.sm),
-        decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.2)
-              : KuberColors.card,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? cs.primary : KuberColors.divider,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? cs.primary : KuberColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CustomRangeChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _CustomRangeChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg, vertical: KuberSpacing.sm),
-        decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.2)
-              : KuberColors.card,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? cs.primary : KuberColors.divider,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.date_range,
-              size: 14,
-              color: selected ? cs.primary : KuberColors.textSecondary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? cs.primary : KuberColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _TabToggle extends StatelessWidget {
   final List<String> labels;

@@ -270,39 +270,74 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 child: Row(
                   children: [
                     if (_hasAdvancedFilters) ...[
-                      _FilterChip(
-                        label: 'Clear Filters',
-                        icon: Icons.close,
-                        isSelected: false,
-                        isHighlighted: true,
-                        onTap: _clearAdvancedFilters,
+                      FilterChip(
+                        avatar: const Icon(Icons.close, size: 14),
+                        label: const Text('Clear Filters'),
+                        selected: false,
+                        onSelected: (_) => _clearAdvancedFilters(),
+                        backgroundColor: KuberColors.expense.withValues(alpha: 0.15),
+                        labelStyle: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: KuberColors.expense,
+                        ),
                       ),
                       const SizedBox(width: KuberSpacing.sm),
                     ],
-                    _FilterChip(
-                      label: 'All',
-                      isSelected: _selectedFilter == 'all',
-                      onTap: () => setState(() => _selectedFilter = 'all'),
+                    FilterChip(
+                      label: const Text('All'),
+                      selected: _selectedFilter == 'all',
+                      onSelected: (val) {
+                        if (_selectedFilter == 'all') return;
+                        setState(() => _selectedFilter = 'all');
+                      },
+                      labelStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: _selectedFilter == 'all' ? FontWeight.w600 : FontWeight.w400,
+                        color: _selectedFilter == 'all' ? KuberColors.primary : KuberColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    _FilterChip(
-                      label: 'Expenses',
-                      icon: Icons.arrow_downward,
-                      isSelected: _selectedFilter == 'expense',
-                      onTap: () => setState(() => _selectedFilter = 'expense'),
+                    FilterChip(
+                      label: const Text('Expenses'),
+                      selected: _selectedFilter == 'expense',
+                      onSelected: (val) {
+                        if (_selectedFilter == 'expense') return;
+                        setState(() => _selectedFilter = 'expense');
+                      },
+                      labelStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: _selectedFilter == 'expense' ? FontWeight.w600 : FontWeight.w400,
+                        color: _selectedFilter == 'expense' ? KuberColors.primary : KuberColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    _FilterChip(
-                      label: 'Income',
-                      icon: Icons.arrow_upward,
-                      isSelected: _selectedFilter == 'income',
-                      onTap: () => setState(() => _selectedFilter = 'income'),
+                    FilterChip(
+                      label: const Text('Income'),
+                      selected: _selectedFilter == 'income',
+                      onSelected: (val) {
+                        if (_selectedFilter == 'income') return;
+                        setState(() => _selectedFilter = 'income');
+                      },
+                      labelStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: _selectedFilter == 'income' ? FontWeight.w600 : FontWeight.w400,
+                        color: _selectedFilter == 'income' ? KuberColors.primary : KuberColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    _FilterChip(
-                      label: 'This Month',
-                      isSelected: _selectedFilter == 'this_month',
-                      onTap: () => setState(() => _selectedFilter = 'this_month'),
+                    FilterChip(
+                      label: const Text('This Month'),
+                      selected: _selectedFilter == 'this_month',
+                      onSelected: (val) {
+                        if (_selectedFilter == 'this_month') return;
+                        setState(() => _selectedFilter = 'this_month');
+                      },
+                      labelStyle: GoogleFonts.plusJakartaSans(
+                        fontSize: 13,
+                        fontWeight: _selectedFilter == 'this_month' ? FontWeight.w600 : FontWeight.w400,
+                        color: _selectedFilter == 'this_month' ? KuberColors.primary : KuberColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
                     _AdvancedFilterButton(
@@ -379,73 +414,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 }
 
 // --- Private widgets ---
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final IconData? icon;
-  final bool isSelected;
-  final bool isHighlighted;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    this.icon,
-    required this.isSelected,
-    this.isHighlighted = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md,
-          vertical: KuberSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? KuberColors.primary
-              : isHighlighted
-                  ? KuberColors.expense.withValues(alpha: 0.15)
-                  : KuberColors.surfaceElement,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(
-                icon,
-                size: 14,
-                color: isSelected
-                    ? Colors.white
-                    : isHighlighted
-                        ? KuberColors.expense
-                        : KuberColors.textSecondary,
-              ),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected
-                    ? Colors.white
-                    : isHighlighted
-                        ? KuberColors.expense
-                        : KuberColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _AdvancedFilterButton extends StatelessWidget {
   final bool hasFilters;

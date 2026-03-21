@@ -5,6 +5,7 @@ import 'package:isar/isar.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../../transactions/data/transaction.dart';
+import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
 import '../data/account_repository.dart';
 
@@ -39,6 +40,9 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
 /// Credit cards: initialBalance + expenses - income (credit utilized).
 final accountBalanceProvider =
     FutureProvider.family<double, int>((ref, accountId) async {
+  // Watch these so balance recomputes when transactions or accounts change
+  ref.watch(transactionListProvider);
+  ref.watch(accountListProvider);
   final isar = ref.watch(isarProvider);
   final account = await isar.accounts.get(accountId);
   if (account == null) return 0.0;
