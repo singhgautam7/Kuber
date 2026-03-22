@@ -103,15 +103,30 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
       );
     }
 
-    // Phone / small tablet → glassmorphic bottom bar
+    // Phone / small tablet → standard NavigationBar
     return Scaffold(
       backgroundColor: KuberColors.background,
-      extendBody: true,
       body: animatedContent,
-      bottomNavigationBar: KuberBottomNavBar(
-        currentIndex: _currentIndex,
-        onTabTapped: _onTabTapped,
-        onAddTapped: _onAddTapped,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onAddTapped,
+        backgroundColor: KuberColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: _onTabTapped,
+        destinations: kuberNavItems.map((item) {
+          return NavigationDestination(
+            icon: Icon(item.icon),
+            selectedIcon: Icon(item.activeIcon),
+            label: item.label,
+          );
+        }).toList(),
       ),
     );
   }

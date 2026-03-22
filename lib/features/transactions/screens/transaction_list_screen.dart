@@ -29,13 +29,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   // Advanced filter state
   DateTimeRange? _dateRange;
-  String? _typeFilter;
+  Set<String> _selectedTypes = {};
   Set<int> _selectedAccountIds = {};
   Set<int> _selectedCategoryIds = {};
 
   bool get _hasAdvancedFilters =>
       _dateRange != null ||
-      _typeFilter != null ||
+      _selectedTypes.isNotEmpty ||
       _selectedAccountIds.isNotEmpty ||
       _selectedCategoryIds.isNotEmpty;
 
@@ -48,7 +48,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   void _clearAdvancedFilters() {
     setState(() {
       _dateRange = null;
-      _typeFilter = null;
+      _selectedTypes = {};
       _selectedAccountIds = {};
       _selectedCategoryIds = {};
     });
@@ -90,8 +90,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           t.createdAt.isBefore(_dateRange!.end.add(const Duration(days: 1)))).toList();
     }
 
-    if (_typeFilter != null) {
-      filtered = filtered.where((t) => t.type == _typeFilter).toList();
+    if (_selectedTypes.isNotEmpty) {
+      filtered = filtered.where((t) => _selectedTypes.contains(t.type)).toList();
     }
 
     if (_selectedAccountIds.isNotEmpty) {
@@ -157,18 +157,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => _AdvancedFilterSheet(
         dateRange: _dateRange,
-        typeFilter: _typeFilter,
+        selectedTypes: _selectedTypes,
         selectedAccountIds: _selectedAccountIds,
         selectedCategoryIds: _selectedCategoryIds,
         searchQuery: _searchQuery,
-        onApply: (dateRange, typeFilter, accountIds, categoryIds, searchQuery) {
+        onApply: (dateRange, types, accountIds, categoryIds, searchQuery) {
           setState(() {
             _dateRange = dateRange;
-            _typeFilter = typeFilter;
+            _selectedTypes = types;
             _selectedAccountIds = accountIds;
             _selectedCategoryIds = categoryIds;
             if (searchQuery != _searchQuery) {
@@ -203,42 +203,42 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: (value) => setState(() => _searchQuery = value),
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: KuberColors.textPrimary,
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Search transactions...',
-                  hintStyle: GoogleFonts.plusJakartaSans(
-                    color: KuberColors.textMuted,
+                  hintStyle: GoogleFonts.inter(
+                    color: KuberColors.textSecondary,
                     fontSize: 14,
                   ),
                   prefixIcon: const Icon(
                     Icons.search,
-                    color: KuberColors.textMuted,
+                    color: KuberColors.textSecondary,
                     size: 20,
                   ),
                   suffixIcon: const Icon(
                     Icons.mic_outlined,
-                    color: KuberColors.textMuted,
+                    color: KuberColors.textSecondary,
                     size: 20,
                   ),
                   filled: true,
-                  fillColor: KuberColors.surfaceElement,
+                  fillColor: KuberColors.surfaceMuted,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: KuberSpacing.lg,
                     vertical: KuberSpacing.md,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                     borderSide:
                         const BorderSide(color: KuberColors.primary, width: 1.5),
                   ),
@@ -265,7 +265,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         selected: false,
                         onSelected: (_) => _clearAdvancedFilters(),
                         backgroundColor: KuberColors.expense.withValues(alpha: 0.15),
-                        labelStyle: GoogleFonts.plusJakartaSans(
+                        labelStyle: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: KuberColors.expense,
@@ -297,15 +297,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       onTap: () {
                         if (_selectedFilter == 'income') return;
                         setState(() => _selectedFilter = 'income');
-                      },
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    _KuberFilterChip(
-                      label: 'Transfers',
-                      selected: _selectedFilter == 'transfer',
-                      onTap: () {
-                        if (_selectedFilter == 'transfer') return;
-                        setState(() => _selectedFilter = 'transfer');
                       },
                     ),
                     const SizedBox(width: KuberSpacing.sm),
@@ -414,8 +405,8 @@ class _AdvancedFilterButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: hasFilters
               ? KuberColors.primary.withValues(alpha: 0.15)
-              : KuberColors.surfaceElement,
-          borderRadius: BorderRadius.circular(10),
+              : KuberColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(8),
           border: hasFilters
               ? Border.all(color: KuberColors.primary, width: 1)
               : null,
@@ -431,7 +422,7 @@ class _AdvancedFilterButton extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               'Advanced',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: hasFilters ? FontWeight.w600 : FontWeight.w400,
                 color: hasFilters ? KuberColors.primary : KuberColors.textSecondary,
@@ -468,10 +459,10 @@ class _DateGroupHeader extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: KuberColors.textMuted,
+              color: KuberColors.textSecondary,
               letterSpacing: 1.0,
             ),
           ),
@@ -479,13 +470,13 @@ class _DateGroupHeader extends StatelessWidget {
           Expanded(
             child: Container(
               height: 0.5,
-              color: KuberColors.surfaceDivider,
+              color: KuberColors.border,
             ),
           ),
           const SizedBox(width: KuberSpacing.sm),
           Text(
             totalText,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: totalColor,
@@ -512,32 +503,25 @@ class _DayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          for (int i = 0; i < transactions.length; i++) ...[
-            if (i > 0)
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-                child: Container(
-                  height: 0.5,
-                  color: KuberColors.surfaceDivider,
-                ),
-              ),
-            _TransactionRow(
+    return Column(
+      children: [
+        for (int i = 0; i < transactions.length; i++) ...[
+          if (i > 0) const SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(
+              color: KuberColors.surfaceCard,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: KuberColors.border),
+            ),
+            child: _TransactionRow(
               transaction: transactions[i],
               onDelete: () => onDelete(transactions[i]),
               onTap: () => onTap(transactions[i]),
               onEdit: () => onEdit(transactions[i]),
             ),
-          ],
+          ),
         ],
-      ),
+      ],
     );
   }
 }
@@ -603,7 +587,7 @@ class _TransactionRow extends ConsumerWidget {
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
         ? KuberColors.textPrimary
-        : (isIncome ? KuberColors.income : KuberColors.expense);
+        : (isIncome ? KuberColors.income : KuberColors.textPrimary);
     final amountPrefix = isTransfer ? '' : (isIncome ? '+' : '-');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
@@ -629,7 +613,7 @@ class _TransactionRow extends ConsumerWidget {
         padding: const EdgeInsets.only(left: KuberSpacing.xl),
         decoration: BoxDecoration(
           color: KuberColors.primary.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: const Icon(Icons.edit_outlined, color: KuberColors.primary),
       ),
@@ -638,7 +622,7 @@ class _TransactionRow extends ConsumerWidget {
         padding: const EdgeInsets.only(right: KuberSpacing.xl),
         decoration: BoxDecoration(
           color: KuberColors.expense.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: const Icon(Icons.delete_outline, color: KuberColors.expense),
       ),
@@ -653,7 +637,7 @@ class _TransactionRow extends ConsumerWidget {
       },
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: KuberSpacing.lg,
@@ -661,7 +645,7 @@ class _TransactionRow extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              CategoryIcon.circle(
+              CategoryIcon.square(
                 icon: iconData,
                 rawColor: iconColor,
                 size: 42,
@@ -673,7 +657,7 @@ class _TransactionRow extends ConsumerWidget {
                   children: [
                     Text(
                       displayName,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: KuberColors.textPrimary,
@@ -684,10 +668,10 @@ class _TransactionRow extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
-                        color: KuberColors.textMuted,
+                        color: KuberColors.textSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -701,7 +685,7 @@ class _TransactionRow extends ConsumerWidget {
                 children: [
                   Text(
                     '$amountPrefix₹${transaction.amount.toStringAsFixed(2)}',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: amountColor,
@@ -710,10 +694,10 @@ class _TransactionRow extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     DateFormatter.time(transaction.createdAt),
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
-                      color: KuberColors.textMuted,
+                      color: KuberColors.textSecondary,
                     ),
                   ),
                 ],
@@ -754,7 +738,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: KuberSpacing.lg),
           Text(
             'No transactions found',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: KuberColors.textPrimary,
@@ -765,7 +749,7 @@ class _EmptyState extends StatelessWidget {
             hasTransactions
                 ? 'Try adjusting your search or filters'
                 : 'Start tracking your expenses',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w400,
               color: KuberColors.textSecondary,
@@ -785,7 +769,7 @@ class _EmptyState extends StatelessWidget {
                   vertical: KuberSpacing.md,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
               ),
             ),
@@ -816,13 +800,13 @@ class _DateGroup {
 
 class _AdvancedFilterSheet extends ConsumerStatefulWidget {
   final DateTimeRange? dateRange;
-  final String? typeFilter;
+  final Set<String> selectedTypes;
   final Set<int> selectedAccountIds;
   final Set<int> selectedCategoryIds;
   final String searchQuery;
   final void Function(
     DateTimeRange? dateRange,
-    String? typeFilter,
+    Set<String> types,
     Set<int> accountIds,
     Set<int> categoryIds,
     String searchQuery,
@@ -830,7 +814,7 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
 
   const _AdvancedFilterSheet({
     required this.dateRange,
-    required this.typeFilter,
+    required this.selectedTypes,
     required this.selectedAccountIds,
     required this.selectedCategoryIds,
     required this.searchQuery,
@@ -844,7 +828,7 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
 
 class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   late DateTimeRange? _dateRange;
-  late String? _typeFilter;
+  late Set<String> _selectedTypes;
   late Set<int> _accountIds;
   late Set<int> _categoryIds;
   late TextEditingController _searchController;
@@ -853,7 +837,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   void initState() {
     super.initState();
     _dateRange = widget.dateRange;
-    _typeFilter = widget.typeFilter;
+    _selectedTypes = Set.from(widget.selectedTypes);
     _accountIds = Set.from(widget.selectedAccountIds);
     _categoryIds = Set.from(widget.selectedCategoryIds);
     _searchController = TextEditingController(text: widget.searchQuery);
@@ -868,7 +852,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   void _reset() {
     setState(() {
       _dateRange = null;
-      _typeFilter = null;
+      _selectedTypes = {};
       _accountIds = {};
       _categoryIds = {};
       _searchController.clear();
@@ -914,7 +898,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: KuberColors.textMuted.withValues(alpha: 0.3),
+                  color: KuberColors.textSecondary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -935,7 +919,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   onPressed: _reset,
                   child: Text(
                     'Reset',
-                    style: GoogleFonts.plusJakartaSans(
+                    style: GoogleFonts.inter(
                       color: KuberColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -957,8 +941,8 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   vertical: KuberSpacing.md,
                 ),
                 decoration: BoxDecoration(
-                  color: KuberColors.surfaceElement,
-                  borderRadius: BorderRadius.circular(12),
+                  color: KuberColors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
                   border: _dateRange != null
                       ? Border.all(color: KuberColors.primary, width: 1)
                       : null,
@@ -972,11 +956,11 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       _dateRange != null
                           ? '${DateFormat('MMM d, y').format(_dateRange!.start)} - ${DateFormat('MMM d, y').format(_dateRange!.end)}'
                           : 'Select date range',
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         color: _dateRange != null
                             ? KuberColors.textPrimary
-                            : KuberColors.textMuted,
+                            : KuberColors.textSecondary,
                       ),
                     ),
                     const Spacer(),
@@ -998,27 +982,45 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
             Row(
               children: [
                 _SheetChip(
-                  label: 'All',
-                  isSelected: _typeFilter == null,
-                  onTap: () => setState(() => _typeFilter = null),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                _SheetChip(
                   label: 'Income',
-                  isSelected: _typeFilter == 'income',
-                  onTap: () => setState(() => _typeFilter = 'income'),
+                  isSelected: _selectedTypes.contains('income'),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains('income')) {
+                        _selectedTypes.remove('income');
+                      } else {
+                        _selectedTypes.add('income');
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(width: KuberSpacing.sm),
                 _SheetChip(
                   label: 'Expense',
-                  isSelected: _typeFilter == 'expense',
-                  onTap: () => setState(() => _typeFilter = 'expense'),
+                  isSelected: _selectedTypes.contains('expense'),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains('expense')) {
+                        _selectedTypes.remove('expense');
+                      } else {
+                        _selectedTypes.add('expense');
+                      }
+                    });
+                  },
                 ),
                 const SizedBox(width: KuberSpacing.sm),
                 _SheetChip(
                   label: 'Transfer',
-                  isSelected: _typeFilter == 'transfer',
-                  onTap: () => setState(() => _typeFilter = 'transfer'),
+                  isSelected: _selectedTypes.contains('transfer'),
+                  onTap: () {
+                    setState(() {
+                      if (_selectedTypes.contains('transfer')) {
+                        _selectedTypes.remove('transfer');
+                      } else {
+                        _selectedTypes.add('transfer');
+                      }
+                    });
+                  },
                 ),
               ],
             ),
@@ -1083,24 +1085,24 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
             const SizedBox(height: KuberSpacing.sm),
             TextField(
               controller: _searchController,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 color: KuberColors.textPrimary,
                 fontSize: 14,
               ),
               decoration: InputDecoration(
                 hintText: 'Search by name...',
-                hintStyle: GoogleFonts.plusJakartaSans(
-                  color: KuberColors.textMuted,
+                hintStyle: GoogleFonts.inter(
+                  color: KuberColors.textSecondary,
                   fontSize: 14,
                 ),
                 filled: true,
-                fillColor: KuberColors.surfaceElement,
+                fillColor: KuberColors.surfaceMuted,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: KuberSpacing.lg,
                   vertical: KuberSpacing.md,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -1114,7 +1116,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                 onPressed: () {
                   widget.onApply(
                     _dateRange,
-                    _typeFilter,
+                    _selectedTypes,
                     _accountIds,
                     _categoryIds,
                     _searchController.text,
@@ -1126,12 +1128,12 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                 ),
                 child: Text(
                   'Apply Filters',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                   ),
@@ -1169,12 +1171,12 @@ class _KuberFilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? KuberColors.primary.withValues(alpha: 0.18)
-              : KuberColors.surfaceElement,
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
             color: selected ? KuberColors.primary : KuberColors.textSecondary,
@@ -1208,15 +1210,15 @@ class _SheetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? KuberColors.primary.withValues(alpha: 0.15)
-              : KuberColors.surfaceElement,
-          borderRadius: BorderRadius.circular(10),
+              : KuberColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(8),
           border: isSelected
               ? Border.all(color: KuberColors.primary, width: 1)
               : null,
         ),
         child: Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             color: isSelected ? KuberColors.primary : KuberColors.textSecondary,

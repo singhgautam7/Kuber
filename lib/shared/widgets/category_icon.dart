@@ -6,19 +6,19 @@ class CategoryIcon extends StatelessWidget {
   final double size;
   final double borderRadius;
 
-  const CategoryIcon.circle({
+  const CategoryIcon.square({
     super.key,
     required this.icon,
     required this.rawColor,
     this.size = 48,
-  }) : borderRadius = 999;
+  }) : borderRadius = 8;
 
   const CategoryIcon.roundedSquare({
     super.key,
     required this.icon,
     required this.rawColor,
     this.size = 64,
-  }) : borderRadius = 16;
+  }) : borderRadius = 8;
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +27,7 @@ class CategoryIcon extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: rawColor.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(
-          borderRadius == 999 ? size / 2 : borderRadius,
-        ),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: Icon(
         icon,

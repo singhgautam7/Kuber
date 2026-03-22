@@ -32,7 +32,7 @@ class TopCategoriesCard extends ConsumerWidget {
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
           color: colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

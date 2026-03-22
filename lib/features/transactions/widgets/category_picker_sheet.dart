@@ -52,7 +52,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
               width: 32,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textMuted,
+                color: KuberColors.textSecondary,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -88,14 +88,14 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
             decoration: InputDecoration(
               hintText: 'Search categories',
               hintStyle: textTheme.bodyMedium?.copyWith(
-                color: KuberColors.textMuted,
+                color: KuberColors.textSecondary,
               ),
               prefixIcon: const Icon(
                 Icons.search,
                 color: KuberColors.textSecondary,
               ),
               filled: true,
-              fillColor: KuberColors.surfaceElement,
+              fillColor: KuberColors.surfaceMuted,
             ),
             onChanged: (v) => setState(() => _query = v.toLowerCase()),
           ),
@@ -156,7 +156,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                             height: 64,
                             decoration: BoxDecoration(
                               color: harmonized.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(KuberRadius.md),
                               border: selected
                                   ? Border.all(
                                       color: harmonized,

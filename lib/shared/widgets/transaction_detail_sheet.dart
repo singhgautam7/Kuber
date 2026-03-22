@@ -27,7 +27,7 @@ void showTransactionDetailSheet(
     isScrollControlled: true,
     useSafeArea: true,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
     ),
     builder: (_) => TransactionDetailSheet(
       transaction: t,
@@ -162,7 +162,7 @@ class TransactionDetailSheet extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textMuted.withValues(alpha: 0.3),
+                color: KuberColors.textSecondary.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -180,7 +180,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 child: Icon(iconData, size: 30, color: iconColor),
               )
             else
-              CategoryIcon.circle(
+              CategoryIcon.square(
                 icon: iconData,
                 rawColor: iconColor,
                 size: 64,
@@ -190,7 +190,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             // Transaction name
             Text(
               displayName,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: KuberColors.textPrimary,
@@ -202,7 +202,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             // Amount
             Text(
               '$amountPrefix${transaction.amount.toStringAsFixed(2)}',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
                 color: amountColor,
@@ -214,7 +214,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             // Date & time
             Text(
               dateLabel,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: KuberColors.textSecondary,
               ),
@@ -230,7 +230,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 label: 'From Account',
                 trailing: Text(
                   fromAccountName ?? 'Unknown',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: KuberColors.textPrimary,
@@ -244,7 +244,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 label: 'To Account',
                 trailing: Text(
                   toAccountName ?? 'Unknown',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: KuberColors.textPrimary,
@@ -258,7 +258,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 label: 'Category',
                 trailing: Text(
                   categoryName,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: KuberColors.primary,
@@ -276,7 +276,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                   children: [
                     Text(
                       accountName,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: KuberColors.textPrimary,
@@ -286,10 +286,10 @@ class TransactionDetailSheet extends ConsumerWidget {
                         account!.last4Digits!.isNotEmpty)
                       Text(
                         'ENDING IN ${account.last4Digits}',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: KuberColors.textMuted,
+                          color: KuberColors.textSecondary,
                         ),
                       ),
                   ],
@@ -307,7 +307,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 trailing: const SizedBox.shrink(),
                 subtitle: Text(
                   transaction.notes!,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     fontStyle: FontStyle.italic,
                     color: KuberColors.textSecondary,
@@ -326,7 +326,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 label: Text(
                   'Edit Transaction',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
                   ),
@@ -337,7 +337,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                 ),
               ),
@@ -350,7 +350,7 @@ class TransactionDetailSheet extends ConsumerWidget {
               icon: const Icon(Icons.delete_outline, size: 18),
               label: Text(
                 'Delete Transaction',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -389,8 +389,8 @@ class DetailRow extends StatelessWidget {
         vertical: KuberSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceElement,
-        borderRadius: BorderRadius.circular(16),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: subtitle != null
           ? Column(
@@ -402,7 +402,7 @@ class DetailRow extends StatelessWidget {
                     const SizedBox(width: KuberSpacing.sm),
                     Text(
                       label,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 13,
                         color: KuberColors.textSecondary,
                       ),
@@ -419,7 +419,7 @@ class DetailRow extends StatelessWidget {
                 const SizedBox(width: KuberSpacing.sm),
                 Text(
                   label,
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 13,
                     color: KuberColors.textSecondary,
                   ),

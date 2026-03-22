@@ -55,7 +55,7 @@ class TransactionListItem extends ConsumerWidget {
               padding: const EdgeInsets.only(right: KuberSpacing.xl),
               decoration: BoxDecoration(
                 color: colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(KuberRadius.md),
               ),
               child: Icon(Icons.delete, color: colorScheme.onErrorContainer),
             ),
@@ -65,7 +65,7 @@ class TransactionListItem extends ConsumerWidget {
                 padding: const EdgeInsets.all(KuberSpacing.lg),
                 decoration: BoxDecoration(
                   color: colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
                 child: Row(
                 children: [
@@ -75,7 +75,7 @@ class TransactionListItem extends ConsumerWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       color: harmonized.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
                     child: Icon(icon, color: harmonized),
                   ),
@@ -103,7 +103,7 @@ class TransactionListItem extends ConsumerWidget {
                     '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
                     style: textTheme.titleMedium?.copyWith(
                       color:
-                          isIncome ? colorScheme.tertiary : colorScheme.error,
+                          isIncome ? colorScheme.tertiary : KuberColors.textPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

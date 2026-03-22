@@ -43,7 +43,7 @@ class MonthlySummaryCard extends StatelessWidget {
                   padding: const EdgeInsets.all(KuberSpacing.lg),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   child: Column(
                     children: [
@@ -68,7 +68,7 @@ class MonthlySummaryCard extends StatelessWidget {
                   padding: const EdgeInsets.all(KuberSpacing.lg),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   child: Column(
                     children: [

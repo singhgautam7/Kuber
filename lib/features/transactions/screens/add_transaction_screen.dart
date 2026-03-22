@@ -180,7 +180,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         decoration: InputDecoration(
                           hintText: 'Transaction name',
                           hintStyle: textTheme.bodyLarge?.copyWith(
-                            color: KuberColors.textMuted,
+                            color: KuberColors.textSecondary,
                           ),
                           prefixIcon: const Icon(
                             Icons.edit_outlined,
@@ -198,8 +198,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           padding: const EdgeInsets.only(top: KuberSpacing.xs),
                           child: Material(
                             elevation: 8,
-                            borderRadius: BorderRadius.circular(12),
-                            color: KuberColors.surfaceElement,
+                            borderRadius: BorderRadius.circular(8),
+                            color: KuberColors.surfaceMuted,
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
                                 maxHeight: 200,
@@ -207,7 +207,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                     2 * KuberSpacing.lg,
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(8),
                                 child: ListView.builder(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: KuberSpacing.xs,
@@ -221,7 +221,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                     final catColor = cat != null
                                         ? harmonizeCategory(
                                             context, Color(cat.colorValue))
-                                        : KuberColors.textMuted;
+                                        : KuberColors.textSecondary;
                                     final catIcon = cat != null
                                         ? IconMapper.fromString(cat.icon)
                                         : Icons.category;
@@ -279,7 +279,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                                           .labelSmall
                                                           ?.copyWith(
                                                             color: KuberColors
-                                                                .textMuted,
+                                                                .textSecondary,
                                                           ),
                                                       overflow:
                                                           TextOverflow.ellipsis,
@@ -442,7 +442,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               iconColor: cat != null
                                   ? harmonizeCategory(
                                       context, Color(cat.colorValue))
-                                  : KuberColors.textMuted,
+                                  : KuberColors.textSecondary,
                               onTap: () => _showCategoryPicker(),
                             );
                           },
@@ -468,7 +468,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               value: acc?.name ?? 'Select',
                               iconColor: acc != null
                                   ? accountColor(acc.type)
-                                  : KuberColors.textMuted,
+                                  : KuberColors.textSecondary,
                               onTap: () => _showAccountPicker(),
                             );
                           },
@@ -480,14 +480,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                   // [E] Date & Time tile
                   InkWell(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                     onTap: _pickDate,
                     child: Container(
                       padding: const EdgeInsets.all(KuberSpacing.lg),
                       decoration: BoxDecoration(
-                        color: KuberColors.surfaceElement,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: KuberColors.surfaceDivider),
+                        color: KuberColors.surfaceMuted,
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: KuberColors.border),
                       ),
                       child: Row(
                         children: [
@@ -496,7 +496,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             height: 40,
                             decoration: BoxDecoration(
                               color: colorScheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
                               Icons.calendar_today,
@@ -511,7 +511,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               Text(
                                 'DATE & TIME',
                                 style: textTheme.labelSmall?.copyWith(
-                                  color: KuberColors.textMuted,
+                                  color: KuberColors.textSecondary,
                                   letterSpacing: 1.2,
                                 ),
                               ),
@@ -527,7 +527,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           const Spacer(),
                           Icon(
                             Icons.chevron_right,
-                            color: KuberColors.textMuted,
+                            color: KuberColors.textSecondary,
                           ),
                         ],
                       ),
@@ -545,7 +545,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     decoration: InputDecoration(
                       hintText: 'Add a note (optional)',
                       hintStyle: textTheme.bodyMedium?.copyWith(
-                        color: KuberColors.textMuted,
+                        color: KuberColors.textSecondary,
                       ),
                       prefixIcon: const Icon(
                         Icons.note_outlined,
@@ -571,7 +571,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             decoration: BoxDecoration(
               color: KuberColors.background,
               border: Border(
-                top: BorderSide(color: KuberColors.surfaceDivider),
+                top: BorderSide(color: KuberColors.border),
               ),
             ),
             child: SizedBox(
@@ -582,10 +582,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 style: FilledButton.styleFrom(
                   backgroundColor: _typeColor,
                   disabledBackgroundColor:
-                      KuberColors.surfaceElement,
-                  disabledForegroundColor: KuberColors.textMuted,
+                      KuberColors.surfaceMuted,
+                  disabledForegroundColor: KuberColors.textSecondary,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   textStyle: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
@@ -607,7 +607,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       label: label,
       icon: Icons.hourglass_empty,
       value: '...',
-      iconColor: KuberColors.textMuted,
+      iconColor: KuberColors.textSecondary,
       onTap: () {},
     );
   }
@@ -638,7 +638,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: _selectedCategoryId,
@@ -659,7 +659,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: _selectedAccountId,
@@ -852,8 +852,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       bgColor = KuberColors.expense.withValues(alpha: 0.15);
       txtColor = KuberColors.expense;
     } else if (subtype == TransferSubtype.creditCardTransfer) {
-      bgColor = KuberColors.neutral.withValues(alpha: 0.15);
-      txtColor = KuberColors.neutral;
+      bgColor = const Color(0xFFF59E0B).withValues(alpha: 0.15);
+      txtColor = const Color(0xFFF59E0B);
     } else {
       bgColor = colorScheme.primaryContainer;
       txtColor = colorScheme.onPrimaryContainer;
@@ -931,7 +931,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       decoration: InputDecoration(
                         hintText: '0',
                         hintStyle: textTheme.displaySmall?.copyWith(
-                          color: KuberColors.textMuted.withValues(alpha: 0.3),
+                          color: KuberColors.textSecondary.withValues(alpha: 0.3),
                           fontWeight: FontWeight.w700,
                           fontSize: 48,
                         ),
@@ -1041,14 +1041,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
         // Date & Time
         InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
           onTap: _pickDate,
           child: Container(
             padding: const EdgeInsets.all(KuberSpacing.lg),
             decoration: BoxDecoration(
-              color: KuberColors.surfaceElement,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: KuberColors.surfaceDivider),
+              color: KuberColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: KuberColors.border),
             ),
             child: Row(
               children: [
@@ -1057,7 +1057,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   height: 40,
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.calendar_today,
@@ -1072,7 +1072,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     Text(
                       'DATE & TIME',
                       style: textTheme.labelSmall?.copyWith(
-                        color: KuberColors.textMuted,
+                        color: KuberColors.textSecondary,
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -1088,7 +1088,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 const Spacer(),
                 Icon(
                   Icons.chevron_right,
-                  color: KuberColors.textMuted,
+                  color: KuberColors.textSecondary,
                 ),
               ],
             ),
@@ -1106,7 +1106,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           decoration: InputDecoration(
             hintText: 'Add a note (optional)',
             hintStyle: textTheme.bodyMedium?.copyWith(
-              color: KuberColors.textMuted,
+              color: KuberColors.textSecondary,
             ),
             prefixIcon: const Icon(
               Icons.note_outlined,
@@ -1130,7 +1130,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId:
@@ -1167,20 +1167,20 @@ class _TransferAccountTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final color = account != null
         ? resolveAccountColor(account!)
-        : KuberColors.textMuted;
+        : KuberColors.textSecondary;
     final icon = account != null
         ? resolveAccountIcon(account!)
         : Icons.account_balance_wallet_outlined;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(KuberRadius.md),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
-          color: KuberColors.surfaceElement,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: KuberColors.surfaceDivider),
+          color: KuberColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: KuberColors.border),
         ),
         child: Row(
           children: [
@@ -1189,7 +1189,7 @@ class _TransferAccountTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, size: 22, color: color),
             ),
@@ -1201,7 +1201,7 @@ class _TransferAccountTile extends StatelessWidget {
                   Text(
                     label,
                     style: textTheme.labelSmall?.copyWith(
-                      color: KuberColors.textMuted,
+                      color: KuberColors.textSecondary,
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -1211,7 +1211,7 @@ class _TransferAccountTile extends StatelessWidget {
                     style: textTheme.bodyMedium?.copyWith(
                       color: account != null
                           ? KuberColors.textPrimary
-                          : KuberColors.textMuted,
+                          : KuberColors.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -1220,7 +1220,7 @@ class _TransferAccountTile extends StatelessWidget {
             ),
             Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: KuberColors.textMuted,
+              color: KuberColors.textSecondary,
             ),
           ],
         ),
@@ -1249,14 +1249,14 @@ class _SelectorTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(KuberRadius.md),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
-          color: KuberColors.surfaceElement,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: KuberColors.surfaceDivider),
+          color: KuberColors.surfaceMuted,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: KuberColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1264,7 +1264,7 @@ class _SelectorTile extends StatelessWidget {
             Text(
               label,
               style: textTheme.labelSmall?.copyWith(
-                color: KuberColors.textMuted,
+                color: KuberColors.textSecondary,
                 letterSpacing: 1.2,
               ),
             ),
@@ -1276,7 +1276,7 @@ class _SelectorTile extends StatelessWidget {
                   height: 36,
                   decoration: BoxDecoration(
                     color: iconColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(icon, size: 18, color: iconColor),
                 ),
@@ -1320,9 +1320,9 @@ class _TransactionTypeSelector extends StatelessWidget {
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceElement,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: KuberColors.surfaceDivider),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: KuberColors.border),
       ),
       child: Row(
         children: List.generate(_types.length, (i) {
@@ -1335,7 +1335,7 @@ class _TransactionTypeSelector extends StatelessWidget {
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
                   color: isSelected ? colorScheme.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
                 alignment: Alignment.center,
                 child: Text(

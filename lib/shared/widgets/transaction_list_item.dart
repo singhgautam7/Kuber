@@ -45,7 +45,7 @@ class DashboardTransactionItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CategoryIcon.circle(
+          CategoryIcon.square(
             icon: icon,
             rawColor: rawColor,
             size: 44,
@@ -78,7 +78,7 @@ class DashboardTransactionItem extends StatelessWidget {
           Text(
             '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
             style: textTheme.titleMedium?.copyWith(
-              color: isIncome ? colorScheme.tertiary : colorScheme.error,
+              color: isIncome ? colorScheme.tertiary : KuberColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),

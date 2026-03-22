@@ -13,6 +13,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
@@ -22,11 +23,12 @@ import '../providers/analytics_provider.dart';
 // Private data classes
 // ---------------------------------------------------------------------------
 
-class _Bucket {
-  final String label;
+class _MutableBucket {
+  final String day;
+  final String month;
   double income = 0;
   double expense = 0;
-  _Bucket(this.label);
+  _MutableBucket(this.day, this.month);
 }
 
 class _CatTotal {
@@ -49,32 +51,33 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   AnalyticsPeriod _period = AnalyticsPeriod.today;
-  int? _selectedTrendBarIndex;
   int? _selectedDonutSliceIndex;
   int _biggestTab = 0; // 0 = expense, 1 = income
 
   // ---- bucket helpers -----------------------------------------------------
 
-  List<_Bucket> _buildBuckets(List<Transaction> txns) {
+  List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns) {
+    txns = txns.where((t) => t.type != 'transfer').toList();
     final now = DateTime.now();
+    List<_MutableBucket> buckets;
+
     switch (_period) {
       case AnalyticsPeriod.today:
-        // 5 named time-of-day slots
-        final slotLabels = ['Dawn', 'Morning', 'Noon', 'Evening', 'Night'];
-        final buckets = slotLabels.map((l) => _Bucket(l)).toList();
+        final labels = ['Dawn', 'Morning', 'Noon', 'Evening', 'Night'];
+        buckets = labels.map((l) => _MutableBucket(l, '')).toList();
         for (final t in txns) {
           final h = t.createdAt.hour;
           int idx;
           if (h < 6) {
-            idx = 0; // Dawn 00-05
+            idx = 0;
           } else if (h < 11) {
-            idx = 1; // Morning 06-10
+            idx = 1;
           } else if (h < 14) {
-            idx = 2; // Noon 11-13
+            idx = 2;
           } else if (h < 19) {
-            idx = 3; // Evening 14-18
+            idx = 3;
           } else {
-            idx = 4; // Night 19-23
+            idx = 4;
           }
           if (t.type == 'income') {
             buckets[idx].income += t.amount;
@@ -82,15 +85,17 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             buckets[idx].expense += t.amount;
           }
         }
-        return buckets;
+        break;
 
       case AnalyticsPeriod.week:
-        final buckets = List.generate(7, (i) {
+        buckets = List.generate(7, (i) {
           final d = now.subtract(Duration(days: 6 - i));
-          return _Bucket(DateFormat.E().format(d));
+          return _MutableBucket(DateFormat('d').format(d), DateFormat('MMM').format(d).toUpperCase());
         });
+        final todayStart = DateTime(now.year, now.month, now.day);
         for (final t in txns) {
-          final diff = now.difference(t.createdAt).inDays;
+          final txnDay = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
+          final diff = todayStart.difference(txnDay).inDays;
           if (diff < 0 || diff > 6) continue;
           final idx = 6 - diff;
           if (t.type == 'income') {
@@ -99,11 +104,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             buckets[idx].expense += t.amount;
           }
         }
-        return buckets;
+        break;
 
       case AnalyticsPeriod.month:
       case AnalyticsPeriod.lastMonth:
-        final buckets = List.generate(5, (i) => _Bucket('W${i + 1}'));
+        buckets = List.generate(5, (i) => _MutableBucket('Week', '${i + 1}'));
         for (final t in txns) {
           final week = ((t.createdAt.day - 1) / 7).floor();
           final idx = week.clamp(0, 4);
@@ -113,17 +118,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             buckets[idx].expense += t.amount;
           }
         }
-        return buckets;
+        break;
 
       case AnalyticsPeriod.threeMonths:
-        final buckets = List.generate(3, (i) {
+        buckets = List.generate(3, (i) {
           final m = DateTime(now.year, now.month - 2 + i, 1);
-          return _Bucket(DateFormat.MMM().format(m));
+          return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m));
         });
         for (final t in txns) {
-          final monthDiff = (now.year - t.createdAt.year) * 12 +
-              now.month -
-              t.createdAt.month;
+          final monthDiff = (now.year - t.createdAt.year) * 12 + now.month - t.createdAt.month;
           final idx = 2 - monthDiff;
           if (idx < 0 || idx > 2) continue;
           if (t.type == 'income') {
@@ -132,11 +135,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             buckets[idx].expense += t.amount;
           }
         }
-        return buckets;
+        break;
 
       case AnalyticsPeriod.year:
-        // 4 quarterly buckets for the current year
-        final buckets = List.generate(4, (i) => _Bucket('Q${i + 1}'));
+        buckets = List.generate(4, (i) => _MutableBucket('Q${i + 1}', '${now.year}'));
         for (final t in txns) {
           if (t.createdAt.year != now.year) continue;
           final idx = ((t.createdAt.month - 1) / 3).floor();
@@ -146,19 +148,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             buckets[idx].expense += t.amount;
           }
         }
-        return buckets;
+        break;
 
       case AnalyticsPeriod.all:
-        // Last 4 quarters
-        final buckets = List.generate(4, (i) {
-          final qOffset = 3 - i; // 3, 2, 1, 0
+        buckets = List.generate(4, (i) {
+          final qOffset = 3 - i;
           final qStartMonth = now.month - qOffset * 3;
           final qStart = DateTime(now.year, qStartMonth, 1);
-          final label = "${DateFormat.MMM().format(qStart)}'${DateFormat('yy').format(qStart)}";
-          return _Bucket(label);
+          final labelDay = "Q${((qStart.month - 1) / 3).floor() + 1}";
+          final labelMonth = DateFormat('yy').format(qStart);
+          return _MutableBucket(labelDay, labelMonth);
         });
         for (final t in txns) {
-          // Determine which quarter bucket this transaction falls into
           bool placed = false;
           for (int i = 0; i < 4 && !placed; i++) {
             final qOffset = 3 - i;
@@ -175,36 +176,43 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             }
           }
         }
-        return buckets;
+        break;
 
       case AnalyticsPeriod.custom:
-        // Group by month across custom range
-        if (txns.isEmpty) return [];
-        final sorted = List<Transaction>.from(txns)
-          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        if (txns.isEmpty) {
+          buckets = [];
+          break;
+        }
+        final sorted = List<Transaction>.from(txns)..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         final first = sorted.first.createdAt;
         final last = sorted.last.createdAt;
-        final monthCount = (last.year - first.year) * 12 +
-            last.month -
-            first.month +
-            1;
-        final cBuckets = List.generate(monthCount, (i) {
+        final monthCount = (last.year - first.year) * 12 + last.month - first.month + 1;
+        buckets = List.generate(monthCount, (i) {
           final m = DateTime(first.year, first.month + i, 1);
-          return _Bucket(DateFormat('MMM yy').format(m));
+          return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m));
         });
         for (final t in txns) {
-          final idx = (t.createdAt.year - first.year) * 12 +
-              t.createdAt.month -
-              first.month;
-          if (idx < 0 || idx >= cBuckets.length) continue;
+          final idx = (t.createdAt.year - first.year) * 12 + t.createdAt.month - first.month;
+          if (idx < 0 || idx >= buckets.length) continue;
           if (t.type == 'income') {
-            cBuckets[idx].income += t.amount;
+            buckets[idx].income += t.amount;
           } else {
-            cBuckets[idx].expense += t.amount;
+            buckets[idx].expense += t.amount;
           }
         }
-        return cBuckets;
+        break;
     }
+
+    return List.generate(buckets.length, (i) {
+      final b = buckets[i];
+      return KuberBarBucket(
+        dayLabel: b.day,
+        monthLabel: b.month,
+        income: b.income,
+        expense: b.expense,
+        isHighlighted: i == buckets.length - 1,
+      );
+    });
   }
 
   int _periodDays() {
@@ -247,21 +255,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   String _formatPercent(double v) => '${v.toStringAsFixed(1)}%';
 
-  String _formatYAxis(double value) {
-    if (value >= 10000000) {
-      final cr = value / 10000000;
-      return '₹${cr.toStringAsFixed(cr.truncateToDouble() == cr ? 0 : 1)}Cr';
-    }
-    if (value >= 100000) {
-      final l = value / 100000;
-      return '₹${l.toStringAsFixed(l.truncateToDouble() == l ? 0 : 1)}L';
-    }
-    if (value >= 1000) {
-      final k = value / 1000;
-      return '₹${k.toStringAsFixed(k.truncateToDouble() == k ? 0 : 1)}k';
-    }
-    return '₹${value.toInt()}';
-  }
+
 
   // ---- build --------------------------------------------------------------
 
@@ -287,7 +281,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final netAmount = totalIncome - totalExpense;
 
     // Buckets
-    final buckets = _buildBuckets(periodTxns);
+    final buckets = _buildPeriodBuckets(periodTxns);
 
     // Category totals (expense only)
     final catMap = <int, double>{};
@@ -360,7 +354,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               if (_period == p) return;
                               setState(() {
                                 _period = p;
-                                _selectedTrendBarIndex = null;
                                 _selectedDonutSliceIndex = null;
                               });
                             },
@@ -391,47 +384,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             const SizedBox(height: KuberSpacing.lg),
 
             // [C] Spending Trend
-            _AnalyticsCard(
+            KuberBarChart(
               title: 'Spending Trend',
-              child: Column(
-                children: [
-                  Builder(
-                    builder: (context) {
-                      final needsScroll = buckets.length > 7;
-                      final chartWidth = needsScroll
-                          ? buckets.length * 60.0
-                          : null; // null = fill parent
-                      final chart = SizedBox(
-                        height: 200,
-                        width: chartWidth,
-                        child: _buildTrendChart(buckets, colorScheme),
-                      );
-                      if (needsScroll) {
-                        return SizedBox(
-                          height: 200,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            reverse: true, // start from the latest month
-                            child: chart,
-                          ),
-                        );
-                      }
-                      return chart;
-                    },
-                  ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: _selectedTrendBarIndex != null &&
-                            _selectedTrendBarIndex! < buckets.length
-                        ? _TrendDetailPanel(
-                            bucket: buckets[_selectedTrendBarIndex!],
-                            formatAmount: _formatAmount,
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ],
-              ),
+              buckets: buckets,
+              height: 200,
             ),
             const SizedBox(height: KuberSpacing.lg),
 
@@ -486,7 +442,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           const EdgeInsets.only(bottom: KuberSpacing.md),
                       child: Row(
                         children: [
-                          CategoryIcon.circle(
+                          CategoryIcon.square(
                             icon:
                                 IconMapper.fromString(ct.category.icon),
                             rawColor: color,
@@ -549,9 +505,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: KuberSpacing.md,
+                mainAxisSpacing: KuberSpacing.sm,
                 crossAxisSpacing: KuberSpacing.md,
-                childAspectRatio: 1.5,
+                childAspectRatio: 2.1,
                 children: [
                   _StatTile(
                     label: 'Avg. Daily',
@@ -648,7 +604,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               ),
                               const SizedBox(width: KuberSpacing.md),
                               if (cat != null)
-                                CategoryIcon.circle(
+                                CategoryIcon.square(
                                   icon:
                                       IconMapper.fromString(cat.icon),
                                   rawColor: harmonizeCategory(context,
@@ -721,7 +677,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ref.read(customDateRangeProvider.notifier).state = range;
       setState(() {
         _period = AnalyticsPeriod.custom;
-        _selectedTrendBarIndex = null;
         _selectedDonutSliceIndex = null;
       });
     }
@@ -741,8 +696,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: KuberColors.card,
-        borderRadius: BorderRadius.circular(16),
+        color: KuberColors.surfaceCard,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       padding: const EdgeInsets.all(KuberSpacing.lg),
       child: Column(
@@ -774,22 +729,22 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             padding: const EdgeInsets.symmetric(
                 vertical: KuberSpacing.sm, horizontal: KuberSpacing.md),
             decoration: BoxDecoration(
-              color: KuberColors.cardLight,
-              borderRadius: BorderRadius.circular(12),
+              color: KuberColors.surfaceMuted,
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Net: ',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: KuberColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     color: net >= 0 ? KuberColors.income : KuberColors.expense,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -799,106 +754,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // ---- trend chart --------------------------------------------------------
-
-  Widget _buildTrendChart(List<_Bucket> buckets, ColorScheme cs) {
-    if (buckets.isEmpty) return const SizedBox.shrink();
-
-    final maxVal = buckets.fold<double>(
-        0, (m, b) => max(m, max(b.income, b.expense)));
-
-    return BarChart(
-      BarChartData(
-        maxY: maxVal * 1.2,
-        barTouchData: BarTouchData(
-          touchTooltipData: BarTouchTooltipData(
-            tooltipBorderRadius: BorderRadius.circular(8),
-            getTooltipItem: (_, _, rod, _) => null,
-          ),
-          touchCallback: (event, response) {
-            if (event is FlTapUpEvent && response?.spot != null) {
-              final idx = response!.spot!.touchedBarGroupIndex;
-              setState(() {
-                _selectedTrendBarIndex =
-                    _selectedTrendBarIndex == idx ? null : idx;
-              });
-            }
-          },
-        ),
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              reservedSize: 40,
-              interval: maxVal > 0 ? (maxVal * 1.2 / 3).ceilToDouble() : 1.0,
-              getTitlesWidget: (value, meta) {
-                if (value == 0) return const SizedBox.shrink();
-                return Text(
-                  _formatYAxis(value),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    color: KuberColors.textSecondary,
-                  ),
-                );
-              },
-            ),
-          ),
-          topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false)),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (val, _) {
-                final idx = val.toInt();
-                if (idx < 0 || idx >= buckets.length) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    buckets[idx].label,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10,
-                      color: KuberColors.textSecondary,
-                    ),
-                  ),
-                );
-              },
-              reservedSize: 24,
-            ),
-          ),
-        ),
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barGroups: List.generate(buckets.length, (i) {
-          final b = buckets[i];
-          final isSelected =
-              _selectedTrendBarIndex == null || _selectedTrendBarIndex == i;
-          final alpha = isSelected ? 1.0 : 0.45;
-          return BarChartGroupData(
-            x: i,
-            barRods: [
-              BarChartRodData(
-                toY: b.income,
-                color: KuberColors.income.withValues(alpha: alpha),
-                width: 14,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              BarChartRodData(
-                toY: b.expense,
-                color: cs.error.withValues(alpha: alpha),
-                width: 14,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ],
-          );
-        }),
       ),
     );
   }
@@ -933,7 +788,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             color: color,
             radius: isSelected ? 60 : 50,
             title: isSelected ? ct.category.name : '',
-            titleStyle: GoogleFonts.plusJakartaSans(
+            titleStyle: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -1000,7 +855,7 @@ class _KuberFilterChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? KuberColors.primary.withValues(alpha: 0.18)
-              : KuberColors.surfaceElement,
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -1012,7 +867,7 @@ class _KuberFilterChip extends StatelessWidget {
             ],
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                 color: selected ? KuberColors.primary : KuberColors.textSecondary,
@@ -1041,7 +896,7 @@ class _TabToggle extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: KuberColors.cardLight,
+        color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -1062,7 +917,7 @@ class _TabToggle extends StatelessWidget {
               ),
               child: Text(
                 labels[i],
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight:
                       isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -1095,8 +950,8 @@ class _AnalyticsCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(KuberSpacing.lg),
       decoration: BoxDecoration(
-        color: KuberColors.card,
-        borderRadius: BorderRadius.circular(16),
+        color: KuberColors.surfaceCard,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1139,7 +994,7 @@ class _ChartLegend extends StatelessWidget {
         const SizedBox(width: KuberSpacing.xs),
         Text(
           label,
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 11,
             color: KuberColors.textSecondary,
           ),
@@ -1167,8 +1022,8 @@ class _SummaryTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
-        color: KuberColors.cardLight,
-        borderRadius: BorderRadius.circular(12),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1179,7 +1034,7 @@ class _SummaryTile extends StatelessWidget {
               const SizedBox(width: KuberSpacing.xs),
               Text(
                 label,
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   color: KuberColors.textSecondary,
                   fontSize: 12,
                 ),
@@ -1189,7 +1044,7 @@ class _SummaryTile extends StatelessWidget {
           const SizedBox(height: KuberSpacing.xs),
           Text(
             amount,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               color: KuberColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -1201,62 +1056,6 @@ class _SummaryTile extends StatelessWidget {
   }
 }
 
-class _TrendDetailPanel extends StatelessWidget {
-  final _Bucket bucket;
-  final String Function(double) formatAmount;
-
-  const _TrendDetailPanel({
-    required this.bucket,
-    required this.formatAmount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final net = bucket.income - bucket.expense;
-    final maxVal = max(bucket.income, bucket.expense).clamp(1.0, double.infinity);
-    return Padding(
-      padding: const EdgeInsets.only(top: KuberSpacing.md),
-      child: Column(
-        children: [
-          _DetailBar(
-            label: 'Income',
-            amount: formatAmount(bucket.income),
-            ratio: bucket.income / maxVal,
-            color: KuberColors.income,
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          _DetailBar(
-            label: 'Expense',
-            amount: formatAmount(bucket.expense),
-            ratio: bucket.expense / maxVal,
-            color: KuberColors.expense,
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Net',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: KuberColors.textSecondary,
-                ),
-              ),
-              Text(
-                '${net >= 0 ? '+' : ''}${formatAmount(net)}',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: net >= 0 ? KuberColors.income : KuberColors.expense,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _DetailBar extends StatelessWidget {
   final String label;
@@ -1280,14 +1079,14 @@ class _DetailBar extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 color: KuberColors.textSecondary,
               ),
             ),
             Text(
               amount,
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: color,
@@ -1355,14 +1154,14 @@ class _DonutDetailPanel extends StatelessWidget {
             children: [
               Text(
                 'Transactions',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   color: KuberColors.textSecondary,
                 ),
               ),
               Text(
                 '${catTxns.length}',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: KuberColors.textPrimary,
@@ -1392,10 +1191,10 @@ class _StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md, vertical: KuberSpacing.sm),
       decoration: BoxDecoration(
-        color: KuberColors.cardLight,
-        borderRadius: BorderRadius.circular(12),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1405,7 +1204,7 @@ class _StatTile extends StatelessWidget {
           const Spacer(),
           Text(
             value,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: KuberColors.textPrimary,
@@ -1414,7 +1213,7 @@ class _StatTile extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             label,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 11,
               color: KuberColors.textSecondary,
             ),

@@ -50,7 +50,7 @@ void _openAccountSheet(BuildContext context, {Account? account}) {
     useSafeArea: true,
     backgroundColor: KuberColors.surfaceCard,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
     ),
     builder: (_) => AccountFormSheet(account: account),
   );
@@ -76,7 +76,7 @@ class AccountsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Text('Error: $e',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                   color: KuberColors.textSecondary)),
         ),
         data: (accounts) => _AccountsBody(accounts: accounts),
@@ -130,7 +130,7 @@ class _AccountsBody extends ConsumerWidget {
                     children: [
                       Text(
                         'Manage\nAccounts',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: KuberColors.textPrimary,
@@ -141,7 +141,7 @@ class _AccountsBody extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Text(
                         'Overview of your linked financial institutions.',
-                        style: GoogleFonts.plusJakartaSans(
+                        style: GoogleFonts.inter(
                           fontSize: 13,
                           color: KuberColors.textSecondary,
                         ),
@@ -234,7 +234,7 @@ class _AccountCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: KuberColors.surfaceCard,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -243,7 +243,7 @@ class _AccountCard extends StatelessWidget {
           // Top row: icon + name/type + menu
           Row(
             children: [
-              CategoryIcon.circle(
+              CategoryIcon.square(
                 icon: _resolveIcon(account),
                 rawColor: accentColor,
                 size: 44,
@@ -255,7 +255,7 @@ class _AccountCard extends StatelessWidget {
                   children: [
                     Text(
                       account.name,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: KuberColors.textPrimary,
@@ -264,10 +264,10 @@ class _AccountCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       _accountTypeLabel(account),
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: KuberColors.textMuted,
+                        color: KuberColors.textSecondary,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -282,7 +282,7 @@ class _AccountCard extends StatelessWidget {
           // Balance label
           Text(
             balanceLabel,
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 12,
               color: KuberColors.textSecondary,
             ),
@@ -296,7 +296,7 @@ class _AccountCard extends StatelessWidget {
             children: [
               Text(
                 '${balance < 0 ? '-' : ''}₹${balance.abs().toStringAsFixed(2)}',
-                style: GoogleFonts.plusJakartaSans(
+                style: GoogleFonts.inter(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
                   color: balanceColor,
@@ -306,9 +306,9 @@ class _AccountCard extends StatelessWidget {
               if (isCreditCard && account.creditLimit != null)
                 Text(
                   'Limit  ₹${account.creditLimit!.toStringAsFixed(0)}',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: KuberColors.textMuted,
+                    color: KuberColors.textSecondary,
                   ),
                 ),
             ],
@@ -332,21 +332,21 @@ class _AccountMenu extends ConsumerWidget {
         color: KuberColors.textSecondary,
         size: 20,
       ),
-      color: KuberColors.surfaceElement,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      color: KuberColors.surfaceMuted,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
       onSelected: (val) => _handleAction(context, ref, val),
       itemBuilder: (_) => [
         PopupMenuItem(
           value: 'edit',
           child: Text('Edit',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                   color: KuberColors.textPrimary)),
         ),
         PopupMenuItem(
           value: 'delete',
           child: Text('Delete',
               style:
-                  GoogleFonts.plusJakartaSans(color: KuberColors.expense)),
+                  GoogleFonts.inter(color: KuberColors.expense)),
         ),
       ],
     );
@@ -361,10 +361,10 @@ class _AccountMenu extends ConsumerWidget {
         builder: (_) => AlertDialog(
           backgroundColor: KuberColors.surfaceCard,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
           title: Text(
             'Delete account?',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               color: KuberColors.textPrimary,
               fontWeight: FontWeight.w700,
             ),
@@ -372,20 +372,20 @@ class _AccountMenu extends ConsumerWidget {
           content: Text(
             'All transactions linked to "${account.name}" will be unlinked.',
             style:
-                GoogleFonts.plusJakartaSans(color: KuberColors.textSecondary),
+                GoogleFonts.inter(color: KuberColors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Cancel',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       color: KuberColors.textSecondary)),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: KuberColors.expense,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
               ),
               onPressed: () {
@@ -395,7 +395,7 @@ class _AccountMenu extends ConsumerWidget {
                 Navigator.pop(context);
               },
               child: Text('Delete',
-                  style: GoogleFonts.plusJakartaSans(
+                  style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600)),
             ),
           ],
@@ -422,25 +422,25 @@ class _NetWorthCard extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceElement,
-        borderRadius: BorderRadius.circular(20),
+        color: KuberColors.surfaceMuted,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'TOTAL NET WORTH',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textMuted,
+              color: KuberColors.textSecondary,
               letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             '${netWorth < 0 ? '-' : ''}₹${netWorth.abs().toStringAsFixed(2)}',
-            style: GoogleFonts.plusJakartaSans(
+            style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: netWorth < 0 ? KuberColors.expense : KuberColors.primary,
@@ -493,7 +493,7 @@ class _NetWorthLegend extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           '$label: ₹${amount.toStringAsFixed(2)}',
-          style: GoogleFonts.plusJakartaSans(
+          style: GoogleFonts.inter(
             fontSize: 12,
             color: KuberColors.textSecondary,
             fontWeight: FontWeight.w500,
@@ -529,7 +529,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'No accounts yet',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: KuberColors.textPrimary,
@@ -538,7 +538,7 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Add your first account to start tracking',
-              style: GoogleFonts.plusJakartaSans(
+              style: GoogleFonts.inter(
                 fontSize: 13,
                 color: KuberColors.textSecondary,
               ),
