@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
@@ -15,11 +16,35 @@ class AppScaffold extends ConsumerStatefulWidget {
   ConsumerState<AppScaffold> createState() => _AppScaffoldState();
 }
 
-class _AppScaffoldState extends ConsumerState<AppScaffold> {
+class _AppScaffoldState extends ConsumerState<AppScaffold>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   int _previousIndex = 0;
+  bool _showSpeedDial = false;
+
+  late final AnimationController _dialController;
+  late final Animation<double> _dialAnimation;
 
   static const _routes = ['/', '/history', '/analytics', '/accounts'];
+
+  @override
+  void initState() {
+    super.initState();
+    _dialController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _dialAnimation = CurvedAnimation(
+      parent: _dialController,
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _dialController.dispose();
+    super.dispose();
+  }
 
   void _onTabTapped(int index) {
     if (index == _currentIndex) return;
@@ -31,7 +56,22 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   }
 
   void _onAddTapped() {
-    context.push('/add-transaction');
+    if (_showSpeedDial) {
+      _closeSpeedDial();
+    } else {
+      context.push('/add-transaction');
+    }
+  }
+
+  void _openSpeedDial() {
+    setState(() => _showSpeedDial = true);
+    _dialController.forward();
+  }
+
+  void _closeSpeedDial() {
+    _dialController.reverse().then((_) {
+      if (mounted) setState(() => _showSpeedDial = false);
+    });
   }
 
   double get _slideDirection =>
@@ -81,7 +121,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     );
 
     if (isWide) {
-      // Large tablet / desktop → side rail
       return Scaffold(
         backgroundColor: KuberColors.background,
         body: Row(
@@ -97,20 +136,50 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
       );
     }
 
-    // Phone / small tablet → standard NavigationBar
     return Scaffold(
       backgroundColor: KuberColors.background,
-      body: animatedContent,
-      floatingActionButton: _currentIndex != 3
-          ? FloatingActionButton(
-              onPressed: _onAddTapped,
-              backgroundColor: KuberColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+      body: Stack(
+        children: [
+          animatedContent,
+          if (_showSpeedDial) ...[
+            // Full-screen barrier
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _closeSpeedDial,
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.5),
+                ),
               ),
-              child: const Icon(Icons.add),
+            ),
+            // Speed dial options
+            Positioned(
+              right: KuberSpacing.lg,
+              bottom: 100,
+              child: _SpeedDialMenu(
+                animation: _dialAnimation,
+                onClose: _closeSpeedDial,
+              ),
+            ),
+          ],
+        ],
+      ),
+      floatingActionButton: _currentIndex != 3
+          ? GestureDetector(
+              onLongPress: _openSpeedDial,
+              child: FloatingActionButton(
+                onPressed: _onAddTapped,
+                backgroundColor: KuberColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                ),
+                child: AnimatedRotation(
+                  turns: _showSpeedDial ? 0.125 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: const Icon(Icons.add),
+                ),
+              ),
             )
           : null,
       bottomNavigationBar: NavigationBar(
@@ -123,6 +192,107 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
             label: item.label,
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class _SpeedDialMenu extends AnimatedWidget {
+  final VoidCallback onClose;
+
+  const _SpeedDialMenu({
+    required Animation<double> animation,
+    required this.onClose,
+  }) : super(listenable: animation);
+
+  Animation<double> get _progress => listenable as Animation<double>;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildOption(
+          context,
+          index: 2,
+          icon: Icons.sync_rounded,
+          label: 'Add Recurring',
+          onTap: () {
+            onClose();
+            context.push('/recurring/add');
+          },
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        _buildOption(
+          context,
+          index: 1,
+          icon: Icons.swap_horiz_rounded,
+          label: 'Add Transfer',
+          onTap: () {
+            onClose();
+            context.push('/add-transaction');
+          },
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        _buildOption(
+          context,
+          index: 0,
+          icon: Icons.arrow_downward_rounded,
+          label: 'Add Income',
+          onTap: () {
+            onClose();
+            context.push('/add-transaction');
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOption(
+    BuildContext context, {
+    required int index,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final delay = (index * 0.15).clamp(0.0, 0.5);
+    final progress =
+        ((_progress.value - delay) / (1.0 - delay)).clamp(0.0, 1.0);
+
+    return Opacity(
+      opacity: progress,
+      child: Transform.translate(
+        offset: Offset(0, 20 * (1 - progress)),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpacing.lg,
+              vertical: KuberSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: KuberColors.surfaceCard,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: KuberColors.border),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: KuberColors.primary, size: 20),
+                const SizedBox(width: KuberSpacing.sm),
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: KuberColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

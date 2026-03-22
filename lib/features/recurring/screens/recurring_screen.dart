@@ -1,0 +1,571 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../core/utils/breakpoints.dart';
+import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../accounts/providers/account_provider.dart';
+import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../data/recurring_repository.dart';
+import '../data/recurring_rule.dart';
+import '../providers/recurring_provider.dart';
+import '../widgets/recurring_detail_sheet.dart';
+
+class RecurringScreen extends ConsumerWidget {
+  const RecurringScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
+    final rulesAsync = ref.watch(recurringListProvider);
+    final categoryMapAsync = ref.watch(categoryMapProvider);
+    final recentlyProcessedAsync = ref.watch(recentlyProcessedProvider);
+    final accountsAsync = ref.watch(accountListProvider);
+    final symbol = ref.watch(currencyProvider).symbol;
+
+    return Scaffold(
+      backgroundColor: KuberColors.background,
+      body: rulesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+        data: (rules) {
+          return CustomScrollView(
+            slivers: [
+              // App bar
+              const SliverToBoxAdapter(
+                child: KuberAppBar(showBack: true, title: 'Recurring'),
+              ),
+
+              // Page header
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Manage\nAutomations',
+                              style: GoogleFonts.inter(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w800,
+                                color: KuberColors.textPrimary,
+                                height: 1.15,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Automated scheduled transactions',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: KuberColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => context.push('/recurring/add'),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: KuberColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.add_rounded,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Body content
+              if (rules.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(KuberSpacing.xl),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.sync_rounded,
+                            size: 64,
+                            color: KuberColors.textSecondary.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(height: KuberSpacing.lg),
+                          Text(
+                            'No recurring transactions yet',
+                            style: textTheme.titleMedium?.copyWith(
+                              color: KuberColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpacing.sm),
+                          GestureDetector(
+                            onTap: () => context.push('/recurring/add'),
+                            child: Text(
+                              'Add one?',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: KuberColors.primary,
+                                decoration: TextDecoration.underline,
+                                decorationColor: KuberColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      KuberSpacing.lg,
+                      0,
+                      KuberSpacing.lg,
+                      navBarBottomPadding(context) + KuberSpacing.lg,
+                    ),
+                    child: Builder(builder: (context) {
+                      final activeRules = rules
+                          .where((r) => !r.isPaused && !RecurringRepository.isExpired(r))
+                          .toList();
+                      final monthlyTotal = _computeMonthlyTotal(activeRules);
+                      final upcomingCount = activeRules
+                          .where((r) => r.nextDueAt
+                              .isBefore(DateTime.now().add(const Duration(days: 7))))
+                          .length;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Stats card
+                          Container(
+                            padding: const EdgeInsets.all(KuberSpacing.lg),
+                            decoration: BoxDecoration(
+                              color: KuberColors.surfaceCard,
+                              borderRadius: BorderRadius.circular(KuberRadius.md),
+                              border: Border.all(color: KuberColors.border),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: _StatTile(
+                                    label: 'Monthly Total',
+                                    value: CurrencyFormatter.format(monthlyTotal),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _StatTile(
+                                    label: 'Active',
+                                    value: '${activeRules.length}',
+                                  ),
+                                ),
+                                Expanded(
+                                  child: _StatTile(
+                                    label: 'Upcoming 7d',
+                                    value: '$upcomingCount',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpacing.xl),
+
+                          // Rule cards
+                          Text(
+                            'RULES',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: KuberColors.textSecondary,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpacing.sm),
+                          categoryMapAsync.when(
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, _) => const SizedBox.shrink(),
+                            data: (catMap) => Column(
+                              children: rules.map((rule) {
+                                final catId = int.tryParse(rule.categoryId);
+                                final cat = catId != null ? catMap[catId] : null;
+                                return _RuleCard(
+                                  rule: rule,
+                                  categoryIcon: cat != null
+                                      ? IconMapper.fromString(cat.icon)
+                                      : Icons.category_outlined,
+                                  categoryColor: cat != null
+                                      ? harmonizeCategory(context, Color(cat.colorValue))
+                                      : KuberColors.textSecondary,
+                                  symbol: symbol,
+                                  onTap: () => showRecurringDetailSheet(
+                                    context, ref, rule,
+                                  ),
+                                  onPause: () => ref
+                                      .read(recurringListProvider.notifier)
+                                      .togglePause(rule),
+                                  onDelete: () => ref
+                                      .read(recurringListProvider.notifier)
+                                      .delete(rule.id),
+                                  onEdit: () => context.push(
+                                    '/recurring/edit',
+                                    extra: rule,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+
+                          // Recently Processed
+                          const SizedBox(height: KuberSpacing.xl),
+                          recentlyProcessedAsync.when(
+                            loading: () => const SizedBox.shrink(),
+                            error: (_, _) => const SizedBox.shrink(),
+                            data: (transactions) {
+                              if (transactions.isEmpty) return const SizedBox.shrink();
+                              final catMap = categoryMapAsync.valueOrNull ?? {};
+                              final accounts = accountsAsync.valueOrNull ?? [];
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'RECENTLY PROCESSED',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: KuberColors.textSecondary,
+                                      letterSpacing: 1.0,
+                                    ),
+                                  ),
+                                  const SizedBox(height: KuberSpacing.sm),
+                                  ...transactions.map((t) {
+                                    final catId = int.tryParse(t.categoryId);
+                                    final cat = catId != null ? catMap[catId] : null;
+                                    final catIcon = cat != null
+                                        ? IconMapper.fromString(cat.icon)
+                                        : Icons.category_outlined;
+                                    final catColor = cat != null
+                                        ? harmonizeCategory(context, Color(cat.colorValue))
+                                        : KuberColors.textSecondary;
+                                    final accountName = accounts
+                                        .where((a) => a.id.toString() == t.accountId)
+                                        .firstOrNull
+                                        ?.name;
+                                    final dateStr = DateFormat('MMM d').format(t.createdAt);
+
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                                      padding: const EdgeInsets.all(KuberSpacing.md),
+                                      decoration: BoxDecoration(
+                                        color: KuberColors.surfaceCard,
+                                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                                        border: Border.all(color: KuberColors.border),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: catColor.withValues(alpha: 0.15),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Icon(catIcon, color: catColor, size: 22),
+                                          ),
+                                          const SizedBox(width: KuberSpacing.md),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  t.name,
+                                                  style: textTheme.bodyMedium?.copyWith(
+                                                    color: KuberColors.textPrimary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '${accountName ?? 'Unknown'} · $dateStr',
+                                                  style: textTheme.labelSmall?.copyWith(
+                                                    color: KuberColors.textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Text(
+                                            CurrencyFormatter.format(t.amount),
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              color: t.type == 'income'
+                                                  ? KuberColors.income
+                                                  : KuberColors.expense,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  double _computeMonthlyTotal(List<RecurringRule> rules) {
+    double total = 0;
+    for (final r in rules) {
+      switch (r.frequency) {
+        case 'daily':
+          total += r.amount * 30;
+        case 'weekly':
+          total += r.amount * 4.33;
+        case 'biweekly':
+          total += r.amount * 2.17;
+        case 'monthly':
+          total += r.amount;
+        case 'yearly':
+          total += r.amount / 12;
+        case 'custom':
+          if (r.customDays != null && r.customDays! > 0) {
+            total += r.amount * (30 / r.customDays!);
+          }
+      }
+    }
+    return total;
+  }
+}
+
+
+class _StatTile extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatTile({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      children: [
+        Text(
+          value,
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: KuberColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: textTheme.labelSmall?.copyWith(
+            color: KuberColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RuleCard extends StatelessWidget {
+  final RecurringRule rule;
+  final IconData categoryIcon;
+  final Color categoryColor;
+  final String symbol;
+  final VoidCallback onTap;
+  final VoidCallback onPause;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
+
+  const _RuleCard({
+    required this.rule,
+    required this.categoryIcon,
+    required this.categoryColor,
+    required this.symbol,
+    required this.onTap,
+    required this.onPause,
+    required this.onDelete,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final isPaused = rule.isPaused;
+    final isExpired = RecurringRepository.isExpired(rule);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
+        padding: const EdgeInsets.all(KuberSpacing.lg),
+        decoration: BoxDecoration(
+          color: KuberColors.surfaceCard,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: KuberColors.border),
+        ),
+        child: Row(
+          children: [
+            // Category icon
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: categoryColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(categoryIcon, color: categoryColor, size: 22),
+            ),
+            const SizedBox(width: KuberSpacing.md),
+
+            // Name & next date
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          rule.name,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: KuberColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: KuberSpacing.sm),
+                      _StatusBadge(
+                        label: isPaused
+                            ? 'PAUSED'
+                            : isExpired
+                                ? 'EXPIRED'
+                                : 'ACTIVE',
+                        color: isPaused
+                            ? KuberColors.textSecondary
+                            : isExpired
+                                ? KuberColors.expense
+                                : KuberColors.income,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Next: ${DateFormat('MMM d, yyyy').format(rule.nextDueAt)}',
+                    style: textTheme.labelSmall?.copyWith(
+                      color: KuberColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Amount
+            Text(
+              CurrencyFormatter.format(rule.amount),
+              style: textTheme.bodyMedium?.copyWith(
+                color: rule.type == 'income'
+                    ? KuberColors.income
+                    : KuberColors.expense,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: KuberSpacing.sm),
+
+            // Actions
+            PopupMenuButton<String>(
+              icon: const Icon(
+                Icons.more_vert,
+                color: KuberColors.textSecondary,
+                size: 20,
+              ),
+              onSelected: (value) {
+                switch (value) {
+                  case 'pause':
+                    onPause();
+                  case 'edit':
+                    onEdit();
+                  case 'delete':
+                    onDelete();
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'pause',
+                  child: Text(isPaused ? 'Resume' : 'Pause'),
+                ),
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Text('Edit'),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Delete'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _StatusBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          color: color,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}

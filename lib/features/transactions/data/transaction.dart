@@ -21,6 +21,8 @@ class Transaction {
   String? fromAccountId; // only set when type == 'transfer'
   String? toAccountId;   // only set when type == 'transfer'
 
+  int? recurringRuleId; // set when created by recurring processor
+
   @Index()
   late DateTime createdAt;
 
