@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../../shared/widgets/add_new_button.dart';
 import '../../accounts/providers/account_provider.dart';
 
 class AccountPickerSheet extends ConsumerWidget {
@@ -23,117 +24,130 @@ class AccountPickerSheet extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final accounts = ref.watch(accountListProvider);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.sm,
-        KuberSpacing.lg,
-        KuberSpacing.lg,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 32,
-              height: 4,
-              decoration: BoxDecoration(
-                color: KuberColors.textSecondary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            KuberSpacing.lg,
+            KuberSpacing.sm,
+            KuberSpacing.lg,
+            0,
           ),
-          const SizedBox(height: KuberSpacing.lg),
-
-          // Title + subtitle
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Select Account',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: KuberColors.textPrimary,
-                    ),
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 32,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: KuberColors.textSecondary,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Choose the account for this transaction',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: KuberColors.textSecondary,
-                    ),
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.lg),
+
+              // Title + subtitle
+              Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Select Account',
+                        style: textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: KuberColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Choose the account for this transaction',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: KuberColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                    color: KuberColors.textSecondary,
                   ),
                 ],
               ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.close, size: 20),
-                onPressed: () => Navigator.pop(context),
-                color: KuberColors.textSecondary,
-              ),
+              const SizedBox(height: KuberSpacing.lg),
             ],
           ),
-          const SizedBox(height: KuberSpacing.lg),
+        ),
 
-          // Account list
-          Flexible(
-            child: accounts.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (e, _) => Center(
-                child: Text('Error: $e'),
-              ),
-              data: (allAccs) {
-                final accs = excludeAccountId != null
-                    ? allAccs.where((a) => a.id != excludeAccountId).toList()
-                    : allAccs;
-                if (accs.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No accounts yet',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: KuberColors.textSecondary,
-                      ),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: accs.length + 1, // +1 for "Add New Account"
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: KuberSpacing.sm),
-                  itemBuilder: (context, index) {
-                    if (index == accs.length) {
-                      return _AddAccountButton(context: context);
-                    }
-
-                    final acc = accs[index];
-                    final selected = acc.id == selectedAccountId;
-                    final color = accountColor(acc.type);
-
-                    return _AccountTile(
-                      name: acc.name,
-                      type: acc.isCreditCard ? 'CREDIT CARD' : acc.type.toUpperCase(),
-                      icon: accountIcon(acc.type),
-                      color: color,
-                      selected: selected,
-                      balance: ref.watch(accountBalanceProvider(acc.id)),
-                      isCreditCard: acc.isCreditCard,
-                      creditLimit: acc.creditLimit,
-                      onTap: () => onSelected(acc.id),
-                    );
-                  },
-                );
-              },
+        // Account list
+        Flexible(
+          child: accounts.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(),
             ),
+            error: (e, _) => Center(
+              child: Text('Error: $e'),
+            ),
+            data: (allAccs) {
+              final accs = excludeAccountId != null
+                  ? allAccs.where((a) => a.id != excludeAccountId).toList()
+                  : allAccs;
+              if (accs.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No accounts yet',
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: KuberColors.textSecondary,
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.lg,
+                ),
+                itemCount: accs.length,
+                separatorBuilder: (_, _) =>
+                    const SizedBox(height: KuberSpacing.sm),
+                itemBuilder: (context, index) {
+                  final acc = accs[index];
+                  final selected = acc.id == selectedAccountId;
+                  final color = resolveAccountColor(acc);
+
+                  return _AccountTile(
+                    name: acc.name,
+                    type: acc.isCreditCard ? 'CREDIT CARD' : acc.type.toUpperCase(),
+                    icon: resolveAccountIcon(acc),
+                    color: color,
+                    selected: selected,
+                    balance: ref.watch(accountBalanceProvider(acc.id)),
+                    isCreditCard: acc.isCreditCard,
+                    creditLimit: acc.creditLimit,
+                    onTap: () => onSelected(acc.id),
+                  );
+                },
+              );
+            },
           ),
-        ],
-      ),
+        ),
+
+        // Add new account button
+        AddNewButton(
+          label: 'Add new account',
+          onTap: () {
+            Navigator.pop(context);
+            GoRouter.of(context).push('/more/accounts');
+          },
+        ),
+      ],
     );
   }
 }
@@ -246,49 +260,3 @@ class _AccountTile extends StatelessWidget {
   }
 }
 
-class _AddAccountButton extends StatelessWidget {
-  final BuildContext context;
-
-  const _AddAccountButton({required this.context});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: () {
-        Navigator.pop(context);
-        GoRouter.of(context).go('/accounts');
-      },
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: KuberColors.border,
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_circle_outline,
-              size: 20,
-              color: KuberColors.primary,
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Text(
-              'Add New Account',
-              style: textTheme.bodyMedium?.copyWith(
-                color: KuberColors.primary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

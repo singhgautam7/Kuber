@@ -1,50 +1,66 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 
-void showTimedSnackBar(
-  BuildContext context, {
-  required String message,
-  Duration duration = const Duration(seconds: 5),
-  SnackBarAction? action,
+import '../../core/theme/app_theme.dart';
+
+Flushbar? _currentFlushbar;
+
+void showKuberSnackBar(
+  BuildContext context,
+  String message, {
+  bool isError = false,
+  String? actionLabel,
+  VoidCallback? onAction,
 }) {
-  ScaffoldMessenger.of(context).clearSnackBars();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Text(message),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 20),
-                onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 1.0, end: 0.0),
-            duration: duration,
-            builder: (context, value, _) => LinearProgressIndicator(
-              value: value,
-              backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation(Colors.white70),
-              minHeight: 2,
-            ),
-          ),
-        ],
-      ),
-      duration: duration,
-      action: action,
+  _currentFlushbar?.dismiss();
+
+  final barColor = isError ? KuberColors.expense : KuberColors.income;
+
+  _currentFlushbar = Flushbar(
+    message: message,
+    messageColor: KuberColors.textPrimary,
+    messageSize: 14,
+    duration: const Duration(seconds: 7),
+    flushbarPosition: FlushbarPosition.TOP,
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    borderRadius: BorderRadius.circular(KuberRadius.md),
+    backgroundColor: KuberColors.surfaceCard,
+    borderColor: isError ? KuberColors.expense : KuberColors.border,
+    borderWidth: 1,
+    icon: Icon(
+      isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
+      color: barColor,
+      size: 22,
     ),
-  );
+    leftBarIndicatorColor: barColor,
+    showProgressIndicator: true,
+    progressIndicatorBackgroundColor: KuberColors.border,
+    progressIndicatorValueColor:
+        AlwaysStoppedAnimation<Color>(KuberColors.primary),
+    mainButton: actionLabel != null
+        ? TextButton(
+            onPressed: () {
+              _currentFlushbar?.dismiss();
+              onAction?.call();
+            },
+            child: Text(
+              actionLabel,
+              style: const TextStyle(
+                color: KuberColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          )
+        : null,
+    boxShadows: [
+      BoxShadow(
+        color: Colors.black.withValues(alpha: 0.3),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+    ],
+    isDismissible: true,
+    dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+  )..show(context);
 }

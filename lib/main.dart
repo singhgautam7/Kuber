@@ -8,7 +8,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final isar = await IsarService.open();
-
   runApp(
     ProviderScope(
       overrides: [

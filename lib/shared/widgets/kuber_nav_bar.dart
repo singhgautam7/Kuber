@@ -37,9 +37,9 @@ const kuberNavItems = [
     label: 'Analytics',
   ),
   KuberNavItem(
-    icon: Icons.account_balance_wallet_outlined,
-    activeIcon: Icons.account_balance_wallet_rounded,
-    label: 'Accounts',
+    icon: Icons.grid_view_outlined,
+    activeIcon: Icons.grid_view_rounded,
+    label: 'More',
   ),
 ];
 
@@ -63,7 +63,7 @@ class KuberNavRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAccountsTab = currentIndex == 3;
+    final isMoreTab = currentIndex == 3;
 
     return Container(
       width: 220,
@@ -107,41 +107,42 @@ class KuberNavRail extends StatelessWidget {
 
             const Spacer(),
 
-            // Add button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  onAddTapped();
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: KuberColors.primary,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.add_rounded,
-                          color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        isAccountsTab ? 'Add Account' : 'Add Transaction',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+            // Add button — hidden on More tab
+            if (!isMoreTab)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    onAddTapped();
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: KuberColors.primary,
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.add_rounded,
+                            color: Colors.white, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Add Transaction',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

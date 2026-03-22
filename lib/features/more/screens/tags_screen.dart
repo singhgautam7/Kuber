@@ -4,14 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+class TagsScreen extends StatelessWidget {
+  const TagsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: KuberColors.background,
-      appBar: const KuberAppBar(showBack: true, title: 'Settings'),
+      appBar: const KuberAppBar(showBack: true, title: 'Tags'),
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -24,12 +24,12 @@ class SettingsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(KuberRadius.md),
                 border: Border.all(color: KuberColors.border),
               ),
-              child: const Icon(Icons.settings_outlined,
+              child: const Icon(Icons.label_outlined,
                   color: KuberColors.textSecondary, size: 28),
             ),
             const SizedBox(height: KuberSpacing.lg),
             Text(
-              'Settings',
+              'Tags',
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,

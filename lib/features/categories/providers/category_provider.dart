@@ -32,6 +32,9 @@ class CategoryListNotifier extends AsyncNotifier<List<Category>> {
   }
 }
 
+/// Used to signal Add Transaction screen to auto-select a newly created category
+final pendingCategorySelectionProvider = StateProvider<int?>((ref) => null);
+
 /// Provides a map of category id -> Category for quick lookup
 final categoryMapProvider = FutureProvider<Map<int, Category>>((ref) async {
   final categories = await ref.watch(categoryListProvider.future);

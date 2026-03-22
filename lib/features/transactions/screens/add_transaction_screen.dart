@@ -81,6 +81,32 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   void _onFieldChanged() => setState(() {});
 
+  void _onTypeChanged(String newType) {
+    setState(() {
+      _type = newType;
+
+      // Check if selected category is still valid for the new type
+      if (_selectedCategoryId != null) {
+        final categories =
+            ref.read(categoryListProvider).valueOrNull ?? [];
+        final selectedCat = categories
+            .where((c) => c.id == _selectedCategoryId)
+            .firstOrNull;
+
+        if (selectedCat != null) {
+          final catType = selectedCat.type;
+          final isStillValid = catType == 'both' ||
+              (newType == 'expense' && catType == 'expense') ||
+              (newType == 'income' && catType == 'income');
+
+          if (!isStillValid) {
+            _selectedCategoryId = null;
+          }
+        }
+      }
+    });
+  }
+
   @override
   void dispose() {
     _nameController.removeListener(_onFieldChanged);
@@ -105,6 +131,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final categoryMap = ref.watch(categoryMapProvider);
     final accounts = ref.watch(accountListProvider);
 
+    // Listen for pending category selection from Add Category flow
+    ref.listen<int?>(pendingCategorySelectionProvider, (_, catId) {
+      if (catId != null) {
+        setState(() => _selectedCategoryId = catId);
+        ref.read(pendingCategorySelectionProvider.notifier).state = null;
+      }
+    });
+
     return Scaffold(
       backgroundColor: KuberColors.background,
       appBar: AppBar(
@@ -115,7 +149,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         title: Text(
           _isEditing
               ? (_type == 'transfer' ? 'Edit Transfer' : 'Edit Transaction')
-              : (_type == 'transfer' ? 'New Transfer' : 'Add Transaction'),
+              : 'Add Transaction',
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -135,9 +169,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   // [A] Type segmented button
                   _TransactionTypeSelector(
                     selected: _type,
-                    onSelected: (selected) {
-                      setState(() => _type = selected);
-                    },
+                    onSelected: _onTypeChanged,
                   ),
                   const SizedBox(height: KuberSpacing.xl),
 
@@ -463,11 +495,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             return _SelectorTile(
                               label: 'FROM ACCOUNT',
                               icon: acc != null
-                                  ? accountIcon(acc.type)
+                                  ? resolveAccountIcon(acc)
                                   : Icons.account_balance_wallet_outlined,
                               value: acc?.name ?? 'Select',
                               iconColor: acc != null
-                                  ? accountColor(acc.type)
+                                  ? resolveAccountColor(acc)
                                   : KuberColors.textSecondary,
                               onTap: () => _showAccountPicker(),
                             );
@@ -642,6 +674,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       ),
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: _selectedCategoryId,
+        defaultType: _type == 'transfer' ? null : _type,
         onSelected: (id) {
           setState(() => _selectedCategoryId = id);
           Navigator.pop(context);
@@ -743,20 +776,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showTimedSnackBar(
-          context,
-          message: 'Failed to save: $e',
-        );
+        showKuberSnackBar(context, 'Failed to save: $e', isError: true);
       }
       return;
     }
 
     if (!mounted) return;
     context.pop();
-    showTimedSnackBar(
+    showKuberSnackBar(
       context,
-      message: _isEditing ? 'Transaction updated' : 'Transaction saved',
-      duration: const Duration(seconds: 2),
+      _isEditing ? 'Transaction updated' : 'Transaction saved',
     );
   }
 
@@ -799,28 +828,25 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     } on InsufficientBalanceException catch (e) {
       if (mounted) {
-        showTimedSnackBar(
+        showKuberSnackBar(
           context,
-          message: 'Insufficient balance: ₹${e.available.toStringAsFixed(2)} available',
+          'Insufficient balance: ₹${e.available.toStringAsFixed(2)} available',
+          isError: true,
         );
       }
       return;
     } catch (e) {
       if (mounted) {
-        showTimedSnackBar(
-          context,
-          message: 'Failed to save: $e',
-        );
+        showKuberSnackBar(context, 'Failed to save: $e', isError: true);
       }
       return;
     }
 
     if (!mounted) return;
     context.pop();
-    showTimedSnackBar(
+    showKuberSnackBar(
       context,
-      message: _isEditing ? 'Transfer updated' : 'Transfer saved',
-      duration: const Duration(seconds: 2),
+      _isEditing ? 'Transfer updated' : 'Transfer saved',
     );
   }
 

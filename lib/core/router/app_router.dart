@@ -10,6 +10,12 @@ import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
+import '../../features/more/screens/more_screen.dart';
+import '../../features/more/screens/categories_screen.dart';
+import '../../features/more/screens/tags_screen.dart';
+import '../../features/more/screens/how_to_use_screen.dart';
+import '../../features/more/screens/add_edit_category_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -36,6 +42,43 @@ GoRouter createRouter() {
           transaction: state.extra as Transaction?,
         ),
       ),
+      GoRoute(
+        path: '/more/accounts',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AccountsScreen(),
+      ),
+      GoRoute(
+        path: '/more/categories',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const CategoriesScreen(),
+      ),
+      GoRoute(
+        path: '/category/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) {
+          final args = state.extra as CategoryRouteArgs?;
+          return AddEditCategoryScreen(
+            existingCategory: args?.category,
+            defaultType: args?.defaultType,
+            returnToCategoryPicker: args?.returnToCategoryPicker ?? false,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/more/tags',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const TagsScreen(),
+      ),
+      GoRoute(
+        path: '/more/settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/more/how-to-use',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const HowToUseScreen(),
+      ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => AppScaffold(child: child),
@@ -54,7 +97,7 @@ GoRouter createRouter() {
           ),
           GoRoute(
             path: '/accounts',
-            builder: (context, state) => const AccountsScreen(),
+            builder: (context, state) => const MoreScreen(),
           ),
         ],
       ),

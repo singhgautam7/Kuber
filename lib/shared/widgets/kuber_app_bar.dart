@@ -6,8 +6,9 @@ import '../../core/theme/app_theme.dart';
 class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
+  final bool showBack;
 
-  const KuberAppBar({super.key, this.title, this.actions});
+  const KuberAppBar({super.key, this.title, this.actions, this.showBack = false});
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -23,6 +24,14 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
               const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
           child: Row(
             children: [
+              if (showBack) ...[
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Icon(Icons.arrow_back_rounded,
+                      color: KuberColors.textPrimary, size: 22),
+                ),
+                const SizedBox(width: 12),
+              ],
               if (title == null) ...[
                 Container(
                   width: 28,

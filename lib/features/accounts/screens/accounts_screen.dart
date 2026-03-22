@@ -114,7 +114,7 @@ class _AccountsBody extends ConsumerWidget {
       slivers: [
         // App bar
         const SliverToBoxAdapter(
-          child: KuberAppBar(title: 'Accounts'),
+          child: KuberAppBar(showBack: true, title: 'Accounts'),
         ),
 
         // Page header

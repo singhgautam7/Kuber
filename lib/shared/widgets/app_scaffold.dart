@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
-import '../../features/accounts/providers/account_provider.dart';
 import 'kuber_nav_bar.dart';
 
 class AppScaffold extends ConsumerStatefulWidget {
@@ -32,12 +31,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   }
 
   void _onAddTapped() {
-    if (_currentIndex == 3) {
-      // On Accounts tab → trigger add-account sheet
-      ref.read(triggerAddAccountProvider.notifier).state = true;
-    } else {
-      context.push('/add-transaction');
-    }
+    context.push('/add-transaction');
   }
 
   double get _slideDirection =>
@@ -107,16 +101,18 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     return Scaffold(
       backgroundColor: KuberColors.background,
       body: animatedContent,
-      floatingActionButton: FloatingActionButton(
-        onPressed: _onAddTapped,
-        backgroundColor: KuberColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _currentIndex != 3
+          ? FloatingActionButton(
+              onPressed: _onAddTapped,
+              backgroundColor: KuberColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+              ),
+              child: const Icon(Icons.add),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onTabTapped,

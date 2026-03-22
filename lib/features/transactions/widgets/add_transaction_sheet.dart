@@ -273,11 +273,11 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
     if (amount == null || amount <= 0) {
-      showTimedSnackBar(context, message: 'Please enter a valid amount');
+      showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
       return;
     }
     if (_selectedCategoryId == null || _selectedAccountId == null) {
-      showTimedSnackBar(context, message: 'Please select a category and account');
+      showKuberSnackBar(context, 'Please select a category and account', isError: true);
       return;
     }
 

@@ -12,7 +12,7 @@ import '../../features/categories/providers/category_provider.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/providers/transaction_provider.dart';
 import 'category_icon.dart';
-import 'timed_snackbar.dart';
+import 'timed_snackbar.dart'; // showKuberSnackBar
 
 /// Shows the transaction detail bottom sheet with edit/delete actions.
 void showTransactionDetailSheet(
@@ -47,28 +47,25 @@ void showTransactionDetailSheet(
 void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction t) {
   ref.read(transactionListProvider.notifier).delete(t.id);
   final label = t.type == 'transfer' ? 'Deleted transfer' : 'Deleted "${t.name}"';
-  showTimedSnackBar(
+  showKuberSnackBar(
     context,
-    message: label,
-    duration: const Duration(seconds: 5),
-    action: SnackBarAction(
-      label: 'Undo',
-      onPressed: () {
-        final restored = Transaction()
-          ..name = t.name
-          ..amount = t.amount
-          ..type = t.type
-          ..categoryId = t.categoryId
-          ..accountId = t.accountId
-          ..fromAccountId = t.fromAccountId
-          ..toAccountId = t.toAccountId
-          ..notes = t.notes
-          ..createdAt = t.createdAt
-          ..updatedAt = t.updatedAt
-          ..nameLower = t.nameLower;
-        ref.read(transactionListProvider.notifier).restore(restored);
-      },
-    ),
+    label,
+    actionLabel: 'Undo',
+    onAction: () {
+      final restored = Transaction()
+        ..name = t.name
+        ..amount = t.amount
+        ..type = t.type
+        ..categoryId = t.categoryId
+        ..accountId = t.accountId
+        ..fromAccountId = t.fromAccountId
+        ..toAccountId = t.toAccountId
+        ..notes = t.notes
+        ..createdAt = t.createdAt
+        ..updatedAt = t.updatedAt
+        ..nameLower = t.nameLower;
+      ref.read(transactionListProvider.notifier).restore(restored);
+    },
   );
 }
 
