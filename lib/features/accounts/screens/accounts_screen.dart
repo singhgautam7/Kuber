@@ -7,6 +7,7 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../widgets/account_form_sheet.dart';
@@ -209,14 +210,15 @@ class _AccountsBody extends ConsumerWidget {
   }
 }
 
-class _AccountCard extends StatelessWidget {
+class _AccountCard extends ConsumerWidget {
   final Account account;
   final double balance;
 
   const _AccountCard({required this.account, required this.balance});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final symbol = ref.watch(currencyProvider).symbol;
     final isCreditCard = account.isCreditCard;
     final balanceLabel = isCreditCard ? 'Credit Utilized' : 'Available Balance';
     final Color balanceColor;
@@ -295,7 +297,7 @@ class _AccountCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${balance < 0 ? '-' : ''}₹${balance.abs().toStringAsFixed(2)}',
+                '${balance < 0 ? '-' : ''}$symbol${balance.abs().toStringAsFixed(2)}',
                 style: GoogleFonts.inter(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
@@ -305,7 +307,7 @@ class _AccountCard extends StatelessWidget {
               ),
               if (isCreditCard && account.creditLimit != null)
                 Text(
-                  'Limit  ₹${account.creditLimit!.toStringAsFixed(0)}',
+                  'Limit  $symbol${account.creditLimit!.toStringAsFixed(0)}',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: KuberColors.textSecondary,
@@ -405,7 +407,7 @@ class _AccountMenu extends ConsumerWidget {
   }
 }
 
-class _NetWorthCard extends StatelessWidget {
+class _NetWorthCard extends ConsumerWidget {
   final double netWorth;
   final double totalAssets;
   final double totalDebt;
@@ -417,7 +419,8 @@ class _NetWorthCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final symbol = ref.watch(currencyProvider).symbol;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -439,7 +442,7 @@ class _NetWorthCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${netWorth < 0 ? '-' : ''}₹${netWorth.abs().toStringAsFixed(2)}',
+            '${netWorth < 0 ? '-' : ''}$symbol${netWorth.abs().toStringAsFixed(2)}',
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -455,12 +458,14 @@ class _NetWorthCard extends StatelessWidget {
                 color: KuberColors.income,
                 label: 'Assets',
                 amount: totalAssets,
+                symbol: symbol,
               ),
               const SizedBox(width: 24),
               _NetWorthLegend(
                 color: KuberColors.expense,
                 label: 'Debt',
                 amount: totalDebt,
+                symbol: symbol,
               ),
             ],
           ),
@@ -474,11 +479,13 @@ class _NetWorthLegend extends StatelessWidget {
   final Color color;
   final String label;
   final double amount;
+  final String symbol;
 
   const _NetWorthLegend({
     required this.color,
     required this.label,
     required this.amount,
+    required this.symbol,
   });
 
   @override
@@ -492,7 +499,7 @@ class _NetWorthLegend extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          '$label: ₹${amount.toStringAsFixed(2)}',
+          '$label: $symbol${amount.toStringAsFixed(2)}',
           style: GoogleFonts.inter(
             fontSize: 12,
             color: KuberColors.textSecondary,

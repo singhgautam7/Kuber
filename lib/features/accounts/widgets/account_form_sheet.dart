@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 
@@ -125,6 +126,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final symbol = ref.watch(currencyProvider).symbol;
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -324,7 +326,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                     color: KuberColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Initial Balance',
-                  prefixText: '₹ ',
+                  prefixText: '$symbol ',
                   prefixStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
                   labelStyle: GoogleFonts.inter(
@@ -343,7 +345,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                     color: KuberColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Credit Utilized',
-                  prefixText: '₹ ',
+                  prefixText: '$symbol ',
                   prefixStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
                   labelStyle: GoogleFonts.inter(
@@ -359,7 +361,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                     color: KuberColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Total Limit',
-                  prefixText: '₹ ',
+                  prefixText: '$symbol ',
                   prefixStyle: GoogleFonts.inter(
                       color: KuberColors.textSecondary),
                   labelStyle: GoogleFonts.inter(

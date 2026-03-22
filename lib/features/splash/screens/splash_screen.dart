@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/prefs_keys.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -50,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _navigate() async {
     final prefs = await SharedPreferences.getInstance();
-    final onboarded = prefs.getBool('kuber_onboarded') ?? false;
+    final onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
     if (!mounted) return;
     context.go(onboarded ? '/' : '/onboarding');
   }

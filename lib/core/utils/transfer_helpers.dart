@@ -42,6 +42,6 @@ class InsufficientBalanceException implements Exception {
 
   @override
   String toString() =>
-      'Insufficient balance: available ₹${available.toStringAsFixed(2)}, '
-      'required ₹${required_.toStringAsFixed(2)}';
+      'Insufficient balance: available ${available.toStringAsFixed(2)}, '
+      'required ${required_.toStringAsFixed(2)}';
 }

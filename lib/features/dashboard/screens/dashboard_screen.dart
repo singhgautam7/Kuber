@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,13 +16,44 @@ import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/transaction_list_item.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
 
-class DashboardScreen extends ConsumerWidget {
+const _subtitles = [
+  'Let\'s manage your money wisely',
+  'Track every rupee, every day',
+  'Stay on top of your finances',
+  'Your wallet will thank you',
+  'Small savings, big results',
+  'Every transaction counts',
+  'Building smart money habits',
+];
+
+String _timeGreeting() {
+  final hour = DateTime.now().hour;
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  late final String _subtitle;
+
+  @override
+  void initState() {
+    super.initState();
+    _subtitle = _subtitles[Random().nextInt(_subtitles.length)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final summaryAsync = ref.watch(monthlySummaryProvider);
@@ -28,6 +61,7 @@ class DashboardScreen extends ConsumerWidget {
     final recentAsync = ref.watch(recentTransactionsProvider);
     final chartAsync = ref.watch(last7DaysSummaryProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
+    final userName = ref.watch(settingsProvider).valueOrNull?.userName ?? '';
 
     return Scaffold(
       body: ListView(
@@ -39,6 +73,33 @@ class DashboardScreen extends ConsumerWidget {
         children: [
           const KuberAppBar(),
           const SizedBox(height: KuberSpacing.lg),
+
+          // Greeting
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                userName.isNotEmpty
+                    ? '${_timeGreeting()}, $userName'
+                    : _timeGreeting(),
+                style: GoogleFonts.inter(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: KuberColors.textPrimary,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.xs),
+              Text(
+                _subtitle,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: KuberColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.xl),
 
             // [A] Balance Hero Card
             summaryAsync.when(
@@ -68,7 +129,7 @@ class DashboardScreen extends ConsumerWidget {
                               fontWeight: FontWeight.w600,
                             )),
                         TextButton(
-                          onPressed: () => context.go('/accounts'),
+                          onPressed: () => context.push('/more/accounts'),
                           child: Text('View All',
                               style: textTheme.labelMedium?.copyWith(
                                 color: colorScheme.primary,
@@ -200,6 +261,7 @@ class DashboardScreen extends ConsumerWidget {
                 subtitle: 'Last 7 Days Activity',
                 buckets: _buildLast7DaysBuckets(days),
                 height: 200,
+                currencySymbol: ref.watch(currencyProvider).symbol,
               ),
             ),
             const SizedBox(height: KuberSpacing.xl),
@@ -283,14 +345,15 @@ class DashboardScreen extends ConsumerWidget {
 
 }
 
-class _BalanceHeroCard extends StatelessWidget {
+class _BalanceHeroCard extends ConsumerWidget {
   final MonthlySummary summary;
 
   const _BalanceHeroCard({required this.summary});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final symbol = ref.watch(currencyProvider).symbol;
 
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.xl),
@@ -311,7 +374,7 @@ class _BalanceHeroCard extends StatelessWidget {
           const SizedBox(height: KuberSpacing.sm),
           Builder(
             builder: (context) {
-              final formattedRaw = CurrencyFormatter.format(summary.net.abs()).replaceAll('₹', '');
+              final formattedRaw = CurrencyFormatter.format(summary.net.abs()).replaceAll(symbol, '');
               final prefix = summary.net < 0 ? '-' : '';
 
               return RichText(
@@ -324,9 +387,9 @@ class _BalanceHeroCard extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(text: prefix),
-                    const TextSpan(
-                      text: '₹',
-                      style: TextStyle(color: KuberColors.primary),
+                    TextSpan(
+                      text: symbol,
+                      style: const TextStyle(color: KuberColors.primary),
                     ),
                     TextSpan(text: formattedRaw),
                   ],

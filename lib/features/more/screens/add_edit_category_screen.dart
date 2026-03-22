@@ -189,7 +189,7 @@ class _AddEditCategoryScreenState
                     ),
                   ),
                   Text(
-                    '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)} Category',
+                    '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: KuberColors.textSecondary,

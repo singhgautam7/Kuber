@@ -10,6 +10,7 @@ import '../../core/utils/icon_mapper.dart';
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/settings/providers/settings_provider.dart' show currencyProvider;
 import '../../features/transactions/providers/transaction_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
@@ -126,11 +127,12 @@ class TransactionDetailSheet extends ConsumerWidget {
           ?.name;
     }
 
+    final symbol = ref.watch(currencyProvider).symbol;
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
         ? KuberColors.textPrimary
         : (isIncome ? KuberColors.income : KuberColors.expense);
-    final amountPrefix = isTransfer ? '₹' : (isIncome ? '+₹' : '−₹');
+    final amountPrefix = isTransfer ? symbol : (isIncome ? '+$symbol' : '−$symbol');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
         : (category != null

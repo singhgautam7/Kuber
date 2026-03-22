@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
-import '../../features/onboarding/screens/onboarding_screen.dart';
+import '../../features/onboarding/screens/welcome_screen.dart';
+import '../../features/onboarding/screens/setup_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
@@ -33,7 +34,12 @@ GoRouter createRouter() {
       GoRoute(
         path: '/onboarding',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding/setup',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SetupScreen(),
       ),
       GoRoute(
         path: '/add-transaction',

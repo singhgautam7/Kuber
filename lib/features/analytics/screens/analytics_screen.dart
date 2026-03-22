@@ -17,6 +17,7 @@ import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../providers/analytics_provider.dart';
 
 // ---------------------------------------------------------------------------
@@ -247,10 +248,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   // ---- format helpers -----------------------------------------------------
 
   String _formatAmount(double v) {
+    final symbol = ref.read(currencyProvider).symbol;
     if (v >= 100000) {
-      return '₹${(v / 1000).toStringAsFixed(0)}K';
+      return '$symbol${(v / 1000).toStringAsFixed(0)}K';
     }
-    return '₹${v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)}';
+    return '$symbol${v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)}';
   }
 
   String _formatPercent(double v) => '${v.toStringAsFixed(1)}%';
@@ -388,6 +390,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: 'Spending Trend',
               buckets: buckets,
               height: 200,
+              currencySymbol: ref.watch(currencyProvider).symbol,
             ),
             const SizedBox(height: KuberSpacing.lg),
 

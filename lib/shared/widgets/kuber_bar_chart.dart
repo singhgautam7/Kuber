@@ -27,6 +27,7 @@ class KuberBarChart extends StatefulWidget {
   final String? subtitle;
   final double height;
   final String Function(double)? formatAmount;
+  final String currencySymbol;
 
   const KuberBarChart({
     super.key,
@@ -35,6 +36,7 @@ class KuberBarChart extends StatefulWidget {
     this.subtitle,
     this.height = 200,
     this.formatAmount,
+    this.currencySymbol = '₹',
   });
 
   @override
@@ -142,15 +144,16 @@ class _KuberBarChartState extends State<KuberBarChart> {
                           showTitles: true,
                           reservedSize: 44,
                           getTitlesWidget: (value, meta) {
+                            final sym = widget.currencySymbol;
                             if (value == meta.min) {
-                              return Text('₹0',
+                              return Text('${sym}0',
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
                                   color: KuberColors.textSecondary));
                             }
                             final label = value >= 1000
-                                ? '₹${(value / 1000).toStringAsFixed(1)}k'
-                                : '₹${value.toInt()}';
+                                ? '$sym${(value / 1000).toStringAsFixed(1)}k'
+                                : '$sym${value.toInt()}';
                             return Text(label,
                               style: GoogleFonts.inter(
                                 fontSize: 10,
@@ -228,8 +231,9 @@ class _KuberBarChartState extends State<KuberBarChart> {
 
     String formatAmt(double val) {
       if (widget.formatAmount != null) return widget.formatAmount!(val);
-      if (val >= 1000) return '₹${(val / 1000).toStringAsFixed(1)}k';
-      return '₹${val.toStringAsFixed(0)}';
+      final sym = widget.currencySymbol;
+      if (val >= 1000) return '$sym${(val / 1000).toStringAsFixed(1)}k';
+      return '$sym${val.toStringAsFixed(0)}';
     }
 
     return Padding(

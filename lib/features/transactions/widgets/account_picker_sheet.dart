@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../shared/widgets/add_new_button.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 
 class AccountPickerSheet extends ConsumerWidget {
   final int? selectedAccountId;
@@ -131,6 +132,7 @@ class AccountPickerSheet extends ConsumerWidget {
                     balance: ref.watch(accountBalanceProvider(acc.id)),
                     isCreditCard: acc.isCreditCard,
                     creditLimit: acc.creditLimit,
+                    currencySymbol: ref.watch(currencyProvider).symbol,
                     onTap: () => onSelected(acc.id),
                   );
                 },
@@ -161,6 +163,7 @@ class _AccountTile extends StatelessWidget {
   final AsyncValue<double> balance;
   final bool isCreditCard;
   final double? creditLimit;
+  final String currencySymbol;
   final VoidCallback onTap;
 
   const _AccountTile({
@@ -172,6 +175,7 @@ class _AccountTile extends StatelessWidget {
     required this.balance,
     this.isCreditCard = false,
     this.creditLimit,
+    required this.currencySymbol,
     required this.onTap,
   });
 
@@ -238,9 +242,10 @@ class _AccountTile extends StatelessWidget {
               ),
               error: (_, _) => const SizedBox.shrink(),
               data: (bal) {
+                final sym = currencySymbol;
                 final display = isCreditCard && creditLimit != null
-                    ? '₹${bal.abs().toStringAsFixed(0)} / ₹${creditLimit!.toStringAsFixed(0)}'
-                    : '₹${bal.abs().toStringAsFixed(0)}';
+                    ? '$sym${bal.abs().toStringAsFixed(0)} / $sym${creditLimit!.toStringAsFixed(0)}'
+                    : '$sym${bal.abs().toStringAsFixed(0)}';
                 return Text(
                   display,
                   style: textTheme.bodyMedium?.copyWith(

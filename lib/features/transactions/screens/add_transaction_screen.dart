@@ -10,6 +10,7 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/transfer_helpers.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -322,7 +323,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                               ),
                                             ),
                                             Text(
-                                              '₹${s.amount.toStringAsFixed(0)}',
+                                              '${ref.watch(currencyProvider).symbol}${s.amount.toStringAsFixed(0)}',
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodySmall
@@ -390,11 +391,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             isCollapsed: true,
                           ),
                         ),
-                        // ₹ — pinned left
+                        // currency symbol — pinned left
                         Positioned(
                           left: 0,
                           child: Text(
-                            '₹',
+                            ref.watch(currencyProvider).symbol,
                             style: GoogleFonts.inter(
                               fontSize: 28,
                               fontWeight: FontWeight.w300,
@@ -878,7 +879,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (mounted) {
         showKuberSnackBar(
           context,
-          'Insufficient balance: ₹${e.available.toStringAsFixed(2)} available',
+          'Insufficient balance: ${ref.read(currencyProvider).symbol}${e.available.toStringAsFixed(2)} available',
           isError: true,
         );
       }
@@ -1008,11 +1009,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   isCollapsed: true,
                 ),
               ),
-              // ₹ — pinned left
+              // currency symbol — pinned left
               Positioned(
                 left: 0,
                 child: Text(
-                  '₹',
+                  ref.watch(currencyProvider).symbol,
                   style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w300,

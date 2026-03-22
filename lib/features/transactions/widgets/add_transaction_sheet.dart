@@ -6,6 +6,7 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
@@ -130,10 +131,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               controller: _amountController,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Amount',
-                border: OutlineInputBorder(),
-                prefixText: '₹ ',
+                border: const OutlineInputBorder(),
+                prefixText: '${ref.watch(currencyProvider).symbol} ',
               ),
             ),
             const SizedBox(height: KuberSpacing.md),

@@ -12,6 +12,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 
@@ -435,18 +436,19 @@ class _AdvancedFilterButton extends StatelessWidget {
   }
 }
 
-class _DateGroupHeader extends StatelessWidget {
+class _DateGroupHeader extends ConsumerWidget {
   final String label;
   final double dayTotal;
 
   const _DateGroupHeader({required this.label, required this.dayTotal});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final symbol = ref.watch(currencyProvider).symbol;
     final isPositive = dayTotal >= 0;
     final totalText = isPositive
-        ? '+₹${dayTotal.toStringAsFixed(2)}'
-        : '-₹${dayTotal.abs().toStringAsFixed(2)}';
+        ? '+$symbol${dayTotal.toStringAsFixed(2)}'
+        : '-$symbol${dayTotal.abs().toStringAsFixed(2)}';
     final totalColor =
         isPositive ? KuberColors.income : KuberColors.textSecondary;
 
@@ -684,7 +686,7 @@ class _TransactionRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$amountPrefix₹${transaction.amount.toStringAsFixed(2)}',
+                    '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
