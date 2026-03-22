@@ -45,22 +45,17 @@ class RecurringListNotifier extends AsyncNotifier<List<RecurringRule>> {
   }
 }
 
-/// Upcoming recurring rules due in the next 7 days, max 3
+/// Next 5 upcoming active recurring rules, sorted by due date
 final upcomingRecurringProvider =
     FutureProvider<List<RecurringRule>>((ref) async {
   final rules = await ref.watch(recurringListProvider.future);
-  final now = DateTime.now();
-  final sevenDaysLater = now.add(const Duration(days: 7));
 
   final upcoming = rules
-      .where((r) =>
-          !r.isPaused &&
-          !RecurringRepository.isExpired(r) &&
-          r.nextDueAt.isBefore(sevenDaysLater))
+      .where((r) => !r.isPaused && !RecurringRepository.isExpired(r))
       .toList()
     ..sort((a, b) => a.nextDueAt.compareTo(b.nextDueAt));
 
-  return upcoming.take(3).toList();
+  return upcoming.take(5).toList();
 });
 
 /// Recently auto-created transactions (with non-null recurringRuleId), last 5

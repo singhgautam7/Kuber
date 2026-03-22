@@ -142,10 +142,15 @@ class TransactionDetailSheet extends ConsumerWidget {
         ? const Color(0xFF78909C)
         : (category != null ? Color(category.colorValue) : KuberColors.primary);
     final categoryName = category?.name ?? 'Unknown';
-    final accountName = account?.name ?? 'Unknown';
     final displayName = isTransfer
         ? '${fromAccountName ?? "Unknown"} → ${toAccountName ?? "Unknown"}'
         : transaction.name;
+
+    // Account display with last4Digits
+    String accountDisplay = account?.name ?? 'Unknown';
+    if (account?.last4Digits != null && account!.last4Digits!.isNotEmpty) {
+      accountDisplay += ' •••• ${account.last4Digits}';
+    }
 
     final dateLabel =
         '${DateFormatter.groupHeader(transaction.createdAt)}, ${DateFormat('d MMM').format(transaction.createdAt)} • ${DateFormatter.time(transaction.createdAt)}';
@@ -167,160 +172,175 @@ class TransactionDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // Icon
-            if (isTransfer)
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+            // Header row: icon + name + close
+            Row(
+              children: [
+                if (isTransfer)
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(iconData, size: 24, color: iconColor),
+                  )
+                else
+                  CategoryIcon.square(
+                    icon: iconData,
+                    rawColor: iconColor,
+                    size: 48,
+                  ),
+                const SizedBox(width: KuberSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: KuberColors.textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'TRANSACTION DETAIL',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: KuberColors.textSecondary,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Icon(iconData, size: 30, color: iconColor),
-              )
-            else
-              CategoryIcon.square(
-                icon: iconData,
-                rawColor: iconColor,
-                size: 64,
-              ),
-            const SizedBox(height: KuberSpacing.lg),
-
-            // Transaction name
-            Text(
-              displayName,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: KuberColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
+                GestureDetector(
+                  onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: KuberColors.surfaceMuted,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      size: 18,
+                      color: KuberColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpacing.xl),
 
-            // Amount
-            Text(
-              '$amountPrefix${transaction.amount.toStringAsFixed(2)}',
-              style: GoogleFonts.inter(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: amountColor,
+            // Amount label
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'AMOUNT',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: KuberColors.textSecondary,
+                  letterSpacing: 1.0,
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: KuberSpacing.xs),
 
-            // Date & time
-            Text(
-              dateLabel,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: KuberColors.textSecondary,
+            // Amount value
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '$amountPrefix${transaction.amount.toStringAsFixed(2)}',
+                style: GoogleFonts.inter(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  color: amountColor,
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // Detail rows
+            // 2×2 detail grid
             if (isTransfer) ...[
-              // From Account
-              DetailRow(
-                icon: Icons.arrow_upward_rounded,
-                label: 'From Account',
-                trailing: Text(
-                  fromAccountName ?? 'Unknown',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: KuberColors.textPrimary,
+              Row(
+                children: [
+                  Expanded(
+                    child: _DetailCell(
+                      label: 'FROM ACCOUNT',
+                      value: fromAccountName ?? 'Unknown',
+                    ),
                   ),
-                ),
+                  const SizedBox(width: KuberSpacing.sm),
+                  Expanded(
+                    child: _DetailCell(
+                      label: 'TO ACCOUNT',
+                      value: toAccountName ?? 'Unknown',
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: KuberSpacing.sm),
-              // To Account
-              DetailRow(
-                icon: Icons.arrow_downward_rounded,
-                label: 'To Account',
-                trailing: Text(
-                  toAccountName ?? 'Unknown',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: KuberColors.textPrimary,
-                  ),
+              SizedBox(
+                width: double.infinity,
+                child: _DetailCell(
+                  label: 'DATE & TIME',
+                  value: dateLabel,
                 ),
               ),
             ] else ...[
-              // Category
-              DetailRow(
-                icon: Icons.category_rounded,
-                label: 'Category',
-                trailing: Text(
-                  categoryName,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: KuberColors.primary,
+              Row(
+                children: [
+                  Expanded(
+                    child: _DetailCell(
+                      label: 'CATEGORY',
+                      value: categoryName,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: KuberSpacing.sm),
+                  Expanded(
+                    child: _DetailCell(
+                      label: 'ACCOUNT',
+                      value: accountDisplay,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: KuberSpacing.sm),
-              // Account
-              DetailRow(
-                icon: Icons.account_balance_wallet_outlined,
-                label: 'Account',
-                trailing: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      accountName,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: KuberColors.textPrimary,
-                      ),
-                    ),
-                    if (account?.last4Digits != null &&
-                        account!.last4Digits!.isNotEmpty)
-                      Text(
-                        'ENDING IN ${account.last4Digits}',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: KuberColors.textSecondary,
-                        ),
-                      ),
-                  ],
+              SizedBox(
+                width: double.infinity,
+                child: _DetailCell(
+                  label: 'DATE & TIME',
+                  value: dateLabel,
                 ),
               ),
             ],
 
-            // Notes
+            // Notes (full-width row)
             if (transaction.notes != null &&
                 transaction.notes!.isNotEmpty) ...[
               const SizedBox(height: KuberSpacing.sm),
-              DetailRow(
-                icon: Icons.notes_rounded,
-                label: 'Notes',
-                trailing: const SizedBox.shrink(),
-                subtitle: Text(
-                  transaction.notes!,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    color: KuberColors.textSecondary,
-                  ),
+              SizedBox(
+                width: double.infinity,
+                child: _DetailCell(
+                  label: 'NOTES',
+                  value: transaction.notes!,
                 ),
               ),
             ],
 
             const SizedBox(height: KuberSpacing.xl),
 
-            // Edit button
+            // Edit button (muted/outlined)
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: onEdit,
                 icon: const Icon(Icons.edit_outlined, size: 18),
                 label: Text(
@@ -330,9 +350,9 @@ class TransactionDetailSheet extends ConsumerWidget {
                     fontSize: 15,
                   ),
                 ),
-                style: FilledButton.styleFrom(
-                  backgroundColor: KuberColors.primary,
-                  foregroundColor: Colors.white,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: KuberColors.textPrimary,
+                  side: BorderSide(color: KuberColors.border),
                   padding:
                       const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                   shape: RoundedRectangleBorder(
@@ -366,19 +386,11 @@ class TransactionDetailSheet extends ConsumerWidget {
   }
 }
 
-class DetailRow extends StatelessWidget {
-  final IconData icon;
+class _DetailCell extends StatelessWidget {
   final String label;
-  final Widget trailing;
-  final Widget? subtitle;
+  final String value;
 
-  const DetailRow({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.trailing,
-    this.subtitle,
-  });
+  const _DetailCell({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -391,42 +403,30 @@ class DetailRow extends StatelessWidget {
         color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
-      child: subtitle != null
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(icon, size: 18, color: KuberColors.textSecondary),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Text(
-                      label,
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: KuberColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                subtitle!,
-              ],
-            )
-          : Row(
-              children: [
-                Icon(icon, size: 18, color: KuberColors.textSecondary),
-                const SizedBox(width: KuberSpacing.sm),
-                Text(
-                  label,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: KuberColors.textSecondary,
-                  ),
-                ),
-                const Spacer(),
-                trailing,
-              ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: KuberColors.textSecondary,
+              letterSpacing: 1.0,
             ),
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: KuberColors.textPrimary,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

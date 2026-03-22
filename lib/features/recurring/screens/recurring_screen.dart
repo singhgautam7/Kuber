@@ -10,11 +10,13 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
+import '../widgets/recurring_detail_sheet.dart';
 
 class RecurringScreen extends ConsumerWidget {
   const RecurringScreen({super.key});
@@ -25,6 +27,7 @@ class RecurringScreen extends ConsumerWidget {
     final rulesAsync = ref.watch(recurringListProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
     final recentlyProcessedAsync = ref.watch(recentlyProcessedProvider);
+    final accountsAsync = ref.watch(accountListProvider);
     final symbol = ref.watch(currencyProvider).symbol;
 
     return Scaffold(
@@ -214,6 +217,9 @@ class RecurringScreen extends ConsumerWidget {
                                       ? harmonizeCategory(context, Color(cat.colorValue))
                                       : KuberColors.textSecondary,
                                   symbol: symbol,
+                                  onTap: () => showRecurringDetailSheet(
+                                    context, ref, rule,
+                                  ),
                                   onPause: () => ref
                                       .read(recurringListProvider.notifier)
                                       .togglePause(rule),
@@ -236,6 +242,8 @@ class RecurringScreen extends ConsumerWidget {
                             error: (_, _) => const SizedBox.shrink(),
                             data: (transactions) {
                               if (transactions.isEmpty) return const SizedBox.shrink();
+                              final catMap = categoryMapAsync.valueOrNull ?? {};
+                              final accounts = accountsAsync.valueOrNull ?? [];
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -249,50 +257,76 @@ class RecurringScreen extends ConsumerWidget {
                                     ),
                                   ),
                                   const SizedBox(height: KuberSpacing.sm),
-                                  Container(
-                                    padding: const EdgeInsets.all(KuberSpacing.md),
-                                    decoration: BoxDecoration(
-                                      color: KuberColors.surfaceCard,
-                                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                                      border: Border.all(color: KuberColors.border),
-                                    ),
-                                    child: Column(
-                                      children: transactions.map((t) {
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: KuberSpacing.sm,
+                                  ...transactions.map((t) {
+                                    final catId = int.tryParse(t.categoryId);
+                                    final cat = catId != null ? catMap[catId] : null;
+                                    final catIcon = cat != null
+                                        ? IconMapper.fromString(cat.icon)
+                                        : Icons.category_outlined;
+                                    final catColor = cat != null
+                                        ? harmonizeCategory(context, Color(cat.colorValue))
+                                        : KuberColors.textSecondary;
+                                    final accountName = accounts
+                                        .where((a) => a.id.toString() == t.accountId)
+                                        .firstOrNull
+                                        ?.name;
+                                    final dateStr = DateFormat('MMM d').format(t.createdAt);
+
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                                      padding: const EdgeInsets.all(KuberSpacing.md),
+                                      decoration: BoxDecoration(
+                                        color: KuberColors.surfaceCard,
+                                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                                        border: Border.all(color: KuberColors.border),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              color: catColor.withValues(alpha: 0.15),
+                                              borderRadius: BorderRadius.circular(8),
+                                            ),
+                                            child: Icon(catIcon, color: catColor, size: 22),
                                           ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                Icons.check_circle_outline,
-                                                size: 16,
-                                                color: KuberColors.income,
-                                              ),
-                                              const SizedBox(width: KuberSpacing.sm),
-                                              Expanded(
-                                                child: Text(
+                                          const SizedBox(width: KuberSpacing.md),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
                                                   t.name,
                                                   style: textTheme.bodyMedium?.copyWith(
                                                     color: KuberColors.textPrimary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  '${accountName ?? 'Unknown'} · $dateStr',
+                                                  style: textTheme.labelSmall?.copyWith(
+                                                    color: KuberColors.textSecondary,
                                                   ),
                                                 ),
-                                              ),
-                                              Text(
-                                                CurrencyFormatter.format(t.amount),
-                                                style: textTheme.bodyMedium?.copyWith(
-                                                  color: t.type == 'income'
-                                                      ? KuberColors.income
-                                                      : KuberColors.expense,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
+                                          Text(
+                                            CurrencyFormatter.format(t.amount),
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              color: t.type == 'income'
+                                                  ? KuberColors.income
+                                                  : KuberColors.expense,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
                                 ],
                               );
                             },
@@ -369,6 +403,7 @@ class _RuleCard extends StatelessWidget {
   final IconData categoryIcon;
   final Color categoryColor;
   final String symbol;
+  final VoidCallback onTap;
   final VoidCallback onPause;
   final VoidCallback onDelete;
   final VoidCallback onEdit;
@@ -378,6 +413,7 @@ class _RuleCard extends StatelessWidget {
     required this.categoryIcon,
     required this.categoryColor,
     required this.symbol,
+    required this.onTap,
     required this.onPause,
     required this.onDelete,
     required this.onEdit,
@@ -390,7 +426,7 @@ class _RuleCard extends StatelessWidget {
     final isExpired = RecurringRepository.isExpired(rule);
 
     return GestureDetector(
-      onTap: onEdit,
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
         padding: const EdgeInsets.all(KuberSpacing.lg),
@@ -479,6 +515,8 @@ class _RuleCard extends StatelessWidget {
                 switch (value) {
                   case 'pause':
                     onPause();
+                  case 'edit':
+                    onEdit();
                   case 'delete':
                     onDelete();
                 }
@@ -487,6 +525,10 @@ class _RuleCard extends StatelessWidget {
                 PopupMenuItem(
                   value: 'pause',
                   child: Text(isPaused ? 'Resume' : 'Pause'),
+                ),
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Text('Edit'),
                 ),
                 const PopupMenuItem(
                   value: 'delete',

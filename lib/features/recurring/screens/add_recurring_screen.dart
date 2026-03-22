@@ -125,20 +125,25 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   }
 
   Future<void> _pickStartDate() async {
+    final now = DateUtils.dateOnly(DateTime.now());
     final picked = await showDatePicker(
       context: context,
-      initialDate: _startDate,
-      firstDate: DateTime(2020),
+      initialDate: _startDate.isBefore(now) ? now : _startDate,
+      firstDate: now,
       lastDate: DateTime(2100),
     );
     if (picked != null) setState(() => _startDate = picked);
   }
 
   Future<void> _pickEndDate() async {
+    final now = DateUtils.dateOnly(DateTime.now());
+    final earliest = _startDate.isBefore(now) ? now : _startDate;
     final picked = await showDatePicker(
       context: context,
-      initialDate: _endDate ?? _startDate,
-      firstDate: _startDate,
+      initialDate: (_endDate != null && !_endDate!.isBefore(earliest))
+          ? _endDate!
+          : earliest,
+      firstDate: earliest,
       lastDate: DateTime(2100),
     );
     if (picked != null) setState(() => _endDate = picked);
@@ -166,9 +171,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           : null
       ..endDate = _endType == 'date' ? _endDate : null;
 
-    if (!_isEdit) {
-      rule.nextDueAt = _startDate;
-    }
+    rule.nextDueAt = _startDate;
 
     if (_isEdit) {
       await ref.read(recurringListProvider.notifier).updateRule(rule);

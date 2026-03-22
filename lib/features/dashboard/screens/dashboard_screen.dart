@@ -19,6 +19,7 @@ import '../../../shared/widgets/transaction_list_item.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../recurring/providers/recurring_provider.dart';
+import '../../recurring/widgets/recurring_detail_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -375,7 +376,7 @@ class _UpcomingRecurringSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Upcoming Recurring',
+                Text('Recurring Transactions',
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     )),
@@ -418,7 +419,9 @@ class _UpcomingRecurringSection extends StatelessWidget {
                       ? harmonizeCategory(context, Color(cat.colorValue))
                       : KuberColors.textSecondary;
 
-                  return Container(
+                  return GestureDetector(
+                    onTap: () => showRecurringDetailSheet(context, ref, rule),
+                    child: Container(
                     margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
                     padding: const EdgeInsets.all(KuberSpacing.md),
                     decoration: BoxDecoration(
@@ -496,13 +499,14 @@ class _UpcomingRecurringSection extends StatelessWidget {
                           CurrencyFormatter.format(rule.amount),
                           style: textTheme.bodyMedium?.copyWith(
                             color: rule.type == 'income'
-                                ? KuberColors.income
-                                : KuberColors.expense,
+                                ? colorScheme.tertiary
+                                : KuberColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
+                  ),
                   );
                 }).toList(),
               ),
