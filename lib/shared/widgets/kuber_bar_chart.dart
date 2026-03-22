@@ -46,8 +46,6 @@ class KuberBarChart extends StatefulWidget {
 class _KuberBarChartState extends State<KuberBarChart> {
   int _touchedGroupIndex = -1;
 
-  // Visual gap in logical pixels
-  static const double _visualGapPx = 3.0;
   // Black overlay blended into bar color when dimmed
   static const Color _dimOverlay  = Color(0x99000000); // 60% black
 
@@ -144,6 +142,9 @@ class _KuberBarChartState extends State<KuberBarChart> {
                           showTitles: true,
                           reservedSize: 44,
                           getTitlesWidget: (value, meta) {
+                            if (value == meta.max && (value % _gridInterval) != 0) {
+                              return const SizedBox.shrink();
+                            }
                             final sym = widget.currencySymbol;
                             if (value == meta.min) {
                               return Text('${sym}0',
@@ -280,78 +281,47 @@ class _KuberBarChartState extends State<KuberBarChart> {
   }
 
   List<BarChartGroupData> _buildGroups(double barWidth) {
-    // Gap in data terms based on the max Y value and chart height
-    final double dataGap = (_maxY * _visualGapPx) / widget.height;
-
     return widget.buckets.asMap().entries.map((entry) {
       final i = entry.key;
       final b = entry.value;
       final isDimmed =
           _touchedGroupIndex != -1 && _touchedGroupIndex != i;
-
-      // Determine which segment goes on top (larger value)
-      final bool expenseOnTop = b.expense >= b.income;
-      final double bottomVal  = expenseOnTop ? b.income   : b.expense;
-      final double topVal     = expenseOnTop ? b.expense  : b.income;
-      final Color  bottomColor = expenseOnTop
-          ? KuberColors.income
-          : KuberColors.expense;
-      final Color  topColor    = expenseOnTop
-          ? KuberColors.expense
-          : KuberColors.income;
-
-      // Apply dim overlay by blending black into the color
       Color applyDim(Color c) => isDimmed
           ? Color.alphaBlend(_dimOverlay, c)
           : c;
 
-      final bool hasBottom = bottomVal > 0;
-      final bool hasTop = topVal > 0;
-      final double gap = (hasBottom && hasTop) ? dataGap : 0.0;
-      final double totalY = bottomVal + gap + topVal;
+      final rodWidth = (barWidth * 0.45).clamp(4.0, 16.0);
 
       return BarChartGroupData(
         x: i,
-        barsSpace: -barWidth,
-        barRods: (!hasBottom && !hasTop)
-            ? [
-                BarChartRodData(
-                  toY: 0,
-                  color: Colors.transparent,
-                  width: barWidth,
-                )
-              ]
-            : [
-                if (hasBottom)
-                  BarChartRodData(
-                    fromY: 0,
-                    toY: bottomVal,
-                    color: applyDim(bottomColor),
-                    width: barWidth,
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
-                  ),
-                if (hasTop)
-                  BarChartRodData(
-                    fromY: bottomVal + gap,
-                    toY: totalY,
-                    color: applyDim(topColor),
-                    width: barWidth,
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
-                  ),
-              ],
+        barsSpace: 3,
+        barRods: [
+          BarChartRodData(
+            toY: b.income,
+            color: applyDim(KuberColors.income),
+            width: rodWidth,
+            borderRadius: BorderRadius.circular(KuberRadius.sm),
+          ),
+          BarChartRodData(
+            toY: b.expense,
+            color: applyDim(KuberColors.expense),
+            width: rodWidth,
+            borderRadius: BorderRadius.circular(KuberRadius.sm),
+          ),
+        ],
       );
     }).toList();
   }
 
   double get _maxY {
     if (widget.buckets.isEmpty) return 100;
-    double max = 0;
+    double maxVal = 0;
     for (final b in widget.buckets) {
-      final total = b.income + b.expense;
-      if (total > max) max = total;
+      final highest = max(b.income, b.expense);
+      if (highest > maxVal) maxVal = highest;
     }
     // ensure gap logic doesn't inflate max bound endlessly
-    return (max * 1.15).ceilToDouble();
+    return (maxVal * 1.15).ceilToDouble();
   }
 
   double get _gridInterval {
