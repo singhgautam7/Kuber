@@ -46,6 +46,8 @@ class KuberBarChart extends StatefulWidget {
 class _KuberBarChartState extends State<KuberBarChart> {
   int _touchedGroupIndex = -1;
 
+  // Visual gap in logical pixels
+  static const double _visualGapPx = 3.0;
   // Black overlay blended into bar color when dimmed
   static const Color _dimOverlay  = Color(0x99000000); // 60% black
 
@@ -281,34 +283,71 @@ class _KuberBarChartState extends State<KuberBarChart> {
   }
 
   List<BarChartGroupData> _buildGroups(double barWidth) {
+    // Gap in data terms based on the max Y value and chart height
+    final double dataGap = (_maxY * _visualGapPx) / widget.height;
+
     return widget.buckets.asMap().entries.map((entry) {
       final i = entry.key;
       final b = entry.value;
       final isDimmed =
           _touchedGroupIndex != -1 && _touchedGroupIndex != i;
+
+      // Determine which segment goes on top (larger value)
+      final bool expenseOnTop = b.expense >= b.income;
+      final double bottomVal  = expenseOnTop ? b.income   : b.expense;
+      final double topVal     = expenseOnTop ? b.expense  : b.income;
+      final Color  bottomColor = expenseOnTop
+          ? KuberColors.income
+          : KuberColors.expense;
+      final Color  topColor    = expenseOnTop
+          ? KuberColors.expense
+          : KuberColors.income;
+
+      // Apply dim overlay by blending black into the color
       Color applyDim(Color c) => isDimmed
           ? Color.alphaBlend(_dimOverlay, c)
           : c;
 
-      final rodWidth = (barWidth * 0.45).clamp(4.0, 16.0);
+      final bool hasBottom = bottomVal > 0;
+      final bool hasTop = topVal > 0;
+      final double gap = (hasBottom && hasTop && topVal > bottomVal) ? dataGap : 0.0;
+      
+      double adjustedTopFrom = bottomVal + gap;
+      double adjustedTopTo = topVal;
+      
+      if (hasTop && hasBottom && adjustedTopTo <= adjustedTopFrom) {
+         adjustedTopTo = adjustedTopFrom + (dataGap * 0.5);
+      }
 
       return BarChartGroupData(
         x: i,
-        barsSpace: 3,
-        barRods: [
-          BarChartRodData(
-            toY: b.income,
-            color: applyDim(KuberColors.income),
-            width: rodWidth,
-            borderRadius: BorderRadius.circular(KuberRadius.sm),
-          ),
-          BarChartRodData(
-            toY: b.expense,
-            color: applyDim(KuberColors.expense),
-            width: rodWidth,
-            borderRadius: BorderRadius.circular(KuberRadius.sm),
-          ),
-        ],
+        barsSpace: -barWidth,
+        barRods: (!hasBottom && !hasTop)
+            ? [
+                BarChartRodData(
+                  toY: 0,
+                  color: Colors.transparent,
+                  width: barWidth,
+                )
+              ]
+            : [
+                if (hasBottom)
+                  BarChartRodData(
+                    fromY: 0,
+                    toY: bottomVal,
+                    color: applyDim(bottomColor),
+                    width: barWidth,
+                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                  ),
+                if (hasTop)
+                  BarChartRodData(
+                    fromY: adjustedTopFrom,
+                    toY: adjustedTopTo,
+                    color: applyDim(topColor),
+                    width: barWidth,
+                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                  ),
+              ],
       );
     }).toList();
   }

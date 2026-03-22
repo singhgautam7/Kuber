@@ -16,6 +16,10 @@ import '../../features/more/screens/categories_screen.dart';
 import '../../features/more/screens/tags_screen.dart';
 import '../../features/more/screens/how_to_use_screen.dart';
 import '../../features/more/screens/add_edit_category_screen.dart';
+import '../../features/recurring/data/recurring_rule.dart';
+import '../../features/recurring/screens/add_recurring_screen.dart';
+import '../../features/recurring/screens/recurring_loader_screen.dart';
+import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -84,6 +88,28 @@ GoRouter createRouter() {
         path: '/more/how-to-use',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const HowToUseScreen(),
+      ),
+      GoRoute(
+        path: '/recurring/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddRecurringScreen(),
+      ),
+      GoRoute(
+        path: '/recurring/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => AddRecurringScreen(
+          existingRule: state.extra as RecurringRule?,
+        ),
+      ),
+      GoRoute(
+        path: '/more/recurring',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const RecurringScreen(),
+      ),
+      GoRoute(
+        path: '/recurring-loader',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const RecurringLoaderScreen(),
       ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,

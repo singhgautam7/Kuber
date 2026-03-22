@@ -9,13 +9,16 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/transaction_list_item.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../recurring/providers/recurring_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
 
@@ -264,6 +267,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 currencySymbol: ref.watch(currencyProvider).symbol,
               ),
             ),
+            // [C.5] Upcoming Recurring
+            _UpcomingRecurringSection(ref: ref),
+
             const SizedBox(height: KuberSpacing.xl),
 
             // [D] Recent Transactions
@@ -343,6 +349,169 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+}
+
+class _UpcomingRecurringSection extends StatelessWidget {
+  final WidgetRef ref;
+
+  const _UpcomingRecurringSection({required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
+    final upcomingAsync = ref.watch(upcomingRecurringProvider);
+    final categoryMapAsync = ref.watch(categoryMapProvider);
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return upcomingAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (rules) {
+        if (rules.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          children: [
+            const SizedBox(height: KuberSpacing.xl),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Upcoming Recurring',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    )),
+                TextButton(
+                  onPressed: () => GoRouter.of(context).push('/more/recurring'),
+                  child: Text('View All',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: colorScheme.primary,
+                      )),
+                ),
+              ],
+            ),
+            const SizedBox(height: KuberSpacing.sm),
+            categoryMapAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (_, _) => const SizedBox.shrink(),
+              data: (catMap) => Column(
+                children: rules.map((rule) {
+                  final catId = int.tryParse(rule.categoryId);
+                  final cat = catId != null ? catMap[catId] : null;
+                  final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                  final dueDay = DateTime(
+                      rule.nextDueAt.year, rule.nextDueAt.month, rule.nextDueAt.day);
+
+                  String statusLabel;
+                  Color statusColor;
+                  if (dueDay.isBefore(today)) {
+                    statusLabel = 'PROCESSED';
+                    statusColor = KuberColors.income;
+                  } else if (dueDay.isAtSameMomentAs(today)) {
+                    statusLabel = 'PENDING';
+                    statusColor = KuberColors.primary;
+                  } else {
+                    statusLabel = 'SCHEDULED';
+                    statusColor = KuberColors.textSecondary;
+                  }
+
+                  final catColor = cat != null
+                      ? harmonizeCategory(context, Color(cat.colorValue))
+                      : KuberColors.textSecondary;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                    padding: const EdgeInsets.all(KuberSpacing.md),
+                    decoration: BoxDecoration(
+                      color: KuberColors.surfaceCard,
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                      border: Border.all(color: KuberColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: catColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            cat != null
+                                ? IconMapper.fromString(cat.icon)
+                                : Icons.category_outlined,
+                            color: catColor,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      rule.name,
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: KuberColors.textPrimary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: KuberSpacing.sm),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 1,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: statusColor.withValues(alpha: 0.15),
+                                      borderRadius:
+                                          BorderRadius.circular(KuberRadius.sm),
+                                    ),
+                                    child: Text(
+                                      statusLabel,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        color: statusColor,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                DateFormat('MMM d').format(rule.nextDueAt),
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: KuberColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          CurrencyFormatter.format(rule.amount),
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: rule.type == 'income'
+                                ? KuberColors.income
+                                : KuberColors.expense,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _BalanceHeroCard extends ConsumerWidget {

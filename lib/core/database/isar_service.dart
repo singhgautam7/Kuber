@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
+import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/categories/data/category_repository.dart';
 import '../../features/accounts/data/account_repository.dart';
@@ -17,7 +18,7 @@ class IsarService {
   static Future<Isar> open() async {
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open(
-      [TransactionSchema, CategorySchema, AccountSchema],
+      [TransactionSchema, CategorySchema, AccountSchema, RecurringRuleSchema],
       directory: dir.path,
     );
   }
