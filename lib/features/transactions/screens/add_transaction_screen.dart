@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -15,6 +16,7 @@ import '../../categories/providers/category_provider.dart';
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../../../shared/widgets/kuber_calculator.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/account_picker_sheet.dart';
 import '../widgets/category_picker_sheet.dart';
@@ -345,65 +347,87 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   const SizedBox(height: KuberSpacing.xl),
 
                   // [C] Large amount display
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: KuberSpacing.xxl,
+                      horizontal: KuberSpacing.lg,
                     ),
-                    alignment: Alignment.center,
-                    child: IntrinsicWidth(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Amount — truly centered across full width
+                        TextField(
+                          controller: _amountController,
+                          keyboardType:
+                              const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d{0,2}'),
+                            ),
+                          ],
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          style: GoogleFonts.inter(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            color: _typeColor,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: '0',
+                            hintStyle: GoogleFonts.inter(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: KuberColors.textSecondary,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
+                            contentPadding: EdgeInsets.zero,
+                            isDense: true,
+                            isCollapsed: true,
+                          ),
+                        ),
+                        // ₹ — pinned left
+                        Positioned(
+                          left: 0,
+                          child: Text(
                             '₹',
-                            style: textTheme.headlineLarge?.copyWith(
-                              color: _typeColor.withValues(alpha: 0.5),
+                            style: GoogleFonts.inter(
+                              fontSize: 28,
                               fontWeight: FontWeight.w300,
-                              fontSize: 36,
+                              color: KuberColors.textSecondary,
                             ),
                           ),
-                          const SizedBox(width: KuberSpacing.xs),
-                          Flexible(
-                            child: IntrinsicWidth(
-                              child: TextField(
-                                controller: _amountController,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                  decimal: true,
+                        ),
+                        // Calculator button — pinned right
+                        Positioned(
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: _openCalculator,
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: KuberColors.surfaceMuted,
+                                borderRadius:
+                                    BorderRadius.circular(KuberRadius.md),
+                                border: Border.all(
+                                  color: KuberColors.border,
                                 ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d{0,2}'),
-                                  ),
-                                ],
-                                textAlign: TextAlign.center,
-                                style: textTheme.displaySmall?.copyWith(
-                                  color: _typeColor,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 48,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: '0',
-                                  hintStyle:
-                                      textTheme.displaySmall?.copyWith(
-                                    color: _typeColor.withValues(alpha: 0.3),
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 48,
-                                  ),
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  filled: false,
-                                  contentPadding: EdgeInsets.zero,
-                                  isDense: true,
-                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                Icons.calculate_outlined,
+                                size: 20,
+                                color: KuberColors.textSecondary,
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: KuberSpacing.sm),
@@ -434,13 +458,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: _typeColor.withValues(alpha: 0.10),
+                              border: Border.all(color: colorScheme.outlineVariant),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               '+$amount',
                               style: textTheme.labelMedium?.copyWith(
-                                color: _typeColor,
+                                color: colorScheme.onSurface,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -660,6 +684,30 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     final timePart = DateFormat('hh:mm a').format(date);
     return '$dayPart • $timePart';
+  }
+
+  void _openCalculator() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: KuberColors.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      builder: (_) => KuberCalculator(
+        initialValue: double.tryParse(_amountController.text.trim()) ?? 0,
+        onConfirm: (result) {
+          setState(() {
+            _amountController.text = result == result.truncateToDouble()
+                ? result.toInt().toString()
+                : result.toStringAsFixed(2);
+          });
+        },
+      ),
+    );
   }
 
   void _showCategoryPicker() {
@@ -918,61 +966,86 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           const SizedBox(height: KuberSpacing.sm),
 
         // Amount display
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xxl),
-          alignment: Alignment.center,
-          child: IntrinsicWidth(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  '₹',
-                  style: textTheme.headlineLarge?.copyWith(
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: KuberSpacing.xxl,
+            horizontal: KuberSpacing.lg,
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Amount — truly centered across full width
+              TextField(
+                controller: _amountController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                    RegExp(r'^\d*\.?\d{0,2}'),
+                  ),
+                ],
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: GoogleFonts.inter(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: KuberColors.textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: '0',
+                  hintStyle: GoogleFonts.inter(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
                     color: KuberColors.textSecondary,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  filled: false,
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                  isCollapsed: true,
+                ),
+              ),
+              // ₹ — pinned left
+              Positioned(
+                left: 0,
+                child: Text(
+                  '₹',
+                  style: GoogleFonts.inter(
+                    fontSize: 28,
                     fontWeight: FontWeight.w300,
-                    fontSize: 36,
+                    color: KuberColors.textSecondary,
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.xs),
-                Flexible(
-                  child: IntrinsicWidth(
-                    child: TextField(
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
+              ),
+              // Calculator button — pinned right
+              Positioned(
+                right: 0,
+                child: GestureDetector(
+                  onTap: _openCalculator,
+                  child: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: KuberColors.surfaceMuted,
+                      borderRadius:
+                          BorderRadius.circular(KuberRadius.md),
+                      border: Border.all(
+                        color: KuberColors.border,
                       ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d{0,2}'),
-                        ),
-                      ],
-                      textAlign: TextAlign.center,
-                      style: textTheme.displaySmall?.copyWith(
-                        color: KuberColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 48,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: '0',
-                        hintStyle: textTheme.displaySmall?.copyWith(
-                          color: KuberColors.textSecondary.withValues(alpha: 0.3),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 48,
-                        ),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        filled: false,
-                        contentPadding: EdgeInsets.zero,
-                        isDense: true,
-                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.calculate_outlined,
+                      size: 20,
+                      color: KuberColors.textSecondary,
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: KuberSpacing.sm),
@@ -999,13 +1072,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary.withValues(alpha: 0.10),
+                    border: Border.all(color: colorScheme.outlineVariant),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '+$amount',
                     style: textTheme.labelMedium?.copyWith(
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

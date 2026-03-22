@@ -62,7 +62,7 @@ class MoreScreen extends StatelessWidget {
                 _MenuItem(
                   icon: Icons.label_outlined,
                   label: 'Tags',
-                  subtitle: 'Label and filter transactions',
+                  subtitle: 'Organize the labels for your transactions',
                   onTap: () => context.push('/more/tags'),
                 ),
               ],
