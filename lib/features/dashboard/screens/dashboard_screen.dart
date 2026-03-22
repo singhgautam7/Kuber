@@ -23,7 +23,7 @@ const _subtitles = [
   'Let\'s manage your money wisely',
   'Track every rupee, every day',
   'Stay on top of your finances',
-  'Your wallet will thank you',
+  'Your wallet will thank you later',
   'Small savings, big results',
   'Every transaction counts',
   'Building smart money habits',
@@ -31,9 +31,9 @@ const _subtitles = [
 
 String _timeGreeting() {
   final hour = DateTime.now().hour;
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return 'Morning';
+  if (hour < 17) return 'Afternoon';
+  return 'Evening';
 }
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -82,18 +82,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 userName.isNotEmpty
                     ? '${_timeGreeting()}, $userName'
                     : _timeGreeting(),
-                style: GoogleFonts.inter(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+                style: textTheme.displaySmall?.copyWith(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
                   color: KuberColors.textPrimary,
-                  letterSpacing: -0.3,
+                  height: 1.15,
+                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: KuberSpacing.xs),
               Text(
                 _subtitle,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
+                style: textTheme.bodyMedium?.copyWith(
                   color: KuberColors.textSecondary,
                 ),
               ),
