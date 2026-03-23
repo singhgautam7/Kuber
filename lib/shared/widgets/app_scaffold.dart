@@ -8,9 +8,9 @@ import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
 
 class AppScaffold extends ConsumerStatefulWidget {
-  final Widget child;
+  final StatefulNavigationShell navigationShell;
 
-  const AppScaffold({super.key, required this.child});
+  const AppScaffold({super.key, required this.navigationShell});
 
   @override
   ConsumerState<AppScaffold> createState() => _AppScaffoldState();
@@ -18,14 +18,13 @@ class AppScaffold extends ConsumerStatefulWidget {
 
 class _AppScaffoldState extends ConsumerState<AppScaffold>
     with SingleTickerProviderStateMixin {
-  int _currentIndex = 0;
   int _previousIndex = 0;
   bool _showSpeedDial = false;
 
   late final AnimationController _dialController;
   late final Animation<double> _dialAnimation;
 
-  static const _routes = ['/', '/history', '/analytics', '/accounts'];
+
 
   @override
   void initState() {
@@ -47,12 +46,14 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   }
 
   void _onTabTapped(int index) {
-    if (index == _currentIndex) return;
+    if (index == widget.navigationShell.currentIndex) return;
     setState(() {
-      _previousIndex = _currentIndex;
-      _currentIndex = index;
+      _previousIndex = widget.navigationShell.currentIndex;
     });
-    context.go(_routes[index]);
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
   }
 
   void _onAddTapped() {
@@ -75,25 +76,12 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   }
 
   double get _slideDirection =>
-      _currentIndex > _previousIndex ? 1.0 : -1.0;
+      widget.navigationShell.currentIndex > _previousIndex ? 1.0 : -1.0;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
-    // Sync tab index from route
-    final location = GoRouterState.of(context).uri.path;
-    final routeIndex = _routes.indexOf(location);
-    if (routeIndex != -1 && routeIndex != _currentIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _previousIndex = _currentIndex;
-            _currentIndex = routeIndex;
-          });
-        }
-      });
-    }
+    final currentIndex = widget.navigationShell.currentIndex;
 
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= KuberBreakpoints.smallTablet;
@@ -117,8 +105,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         );
       },
       child: KeyedSubtree(
-        key: ValueKey(_currentIndex),
-        child: widget.child,
+        key: ValueKey(currentIndex),
+        child: widget.navigationShell,
       ),
     );
 
@@ -128,7 +116,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         body: Row(
           children: [
             KuberNavRail(
-              currentIndex: _currentIndex,
+              currentIndex: currentIndex,
               onTabTapped: _onTabTapped,
               onAddTapped: _onAddTapped,
             ),
@@ -165,7 +153,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           ],
         ],
       ),
-      floatingActionButton: _currentIndex != 3
+      floatingActionButton: currentIndex != 3
           ? GestureDetector(
               onLongPress: _openSpeedDial,
               child: FloatingActionButton(
@@ -185,7 +173,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
             )
           : null,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
+        selectedIndex: currentIndex,
         onDestinationSelected: _onTabTapped,
         destinations: kuberNavItems.map((item) {
           return NavigationDestination(

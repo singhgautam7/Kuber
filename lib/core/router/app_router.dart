@@ -23,7 +23,7 @@ import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
 
 GoRouter createRouter() {
   return GoRouter(
@@ -111,25 +111,41 @@ GoRouter createRouter() {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const RecurringLoaderScreen(),
       ),
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => AppScaffold(child: child),
-        routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const DashboardScreen(),
+StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AppScaffold(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/history',
-            builder: (context, state) => const HistoryScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/history',
+                builder: (context, state) => const HistoryScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/analytics',
-            builder: (context, state) => const AnalyticsScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/analytics',
+                builder: (context, state) => const AnalyticsScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/accounts',
-            builder: (context, state) => const MoreScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/accounts',
+                builder: (context, state) => const MoreScreen(),
+              ),
+            ],
           ),
         ],
       ),
