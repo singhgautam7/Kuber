@@ -6,11 +6,10 @@ import '../../../core/database/isar_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../accounts/providers/account_provider.dart';
-import '../../categories/providers/category_provider.dart';
-import '../../recurring/providers/recurring_provider.dart';
-import '../../transactions/providers/transaction_provider.dart';
+
 import '../providers/settings_provider.dart';
+import '../../../main.dart';
+
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -388,10 +387,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 final isar = ref.read(isarProvider);
                 await isar.writeTxn(() => isar.clear());
                 await ref.read(settingsProvider.notifier).clearAllData();
-                ref.invalidate(transactionListProvider);
-                ref.invalidate(accountListProvider);
-                ref.invalidate(categoryListProvider);
-                ref.invalidate(recurringListProvider);
+                
+                // Programmatic restart of the app
+                if (context.mounted) {
+                  RestartWidget.restartApp(context);
+                }
               },
               style: FilledButton.styleFrom(
                 backgroundColor: cs.error,
