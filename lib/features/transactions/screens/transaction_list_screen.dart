@@ -509,23 +509,15 @@ class _DayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         for (int i = 0; i < transactions.length; i++) ...[
           if (i > 0) const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
-            ),
-            child: _TransactionRow(
-              transaction: transactions[i],
-              onDelete: () => onDelete(transactions[i]),
-              onTap: () => onTap(transactions[i]),
-              onEdit: () => onEdit(transactions[i]),
-            ),
+          _TransactionRow(
+            transaction: transactions[i],
+            onDelete: () => onDelete(transactions[i]),
+            onTap: () => onTap(transactions[i]),
+            onEdit: () => onEdit(transactions[i]),
           ),
         ],
       ],
@@ -643,74 +635,81 @@ class _TransactionRow extends ConsumerWidget {
           return false;
         }
       },
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg,
-            vertical: KuberSpacing.md,
-          ),
-          child: Row(
-            children: [
-              CategoryIcon.square(
-                icon: iconData,
-                rawColor: iconColor,
-                size: 42,
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpacing.lg,
+              vertical: KuberSpacing.md,
+            ),
+            child: Row(
+              children: [
+                CategoryIcon.square(
+                  icon: iconData,
+                  rawColor: iconColor,
+                  size: 42,
+                ),
+                const SizedBox(width: KuberSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: KuberSpacing.sm),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      displayName,
+                      '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
+                        fontWeight: FontWeight.w700,
+                        color: amountColor,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      subtitle,
+                      DateFormatter.time(transaction.createdAt),
                       style: GoogleFonts.inter(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w400,
                         color: cs.onSurfaceVariant,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: amountColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormatter.time(transaction.createdAt),
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
