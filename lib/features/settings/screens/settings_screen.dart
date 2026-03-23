@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/database/isar_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
 import '../providers/settings_provider.dart';
-import '../../../main.dart';
 
+
+import '../../../shared/widgets/timed_snackbar.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -20,12 +20,17 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late TextEditingController _userNameController;
+  ThemeMode? _tempThemeMode;
+  String? _tempCurrencyCode;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     final settings = ref.read(settingsProvider).valueOrNull;
     _userNameController = TextEditingController(text: settings?.userName ?? '');
+    _tempThemeMode = settings?.themeMode;
+    _tempCurrencyCode = settings?.currency;
   }
 
   @override
@@ -34,217 +39,308 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.dispose();
   }
 
+  bool get _hasChanges {
+    final settings = ref.read(settingsProvider).valueOrNull;
+    if (settings == null) return false;
+    return _userNameController.text.trim() != settings.userName ||
+        _tempThemeMode != settings.themeMode ||
+        _tempCurrencyCode != settings.currency;
+  }
+
+  Future<void> _saveSettings() async {
+    setState(() => _isSaving = true);
+    final notifier = ref.read(settingsProvider.notifier);
+    await notifier.setUserName(_userNameController.text.trim());
+    if (_tempThemeMode != null) await notifier.setThemeMode(_tempThemeMode!);
+    if (_tempCurrencyCode != null) await notifier.setCurrency(_tempCurrencyCode!);
+
+    if (mounted) {
+      showKuberSnackBar(context, 'Settings saved successfully');
+      setState(() => _isSaving = false);
+    }
+  }
+
+  void _revertTheme() {
+    final settings = ref.read(settingsProvider).valueOrNull;
+    if (settings != null) {
+      ref.read(themeModeProvider.notifier).state = settings.themeMode;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider).valueOrNull;
-    final currentTheme = settings?.themeMode ?? ThemeMode.system;
-    final currency = ref.watch(currencyProvider);
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'Settings'),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.lg,
-        ),
-        children: [
-          // APPEARANCE
-          _SectionLabel(label: 'APPEARANCE'),
-          const SizedBox(height: KuberSpacing.sm),
-          _SettingsCard(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
-                  vertical: KuberSpacing.md,
-                ),
+    // Fallbacks if data isn't ready
+    final currentTheme = _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
+    final currencyCode = _tempCurrencyCode ?? settings?.currency ?? 'INR';
+    final currency = currencyFromCode(currencyCode);
+
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop && !_isSaving) {
+          _revertTheme();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: cs.surface,
+        appBar: const KuberAppBar(showBack: true, title: 'Settings'),
+        body: CustomScrollView(
+          slivers: [
+            // Page header
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.palette_outlined, size: 20, color: cs.onSurface),
-                        const SizedBox(width: KuberSpacing.md),
-                        Text(
-                          'Theme',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'App\nSettings',
+                      style: GoogleFonts.inter(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color: cs.onSurface,
+                        height: 1.15,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-                    const SizedBox(height: KuberSpacing.md),
-                    SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<ThemeMode>(
-                        segments: const [
-                          ButtonSegment(
-                            value: ThemeMode.light,
-                            label: Text('Light'),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.dark,
-                            label: Text('Dark'),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.system,
-                            label: Text('System'),
-                          ),
-                        ],
-                        selected: {currentTheme},
-                        onSelectionChanged: (val) {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setThemeMode(val.first);
-                        },
+                    const SizedBox(height: 6),
+                    Text(
+                      'Customize your experience and preferences.',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
 
-          const SizedBox(height: KuberSpacing.xl),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // APPEARANCE
+                  _SectionLabel(label: 'APPEARANCE'),
+                  const SizedBox(height: KuberSpacing.sm),
+                  _SettingsCard(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
+                          vertical: KuberSpacing.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.palette_outlined, size: 20, color: cs.onSurface),
+                                const SizedBox(width: KuberSpacing.md),
+                                Text(
+                                  'Theme',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: KuberSpacing.md),
+                            SizedBox(
+                              width: double.infinity,
+                              child: SegmentedButton<ThemeMode>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: ThemeMode.light,
+                                    label: Text('Light'),
+                                  ),
+                                  ButtonSegment(
+                                    value: ThemeMode.dark,
+                                    label: Text('Dark'),
+                                  ),
+                                  ButtonSegment(
+                                    value: ThemeMode.system,
+                                    label: Text('System'),
+                                  ),
+                                ],
+                                selected: {currentTheme},
+                                onSelectionChanged: (val) {
+                                  setState(() => _tempThemeMode = val.first);
+                                  // Immediate preview
+                                  ref.read(themeModeProvider.notifier).state = val.first;
+                                },
+                              ),
+                            ),
+                            if (_tempThemeMode != settings?.themeMode) ...[
+                              const SizedBox(height: KuberSpacing.sm),
+                              Text(
+                                'Save the settings to apply this theme',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
 
-          // PREFERENCE
-          _SectionLabel(label: 'PREFERENCE'),
-          const SizedBox(height: KuberSpacing.sm),
-          _SettingsCard(
-            children: [
-              // User Name
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
-                  vertical: KuberSpacing.md,
-                ),
-                child: Row(
+                const SizedBox(height: KuberSpacing.xl),
+
+                // PREFERENCE
+                _SectionLabel(label: 'PREFERENCE'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
                   children: [
-                    Icon(Icons.person_outline_rounded, size: 20, color: cs.onSurface),
-                    const SizedBox(width: KuberSpacing.md),
-                    Expanded(
+                    // User Name
+                    Padding(
+                      padding: const EdgeInsets.all(KuberSpacing.lg),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Your Name',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: cs.onSurface,
-                            ),
+                          Row(
+                            children: [
+                              Icon(Icons.person_outline_rounded, size: 20, color: cs.onSurface),
+                              const SizedBox(width: KuberSpacing.md),
+                              Text(
+                                'Your Name',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: cs.onSurface,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: KuberSpacing.xs),
+                          const SizedBox(height: KuberSpacing.md),
                           TextField(
                             controller: _userNameController,
-                            onChanged: (val) {
-                              ref
-                                  .read(settingsProvider.notifier)
-                                  .setUserName(val.trim());
-                            },
+                            maxLength: 15,
+                            onChanged: (_) => setState(() {}),
                             style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: cs.onSurfaceVariant,
+                              fontSize: 14,
+                              color: cs.onSurface,
                             ),
                             decoration: InputDecoration(
-                              isDense: true,
-                              contentPadding: EdgeInsets.zero,
                               hintText: 'Enter your name',
                               hintStyle: GoogleFonts.inter(
-                                fontSize: 13,
+                                fontSize: 14,
                                 color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                               ),
-                              border: InputBorder.none,
+                              filled: true,
+                              fillColor: cs.surfaceContainerHigh,
+                              counterText: '', // Hide default counter
+                              suffixText: '${_userNameController.text.length}/15',
+                              suffixStyle: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(KuberRadius.md),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: KuberSpacing.lg,
+                                vertical: KuberSpacing.md,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.attach_money_rounded,
+                      label: 'Currency',
+                      trailing: GestureDetector(
+                        onTap: () => _showCurrencyPicker(context, currencyCode),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${currency.symbol}  ${currency.code}',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(width: KuberSpacing.xs),
+                            Icon(Icons.chevron_right_rounded,
+                                color: cs.onSurfaceVariant, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              Divider(height: 1, color: cs.outline),
-              _SettingsTile(
-                icon: Icons.attach_money_rounded,
-                label: 'Currency',
-                trailing: GestureDetector(
-                  onTap: () => _showCurrencyPicker(context),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${currency.symbol}  ${currency.code}',
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // ABOUT
+                _SectionLabel(label: 'ABOUT'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.info_outline_rounded,
+                      label: 'App Version',
+                      trailing: Text(
+                        'v1.0.0',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: cs.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(width: KuberSpacing.xs),
-                      Icon(Icons.chevron_right_rounded,
-                          color: cs.onSurfaceVariant, size: 20),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: KuberSpacing.xl),
-
-          // DATA
-          _SectionLabel(label: 'DATA'),
-          const SizedBox(height: KuberSpacing.sm),
-          _SettingsCard(
-            children: [
-              _SettingsTile(
-                icon: Icons.upload_file_rounded,
-                label: 'Export Data',
-                onTap: () {
-                  // Stub — no-op
-                },
-              ),
-              Divider(height: 1, color: cs.outline),
-              _SettingsTile(
-                icon: Icons.delete_forever_rounded,
-                label: 'Clear All Data',
-                destructive: true,
-                onTap: () => _confirmClearData(context),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: KuberSpacing.xl),
-
-          // ABOUT
-          _SectionLabel(label: 'ABOUT'),
-          const SizedBox(height: KuberSpacing.sm),
-          _SettingsCard(
-            children: [
-              _SettingsTile(
-                icon: Icons.info_outline_rounded,
-                label: 'App Version',
-                trailing: Text(
-                  'v1.0.0',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
+                const SizedBox(height: KuberSpacing.xxl),
+              ]),
+            ),
           ),
         ],
+      ),
+      bottomNavigationBar: _hasChanges
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(KuberSpacing.lg),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: _saveSettings,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: cs.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                      ),
+                    ),
+                    child: Text(
+                      'Save Settings',
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       ),
     );
   }
 
-  void _showCurrencyPicker(BuildContext context) {
+  void _showCurrencyPicker(BuildContext context, String currentCode) {
     final cs = Theme.of(context).colorScheme;
-    final currentCode = ref.read(currencyProvider).code;
 
     showModalBottomSheet(
       context: context,
@@ -337,9 +433,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 color: sheetCs.primary, size: 20)
                             : null,
                         onTap: () {
-                          ref
-                              .read(settingsProvider.notifier)
-                              .setCurrency(c.code);
+                          setState(() => _tempCurrencyCode = c.code);
                           Navigator.pop(ctx);
                         },
                       );
@@ -349,56 +443,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             );
           },
-        );
-      },
-    );
-  }
-
-  void _confirmClearData(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        final dCs = Theme.of(ctx).colorScheme;
-        return AlertDialog(
-          title: Text(
-            'Clear All Data?',
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w700,
-              color: dCs.onSurface,
-            ),
-          ),
-          content: Text(
-            'This will permanently delete all your transactions, accounts, categories, and recurring rules. This action cannot be undone.',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: dCs.onSurfaceVariant,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                final isar = ref.read(isarProvider);
-                await isar.writeTxn(() => isar.clear());
-                await ref.read(settingsProvider.notifier).clearAllData();
-                
-                // Programmatic restart of the app
-                if (context.mounted) {
-                  RestartWidget.restartApp(context);
-                }
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.error,
-              ),
-              child: const Text('Clear All Data'),
-            ),
-          ],
         );
       },
     );
@@ -451,46 +495,38 @@ class _SettingsTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final Widget? trailing;
-  final VoidCallback? onTap;
-  final bool destructive;
 
   const _SettingsTile({
     required this.icon,
     required this.label,
     this.trailing,
-    this.onTap,
-    this.destructive = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final color = destructive ? cs.error : cs.onSurface;
+    final color = cs.onSurface;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.md,
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: color),
-            const SizedBox(width: KuberSpacing.md),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: color,
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.lg,
+        vertical: KuberSpacing.md,
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: KuberSpacing.md),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: color,
             ),
-            const SizedBox(width: KuberSpacing.sm),
-            if (trailing != null) Flexible(child: trailing!),
-          ],
-        ),
+          ),
+          const SizedBox(width: KuberSpacing.sm),
+          if (trailing != null) Flexible(child: trailing!),
+        ],
       ),
     );
   }

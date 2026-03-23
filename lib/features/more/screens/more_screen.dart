@@ -15,7 +15,7 @@ class MoreScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(),
+      appBar: const KuberAppBar(title: 'More'),
       body: SingleChildScrollView(
         padding: EdgeInsets.only(
           left: KuberSpacing.lg,
@@ -26,23 +26,23 @@ class MoreScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'More',
-              style: GoogleFonts.inter(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.xs),
-            Text(
-              'Manage your data and app preferences',
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
+            // Text(
+            //   'More',
+            //   style: GoogleFonts.inter(
+            //     fontSize: 22,
+            //     fontWeight: FontWeight.w700,
+            //     color: cs.onSurface,
+            //     letterSpacing: -0.3,
+            //   ),
+            // ),
+            // const SizedBox(height: KuberSpacing.xs),
+            // Text(
+            //   'Manage your data and app preferences',
+            //   style: GoogleFonts.inter(
+            //     fontSize: 13,
+            //     color: cs.onSurfaceVariant,
+            //   ),
+            // ),
             const SizedBox(height: KuberSpacing.xl),
 
             // Manage section
@@ -85,9 +85,16 @@ class MoreScreen extends StatelessWidget {
                 _MenuItem(
                   icon: Icons.settings_outlined,
                   label: 'Settings',
-                  subtitle: 'Theme, currency, and data',
+                  subtitle: 'Theme, currency, and profile',
                   onTap: () => context.push('/more/settings'),
                 ),
+                _MenuItem(
+                  icon: Icons.storage_rounded,
+                  label: 'Data',
+                  subtitle: 'Export and clear your data',
+                  onTap: () => context.push('/more/data'),
+                ),
+
                 _MenuItem(
                   icon: Icons.help_outline_rounded,
                   label: 'How to Use',

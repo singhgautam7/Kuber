@@ -17,7 +17,7 @@ class _KuberAppState extends ConsumerState<KuberApp> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(settingsProvider).valueOrNull?.themeMode ?? ThemeMode.system;
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'Kuber',

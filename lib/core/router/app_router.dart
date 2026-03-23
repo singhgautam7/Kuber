@@ -21,6 +21,8 @@ import '../../features/recurring/screens/add_recurring_screen.dart';
 import '../../features/recurring/screens/recurring_loader_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
+import '../../features/settings/screens/data_management_screen.dart';
+
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -52,16 +54,7 @@ GoRouter createRouter() {
           transaction: state.extra as Transaction?,
         ),
       ),
-      GoRoute(
-        path: '/more/accounts',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const AccountsScreen(),
-      ),
-      GoRoute(
-        path: '/more/categories',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const CategoriesScreen(),
-      ),
+
       GoRoute(
         path: '/category/add',
         parentNavigatorKey: _rootNavigatorKey,
@@ -74,21 +67,8 @@ GoRouter createRouter() {
           );
         },
       ),
-      GoRoute(
-        path: '/more/tags',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const TagsScreen(),
-      ),
-      GoRoute(
-        path: '/more/settings',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const SettingsScreen(),
-      ),
-      GoRoute(
-        path: '/more/how-to-use',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const HowToUseScreen(),
-      ),
+
+
       GoRoute(
         path: '/recurring/add',
         parentNavigatorKey: _rootNavigatorKey,
@@ -101,11 +81,7 @@ GoRouter createRouter() {
           existingRule: state.extra as RecurringRule?,
         ),
       ),
-      GoRoute(
-        path: '/more/recurring',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const RecurringScreen(),
-      ),
+
       GoRoute(
         path: '/recurring-loader',
         parentNavigatorKey: _rootNavigatorKey,
@@ -142,8 +118,45 @@ StatefulShellRoute.indexedStack(
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/accounts',
+                path: '/more',
                 builder: (context, state) => const MoreScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'accounts',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const AccountsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'categories',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const CategoriesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tags',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const TagsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'settings',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const SettingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'how-to-use',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const HowToUseScreen(),
+                  ),
+                  GoRoute(
+                    path: 'data',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const DataManagementScreen(),
+                  ),
+                  GoRoute(
+                    path: 'recurring',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const RecurringScreen(),
+                  ),
+                ],
               ),
             ],
           ),

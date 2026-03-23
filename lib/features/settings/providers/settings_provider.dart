@@ -18,6 +18,12 @@ final currencyProvider = Provider<KuberCurrency>((ref) {
   return currencyFromCode(code);
 });
 
+final themeModeProvider = StateProvider<ThemeMode>((ref) {
+  final settings = ref.watch(settingsProvider).valueOrNull;
+  return settings?.themeMode ?? ThemeMode.system;
+});
+
+
 class SettingsState {
   final ThemeMode themeMode;
   final String currency;
