@@ -19,10 +19,17 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+
 subprojects {
     val patchManifest: Action<Project> = Action {
         if (project.hasProperty("android")) {
             val android = project.extensions.getByName("android")
+            // Force compileSdk 36 for all subprojects (fixes isar_flutter_libs lStar issue)
+            if (android is com.android.build.gradle.BaseExtension) {
+                if (android.compileSdkVersion != "android-36") {
+                    android.compileSdkVersion(36)
+                }
+            }
             if (android is com.android.build.gradle.LibraryExtension) {
                 val mainSourceSet = android.sourceSets.getByName("main")
                 val originalManifest = mainSourceSet.manifest.srcFile
