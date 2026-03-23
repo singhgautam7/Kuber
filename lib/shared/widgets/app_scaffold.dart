@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../features/settings/providers/settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
@@ -81,32 +82,53 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final settings = ref.watch(settingsProvider).valueOrNull;
     final currentIndex = widget.navigationShell.currentIndex;
 
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= KuberBreakpoints.smallTablet;
 
-    final animatedContent = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 280),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      transitionBuilder: (child, animation) {
-        final slideIn = Tween<Offset>(
-          begin: Offset(_slideDirection, 0),
-          end: Offset.zero,
-        ).animate(animation);
+    final swipeMode = settings?.swipeMode ?? SwipeMode.changeTabs;
 
-        return SlideTransition(
-          position: slideIn,
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
-        );
-      },
-      child: KeyedSubtree(
-        key: ValueKey(currentIndex),
-        child: widget.navigationShell,
+    final animatedContent = GestureDetector(
+      onHorizontalDragEnd: swipeMode == SwipeMode.changeTabs
+          ? (details) {
+              if (details.primaryVelocity == null) return;
+              if (details.primaryVelocity! < 0) {
+                // Swipe left -> Next tab
+                if (currentIndex < kuberNavItems.length - 1) {
+                  _onTabTapped(currentIndex + 1);
+                }
+              } else if (details.primaryVelocity! > 0) {
+                // Swipe right -> Previous tab
+                if (currentIndex > 0) {
+                  _onTabTapped(currentIndex - 1);
+                }
+              }
+            }
+          : null,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 280),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) {
+          final slideIn = Tween<Offset>(
+            begin: Offset(_slideDirection, 0),
+            end: Offset.zero,
+          ).animate(animation);
+
+          return SlideTransition(
+            position: slideIn,
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+        child: KeyedSubtree(
+          key: ValueKey(currentIndex),
+          child: widget.navigationShell,
+        ),
       ),
     );
 

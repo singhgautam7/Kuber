@@ -3,4 +3,5 @@ class PrefsKeys {
   static const userName = 'kuber_user_name';
   static const currency = 'currency';
   static const themeMode = 'theme_mode';
+  static const swipeMode = 'swipe_mode';
 }

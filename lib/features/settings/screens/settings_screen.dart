@@ -22,6 +22,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late TextEditingController _userNameController;
   ThemeMode? _tempThemeMode;
   String? _tempCurrencyCode;
+  SwipeMode? _tempSwipeMode;
   bool _isSaving = false;
 
   @override
@@ -43,8 +44,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settings = ref.read(settingsProvider).valueOrNull;
     if (settings == null) return false;
     return _userNameController.text.trim() != settings.userName ||
-        _tempThemeMode != settings.themeMode ||
-        _tempCurrencyCode != settings.currency;
+        (_tempThemeMode != null && _tempThemeMode != settings.themeMode) ||
+        (_tempCurrencyCode != null && _tempCurrencyCode != settings.currency) ||
+        (_tempSwipeMode != null && _tempSwipeMode != settings.swipeMode);
   }
 
   Future<void> _saveSettings() async {
@@ -53,6 +55,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await notifier.setUserName(_userNameController.text.trim());
     if (_tempThemeMode != null) await notifier.setThemeMode(_tempThemeMode!);
     if (_tempCurrencyCode != null) await notifier.setCurrency(_tempCurrencyCode!);
+    if (_tempSwipeMode != null) await notifier.setSwipeMode(_tempSwipeMode!);
 
     if (mounted) {
       showKuberSnackBar(context, 'Settings saved successfully');
@@ -75,6 +78,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Fallbacks if data isn't ready
     final currentTheme = _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
     final currencyCode = _tempCurrencyCode ?? settings?.currency ?? 'INR';
+    final currentSwipeMode = _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
     final currency = currencyFromCode(currencyCode);
 
     return PopScope(
@@ -285,6 +289,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
+
+                // SWIPE GESTURES
+                _SectionLabel(label: 'SWIPE GESTURES'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SwipeModeTile(
+                      title: 'Swipe to change tabs',
+                      description: 'Change the tabs by swiping over the screen (Horizontal swipe).',
+                      isSelected: currentSwipeMode == SwipeMode.changeTabs,
+                      onTap: () => setState(() => _tempSwipeMode = SwipeMode.changeTabs),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SwipeModeTile(
+                      title: 'Swipe to perform actions',
+                      description: 'Swipe right to edit and swipe left to delete a transaction in "History" tab.',
+                      isSelected: currentSwipeMode == SwipeMode.performActions,
+                      onTap: () => setState(() => _tempSwipeMode = SwipeMode.performActions),
                     ),
                   ],
                 ),
@@ -535,6 +561,73 @@ class _SettingsTile extends StatelessWidget {
           const SizedBox(width: KuberSpacing.sm),
           if (trailing != null) Flexible(child: trailing!),
         ],
+      ),
+    );
+  }
+}
+
+class _SwipeModeTile extends StatelessWidget {
+  final String title;
+  final String description;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _SwipeModeTile({
+    required this.title,
+    required this.description,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(KuberSpacing.lg),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected ? cs.primary : cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: KuberSpacing.md),
+            // Custom Radio-like circle
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? cs.primary : cs.outline,
+                  width: isSelected ? 6 : 2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

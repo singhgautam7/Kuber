@@ -12,7 +12,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart';
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 
@@ -605,115 +605,123 @@ class _TransactionRow extends ConsumerWidget {
         ? 'Transfer · ${toName ?? "Unknown"}'
         : '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
 
-    return Dismissible(
-      key: ValueKey(transaction.id),
-      direction: DismissDirection.horizontal,
-      background: Container(
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: KuberSpacing.xl),
-        decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        child: Icon(Icons.edit_outlined, color: cs.primary),
+    final swipeMode = ref.watch(settingsProvider).valueOrNull?.swipeMode ?? SwipeMode.changeTabs;
+
+    final content = Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
       ),
-      secondaryBackground: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: KuberSpacing.xl),
-        decoration: BoxDecoration(
-          color: cs.error.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        child: Icon(Icons.delete_outline, color: cs.error),
-      ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.endToStart) {
-          onDelete();
-          return true;
-        } else {
-          onEdit();
-          return false;
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.md,
-            ),
-            child: Row(
-              children: [
-                CategoryIcon.square(
-                  icon: iconData,
-                  rawColor: iconColor,
-                  size: 42,
-                ),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        displayName,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.lg,
+            vertical: KuberSpacing.md,
+          ),
+          child: Row(
+            children: [
+              CategoryIcon.square(
+                icon: iconData,
+                rawColor: iconColor,
+                size: 42,
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
+                      displayName,
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: amountColor,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      DateFormatter.time(transaction.createdAt),
+                      subtitle,
                       style: GoogleFonts.inter(
-                        fontSize: 11,
+                        fontSize: 12,
                         fontWeight: FontWeight.w400,
                         color: cs.onSurfaceVariant,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: amountColor,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    DateFormatter.time(transaction.createdAt),
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w400,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
+
+    if (swipeMode == SwipeMode.performActions) {
+      return Dismissible(
+        key: ValueKey(transaction.id),
+        direction: DismissDirection.horizontal,
+        background: Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: KuberSpacing.xl),
+          decoration: BoxDecoration(
+            color: cs.primary.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+          ),
+          child: Icon(Icons.edit_outlined, color: cs.primary),
+        ),
+        secondaryBackground: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: KuberSpacing.xl),
+          decoration: BoxDecoration(
+            color: cs.error.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+          ),
+          child: Icon(Icons.delete_outline, color: cs.error),
+        ),
+        confirmDismiss: (direction) async {
+          if (direction == DismissDirection.endToStart) {
+            onDelete();
+            return true;
+          } else {
+            onEdit();
+            return false;
+          }
+        },
+        child: content,
+      );
+    }
+
+    return content;
   }
 }
 
