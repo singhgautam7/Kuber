@@ -103,12 +103,12 @@ class MoreScreen extends StatelessWidget {
             _MenuSection(
               title: 'About',
               items: [
-                _MenuItem(
-                  icon: Icons.waving_hand_outlined,
-                  label: 'Show Welcome Screen',
-                  subtitle: 'View the onboarding experience again',
-                  onTap: () => context.push('/onboarding'),
-                ),
+                // _MenuItem(
+                //   icon: Icons.waving_hand_outlined,
+                //   label: 'Show Welcome Screen',
+                //   subtitle: 'View the onboarding experience again',
+                //   onTap: () => context.push('/onboarding'),
+                // ),
                 _MenuItem(
                   icon: Icons.info_outline_rounded,
                   label: 'About Kuber',

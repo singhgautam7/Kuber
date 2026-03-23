@@ -12,11 +12,31 @@ import '../../recurring/providers/recurring_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../providers/settings_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  late TextEditingController _userNameController;
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = ref.read(settingsProvider).valueOrNull;
+    _userNameController = TextEditingController(text: settings?.userName ?? '');
+  }
+
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider).valueOrNull;
     final currentTheme = settings?.themeMode ?? ThemeMode.system;
@@ -92,16 +112,68 @@ class SettingsScreen extends ConsumerWidget {
 
           const SizedBox(height: KuberSpacing.xl),
 
-          // DATA
-          _SectionLabel(label: 'DATA'),
+          // PREFERENCE
+          _SectionLabel(label: 'PREFERENCE'),
           const SizedBox(height: KuberSpacing.sm),
           _SettingsCard(
             children: [
+              // User Name
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.lg,
+                  vertical: KuberSpacing.md,
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline_rounded, size: 20, color: cs.onSurface),
+                    const SizedBox(width: KuberSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Your Name',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpacing.xs),
+                          TextField(
+                            controller: _userNameController,
+                            onChanged: (val) {
+                              ref
+                                  .read(settingsProvider.notifier)
+                                  .setUserName(val.trim());
+                            },
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                              hintText: 'Enter your name',
+                              hintStyle: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: cs.outline),
               _SettingsTile(
                 icon: Icons.attach_money_rounded,
                 label: 'Currency',
                 trailing: GestureDetector(
-                  onTap: () => _showCurrencyPicker(context, ref),
+                  onTap: () => _showCurrencyPicker(context),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -119,7 +191,16 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              Divider(height: 1, color: cs.outline),
+            ],
+          ),
+
+          const SizedBox(height: KuberSpacing.xl),
+
+          // DATA
+          _SectionLabel(label: 'DATA'),
+          const SizedBox(height: KuberSpacing.sm),
+          _SettingsCard(
+            children: [
               _SettingsTile(
                 icon: Icons.upload_file_rounded,
                 label: 'Export Data',
@@ -132,7 +213,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.delete_forever_rounded,
                 label: 'Clear All Data',
                 destructive: true,
-                onTap: () => _confirmClearData(context, ref),
+                onTap: () => _confirmClearData(context),
               ),
             ],
           ),
@@ -162,7 +243,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showCurrencyPicker(BuildContext context, WidgetRef ref) {
+  void _showCurrencyPicker(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final currentCode = ref.read(currencyProvider).code;
 
@@ -274,7 +355,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmClearData(BuildContext context, WidgetRef ref) {
+  void _confirmClearData(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     showDialog(

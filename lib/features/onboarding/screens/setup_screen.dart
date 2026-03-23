@@ -20,7 +20,7 @@ class SetupScreen extends ConsumerStatefulWidget {
 class _SetupScreenState extends ConsumerState<SetupScreen> {
   final _nameController = TextEditingController();
   String _selectedCurrencyCode = 'INR';
-  ThemeMode _selectedTheme = ThemeMode.dark;
+  ThemeMode _selectedTheme = ThemeMode.system;
 
   bool get _canContinue => _nameController.text.trim().isNotEmpty;
 
