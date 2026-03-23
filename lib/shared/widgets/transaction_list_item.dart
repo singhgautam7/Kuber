@@ -78,7 +78,7 @@ class DashboardTransactionItem extends StatelessWidget {
           Text(
             '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
             style: textTheme.titleMedium?.copyWith(
-              color: isIncome ? colorScheme.tertiary : KuberColors.textPrimary,
+              color: isIncome ? colorScheme.tertiary : colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             ),
           ),

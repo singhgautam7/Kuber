@@ -70,14 +70,16 @@ class _AddEditCategoryScreenState
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
-        backgroundColor: KuberColors.background,
+        backgroundColor: cs.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded,
-              color: KuberColors.textPrimary),
+          icon: Icon(Icons.arrow_back_rounded,
+              color: cs.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
@@ -85,7 +87,7 @@ class _AddEditCategoryScreenState
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: KuberColors.textPrimary,
+            color: cs.onSurface,
           ),
         ),
         centerTitle: false,
@@ -139,12 +141,14 @@ class _AddEditCategoryScreenState
   }
 
   Widget _buildLivePreview() {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: KuberColors.border, width: 1),
+        border: Border.all(color: cs.outline, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +157,7 @@ class _AddEditCategoryScreenState
               style: GoogleFonts.inter(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
                 letterSpacing: 1.0,
               )),
           const SizedBox(height: 12),
@@ -184,15 +188,15 @@ class _AddEditCategoryScreenState
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: _nameController.text.isEmpty
-                          ? KuberColors.textSecondary
-                          : KuberColors.textPrimary,
+                          ? cs.onSurfaceVariant
+                          : cs.onSurface,
                     ),
                   ),
                   Text(
                     '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -205,6 +209,8 @@ class _AddEditCategoryScreenState
   }
 
   Widget _buildNameField() {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -212,7 +218,7 @@ class _AddEditCategoryScreenState
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
             )),
         const SizedBox(height: 8),
         TextField(
@@ -228,6 +234,8 @@ class _AddEditCategoryScreenState
   }
 
   Widget _buildIconSelector() {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -238,12 +246,12 @@ class _AddEditCategoryScreenState
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 )),
             Text('Scroll to see more icons',
                 style: GoogleFonts.inter(
                   fontSize: 11,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 )),
           ],
         ),
@@ -251,9 +259,9 @@ class _AddEditCategoryScreenState
         Container(
           height: 200,
           decoration: BoxDecoration(
-            color: KuberColors.surfaceCard,
+            color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: KuberColors.border, width: 1),
+            border: Border.all(color: cs.outline, width: 1),
           ),
           child: GridView.builder(
             padding: const EdgeInsets.all(10),
@@ -265,6 +273,7 @@ class _AddEditCategoryScreenState
             ),
             itemCount: kCategoryIcons.length,
             itemBuilder: (ctx, i) {
+              final cs = Theme.of(ctx).colorScheme;
               final item = kCategoryIcons[i];
               final iconName = item['name'] as String;
               final isSelected = _selectedIcon == iconName;
@@ -275,7 +284,7 @@ class _AddEditCategoryScreenState
                   decoration: BoxDecoration(
                     color: isSelected
                         ? _selectedColor.withValues(alpha: 0.15)
-                        : KuberColors.surfaceMuted,
+                        : cs.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSelected ? _selectedColor : Colors.transparent,
@@ -286,7 +295,7 @@ class _AddEditCategoryScreenState
                     item['icon'] as IconData,
                     color: isSelected
                         ? _selectedColor
-                        : KuberColors.textSecondary,
+                        : cs.onSurfaceVariant,
                     size: 22,
                   ),
                 ),
@@ -299,6 +308,8 @@ class _AddEditCategoryScreenState
   }
 
   Widget _buildColorSelector() {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -306,7 +317,7 @@ class _AddEditCategoryScreenState
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
             )),
         const SizedBox(height: 10),
         SingleChildScrollView(
@@ -326,7 +337,7 @@ class _AddEditCategoryScreenState
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? KuberColors.textPrimary
+                          ? cs.onSurface
                           : Colors.transparent,
                       width: 2.5,
                     ),
@@ -350,6 +361,8 @@ class _AddEditCategoryScreenState
   }
 
   Widget _buildTypeSelector() {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -357,7 +370,7 @@ class _AddEditCategoryScreenState
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
             )),
         const SizedBox(height: 10),
         RadioGroup<String>(
@@ -378,25 +391,27 @@ class _AddEditCategoryScreenState
   }
 
   Widget _buildTypeRadioTile(String value, String label) {
+    final cs = Theme.of(context).colorScheme;
     final isSelected = _selectedType == value;
+
     return Container(
       decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.md),
         border: Border.all(
-          color: isSelected ? KuberColors.primary : KuberColors.border,
+          color: isSelected ? cs.primary : cs.outline,
           width: 1,
         ),
       ),
       child: RadioListTile<String>(
         value: value,
-        activeColor: KuberColors.primary,
+        activeColor: cs.primary,
         title: Text(
           label,
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: KuberColors.textPrimary,
+            color: cs.onSurface,
           ),
         ),
         shape: RoundedRectangleBorder(

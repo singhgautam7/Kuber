@@ -184,13 +184,14 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final categories = ref.watch(categoryListProvider);
     final accounts = ref.watch(accountListProvider);
     final symbol = ref.watch(currencyProvider).symbol;
 
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       appBar: AppBar(
         title: Text(_isEdit ? 'Edit Recurring' : 'Add Recurring'),
         leading: IconButton(
@@ -218,7 +219,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           // Name
           TextField(
             controller: _nameController,
-            style: textTheme.bodyMedium?.copyWith(color: KuberColors.textPrimary),
+            style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
             decoration: const InputDecoration(
               labelText: 'Name',
               hintText: 'e.g. Netflix, Rent, Salary',
@@ -230,7 +231,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           // Amount
           TextField(
             controller: _amountController,
-            style: textTheme.bodyMedium?.copyWith(color: KuberColors.textPrimary),
+            style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
             decoration: InputDecoration(
               labelText: 'Amount',
               prefixText: '$symbol ',
@@ -312,7 +313,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
@@ -332,19 +333,19 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: selected
-                        ? KuberColors.primarySubtle
-                        : KuberColors.surfaceMuted,
+                        ? cs.primaryContainer
+                        : cs.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                     border: Border.all(
-                      color: selected ? KuberColors.primary : KuberColors.border,
+                      color: selected ? cs.primary : cs.outline,
                     ),
                   ),
                   child: Text(
                     f.$2,
                     style: textTheme.bodyMedium?.copyWith(
                       color: selected
-                          ? KuberColors.primary
-                          : KuberColors.textSecondary,
+                          ? cs.primary
+                          : cs.onSurfaceVariant,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
@@ -362,7 +363,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     child: TextField(
                       controller: _customDaysController,
                       style: textTheme.bodyMedium
-                          ?.copyWith(color: KuberColors.textPrimary),
+                          ?.copyWith(color: cs.onSurface),
                       decoration: const InputDecoration(
                         labelText: 'Every X days',
                         hintText: 'e.g. 10',
@@ -383,7 +384,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
@@ -405,7 +406,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     child: TextField(
                       controller: _endAfterController,
                       style: textTheme.bodyMedium
-                          ?.copyWith(color: KuberColors.textPrimary),
+                          ?.copyWith(color: cs.onSurface),
                       decoration: const InputDecoration(
                         hintText: '#',
                         isDense: true,
@@ -443,7 +444,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           // Notes
           TextField(
             controller: _notesController,
-            style: textTheme.bodyMedium?.copyWith(color: KuberColors.textPrimary),
+            style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
             decoration: const InputDecoration(
               labelText: 'Notes (optional)',
               hintText: 'Add a note...',
@@ -482,6 +483,7 @@ class _PickerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
@@ -490,9 +492,9 @@ class _PickerTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
-          color: KuberColors.surfaceCard,
+          color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: KuberColors.border),
+          border: Border.all(color: cs.outline),
         ),
         child: Row(
           children: [
@@ -507,23 +509,23 @@ class _PickerTile extends StatelessWidget {
                   Text(
                     label,
                     style: textTheme.labelSmall?.copyWith(
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   Text(
                     value ?? 'Select',
                     style: textTheme.bodyMedium?.copyWith(
                       color: value != null
-                          ? KuberColors.textPrimary
-                          : KuberColors.textSecondary,
+                          ? cs.onSurface
+                          : cs.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               size: 20,
             ),
           ],
@@ -598,6 +600,7 @@ class _EndRadio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
@@ -612,8 +615,8 @@ class _EndRadio extends StatelessWidget {
                   ? Icons.radio_button_checked
                   : Icons.radio_button_off,
               color: value == groupValue
-                  ? KuberColors.primary
-                  : KuberColors.textSecondary,
+                  ? cs.primary
+                  : cs.onSurfaceVariant,
               size: 20,
             ),
             const SizedBox(width: KuberSpacing.md),
@@ -621,7 +624,7 @@ class _EndRadio extends StatelessWidget {
               child: Text(
                 label,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: KuberColors.textPrimary,
+                  color: cs.onSurface,
                 ),
               ),
             ),

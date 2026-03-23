@@ -58,7 +58,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final colorScheme = cs;
     final textTheme = Theme.of(context).textTheme;
     final summaryAsync = ref.watch(monthlySummaryProvider);
     final accountsAsync = ref.watch(accountListProvider);
@@ -89,7 +90,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 style: textTheme.displaySmall?.copyWith(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: KuberColors.textPrimary,
+                  color: cs.onSurface,
                   height: 1.15,
                   letterSpacing: -0.5,
                 ),
@@ -98,7 +99,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Text(
                 _subtitle,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ],
@@ -164,10 +165,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(KuberSpacing.lg),
                               decoration: BoxDecoration(
-                                color: KuberColors.surfaceCard,
+                                color: cs.surfaceContainer,
                                 borderRadius: BorderRadius.circular(KuberRadius.md),
                                 border: Border.all(
-                                  color: KuberColors.border,
+                                  color: cs.outline,
                                   width: 0.5,
                                 ),
                               ),
@@ -215,13 +216,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                       final Color? balanceColor;
                                       if (account.isCreditCard) {
                                         balanceColor = balance > 0
-                                            ? KuberColors.expense
+                                            ? cs.error
                                             : balance < 0
-                                                ? KuberColors.income
+                                                ? cs.tertiary
                                                 : null;
                                       } else {
                                         balanceColor = balance < 0
-                                            ? KuberColors.expense
+                                            ? cs.error
                                             : null;
                                       }
                                       final prefix = balance < 0 ? '-' : '';
@@ -300,7 +301,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   return Container(
                     padding: const EdgeInsets.all(KuberSpacing.xl),
                     decoration: BoxDecoration(
-                      color: KuberColors.surfaceCard,
+                      color: cs.surfaceContainer,
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
                     child: Center(
@@ -319,7 +320,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     vertical: KuberSpacing.sm,
                   ),
                   decoration: BoxDecoration(
-                    color: KuberColors.surfaceCard,
+                    color: cs.surfaceContainer,
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   child: categoryMapAsync.when(
@@ -362,7 +363,8 @@ class _UpcomingRecurringSection extends StatelessWidget {
     final upcomingAsync = ref.watch(upcomingRecurringProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final colorScheme = cs;
 
     return upcomingAsync.when(
       loading: () => const SizedBox.shrink(),
@@ -406,18 +408,18 @@ class _UpcomingRecurringSection extends StatelessWidget {
                   Color statusColor;
                   if (dueDay.isBefore(today)) {
                     statusLabel = 'PROCESSED';
-                    statusColor = KuberColors.income;
+                    statusColor = cs.tertiary;
                   } else if (dueDay.isAtSameMomentAs(today)) {
                     statusLabel = 'PENDING';
-                    statusColor = KuberColors.primary;
+                    statusColor = cs.primary;
                   } else {
                     statusLabel = 'SCHEDULED';
-                    statusColor = KuberColors.textSecondary;
+                    statusColor = cs.onSurfaceVariant;
                   }
 
                   final catColor = cat != null
                       ? harmonizeCategory(context, Color(cat.colorValue))
-                      : KuberColors.textSecondary;
+                      : cs.onSurfaceVariant;
 
                   return GestureDetector(
                     onTap: () => showRecurringDetailSheet(context, ref, rule),
@@ -425,9 +427,9 @@ class _UpcomingRecurringSection extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
                     padding: const EdgeInsets.all(KuberSpacing.md),
                     decoration: BoxDecoration(
-                      color: KuberColors.surfaceCard,
+                      color: cs.surfaceContainer,
                       borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(color: KuberColors.border),
+                      border: Border.all(color: cs.outline),
                     ),
                     child: Row(
                       children: [
@@ -457,7 +459,7 @@ class _UpcomingRecurringSection extends StatelessWidget {
                                     child: Text(
                                       rule.name,
                                       style: textTheme.bodyMedium?.copyWith(
-                                        color: KuberColors.textPrimary,
+                                        color: cs.onSurface,
                                         fontWeight: FontWeight.w500,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -489,7 +491,7 @@ class _UpcomingRecurringSection extends StatelessWidget {
                               Text(
                                 DateFormat('MMM d').format(rule.nextDueAt),
                                 style: textTheme.labelSmall?.copyWith(
-                                  color: KuberColors.textSecondary,
+                                  color: cs.onSurfaceVariant,
                                 ),
                               ),
                             ],
@@ -499,8 +501,8 @@ class _UpcomingRecurringSection extends StatelessWidget {
                           CurrencyFormatter.format(rule.amount),
                           style: textTheme.bodyMedium?.copyWith(
                             color: rule.type == 'income'
-                                ? colorScheme.tertiary
-                                : KuberColors.textPrimary,
+                                ? cs.tertiary
+                                : cs.onSurface,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -525,14 +527,15 @@ class _BalanceHeroCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final symbol = ref.watch(currencyProvider).symbol;
 
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.xl),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
-        border: Border.all(color: KuberColors.border),
+        color: cs.surfaceContainer,
+        border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
@@ -541,7 +544,7 @@ class _BalanceHeroCard extends ConsumerWidget {
           Text(
             'Total Balance',
             style: textTheme.labelLarge?.copyWith(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: KuberSpacing.sm),
@@ -556,13 +559,13 @@ class _BalanceHeroCard extends ConsumerWidget {
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.05,
-                    color: Colors.white,
+                    color: cs.onSurface,
                   ),
                   children: [
                     TextSpan(text: prefix),
                     TextSpan(
                       text: symbol,
-                      style: const TextStyle(color: KuberColors.primary),
+                      style: TextStyle(color: cs.primary),
                     ),
                     TextSpan(text: formattedRaw),
                   ],
@@ -578,7 +581,7 @@ class _BalanceHeroCard extends ConsumerWidget {
                   label: 'Income',
                   amount: summary.totalIncome,
                   icon: Icons.arrow_downward_rounded,
-                  iconColor: KuberColors.income,
+                  iconColor: cs.tertiary,
                 ),
               ),
               const SizedBox(width: KuberSpacing.lg),
@@ -587,7 +590,7 @@ class _BalanceHeroCard extends ConsumerWidget {
                   label: 'Expense',
                   amount: summary.totalExpense,
                   icon: Icons.arrow_upward_rounded,
-                  iconColor: KuberColors.expense,
+                  iconColor: cs.error,
                 ),
               ),
             ],
@@ -613,12 +616,13 @@ class _BalanceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.1),
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Row(
@@ -627,7 +631,7 @@ class _BalanceTile extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-               color: Colors.black.withValues(alpha: 0.25),
+               color: cs.outline.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: iconColor, size: 18),
@@ -640,13 +644,13 @@ class _BalanceTile extends StatelessWidget {
                 Text(
                   label,
                   style: textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   CurrencyFormatter.format(amount),
                   style: textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
+                    color: cs.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,

@@ -188,12 +188,13 @@ class _KuberCalculatorState extends State<KuberCalculator> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // ── Header — surfaceCard ──────────────────
+        // ── Header — surfaceContainer ──────────────────
         Container(
-          color: KuberColors.surfaceCard,
+          color: cs.surfaceContainer,
           child: Column(
             children: [
               // Drag handle
@@ -203,7 +204,7 @@ class _KuberCalculatorState extends State<KuberCalculator> {
                   height: 4,
                   margin: const EdgeInsets.only(top: 12, bottom: 8),
                   decoration: BoxDecoration(
-                    color: KuberColors.border,
+                    color: cs.outline,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -219,13 +220,13 @@ class _KuberCalculatorState extends State<KuberCalculator> {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: KuberColors.textPrimary,
+                        color: cs.onSurface,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close_rounded,
-                        color: KuberColors.textSecondary,
+                        color: cs.onSurfaceVariant,
                         size: 20,
                       ),
                       onPressed: () => Navigator.pop(context),
@@ -237,9 +238,9 @@ class _KuberCalculatorState extends State<KuberCalculator> {
           ),
         ),
 
-        // ── Everything below — pure black ─────────
+        // ── Everything below — surface ─────────
         Container(
-          color: KuberColors.background,
+          color: cs.surface,
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).padding.bottom + KuberSpacing.lg,
           ),
@@ -263,6 +264,7 @@ class _KuberCalculatorState extends State<KuberCalculator> {
   }
 
   Widget _buildDisplay() {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       height: 120,
@@ -279,7 +281,7 @@ class _KuberCalculatorState extends State<KuberCalculator> {
               _previewResult ?? '',
               style: GoogleFonts.inter(
                 fontSize: 18,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -293,7 +295,7 @@ class _KuberCalculatorState extends State<KuberCalculator> {
             style: GoogleFonts.inter(
               fontSize: 40,
               fontWeight: FontWeight.bold,
-              color: KuberColors.textPrimary,
+              color: cs.onSurface,
               letterSpacing: -1,
             ),
             maxLines: 1,
@@ -306,42 +308,43 @@ class _KuberCalculatorState extends State<KuberCalculator> {
   }
 
   Widget _buildButtonGrid() {
+    final cs = Theme.of(context).colorScheme;
     final rows = [
       // Row 1: C (flex 2, red), ⌫ (red), ÷ (blue)
       [
-        _CalcBtn('C', _onClear, color: KuberColors.expense, flex: 2),
+        _CalcBtn('C', _onClear, color: cs.error, flex: 2),
         _CalcBtn('⌫', _onBackspace,
-            color: KuberColors.expense, icon: Icons.backspace_outlined),
-        _CalcBtn('÷', () => _onOperator('÷'), color: KuberColors.primary),
+            color: cs.error, icon: Icons.backspace_outlined),
+        _CalcBtn('÷', () => _onOperator('÷'), color: cs.primary),
       ],
       // Row 2: 7, 8, 9, × (blue)
       [
         _CalcBtn('7', () => _onDigit('7')),
         _CalcBtn('8', () => _onDigit('8')),
         _CalcBtn('9', () => _onDigit('9')),
-        _CalcBtn('×', () => _onOperator('×'), color: KuberColors.primary),
+        _CalcBtn('×', () => _onOperator('×'), color: cs.primary),
       ],
       // Row 3: 4, 5, 6, − (blue)
       [
         _CalcBtn('4', () => _onDigit('4')),
         _CalcBtn('5', () => _onDigit('5')),
         _CalcBtn('6', () => _onDigit('6')),
-        _CalcBtn('−', () => _onOperator('−'), color: KuberColors.primary),
+        _CalcBtn('−', () => _onOperator('−'), color: cs.primary),
       ],
       // Row 4: 1, 2, 3, + (blue)
       [
         _CalcBtn('1', () => _onDigit('1')),
         _CalcBtn('2', () => _onDigit('2')),
         _CalcBtn('3', () => _onDigit('3')),
-        _CalcBtn('+', () => _onOperator('+'), color: KuberColors.primary),
+        _CalcBtn('+', () => _onOperator('+'), color: cs.primary),
       ],
       // Row 5: 0, ., = (blue), ✓ (blue filled)
       [
         _CalcBtn('0', () => _onDigit('0')),
         _CalcBtn('.', () => _onDigit('.')),
-        _CalcBtn('=', _onEquals, color: KuberColors.primary),
+        _CalcBtn('=', _onEquals, color: cs.primary),
         _CalcBtn('✓', _onConfirm,
-            color: KuberColors.white, backgroundColor: KuberColors.primary),
+            color: cs.onPrimary, backgroundColor: cs.primary),
       ],
     ];
 
@@ -367,9 +370,10 @@ class _KuberCalculatorState extends State<KuberCalculator> {
   }
 
   Widget _buildButton(_CalcBtn btn) {
+    final cs = Theme.of(context).colorScheme;
     final bool isFilled = btn.backgroundColor != null;
-    final Color bgColor = btn.backgroundColor ?? KuberColors.surfaceMuted;
-    final Color fgColor = btn.color ?? KuberColors.textPrimary;
+    final Color bgColor = btn.backgroundColor ?? cs.surfaceContainerHigh;
+    final Color fgColor = btn.color ?? cs.onSurface;
 
     return GestureDetector(
       onTap: btn.onTap,
@@ -378,7 +382,7 @@ class _KuberCalculatorState extends State<KuberCalculator> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: !isFilled ? Border.all(color: KuberColors.border) : null,
+          border: !isFilled ? Border.all(color: cs.outline) : null,
         ),
         alignment: Alignment.center,
         child: btn.icon != null

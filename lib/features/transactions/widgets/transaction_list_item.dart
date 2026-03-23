@@ -23,7 +23,7 @@ class TransactionListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final categoryMap = ref.watch(categoryMapProvider);
     final isIncome = transaction.type == 'income';
@@ -35,7 +35,7 @@ class TransactionListItem extends ConsumerWidget {
         final categoryId = int.tryParse(transaction.categoryId);
         final category = categoryId != null ? categories[categoryId] : null;
         final rawColor =
-            category != null ? Color(category.colorValue) : colorScheme.outline;
+            category != null ? Color(category.colorValue) : cs.outline;
         final harmonized = harmonizeCategory(context, rawColor);
         final icon = category != null
             ? IconMapper.fromString(category.icon)
@@ -54,17 +54,17 @@ class TransactionListItem extends ConsumerWidget {
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: KuberSpacing.xl),
               decoration: BoxDecoration(
-                color: colorScheme.errorContainer,
+                color: cs.errorContainer,
                 borderRadius: BorderRadius.circular(KuberRadius.md),
               ),
-              child: Icon(Icons.delete, color: colorScheme.onErrorContainer),
+              child: Icon(Icons.delete, color: cs.onErrorContainer),
             ),
             child: GestureDetector(
               onTap: onTap,
               child: Container(
                 padding: const EdgeInsets.all(KuberSpacing.lg),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainer,
+                  color: cs.surfaceContainer,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
                 child: Row(
@@ -92,7 +92,7 @@ class TransactionListItem extends ConsumerWidget {
                             DateFormatter.time(transaction.createdAt),
                           ].join(' · '),
                           style: textTheme.labelMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -103,7 +103,7 @@ class TransactionListItem extends ConsumerWidget {
                     '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
                     style: textTheme.titleMedium?.copyWith(
                       color:
-                          isIncome ? colorScheme.tertiary : KuberColors.textPrimary,
+                          isIncome ? cs.tertiary : cs.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

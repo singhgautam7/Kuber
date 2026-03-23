@@ -3,21 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/settings/providers/settings_provider.dart';
 
-class KuberApp extends ConsumerWidget {
+class KuberApp extends ConsumerStatefulWidget {
   const KuberApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = createRouter();
+  ConsumerState<KuberApp> createState() => _KuberAppState();
+}
+
+class _KuberAppState extends ConsumerState<KuberApp> {
+  late final _router = createRouter();
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = ref.watch(settingsProvider).valueOrNull?.themeMode ?? ThemeMode.system;
 
     return MaterialApp.router(
       title: 'Kuber',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark(),
+      theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.dark,
-      routerConfig: router,
+      themeMode: themeMode,
+      routerConfig: _router,
     );
   }
 }

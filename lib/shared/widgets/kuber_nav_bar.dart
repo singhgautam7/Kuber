@@ -63,15 +63,16 @@ class KuberNavRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final isMoreTab = currentIndex == 3;
 
     return Container(
       width: 220,
-      decoration: const BoxDecoration(
-        color: KuberColors.surfaceCard,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
         border: Border(
           right: BorderSide(
-            color: KuberColors.border,
+            color: cs.outline,
             width: 1,
           ),
         ),
@@ -88,7 +89,7 @@ class KuberNavRail extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: KuberColors.primary,
+                  color: cs.primary,
                   letterSpacing: -0.3,
                 ),
               ),
@@ -121,7 +122,7 @@ class KuberNavRail extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
-                      color: KuberColors.primary,
+                      color: cs.primary,
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
                     child: Row(
@@ -163,6 +164,8 @@ class _RailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -176,7 +179,7 @@ class _RailItem extends StatelessWidget {
                 isActive ? item.activeIcon : item.icon,
                 size: 22,
                 color:
-                    isActive ? KuberColors.primary : KuberColors.textSecondary,
+                    isActive ? cs.primary : cs.onSurfaceVariant,
               ),
               const SizedBox(width: 12),
               Text(
@@ -185,8 +188,8 @@ class _RailItem extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                   color: isActive
-                      ? KuberColors.primary
-                      : KuberColors.textSecondary,
+                      ? cs.primary
+                      : cs.onSurfaceVariant,
                 ),
               ),
             ],

@@ -47,8 +47,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.xl),
@@ -61,12 +62,12 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: KuberColors.primary.withValues(alpha: 0.15),
+                  color: cs.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: KuberColors.primary,
+                  color: cs.primary,
                   size: 32,
                 ),
               ),
@@ -78,7 +79,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
-                  color: KuberColors.textPrimary,
+                  color: cs.onSurface,
                   letterSpacing: -0.5,
                 ),
                 textAlign: TextAlign.center,
@@ -88,7 +89,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 'Personalize Kuber before you start.',
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -98,9 +99,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               Container(
                 padding: const EdgeInsets.all(KuberSpacing.xl),
                 decoration: BoxDecoration(
-                  color: KuberColors.surfaceCard,
+                  color: cs.surfaceContainer,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: KuberColors.border),
+                  border: Border.all(color: cs.outline),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,14 +112,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     TextField(
                       controller: _nameController,
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(color: KuberColors.textPrimary),
+                      style: GoogleFonts.inter(color: cs.onSurface),
                       decoration: InputDecoration(
                         hintText: 'Enter your name',
                         hintStyle: GoogleFonts.inter(
-                          color: KuberColors.textSecondary,
+                          color: cs.onSurfaceVariant,
                         ),
                         filled: true,
-                        fillColor: KuberColors.surfaceMuted,
+                        fillColor: cs.surfaceContainerHigh,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(KuberRadius.md),
                           borderSide: BorderSide.none,
@@ -140,17 +141,17 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                         horizontal: KuberSpacing.lg,
                       ),
                       decoration: BoxDecoration(
-                        color: KuberColors.surfaceMuted,
+                        color: cs.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _selectedCurrencyCode,
-                          dropdownColor: KuberColors.surfaceCard,
+                          dropdownColor: cs.surfaceContainer,
                           isExpanded: true,
                           style: GoogleFonts.inter(
                             fontSize: 14,
-                            color: KuberColors.textPrimary,
+                            color: cs.onSurface,
                           ),
                           items: kCurrencies.map((c) {
                             return DropdownMenuItem(
@@ -207,9 +208,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 child: FilledButton(
                   onPressed: _canContinue ? _saveAndStart : null,
                   style: FilledButton.styleFrom(
-                    backgroundColor: KuberColors.primary,
+                    backgroundColor: cs.primary,
                     disabledBackgroundColor:
-                        KuberColors.primary.withValues(alpha: 0.3),
+                        cs.primary.withValues(alpha: 0.3),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
@@ -230,21 +231,21 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
 
               // Stat tiles
               Row(
-                children: const [
+                children: [
                   Expanded(
                     child: _StatTile(
                       icon: Icons.shield_outlined,
                       label: '100% Private',
                     ),
                   ),
-                  SizedBox(width: KuberSpacing.md),
+                  const SizedBox(width: KuberSpacing.md),
                   Expanded(
                     child: _StatTile(
                       icon: Icons.smartphone_outlined,
                       label: 'Local-First',
                     ),
                   ),
-                  SizedBox(width: KuberSpacing.md),
+                  const SizedBox(width: KuberSpacing.md),
                   Expanded(
                     child: _StatTile(
                       icon: Icons.auto_graph_rounded,
@@ -260,7 +261,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 'Your data never leaves your device.',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -279,12 +280,13 @@ class _FormLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Text(
       text,
       style: GoogleFonts.inter(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: KuberColors.textSecondary,
+        color: cs.onSurfaceVariant,
       ),
     );
   }
@@ -298,25 +300,26 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         vertical: KuberSpacing.md,
         horizontal: KuberSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceMuted,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 20, color: KuberColors.primary),
+          Icon(icon, size: 20, color: cs.primary),
           const SizedBox(height: KuberSpacing.xs),
           Text(
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),

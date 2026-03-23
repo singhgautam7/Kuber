@@ -15,6 +15,8 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SafeArea(
       bottom: false,
       child: SizedBox(
@@ -27,8 +29,8 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
               if (showBack) ...[
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back_rounded,
-                      color: KuberColors.textPrimary, size: 22),
+                  child: Icon(Icons.arrow_back_rounded,
+                      color: cs.onSurface, size: 22),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -37,14 +39,14 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: KuberColors.surfaceCard,
+                    color: cs.surfaceContainer,
                     borderRadius:
                         BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: KuberColors.border),
+                    border: Border.all(color: cs.outline),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.account_balance_wallet_outlined,
-                    color: KuberColors.primary,
+                    color: cs.primary,
                     size: 15,
                   ),
                 ),
@@ -54,7 +56,7 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    color: KuberColors.primary,
+                    color: cs.primary,
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -64,7 +66,7 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    color: KuberColors.textPrimary,
+                    color: cs.onSurface,
                     letterSpacing: -0.3,
                   ),
                 ),

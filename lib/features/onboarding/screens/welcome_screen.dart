@@ -28,8 +28,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.xl),
@@ -42,12 +43,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: KuberColors.primary.withValues(alpha: 0.15),
+                  color: cs.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: KuberColors.primary,
+                  color: cs.primary,
                   size: 44,
                 ),
               ),
@@ -59,7 +60,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                  color: KuberColors.textPrimary,
+                  color: cs.onSurface,
                   letterSpacing: -0.5,
                 ),
                 textAlign: TextAlign.center,
@@ -71,32 +72,32 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 'Your personal financial log — simple, private, and local-first.',
                 style: GoogleFonts.inter(
                   fontSize: 15,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: KuberSpacing.xxl),
 
               // Feature tiles
-              const _FeatureTile(
+              _FeatureTile(
                 icon: Icons.flash_on_rounded,
                 title: 'Smart Entry',
                 subtitle: 'Auto-fill from your history',
               ),
               const SizedBox(height: KuberSpacing.md),
-              const _FeatureTile(
+              _FeatureTile(
                 icon: Icons.bar_chart_rounded,
                 title: 'Analytics',
                 subtitle: 'Charts and spending breakdowns',
               ),
               const SizedBox(height: KuberSpacing.md),
-              const _FeatureTile(
+              _FeatureTile(
                 icon: Icons.account_balance_rounded,
                 title: 'Multi-Account',
                 subtitle: 'Track bank, cash, and credit cards',
               ),
               const SizedBox(height: KuberSpacing.md),
-              const _FeatureTile(
+              _FeatureTile(
                 icon: Icons.lock_outline_rounded,
                 title: 'Private & Local',
                 subtitle: 'Your data stays on your device',
@@ -111,7 +112,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: FilledButton(
                   onPressed: () => context.push('/onboarding/setup'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: KuberColors.primary,
+                    backgroundColor: cs.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
@@ -133,7 +134,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 _version,
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: KuberSpacing.lg),
@@ -158,12 +159,13 @@ class _FeatureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.lg),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: KuberColors.border),
+        border: Border.all(color: cs.outline),
       ),
       child: Row(
         children: [
@@ -171,10 +173,10 @@ class _FeatureTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: KuberColors.primary.withValues(alpha: 0.15),
+              color: cs.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(KuberRadius.md),
             ),
-            child: Icon(icon, color: KuberColors.primary, size: 20),
+            child: Icon(icon, color: cs.primary, size: 20),
           ),
           const SizedBox(width: KuberSpacing.md),
           Expanded(
@@ -186,14 +188,14 @@ class _FeatureTile extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: KuberColors.textPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
                 Text(
                   subtitle,
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
               ],

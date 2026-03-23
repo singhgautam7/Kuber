@@ -39,6 +39,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final categories = ref.watch(categoryListProvider);
 
@@ -61,7 +62,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -75,14 +76,14 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                     'Select Category',
                     style: textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: KuberColors.textPrimary,
+                      color: cs.onSurface,
                     ),
                   ),
                   const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     onPressed: () => Navigator.pop(context),
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -92,19 +93,19 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
               TextField(
                 controller: _searchController,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: KuberColors.textPrimary,
+                  color: cs.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Search categories',
                   hintStyle: textTheme.bodyMedium?.copyWith(
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search,
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                   filled: true,
-                  fillColor: KuberColors.surfaceMuted,
+                  fillColor: cs.surfaceContainerHigh,
                 ),
                 onChanged: (v) => setState(() => _query = v.toLowerCase()),
               ),
@@ -154,7 +155,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                     child: Text(
                       'No categories found',
                       style: textTheme.bodyMedium?.copyWith(
-                        color: KuberColors.textSecondary,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -211,8 +212,8 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                           cat.name,
                           style: textTheme.labelSmall?.copyWith(
                             color: selected
-                                ? KuberColors.textPrimary
-                                : KuberColors.textSecondary,
+                                ? cs.onSurface
+                                : cs.onSurfaceVariant,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 1,

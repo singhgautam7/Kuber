@@ -72,8 +72,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -86,12 +87,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   width: 88,
                   height: 88,
                   decoration: BoxDecoration(
-                    color: KuberColors.primary.withValues(alpha: 0.15),
+                    color: cs.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.account_balance_wallet_outlined,
-                    color: KuberColors.primary,
+                    color: cs.primary,
                     size: 44,
                   ),
                 ),
@@ -101,7 +102,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   style: GoogleFonts.inter(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
-                    color: KuberColors.primary,
+                    color: cs.primary,
                   ),
                 ),
                 const SizedBox(height: KuberSpacing.sm),
@@ -110,7 +111,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
               ],

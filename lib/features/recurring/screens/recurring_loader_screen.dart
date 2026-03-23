@@ -53,11 +53,12 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final count = ref.watch(recurringProcessResultProvider);
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: Center(
         child: FadeTransition(
           opacity: _fadeIn,
@@ -79,14 +80,14 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: KuberColors.textPrimary,
+                  color: cs.onSurface,
                 ),
               ),
               const SizedBox(height: KuberSpacing.sm),
               Text(
                 'Creating missed transactions...',
                 style: textTheme.bodyMedium?.copyWith(
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: KuberSpacing.xl),
@@ -119,12 +120,17 @@ class _SweepRingWidget extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return CustomPaint(
-      painter: _SweepRingPainter(progress: controller.value),
-      child: const Center(
+      painter: _SweepRingPainter(
+        progress: controller.value,
+        primaryColor: cs.primary,
+        surfaceMutedColor: cs.surfaceContainerHigh,
+      ),
+      child: Center(
         child: Icon(
           Icons.sync_rounded,
-          color: KuberColors.primary,
+          color: cs.primary,
           size: 36,
         ),
       ),
@@ -140,15 +146,16 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: KuberSpacing.md,
         vertical: KuberSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceMuted,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.full),
-        border: Border.all(color: KuberColors.border),
+        border: Border.all(color: cs.outline),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -158,7 +165,7 @@ class _StatusPill extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
           ),
@@ -168,7 +175,7 @@ class _StatusPill extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: KuberColors.textPrimary,
+              color: cs.onSurface,
             ),
           ),
         ],
@@ -179,8 +186,14 @@ class _StatusPill extends StatelessWidget {
 
 class _SweepRingPainter extends CustomPainter {
   final double progress;
+  final Color primaryColor;
+  final Color surfaceMutedColor;
 
-  _SweepRingPainter({required this.progress});
+  _SweepRingPainter({
+    required this.progress,
+    required this.primaryColor,
+    required this.surfaceMutedColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -189,7 +202,7 @@ class _SweepRingPainter extends CustomPainter {
 
     // Background ring
     final bgPaint = Paint()
-      ..color = KuberColors.surfaceMuted
+      ..color = surfaceMutedColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
     canvas.drawCircle(center, radius, bgPaint);
@@ -203,8 +216,8 @@ class _SweepRingPainter extends CustomPainter {
         startAngle: 0,
         endAngle: math.pi * 2,
         colors: [
-          KuberColors.primary.withValues(alpha: 0.0),
-          KuberColors.primary,
+          primaryColor.withValues(alpha: 0.0),
+          primaryColor,
         ],
         transform: GradientRotation(progress * math.pi * 2 - math.pi / 2),
       ).createShader(Rect.fromCircle(center: center, radius: radius));

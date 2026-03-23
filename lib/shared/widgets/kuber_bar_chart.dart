@@ -53,12 +53,13 @@ class _KuberBarChartState extends State<KuberBarChart> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: KuberColors.border, width: 1),
+        border: Border.all(color: cs.outline, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,21 +75,21 @@ class _KuberBarChartState extends State<KuberBarChart> {
                   Text(widget.title,
                     style: GoogleFonts.inter(
                       fontSize: 16, fontWeight: FontWeight.w600,
-                      color: KuberColors.textPrimary)),
+                      color: cs.onSurface)),
                   if (widget.subtitle != null) ...[
                     const SizedBox(height: 2),
                     Text(widget.subtitle!,
                       style: GoogleFonts.inter(
                         fontSize: 12,
-                        color: KuberColors.textSecondary)),
+                        color: cs.onSurfaceVariant)),
                   ],
                 ],
               ),
               // Legend
               Row(children: [
-                const _LegendDot(color: KuberColors.income,  label: 'INC'),
+                _LegendDot(color: cs.tertiary, label: 'INC'),
                 const SizedBox(width: 12),
-                const _LegendDot(color: KuberColors.expense, label: 'EXP'),
+                _LegendDot(color: cs.error, label: 'EXP'),
               ]),
             ],
           ),
@@ -99,6 +100,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
             height: widget.height,
             child: LayoutBuilder(
               builder: (context, constraints) {
+                final cs = Theme.of(context).colorScheme;
                 final slotWidth =
                     constraints.maxWidth / widget.buckets.length;
                 final barWidth =
@@ -132,8 +134,8 @@ class _KuberBarChartState extends State<KuberBarChart> {
                       show: true,
                       drawVerticalLine: false,
                       horizontalInterval: _gridInterval,
-                      getDrawingHorizontalLine: (_) => const FlLine(
-                        color: KuberColors.border,
+                      getDrawingHorizontalLine: (_) => FlLine(
+                        color: cs.outline,
                         strokeWidth: 1,
                       ),
                     ),
@@ -152,7 +154,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
                               return Text('${sym}0',
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
-                                  color: KuberColors.textSecondary));
+                                  color: cs.onSurfaceVariant));
                             }
                             final label = value >= 1000
                                 ? '$sym${(value / 1000).toStringAsFixed(1)}k'
@@ -160,7 +162,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
                             return Text(label,
                               style: GoogleFonts.inter(
                                 fontSize: 10,
-                                color: KuberColors.textSecondary));
+                                color: cs.onSurfaceVariant));
                           },
                         ),
                       ),
@@ -190,8 +192,8 @@ class _KuberBarChartState extends State<KuberBarChart> {
                                           ? FontWeight.w700
                                           : FontWeight.w400,
                                       color: b.isHighlighted
-                                          ? KuberColors.textPrimary
-                                          : KuberColors.textSecondary)),
+                                          ? cs.onSurface
+                                          : cs.onSurfaceVariant)),
                                   Text(b.monthLabel,
                                     style: GoogleFonts.inter(
                                       fontSize: 10,
@@ -199,8 +201,8 @@ class _KuberBarChartState extends State<KuberBarChart> {
                                           ? FontWeight.w700
                                           : FontWeight.w400,
                                       color: b.isHighlighted
-                                          ? KuberColors.textPrimary
-                                          : KuberColors.textSecondary)),
+                                          ? cs.onSurface
+                                          : cs.onSurfaceVariant)),
                                 ],
                               ),
                             );
@@ -208,7 +210,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
                         ),
                       ),
                     ),
-                    barGroups: _buildGroups(barWidth),
+                    barGroups: _buildGroups(barWidth, cs),
                   ),
                 );
               },
@@ -220,7 +222,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             child: _touchedGroupIndex != -1 && _touchedGroupIndex < widget.buckets.length
-                ? _buildDetailPanel(widget.buckets[_touchedGroupIndex])
+                ? _buildDetailPanel(widget.buckets[_touchedGroupIndex], cs)
                 : const SizedBox.shrink(),
           ),
         ],
@@ -228,7 +230,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
     );
   }
 
-  Widget _buildDetailPanel(KuberBarBucket bucket) {
+  Widget _buildDetailPanel(KuberBarBucket bucket, ColorScheme cs) {
     final net = bucket.income - bucket.expense;
     final maxVal = max(bucket.income, bucket.expense).clamp(1.0, double.infinity);
 
@@ -247,14 +249,14 @@ class _KuberBarChartState extends State<KuberBarChart> {
             label: 'Income',
             amount: formatAmt(bucket.income),
             ratio: bucket.income / maxVal,
-            color: KuberColors.income,
+            color: cs.tertiary,
           ),
           const SizedBox(height: 12),
           _DetailBar(
             label: 'Expense',
             amount: formatAmt(bucket.expense),
             ratio: bucket.expense / maxVal,
-            color: KuberColors.expense,
+            color: cs.error,
           ),
           const SizedBox(height: 12),
           Row(
@@ -264,7 +266,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
                 'Net',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
               Text(
@@ -272,7 +274,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: net >= 0 ? KuberColors.income : KuberColors.expense,
+                  color: net >= 0 ? cs.tertiary : cs.error,
                 ),
               ),
             ],
@@ -282,7 +284,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
     );
   }
 
-  List<BarChartGroupData> _buildGroups(double barWidth) {
+  List<BarChartGroupData> _buildGroups(double barWidth, ColorScheme cs) {
     // Gap in data terms based on the max Y value and chart height
     final double dataGap = (_maxY * _visualGapPx) / widget.height;
 
@@ -297,11 +299,11 @@ class _KuberBarChartState extends State<KuberBarChart> {
       final double bottomVal  = expenseOnTop ? b.income   : b.expense;
       final double topVal     = expenseOnTop ? b.expense  : b.income;
       final Color  bottomColor = expenseOnTop
-          ? KuberColors.income
-          : KuberColors.expense;
+          ? cs.tertiary
+          : cs.error;
       final Color  topColor    = expenseOnTop
-          ? KuberColors.expense
-          : KuberColors.income;
+          ? cs.error
+          : cs.tertiary;
 
       // Apply dim overlay by blending black into the color
       Color applyDim(Color c) => isDimmed
@@ -311,10 +313,10 @@ class _KuberBarChartState extends State<KuberBarChart> {
       final bool hasBottom = bottomVal > 0;
       final bool hasTop = topVal > 0;
       final double gap = (hasBottom && hasTop && topVal > bottomVal) ? dataGap : 0.0;
-      
+
       double adjustedTopFrom = bottomVal + gap;
       double adjustedTopTo = topVal;
-      
+
       if (hasTop && hasBottom && adjustedTopTo <= adjustedTopFrom) {
          adjustedTopTo = adjustedTopFrom + (dataGap * 0.5);
       }
@@ -405,6 +407,7 @@ class _DetailBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         Row(
@@ -414,7 +417,7 @@ class _DetailBar extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
               ),
             ),
             Text(

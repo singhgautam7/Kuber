@@ -23,6 +23,7 @@ class RecurringScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final rulesAsync = ref.watch(recurringListProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
@@ -31,7 +32,7 @@ class RecurringScreen extends ConsumerWidget {
     final symbol = ref.watch(currencyProvider).symbol;
 
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: rulesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -59,7 +60,7 @@ class RecurringScreen extends ConsumerWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 32,
                                 fontWeight: FontWeight.w800,
-                                color: KuberColors.textPrimary,
+                                color: cs.onSurface,
                                 height: 1.15,
                                 letterSpacing: -0.5,
                               ),
@@ -69,7 +70,7 @@ class RecurringScreen extends ConsumerWidget {
                               'Automated scheduled transactions',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
-                                color: KuberColors.textSecondary,
+                                color: cs.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -80,13 +81,13 @@ class RecurringScreen extends ConsumerWidget {
                         child: Container(
                           width: 48,
                           height: 48,
-                          decoration: const BoxDecoration(
-                            color: KuberColors.primary,
+                          decoration: BoxDecoration(
+                            color: cs.primary,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.add_rounded,
-                            color: Colors.white,
+                            color: cs.onPrimary,
                             size: 24,
                           ),
                         ),
@@ -109,13 +110,13 @@ class RecurringScreen extends ConsumerWidget {
                           Icon(
                             Icons.sync_rounded,
                             size: 64,
-                            color: KuberColors.textSecondary.withValues(alpha: 0.5),
+                            color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: KuberSpacing.lg),
                           Text(
                             'No recurring transactions yet',
                             style: textTheme.titleMedium?.copyWith(
-                              color: KuberColors.textPrimary,
+                              color: cs.onSurface,
                             ),
                           ),
                           const SizedBox(height: KuberSpacing.sm),
@@ -124,9 +125,9 @@ class RecurringScreen extends ConsumerWidget {
                             child: Text(
                               'Add one?',
                               style: textTheme.bodyMedium?.copyWith(
-                                color: KuberColors.primary,
+                                color: cs.primary,
                                 decoration: TextDecoration.underline,
-                                decorationColor: KuberColors.primary,
+                                decorationColor: cs.primary,
                               ),
                             ),
                           ),
@@ -161,9 +162,9 @@ class RecurringScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(KuberSpacing.lg),
                             decoration: BoxDecoration(
-                              color: KuberColors.surfaceCard,
+                              color: cs.surfaceContainer,
                               borderRadius: BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(color: KuberColors.border),
+                              border: Border.all(color: cs.outline),
                             ),
                             child: Row(
                               children: [
@@ -196,7 +197,7 @@ class RecurringScreen extends ConsumerWidget {
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: KuberColors.textSecondary,
+                              color: cs.onSurfaceVariant,
                               letterSpacing: 1.0,
                             ),
                           ),
@@ -215,7 +216,7 @@ class RecurringScreen extends ConsumerWidget {
                                       : Icons.category_outlined,
                                   categoryColor: cat != null
                                       ? harmonizeCategory(context, Color(cat.colorValue))
-                                      : KuberColors.textSecondary,
+                                      : cs.onSurfaceVariant,
                                   symbol: symbol,
                                   onTap: () => showRecurringDetailSheet(
                                     context, ref, rule,
@@ -252,7 +253,7 @@ class RecurringScreen extends ConsumerWidget {
                                     style: GoogleFonts.inter(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: KuberColors.textSecondary,
+                                      color: cs.onSurfaceVariant,
                                       letterSpacing: 1.0,
                                     ),
                                   ),
@@ -265,7 +266,7 @@ class RecurringScreen extends ConsumerWidget {
                                         : Icons.category_outlined;
                                     final catColor = cat != null
                                         ? harmonizeCategory(context, Color(cat.colorValue))
-                                        : KuberColors.textSecondary;
+                                        : cs.onSurfaceVariant;
                                     final accountName = accounts
                                         .where((a) => a.id.toString() == t.accountId)
                                         .firstOrNull
@@ -276,9 +277,9 @@ class RecurringScreen extends ConsumerWidget {
                                       margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
                                       padding: const EdgeInsets.all(KuberSpacing.md),
                                       decoration: BoxDecoration(
-                                        color: KuberColors.surfaceCard,
+                                        color: cs.surfaceContainer,
                                         borderRadius: BorderRadius.circular(KuberRadius.md),
-                                        border: Border.all(color: KuberColors.border),
+                                        border: Border.all(color: cs.outline),
                                       ),
                                       child: Row(
                                         children: [
@@ -299,7 +300,7 @@ class RecurringScreen extends ConsumerWidget {
                                                 Text(
                                                   t.name,
                                                   style: textTheme.bodyMedium?.copyWith(
-                                                    color: KuberColors.textPrimary,
+                                                    color: cs.onSurface,
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                   overflow: TextOverflow.ellipsis,
@@ -308,7 +309,7 @@ class RecurringScreen extends ConsumerWidget {
                                                 Text(
                                                   '${accountName ?? 'Unknown'} · $dateStr',
                                                   style: textTheme.labelSmall?.copyWith(
-                                                    color: KuberColors.textSecondary,
+                                                    color: cs.onSurfaceVariant,
                                                   ),
                                                 ),
                                               ],
@@ -318,8 +319,8 @@ class RecurringScreen extends ConsumerWidget {
                                             CurrencyFormatter.format(t.amount),
                                             style: textTheme.bodyMedium?.copyWith(
                                               color: t.type == 'income'
-                                                  ? KuberColors.income
-                                                  : KuberColors.expense,
+                                                  ? cs.tertiary
+                                                  : cs.error,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -376,6 +377,7 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Column(
       children: [
@@ -383,14 +385,14 @@ class _StatTile extends StatelessWidget {
           value,
           style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: KuberColors.textPrimary,
+            color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
           style: textTheme.labelSmall?.copyWith(
-            color: KuberColors.textSecondary,
+            color: cs.onSurfaceVariant,
           ),
         ),
       ],
@@ -421,6 +423,7 @@ class _RuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isPaused = rule.isPaused;
     final isExpired = RecurringRepository.isExpired(rule);
@@ -431,9 +434,9 @@ class _RuleCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
-          color: KuberColors.surfaceCard,
+          color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: KuberColors.border),
+          border: Border.all(color: cs.outline),
         ),
         child: Row(
           children: [
@@ -460,7 +463,7 @@ class _RuleCard extends StatelessWidget {
                         child: Text(
                           rule.name,
                           style: textTheme.bodyMedium?.copyWith(
-                            color: KuberColors.textPrimary,
+                            color: cs.onSurface,
                             fontWeight: FontWeight.w600,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -474,10 +477,10 @@ class _RuleCard extends StatelessWidget {
                                 ? 'EXPIRED'
                                 : 'ACTIVE',
                         color: isPaused
-                            ? KuberColors.textSecondary
+                            ? cs.onSurfaceVariant
                             : isExpired
-                                ? KuberColors.expense
-                                : KuberColors.income,
+                                ? cs.error
+                                : cs.tertiary,
                       ),
                     ],
                   ),
@@ -485,7 +488,7 @@ class _RuleCard extends StatelessWidget {
                   Text(
                     'Next: ${DateFormat('MMM d, yyyy').format(rule.nextDueAt)}',
                     style: textTheme.labelSmall?.copyWith(
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -497,8 +500,8 @@ class _RuleCard extends StatelessWidget {
               CurrencyFormatter.format(rule.amount),
               style: textTheme.bodyMedium?.copyWith(
                 color: rule.type == 'income'
-                    ? KuberColors.income
-                    : KuberColors.expense,
+                    ? cs.tertiary
+                    : cs.error,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -506,9 +509,9 @@ class _RuleCard extends StatelessWidget {
 
             // Actions
             PopupMenuButton<String>(
-              icon: const Icon(
+              icon: Icon(
                 Icons.more_vert,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
                 size: 20,
               ),
               onSelected: (value) {
