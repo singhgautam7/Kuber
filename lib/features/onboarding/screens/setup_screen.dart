@@ -193,6 +193,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                         selected: {_selectedTheme},
                         onSelectionChanged: (v) {
                           setState(() => _selectedTheme = v.first);
+                          ref.read(settingsProvider.notifier).setThemeMode(v.first);
                         },
                       ),
                     ),
