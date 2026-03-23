@@ -235,7 +235,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                               ),
                               filled: true,
-                              fillColor: cs.surfaceContainerHigh,
+                              fillColor: cs.surface,
                               counterText: '', // Hide default counter
                               suffixText: '${_userNameController.text.length}/15',
                               suffixStyle: GoogleFonts.inter(
@@ -244,7 +244,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(KuberRadius.md),
-                                borderSide: BorderSide.none,
+                                borderSide: BorderSide(color: cs.outline),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(KuberRadius.md),
+                                borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(KuberRadius.md),
+                                borderSide: BorderSide(color: cs.primary, width: 1.5),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: KuberSpacing.lg,
