@@ -129,8 +129,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final colorScheme = cs;
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final categoryMap = ref.watch(categoryMapProvider);
     final accounts = ref.watch(accountListProvider);
@@ -144,7 +143,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
 
     return Scaffold(
-      backgroundColor: cs.surface,
+      backgroundColor: KuberColors.background,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close),
@@ -206,28 +205,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     },
                     fieldViewBuilder:
                         (context, controller, focusNode, onFieldSubmitted) {
-                      final cs = Theme.of(context).colorScheme;
                       return TextField(
                         controller: controller,
                         focusNode: focusNode,
                         autofocus: !_isEditing,
                         style: textTheme.bodyLarge?.copyWith(
-                          color: cs.onSurface,
+                          color: KuberColors.textPrimary,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Transaction name',
                           hintStyle: textTheme.bodyLarge?.copyWith(
-                            color: cs.onSurfaceVariant,
+                            color: KuberColors.textSecondary,
                           ),
-                          prefixIcon: Icon(
+                          prefixIcon: const Icon(
                             Icons.edit_outlined,
-                            color: cs.onSurfaceVariant,
+                            color: KuberColors.textSecondary,
                           ),
                         ),
                       );
                     },
                     optionsViewBuilder: (context, onSelected, options) {
-                      final cs = Theme.of(context).colorScheme;
                       final catMap =
                           ref.read(categoryMapProvider).valueOrNull ?? {};
                       return Align(
@@ -237,7 +234,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           child: Material(
                             elevation: 8,
                             borderRadius: BorderRadius.circular(8),
-                            color: cs.surfaceContainerHigh,
+                            color: KuberColors.surfaceMuted,
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
                                 maxHeight: 200,
@@ -253,14 +250,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   shrinkWrap: true,
                                   itemCount: options.length,
                                   itemBuilder: (context, index) {
-                                    final cs = Theme.of(context).colorScheme;
                                     final s = options.elementAt(index);
                                     final cat =
                                         catMap[int.tryParse(s.categoryId)];
                                     final catColor = cat != null
                                         ? harmonizeCategory(
                                             context, Color(cat.colorValue))
-                                        : cs.onSurfaceVariant;
+                                        : KuberColors.textSecondary;
                                     final catIcon = cat != null
                                         ? IconMapper.fromString(cat.icon)
                                         : Icons.category;
@@ -304,7 +300,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                                         .textTheme
                                                         .bodyMedium
                                                         ?.copyWith(
-                                                          color: cs.onSurface,
+                                                          color: KuberColors
+                                                              .textPrimary,
                                                         ),
                                                     overflow:
                                                         TextOverflow.ellipsis,
@@ -316,7 +313,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                                           .textTheme
                                                           .labelSmall
                                                           ?.copyWith(
-                                                            color: cs.onSurfaceVariant,
+                                                            color: KuberColors
+                                                                .textSecondary,
                                                           ),
                                                       overflow:
                                                           TextOverflow.ellipsis,
@@ -382,7 +380,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             hintStyle: GoogleFonts.inter(
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
-                              color: cs.onSurfaceVariant,
+                              color: KuberColors.textSecondary,
                             ),
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none,
@@ -401,7 +399,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             style: GoogleFonts.inter(
                               fontSize: 28,
                               fontWeight: FontWeight.w300,
-                              color: cs.onSurfaceVariant,
+                              color: KuberColors.textSecondary,
                             ),
                           ),
                         ),
@@ -414,18 +412,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               width: 44,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: cs.surfaceContainerHigh,
+                                color: KuberColors.surfaceMuted,
                                 borderRadius:
                                     BorderRadius.circular(KuberRadius.md),
                                 border: Border.all(
-                                  color: cs.outline,
+                                  color: KuberColors.border,
                                 ),
                               ),
                               alignment: Alignment.center,
-                              child: Icon(
+                              child: const Icon(
                                 Icons.calculate_outlined,
                                 size: 20,
-                                color: cs.onSurfaceVariant,
+                                color: KuberColors.textSecondary,
                               ),
                             ),
                           ),
@@ -501,7 +499,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               iconColor: cat != null
                                   ? harmonizeCategory(
                                       context, Color(cat.colorValue))
-                                  : cs.onSurfaceVariant,
+                                  : KuberColors.textSecondary,
                               onTap: () => _showCategoryPicker(),
                             );
                           },
@@ -527,7 +525,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               value: acc?.name ?? 'Select',
                               iconColor: acc != null
                                   ? resolveAccountColor(acc)
-                                  : cs.onSurfaceVariant,
+                                  : KuberColors.textSecondary,
                               onTap: () => _showAccountPicker(),
                             );
                           },
@@ -544,9 +542,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(KuberSpacing.lg),
                       decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
+                        color: KuberColors.surfaceMuted,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline),
+                        border: Border.all(color: KuberColors.border),
                       ),
                       child: Row(
                         children: [
@@ -570,7 +568,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               Text(
                                 'DATE & TIME',
                                 style: textTheme.labelSmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
+                                  color: KuberColors.textSecondary,
                                   letterSpacing: 1.2,
                                 ),
                               ),
@@ -578,7 +576,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               Text(
                                 _formatDate(_selectedDate),
                                 style: textTheme.bodyMedium?.copyWith(
-                                  color: cs.onSurface,
+                                  color: KuberColors.textPrimary,
                                 ),
                               ),
                             ],
@@ -586,7 +584,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           const Spacer(),
                           Icon(
                             Icons.chevron_right,
-                            color: cs.onSurfaceVariant,
+                            color: KuberColors.textSecondary,
                           ),
                         ],
                       ),
@@ -599,16 +597,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     controller: _notesController,
                     maxLines: 2,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface,
+                      color: KuberColors.textPrimary,
                     ),
                     decoration: InputDecoration(
                       hintText: 'Add a note (optional)',
                       hintStyle: textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
+                        color: KuberColors.textSecondary,
                       ),
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                         Icons.note_outlined,
-                        color: cs.onSurfaceVariant,
+                        color: KuberColors.textSecondary,
                       ),
                     ),
                   ),
@@ -628,9 +626,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               MediaQuery.of(context).viewPadding.bottom + KuberSpacing.lg,
             ),
             decoration: BoxDecoration(
-              color: cs.surface,
+              color: KuberColors.background,
               border: Border(
-                top: BorderSide(color: cs.outline),
+                top: BorderSide(color: KuberColors.border),
               ),
             ),
             child: SizedBox(
@@ -641,8 +639,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 style: FilledButton.styleFrom(
                   backgroundColor: _typeColor,
                   disabledBackgroundColor:
-                      cs.surfaceContainerHigh,
-                  disabledForegroundColor: cs.onSurfaceVariant,
+                      KuberColors.surfaceMuted,
+                  disabledForegroundColor: KuberColors.textSecondary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
@@ -662,12 +660,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Widget _buildSelectorTilePlaceholder(String label) {
-    final cs = Theme.of(context).colorScheme;
     return _SelectorTile(
       label: label,
       icon: Icons.hourglass_empty,
       value: '...',
-      iconColor: cs.onSurfaceVariant,
+      iconColor: KuberColors.textSecondary,
       onTap: () {},
     );
   }
@@ -691,13 +688,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _openCalculator() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       useRootNavigator: true,
-      backgroundColor: cs.surface,
+      backgroundColor: KuberColors.background,
       shape: const RoundedRectangleBorder(
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
@@ -716,13 +712,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _showCategoryPicker() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
+      backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
@@ -739,13 +734,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _showAccountPicker() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
+      backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
@@ -910,7 +904,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     TextTheme textTheme,
     AsyncValue<List<Account>> accounts,
   ) {
-    final cs = colorScheme;
     final accs = accounts.valueOrNull ?? [];
     final fromAccount = _selectedFromAccountId != null
         ? accs.where((a) => a.id == _selectedFromAccountId).firstOrNull
@@ -928,11 +921,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     Color bgColor;
     Color txtColor;
     if (subtype == TransferSubtype.creditCardPayment) {
-      bgColor = cs.tertiary.withValues(alpha: 0.15);
-      txtColor = cs.tertiary;
+      bgColor = KuberColors.income.withValues(alpha: 0.15);
+      txtColor = KuberColors.income;
     } else if (subtype == TransferSubtype.creditCardWithdrawal) {
-      bgColor = cs.error.withValues(alpha: 0.15);
-      txtColor = cs.error;
+      bgColor = KuberColors.expense.withValues(alpha: 0.15);
+      txtColor = KuberColors.expense;
     } else if (subtype == TransferSubtype.creditCardTransfer) {
       bgColor = const Color(0xFFF59E0B).withValues(alpha: 0.15);
       txtColor = const Color(0xFFF59E0B);
@@ -998,14 +991,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
-                  color: cs.onSurface,
+                  color: KuberColors.textPrimary,
                 ),
                 decoration: InputDecoration(
                   hintText: '0',
                   hintStyle: GoogleFonts.inter(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
-                    color: cs.onSurfaceVariant,
+                    color: KuberColors.textSecondary,
                   ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -1024,7 +1017,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w300,
-                    color: cs.onSurfaceVariant,
+                    color: KuberColors.textSecondary,
                   ),
                 ),
               ),
@@ -1037,18 +1030,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
+                      color: KuberColors.surfaceMuted,
                       borderRadius:
                           BorderRadius.circular(KuberRadius.md),
                       border: Border.all(
-                        color: cs.outline,
+                        color: KuberColors.border,
                       ),
                     ),
                     alignment: Alignment.center,
-                    child: Icon(
+                    child: const Icon(
                       Icons.calculate_outlined,
                       size: 20,
-                      color: cs.onSurfaceVariant,
+                      color: KuberColors.textSecondary,
                     ),
                   ),
                 ),
@@ -1153,9 +1146,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           child: Container(
             padding: const EdgeInsets.all(KuberSpacing.lg),
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
+              color: KuberColors.surfaceMuted,
               borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              border: Border.all(color: KuberColors.border),
             ),
             child: Row(
               children: [
@@ -1179,7 +1172,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     Text(
                       'DATE & TIME',
                       style: textTheme.labelSmall?.copyWith(
-                        color: cs.onSurfaceVariant,
+                        color: KuberColors.textSecondary,
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -1187,7 +1180,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     Text(
                       _formatDate(_selectedDate),
                       style: textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurface,
+                        color: KuberColors.textPrimary,
                       ),
                     ),
                   ],
@@ -1195,7 +1188,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 const Spacer(),
                 Icon(
                   Icons.chevron_right,
-                  color: cs.onSurfaceVariant,
+                  color: KuberColors.textSecondary,
                 ),
               ],
             ),
@@ -1208,16 +1201,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           controller: _notesController,
           maxLines: 2,
           style: textTheme.bodyMedium?.copyWith(
-            color: cs.onSurface,
+            color: KuberColors.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: 'Add a note (optional)',
             hintStyle: textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
+              color: KuberColors.textSecondary,
             ),
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.note_outlined,
-              color: cs.onSurfaceVariant,
+              color: KuberColors.textSecondary,
             ),
           ),
         ),
@@ -1230,13 +1223,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     required bool isFrom,
     int? excludeId,
   }) {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
+      backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
@@ -1272,11 +1264,10 @@ class _TransferAccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final color = account != null
         ? resolveAccountColor(account!)
-        : cs.onSurfaceVariant;
+        : KuberColors.textSecondary;
     final icon = account != null
         ? resolveAccountIcon(account!)
         : Icons.account_balance_wallet_outlined;
@@ -1287,9 +1278,9 @@ class _TransferAccountTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
+          color: KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          border: Border.all(color: KuberColors.border),
         ),
         child: Row(
           children: [
@@ -1310,7 +1301,7 @@ class _TransferAccountTile extends StatelessWidget {
                   Text(
                     label,
                     style: textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
+                      color: KuberColors.textSecondary,
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -1319,8 +1310,8 @@ class _TransferAccountTile extends StatelessWidget {
                     account?.name ?? 'Select Account',
                     style: textTheme.bodyMedium?.copyWith(
                       color: account != null
-                          ? cs.onSurface
-                          : cs.onSurfaceVariant,
+                          ? KuberColors.textPrimary
+                          : KuberColors.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -1329,7 +1320,7 @@ class _TransferAccountTile extends StatelessWidget {
             ),
             Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: cs.onSurfaceVariant,
+              color: KuberColors.textSecondary,
             ),
           ],
         ),
@@ -1355,7 +1346,6 @@ class _SelectorTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
@@ -1364,9 +1354,9 @@ class _SelectorTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(KuberSpacing.lg),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
+          color: KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          border: Border.all(color: KuberColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1374,7 +1364,7 @@ class _SelectorTile extends StatelessWidget {
             Text(
               label,
               style: textTheme.labelSmall?.copyWith(
-                color: cs.onSurfaceVariant,
+                color: KuberColors.textSecondary,
                 letterSpacing: 1.2,
               ),
             ),
@@ -1395,7 +1385,7 @@ class _SelectorTile extends StatelessWidget {
                   child: Text(
                     value,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface,
+                      color: KuberColors.textPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1423,17 +1413,16 @@ class _TransactionTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final colorScheme = cs;
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
       height: 48,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        border: Border.all(color: KuberColors.border),
       ),
       child: Row(
         children: List.generate(_types.length, (i) {
@@ -1454,7 +1443,7 @@ class _TransactionTypeSelector extends StatelessWidget {
                   style: textTheme.labelLarge?.copyWith(
                     color: isSelected
                         ? colorScheme.onPrimary
-                        : cs.onSurfaceVariant,
+                        : KuberColors.textSecondary,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),

@@ -21,10 +21,11 @@ void showTransactionDetailSheet(
   WidgetRef ref,
   Transaction t,
 ) {
+  final cs = Theme.of(context).colorScheme;
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
-    backgroundColor: KuberColors.surfaceCard,
+    backgroundColor: cs.surfaceContainer,
     isScrollControlled: true,
     useSafeArea: true,
     shape: const RoundedRectangleBorder(
@@ -84,6 +85,7 @@ class TransactionDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
     final isTransfer = transaction.type == 'transfer';
@@ -130,8 +132,8 @@ class TransactionDetailSheet extends ConsumerWidget {
     final symbol = ref.watch(currencyProvider).symbol;
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
-        ? KuberColors.textPrimary
-        : (isIncome ? KuberColors.income : KuberColors.expense);
+        ? cs.onSurface
+        : (isIncome ? cs.tertiary : cs.error);
     final amountPrefix = isTransfer ? symbol : (isIncome ? '+$symbol' : '−$symbol');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
@@ -140,7 +142,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             : Icons.category);
     final iconColor = isTransfer
         ? const Color(0xFF78909C)
-        : (category != null ? Color(category.colorValue) : KuberColors.primary);
+        : (category != null ? Color(category.colorValue) : cs.primary);
     final categoryName = category?.name ?? 'Unknown';
     final displayName = isTransfer
         ? '${fromAccountName ?? "Unknown"} → ${toAccountName ?? "Unknown"}'
@@ -166,7 +168,7 @@ class TransactionDetailSheet extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textSecondary.withValues(alpha: 0.3),
+                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -201,7 +203,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: KuberColors.textPrimary,
+                          color: cs.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -211,7 +213,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: KuberColors.textSecondary,
+                          color: cs.onSurfaceVariant,
                           letterSpacing: 1.0,
                         ),
                       ),
@@ -224,13 +226,13 @@ class TransactionDetailSheet extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: KuberColors.surfaceMuted,
+                      color: cs.surfaceContainerHigh,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       size: 18,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -246,7 +248,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -351,8 +353,8 @@ class TransactionDetailSheet extends ConsumerWidget {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: KuberColors.textPrimary,
-                  side: BorderSide(color: KuberColors.border),
+                  foregroundColor: cs.onSurface,
+                  side: BorderSide(color: cs.outline),
                   padding:
                       const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                   shape: RoundedRectangleBorder(
@@ -375,7 +377,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                 ),
               ),
               style: TextButton.styleFrom(
-                foregroundColor: KuberColors.expense,
+                foregroundColor: cs.error,
               ),
             ),
 
@@ -394,13 +396,14 @@ class _DetailCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: KuberSpacing.lg,
         vertical: KuberSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceMuted,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
@@ -411,7 +414,7 @@ class _DetailCell extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
@@ -421,7 +424,7 @@ class _DetailCell extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textPrimary,
+              color: cs.onSurface,
             ),
             overflow: TextOverflow.ellipsis,
           ),

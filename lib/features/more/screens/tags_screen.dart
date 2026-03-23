@@ -9,8 +9,10 @@ class TagsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       appBar: const KuberAppBar(showBack: true, title: 'Tags'),
       body: Center(
         child: Column(
@@ -20,12 +22,12 @@ class TagsScreen extends StatelessWidget {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: KuberColors.surfaceCard,
+                color: cs.surfaceContainer,
                 borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: KuberColors.border),
+                border: Border.all(color: cs.outline),
               ),
-              child: const Icon(Icons.label_outlined,
-                  color: KuberColors.textSecondary, size: 28),
+              child: Icon(Icons.label_outlined,
+                  color: cs.onSurfaceVariant, size: 28),
             ),
             const SizedBox(height: KuberSpacing.lg),
             Text(
@@ -33,7 +35,7 @@ class TagsScreen extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: KuberColors.textPrimary,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: KuberSpacing.xs),
@@ -41,7 +43,7 @@ class TagsScreen extends StatelessWidget {
               'Coming soon',
               style: GoogleFonts.inter(
                 fontSize: 14,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
               ),
             ),
           ],

@@ -79,6 +79,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     // Sync tab index from route
     final location = GoRouterState.of(context).uri.path;
     final routeIndex = _routes.indexOf(location);
@@ -122,7 +124,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
     if (isWide) {
       return Scaffold(
-        backgroundColor: KuberColors.background,
+        backgroundColor: cs.surface,
         body: Row(
           children: [
             KuberNavRail(
@@ -137,7 +139,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     }
 
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: Stack(
         children: [
           animatedContent,
@@ -168,7 +170,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
               onLongPress: _openSpeedDial,
               child: FloatingActionButton(
                 onPressed: _onAddTapped,
-                backgroundColor: KuberColors.primary,
+                backgroundColor: cs.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -256,6 +258,7 @@ class _SpeedDialMenu extends AnimatedWidget {
     required String label,
     required VoidCallback onTap,
   }) {
+    final cs = Theme.of(context).colorScheme;
     final delay = (index * 0.15).clamp(0.0, 0.5);
     final progress =
         ((_progress.value - delay) / (1.0 - delay)).clamp(0.0, 1.0);
@@ -272,21 +275,21 @@ class _SpeedDialMenu extends AnimatedWidget {
               vertical: KuberSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: KuberColors.surfaceCard,
+              color: cs.surfaceContainer,
               borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: KuberColors.border),
+              border: Border.all(color: cs.outline),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: KuberColors.primary, size: 20),
+                Icon(icon, color: cs.primary, size: 20),
                 const SizedBox(width: KuberSpacing.sm),
                 Text(
                   label,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: KuberColors.textPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
               ],

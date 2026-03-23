@@ -266,8 +266,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final periodTxns = ref.watch(analyticsTransactionsProvider(_period));
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
 
-    final cs = Theme.of(context).colorScheme;
-    final colorScheme = cs;
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     final isEmpty = periodTxns.isEmpty;
@@ -362,7 +361,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             },
                       icon: isCustom
                           ? Icon(Icons.date_range, size: 14,
-                              color: isSelected ? cs.primary : cs.onSurfaceVariant)
+                              color: isSelected ? KuberColors.primary : KuberColors.textSecondary)
                           : null,
                     ),
                   );
@@ -570,7 +569,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         child: Text(
                           'No $biggestType transactions',
                           style: textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
+                            color: KuberColors.textSecondary,
                           ),
                         ),
                       ),
@@ -700,7 +699,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: KuberColors.surfaceCard,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       padding: const EdgeInsets.all(KuberSpacing.lg),
@@ -712,7 +711,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: _SummaryTile(
                   label: 'Income',
                   amount: _formatAmount(income),
-                  color: cs.tertiary,
+                  color: KuberColors.income,
                   icon: Icons.arrow_downward,
                 ),
               ),
@@ -721,7 +720,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: _SummaryTile(
                   label: 'Expense',
                   amount: _formatAmount(expense),
-                  color: cs.error,
+                  color: KuberColors.expense,
                   icon: Icons.arrow_upward,
                 ),
               ),
@@ -733,7 +732,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             padding: const EdgeInsets.symmetric(
                 vertical: KuberSpacing.sm, horizontal: KuberSpacing.md),
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
+              color: KuberColors.surfaceMuted,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -742,14 +741,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 Text(
                   'Net: ',
                   style: GoogleFonts.inter(
-                    color: cs.onSurfaceVariant,
+                    color: KuberColors.textSecondary,
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
                   style: GoogleFonts.inter(
-                    color: net >= 0 ? cs.tertiary : cs.error,
+                    color: net >= 0 ? KuberColors.income : KuberColors.expense,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -849,7 +848,6 @@ class _KuberFilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -859,8 +857,8 @@ class _KuberFilterChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? cs.primary.withValues(alpha: 0.18)
-              : cs.surfaceContainerHigh,
+              ? KuberColors.primary.withValues(alpha: 0.18)
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -875,7 +873,7 @@ class _KuberFilterChip extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? cs.primary : cs.onSurfaceVariant,
+                color: selected ? KuberColors.primary : KuberColors.textSecondary,
               ),
             ),
           ],
@@ -901,7 +899,7 @@ class _TabToggle extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -926,7 +924,7 @@ class _TabToggle extends StatelessWidget {
                   fontSize: 11,
                   fontWeight:
                       isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? cs.primary : cs.onSurfaceVariant,
+                  color: isSelected ? cs.primary : KuberColors.textSecondary,
                 ),
               ),
             ),
@@ -950,13 +948,12 @@ class _AnalyticsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(KuberSpacing.lg),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: KuberColors.surfaceCard,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
@@ -989,7 +986,6 @@ class _ChartLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -1003,7 +999,7 @@ class _ChartLegend extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             fontSize: 11,
-            color: cs.onSurfaceVariant,
+            color: KuberColors.textSecondary,
           ),
         ),
       ],
@@ -1026,11 +1022,10 @@ class _SummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -1043,7 +1038,7 @@ class _SummaryTile extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.inter(
-                  color: cs.onSurfaceVariant,
+                  color: KuberColors.textSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -1053,7 +1048,7 @@ class _SummaryTile extends StatelessWidget {
           Text(
             amount,
             style: GoogleFonts.inter(
-              color: cs.onSurface,
+              color: KuberColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
@@ -1080,7 +1075,6 @@ class _DetailBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         Row(
@@ -1090,7 +1084,7 @@ class _DetailBar extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: cs.onSurfaceVariant,
+                color: KuberColors.textSecondary,
               ),
             ),
             Text(
@@ -1131,7 +1125,6 @@ class _DonutDetailPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final catIdStr = catTotal.category.id.toString();
     final catTxns =
         transactions.where((t) => t.categoryId == catIdStr).toList();
@@ -1149,14 +1142,14 @@ class _DonutDetailPanel extends StatelessWidget {
             label: 'Income',
             amount: formatAmount(income),
             ratio: income / maxVal,
-            color: cs.tertiary,
+            color: KuberColors.income,
           ),
           const SizedBox(height: KuberSpacing.sm),
           _DetailBar(
             label: 'Expense',
             amount: formatAmount(expense),
             ratio: expense / maxVal,
-            color: cs.error,
+            color: KuberColors.expense,
           ),
           const SizedBox(height: KuberSpacing.sm),
           Row(
@@ -1166,7 +1159,7 @@ class _DonutDetailPanel extends StatelessWidget {
                 'Transactions',
                 style: GoogleFonts.inter(
                   fontSize: 12,
-                  color: cs.onSurfaceVariant,
+                  color: KuberColors.textSecondary,
                 ),
               ),
               Text(
@@ -1174,7 +1167,7 @@ class _DonutDetailPanel extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
+                  color: KuberColors.textPrimary,
                 ),
               ),
             ],
@@ -1200,11 +1193,10 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md, vertical: KuberSpacing.sm),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: KuberColors.surfaceMuted,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -1218,7 +1210,7 @@ class _StatTile extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: cs.onSurface,
+              color: KuberColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -1226,7 +1218,7 @@ class _StatTile extends StatelessWidget {
             label,
             style: GoogleFonts.inter(
               fontSize: 11,
-              color: cs.onSurfaceVariant,
+              color: KuberColors.textSecondary,
             ),
           ),
         ],

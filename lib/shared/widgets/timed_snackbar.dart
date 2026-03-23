@@ -20,14 +20,16 @@ void showKuberSnackBar(
   String? actionLabel,
   VoidCallback? onAction,
 }) {
+  final cs = Theme.of(context).colorScheme;
+
   _currentFlushbar?.dismiss();
 
-  final barColor = isError ? KuberColors.expense : KuberColors.income;
+  final barColor = isError ? cs.error : cs.tertiary;
   bool actionFired = false;
 
   final closeButton = IconButton(
     icon: const Icon(Icons.close, size: 18),
-    color: KuberColors.textSecondary,
+    color: cs.onSurfaceVariant,
     onPressed: _dismissInstantly,
   );
 
@@ -45,8 +47,8 @@ void showKuberSnackBar(
           },
           child: Text(
             actionLabel,
-            style: const TextStyle(
-              color: KuberColors.primary,
+            style: TextStyle(
+              color: cs.primary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -63,14 +65,15 @@ void showKuberSnackBar(
       tween: Tween(begin: 1.0, end: 0.0),
       duration: const Duration(seconds: 7),
       builder: (context, value, child) {
+        final innerCs = Theme.of(context).colorScheme;
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               message,
-              style: const TextStyle(
-                color: KuberColors.textPrimary,
+              style: TextStyle(
+                color: innerCs.onSurface,
                 fontSize: 14,
               ),
             ),
@@ -79,8 +82,8 @@ void showKuberSnackBar(
               value: value,
               minHeight: 2,
               valueColor:
-                  AlwaysStoppedAnimation<Color>(KuberColors.primary),
-              backgroundColor: KuberColors.border,
+                  AlwaysStoppedAnimation<Color>(innerCs.primary),
+              backgroundColor: innerCs.outline,
               borderRadius: BorderRadius.circular(1),
             ),
           ],
@@ -92,8 +95,8 @@ void showKuberSnackBar(
     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     borderRadius: BorderRadius.circular(KuberRadius.md),
-    backgroundColor: KuberColors.surfaceCard,
-    borderColor: isError ? KuberColors.expense : KuberColors.border,
+    backgroundColor: cs.surfaceContainer,
+    borderColor: isError ? cs.error : cs.outline,
     borderWidth: 1,
     icon: Icon(
       isError

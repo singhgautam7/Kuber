@@ -22,6 +22,7 @@ class AccountPickerSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final accounts = ref.watch(accountListProvider);
 
@@ -44,7 +45,7 @@ class AccountPickerSheet extends ConsumerWidget {
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -61,14 +62,14 @@ class AccountPickerSheet extends ConsumerWidget {
                         'Select Account',
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: KuberColors.textPrimary,
+                          color: cs.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Choose the account for this transaction',
                         style: textTheme.bodySmall?.copyWith(
-                          color: KuberColors.textSecondary,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -77,7 +78,7 @@ class AccountPickerSheet extends ConsumerWidget {
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     onPressed: () => Navigator.pop(context),
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -104,7 +105,7 @@ class AccountPickerSheet extends ConsumerWidget {
                   child: Text(
                     'No accounts yet',
                     style: textTheme.bodyMedium?.copyWith(
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -181,6 +182,7 @@ class _AccountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     return InkWell(
@@ -191,10 +193,10 @@ class _AccountTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? color.withValues(alpha: 0.1)
-              : KuberColors.surfaceMuted,
+              : cs.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(
-            color: selected ? color : KuberColors.border,
+            color: selected ? color : cs.outline,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -217,14 +219,14 @@ class _AccountTile extends StatelessWidget {
                   Text(
                     name,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: KuberColors.textPrimary,
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
                     type,
                     style: textTheme.labelSmall?.copyWith(
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -237,7 +239,7 @@ class _AccountTile extends StatelessWidget {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
               error: (_, _) => const SizedBox.shrink(),
@@ -249,7 +251,7 @@ class _AccountTile extends StatelessWidget {
                 return Text(
                   display,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 );
               },
@@ -264,4 +266,3 @@ class _AccountTile extends StatelessWidget {
     );
   }
 }
-

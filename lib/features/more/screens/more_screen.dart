@@ -11,8 +11,10 @@ class MoreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       appBar: const KuberAppBar(),
       body: SingleChildScrollView(
         padding: EdgeInsets.only(
@@ -29,7 +31,7 @@ class MoreScreen extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
-                color: KuberColors.textPrimary,
+                color: cs.onSurface,
                 letterSpacing: -0.3,
               ),
             ),
@@ -38,7 +40,7 @@ class MoreScreen extends StatelessWidget {
               'Manage your data and app preferences',
               style: GoogleFonts.inter(
                 fontSize: 13,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: KuberSpacing.xl),
@@ -130,6 +132,8 @@ class _MenuSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,25 +142,25 @@ class _MenuSection extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: KuberColors.textSecondary,
+            color: cs.onSurfaceVariant,
             letterSpacing: 1.0,
           ),
         ),
         const SizedBox(height: KuberSpacing.sm),
         Container(
           decoration: BoxDecoration(
-            color: KuberColors.surfaceCard,
+            color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: KuberColors.border),
+            border: Border.all(color: cs.outline),
           ),
           child: Column(
             children: [
               for (int i = 0; i < items.length; i++) ...[
                 items[i],
                 if (i < items.length - 1)
-                  const Divider(
+                  Divider(
                     height: 1,
-                    color: KuberColors.border,
+                    color: cs.outline,
                     indent: 52,
                   ),
               ],
@@ -183,6 +187,8 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -193,7 +199,7 @@ class _MenuItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: KuberColors.textSecondary, size: 22),
+            Icon(icon, color: cs.onSurfaceVariant, size: 22),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Column(
@@ -204,21 +210,21 @@ class _MenuItem extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: KuberColors.textPrimary,
+                      color: cs.onSurface,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: KuberColors.textSecondary, size: 20),
+            Icon(Icons.chevron_right_rounded,
+                color: cs.onSurfaceVariant, size: 20),
           ],
         ),
       ),

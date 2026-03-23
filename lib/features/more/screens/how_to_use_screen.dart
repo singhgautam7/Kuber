@@ -32,8 +32,10 @@ class HowToUseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       appBar: const KuberAppBar(showBack: true, title: 'How to Use'),
       body: ListView(
         padding: const EdgeInsets.symmetric(
@@ -46,7 +48,7 @@ class HowToUseScreen extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: KuberColors.textPrimary,
+              color: cs.onSurface,
               letterSpacing: -0.3,
             ),
           ),
@@ -54,9 +56,9 @@ class HowToUseScreen extends StatelessWidget {
           for (final faq in _faqs) ...[
             Container(
               decoration: BoxDecoration(
-                color: KuberColors.surfaceCard,
+                color: cs.surfaceContainer,
                 borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: KuberColors.border),
+                border: Border.all(color: cs.outline),
               ),
               child: ExpansionTile(
                 shape: const Border(),
@@ -75,17 +77,17 @@ class HowToUseScreen extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: KuberColors.textPrimary,
+                    color: cs.onSurface,
                   ),
                 ),
-                iconColor: KuberColors.textSecondary,
-                collapsedIconColor: KuberColors.textSecondary,
+                iconColor: cs.onSurfaceVariant,
+                collapsedIconColor: cs.onSurfaceVariant,
                 children: [
                   Text(
                     faq.body,
                     style: GoogleFonts.inter(
                       fontSize: 13,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                       height: 1.5,
                     ),
                   ),

@@ -44,12 +44,13 @@ Color _resolveColor(Account account) {
 }
 
 void _openAccountSheet(BuildContext context, {Account? account}) {
+  final cs = Theme.of(context).colorScheme;
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: KuberColors.surfaceCard,
+    backgroundColor: cs.surfaceContainer,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
     ),
@@ -62,6 +63,7 @@ class AccountsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final accountsAsync = ref.watch(accountListProvider);
 
     // Listen for add-account trigger from nav bar
@@ -78,7 +80,7 @@ class AccountsScreen extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text('Error: $e',
               style: GoogleFonts.inter(
-                  color: KuberColors.textSecondary)),
+                  color: cs.onSurfaceVariant)),
         ),
         data: (accounts) => _AccountsBody(accounts: accounts),
       ),
@@ -93,6 +95,7 @@ class _AccountsBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     // Compute net worth from all account balances
     double totalAssets = 0;
     double totalDebt = 0;
@@ -134,7 +137,7 @@ class _AccountsBody extends ConsumerWidget {
                         style: GoogleFonts.inter(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
-                          color: KuberColors.textPrimary,
+                          color: cs.onSurface,
                           height: 1.15,
                           letterSpacing: -0.5,
                         ),
@@ -144,7 +147,7 @@ class _AccountsBody extends ConsumerWidget {
                         'Overview of your linked financial institutions.',
                         style: GoogleFonts.inter(
                           fontSize: 13,
-                          color: KuberColors.textSecondary,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -155,13 +158,13 @@ class _AccountsBody extends ConsumerWidget {
                   child: Container(
                     width: 48,
                     height: 48,
-                    decoration: const BoxDecoration(
-                      color: KuberColors.primary,
+                    decoration: BoxDecoration(
+                      color: cs.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add_rounded,
-                      color: Colors.white,
+                      color: cs.onPrimary,
                       size: 24,
                     ),
                   ),
@@ -218,24 +221,25 @@ class _AccountCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
     final isCreditCard = account.isCreditCard;
     final balanceLabel = isCreditCard ? 'Credit Utilized' : 'Available Balance';
     final Color balanceColor;
     if (isCreditCard) {
       balanceColor = balance > 0
-          ? KuberColors.expense
+          ? cs.error
           : balance < 0
-              ? KuberColors.income
-              : KuberColors.textPrimary;
+              ? cs.tertiary
+              : cs.onSurface;
     } else {
-      balanceColor = balance < 0 ? KuberColors.expense : KuberColors.textPrimary;
+      balanceColor = balance < 0 ? cs.error : cs.onSurface;
     }
     final accentColor = _resolveColor(account);
 
     return Container(
       decoration: BoxDecoration(
-        color: KuberColors.surfaceCard,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       padding: const EdgeInsets.all(20),
@@ -260,7 +264,7 @@ class _AccountCard extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: KuberColors.textPrimary,
+                        color: cs.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -269,7 +273,7 @@ class _AccountCard extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: KuberColors.textSecondary,
+                        color: cs.onSurfaceVariant,
                         letterSpacing: 0.8,
                       ),
                     ),
@@ -286,7 +290,7 @@ class _AccountCard extends ConsumerWidget {
             balanceLabel,
             style: GoogleFonts.inter(
               fontSize: 12,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 6),
@@ -310,7 +314,7 @@ class _AccountCard extends ConsumerWidget {
                   'Limit  $symbol${account.creditLimit!.toStringAsFixed(0)}',
                   style: GoogleFonts.inter(
                     fontSize: 12,
-                    color: KuberColors.textSecondary,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
             ],
@@ -328,13 +332,14 @@ class _AccountMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     return PopupMenuButton<String>(
-      icon: const Icon(
+      icon: Icon(
         Icons.more_horiz_rounded,
-        color: KuberColors.textSecondary,
+        color: cs.onSurfaceVariant,
         size: 20,
       ),
-      color: KuberColors.surfaceMuted,
+      color: cs.surfaceContainerHigh,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
       onSelected: (val) => _handleAction(context, ref, val),
       itemBuilder: (_) => [
@@ -342,50 +347,51 @@ class _AccountMenu extends ConsumerWidget {
           value: 'edit',
           child: Text('Edit',
               style: GoogleFonts.inter(
-                  color: KuberColors.textPrimary)),
+                  color: cs.onSurface)),
         ),
         PopupMenuItem(
           value: 'delete',
           child: Text('Delete',
               style:
-                  GoogleFonts.inter(color: KuberColors.expense)),
+                  GoogleFonts.inter(color: cs.error)),
         ),
       ],
     );
   }
 
   void _handleAction(BuildContext context, WidgetRef ref, String action) {
+    final cs = Theme.of(context).colorScheme;
     if (action == 'edit') {
       _openAccountSheet(context, account: account);
     } else if (action == 'delete') {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          backgroundColor: KuberColors.surfaceCard,
+          backgroundColor: cs.surfaceContainer,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
           title: Text(
             'Delete account?',
             style: GoogleFonts.inter(
-              color: KuberColors.textPrimary,
+              color: cs.onSurface,
               fontWeight: FontWeight.w700,
             ),
           ),
           content: Text(
             'All transactions linked to "${account.name}" will be unlinked.',
             style:
-                GoogleFonts.inter(color: KuberColors.textSecondary),
+                GoogleFonts.inter(color: cs.onSurfaceVariant),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Cancel',
                   style: GoogleFonts.inter(
-                      color: KuberColors.textSecondary)),
+                      color: cs.onSurfaceVariant)),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: KuberColors.expense,
+                backgroundColor: cs.error,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
@@ -420,12 +426,13 @@ class _NetWorthCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceMuted,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
@@ -436,7 +443,7 @@ class _NetWorthCard extends ConsumerWidget {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 1.2,
             ),
           ),
@@ -446,7 +453,7 @@ class _NetWorthCard extends ConsumerWidget {
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: netWorth < 0 ? KuberColors.expense : KuberColors.primary,
+              color: netWorth < 0 ? cs.error : cs.primary,
               letterSpacing: -0.5,
             ),
           ),
@@ -455,14 +462,14 @@ class _NetWorthCard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _NetWorthLegend(
-                color: KuberColors.income,
+                color: cs.tertiary,
                 label: 'Assets',
                 amount: totalAssets,
                 symbol: symbol,
               ),
               const SizedBox(width: 24),
               _NetWorthLegend(
-                color: KuberColors.expense,
+                color: cs.error,
                 label: 'Debt',
                 amount: totalDebt,
                 symbol: symbol,
@@ -490,6 +497,7 @@ class _NetWorthLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
@@ -502,7 +510,7 @@ class _NetWorthLegend extends StatelessWidget {
           '$label: $symbol${amount.toStringAsFixed(2)}',
           style: GoogleFonts.inter(
             fontSize: 12,
-            color: KuberColors.textSecondary,
+            color: cs.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -514,6 +522,7 @@ class _NetWorthLegend extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.only(bottom: 120),
@@ -524,12 +533,12 @@ class _EmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: KuberColors.primary.withValues(alpha: 0.1),
+                color: cs.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.account_balance_wallet_outlined,
-                color: KuberColors.primary,
+                color: cs.primary,
                 size: 32,
               ),
             ),
@@ -539,7 +548,7 @@ class _EmptyState extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: KuberColors.textPrimary,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 6),
@@ -547,7 +556,7 @@ class _EmptyState extends StatelessWidget {
               'Add your first account to start tracking',
               style: GoogleFonts.inter(
                 fontSize: 13,
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
               ),
             ),
           ],

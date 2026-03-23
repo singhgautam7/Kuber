@@ -21,10 +21,11 @@ void showRecurringDetailSheet(
   WidgetRef ref,
   RecurringRule rule,
 ) {
+  final cs = Theme.of(context).colorScheme;
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
-    backgroundColor: KuberColors.surfaceCard,
+    backgroundColor: cs.surfaceContainer,
     isScrollControlled: true,
     useSafeArea: true,
     shape: const RoundedRectangleBorder(
@@ -41,6 +42,7 @@ class RecurringDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final categoryMap = ref.watch(categoryMapProvider);
     final accountsAsync = ref.watch(accountListProvider);
 
@@ -68,11 +70,11 @@ class RecurringDetailSheet extends ConsumerWidget {
         : Icons.category_outlined;
     final iconColor = cat != null
         ? harmonizeCategory(context, Color(cat.colorValue))
-        : KuberColors.textSecondary;
+        : cs.onSurfaceVariant;
     final categoryName = cat?.name ?? 'Unknown';
 
     final isIncome = rule.type == 'income';
-    final amountColor = isIncome ? KuberColors.income : KuberColors.expense;
+    final amountColor = isIncome ? cs.tertiary : cs.error;
 
     final isPaused = rule.isPaused;
     final isExpired = RecurringRepository.isExpired(rule);
@@ -85,10 +87,10 @@ class RecurringDetailSheet extends ConsumerWidget {
                 ? 'ACTIVE \u2022 CUSTOM'
                 : 'ACTIVE';
     final statusColor = isPaused
-        ? KuberColors.textSecondary
+        ? cs.onSurfaceVariant
         : isExpired
-            ? KuberColors.expense
-            : KuberColors.income;
+            ? cs.error
+            : cs.tertiary;
 
     final frequencyLabel = rule.frequency == 'custom'
         ? 'Every ${rule.customDays ?? 1} days'
@@ -105,7 +107,7 @@ class RecurringDetailSheet extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textSecondary.withValues(alpha: 0.3),
+                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -129,7 +131,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                         style: GoogleFonts.inter(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: KuberColors.textPrimary,
+                          color: cs.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -139,7 +141,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: KuberColors.textSecondary,
+                          color: cs.onSurfaceVariant,
                           letterSpacing: 1.0,
                         ),
                       ),
@@ -152,13 +154,13 @@ class RecurringDetailSheet extends ConsumerWidget {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: KuberColors.surfaceMuted,
+                      color: cs.surfaceContainerHigh,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       size: 18,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -174,7 +176,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -241,7 +243,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                 vertical: KuberSpacing.md,
               ),
               decoration: BoxDecoration(
-                color: KuberColors.surfaceMuted,
+                color: cs.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(KuberRadius.md),
               ),
               child: Row(
@@ -251,7 +253,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                     style: GoogleFonts.inter(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                       letterSpacing: 1.0,
                     ),
                   ),
@@ -297,8 +299,8 @@ class RecurringDetailSheet extends ConsumerWidget {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: KuberColors.textPrimary,
-                  side: BorderSide(color: KuberColors.border),
+                  foregroundColor: cs.onSurface,
+                  side: BorderSide(color: cs.outline),
                   padding:
                       const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                   shape: RoundedRectangleBorder(
@@ -334,8 +336,8 @@ class RecurringDetailSheet extends ConsumerWidget {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: KuberColors.textPrimary,
-                    side: BorderSide(color: KuberColors.border),
+                    foregroundColor: cs.onSurface,
+                    side: BorderSide(color: cs.outline),
                     padding:
                         const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                     shape: RoundedRectangleBorder(
@@ -361,7 +363,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                 ),
               ),
               style: TextButton.styleFrom(
-                foregroundColor: KuberColors.expense,
+                foregroundColor: cs.error,
               ),
             ),
           ],
@@ -379,13 +381,14 @@ class _DetailCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: KuberSpacing.lg,
         vertical: KuberSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: KuberColors.surfaceMuted,
+        color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
@@ -396,7 +399,7 @@ class _DetailCell extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textSecondary,
+              color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
@@ -406,7 +409,7 @@ class _DetailCell extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: KuberColors.textPrimary,
+              color: cs.onSurface,
             ),
             overflow: TextOverflow.ellipsis,
           ),

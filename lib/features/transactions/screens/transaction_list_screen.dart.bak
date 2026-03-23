@@ -151,13 +151,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   void _openAdvancedFilters() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
+      backgroundColor: KuberColors.surfaceCard,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
@@ -185,7 +184,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final transactionsAsync = ref.watch(transactionListProvider);
 
     return Scaffold(
@@ -207,27 +205,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 controller: _searchController,
                 onChanged: (value) => setState(() => _searchQuery = value),
                 style: GoogleFonts.inter(
-                  color: cs.onSurface,
+                  color: KuberColors.textPrimary,
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Search transactions...',
                   hintStyle: GoogleFonts.inter(
-                    color: cs.onSurfaceVariant,
+                    color: KuberColors.textSecondary,
                     fontSize: 14,
                   ),
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.search,
-                    color: cs.onSurfaceVariant,
+                    color: KuberColors.textSecondary,
                     size: 20,
                   ),
-                  suffixIcon: Icon(
+                  suffixIcon: const Icon(
                     Icons.mic_outlined,
-                    color: cs.onSurfaceVariant,
+                    color: KuberColors.textSecondary,
                     size: 20,
                   ),
                   filled: true,
-                  fillColor: cs.surfaceContainerHigh,
+                  fillColor: KuberColors.surfaceMuted,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: KuberSpacing.lg,
                     vertical: KuberSpacing.md,
@@ -243,7 +241,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                     borderSide:
-                        BorderSide(color: cs.primary, width: 1.5),
+                        const BorderSide(color: KuberColors.primary, width: 1.5),
                   ),
                 ),
               ),
@@ -267,11 +265,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         label: const Text('Clear Filters'),
                         selected: false,
                         onSelected: (_) => _clearAdvancedFilters(),
-                        backgroundColor: cs.error.withValues(alpha: 0.15),
+                        backgroundColor: KuberColors.expense.withValues(alpha: 0.15),
                         labelStyle: GoogleFonts.inter(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: cs.error,
+                          color: KuberColors.expense,
                         ),
                       ),
                       const SizedBox(width: KuberSpacing.sm),
@@ -398,7 +396,6 @@ class _AdvancedFilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -408,11 +405,11 @@ class _AdvancedFilterButton extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: hasFilters
-              ? cs.primary.withValues(alpha: 0.15)
-              : cs.surfaceContainerHigh,
+              ? KuberColors.primary.withValues(alpha: 0.15)
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
           border: hasFilters
-              ? Border.all(color: cs.primary, width: 1)
+              ? Border.all(color: KuberColors.primary, width: 1)
               : null,
         ),
         child: Row(
@@ -421,7 +418,7 @@ class _AdvancedFilterButton extends StatelessWidget {
             Icon(
               Icons.tune,
               size: 14,
-              color: hasFilters ? cs.primary : cs.onSurfaceVariant,
+              color: hasFilters ? KuberColors.primary : KuberColors.textSecondary,
             ),
             const SizedBox(width: 4),
             Text(
@@ -429,7 +426,7 @@ class _AdvancedFilterButton extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 12,
                 fontWeight: hasFilters ? FontWeight.w600 : FontWeight.w400,
-                color: hasFilters ? cs.primary : cs.onSurfaceVariant,
+                color: hasFilters ? KuberColors.primary : KuberColors.textSecondary,
               ),
             ),
           ],
@@ -447,14 +444,13 @@ class _DateGroupHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
     final isPositive = dayTotal >= 0;
     final totalText = isPositive
         ? '+$symbol${dayTotal.toStringAsFixed(2)}'
         : '-$symbol${dayTotal.abs().toStringAsFixed(2)}';
     final totalColor =
-        isPositive ? cs.tertiary : cs.onSurfaceVariant;
+        isPositive ? KuberColors.income : KuberColors.textSecondary;
 
     return Padding(
       padding: const EdgeInsets.only(
@@ -468,7 +464,7 @@ class _DateGroupHeader extends ConsumerWidget {
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
+              color: KuberColors.textSecondary,
               letterSpacing: 1.0,
             ),
           ),
@@ -476,7 +472,7 @@ class _DateGroupHeader extends ConsumerWidget {
           Expanded(
             child: Container(
               height: 0.5,
-              color: cs.outline,
+              color: KuberColors.border,
             ),
           ),
           const SizedBox(width: KuberSpacing.sm),
@@ -509,16 +505,15 @@ class _DayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
         for (int i = 0; i < transactions.length; i++) ...[
           if (i > 0) const SizedBox(height: 8),
           Container(
             decoration: BoxDecoration(
-              color: cs.surfaceContainer,
+              color: KuberColors.surfaceCard,
               borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              border: Border.all(color: KuberColors.border),
             ),
             child: _TransactionRow(
               transaction: transactions[i],
@@ -548,7 +543,6 @@ class _TransactionRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
     final isTransfer = transaction.type == 'transfer';
@@ -594,8 +588,8 @@ class _TransactionRow extends ConsumerWidget {
 
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
-        ? cs.onSurface
-        : (isIncome ? cs.tertiary : cs.onSurface);
+        ? KuberColors.textPrimary
+        : (isIncome ? KuberColors.income : KuberColors.textPrimary);
     final amountPrefix = isTransfer ? '' : (isIncome ? '+' : '-');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
@@ -604,7 +598,7 @@ class _TransactionRow extends ConsumerWidget {
             : Icons.category);
     final iconColor = isTransfer
         ? const Color(0xFF78909C)
-        : (category != null ? Color(category.colorValue) : cs.primary);
+        : (category != null ? Color(category.colorValue) : KuberColors.primary);
 
     final displayName = isTransfer
         ? '${fromName ?? "Unknown"} → ${toName ?? "Unknown"}'
@@ -620,19 +614,19 @@ class _TransactionRow extends ConsumerWidget {
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: KuberSpacing.xl),
         decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.15),
+          color: KuberColors.primary.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
-        child: Icon(Icons.edit_outlined, color: cs.primary),
+        child: const Icon(Icons.edit_outlined, color: KuberColors.primary),
       ),
       secondaryBackground: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: KuberSpacing.xl),
         decoration: BoxDecoration(
-          color: cs.error.withValues(alpha: 0.15),
+          color: KuberColors.expense.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
-        child: Icon(Icons.delete_outline, color: cs.error),
+        child: const Icon(Icons.delete_outline, color: KuberColors.expense),
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
@@ -668,7 +662,7 @@ class _TransactionRow extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
+                        color: KuberColors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -679,7 +673,7 @@ class _TransactionRow extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
-                        color: cs.onSurfaceVariant,
+                        color: KuberColors.textSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -705,7 +699,7 @@ class _TransactionRow extends ConsumerWidget {
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
-                      color: cs.onSurfaceVariant,
+                      color: KuberColors.textSecondary,
                     ),
                   ),
                 ],
@@ -726,7 +720,6 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -735,12 +728,12 @@ class _EmptyState extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.1),
+              color: KuberColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.receipt_long_outlined,
-              color: cs.primary,
+              color: KuberColors.primary,
               size: 32,
             ),
           ),
@@ -750,7 +743,7 @@ class _EmptyState extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: cs.onSurface,
+              color: KuberColors.textPrimary,
             ),
           ),
           const SizedBox(height: KuberSpacing.xs),
@@ -761,7 +754,7 @@ class _EmptyState extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 13,
               fontWeight: FontWeight.w400,
-              color: cs.onSurfaceVariant,
+              color: KuberColors.textSecondary,
             ),
           ),
           if (!hasTransactions) ...[
@@ -771,7 +764,7 @@ class _EmptyState extends StatelessWidget {
               icon: const Icon(Icons.add, size: 18),
               label: const Text('Add Transaction'),
               style: FilledButton.styleFrom(
-                backgroundColor: cs.primary,
+                backgroundColor: KuberColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: KuberSpacing.xl,
@@ -887,7 +880,6 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
     final categories = ref.watch(categoryListProvider).valueOrNull ?? [];
     final textTheme = Theme.of(context).textTheme;
@@ -908,7 +900,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: KuberColors.textSecondary.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -930,7 +922,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   child: Text(
                     'Reset',
                     style: GoogleFonts.inter(
-                      color: cs.primary,
+                      color: KuberColors.primary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -951,16 +943,16 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   vertical: KuberSpacing.md,
                 ),
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
+                  color: KuberColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                   border: _dateRange != null
-                      ? Border.all(color: cs.primary, width: 1)
+                      ? Border.all(color: KuberColors.primary, width: 1)
                       : null,
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.date_range,
-                        size: 18, color: cs.onSurfaceVariant),
+                    const Icon(Icons.date_range,
+                        size: 18, color: KuberColors.textSecondary),
                     const SizedBox(width: KuberSpacing.sm),
                     Text(
                       _dateRange != null
@@ -969,16 +961,16 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         color: _dateRange != null
-                            ? cs.onSurface
-                            : cs.onSurfaceVariant,
+                            ? KuberColors.textPrimary
+                            : KuberColors.textSecondary,
                       ),
                     ),
                     const Spacer(),
                     if (_dateRange != null)
                       GestureDetector(
                         onTap: () => setState(() => _dateRange = null),
-                        child: Icon(Icons.close,
-                            size: 16, color: cs.onSurfaceVariant),
+                        child: const Icon(Icons.close,
+                            size: 16, color: KuberColors.textSecondary),
                       ),
                   ],
                 ),
@@ -1096,17 +1088,17 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
             TextField(
               controller: _searchController,
               style: GoogleFonts.inter(
-                color: cs.onSurface,
+                color: KuberColors.textPrimary,
                 fontSize: 14,
               ),
               decoration: InputDecoration(
                 hintText: 'Search by name...',
                 hintStyle: GoogleFonts.inter(
-                  color: cs.onSurfaceVariant,
+                  color: KuberColors.textSecondary,
                   fontSize: 14,
                 ),
                 filled: true,
-                fillColor: cs.surfaceContainerHigh,
+                fillColor: KuberColors.surfaceMuted,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: KuberSpacing.lg,
                   vertical: KuberSpacing.md,
@@ -1134,7 +1126,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                   Navigator.pop(context);
                 },
                 style: FilledButton.styleFrom(
-                  backgroundColor: cs.primary,
+                  backgroundColor: KuberColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                   shape: RoundedRectangleBorder(
@@ -1171,7 +1163,6 @@ class _KuberFilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1181,8 +1172,8 @@ class _KuberFilterChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: selected
-              ? cs.primary.withValues(alpha: 0.18)
-              : cs.surfaceContainerHigh,
+              ? KuberColors.primary.withValues(alpha: 0.18)
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -1190,7 +1181,7 @@ class _KuberFilterChip extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? cs.primary : cs.onSurfaceVariant,
+            color: selected ? KuberColors.primary : KuberColors.textSecondary,
           ),
         ),
       ),
@@ -1211,7 +1202,6 @@ class _SheetChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1221,11 +1211,11 @@ class _SheetChip extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? cs.primary.withValues(alpha: 0.15)
-              : cs.surfaceContainerHigh,
+              ? KuberColors.primary.withValues(alpha: 0.15)
+              : KuberColors.surfaceMuted,
           borderRadius: BorderRadius.circular(8),
           border: isSelected
-              ? Border.all(color: cs.primary, width: 1)
+              ? Border.all(color: KuberColors.primary, width: 1)
               : null,
         ),
         child: Text(
@@ -1233,7 +1223,7 @@ class _SheetChip extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? cs.primary : cs.onSurfaceVariant,
+            color: isSelected ? KuberColors.primary : KuberColors.textSecondary,
           ),
         ),
       ),

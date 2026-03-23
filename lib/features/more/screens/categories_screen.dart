@@ -17,10 +17,11 @@ class CategoriesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
 
     return Scaffold(
-      backgroundColor: KuberColors.background,
+      backgroundColor: cs.surface,
       body: categoriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -47,7 +48,7 @@ class CategoriesScreen extends ConsumerWidget {
                             style: GoogleFonts.inter(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
-                              color: KuberColors.textPrimary,
+                              color: cs.onSurface,
                               height: 1.15,
                               letterSpacing: -0.5,
                             ),
@@ -57,7 +58,7 @@ class CategoriesScreen extends ConsumerWidget {
                             'Organize your transactions with custom categories.',
                             style: GoogleFonts.inter(
                               fontSize: 13,
-                              color: KuberColors.textSecondary,
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -72,11 +73,11 @@ class CategoriesScreen extends ConsumerWidget {
                       child: Container(
                         width: 48,
                         height: 48,
-                        decoration: const BoxDecoration(
-                          color: KuberColors.primary,
+                        decoration: BoxDecoration(
+                          color: cs.primary,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.add_rounded,
                           color: Colors.white,
                           size: 24,
@@ -97,7 +98,7 @@ class CategoriesScreen extends ConsumerWidget {
                     'No categories yet',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -120,10 +121,10 @@ class CategoriesScreen extends ConsumerWidget {
                         vertical: KuberSpacing.md,
                       ),
                       decoration: BoxDecoration(
-                        color: KuberColors.surfaceCard,
+                        color: cs.surfaceContainer,
                         borderRadius:
                             BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: KuberColors.border),
+                        border: Border.all(color: cs.outline),
                       ),
                       child: Row(
                         children: [
@@ -142,7 +143,7 @@ class CategoriesScreen extends ConsumerWidget {
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: KuberColors.textPrimary,
+                                    color: cs.onSurface,
                                   ),
                                 ),
                                 Text(
@@ -150,7 +151,7 @@ class CategoriesScreen extends ConsumerWidget {
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    color: KuberColors.textSecondary,
+                                    color: cs.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -158,8 +159,8 @@ class CategoriesScreen extends ConsumerWidget {
                           ),
                           // Edit — all categories
                           IconButton(
-                            icon: const Icon(Icons.edit_outlined,
-                                color: KuberColors.textSecondary,
+                            icon: Icon(Icons.edit_outlined,
+                                color: cs.onSurfaceVariant,
                                 size: 18),
                             onPressed: () => context.push(
                               '/category/add',
@@ -170,9 +171,9 @@ class CategoriesScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 8),
                           IconButton(
-                            icon: const Icon(
+                            icon: Icon(
                                 Icons.delete_outline_rounded,
-                                color: KuberColors.textSecondary,
+                                color: cs.onSurfaceVariant,
                                 size: 18),
                             onPressed: () =>
                                 _confirmDelete(context, ref, cat),
@@ -197,6 +198,7 @@ class CategoriesScreen extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref, Category cat) async {
+    final cs = Theme.of(context).colorScheme;
     final repo = ref.read(categoryRepositoryProvider);
     final hasTxns = await repo.hasTransactions(cat.id);
 
@@ -206,25 +208,25 @@ class CategoriesScreen extends ConsumerWidget {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          backgroundColor: KuberColors.surfaceCard,
+          backgroundColor: cs.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: KuberColors.border, width: 1),
+            side: BorderSide(color: cs.outline, width: 1),
           ),
           title: Text('Cannot delete category',
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w600,
-                color: KuberColors.textPrimary,
+                color: cs.onSurface,
               )),
           content: Text(
             'This category has transactions linked to it. '
             'To delete this category, delete the linked transactions first.',
-            style: GoogleFonts.inter(color: KuberColors.textSecondary),
+            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
           ),
           actions: [
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: KuberColors.primary,
+                backgroundColor: cs.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -240,29 +242,29 @@ class CategoriesScreen extends ConsumerWidget {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          backgroundColor: KuberColors.surfaceCard,
+          backgroundColor: cs.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: KuberColors.border, width: 1),
+            side: BorderSide(color: cs.outline, width: 1),
           ),
           title: Text('Delete category?',
               style: GoogleFonts.inter(
                 fontWeight: FontWeight.w600,
-                color: KuberColors.textPrimary,
+                color: cs.onSurface,
               )),
           content: Text(
             '"${cat.name}" will be permanently deleted.',
-            style: GoogleFonts.inter(color: KuberColors.textSecondary),
+            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('Cancel',
-                  style: GoogleFonts.inter(color: KuberColors.textSecondary)),
+                  style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
             ),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: KuberColors.expense,
+                backgroundColor: cs.error,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

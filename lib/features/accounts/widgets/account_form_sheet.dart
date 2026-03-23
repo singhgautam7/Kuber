@@ -126,6 +126,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
     return Padding(
       padding: EdgeInsets.only(
@@ -143,7 +144,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: KuberColors.textSecondary,
+                color: cs.onSurfaceVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -155,7 +156,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: KuberColors.textPrimary,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 24),
@@ -164,11 +165,11 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
             TextField(
               controller: _nameController,
               style:
-                  GoogleFonts.inter(color: KuberColors.textPrimary),
+                  GoogleFonts.inter(color: cs.onSurface),
               decoration: InputDecoration(
                 labelText: _selectedType == 'credit' ? 'Credit Card Name' : 'Cash or Bank Name',
                 labelStyle: GoogleFonts.inter(
-                    color: KuberColors.textSecondary),
+                    color: cs.onSurfaceVariant),
               ),
             ),
             const SizedBox(height: 20),
@@ -181,7 +182,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ),
@@ -202,20 +203,20 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                       height: 48,
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? KuberColors.primary.withValues(alpha: 0.15)
-                            : KuberColors.surfaceMuted,
+                            ? cs.primary.withValues(alpha: 0.15)
+                            : cs.surfaceContainerHigh,
                         shape: BoxShape.circle,
                         border: isSelected
                             ? Border.all(
-                                color: KuberColors.primary, width: 2)
+                                color: cs.primary, width: 2)
                             : null,
                       ),
                       child: Icon(
                         IconMapper.fromString(iconName),
                         size: 22,
                         color: isSelected
-                            ? KuberColors.primary
-                            : KuberColors.textSecondary,
+                            ? cs.primary
+                            : cs.onSurfaceVariant,
                       ),
                     ),
                   );
@@ -232,7 +233,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: KuberColors.textSecondary,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ),
@@ -297,17 +298,17 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   style: GoogleFonts.inter(
-                      color: KuberColors.textPrimary),
+                      color: cs.onSurface),
                   decoration: InputDecoration(
                     labelText: 'Last 4 digits',
                     helperText:
                         'Just to help you identify your account — stored only on your device',
                     helperMaxLines: 2,
                     labelStyle: GoogleFonts.inter(
-                        color: KuberColors.textSecondary),
+                        color: cs.onSurfaceVariant),
                     helperStyle: GoogleFonts.inter(
                       fontSize: 11,
-                      color: KuberColors.textSecondary,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -323,14 +324,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                   FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                 ],
                 style: GoogleFonts.inter(
-                    color: KuberColors.textPrimary),
+                    color: cs.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Initial Balance',
                   prefixText: '$symbol ',
                   prefixStyle: GoogleFonts.inter(
-                      color: KuberColors.textSecondary),
+                      color: cs.onSurfaceVariant),
                   labelStyle: GoogleFonts.inter(
-                      color: KuberColors.textSecondary),
+                      color: cs.onSurfaceVariant),
                 ),
               )
             else ...[
@@ -342,14 +343,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                   FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
                 ],
                 style: GoogleFonts.inter(
-                    color: KuberColors.textPrimary),
+                    color: cs.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Credit Utilized',
                   prefixText: '$symbol ',
                   prefixStyle: GoogleFonts.inter(
-                      color: KuberColors.textSecondary),
+                      color: cs.onSurfaceVariant),
                   labelStyle: GoogleFonts.inter(
-                      color: KuberColors.textSecondary),
+                      color: cs.onSurfaceVariant),
                 ),
               ),
               const SizedBox(height: 16),
@@ -358,14 +359,14 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: GoogleFonts.inter(
-                    color: KuberColors.textPrimary),
+                    color: cs.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Total Limit',
                   prefixText: '$symbol ',
                   prefixStyle: GoogleFonts.inter(
-                      color: KuberColors.textSecondary),
+                      color: cs.onSurfaceVariant),
                   labelStyle: GoogleFonts.inter(
-                      color: KuberColors.textSecondary),
+                      color: cs.onSurfaceVariant),
                 ),
               ),
             ],
@@ -378,7 +379,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
               child: FilledButton(
                 onPressed: _save,
                 style: FilledButton.styleFrom(
-                  backgroundColor: KuberColors.primary,
+                  backgroundColor: cs.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
@@ -400,6 +401,7 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
   }
 
   Widget _buildTypeChip(String type, IconData icon, String label) {
+    final cs = Theme.of(context).colorScheme;
     final selected = _selectedType == type;
     final disabled = _isEditing;
     return Expanded(
@@ -415,13 +417,13 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
           decoration: BoxDecoration(
             color: selected
                 ? (disabled
-                    ? KuberColors.primary.withValues(alpha: 0.08)
-                    : KuberColors.primary.withValues(alpha: 0.15))
-                : KuberColors.surfaceMuted,
+                    ? cs.primary.withValues(alpha: 0.08)
+                    : cs.primary.withValues(alpha: 0.15))
+                : cs.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(KuberRadius.md),
             border: selected
                 ? Border.all(
-                    color: KuberColors.primary
+                    color: cs.primary
                         .withValues(alpha: disabled ? 0.2 : 0.4))
                 : null,
           ),
@@ -434,8 +436,8 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                   icon,
                   size: 20,
                   color: selected
-                      ? KuberColors.primary
-                      : KuberColors.textSecondary,
+                      ? cs.primary
+                      : cs.onSurfaceVariant,
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -444,8 +446,8 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
                     fontSize: 11,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     color: selected
-                        ? KuberColors.primary
-                        : KuberColors.textSecondary,
+                        ? cs.primary
+                        : cs.onSurfaceVariant,
                   ),
                 ),
               ],
