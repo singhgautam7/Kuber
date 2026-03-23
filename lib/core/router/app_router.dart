@@ -52,6 +52,7 @@ GoRouter createRouter() {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => AddTransactionScreen(
           transaction: state.extra as Transaction?,
+          initialType: state.uri.queryParameters['type'],
         ),
       ),
 

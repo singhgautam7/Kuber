@@ -243,7 +243,7 @@ class _SpeedDialMenu extends AnimatedWidget {
           label: 'Add Transfer',
           onTap: () {
             onClose();
-            context.push('/add-transaction');
+            context.push('/add-transaction?type=transfer');
           },
         ),
         const SizedBox(height: KuberSpacing.md),
@@ -254,7 +254,7 @@ class _SpeedDialMenu extends AnimatedWidget {
           label: 'Add Income',
           onTap: () {
             onClose();
-            context.push('/add-transaction');
+            context.push('/add-transaction?type=income');
           },
         ),
       ],

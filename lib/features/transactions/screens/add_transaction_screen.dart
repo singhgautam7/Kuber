@@ -24,8 +24,13 @@ import '../widgets/category_picker_sheet.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
+  final String? initialType;
 
-  const AddTransactionScreen({super.key, this.transaction});
+  const AddTransactionScreen({
+    super.key,
+    this.transaction,
+    this.initialType,
+  });
 
   @override
   ConsumerState<AddTransactionScreen> createState() =>
@@ -78,6 +83,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         _selectedFromAccountId = int.tryParse(t.fromAccountId ?? '');
         _selectedToAccountId = int.tryParse(t.toAccountId ?? '');
       }
+    } else {
+      _type = widget.initialType ?? 'expense';
     }
     _nameController.addListener(_onFieldChanged);
     _amountController.addListener(_onFieldChanged);
