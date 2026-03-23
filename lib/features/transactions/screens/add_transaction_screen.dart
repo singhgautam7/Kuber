@@ -37,6 +37,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   final _nameFocusNode = FocusNode();
+  final _amountFocusNode = FocusNode();
 
   String _type = 'expense';
   int? _selectedCategoryId;
@@ -118,6 +119,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _amountController.dispose();
     _notesController.dispose();
     _nameFocusNode.dispose();
+    _amountFocusNode.dispose();
     super.dispose();
   }
 
@@ -691,6 +693,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _openCalculator() {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -716,6 +720,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _showCategoryPicker() {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -733,12 +739,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           setState(() => _selectedCategoryId = id);
           Navigator.pop(context);
           _nameFocusNode.unfocus();
+          _amountFocusNode.unfocus();
         },
       ),
     );
   }
 
   void _showAccountPicker() {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -755,12 +764,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           setState(() => _selectedAccountId = id);
           Navigator.pop(context);
           _nameFocusNode.unfocus();
+          _amountFocusNode.unfocus();
         },
       ),
     );
   }
 
   Future<void> _pickDate() async {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -783,6 +795,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         );
       });
       _nameFocusNode.unfocus();
+      _amountFocusNode.unfocus();
     }
   }
 
@@ -985,6 +998,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               // Amount — truly centered across full width
               TextField(
                 controller: _amountController,
+                focusNode: _amountFocusNode,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
@@ -1230,6 +1244,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     required bool isFrom,
     int? excludeId,
   }) {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,

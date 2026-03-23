@@ -41,6 +41,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   final _endAfterController = TextEditingController();
   DateTime? _endDate;
 
+  final _nameFocusNode = FocusNode();
+  final _amountFocusNode = FocusNode();
+
   bool get _isEdit => widget.existingRule != null;
 
   bool get _canSave =>
@@ -90,10 +93,14 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     _notesController.dispose();
     _customDaysController.dispose();
     _endAfterController.dispose();
+    _nameFocusNode.dispose();
+    _amountFocusNode.dispose();
     super.dispose();
   }
 
   void _openCategoryPicker() {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -103,6 +110,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
         onSelected: (id) {
           setState(() => _selectedCategoryId = id);
           Navigator.pop(context);
+          _nameFocusNode.unfocus();
+          _amountFocusNode.unfocus();
         },
         defaultType: _type,
       ),
@@ -110,6 +119,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   }
 
   void _openAccountPicker() {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -119,12 +130,16 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
         onSelected: (id) {
           setState(() => _selectedAccountId = id);
           Navigator.pop(context);
+          _nameFocusNode.unfocus();
+          _amountFocusNode.unfocus();
         },
       ),
     );
   }
 
   Future<void> _pickStartDate() async {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final now = DateUtils.dateOnly(DateTime.now());
     final picked = await showDatePicker(
       context: context,
@@ -136,6 +151,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   }
 
   Future<void> _pickEndDate() async {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
     final now = DateUtils.dateOnly(DateTime.now());
     final earliest = _startDate.isBefore(now) ? now : _startDate;
     final picked = await showDatePicker(
@@ -219,6 +236,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           // Name
           TextField(
             controller: _nameController,
+            focusNode: _nameFocusNode,
             style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
             decoration: const InputDecoration(
               labelText: 'Name',
@@ -231,6 +249,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           // Amount
           TextField(
             controller: _amountController,
+            focusNode: _amountFocusNode,
             style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
             decoration: InputDecoration(
               labelText: 'Amount',
