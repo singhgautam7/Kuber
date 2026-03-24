@@ -92,9 +92,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const RecurringLoaderScreen(),
       ),
-StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, navigationShell) =>
-            AppScaffold(navigationShell: navigationShell),
+            navigationShell, // The shell is rendered via navigatorContainerBuilder
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            AppScaffold(
+          navigationShell: navigationShell,
+          children: children,
+        ),
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellDashboardKey,
