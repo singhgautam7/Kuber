@@ -19,7 +19,6 @@ class AppScaffold extends ConsumerStatefulWidget {
 
 class _AppScaffoldState extends ConsumerState<AppScaffold>
     with SingleTickerProviderStateMixin {
-  int _previousIndex = 0;
   bool _showSpeedDial = false;
 
   late final AnimationController _dialController;
@@ -48,9 +47,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
   void _onTabTapped(int index) {
     if (index == widget.navigationShell.currentIndex) return;
-    setState(() {
-      _previousIndex = widget.navigationShell.currentIndex;
-    });
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
@@ -75,9 +71,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       if (mounted) setState(() => _showSpeedDial = false);
     });
   }
-
-  double get _slideDirection =>
-      widget.navigationShell.currentIndex > _previousIndex ? 1.0 : -1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -107,29 +100,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
               }
             }
           : null,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 280),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        transitionBuilder: (child, animation) {
-          final slideIn = Tween<Offset>(
-            begin: Offset(_slideDirection, 0),
-            end: Offset.zero,
-          ).animate(animation);
-
-          return SlideTransition(
-            position: slideIn,
-            child: FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-          );
-        },
-        child: KeyedSubtree(
-          key: ValueKey(currentIndex),
-          child: widget.navigationShell,
-        ),
-      ),
+      child: widget.navigationShell,
     );
 
     if (isWide) {

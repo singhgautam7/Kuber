@@ -32,11 +32,6 @@ final _shellAnalyticsKey = GlobalKey<NavigatorState>(debugLabel: 'analytics');
 final _shellMoreKey = GlobalKey<NavigatorState>(debugLabel: 'more');
 
 final routerProvider = Provider<GoRouter>((ref) {
-  return createRouter();
-});
-
-
-GoRouter createRouter() {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
@@ -178,4 +173,4 @@ StatefulShellRoute.indexedStack(
       ),
     ],
   );
-}
+});
