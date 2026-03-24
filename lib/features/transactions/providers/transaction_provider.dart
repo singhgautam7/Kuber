@@ -21,14 +21,16 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     return ref.watch(transactionRepositoryProvider).getAll();
   }
 
-  Future<void> add(Transaction t) async {
-    await ref.read(transactionRepositoryProvider).save(t);
+  Future<int> add(Transaction t) async {
+    final id = await ref.read(transactionRepositoryProvider).save(t);
     ref.invalidateSelf();
+    return id;
   }
 
-  Future<void> updateTransaction(Transaction t) async {
-    await ref.read(transactionRepositoryProvider).save(t);
+  Future<int> updateTransaction(Transaction t) async {
+    final id = await ref.read(transactionRepositoryProvider).save(t);
     ref.invalidateSelf();
+    return id;
   }
 
   Future<void> delete(int id) async {
@@ -41,7 +43,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
   }
 
-  Future<void> saveTransfer({
+  Future<int> saveTransfer({
     required String fromAccountId,
     required String toAccountId,
     required double amount,
@@ -49,7 +51,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     String? notes,
     bool fromIsCreditCard = false,
   }) async {
-    await ref.read(transactionRepositoryProvider).saveTransfer(
+    final id = await ref.read(transactionRepositoryProvider).saveTransfer(
       fromAccountId: fromAccountId,
       toAccountId: toAccountId,
       amount: amount,
@@ -58,9 +60,10 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
       fromIsCreditCard: fromIsCreditCard,
     );
     ref.invalidateSelf();
+    return id;
   }
 
-  Future<void> updateTransfer({
+  Future<int> updateTransfer({
     required int id,
     required String fromAccountId,
     required String toAccountId,
@@ -69,7 +72,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     String? notes,
     bool fromIsCreditCard = false,
   }) async {
-    await ref.read(transactionRepositoryProvider).updateTransfer(
+    final resultId = await ref.read(transactionRepositoryProvider).updateTransfer(
       id: id,
       fromAccountId: fromAccountId,
       toAccountId: toAccountId,
@@ -79,6 +82,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
       fromIsCreditCard: fromIsCreditCard,
     );
     ref.invalidateSelf();
+    return resultId;
   }
 }
 

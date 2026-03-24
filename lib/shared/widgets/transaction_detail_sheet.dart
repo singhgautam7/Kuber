@@ -14,6 +14,7 @@ import '../../features/settings/providers/settings_provider.dart' show currencyP
 import '../../features/transactions/providers/transaction_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
+import '../../features/tags/providers/tag_providers.dart';
 
 /// Shows the transaction detail bottom sheet with edit/delete actions.
 void showTransactionDetailSheet(
@@ -323,6 +324,75 @@ class TransactionDetailSheet extends ConsumerWidget {
                 ),
               ),
             ],
+
+            // Tags (full-width row)
+            ref.watch(transactionTagsProvider(transaction.id)).when(
+                  data: (tags) {
+                    if (tags.isEmpty) return const SizedBox.shrink();
+                    return Column(
+                      children: [
+                        const SizedBox(height: KuberSpacing.sm),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: KuberSpacing.lg,
+                              vertical: KuberSpacing.md,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(KuberRadius.md),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'TAGS',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: cs.onSurfaceVariant,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(height: KuberSpacing.sm),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: tags.map((tag) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: cs.primary.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(
+                                          color: cs.primary.withValues(alpha: 0.2),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '#${tag.name}',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: cs.primary,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
 
             // Notes (full-width row)
             if (transaction.notes != null &&

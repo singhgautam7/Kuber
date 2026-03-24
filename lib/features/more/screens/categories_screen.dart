@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
@@ -93,13 +94,14 @@ class CategoriesScreen extends ConsumerWidget {
             if (categories.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(
-                  child: Text(
-                    'No categories yet',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: cs.onSurfaceVariant,
-                    ),
+                child: EmptyState(
+                  icon: Icons.category_outlined,
+                  title: 'No categories yet',
+                  description: 'Create categories to organize your expenses',
+                  actionLabel: 'Add Category',
+                  onAction: () => context.push(
+                    '/category/add',
+                    extra: const CategoryRouteArgs(returnToCategoryPicker: false),
                   ),
                 ),
               )

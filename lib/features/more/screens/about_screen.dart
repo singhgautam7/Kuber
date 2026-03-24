@@ -311,13 +311,6 @@ class AboutScreen extends ConsumerWidget {
       ),
     );
   }
-
-  Future<void> _launchURL(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
 }
 
 class _AboutCard extends StatelessWidget {
@@ -523,32 +516,3 @@ class _DeveloperLetter extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-
-  const _SocialButton({required this.label, required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        side: BorderSide(color: cs.outline),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
-        ),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: cs.onSurface,
-        ),
-      ),
-    );
-  }
-}

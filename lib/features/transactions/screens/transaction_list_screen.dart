@@ -8,6 +8,7 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -15,6 +16,8 @@ import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
+import '../../tags/providers/tag_providers.dart';
+import '../../tags/widgets/tag_selector_bottom_sheet.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -33,12 +36,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Set<String> _selectedTypes = {};
   Set<int> _selectedAccountIds = {};
   Set<int> _selectedCategoryIds = {};
+  Set<int> _selectedTagIds = {};
 
   bool get _hasAdvancedFilters =>
       _dateRange != null ||
       _selectedTypes.isNotEmpty ||
       _selectedAccountIds.isNotEmpty ||
-      _selectedCategoryIds.isNotEmpty;
+      _selectedCategoryIds.isNotEmpty ||
+      _selectedTagIds.isNotEmpty;
 
   @override
   void dispose() {
@@ -52,6 +57,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       _selectedTypes = {};
       _selectedAccountIds = {};
       _selectedCategoryIds = {};
+      _selectedTagIds = {};
     });
   }
 
@@ -103,6 +109,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (_selectedCategoryIds.isNotEmpty) {
       filtered = filtered.where((t) =>
           _selectedCategoryIds.contains(int.tryParse(t.categoryId))).toList();
+    }
+
+    if (_selectedTagIds.isNotEmpty) {
+      final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+      filtered = filtered.where((t) {
+        final txnTags = txnTagsMap[t.id] ?? {};
+        // AND logic: transaction must have ALL selected tags
+        return _selectedTagIds.every((tagId) => txnTags.contains(tagId));
+      }).toList();
     }
 
     return filtered;
@@ -166,13 +181,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         selectedTypes: _selectedTypes,
         selectedAccountIds: _selectedAccountIds,
         selectedCategoryIds: _selectedCategoryIds,
+        selectedTagIds: _selectedTagIds,
         searchQuery: _searchQuery,
-        onApply: (dateRange, types, accountIds, categoryIds, searchQuery) {
+        onApply: (dateRange, types, accountIds, categoryIds, tagIds, searchQuery) {
           setState(() {
             _dateRange = dateRange;
             _selectedTypes = types;
             _selectedAccountIds = accountIds;
             _selectedCategoryIds = categoryIds;
+            _selectedTagIds = tagIds;
             if (searchQuery != _searchQuery) {
               _searchQuery = searchQuery;
               _searchController.text = searchQuery;
@@ -340,9 +357,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               if (filtered.isEmpty) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
-                  child: _EmptyState(
-                    hasTransactions: transactions.isNotEmpty,
-                    onAdd: () => context.push('/add-transaction'),
+                  child: EmptyState(
+                    icon: Icons.receipt_long_outlined,
+                    title: transactions.isEmpty
+                        ? 'No transactions yet'
+                        : 'No transactions found',
+                    description: transactions.isEmpty
+                        ? 'Start tracking your expenses'
+                        : 'Try adjusting your search or filters',
+                    actionLabel: transactions.isEmpty ? 'Add Transaction' : null,
+                    onAction:
+                        transactions.isEmpty ? () => context.push('/add-transaction') : null,
                   ),
                 );
               }
@@ -725,76 +750,6 @@ class _TransactionRow extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  final bool hasTransactions;
-  final VoidCallback onAdd;
-
-  const _EmptyState({required this.hasTransactions, required this.onAdd});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: cs.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.receipt_long_outlined,
-              color: cs.primary,
-              size: 32,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          Text(
-            'No transactions found',
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xs),
-          Text(
-            hasTransactions
-                ? 'Try adjusting your search or filters'
-                : 'Start tracking your expenses',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          if (!hasTransactions) ...[
-            const SizedBox(height: KuberSpacing.xl),
-            FilledButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Add Transaction'),
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.xl,
-                  vertical: KuberSpacing.md,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _DateGroup {
   final String label;
@@ -819,12 +774,14 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
   final Set<String> selectedTypes;
   final Set<int> selectedAccountIds;
   final Set<int> selectedCategoryIds;
+  final Set<int> selectedTagIds;
   final String searchQuery;
   final void Function(
     DateTimeRange? dateRange,
     Set<String> types,
     Set<int> accountIds,
     Set<int> categoryIds,
+    Set<int> tagIds,
     String searchQuery,
   ) onApply;
 
@@ -833,6 +790,7 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
     required this.selectedTypes,
     required this.selectedAccountIds,
     required this.selectedCategoryIds,
+    required this.selectedTagIds,
     required this.searchQuery,
     required this.onApply,
   });
@@ -847,6 +805,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   late Set<String> _selectedTypes;
   late Set<int> _accountIds;
   late Set<int> _categoryIds;
+  late Set<int> _tagIds;
   late TextEditingController _searchController;
 
   @override
@@ -856,6 +815,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
     _selectedTypes = Set.from(widget.selectedTypes);
     _accountIds = Set.from(widget.selectedAccountIds);
     _categoryIds = Set.from(widget.selectedCategoryIds);
+    _tagIds = Set.from(widget.selectedTagIds);
     _searchController = TextEditingController(text: widget.searchQuery);
   }
 
@@ -871,6 +831,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
       _selectedTypes = {};
       _accountIds = {};
       _categoryIds = {};
+      _tagIds = {};
       _searchController.clear();
     });
   }
@@ -1097,6 +1058,87 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
               const SizedBox(height: KuberSpacing.lg),
             ],
 
+            // Tags
+            Text('Tags', style: textTheme.labelLarge),
+            const SizedBox(height: KuberSpacing.sm),
+            InkWell(
+              onTap: _showTagSelector,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(KuberSpacing.md),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: _tagIds.isNotEmpty
+                      ? Border.all(color: cs.primary, width: 1)
+                      : null,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.sell_outlined,
+                            size: 18, color: cs.onSurfaceVariant),
+                        const SizedBox(width: KuberSpacing.sm),
+                        Text(
+                          _tagIds.isEmpty
+                              ? 'Filter by tags'
+                              : '${_tagIds.length} tags selected',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: _tagIds.isNotEmpty
+                                ? cs.onSurface
+                                : cs.onSurfaceVariant,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.chevron_right, size: 16),
+                      ],
+                    ),
+                    if (_tagIds.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      ref.watch(tagListProvider).when(
+                            data: (allTags) {
+                              final selectedTags = allTags
+                                  .where((t) => _tagIds.contains(t.id))
+                                  .toList();
+                              return Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: selectedTags.map((tag) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: cs.primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '#${tag.name}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: cs.primary,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            },
+                            loading: () => const SizedBox.shrink(),
+                            error: (e, errorObject) => const SizedBox.shrink(),
+                          ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+
             // Search
             Text('Search', style: textTheme.labelLarge),
             const SizedBox(height: KuberSpacing.sm),
@@ -1136,6 +1178,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                     _selectedTypes,
                     _accountIds,
                     _categoryIds,
+                    _tagIds,
                     _searchController.text,
                   );
                   Navigator.pop(context);
@@ -1160,6 +1203,30 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
             const SizedBox(height: KuberSpacing.lg),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showTagSelector() {
+    final allTags = ref.read(tagListProvider).valueOrNull ?? [];
+    final initialTags = allTags.where((t) => _tagIds.contains(t.id)).toList();
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      builder: (_) => TagSelectorBottomSheet(
+        initialSelectedTags: initialTags,
+        onDone: (tags) {
+          setState(() {
+            _tagIds = tags.map((t) => t.id).toSet();
+          });
+        },
       ),
     );
   }

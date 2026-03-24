@@ -9,6 +9,8 @@ import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/categories/data/category_repository.dart';
 import '../../features/accounts/data/account_repository.dart';
+import '../../features/tags/data/tag.dart';
+import '../../features/tags/data/transaction_tag.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -18,7 +20,14 @@ class IsarService {
   static Future<Isar> open() async {
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open(
-      [TransactionSchema, CategorySchema, AccountSchema, RecurringRuleSchema],
+      [
+        TransactionSchema,
+        CategorySchema,
+        AccountSchema,
+        RecurringRuleSchema,
+        TagSchema,
+        TransactionTagSchema,
+      ],
       directory: dir.path,
     );
   }

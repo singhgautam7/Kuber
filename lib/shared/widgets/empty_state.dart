@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
-  final String? subtitle;
+  final String description;
   final String? actionLabel;
   final VoidCallback? onAction;
 
@@ -13,48 +13,75 @@ class EmptyState extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
-    this.subtitle,
+    required this.description,
     this.actionLabel,
     this.onAction,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.xxl),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 64,
-              color: colorScheme.onSurface.withValues(alpha: 0.38),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: cs.primary,
+                size: 32,
+              ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: 16),
             Text(
               title,
-              style: textTheme.titleLarge,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
-            if (subtitle != null) ...[
-              const SizedBox(height: KuberSpacing.sm),
-              Text(
-                subtitle!,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
+            const SizedBox(height: 6),
+            Text(
+              description,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
               ),
-            ],
+              textAlign: TextAlign.center,
+            ),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: KuberSpacing.xl),
-              FilledButton(
+              const SizedBox(height: 24),
+              FilledButton.icon(
                 onPressed: onAction,
-                child: Text(actionLabel!),
+                style: FilledButton.styleFrom(
+                  backgroundColor: cs.primary,
+                  foregroundColor: cs.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 20),
+                label: Text(
+                  actionLabel!,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ],

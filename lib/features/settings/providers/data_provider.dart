@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/services/data_service.dart';
 import '../../../core/services/notification_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -16,7 +18,8 @@ class DataState {
   final String? message;
   final int? successCount;
   final int? failureCount;
-  final String? filePath;
+  final String? filePath; // Main file for "Open"
+  final List<String>? filePaths; // All files for "Share"
   final String? loadingMessage;
 
   DataState({
@@ -25,6 +28,7 @@ class DataState {
     this.successCount,
     this.failureCount,
     this.filePath,
+    this.filePaths,
     this.loadingMessage,
   });
 
@@ -34,6 +38,7 @@ class DataState {
     int? successCount,
     int? failureCount,
     String? filePath,
+    List<String>? filePaths,
     String? loadingMessage,
   }) {
     return DataState(
@@ -42,6 +47,7 @@ class DataState {
       successCount: successCount ?? this.successCount,
       failureCount: failureCount ?? this.failureCount,
       filePath: filePath ?? this.filePath,
+      filePaths: filePaths ?? this.filePaths,
       loadingMessage: loadingMessage ?? this.loadingMessage,
     );
   }
@@ -85,17 +91,29 @@ class DataController extends StateNotifier<DataState> {
         isProgress: true,
       );
 
-      final path = await _service.exportData();
-      state = state.copyWith(status: DataOpStatus.success, message: 'Data exported successfully', filePath: path);
+      final exports = await _service.exportData();
+      final entry = exports.entries.first;
+      final timestamp = DateFormat('yyyy_MM_dd_HHmm').format(DateTime.now());
+      final fileName = 'kuber_backup_$timestamp.csv';
       
-      final fileName = path?.split('/').last ?? 'export.csv';
-      _notificationService.showExportNotification(
-        id: notificationId,
-        title: 'Export Complete',
-        body: 'Saved to Downloads/$fileName',
-        isSuccess: true,
-        payload: path,
-      );
+      final path = await _saveFile(entry.value, fileName);
+      
+      if (path != null) {
+        state = state.copyWith(
+          status: DataOpStatus.success,
+          message: 'Data exported successfully',
+          filePath: path,
+          filePaths: [path],
+        );
+
+        _notificationService.showExportNotification(
+          id: notificationId,
+          title: 'Export Complete',
+          body: 'Saved to Downloads/$fileName',
+          isSuccess: true,
+          payload: path,
+        );
+      }
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Export failed: $e');
       
@@ -105,6 +123,27 @@ class DataController extends StateNotifier<DataState> {
         body: e.toString(),
       );
     }
+  }
+
+  Future<String?> _saveFile(String content, String fileName) async {
+    Directory? directory;
+    if (Platform.isAndroid) {
+      directory = Directory('/storage/emulated/0/Download');
+      if (!await directory.exists()) {
+        try {
+          await directory.create(recursive: true);
+        } catch (_) {}
+      }
+    } else {
+      directory = await getDownloadsDirectory();
+    }
+    
+    directory ??= await getExternalStorageDirectory();
+    directory ??= await getApplicationDocumentsDirectory();
+    
+    final file = File('${directory.path}/$fileName');
+    await file.writeAsString(content);
+    return file.path;
   }
 
   Future<void> downloadTemplate() async {
@@ -148,6 +187,7 @@ class DataController extends StateNotifier<DataState> {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
+        allowMultiple: false,
       );
 
       if (result == null || result.files.isEmpty) return;
@@ -157,26 +197,33 @@ class DataController extends StateNotifier<DataState> {
         loadingMessage: 'Importing data...',
       );
 
-      final file = File(result.files.first.path!);
-      final csvContent = await file.readAsString();
-      
-      final importResult = await _service.importData(csvContent);
+      int totalSuccess = 0;
+      int totalFailure = 0;
 
-      if (importResult.error != null) {
-        state = state.copyWith(status: DataOpStatus.error, message: importResult.error);
-      } else {
-        _refreshData();
-        final msg = importResult.failureCount > 0 
-          ? 'Imported ${importResult.successCount} records, ${importResult.failureCount} failed'
-          : 'Imported ${importResult.successCount} records successfully';
-          
-        state = state.copyWith(
-          status: DataOpStatus.success,
-          message: msg,
-          successCount: importResult.successCount,
-          failureCount: importResult.failureCount,
-        );
+      for (final fileData in result.files) {
+        final file = File(fileData.path!);
+        final csvContent = await file.readAsString();
+        final importResult = await _service.importData(csvContent);
+        
+        if (importResult.error != null) {
+           // Skip or handle individual file error
+        } else {
+          totalSuccess += importResult.successCount;
+          totalFailure += importResult.failureCount;
+        }
       }
+
+      _refreshData();
+      final msg = totalFailure > 0 
+        ? 'Imported $totalSuccess records, $totalFailure failed'
+        : 'Imported $totalSuccess records successfully';
+        
+      state = state.copyWith(
+        status: DataOpStatus.success,
+        message: msg,
+        successCount: totalSuccess,
+        failureCount: totalFailure,
+      );
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Import failed: $e');
     }

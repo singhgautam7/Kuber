@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
 
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/tags/data/tag.dart';
+import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
 import 'mock_data_generator.dart';
 import '../database/isar_service.dart';
@@ -31,24 +33,34 @@ class DataService {
 
   DataService(this.isar);
 
-  /// Exports all data to a CSV and returns the file path.
-  Future<String?> exportData() async {
+  /// Exports all data to a single CSV string.
+  Future<Map<String, String>> exportData() async {
     final transactions = await isar.transactions.where().findAll();
     final categories = await isar.categorys.where().findAll();
     final accounts = await isar.accounts.where().findAll();
+    final tags = await isar.tags.where().findAll();
+    final transactionTags = await isar.transactionTags.where().findAll();
 
     final categoryNames = {for (var c in categories) c.id.toString(): c.name};
     final accountNames = {for (var a in accounts) a.id.toString(): a.name};
+    final tagNameMap = {for (var t in tags) t.id: t.name};
+
+    final Map<int, List<String>> txTagsMap = {};
+    for (var bridge in transactionTags) {
+      final name = tagNameMap[bridge.tagId];
+      if (name != null) {
+        txTagsMap.putIfAbsent(bridge.transactionId, () => []).add(name);
+      }
+    }
 
     final csvContent = _csvService.exportTransactions(
       transactions: transactions,
       categoryNames: categoryNames,
       accountNames: accountNames,
+      transactionTags: txTagsMap,
     );
 
-    final timestamp = DateFormat('yyyy_MM_dd_HHmm').format(DateTime.now());
-    final fileName = 'kuber_export_$timestamp.csv';
-    return await _saveFile(csvContent, fileName);
+    return {'transactions.csv': csvContent};
   }
 
   /// Downloads the CSV template and returns the file path.
@@ -86,139 +98,211 @@ class DataService {
     return file.path;
   }
 
+  /// Parses CSV content into a list of maps.
+  List<Map<String, String>> parseCsv(String csvContent) {
+    if (csvContent.isEmpty) return [];
+    
+    final List<List<dynamic>> rows = Csv(dynamicTyping: false).decode(csvContent);
+    
+    if (rows.isEmpty) return [];
+
+    final List<String> headers = rows.first.map((e) => e.toString().trim()).toList();
+    final List<Map<String, String>> parsedRows = [];
+
+    for (int i = 1; i < rows.length; i++) {
+      final Map<String, String> rowMap = {};
+      for (int j = 0; j < headers.length; j++) {
+        if (j < rows[i].length) {
+          rowMap[headers[j]] = rows[i][j]?.toString().trim() ?? '';
+        } else {
+          rowMap[headers[j]] = ''; // Handle cases where a row has fewer columns than headers
+        }
+      }
+      parsedRows.add(rowMap);
+    }
+    return parsedRows;
+  }
+
   /// Imports data from a CSV file.
   Future<ImportResult> importData(String csvContent) async {
     try {
-      final rows = _csvService.parseCsv(csvContent);
+      final rows = parseCsv(csvContent); // Changed to use internal parseCsv
       if (rows.isEmpty) return ImportResult(successCount: 0, failureCount: 0, error: 'Empty file');
 
-      int success = 0;
-      int failure = 0;
-
-      // 1. Preload categories and accounts for name-to-id mapping
-      final existingCategories = await isar.categorys.where().findAll();
-      final existingAccounts = await isar.accounts.where().findAll();
-
-      final categoryMap = {for (var c in existingCategories) c.name.toLowerCase(): c};
-      final accountMap = {for (var a in existingAccounts) a.name.toLowerCase(): a};
-
-      final List<Transaction> toInsert = [];
-
-      for (final row in rows) {
-        try {
-          final dateStr = row['date'] ?? '';
-          final name = row['name'] ?? 'Imported Transaction';
-          final amount = double.tryParse(row['amount'] ?? '0') ?? 0.0;
-          final type = (row['type']?.toLowerCase() ?? 'expense');
-          final categoryName = row['category'] ?? 'Other';
-          final accountName = row['account'] ?? 'Cash';
-          final notes = row['notes'];
-          final fromAccName = row['from_account'];
-          final toAccName = row['to_account'];
-
-          if (amount <= 0 && type != 'transfer') {
-             failure++;
-             continue;
-          }
-
-          // Resolve Category
-          Category? category = categoryMap[categoryName.toLowerCase()];
-          if (category == null && type != 'transfer') {
-            category = Category()
-              ..name = categoryName
-              ..icon = 'category'
-              ..colorValue = AppColorPalette.getRandomColor()
-              ..type = type;
-            await isar.writeTxn(() => isar.categorys.put(category!));
-            categoryMap[categoryName.toLowerCase()] = category;
-          } else if (category != null && category.colorValue == 0xFF90A4AE) {
-             category.colorValue = AppColorPalette.getRandomColor();
-             await isar.writeTxn(() => isar.categorys.put(category!));
-          }
-
-          // Resolve Account
-          Account? account = accountMap[accountName.toLowerCase()];
-          if (account == null) {
-            final isCC = accountName.toLowerCase().contains('credit');
-            account = Account()
-              ..name = accountName
-              ..type = 'bank' // default type
-              ..isCreditCard = isCC
-              ..icon = isCC ? 'credit_card' : 'account_balance'
-              ..colorValue = AppColorPalette.getRandomColor();
-            await isar.writeTxn(() => isar.accounts.put(account!));
-            accountMap[accountName.toLowerCase()] = account;
-          } else if (account.colorValue == null) {
-             account.colorValue = AppColorPalette.getRandomColor();
-             await isar.writeTxn(() => isar.accounts.put(account!));
-          }
-
-          final tx = Transaction()
-            ..name = name
-            ..nameLower = name.toLowerCase()
-            ..amount = amount
-            ..type = type
-            ..categoryId = category?.id.toString() ?? ''
-            ..accountId = account.id.toString()
-            ..notes = notes
-            ..createdAt = DateTime.tryParse(dateStr) ?? DateTime.now()
-            ..updatedAt = DateTime.now();
-
-          // Handle Transfer
-          if (type == 'transfer' || (fromAccName != null && toAccName != null && fromAccName.isNotEmpty && toAccName.isNotEmpty)) {
-            tx.type = 'transfer';
-            
-            Account? fromAcc = accountMap[fromAccName?.toLowerCase()];
-            if (fromAcc == null && fromAccName != null && fromAccName.isNotEmpty) {
-               fromAcc = Account()
-                 ..name = fromAccName
-                 ..type = 'bank'
-                 ..isCreditCard = fromAccName.toLowerCase().contains('credit')
-                 ..icon = 'account_balance'
-                 ..colorValue = AppColorPalette.getRandomColor();
-               await isar.writeTxn(() => isar.accounts.put(fromAcc!));
-               accountMap[fromAccName.toLowerCase()] = fromAcc;
-            } else if (fromAcc != null && fromAcc.colorValue == null) {
-               fromAcc.colorValue = AppColorPalette.getRandomColor();
-               await isar.writeTxn(() => isar.accounts.put(fromAcc!));
-            }
-
-            Account? toAcc = accountMap[toAccName?.toLowerCase()];
-            if (toAcc == null && toAccName != null && toAccName.isNotEmpty) {
-               toAcc = Account()
-                 ..name = toAccName
-                 ..type = 'bank'
-                 ..isCreditCard = toAccName.toLowerCase().contains('credit')
-                 ..icon = 'account_balance'
-                 ..colorValue = AppColorPalette.getRandomColor();
-               await isar.writeTxn(() => isar.accounts.put(toAcc!));
-               accountMap[toAccName.toLowerCase()] = toAcc;
-            } else if (toAcc != null && toAcc.colorValue == null) {
-               toAcc.colorValue = AppColorPalette.getRandomColor();
-               await isar.writeTxn(() => isar.accounts.put(toAcc!));
-            }
-
-            tx.fromAccountId = fromAcc?.id.toString();
-            tx.toAccountId = toAcc?.id.toString();
-            tx.accountId = fromAcc?.id.toString() ?? account.id.toString(); // primary account is 'from'
-          }
-
-          toInsert.add(tx);
-          success++;
-        } catch (e) {
-          debugPrint('Row import failed: $e');
-          failure++;
-        }
-      }
-
-      if (toInsert.isNotEmpty) {
-        await isar.writeTxn(() => isar.transactions.putAll(toInsert));
-      }
-
-      return ImportResult(successCount: success, failureCount: failure);
+      return await _importTransactions(rows);
     } catch (e) {
       return ImportResult(successCount: 0, failureCount: 0, error: e.toString());
     }
+  }
+
+
+  Future<ImportResult> _importTransactions(List<Map<String, String>> rows) async {
+    int success = 0;
+    int failure = 0;
+
+    // 1. Preload categories and accounts for name-to-id mapping
+    final existingCategories = await isar.categorys.where().findAll();
+    final existingAccounts = await isar.accounts.where().findAll();
+
+    final categoryMap = {for (var c in existingCategories) c.name.toLowerCase(): c};
+    final accountMap = {for (var a in existingAccounts) a.name.toLowerCase(): a};
+
+    final List<Transaction> toInsert = [];
+
+    // Preload tags to minimize queries (optional, but keep it simple for now)
+
+    for (final row in rows) {
+      try {
+        final dateStr = row['date'] ?? '';
+        final name = row['name'] ?? 'Imported Transaction';
+        final amount = double.tryParse(row['amount'] ?? '0') ?? 0.0;
+        final type = (row['type']?.toLowerCase() ?? 'expense');
+        final categoryName = row['category'] ?? 'Other';
+        final accountName = row['account'] ?? 'Cash';
+        final notes = row['notes'];
+        final fromAccName = row['from_account'];
+        final toAccName = row['to_account'];
+
+        if (amount <= 0 && type != 'transfer') {
+           failure++;
+           continue;
+        }
+
+        // Resolve Category
+        Category? category = categoryMap[categoryName.toLowerCase()];
+        if (category == null && type != 'transfer') {
+          category = Category()
+            ..name = categoryName
+            ..icon = 'category'
+            ..colorValue = AppColorPalette.getRandomColor()
+            ..type = type;
+          await isar.writeTxn(() => isar.categorys.put(category!));
+          categoryMap[categoryName.toLowerCase()] = category;
+        } else if (category != null && category.colorValue == 0xFF90A4AE) {
+           category.colorValue = AppColorPalette.getRandomColor();
+           await isar.writeTxn(() => isar.categorys.put(category!));
+        }
+
+        // Resolve Account
+        Account? account = accountMap[accountName.toLowerCase()];
+        if (account == null) {
+          final isCC = accountName.toLowerCase().contains('credit');
+          account = Account()
+            ..name = accountName
+            ..type = 'bank' // default type
+            ..isCreditCard = isCC
+            ..icon = isCC ? 'credit_card' : 'account_balance'
+            ..colorValue = AppColorPalette.getRandomColor();
+          await isar.writeTxn(() => isar.accounts.put(account!));
+          accountMap[accountName.toLowerCase()] = account;
+        } else if (account.colorValue == null) {
+           account.colorValue = AppColorPalette.getRandomColor();
+           await isar.writeTxn(() => isar.accounts.put(account!));
+        }
+
+        final tx = Transaction()
+          ..id = int.tryParse(row['id'] ?? '') ?? Isar.autoIncrement
+          ..name = name
+          ..nameLower = name.toLowerCase()
+          ..amount = amount
+          ..type = type
+          ..categoryId = category?.id.toString() ?? ''
+          ..accountId = account.id.toString()
+          ..notes = notes
+          ..createdAt = DateTime.tryParse(dateStr) ?? DateTime.now()
+          ..updatedAt = DateTime.now();
+        
+        // Temporarily store tags for post-save mapping
+        tx.tempTags = row['tags'];
+
+        // Handle Transfer
+        if (type == 'transfer' || (fromAccName != null && toAccName != null && fromAccName.isNotEmpty && toAccName.isNotEmpty)) {
+          tx.type = 'transfer';
+          
+          Account? fromAcc = accountMap[fromAccName?.toLowerCase()];
+          if (fromAcc == null && fromAccName != null && fromAccName.isNotEmpty) {
+             fromAcc = Account()
+               ..name = fromAccName
+               ..type = 'bank'
+               ..isCreditCard = fromAccName.toLowerCase().contains('credit')
+               ..icon = 'account_balance'
+               ..colorValue = AppColorPalette.getRandomColor();
+             await isar.writeTxn(() => isar.accounts.put(fromAcc!));
+             accountMap[fromAccName.toLowerCase()] = fromAcc;
+          } else if (fromAcc != null && fromAcc.colorValue == null) {
+             fromAcc.colorValue = AppColorPalette.getRandomColor();
+             await isar.writeTxn(() => isar.accounts.put(fromAcc!));
+          }
+
+          Account? toAcc = accountMap[toAccName?.toLowerCase()];
+          if (toAcc == null && toAccName != null && toAccName.isNotEmpty) {
+             toAcc = Account()
+               ..name = toAccName
+               ..type = 'bank'
+               ..isCreditCard = toAccName.toLowerCase().contains('credit')
+               ..icon = 'account_balance'
+               ..colorValue = AppColorPalette.getRandomColor();
+             await isar.writeTxn(() => isar.accounts.put(toAcc!));
+             accountMap[toAccName.toLowerCase()] = toAcc;
+          } else if (toAcc != null && toAcc.colorValue == null) {
+             toAcc.colorValue = AppColorPalette.getRandomColor();
+             await isar.writeTxn(() => isar.accounts.put(toAcc!));
+          }
+
+          tx.fromAccountId = fromAcc?.id.toString();
+          tx.toAccountId = toAcc?.id.toString();
+          tx.accountId = fromAcc?.id.toString() ?? account.id.toString(); // primary account is 'from'
+        }
+
+        toInsert.add(tx);
+        success++;
+      } catch (e) {
+        debugPrint('Row import failed: $e');
+        failure++;
+      }
+    }
+
+    if (toInsert.isNotEmpty) {
+      await isar.writeTxn(() async {
+        for (final tx in toInsert) {
+          await isar.transactions.put(tx);
+          
+          // Process Tags
+          final tagsStr = tx.tempTags; // I'll add a temp field or use row mapping
+          if (tagsStr != null && tagsStr.isNotEmpty) {
+             final tagNames = tagsStr.split('|').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+             for (final rawName in tagNames) {
+                final normalized = Tag.normalize(rawName);
+                if (normalized.isEmpty) continue;
+                
+                // Find or create tag
+                var tag = await isar.tags.filter().nameEqualTo(normalized).findFirst();
+                if (tag == null) {
+                  tag = Tag()
+                    ..name = normalized
+                    ..createdAt = DateTime.now();
+                  await isar.tags.put(tag);
+                }
+                
+                // Link
+                final existingMapping = await isar.transactionTags
+                  .filter()
+                  .transactionIdEqualTo(tx.id)
+                  .tagIdEqualTo(tag.id)
+                  .findFirst();
+                  
+                if (existingMapping == null) {
+                  await isar.transactionTags.put(TransactionTag()
+                    ..transactionId = tx.id
+                    ..tagId = tag.id);
+                }
+             }
+          }
+        }
+      });
+    }
+
+    return ImportResult(successCount: success, failureCount: failure);
   }
 
   /// Generates mock data.
