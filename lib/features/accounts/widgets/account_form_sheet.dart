@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/color_palette.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
@@ -32,20 +33,7 @@ const _accountIcons = [
   'receipt_long',
 ];
 
-const _accountColors = [
-  0xFF5C6BC0, // indigo
-  0xFF42A5F5, // blue
-  0xFF26A69A, // teal
-  0xFF66BB6A, // green
-  0xFFFFCA28, // amber
-  0xFFFF7043, // deep orange
-  0xFFEF5350, // red
-  0xFFAB47BC, // purple
-  0xFFEC407A, // pink
-  0xFF78909C, // blue grey
-  0xFF8D6E63, // brown
-  0xFF29B6F6, // light blue
-];
+const _accountColors = AppColorPalette.colors;
 
 class AccountFormSheet extends ConsumerStatefulWidget {
   final Account? account;

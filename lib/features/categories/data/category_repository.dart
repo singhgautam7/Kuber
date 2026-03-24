@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 
 import '../../../core/database/base_repository.dart';
+import '../../../core/utils/color_palette.dart';
 import '../../transactions/data/transaction.dart';
 import 'category.dart';
 
@@ -36,15 +37,15 @@ class CategoryRepository extends BaseRepository<Category> {
     if (count > 0) return;
 
     final defaults = [
-      _cat('Food & Dining', 'restaurant', 0xFFE57373, 'expense'),
-      _cat('Transport', 'directions_car', 0xFF64B5F6, 'expense'),
-      _cat('Shopping', 'shopping_bag', 0xFFBA68C8, 'expense'),
-      _cat('Bills & Utilities', 'receipt_long', 0xFFFFB74D, 'expense'),
-      _cat('Health', 'favorite', 0xFF81C784, 'expense'),
-      _cat('Entertainment', 'movie', 0xFFF06292, 'expense'),
-      _cat('Income', 'trending_up', 0xFF4DB6AC, 'income'),
-      _cat('Savings', 'savings', 0xFF4DD0E1, 'both'),
-      _cat('Other', 'category', 0xFF90A4AE, 'both'),
+      _cat('Food & Dining', 'restaurant', AppColorPalette.colors[4], 'expense'), // red
+      _cat('Transport', 'directions_car', AppColorPalette.colors[0], 'expense'), // blue
+      _cat('Shopping', 'shopping_bag', AppColorPalette.colors[3], 'expense'), // pink
+      _cat('Bills & Utilities', 'receipt_long', AppColorPalette.colors[5], 'expense'), // orange
+      _cat('Health', 'favorite', AppColorPalette.colors[7], 'expense'), // emerald
+      _cat('Entertainment', 'movie', AppColorPalette.colors[2], 'expense'), // violet
+      _cat('Income', 'trending_up', AppColorPalette.colors[8], 'income'), // teal
+      _cat('Savings', 'savings', AppColorPalette.colors[9], 'both'), // cyan
+      _cat('Other', 'category', AppColorPalette.colors[10], 'both'), // slate
     ];
 
     await isar.writeTxn(() => isar.categorys.putAll(defaults));

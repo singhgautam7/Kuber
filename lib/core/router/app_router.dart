@@ -23,11 +23,15 @@ import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
+final _shellHistoryKey = GlobalKey<NavigatorState>(debugLabel: 'history');
+final _shellAnalyticsKey = GlobalKey<NavigatorState>(debugLabel: 'analytics');
+final _shellMoreKey = GlobalKey<NavigatorState>(debugLabel: 'more');
 
-
-GoRouter createRouter() {
+final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
@@ -93,6 +97,7 @@ StatefulShellRoute.indexedStack(
             AppScaffold(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
+            navigatorKey: _shellDashboardKey,
             routes: [
               GoRoute(
                 path: '/',
@@ -101,6 +106,7 @@ StatefulShellRoute.indexedStack(
             ],
           ),
           StatefulShellBranch(
+            navigatorKey: _shellHistoryKey,
             routes: [
               GoRoute(
                 path: '/history',
@@ -109,6 +115,7 @@ StatefulShellRoute.indexedStack(
             ],
           ),
           StatefulShellBranch(
+            navigatorKey: _shellAnalyticsKey,
             routes: [
               GoRoute(
                 path: '/analytics',
@@ -117,6 +124,7 @@ StatefulShellRoute.indexedStack(
             ],
           ),
           StatefulShellBranch(
+            navigatorKey: _shellMoreKey,
             routes: [
               GoRoute(
                 path: '/more',
@@ -165,4 +173,4 @@ StatefulShellRoute.indexedStack(
       ),
     ],
   );
-}
+});
