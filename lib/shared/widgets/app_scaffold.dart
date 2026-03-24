@@ -9,9 +9,14 @@ import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
 
 class AppScaffold extends ConsumerStatefulWidget {
-  final StatefulNavigationShell navigationShell;
+  final StatefulNavigationShell? navigationShell;
+  final List<Widget> children;
 
-  const AppScaffold({super.key, required this.navigationShell});
+  const AppScaffold({
+    super.key,
+    this.navigationShell,
+    this.children = const [],
+  });
 
   @override
   ConsumerState<AppScaffold> createState() => _AppScaffoldState();
@@ -20,15 +25,15 @@ class AppScaffold extends ConsumerStatefulWidget {
 class _AppScaffoldState extends ConsumerState<AppScaffold>
     with SingleTickerProviderStateMixin {
   bool _showSpeedDial = false;
-
+  late final PageController _pageController;
   late final AnimationController _dialController;
   late final Animation<double> _dialAnimation;
-
-
 
   @override
   void initState() {
     super.initState();
+    _pageController =
+        PageController(initialPage: widget.navigationShell?.currentIndex ?? 0);
     _dialController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -41,16 +46,47 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
   @override
   void dispose() {
+    _pageController.dispose();
     _dialController.dispose();
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(AppScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.navigationShell == null || oldWidget.navigationShell == null) return;
+    if (widget.navigationShell!.currentIndex != oldWidget.navigationShell!.currentIndex) {
+      if (_pageController.hasClients &&
+          _pageController.page?.round() != widget.navigationShell!.currentIndex) {
+        _pageController.animateToPage(
+          widget.navigationShell!.currentIndex,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
+  }
+
   void _onTabTapped(int index) {
-    if (index == widget.navigationShell.currentIndex) return;
-    widget.navigationShell.goBranch(
+    if (widget.navigationShell == null) return;
+    if (index == widget.navigationShell!.currentIndex) return;
+    widget.navigationShell!.goBranch(
       index,
-      initialLocation: index == widget.navigationShell.currentIndex,
+      initialLocation: index == widget.navigationShell!.currentIndex,
     );
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _onPageChanged(int index) {
+    if (widget.navigationShell == null) return;
+    if (index == widget.navigationShell!.currentIndex) return;
+    widget.navigationShell!.goBranch(index);
   }
 
   void _onAddTapped() {
@@ -76,32 +112,23 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider).valueOrNull;
-    final currentIndex = widget.navigationShell.currentIndex;
+    if (widget.navigationShell == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final currentIndex = widget.navigationShell!.currentIndex;
 
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= KuberBreakpoints.smallTablet;
 
     final swipeMode = settings?.swipeMode ?? SwipeMode.changeTabs;
 
-    final animatedContent = GestureDetector(
-      onHorizontalDragEnd: swipeMode == SwipeMode.changeTabs
-          ? (details) {
-              if (details.primaryVelocity == null) return;
-              if (details.primaryVelocity! < 0) {
-                // Swipe left -> Next tab
-                if (currentIndex < kuberNavItems.length - 1) {
-                  _onTabTapped(currentIndex + 1);
-                }
-              } else if (details.primaryVelocity! > 0) {
-                // Swipe right -> Previous tab
-                if (currentIndex > 0) {
-                  _onTabTapped(currentIndex - 1);
-                }
-              }
-            }
-          : null,
-      child: widget.navigationShell,
-    );
+    final animatedContent = swipeMode == SwipeMode.changeTabs
+        ? PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: widget.children,
+          )
+        : widget.navigationShell!;
 
     if (isWide) {
       return Scaffold(

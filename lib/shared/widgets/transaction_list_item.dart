@@ -66,7 +66,7 @@ class DashboardTransactionItem extends StatelessWidget {
                   [
                     category?.name ?? 'Unknown',
                     if (accountName != null) accountName,
-                    DateFormatter.time(transaction.createdAt),
+                    DateFormatter.relativeTime(transaction.createdAt),
                   ].join(' · '),
                   style: textTheme.labelMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
