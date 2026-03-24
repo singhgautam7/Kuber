@@ -12,6 +12,7 @@ import '../../features/transactions/screens/add_transaction_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
 import '../../features/more/screens/more_screen.dart';
+import '../../features/more/screens/about_screen.dart';
 import '../../features/more/screens/permissions_screen.dart';
 import '../../features/more/screens/categories_screen.dart';
 import '../../features/more/screens/tags_screen.dart';
@@ -98,6 +99,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/security',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const PermissionsScreen(),
+      ),
+      GoRoute(
+        name: 'about',
+        path: '/more/about',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AboutScreen(),
       ),
       StatefulShellRoute(
         builder: (context, state, navigationShell) =>

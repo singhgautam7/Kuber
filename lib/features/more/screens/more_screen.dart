@@ -119,8 +119,8 @@ class MoreScreen extends StatelessWidget {
                 _MenuItem(
                   icon: Icons.info_outline_rounded,
                   label: 'About Kuber',
-                  subtitle: 'Version 1.0.0',
-                  onTap: () {},
+                  subtitle: 'Vision, origin, and developer',
+                  onTap: () => context.pushNamed('about'),
                 ),
                 _MenuItem(
                   icon: Icons.security_outlined,
