@@ -229,34 +229,34 @@ class _SpeedDialMenu extends AnimatedWidget {
           context,
           index: 2,
           icon: Icons.sync_rounded,
-          label: 'Add Recurring',
+          label: 'Add Recurring Transaction',
           onTap: () {
             onClose();
             context.push('/recurring/add');
           },
         ),
-        const SizedBox(height: KuberSpacing.md),
-        _buildOption(
-          context,
-          index: 1,
-          icon: Icons.swap_horiz_rounded,
-          label: 'Add Transfer',
-          onTap: () {
-            onClose();
-            context.push('/add-transaction?type=transfer');
-          },
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        _buildOption(
-          context,
-          index: 0,
-          icon: Icons.arrow_downward_rounded,
-          label: 'Add Income',
-          onTap: () {
-            onClose();
-            context.push('/add-transaction?type=income');
-          },
-        ),
+        // const SizedBox(height: KuberSpacing.md),
+        // _buildOption(
+        //   context,
+        //   index: 1,
+        //   icon: Icons.swap_horiz_rounded,
+        //   label: 'Add Transfer',
+        //   onTap: () {
+        //     onClose();
+        //     context.push('/add-transaction?type=transfer');
+        //   },
+        // ),
+        // const SizedBox(height: KuberSpacing.md),
+        // _buildOption(
+        //   context,
+        //   index: 0,
+        //   icon: Icons.arrow_downward_rounded,
+        //   label: 'Add Income',
+        //   onTap: () {
+        //     onClose();
+        //     context.push('/add-transaction?type=income');
+        //   },
+        // ),
       ],
     );
   }
