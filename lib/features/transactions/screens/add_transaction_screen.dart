@@ -21,6 +21,9 @@ import '../../../shared/widgets/kuber_calculator.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/account_picker_sheet.dart';
 import '../widgets/category_picker_sheet.dart';
+import '../../tags/data/tag.dart';
+import '../../tags/providers/tag_providers.dart';
+import '../../tags/widgets/tag_selector_bottom_sheet.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -51,6 +54,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   int? _selectedToAccountId;
   DateTime _selectedDate = DateTime.now();
   bool _suppressSuggestions = false;
+  List<Tag> _selectedTags = [];
 
   bool get _isEditing => widget.transaction != null;
 
@@ -83,6 +87,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         _selectedFromAccountId = int.tryParse(t.fromAccountId ?? '');
         _selectedToAccountId = int.tryParse(t.toAccountId ?? '');
       }
+      _loadTags();
     } else {
       _type = widget.initialType ?? 'expense';
     }
@@ -128,6 +133,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _nameFocusNode.dispose();
     _amountFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadTags() async {
+    if (widget.transaction == null) return;
+    final tags = await ref.read(tagRepositoryProvider).getTagsForTransaction(widget.transaction!.id);
+    if (mounted) {
+      setState(() => _selectedTags = tags);
+    }
   }
 
   Color get _typeColor {
@@ -603,6 +616,102 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ),
                   const SizedBox(height: KuberSpacing.md),
 
+                  // Tags section
+                  InkWell(
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    onTap: _showTagSelector,
+                    child: Container(
+                      padding: const EdgeInsets.all(KuberSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: cs.outline),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: cs.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.sell_outlined,
+                                  size: 18,
+                                  color: cs.primary,
+                                ),
+                              ),
+                              const SizedBox(width: KuberSpacing.md),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'TAGS',
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _selectedTags.isEmpty
+                                        ? 'No tags selected'
+                                        : '${_selectedTags.length} tags selected',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: _selectedTags.isEmpty
+                                          ? cs.onSurfaceVariant
+                                          : cs.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Icon(
+                                Icons.chevron_right,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ],
+                          ),
+                          if (_selectedTags.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _selectedTags.map((tag) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: cs.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: cs.primary.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '#${tag.name}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.primary,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: KuberSpacing.md),
+
                   // Notes field
                   TextField(
                     controller: _notesController,
@@ -615,12 +724,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       hintStyle: textTheme.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
-                      prefixIcon: Icon(
-                        Icons.note_outlined,
-                        color: cs.onSurfaceVariant,
-                      ),
                     ),
                   ),
+                  const SizedBox(height: KuberSpacing.md),
                   const SizedBox(height: KuberSpacing.xl),
                   ], // end else (non-transfer)
                 ],
@@ -844,11 +950,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     t.updatedAt = DateTime.now();
 
     try {
+      final int resultId;
       if (_isEditing) {
-        await ref.read(transactionListProvider.notifier).updateTransaction(t);
+        resultId = await ref.read(transactionListProvider.notifier).updateTransaction(t);
       } else {
-        await ref.read(transactionListProvider.notifier).add(t);
+        resultId = await ref.read(transactionListProvider.notifier).add(t);
       }
+      
+      // Save tags
+      await ref.read(tagRepositoryProvider).updateTransactionTags(
+        resultId, 
+        _selectedTags.map((tag) => tag.id).toList(),
+      );
     } catch (e) {
       if (mounted) {
         showKuberSnackBar(context, 'Failed to save: $e', isError: true);
@@ -881,8 +994,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         : _notesController.text.trim();
 
     try {
+      final int resultId;
       if (_isEditing) {
-        await ref.read(transactionListProvider.notifier).updateTransfer(
+        resultId = await ref.read(transactionListProvider.notifier).updateTransfer(
           id: widget.transaction!.id,
           fromAccountId: _selectedFromAccountId.toString(),
           toAccountId: _selectedToAccountId.toString(),
@@ -892,7 +1006,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           fromIsCreditCard: fromIsCreditCard,
         );
       } else {
-        await ref.read(transactionListProvider.notifier).saveTransfer(
+        resultId = await ref.read(transactionListProvider.notifier).saveTransfer(
           fromAccountId: _selectedFromAccountId.toString(),
           toAccountId: _selectedToAccountId.toString(),
           amount: amount,
@@ -901,6 +1015,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           fromIsCreditCard: fromIsCreditCard,
         );
       }
+
+      // Save tags
+      await ref.read(tagRepositoryProvider).updateTransactionTags(
+        resultId, 
+        _selectedTags.map((tag) => tag.id).toList(),
+      );
     } on InsufficientBalanceException catch (e) {
       if (mounted) {
         showKuberSnackBar(
@@ -1224,6 +1344,102 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
         const SizedBox(height: KuberSpacing.md),
 
+        // Tags section
+        InkWell(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          onTap: _showTagSelector,
+          child: Container(
+            padding: const EdgeInsets.all(KuberSpacing.lg),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: cs.outline),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: cs.primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.sell_outlined,
+                        size: 18,
+                        color: cs.primary,
+                      ),
+                    ),
+                    const SizedBox(width: KuberSpacing.md),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TAGS',
+                          style: textTheme.labelSmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _selectedTags.isEmpty
+                              ? 'No tags selected'
+                              : '${_selectedTags.length} tags selected',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: _selectedTags.isEmpty
+                                ? cs.onSurfaceVariant
+                                : cs.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.chevron_right,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+                if (_selectedTags.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _selectedTags.map((tag) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cs.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: cs.primary.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Text(
+                          '#${tag.name}',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: cs.primary,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.md),
+
         // Notes
         TextField(
           controller: _notesController,
@@ -1276,6 +1492,27 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             }
           });
           Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
+  void _showTagSelector() {
+    _nameFocusNode.unfocus();
+    _amountFocusNode.unfocus();
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      builder: (_) => TagSelectorBottomSheet(
+        initialSelectedTags: _selectedTags,
+        onDone: (tags) {
+          setState(() => _selectedTags = tags);
         },
       ),
     );

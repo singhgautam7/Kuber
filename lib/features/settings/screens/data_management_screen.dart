@@ -30,7 +30,12 @@ class DataManagementScreen extends ConsumerWidget {
           actionLabel: filePath != null ? 'OPEN' : null,
           onAction: filePath != null ? () => OpenFilex.open(filePath) : null,
           secondaryActionLabel: filePath != null ? 'SHARE' : null,
-          onSecondaryAction: filePath != null ? () => SharePlus.instance.share(ShareParams(files: [XFile(filePath)])) : null,
+          onSecondaryAction: (next.filePaths != null && next.filePaths!.isNotEmpty)
+              ? () => SharePlus.instance.share(
+                  ShareParams(files: next.filePaths!.map((p) => XFile(p)).toList()))
+              : (filePath != null
+                  ? () => SharePlus.instance.share(ShareParams(files: [XFile(filePath)]))
+                  : null),
         );
         ref.read(dataControllerProvider.notifier).reset();
       } else if (next.status == DataOpStatus.error && next.message != null) {

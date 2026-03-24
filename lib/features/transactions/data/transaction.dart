@@ -30,4 +30,7 @@ class Transaction {
 
   @Index(composite: [CompositeIndex('updatedAt')])
   late String nameLower; // store name.toLowerCase() for fast search
+
+  @ignore
+  String? tempTags; // temporary storage for import
 }

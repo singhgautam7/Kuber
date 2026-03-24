@@ -377,7 +377,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               const EmptyState(
                 icon: Icons.bar_chart,
                 title: 'No data',
-                subtitle: 'No transactions found for this period',
+                description: 'No transactions found for this period',
               ),
             ] else ...[
 

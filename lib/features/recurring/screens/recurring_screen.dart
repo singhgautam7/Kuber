@@ -9,6 +9,7 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -101,39 +102,12 @@ class RecurringScreen extends ConsumerWidget {
               if (rules.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(KuberSpacing.xl),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.sync_rounded,
-                            size: 64,
-                            color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          Text(
-                            'No recurring transactions yet',
-                            style: textTheme.titleMedium?.copyWith(
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          GestureDetector(
-                            onTap: () => context.push('/recurring/add'),
-                            child: Text(
-                              'Add one?',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: cs.primary,
-                                decoration: TextDecoration.underline,
-                                decorationColor: cs.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: EmptyState(
+                    icon: Icons.repeat_rounded,
+                    title: 'No recurring transactions',
+                    description: 'Automate subscriptions and repeated payments',
+                    actionLabel: 'Add Recurring',
+                    onAction: () => context.push('/recurring/add'),
                   ),
                 )
               else

@@ -16,13 +16,13 @@ class TransactionRepository extends BaseRepository<Transaction> {
     return isar.transactions.get(id);
   }
 
-  Future<void> save(Transaction t) async {
+  Future<int> save(Transaction t) async {
     t.nameLower = t.name.toLowerCase();
     t.updatedAt = DateTime.now();
     if (t.id == Isar.autoIncrement) {
       t.createdAt = DateTime.now();
     }
-    await isar.writeTxn(() => isar.transactions.put(t));
+    return isar.writeTxn(() => isar.transactions.put(t));
   }
 
   Future<void> delete(Id id) async {
@@ -65,7 +65,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
     return getByDateRange(start, end);
   }
 
-  Future<void> saveTransfer({
+  Future<int> saveTransfer({
     required String fromAccountId,
     required String toAccountId,
     required double amount,
@@ -104,10 +104,10 @@ class TransactionRepository extends BaseRepository<Transaction> {
       ..createdAt = createdAt
       ..updatedAt = DateTime.now();
 
-    await isar.writeTxn(() => isar.transactions.put(t));
+    return isar.writeTxn(() => isar.transactions.put(t));
   }
 
-  Future<void> updateTransfer({
+  Future<int> updateTransfer({
     required int id,
     required String fromAccountId,
     required String toAccountId,
@@ -152,7 +152,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
       ..createdAt = createdAt
       ..updatedAt = DateTime.now();
 
-    await isar.writeTxn(() => isar.transactions.put(existing));
+    return isar.writeTxn(() => isar.transactions.put(existing));
   }
 
   Future<double> _computeBalance(String accountId, {int? excludeTransactionId}) async {

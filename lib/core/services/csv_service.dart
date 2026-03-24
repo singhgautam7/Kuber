@@ -3,6 +3,7 @@ import '../../features/transactions/data/transaction.dart';
 
 class CsvService {
   static const List<String> headers = [
+    'id',
     'date',
     'name',
     'amount',
@@ -12,6 +13,7 @@ class CsvService {
     'notes',
     'from_account',
     'to_account',
+    'tags',
     'frequency',
   ];
 
@@ -25,11 +27,14 @@ class CsvService {
     required List<Transaction> transactions,
     required Map<String, String> categoryNames, // id -> name
     required Map<String, String> accountNames,  // id -> name
+    required Map<int, List<String>> transactionTags, // txId -> list of tag names
   }) {
     final List<List<dynamic>> rows = [headers];
 
     for (final tx in transactions) {
+      final tags = transactionTags[tx.id] ?? [];
       rows.add([
+        tx.id,
         tx.createdAt.toIso8601String(),
         tx.name,
         tx.amount,
@@ -39,6 +44,7 @@ class CsvService {
         tx.notes ?? '',
         tx.fromAccountId != null ? accountNames[tx.fromAccountId] ?? '' : '',
         tx.toAccountId != null ? accountNames[tx.toAccountId] ?? '' : '',
+        tags.join('|'),
         '', // frequency - for now, standard transactions don't have it in this export
       ]);
     }
@@ -48,7 +54,7 @@ class CsvService {
 
   /// Parses CSV content into a list of maps.
   List<Map<String, String>> parseCsv(String csvContent) {
-    final List<List<dynamic>> rows = Csv().decode(csvContent);
+    final List<List<dynamic>> rows = Csv(dynamicTyping: false).decode(csvContent);
     if (rows.isEmpty) return [];
 
     final headerRow = rows.first.map((e) => e.toString().toLowerCase().trim()).toList();

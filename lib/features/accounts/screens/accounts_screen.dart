@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
@@ -188,7 +189,13 @@ class _AccountsBody extends ConsumerWidget {
         if (accounts.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _EmptyState(),
+            child: EmptyState(
+              icon: Icons.account_balance_wallet_outlined,
+              title: 'No accounts yet',
+              description: 'Add your first account to start tracking',
+              actionLabel: 'Add Account',
+              onAction: () => _openAccountSheet(context),
+            ),
           )
         else
           SliverPadding(
@@ -519,49 +526,3 @@ class _NetWorthLegend extends StatelessWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 120),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.account_balance_wallet_outlined,
-                color: cs.primary,
-                size: 32,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No accounts yet',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Add your first account to start tracking',
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

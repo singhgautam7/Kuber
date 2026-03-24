@@ -4,6 +4,8 @@ import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/tags/data/tag.dart';
+import '../../features/tags/data/transaction_tag.dart';
 import '../utils/color_palette.dart';
 
 class MockDataGenerator {
@@ -14,6 +16,7 @@ class MockDataGenerator {
   Future<void> generate() async {
     await isar.writeTxn(() async {
       await isar.clear();
+      final now = DateTime.now();
 
       // 1. Create Accounts
       final cash = Account()
@@ -48,8 +51,18 @@ class MockDataGenerator {
 
       await isar.categorys.putAll([food, transport, shopping, bills, income, other]);
 
+      // 2.5 Create Tags
+      final tagVacation = Tag()..name = 'vacation'..createdAt = now;
+      final tagUrgent = Tag()..name = 'urgent'..createdAt = now;
+      final tagReimbursable = Tag()..name = 'reimbursable'..createdAt = now;
+      final tagPersonal = Tag()..name = 'personal'..createdAt = now;
+      final tagWork = Tag()..name = 'work'..createdAt = now;
+      final tagPending = Tag()..name = 'pending'..createdAt = now;
+
+      final allTags = [tagVacation, tagUrgent, tagReimbursable, tagPersonal, tagWork, tagPending];
+      await isar.tags.putAll(allTags);
+
       // 3. Create Recurring Rules
-      final now = DateTime.now();
       final lastMonth = DateTime(now.year, now.month - 1, 1);
 
       final rent = RecurringRule()
@@ -152,6 +165,23 @@ class MockDataGenerator {
       }
 
       await isar.transactions.putAll(transactions);
+
+      // 5. Assign Tags
+      final List<TransactionTag> txTags = [];
+      for (final tx in transactions) {
+        // 40% chance of having tags
+        if (random.nextDouble() < 0.4) {
+          // 1-3 tags per transaction
+          final numTags = random.nextInt(3) + 1;
+          final shuffled = List.from(allTags)..shuffle(random);
+          for (int k = 0; k < numTags; k++) {
+            txTags.add(TransactionTag()
+              ..transactionId = tx.id
+              ..tagId = shuffled[k].id);
+          }
+        }
+      }
+      await isar.transactionTags.putAll(txTags);
     });
   }
 
