@@ -26,7 +26,7 @@ class DataManagementScreen extends ConsumerWidget {
           SnackBar(content: Text(msg)),
         );
         ref.read(dataControllerProvider.notifier).reset();
-        
+
         // If data was cleared or mock generated, we might want to restart?
         // For now, simple refresh is enough for most cases, but clear/mock are heavy.
         if (next.message!.contains('cleared') || next.message!.contains('generated')) {
@@ -45,7 +45,7 @@ class DataManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'Data Management'),
+      appBar: const KuberAppBar(showBack: true, title: 'Data'),
       body: Stack(
         children: [
           CustomScrollView(
@@ -228,10 +228,10 @@ class _DataCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(KuberSpacing.sm),
                 decoration: BoxDecoration(
-                  color: cs.primaryContainer,
+                  color: cs.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
-                child: Icon(icon, color: cs.primary, size: 20),
+                child: Icon(icon, color: cs.onSurfaceVariant, size: 20),
               ),
               const SizedBox(width: KuberSpacing.md),
               Text(
