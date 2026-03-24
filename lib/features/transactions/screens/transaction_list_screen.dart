@@ -263,7 +263,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   children: [
                     if (_hasAdvancedFilters) ...[
                       FilterChip(
-                        avatar: const Icon(Icons.close, size: 14),
+                        avatar: Icon(Icons.close, size: 14, color: cs.error),
                         label: const Text('Clear Filters'),
                         selected: false,
                         onSelected: (_) => _clearAdvancedFilters(),
