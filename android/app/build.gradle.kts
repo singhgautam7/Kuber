@@ -25,6 +25,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Optimization: Include only required locales to save space in the App Bundle.
+        // This removes translations from various libraries that the app doesn't use.
+        resConfigs("en")
     }
 
     buildTypes {
