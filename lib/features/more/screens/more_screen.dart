@@ -122,6 +122,12 @@ class MoreScreen extends StatelessWidget {
                   subtitle: 'Version 1.0.0',
                   onTap: () {},
                 ),
+                _MenuItem(
+                  icon: Icons.security_outlined,
+                  label: 'Permissions',
+                  subtitle: 'App limits and security',
+                  onTap: () => context.pushNamed('permissions'),
+                ),
               ],
             ),
           ],

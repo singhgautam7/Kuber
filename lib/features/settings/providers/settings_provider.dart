@@ -35,6 +35,7 @@ class SettingsState {
   final String dateFormat;
   final String userName;
   final SwipeMode swipeMode;
+  final bool biometricsEnabled;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -42,6 +43,7 @@ class SettingsState {
     this.dateFormat = 'dd/MM/yyyy',
     this.userName = '',
     this.swipeMode = SwipeMode.changeTabs,
+    this.biometricsEnabled = false,
   });
 
   SettingsState copyWith({
@@ -50,6 +52,7 @@ class SettingsState {
     String? dateFormat,
     String? userName,
     SwipeMode? swipeMode,
+    bool? biometricsEnabled,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -57,6 +60,7 @@ class SettingsState {
       dateFormat: dateFormat ?? this.dateFormat,
       userName: userName ?? this.userName,
       swipeMode: swipeMode ?? this.swipeMode,
+      biometricsEnabled: biometricsEnabled ?? this.biometricsEnabled,
     );
   }
 }
@@ -70,6 +74,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final dateFormat = prefs.getString('date_format') ?? 'dd/MM/yyyy';
     final userName = prefs.getString(PrefsKeys.userName) ?? '';
     final swipeModeIndex = prefs.getInt(PrefsKeys.swipeMode) ?? 0;
+    final biometricsEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -77,6 +82,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       dateFormat: dateFormat,
       userName: userName,
       swipeMode: SwipeMode.values[swipeModeIndex],
+      biometricsEnabled: biometricsEnabled,
     );
   }
 
@@ -108,6 +114,12 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefsKeys.swipeMode, mode.index);
     state = AsyncData(state.requireValue.copyWith(swipeMode: mode));
+  }
+
+  Future<void> setBiometricsEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PrefsKeys.biometricsEnabled, enabled);
+    state = AsyncData(state.requireValue.copyWith(biometricsEnabled: enabled));
   }
 
   Future<void> clearAllData() async {

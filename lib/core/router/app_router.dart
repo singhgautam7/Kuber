@@ -12,6 +12,7 @@ import '../../features/transactions/screens/add_transaction_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
 import '../../features/more/screens/more_screen.dart';
+import '../../features/more/screens/permissions_screen.dart';
 import '../../features/more/screens/categories_screen.dart';
 import '../../features/more/screens/tags_screen.dart';
 import '../../features/more/screens/how_to_use_screen.dart';
@@ -91,6 +92,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/recurring-loader',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const RecurringLoaderScreen(),
+      ),
+      GoRoute(
+        name: 'permissions',
+        path: '/security',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const PermissionsScreen(),
       ),
       StatefulShellRoute(
         builder: (context, state, navigationShell) =>
