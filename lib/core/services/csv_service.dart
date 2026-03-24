@@ -17,7 +17,7 @@ class CsvService {
 
   /// Generates a CSV template with only headers.
   String generateTemplate() {
-    return const ListToCsvConverter().convert([headers]);
+    return Csv().encode([headers]);
   }
 
   /// Exports a list of transactions to a CSV string.
@@ -43,12 +43,12 @@ class CsvService {
       ]);
     }
 
-    return const ListToCsvConverter().convert(rows);
+    return Csv().encode(rows);
   }
 
   /// Parses CSV content into a list of maps.
   List<Map<String, String>> parseCsv(String csvContent) {
-    final List<List<dynamic>> rows = const CsvToListConverter().convert(csvContent);
+    final List<List<dynamic>> rows = Csv().decode(csvContent);
     if (rows.isEmpty) return [];
 
     final headerRow = rows.first.map((e) => e.toString().toLowerCase().trim()).toList();

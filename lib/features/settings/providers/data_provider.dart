@@ -3,6 +3,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/services/data_service.dart';
+import '../../../core/services/notification_service.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../../accounts/providers/account_provider.dart';
+import '../../categories/providers/category_provider.dart';
+import '../../recurring/providers/recurring_provider.dart';
 
 enum DataOpStatus { initial, loading, success, error }
 
@@ -11,12 +16,16 @@ class DataState {
   final String? message;
   final int? successCount;
   final int? failureCount;
+  final String? filePath;
+  final String? loadingMessage;
 
   DataState({
     this.status = DataOpStatus.initial,
     this.message,
     this.successCount,
     this.failureCount,
+    this.filePath,
+    this.loadingMessage,
   });
 
   DataState copyWith({
@@ -24,12 +33,16 @@ class DataState {
     String? message,
     int? successCount,
     int? failureCount,
+    String? filePath,
+    String? loadingMessage,
   }) {
     return DataState(
       status: status ?? this.status,
       message: message, // Allow nulling out
       successCount: successCount ?? this.successCount,
       failureCount: failureCount ?? this.failureCount,
+      filePath: filePath ?? this.filePath,
+      loadingMessage: loadingMessage ?? this.loadingMessage,
     );
   }
 }
@@ -39,48 +52,110 @@ final dataServiceProvider = Provider<DataService>((ref) {
   return DataService(isar);
 });
 
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService();
+});
+
 final dataControllerProvider = StateNotifierProvider<DataController, DataState>((ref) {
   final service = ref.watch(dataServiceProvider);
-  return DataController(service);
+  final notificationService = ref.watch(notificationServiceProvider);
+  return DataController(service, notificationService, ref);
 });
 
 class DataController extends StateNotifier<DataState> {
   final DataService _service;
+  final NotificationService _notificationService;
+  final Ref _ref;
 
-  DataController(this._service) : super(DataState());
+  static const notificationId = 1001;
+  DataController(this._service, this._notificationService, this._ref) : super(DataState());
 
   Future<void> exportData() async {
-    state = state.copyWith(status: DataOpStatus.loading);
+    state = state.copyWith(status: DataOpStatus.loading, filePath: null);
+    
     try {
-      await _service.exportData();
-      state = state.copyWith(status: DataOpStatus.success, message: 'Data exported successfully');
+      await _notificationService.init();
+      await _notificationService.requestPermission();
+      
+      // Non-awaited to avoid blocking the main flow
+      _notificationService.showExportNotification(
+        id: notificationId,
+        title: 'Exporting data...',
+        body: 'Preparing your file',
+        isProgress: true,
+      );
+
+      final path = await _service.exportData();
+      state = state.copyWith(status: DataOpStatus.success, message: 'Data exported successfully', filePath: path);
+      
+      final fileName = path?.split('/').last ?? 'export.csv';
+      _notificationService.showExportNotification(
+        id: notificationId,
+        title: 'Export Complete',
+        body: 'Saved to Downloads/$fileName',
+        isSuccess: true,
+        payload: path,
+      );
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Export failed: $e');
+      
+      _notificationService.showExportNotification(
+        id: notificationId,
+        title: 'Export Failed',
+        body: e.toString(),
+      );
     }
   }
 
   Future<void> downloadTemplate() async {
-    state = state.copyWith(status: DataOpStatus.loading);
+    state = state.copyWith(status: DataOpStatus.loading, filePath: null);
+    
+    await _notificationService.init();
+    await _notificationService.requestPermission();
+    
+    const notificationId = 1002;
+    await _notificationService.showExportNotification(
+      id: notificationId,
+      title: 'Downloading template...',
+      body: 'Preparing CSV template',
+      isProgress: true,
+    );
+
     try {
-      await _service.downloadTemplate();
-      state = state.copyWith(status: DataOpStatus.success, message: 'Template downloaded successfully');
+      final path = await _service.downloadTemplate();
+      state = state.copyWith(status: DataOpStatus.success, message: 'Template downloaded successfully', filePath: path);
+      
+      final fileName = path?.split('/').last ?? 'template.csv';
+      await _notificationService.showExportNotification(
+        id: notificationId,
+        title: 'Download Complete',
+        body: 'Saved to Downloads/$fileName',
+        isSuccess: true,
+        payload: path,
+      );
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Download failed: $e');
+      await _notificationService.showExportNotification(
+        id: notificationId,
+        title: 'Download Failed',
+        body: e.toString(),
+      );
     }
   }
 
   Future<void> importData() async {
-    state = state.copyWith(status: DataOpStatus.loading);
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
       );
 
-      if (result == null || result.files.isEmpty) {
-        state = state.copyWith(status: DataOpStatus.initial);
-        return;
-      }
+      if (result == null || result.files.isEmpty) return;
+
+      state = state.copyWith(
+        status: DataOpStatus.loading,
+        loadingMessage: 'Importing data...',
+      );
 
       final file = File(result.files.first.path!);
       final csvContent = await file.readAsString();
@@ -90,9 +165,14 @@ class DataController extends StateNotifier<DataState> {
       if (importResult.error != null) {
         state = state.copyWith(status: DataOpStatus.error, message: importResult.error);
       } else {
+        _refreshData();
+        final msg = importResult.failureCount > 0 
+          ? 'Imported ${importResult.successCount} records, ${importResult.failureCount} failed'
+          : 'Imported ${importResult.successCount} records successfully';
+          
         state = state.copyWith(
           status: DataOpStatus.success,
-          message: 'Import completed',
+          message: msg,
           successCount: importResult.successCount,
           failureCount: importResult.failureCount,
         );
@@ -103,9 +183,13 @@ class DataController extends StateNotifier<DataState> {
   }
 
   Future<void> generateMockData() async {
-    state = state.copyWith(status: DataOpStatus.loading);
+    state = state.copyWith(
+      status: DataOpStatus.loading,
+      loadingMessage: 'Generating mock data...',
+    );
     try {
       await _service.generateMockData();
+      _refreshData();
       state = state.copyWith(status: DataOpStatus.success, message: 'Mock data generated successfully');
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Generation failed: $e');
@@ -113,13 +197,25 @@ class DataController extends StateNotifier<DataState> {
   }
 
   Future<void> clearAllData() async {
-    state = state.copyWith(status: DataOpStatus.loading);
+    state = state.copyWith(
+      status: DataOpStatus.loading,
+      loadingMessage: 'Clearing all data...',
+    );
     try {
       await _service.clearAllData();
+      _refreshData();
       state = state.copyWith(status: DataOpStatus.success, message: 'All data cleared successfully');
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Clear failed: $e');
     }
+  }
+
+  void _refreshData() {
+    _ref.invalidate(transactionListProvider);
+    _ref.invalidate(accountListProvider);
+    _ref.invalidate(categoryListProvider);
+    _ref.invalidate(recurringListProvider);
+    // These derived providers will automatically update because they watch transactionListProvider
   }
 
   void reset() {

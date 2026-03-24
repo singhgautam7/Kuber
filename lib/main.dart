@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/database/isar_service.dart';
+import 'core/services/notification_service.dart';
 import 'features/recurring/data/recurring_processor.dart';
 
 final recurringProcessResultProvider = Provider<int>((ref) {
@@ -44,6 +45,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final isar = await IsarService.open();
+  await NotificationService().init();
   final missedCount = await RecurringProcessor(isar).processAll();
 
   runApp(

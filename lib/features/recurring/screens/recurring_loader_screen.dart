@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
+import '../../../shared/widgets/loading_widgets.dart';
 
 class RecurringLoaderScreen extends ConsumerStatefulWidget {
   const RecurringLoaderScreen({super.key});
@@ -65,14 +64,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated sync ring
-              SizedBox(
-                width: 96,
-                height: 96,
-                child: _SweepRingWidget(
-                  controller: _controller,
-                ),
-              ),
+              SweepRingWidget(controller: _controller),
               const SizedBox(height: KuberSpacing.xl),
 
               Text(
@@ -96,9 +88,9 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _StatusPill(label: 'NETWORK', value: 'Local Only'),
+                  const StatusPill(label: 'NETWORK', value: 'Local Only'),
                   const SizedBox(width: KuberSpacing.md),
-                  _StatusPill(
+                  StatusPill(
                     label: 'PROCESSED',
                     value: '$count transaction${count == 1 ? '' : 's'}',
                   ),
@@ -110,128 +102,4 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
       ),
     );
   }
-}
-
-class _SweepRingWidget extends AnimatedWidget {
-  final AnimationController controller;
-
-  const _SweepRingWidget({required this.controller})
-      : super(listenable: controller);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return CustomPaint(
-      painter: _SweepRingPainter(
-        progress: controller.value,
-        primaryColor: cs.primary,
-        surfaceMutedColor: cs.surfaceContainerHigh,
-      ),
-      child: Center(
-        child: Icon(
-          Icons.sync_rounded,
-          color: cs.primary,
-          size: 36,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatusPill({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: KuberSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.full),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SweepRingPainter extends CustomPainter {
-  final double progress;
-  final Color primaryColor;
-  final Color surfaceMutedColor;
-
-  _SweepRingPainter({
-    required this.progress,
-    required this.primaryColor,
-    required this.surfaceMutedColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 4;
-
-    // Background ring
-    final bgPaint = Paint()
-      ..color = surfaceMutedColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-    canvas.drawCircle(center, radius, bgPaint);
-
-    // Sweep gradient arc
-    final sweepPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round
-      ..shader = SweepGradient(
-        startAngle: 0,
-        endAngle: math.pi * 2,
-        colors: [
-          primaryColor.withValues(alpha: 0.0),
-          primaryColor,
-        ],
-        transform: GradientRotation(progress * math.pi * 2 - math.pi / 2),
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
-
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -math.pi / 2 + progress * math.pi * 2 - math.pi,
-      math.pi,
-      false,
-      sweepPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_SweepRingPainter oldDelegate) =>
-      oldDelegate.progress != progress;
 }

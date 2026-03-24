@@ -5,7 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../providers/data_provider.dart';
-import '../../../main.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../shared/widgets/loading_widgets.dart';
+import 'package:open_filex/open_filex.dart';
 
 class DataManagementScreen extends ConsumerWidget {
   const DataManagementScreen({super.key});
@@ -19,25 +22,22 @@ class DataManagementScreen extends ConsumerWidget {
     ref.listen(dataControllerProvider, (previous, next) {
       if (next.status == DataOpStatus.success && next.message != null) {
         String msg = next.message!;
-        if (next.successCount != null) {
-          msg += ' (${next.successCount} success, ${next.failureCount} failed)';
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
+        
+        final filePath = next.filePath;
+        showKuberSnackBar(
+          context, 
+          msg,
+          actionLabel: filePath != null ? 'OPEN' : null,
+          onAction: filePath != null ? () => OpenFilex.open(filePath) : null,
+          secondaryActionLabel: filePath != null ? 'SHARE' : null,
+          onSecondaryAction: filePath != null ? () => SharePlus.instance.share(ShareParams(files: [XFile(filePath)])) : null,
         );
         ref.read(dataControllerProvider.notifier).reset();
-
-        // If data was cleared or mock generated, we might want to restart?
-        // For now, simple refresh is enough for most cases, but clear/mock are heavy.
-        if (next.message!.contains('cleared') || next.message!.contains('generated')) {
-           RestartWidget.restartApp(context);
-        }
       } else if (next.status == DataOpStatus.error && next.message != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.message!),
-            backgroundColor: cs.error,
-          ),
+        showKuberSnackBar(
+          context,
+          next.message!,
+          isError: true,
         );
         ref.read(dataControllerProvider.notifier).reset();
       }
@@ -125,12 +125,7 @@ class DataManagementScreen extends ConsumerWidget {
             ],
           ),
           if (state.status == DataOpStatus.loading)
-            Container(
-              color: Colors.black45,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+            _DataLoadingOverlay(message: state.loadingMessage ?? 'Processing...'),
         ],
       ),
     );
@@ -182,6 +177,74 @@ class DataManagementScreen extends ConsumerWidget {
             child: const Text('Generate'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DataLoadingOverlay extends StatefulWidget {
+  final String message;
+  const _DataLoadingOverlay({required this.message});
+
+  @override
+  State<_DataLoadingOverlay> createState() => _DataLoadingOverlayState();
+}
+
+class _DataLoadingOverlayState extends State<_DataLoadingOverlay> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      color: Colors.black54,
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(KuberRadius.lg),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SweepRingWidget(controller: _controller),
+              const SizedBox(height: KuberSpacing.lg),
+              Text(
+                widget.message,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

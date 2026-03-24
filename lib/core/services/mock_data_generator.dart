@@ -4,6 +4,7 @@ import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../utils/color_palette.dart';
 
 class MockDataGenerator {
   final Isar isar;
@@ -19,31 +20,31 @@ class MockDataGenerator {
         ..name = 'Cash'
         ..type = 'bank'
         ..icon = 'payments'
-        ..colorValue = 0xFF66BB6A;
+        ..colorValue = AppColorPalette.colors[7]; // emerald
 
       final hdfc = Account()
         ..name = 'HDFC Bank'
         ..type = 'bank'
         ..icon = 'account_balance'
-        ..colorValue = 0xFF5C6BC0;
+        ..colorValue = AppColorPalette.colors[1]; // indigo
 
       final icici = Account()
         ..name = 'ICICI Credit Card'
         ..type = 'bank'
         ..isCreditCard = true
         ..icon = 'credit_card'
-        ..colorValue = 0xFFAB47BC
+        ..colorValue = AppColorPalette.colors[2] // violet
         ..creditLimit = 100000;
 
       await isar.accounts.putAll([cash, hdfc, icici]);
 
       // 2. Create Categories
-      final food = _cat('Food', 'restaurant', 0xFFE57373, 'expense');
-      final transport = _cat('Transport', 'directions_car', 0xFF64B5F6, 'expense');
-      final shopping = _cat('Shopping', 'shopping_bag', 0xFFBA68C8, 'expense');
-      final bills = _cat('Bills', 'receipt_long', 0xFFFFB74D, 'expense');
-      final income = _cat('Salary', 'trending_up', 0xFF4DB6AC, 'income');
-      final other = _cat('Other', 'category', 0xFF90A4AE, 'both');
+      final food = _cat('Food', 'restaurant', AppColorPalette.colors[4], 'expense');
+      final transport = _cat('Transport', 'directions_car', AppColorPalette.colors[0], 'expense');
+      final shopping = _cat('Shopping', 'shopping_bag', AppColorPalette.colors[3], 'expense');
+      final bills = _cat('Bills', 'receipt_long', AppColorPalette.colors[5], 'expense');
+      final income = _cat('Salary', 'trending_up', AppColorPalette.colors[8], 'income');
+      final other = _cat('Other', 'category', AppColorPalette.colors[10], 'both');
 
       await isar.categorys.putAll([food, transport, shopping, bills, income, other]);
 

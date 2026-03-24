@@ -1,7 +1,28 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 allprojects {
     repositories {
         google()
         mavenCentral()
+    }
+}
+
+subprojects {
+    afterEvaluate {
+        if (project.hasProperty("android")) {
+            val android = project.extensions.getByName("android")
+            if (android is com.android.build.gradle.BaseExtension) {
+                android.compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                    targetCompatibility = JavaVersion.VERSION_17
+                }
+            }
+        }
+        project.tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_17)
+            }
+        }
     }
 }
 
@@ -30,6 +51,7 @@ subprojects {
                     android.compileSdkVersion(36)
                 }
             }
+            
             if (android is com.android.build.gradle.LibraryExtension) {
                 val mainSourceSet = android.sourceSets.getByName("main")
                 val originalManifest = mainSourceSet.manifest.srcFile

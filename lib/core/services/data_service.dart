@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:intl/intl.dart';
 
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
@@ -10,6 +10,7 @@ import '../../features/transactions/data/transaction.dart';
 import 'csv_service.dart';
 import 'mock_data_generator.dart';
 import '../database/isar_service.dart';
+import '../utils/color_palette.dart';
 
 
 class ImportResult {
@@ -30,8 +31,8 @@ class DataService {
 
   DataService(this.isar);
 
-  /// Exports all data to a CSV and shares it.
-  Future<void> exportData() async {
+  /// Exports all data to a CSV and returns the file path.
+  Future<String?> exportData() async {
     final transactions = await isar.transactions.where().findAll();
     final categories = await isar.categorys.where().findAll();
     final accounts = await isar.accounts.where().findAll();
@@ -45,21 +46,44 @@ class DataService {
       accountNames: accountNames,
     );
 
-    final directory = await getTemporaryDirectory();
-    final file = File('${directory.path}/kuber_export_${DateTime.now().millisecondsSinceEpoch}.csv');
-    await file.writeAsString(csvContent);
-
-    await Share.shareXFiles([XFile(file.path)], text: 'Kuber Data Export');
+    final timestamp = DateFormat('yyyy_MM_dd_HHmm').format(DateTime.now());
+    final fileName = 'kuber_export_$timestamp.csv';
+    return await _saveFile(csvContent, fileName);
   }
 
-  /// Downloads the CSV template.
-  Future<void> downloadTemplate() async {
+  /// Downloads the CSV template and returns the file path.
+  Future<String?> downloadTemplate() async {
     final template = _csvService.generateTemplate();
-    final directory = await getTemporaryDirectory();
-    final file = File('${directory.path}/kuber_template.csv');
-    await file.writeAsString(template);
+    const fileName = 'kuber_template.csv';
+    return await _saveFile(template, fileName);
+  }
 
-    await Share.shareXFiles([XFile(file.path)], text: 'Kuber CSV Template');
+  Future<String?> _saveFile(String content, String fileName) async {
+    // Option A (Preferred): Save to app-specific directory (no permission required)
+    // We'll use the external storage directory if available (visible in Files app on some Androids)
+    // or fallback to application documents.
+    Directory? directory;
+    if (Platform.isAndroid) {
+      directory = Directory('/storage/emulated/0/Download');
+      // Ensure directory exists
+      if (!await directory.exists()) {
+        try {
+          await directory.create(recursive: true);
+        } catch (e) {
+          debugPrint('DataService: Failed to create Download directory: $e');
+        }
+      }
+    } else {
+      directory = await getDownloadsDirectory();
+    }
+    
+    directory ??= await getExternalStorageDirectory();
+    directory ??= await getApplicationDocumentsDirectory();
+    
+    final file = File('${directory.path}/$fileName');
+    await file.writeAsString(content);
+    debugPrint('DataService: File saved to ${file.path}');
+    return file.path;
   }
 
   /// Imports data from a CSV file.
@@ -103,10 +127,13 @@ class DataService {
             category = Category()
               ..name = categoryName
               ..icon = 'category'
-              ..colorValue = 0xFF90A4AE
+              ..colorValue = AppColorPalette.getRandomColor()
               ..type = type;
             await isar.writeTxn(() => isar.categorys.put(category!));
             categoryMap[categoryName.toLowerCase()] = category;
+          } else if (category != null && category.colorValue == 0xFF90A4AE) {
+             category.colorValue = AppColorPalette.getRandomColor();
+             await isar.writeTxn(() => isar.categorys.put(category!));
           }
 
           // Resolve Account
@@ -118,9 +145,12 @@ class DataService {
               ..type = 'bank' // default type
               ..isCreditCard = isCC
               ..icon = isCC ? 'credit_card' : 'account_balance'
-              ..colorValue = isCC ? 0xFFAB47BC : 0xFF5C6BC0;
+              ..colorValue = AppColorPalette.getRandomColor();
             await isar.writeTxn(() => isar.accounts.put(account!));
             accountMap[accountName.toLowerCase()] = account;
+          } else if (account.colorValue == null) {
+             account.colorValue = AppColorPalette.getRandomColor();
+             await isar.writeTxn(() => isar.accounts.put(account!));
           }
 
           final tx = Transaction()
@@ -140,16 +170,32 @@ class DataService {
             
             Account? fromAcc = accountMap[fromAccName?.toLowerCase()];
             if (fromAcc == null && fromAccName != null && fromAccName.isNotEmpty) {
-               fromAcc = Account()..name = fromAccName..type = 'bank'..isCreditCard = fromAccName.toLowerCase().contains('credit')..icon = 'account_balance'..colorValue = 0xFF5C6BC0;
+               fromAcc = Account()
+                 ..name = fromAccName
+                 ..type = 'bank'
+                 ..isCreditCard = fromAccName.toLowerCase().contains('credit')
+                 ..icon = 'account_balance'
+                 ..colorValue = AppColorPalette.getRandomColor();
                await isar.writeTxn(() => isar.accounts.put(fromAcc!));
                accountMap[fromAccName.toLowerCase()] = fromAcc;
+            } else if (fromAcc != null && fromAcc.colorValue == null) {
+               fromAcc.colorValue = AppColorPalette.getRandomColor();
+               await isar.writeTxn(() => isar.accounts.put(fromAcc!));
             }
 
             Account? toAcc = accountMap[toAccName?.toLowerCase()];
             if (toAcc == null && toAccName != null && toAccName.isNotEmpty) {
-               toAcc = Account()..name = toAccName..type = 'bank'..isCreditCard = toAccName.toLowerCase().contains('credit')..icon = 'account_balance'..colorValue = 0xFF5C6BC0;
+               toAcc = Account()
+                 ..name = toAccName
+                 ..type = 'bank'
+                 ..isCreditCard = toAccName.toLowerCase().contains('credit')
+                 ..icon = 'account_balance'
+                 ..colorValue = AppColorPalette.getRandomColor();
                await isar.writeTxn(() => isar.accounts.put(toAcc!));
                accountMap[toAccName.toLowerCase()] = toAcc;
+            } else if (toAcc != null && toAcc.colorValue == null) {
+               toAcc.colorValue = AppColorPalette.getRandomColor();
+               await isar.writeTxn(() => isar.accounts.put(toAcc!));
             }
 
             tx.fromAccountId = fromAcc?.id.toString();
@@ -185,4 +231,6 @@ class DataService {
     await isar.writeTxn(() => isar.clear());
     await IsarService.seedIfNeeded(isar);
   }
+
+
 }

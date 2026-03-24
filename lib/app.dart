@@ -5,19 +5,13 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/providers/settings_provider.dart';
 
-class KuberApp extends ConsumerStatefulWidget {
+class KuberApp extends ConsumerWidget {
   const KuberApp({super.key});
 
   @override
-  ConsumerState<KuberApp> createState() => _KuberAppState();
-}
-
-class _KuberAppState extends ConsumerState<KuberApp> {
-  late final _router = createRouter();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
       title: 'Kuber',
@@ -25,7 +19,7 @@ class _KuberAppState extends ConsumerState<KuberApp> {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,
-      routerConfig: _router,
+      routerConfig: router,
     );
   }
 }

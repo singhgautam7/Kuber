@@ -19,6 +19,8 @@ void showKuberSnackBar(
   bool isError = false,
   String? actionLabel,
   VoidCallback? onAction,
+  String? secondaryActionLabel,
+  VoidCallback? onSecondaryAction,
 }) {
   final cs = Theme.of(context).colorScheme;
 
@@ -34,25 +36,42 @@ void showKuberSnackBar(
   );
 
   final Widget mainButton;
-  if (actionLabel != null) {
+  if (actionLabel != null || secondaryActionLabel != null) {
     mainButton = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        TextButton(
-          onPressed: () {
-            if (actionFired) return;
-            actionFired = true;
-            _dismissInstantly();
-            onAction?.call();
-          },
-          child: Text(
-            actionLabel,
-            style: TextStyle(
-              color: cs.primary,
-              fontWeight: FontWeight.w600,
+        if (secondaryActionLabel != null)
+          TextButton(
+            onPressed: () {
+              if (actionFired) return;
+              actionFired = true;
+              _dismissInstantly();
+              onSecondaryAction?.call();
+            },
+            child: Text(
+              secondaryActionLabel,
+              style: TextStyle(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-        ),
+        if (actionLabel != null)
+          TextButton(
+            onPressed: () {
+              if (actionFired) return;
+              actionFired = true;
+              _dismissInstantly();
+              onAction?.call();
+            },
+            child: Text(
+              actionLabel,
+              style: TextStyle(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         closeButton,
       ],
     );
