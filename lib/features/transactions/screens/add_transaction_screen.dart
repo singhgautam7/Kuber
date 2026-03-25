@@ -24,6 +24,7 @@ import '../widgets/category_picker_sheet.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
+import '../../budgets/providers/budget_provider.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -557,6 +558,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       ),
                     ],
                   ),
+                  if (_selectedCategoryId != null) ...[
+                    const SizedBox(height: KuberSpacing.md),
+                    _BudgetProgressIndicator(categoryId: _selectedCategoryId!.toString()),
+                  ],
                   const SizedBox(height: KuberSpacing.md),
 
                   // [E] Date & Time tile
@@ -1505,7 +1510,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
@@ -1723,6 +1728,66 @@ class _TransactionTypeSelector extends StatelessWidget {
           );
         }),
       ),
+    );
+  }
+}
+
+class _BudgetProgressIndicator extends ConsumerWidget {
+  final String categoryId;
+  const _BudgetProgressIndicator({required this.categoryId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final budgetAsync = ref.watch(budgetByCategoryProvider(categoryId));
+    final cs = Theme.of(context).colorScheme;
+
+    return budgetAsync.when(
+      data: (budget) {
+        if (budget == null || !budget.isActive) return const SizedBox.shrink();
+        
+        final progressAsync = ref.watch(budgetProgressProvider(budget));
+        return progressAsync.when(
+          data: (p) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.account_balance_wallet_outlined, size: 14, color: cs.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'Budget',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '₹${p.spent.toStringAsFixed(0)} / ₹${p.limit.toStringAsFixed(0)} (${p.percentage.toStringAsFixed(0)}% used)',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: p.percentage >= 100 ? cs.error : cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (p.percentage >= 100)
+                  Icon(Icons.warning_amber_rounded, size: 14, color: cs.error),
+              ],
+            ),
+          ),
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

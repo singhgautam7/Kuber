@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
 import '../../../shared/widgets/loading_widgets.dart';
+import '../../budgets/services/budget_service.dart';
 
 class RecurringLoaderScreen extends ConsumerStatefulWidget {
   const RecurringLoaderScreen({super.key});
@@ -35,6 +36,9 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
     );
 
     _controller.forward();
+
+    // Initialize budgets
+    ref.read(budgetServiceProvider).init();
 
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (mounted && !_navigating) {

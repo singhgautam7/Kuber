@@ -150,7 +150,12 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
 
                   return ListView(
                     controller: scrollController,
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 20,
+                      bottom: MediaQuery.of(context).padding.bottom + 16,
+                    ),
                     children: [
                       if (_searchQuery.trim().isNotEmpty && !queryExists)
                         _TagActionTile(
