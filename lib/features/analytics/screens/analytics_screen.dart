@@ -271,10 +271,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final top5 = biggest.take(5).toList();
 
     return Scaffold(
-      appBar: const KuberAppBar(title: 'Analytics'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(
-          top: KuberSpacing.md,
           left: KuberSpacing.lg,
           right: KuberSpacing.lg,
           bottom: KuberSpacing.xl,
@@ -282,6 +280,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const KuberAppBar(title: 'Analytics'),
+            const SizedBox(height: KuberSpacing.sm),
 
             // [A] Period selector
             SingleChildScrollView(

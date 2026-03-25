@@ -72,15 +72,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final userName = ref.watch(settingsProvider).valueOrNull?.userName ?? '';
 
     return Scaffold(
-      appBar: const KuberAppBar(),
       body: ListView(
         padding: EdgeInsets.only(
-          top: KuberSpacing.lg,
           left: KuberSpacing.lg,
           right: KuberSpacing.lg,
           bottom: navBarBottomPadding(context),
         ),
         children: [
+          const KuberAppBar(),
+          const SizedBox(height: KuberSpacing.lg),
+
           // Greeting
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
