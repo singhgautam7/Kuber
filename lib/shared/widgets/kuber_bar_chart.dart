@@ -58,8 +58,8 @@ class _KuberBarChartState extends State<KuberBarChart> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: cs.outline, width: 1),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.5), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,10 +72,12 @@ class _KuberBarChartState extends State<KuberBarChart> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.title,
-                    style: GoogleFonts.inter(
-                      fontSize: 16, fontWeight: FontWeight.w600,
-                      color: cs.onSurface)),
+                  Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
                   if (widget.subtitle != null) ...[
                     const SizedBox(height: 2),
                     Text(widget.subtitle!,

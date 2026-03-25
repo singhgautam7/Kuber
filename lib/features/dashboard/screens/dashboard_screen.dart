@@ -22,6 +22,9 @@ import '../../recurring/providers/recurring_provider.dart';
 import '../../recurring/widgets/recurring_detail_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
+import '../widgets/smart_insights_card.dart';
+import '../widgets/budget_snapshot_card.dart';
+import '../widgets/burn_rate_card.dart';
 
 const _subtitles = [
   'Let\'s manage your money wisely',
@@ -69,16 +72,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final userName = ref.watch(settingsProvider).valueOrNull?.userName ?? '';
 
     return Scaffold(
+      appBar: const KuberAppBar(),
       body: ListView(
         padding: EdgeInsets.only(
+          top: KuberSpacing.lg,
           left: KuberSpacing.lg,
           right: KuberSpacing.lg,
           bottom: navBarBottomPadding(context),
         ),
         children: [
-          const KuberAppBar(),
-          const SizedBox(height: KuberSpacing.lg),
-
           // Greeting
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,7 +117,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               error: (e, _) => Center(child: Text('Error: $e')),
               data: (summary) => _BalanceHeroCard(summary: summary),
             ),
-            const SizedBox(height: KuberSpacing.xl),
+            const SizedBox(height: KuberSpacing.md),
+
+            // Daily Burn Rate
+            const BurnRateCard(),
+
+            // Smart Insights
+            const SmartInsightsCard(),
+
+            // Budget Snapshot
+            const BudgetSnapshotCard(),
 
             // [B] Bank Accounts
             accountsAsync.when(
