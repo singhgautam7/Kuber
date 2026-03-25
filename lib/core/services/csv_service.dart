@@ -14,6 +14,7 @@ class CsvService {
     'from_account',
     'to_account',
     'tags',
+    'group',
     'frequency',
   ];
 
@@ -27,6 +28,7 @@ class CsvService {
     required List<Transaction> transactions,
     required Map<String, String> categoryNames, // id -> name
     required Map<String, String> accountNames,  // id -> name
+    required Map<String, String> groupNames,    // categoryId -> groupName
     required Map<int, List<String>> transactionTags, // txId -> list of tag names
   }) {
     final List<List<dynamic>> rows = [headers];
@@ -45,6 +47,7 @@ class CsvService {
         tx.fromAccountId != null ? accountNames[tx.fromAccountId] ?? '' : '',
         tx.toAccountId != null ? accountNames[tx.toAccountId] ?? '' : '',
         tags.join('|'),
+        groupNames[tx.categoryId] ?? '',
         '', // frequency - for now, standard transactions don't have it in this export
       ]);
     }

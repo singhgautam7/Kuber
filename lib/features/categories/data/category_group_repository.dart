@@ -11,8 +11,8 @@ class CategoryGroupRepository {
     return isar.categoryGroups.where().sortByName().findAll();
   }
 
-  Future<void> save(CategoryGroup group) async {
-    await isar.writeTxn(() => isar.categoryGroups.put(group));
+  Future<Id> save(CategoryGroup group) async {
+    return isar.writeTxn(() => isar.categoryGroups.put(group));
   }
 
   Future<void> delete(int id) async {

@@ -29,7 +29,7 @@ class CategoriesScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (categories) {
           final groups = groupsAsync.valueOrNull ?? [];
-          
+
           return CustomScrollView(
             slivers: [
               // App bar
@@ -60,7 +60,7 @@ class CategoriesScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              'Organize your transactions with custom categories.',
+                              'Organize your transactions with custom categories and group those categories.',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: cs.onSurfaceVariant,
@@ -288,7 +288,7 @@ class CategoriesScreen extends ConsumerWidget {
     _showGroupDialog(context, controller, 'Add Group', (ref, name) {
       final group = CategoryGroup()..name = name;
       ref.read(categoryGroupListProvider.notifier).add(group);
-    });
+    }, null);
   }
 
   void _showEditGroupDialog(BuildContext context, WidgetRef ref, CategoryGroup group) {
@@ -297,7 +297,7 @@ class CategoriesScreen extends ConsumerWidget {
       group.name = name;
       ref.read(categoryGroupRepositoryProvider).save(group);
       ref.invalidate(categoryGroupListProvider);
-    });
+    }, group.id);
   }
 
   void _showGroupDialog(
@@ -305,34 +305,74 @@ class CategoriesScreen extends ConsumerWidget {
     TextEditingController controller,
     String title,
     void Function(WidgetRef ref, String name) onSave,
+    int? editingGroupId,
   ) {
     showDialog(
       context: context,
       builder: (context) => Consumer(
         builder: (context, ref, _) {
           final cs = Theme.of(context).colorScheme;
-          return AlertDialog(
-            backgroundColor: cs.surfaceContainer,
-            title: Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(hintText: 'Group name (e.g. Food, Transport)'),
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-              FilledButton(
-                onPressed: () {
-                  final name = controller.text.trim();
-                  if (name.isNotEmpty) {
-                    onSave(ref, name);
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('Save'),
-              ),
-            ],
+          final groups = ref.watch(categoryGroupListProvider).valueOrNull ?? [];
+          
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              // Normalize: trim and replace multiple spaces with one
+              final raw = controller.text;
+              final normalized = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
+              
+              final isDuplicate = groups.any((g) {
+                if (editingGroupId != null && g.id == editingGroupId) return false;
+                return g.name.toLowerCase() == normalized.toLowerCase();
+              });
+              
+              final canSave = normalized.isNotEmpty && !isDuplicate;
+              
+              String? errorText;
+              if (raw.trim().isNotEmpty && isDuplicate) {
+                errorText = 'This group already exists';
+              } else if (raw.isNotEmpty && normalized.isEmpty) {
+                 errorText = 'Group name cannot be empty';
+              }
+
+              return AlertDialog(
+                backgroundColor: cs.surfaceContainer,
+                title: Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: controller,
+                      autofocus: true,
+                      maxLength: 15,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: InputDecoration(
+                        hintText: 'Group name (e.g. Food, Transport)',
+                        errorText: errorText,
+                        counterText: '${raw.length} / 15',
+                        counterStyle: GoogleFonts.inter(
+                          fontSize: 10,
+                          color: raw.length >= 15 ? cs.error : cs.onSurfaceVariant,
+                        ),
+                      ),
+                      onChanged: (_) => setDialogState(() {}),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                  FilledButton(
+                    onPressed: canSave
+                        ? () {
+                            onSave(ref, normalized);
+                            Navigator.pop(context);
+                          }
+                        : null,
+                    child: const Text('Save'),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
@@ -401,7 +441,13 @@ class CategoriesScreen extends ConsumerWidget {
               const SizedBox(height: 24),
               _buildDetailItem(context, label: 'GROUP', value: groupName ?? 'None'),
               const SizedBox(height: 16),
-              _buildDetailItem(context, label: 'TYPE', value: cat.effectiveType[0].toUpperCase() + cat.effectiveType.substring(1)),
+              _buildDetailItem(
+                context,
+                label: 'TYPE',
+                value: cat.effectiveType == 'both'
+                    ? 'Income & Expense'
+                    : cat.effectiveType[0].toUpperCase() + cat.effectiveType.substring(1),
+              ),
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -625,6 +671,23 @@ class _CategoryGridItem extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              decoration: BoxDecoration(
+                color: cs.onSurface.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5), width: 0.5),
+              ),
+              child: Text(
+                category.effectiveType,
+                style: GoogleFonts.inter(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w500,
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ),

@@ -8,6 +8,7 @@ import '../../../core/utils/category_presets.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../categories/data/category.dart';
+import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
 
 class CategoryRouteArgs {
@@ -95,7 +96,7 @@ class _AddEditCategoryScreenState
         centerTitle: false,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -121,26 +122,34 @@ class _AddEditCategoryScreenState
 
             // [F] Category Type
             _buildTypeSelector(),
-            const SizedBox(height: 32),
-
-            // [G] Save button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton(
-                onPressed: _canSave ? _save : null,
-                child: Text(
-                  widget.existingCategory != null
-                      ? 'Save Changes'
-                      : 'Save Category',
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: FilledButton(
+                  onPressed: _canSave ? _save : null,
+                  child: Text(
+                    widget.existingCategory != null
+                        ? 'Save Changes'
+                        : 'Save Category',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -149,6 +158,14 @@ class _AddEditCategoryScreenState
   Widget _buildGroupSelector() {
     final cs = Theme.of(context).colorScheme;
     final groupsAsync = ref.watch(categoryGroupListProvider);
+
+    String groupName = 'None';
+    if (_selectedGroupId != null && groupsAsync.hasValue) {
+      final groups = groupsAsync.value!;
+      final group = groups.firstWhere((g) => g.id == _selectedGroupId,
+          orElse: () => CategoryGroup()..name = 'None');
+      groupName = group.name;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,38 +177,47 @@ class _AddEditCategoryScreenState
               color: cs.onSurfaceVariant,
             )),
         const SizedBox(height: 8),
-        groupsAsync.when(
-          loading: () => const LinearProgressIndicator(),
-          error: (_, __) => const Text('Error loading groups'),
-          data: (groups) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+        InkWell(
+          onTap: () => _showGroupPickerSheet(context),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             decoration: BoxDecoration(
               color: cs.surfaceContainer,
               borderRadius: BorderRadius.circular(KuberRadius.md),
               border: Border.all(color: cs.outline, width: 1),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int?>(
-                value: _selectedGroupId,
-                isExpanded: true,
-                dropdownColor: cs.surfaceContainerHigh,
-                hint: Text('None', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
-                items: [
-                  DropdownMenuItem<int?>(
-                    value: null,
-                    child: Text('None', style: GoogleFonts.inter(color: cs.onSurface)),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    groupName,
+                    style: GoogleFonts.inter(
+                      color: _selectedGroupId == null
+                          ? cs.onSurfaceVariant
+                          : cs.onSurface,
+                      fontSize: 15,
+                    ),
                   ),
-                  ...groups.map((g) => DropdownMenuItem<int?>(
-                        value: g.id,
-                        child: Text(g.name, style: GoogleFonts.inter(color: cs.onSurface)),
-                      )),
-                ],
-                onChanged: (val) => setState(() => _selectedGroupId = val),
-              ),
+                ),
+                Icon(Icons.keyboard_arrow_down_rounded, color: cs.onSurfaceVariant),
+              ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  void _showGroupPickerSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _GroupPickerSheet(
+        selectedGroupId: _selectedGroupId,
+        onSelected: (id) => setState(() => _selectedGroupId = id),
+      ),
     );
   }
 
@@ -520,5 +546,230 @@ class _AddEditCategoryScreenState
         widget.existingCategory != null ? 'Category updated' : 'Category added',
       );
     }
+  }
+}
+
+class _GroupPickerSheet extends ConsumerStatefulWidget {
+  final int? selectedGroupId;
+  final ValueChanged<int?> onSelected;
+
+  const _GroupPickerSheet({
+    required this.selectedGroupId,
+    required this.onSelected,
+  });
+
+  @override
+  ConsumerState<_GroupPickerSheet> createState() => _GroupPickerSheetState();
+}
+
+class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
+  final _groupNameController = TextEditingController();
+  bool _isAdding = false;
+
+  @override
+  void dispose() {
+    _groupNameController.dispose();
+    super.dispose();
+  }
+
+  void _addGroup() async {
+    final raw = _groupNameController.text;
+    final name = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (name.isEmpty) return;
+
+    final group = CategoryGroup()..name = name;
+    final id = await ref.read(categoryGroupListProvider.notifier).add(group);
+    
+    if (mounted) {
+      widget.onSelected(id);
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final groupsAsync = ref.watch(categoryGroupListProvider);
+    final groups = groupsAsync.valueOrNull ?? [];
+    
+    final name = _groupNameController.text.trim();
+    final isDuplicate = groups.any((g) => g.name.toLowerCase() == name.toLowerCase());
+    final canAdd = name.isNotEmpty && !isDuplicate;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+            child: Row(
+              children: [
+                Text(
+                  'Select Group',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          // List
+          Flexible(
+            child: groupsAsync.when(
+              loading: () => const Padding(
+                padding: EdgeInsets.all(32),
+                child: CircularProgressIndicator(),
+              ),
+              error: (e, _) => Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text('Error: $e'),
+              ),
+              data: (groups) {
+                final sortedGroups = groups.toList()
+                  ..sort((a, b) => a.name.compareTo(b.name));
+
+                return ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  children: [
+                    _buildOption(
+                      context,
+                      id: null,
+                      name: 'None',
+                      isSelected: widget.selectedGroupId == null,
+                    ),
+                    ...sortedGroups.map((g) => _buildOption(
+                          context,
+                          id: g.id,
+                          name: g.name,
+                          isSelected: widget.selectedGroupId == g.id,
+                        )),
+                  ],
+                );
+              },
+            ),
+          ),
+
+          const Divider(height: 1),
+
+          // Footer / Add Group
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _isAdding
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _groupNameController,
+                              autofocus: true,
+                              maxLength: 15,
+                              textCapitalization: TextCapitalization.words,
+                              decoration: InputDecoration(
+                                hintText: 'Group name...',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
+                                errorText: (name.isNotEmpty && isDuplicate) ? 'This group already exists' : null,
+                                counterText: '${_groupNameController.text.length} / 15',
+                                counterStyle: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: _groupNameController.text.length >= 15 ? cs.error : cs.onSurfaceVariant,
+                                ),
+                              ),
+                              onChanged: (_) => setState(() {}),
+                              onSubmitted: (_) => canAdd ? _addGroup() : null,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton.filled(
+                            onPressed: canAdd ? _addGroup : null,
+                            icon: const Icon(Icons.check_rounded),
+                          ),
+                          IconButton(
+                            onPressed: () => setState(() {
+                              _isAdding = false;
+                              _groupNameController.clear();
+                            }),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => setState(() => _isAdding = true),
+                      icon: const Icon(Icons.add_rounded),
+                      label: const Text('Add New Group'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: BorderSide(color: cs.primary),
+                      ),
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOption(
+    BuildContext context, {
+    required int? id,
+    required String name,
+    required bool isSelected,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () {
+        widget.onSelected(id);
+        Navigator.pop(context);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        color: isSelected ? cs.primary.withValues(alpha: 0.1) : null,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                name,
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? cs.primary : cs.onSurface,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: cs.primary, size: 20),
+          ],
+        ),
+      ),
+    );
   }
 }

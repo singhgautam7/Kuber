@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../data/category.dart';
@@ -49,14 +50,16 @@ class CategoryGroupListNotifier extends AsyncNotifier<List<CategoryGroup>> {
     return ref.watch(categoryGroupRepositoryProvider).getAll();
   }
 
-  Future<void> add(CategoryGroup g) async {
-    await ref.read(categoryGroupRepositoryProvider).save(g);
+  Future<Id> add(CategoryGroup g) async {
+    final id = await ref.read(categoryGroupRepositoryProvider).save(g);
     ref.invalidateSelf();
+    return id;
   }
 
   Future<void> delete(int id) async {
     await ref.read(categoryGroupRepositoryProvider).delete(id);
     ref.invalidateSelf();
+    ref.invalidate(categoryListProvider);
   }
 }
 
