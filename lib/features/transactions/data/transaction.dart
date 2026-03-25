@@ -10,7 +10,7 @@ class Transaction {
   late double amount;
   late String type; // 'income' | 'expense' | 'transfer'
 
-  @Index()
+  @Index(composite: [CompositeIndex('createdAt')])
   late String categoryId;
 
   @Index()

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/isar_service.dart';
 import '../data/transaction.dart';
 import '../data/transaction_repository.dart';
+import '../../budgets/services/budget_service.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   return TransactionRepository(ref.watch(isarProvider));
@@ -24,12 +25,18 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
   Future<int> add(Transaction t) async {
     final id = await ref.read(transactionRepositoryProvider).save(t);
     ref.invalidateSelf();
+    if (t.type == 'expense') {
+      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+    }
     return id;
   }
 
   Future<int> updateTransaction(Transaction t) async {
     final id = await ref.read(transactionRepositoryProvider).save(t);
     ref.invalidateSelf();
+    if (t.type == 'expense') {
+      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+    }
     return id;
   }
 

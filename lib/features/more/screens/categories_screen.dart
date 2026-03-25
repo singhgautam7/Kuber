@@ -8,9 +8,12 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../budgets/providers/budget_provider.dart';
+import '../../budgets/widgets/budget_details_sheet.dart';
 import 'add_edit_category_screen.dart';
 
 class CategoriesScreen extends ConsumerWidget {
@@ -201,16 +204,60 @@ class CategoriesScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      backgroundColor: cs.surfaceContainer,
+      backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+          padding: EdgeInsets.all(KuberSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.xl),
+
+              // Header with Title + Close
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Add New',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               _buildAddOption(
                 context,
                 icon: Icons.category_rounded,
@@ -406,39 +453,79 @@ class CategoriesScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: cs.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
       builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(KuberSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: KuberSpacing.xl),
+
+              // Header row: icon + name + close
               Row(
                 children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: Color(cat.colorValue).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(IconMapper.fromString(cat.icon), color: Color(cat.colorValue), size: 28),
+                  CategoryIcon.square(
+                    icon: IconMapper.fromString(cat.icon),
+                    rawColor: Color(cat.colorValue),
+                    size: 48,
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(cat.name, style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700, color: cs.onSurface)),
-                        Text(cat.effectiveType.toUpperCase(), style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: cs.onSurfaceVariant)),
+                        Text(
+                          cat.name,
+                          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: cs.onSurface),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          'CATEGORY DETAIL',
+                          style: GoogleFonts.inter(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurfaceVariant,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
                       ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               _buildDetailItem(context, label: 'GROUP', value: groupName ?? 'None'),
               const SizedBox(height: 16),
               _buildDetailItem(
@@ -448,6 +535,8 @@ class CategoriesScreen extends ConsumerWidget {
                     ? 'Income & Expense'
                     : cat.effectiveType[0].toUpperCase() + cat.effectiveType.substring(1),
               ),
+              const SizedBox(height: 24),
+              _BudgetStatusSection(category: cat),
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -694,6 +783,122 @@ class _CategoryGridItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BudgetStatusSection extends ConsumerWidget {
+  final Category category;
+  const _BudgetStatusSection({required this.category});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final budgetAsync = ref.watch(budgetByCategoryProvider(category.id.toString()));
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'BUDGET STATUS',
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurfaceVariant,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: 12),
+        budgetAsync.when(
+          data: (budget) {
+            if (budget == null || !budget.isActive) {
+              return InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  context.push('/budgets/add');
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_circle_outline_rounded, size: 20, color: cs.primary),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Set a budget for this category',
+                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: cs.primary),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final progressAsync = ref.watch(budgetProgressProvider(budget));
+            return progressAsync.when(
+              data: (p) => InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => BudgetDetailsSheet(budget: budget, category: category),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '₹${p.spent.toStringAsFixed(0)} / ₹${p.limit.toStringAsFixed(0)}',
+                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            '${p.percentage.toStringAsFixed(0)}%',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: p.percentage >= 100 ? cs.error : cs.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: (p.percentage / 100).clamp(0.0, 1.0),
+                          minHeight: 6,
+                          backgroundColor: cs.outline.withValues(alpha: 0.1),
+                          color: p.percentage >= 100 ? cs.error : cs.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              loading: () => const LinearProgressIndicator(),
+              error: (err, _) => Text('Error calculating progress: $err'),
+            );
+          },
+          loading: () => const LinearProgressIndicator(),
+          error: (err, _) => Text('Error: $err'),
+        ),
+      ],
     );
   }
 }

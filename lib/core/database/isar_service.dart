@@ -12,6 +12,7 @@ import '../../features/categories/data/category_repository.dart';
 import '../../features/accounts/data/account_repository.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
+import '../../features/budgets/data/budget.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -29,6 +30,8 @@ class IsarService {
         RecurringRuleSchema,
         TagSchema,
         TransactionTagSchema,
+        BudgetSchema,
+        BudgetAlertSchema,
       ],
       directory: dir.path,
     );

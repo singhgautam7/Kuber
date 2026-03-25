@@ -1,6 +1,11 @@
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService();
+});
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -107,6 +112,39 @@ class NotificationService {
 
     try {
       await _notificationsPlugin.show(id, title, body, notificationDetails, payload: payload);
+    } catch (e) {
+      // Silently fail
+    }
+  }
+
+  Future<void> showBudgetAlertNotification({
+    required int id,
+    required String title,
+    required String body,
+  }) async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'budget_alerts',
+      'Budget Alerts',
+      channelDescription: 'Notifications for budget spending limits',
+      importance: Importance.high,
+      priority: Priority.high,
+      autoCancel: true,
+    );
+
+    const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
+    );
+
+    try {
+      await _notificationsPlugin.show(id, title, body, notificationDetails);
     } catch (e) {
       // Silently fail
     }

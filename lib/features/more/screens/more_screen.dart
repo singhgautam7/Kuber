@@ -68,6 +68,12 @@ class MoreScreen extends StatelessWidget {
                   onTap: () => context.push('/more/tags'),
                 ),
                 _MenuItem(
+                  icon: Icons.account_balance_rounded,
+                  label: 'Budgets',
+                  subtitle: 'Track and control your monthly spending',
+                  onTap: () => context.push('/more/budgets'),
+                ),
+                _MenuItem(
                   icon: Icons.sync_rounded,
                   label: 'Recurring Transactions',
                   subtitle: 'Automated scheduled transactions',

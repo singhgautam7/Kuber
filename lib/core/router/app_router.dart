@@ -24,6 +24,9 @@ import '../../features/recurring/screens/recurring_loader_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
+import '../../features/budgets/data/budget.dart';
+import '../../features/budgets/screens/budgets_screen.dart';
+import '../../features/budgets/screens/add_edit_budget_screen.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -184,11 +187,28 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const RecurringScreen(),
                   ),
+                  GoRoute(
+                    path: 'budgets',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const BudgetsScreen(),
+                  ),
                 ],
               ),
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/budgets/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddEditBudgetScreen(),
+      ),
+      GoRoute(
+        path: '/budgets/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) => AddEditBudgetScreen(
+          existingBudget: state.extra as Budget?,
+        ),
       ),
     ],
   );

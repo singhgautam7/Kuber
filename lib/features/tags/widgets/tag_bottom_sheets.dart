@@ -62,17 +62,34 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
     final cs = Theme.of(context).colorScheme;
     final isEdit = widget.tag != null;
 
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        left: 20,
-        right: 20,
-        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + KuberSpacing.xl,
+        left: KuberSpacing.xl,
+        right: KuberSpacing.xl,
+        top: KuberSpacing.xl,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xl),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -84,13 +101,25 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
                   color: cs.onSurface,
                 ),
               ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           TextField(
             controller: _controller,
             autofocus: true,
@@ -180,7 +209,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => AddEditTagBottomSheet(tag: tag),
@@ -197,12 +226,29 @@ class ViewTagBottomSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final dateStr = DateFormat('MMM dd, yyyy').format(tag.createdAt);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      padding: const EdgeInsets.all(KuberSpacing.xl),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xl),
+
           Row(
             children: [
               Text(
@@ -226,15 +272,34 @@ class ViewTagBottomSheet extends ConsumerWidget {
                         color: cs.onSurface,
                         letterSpacing: -0.5,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      "Created on $dateStr",
+                      "CREATED ON ${dateStr.toUpperCase()}",
                       style: GoogleFonts.inter(
-                        fontSize: 13,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurfaceVariant,
+                        letterSpacing: 1.0,
                       ),
                     ),
                   ],
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],

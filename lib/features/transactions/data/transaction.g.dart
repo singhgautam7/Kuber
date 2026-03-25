@@ -84,9 +84,9 @@ const TransactionSchema = CollectionSchema(
   deserializeProp: _transactionDeserializeProp,
   idName: r'id',
   indexes: {
-    r'categoryId': IndexSchema(
-      id: -8798048739239305339,
-      name: r'categoryId',
+    r'categoryId_createdAt': IndexSchema(
+      id: -8908735139631551607,
+      name: r'categoryId_createdAt',
       unique: false,
       replace: false,
       properties: [
@@ -94,6 +94,11 @@ const TransactionSchema = CollectionSchema(
           name: r'categoryId',
           type: IndexType.hash,
           caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'createdAt',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     ),
@@ -359,29 +364,29 @@ extension TransactionQueryWhere
     });
   }
 
-  QueryBuilder<Transaction, Transaction, QAfterWhereClause> categoryIdEqualTo(
-      String categoryId) {
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      categoryIdEqualToAnyCreatedAt(String categoryId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'categoryId',
+        indexName: r'categoryId_createdAt',
         value: [categoryId],
       ));
     });
   }
 
   QueryBuilder<Transaction, Transaction, QAfterWhereClause>
-      categoryIdNotEqualTo(String categoryId) {
+      categoryIdNotEqualToAnyCreatedAt(String categoryId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
+              indexName: r'categoryId_createdAt',
               lower: [],
               upper: [categoryId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
+              indexName: r'categoryId_createdAt',
               lower: [categoryId],
               includeLower: false,
               upper: [],
@@ -389,18 +394,115 @@ extension TransactionQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
+              indexName: r'categoryId_createdAt',
               lower: [categoryId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'categoryId',
+              indexName: r'categoryId_createdAt',
               lower: [],
               upper: [categoryId],
               includeUpper: false,
             ));
       }
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      categoryIdCreatedAtEqualTo(String categoryId, DateTime createdAt) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'categoryId_createdAt',
+        value: [categoryId, createdAt],
+      ));
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      categoryIdEqualToCreatedAtNotEqualTo(
+          String categoryId, DateTime createdAt) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId_createdAt',
+              lower: [categoryId],
+              upper: [categoryId, createdAt],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId_createdAt',
+              lower: [categoryId, createdAt],
+              includeLower: false,
+              upper: [categoryId],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId_createdAt',
+              lower: [categoryId, createdAt],
+              includeLower: false,
+              upper: [categoryId],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'categoryId_createdAt',
+              lower: [categoryId],
+              upper: [categoryId, createdAt],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      categoryIdEqualToCreatedAtGreaterThan(
+    String categoryId,
+    DateTime createdAt, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryId_createdAt',
+        lower: [categoryId, createdAt],
+        includeLower: include,
+        upper: [categoryId],
+      ));
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      categoryIdEqualToCreatedAtLessThan(
+    String categoryId,
+    DateTime createdAt, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryId_createdAt',
+        lower: [categoryId],
+        upper: [categoryId, createdAt],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      categoryIdEqualToCreatedAtBetween(
+    String categoryId,
+    DateTime lowerCreatedAt,
+    DateTime upperCreatedAt, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'categoryId_createdAt',
+        lower: [categoryId, lowerCreatedAt],
+        includeLower: includeLower,
+        upper: [categoryId, upperCreatedAt],
+        includeUpper: includeUpper,
+      ));
     });
   }
 
