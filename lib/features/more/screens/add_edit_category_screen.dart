@@ -45,6 +45,7 @@ class _AddEditCategoryScreenState
   Color _selectedColor = kCategoryColors[0];
   String _selectedIcon = kCategoryIcons[0]['name'] as String;
   String _selectedType = 'expense';
+  int? _selectedGroupId;
 
   bool get _canSave => _nameController.text.trim().isNotEmpty;
 
@@ -57,6 +58,7 @@ class _AddEditCategoryScreenState
       _selectedIcon = cat.icon;
       _selectedColor = Color(cat.colorValue);
       _selectedType = cat.effectiveType;
+      _selectedGroupId = cat.groupId;
     } else if (widget.defaultType != null) {
       _selectedType = widget.defaultType!;
     }
@@ -113,11 +115,15 @@ class _AddEditCategoryScreenState
             _buildColorSelector(),
             const SizedBox(height: 20),
 
-            // [E] Category Type
+            // [E] Category Group
+            _buildGroupSelector(),
+            const SizedBox(height: 20),
+
+            // [F] Category Type
             _buildTypeSelector(),
             const SizedBox(height: 32),
 
-            // [F] Save button
+            // [G] Save button
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -137,6 +143,55 @@ class _AddEditCategoryScreenState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildGroupSelector() {
+    final cs = Theme.of(context).colorScheme;
+    final groupsAsync = ref.watch(categoryGroupListProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Category Group (Optional)',
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: cs.onSurfaceVariant,
+            )),
+        const SizedBox(height: 8),
+        groupsAsync.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (_, __) => const Text('Error loading groups'),
+          data: (groups) => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainer,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: cs.outline, width: 1),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int?>(
+                value: _selectedGroupId,
+                isExpanded: true,
+                dropdownColor: cs.surfaceContainerHigh,
+                hint: Text('None', style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                items: [
+                  DropdownMenuItem<int?>(
+                    value: null,
+                    child: Text('None', style: GoogleFonts.inter(color: cs.onSurface)),
+                  ),
+                  ...groups.map((g) => DropdownMenuItem<int?>(
+                        value: g.id,
+                        child: Text(g.name, style: GoogleFonts.inter(color: cs.onSurface)),
+                      )),
+                ],
+                onChanged: (val) => setState(() => _selectedGroupId = val),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -432,6 +487,7 @@ class _AddEditCategoryScreenState
       cat.icon = _selectedIcon;
       cat.colorValue = _selectedColor.toARGB32();
       cat.type = _selectedType;
+      cat.groupId = _selectedGroupId;
       await ref.read(categoryRepositoryProvider).save(cat);
     } else {
       final cat = Category()
@@ -439,7 +495,8 @@ class _AddEditCategoryScreenState
         ..icon = _selectedIcon
         ..colorValue = _selectedColor.toARGB32()
         ..isDefault = false
-        ..type = _selectedType;
+        ..type = _selectedType
+        ..groupId = _selectedGroupId;
       await ref.read(categoryRepositoryProvider).save(cat);
 
       // If returning to category picker flow, signal the pending selection

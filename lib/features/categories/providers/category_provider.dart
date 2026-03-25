@@ -4,10 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../data/category.dart';
+import '../data/category_group.dart';
+import '../data/category_group_repository.dart';
 import '../data/category_repository.dart';
 
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
   return CategoryRepository(ref.watch(isarProvider));
+});
+
+final categoryGroupRepositoryProvider = Provider<CategoryGroupRepository>((ref) {
+  return CategoryGroupRepository(ref.watch(isarProvider));
 });
 
 final categoryListProvider =
@@ -28,6 +34,28 @@ class CategoryListNotifier extends AsyncNotifier<List<Category>> {
 
   Future<void> delete(int id) async {
     await ref.read(categoryRepositoryProvider).delete(id);
+    ref.invalidateSelf();
+  }
+}
+
+final categoryGroupListProvider =
+    AsyncNotifierProvider<CategoryGroupListNotifier, List<CategoryGroup>>(
+  CategoryGroupListNotifier.new,
+);
+
+class CategoryGroupListNotifier extends AsyncNotifier<List<CategoryGroup>> {
+  @override
+  FutureOr<List<CategoryGroup>> build() {
+    return ref.watch(categoryGroupRepositoryProvider).getAll();
+  }
+
+  Future<void> add(CategoryGroup g) async {
+    await ref.read(categoryGroupRepositoryProvider).save(g);
+    ref.invalidateSelf();
+  }
+
+  Future<void> delete(int id) async {
+    await ref.read(categoryGroupRepositoryProvider).delete(id);
     ref.invalidateSelf();
   }
 }

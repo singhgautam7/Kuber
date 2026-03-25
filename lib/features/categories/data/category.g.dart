@@ -22,23 +22,28 @@ const CategorySchema = CollectionSchema(
       name: r'colorValue',
       type: IsarType.long,
     ),
-    r'icon': PropertySchema(
+    r'groupId': PropertySchema(
       id: 1,
+      name: r'groupId',
+      type: IsarType.long,
+    ),
+    r'icon': PropertySchema(
+      id: 2,
       name: r'icon',
       type: IsarType.string,
     ),
     r'isDefault': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isDefault',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'type',
       type: IsarType.string,
     )
@@ -48,7 +53,21 @@ const CategorySchema = CollectionSchema(
   deserialize: _categoryDeserialize,
   deserializeProp: _categoryDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'groupId': IndexSchema(
+      id: -8523216633229774932,
+      name: r'groupId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'groupId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _categoryGetId,
@@ -76,10 +95,11 @@ void _categorySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.colorValue);
-  writer.writeString(offsets[1], object.icon);
-  writer.writeBool(offsets[2], object.isDefault);
-  writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.type);
+  writer.writeLong(offsets[1], object.groupId);
+  writer.writeString(offsets[2], object.icon);
+  writer.writeBool(offsets[3], object.isDefault);
+  writer.writeString(offsets[4], object.name);
+  writer.writeString(offsets[5], object.type);
 }
 
 Category _categoryDeserialize(
@@ -90,11 +110,12 @@ Category _categoryDeserialize(
 ) {
   final object = Category();
   object.colorValue = reader.readLong(offsets[0]);
-  object.icon = reader.readString(offsets[1]);
+  object.groupId = reader.readLongOrNull(offsets[1]);
+  object.icon = reader.readString(offsets[2]);
   object.id = id;
-  object.isDefault = reader.readBool(offsets[2]);
-  object.name = reader.readString(offsets[3]);
-  object.type = reader.readString(offsets[4]);
+  object.isDefault = reader.readBool(offsets[3]);
+  object.name = reader.readString(offsets[4]);
+  object.type = reader.readString(offsets[5]);
   return object;
 }
 
@@ -108,12 +129,14 @@ P _categoryDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
-    case 3:
       return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readBool(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -136,6 +159,14 @@ extension CategoryQueryWhereSort on QueryBuilder<Category, Category, QWhere> {
   QueryBuilder<Category, Category, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhere> anyGroupId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'groupId'),
+      );
     });
   }
 }
@@ -205,6 +236,116 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       ));
     });
   }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'groupId',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'groupId',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdEqualTo(
+      int? groupId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'groupId',
+        value: [groupId],
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdNotEqualTo(
+      int? groupId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'groupId',
+              lower: [],
+              upper: [groupId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'groupId',
+              lower: [groupId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'groupId',
+              lower: [groupId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'groupId',
+              lower: [],
+              upper: [groupId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdGreaterThan(
+    int? groupId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'groupId',
+        lower: [groupId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdLessThan(
+    int? groupId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'groupId',
+        lower: [],
+        upper: [groupId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterWhereClause> groupIdBetween(
+    int? lowerGroupId,
+    int? upperGroupId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'groupId',
+        lower: [lowerGroupId],
+        includeLower: includeLower,
+        upper: [upperGroupId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension CategoryQueryFilter
@@ -254,6 +395,75 @@ extension CategoryQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'colorValue',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> groupIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'groupId',
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> groupIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'groupId',
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> groupIdEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'groupId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> groupIdGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'groupId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> groupIdLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'groupId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> groupIdBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'groupId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -734,6 +944,18 @@ extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
     });
   }
 
+  QueryBuilder<Category, Category, QAfterSortBy> sortByGroupId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'groupId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterSortBy> sortByGroupIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'groupId', Sort.desc);
+    });
+  }
+
   QueryBuilder<Category, Category, QAfterSortBy> sortByIcon() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'icon', Sort.asc);
@@ -794,6 +1016,18 @@ extension CategoryQuerySortThenBy
   QueryBuilder<Category, Category, QAfterSortBy> thenByColorValueDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterSortBy> thenByGroupId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'groupId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterSortBy> thenByGroupIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'groupId', Sort.desc);
     });
   }
 
@@ -866,6 +1100,12 @@ extension CategoryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Category, Category, QDistinct> distinctByGroupId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'groupId');
+    });
+  }
+
   QueryBuilder<Category, Category, QDistinct> distinctByIcon(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -905,6 +1145,12 @@ extension CategoryQueryProperty
   QueryBuilder<Category, int, QQueryOperations> colorValueProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'colorValue');
+    });
+  }
+
+  QueryBuilder<Category, int?, QQueryOperations> groupIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'groupId');
     });
   }
 

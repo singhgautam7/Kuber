@@ -42,6 +42,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final categories = ref.watch(categoryListProvider);
+    final groups = ref.watch(categoryGroupListProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -114,26 +115,21 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
           ),
         ),
 
-        // Category grid
         Flexible(
           child: categories.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (e, _) => Center(
-              child: Text('Error: $e'),
-            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Error: $e')),
             data: (cats) {
-              // Filter by search query
-              var filtered = _query.isEmpty
-                  ? cats
-                  : cats
-                      .where(
-                        (c) => c.name.toLowerCase().contains(_query),
-                      )
-                      .toList();
+              final groupsData = groups.valueOrNull ?? [];
 
-              // Filter by transaction type
+              // 1. Initial Filtering (Search + Type)
+              var filtered = cats;
+              if (_query.isNotEmpty) {
+                filtered = filtered
+                    .where((c) => c.name.toLowerCase().contains(_query))
+                    .toList();
+              }
+
               if (widget.defaultType == 'expense') {
                 filtered = filtered
                     .where((c) =>
@@ -162,67 +158,96 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                 );
               }
 
-              return GridView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
-                ),
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: KuberSpacing.md,
-                  crossAxisSpacing: KuberSpacing.md,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: filtered.length,
-                itemBuilder: (context, index) {
-                  final cat = filtered[index];
-                  final selected =
-                      cat.id == widget.selectedCategoryId;
-                  final harmonized =
-                      harmonizeCategory(context, Color(cat.colorValue));
+              // 2. Rendering based on Query
+              if (_query.isNotEmpty) {
+                // Flat grid for search results
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: KuberSpacing.md,
+                    crossAxisSpacing: KuberSpacing.md,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) =>
+                      _CategoryItem(cat: filtered[index], selectedCategoryId: widget.selectedCategoryId, onSelected: widget.onSelected),
+                );
+              }
 
-                  return GestureDetector(
-                    onTap: () => widget.onSelected(cat.id),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: harmonized.withValues(alpha: 0.15),
-                            borderRadius:
-                                BorderRadius.circular(KuberRadius.md),
-                            border: selected
-                                ? Border.all(
-                                    color: harmonized,
-                                    width: 2,
-                                  )
-                                : null,
+              // 3. Grouping & Sorting logic
+              final Map<int?, List<Category>> grouped = {};
+              for (final cat in filtered) {
+                grouped.putIfAbsent(cat.groupId, () => []).add(cat);
+              }
+
+              // Sort categories within each group
+              for (final groupCats in grouped.values) {
+                groupCats.sort((a, b) => a.name.compareTo(b.name));
+              }
+
+              // Sort groups alphabetically
+              final sortedGroups = groupsData.toList()
+                ..sort((a, b) => a.name.compareTo(b.name));
+
+              return CustomScrollView(
+                shrinkWrap: true,
+                slivers: [
+                  // Grouped categories
+                  for (final group in sortedGroups) ...[
+                    if (grouped.containsKey(group.id) && grouped[group.id]!.isNotEmpty) ...[
+                      SliverToBoxAdapter(
+                        child: _GroupHeader(name: group.name),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                        sliver: SliverGrid(
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            mainAxisSpacing: KuberSpacing.md,
+                            crossAxisSpacing: KuberSpacing.md,
+                            childAspectRatio: 0.8,
                           ),
-                          child: Icon(
-                            IconMapper.fromString(cat.icon),
-                            color: harmonized,
-                            size: 28,
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) => _CategoryItem(
+                              cat: grouped[group.id]![index],
+                              selectedCategoryId: widget.selectedCategoryId,
+                              onSelected: widget.onSelected,
+                            ),
+                            childCount: grouped[group.id]!.length,
                           ),
                         ),
-                        const SizedBox(height: KuberSpacing.xs),
-                        Text(
-                          cat.name,
-                          style: textTheme.labelSmall?.copyWith(
-                            color: selected
-                                ? cs.onSurface
-                                : cs.onSurfaceVariant,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                      ),
+                    ],
+                  ],
+
+                  // Ungrouped categories
+                  if (grouped.containsKey(null) && grouped[null]!.isNotEmpty) ...[
+                    const SliverToBoxAdapter(
+                      child: _GroupHeader(name: 'Ungrouped'),
                     ),
-                  );
-                },
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                      sliver: SliverGrid(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          mainAxisSpacing: KuberSpacing.md,
+                          crossAxisSpacing: KuberSpacing.md,
+                          childAspectRatio: 0.8,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _CategoryItem(
+                            cat: grouped[null]![index],
+                            selectedCategoryId: widget.selectedCategoryId,
+                            onSelected: widget.onSelected,
+                          ),
+                          childCount: grouped[null]!.length,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.lg)),
+                ],
               );
             },
           ),
@@ -245,6 +270,92 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
           },
         ),
       ],
+    );
+  }
+}
+class _GroupHeader extends StatelessWidget {
+  final String name;
+
+  const _GroupHeader({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpacing.lg,
+        KuberSpacing.lg,
+        KuberSpacing.lg,
+        KuberSpacing.sm,
+      ),
+      child: Text(
+        name.toUpperCase(),
+        style: textTheme.labelSmall?.copyWith(
+          color: cs.onSurfaceVariant,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryItem extends StatelessWidget {
+  final Category cat;
+  final int? selectedCategoryId;
+  final ValueChanged<int> onSelected;
+
+  const _CategoryItem({
+    required this.cat,
+    required this.selectedCategoryId,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final selected = cat.id == selectedCategoryId;
+    final harmonized = harmonizeCategory(context, Color(cat.colorValue));
+
+    return GestureDetector(
+      onTap: () => onSelected(cat.id),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: harmonized.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: selected
+                  ? Border.all(
+                      color: harmonized,
+                      width: 2,
+                    )
+                  : null,
+            ),
+            child: Icon(
+              IconMapper.fromString(cat.icon),
+              color: harmonized,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            cat.name,
+            style: textTheme.labelSmall?.copyWith(
+              color: selected ? cs.onSurface : cs.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }

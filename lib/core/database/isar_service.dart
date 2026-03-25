@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
+import '../../features/categories/data/category_group.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/categories/data/category_repository.dart';
@@ -23,6 +24,7 @@ class IsarService {
       [
         TransactionSchema,
         CategorySchema,
+        CategoryGroupSchema,
         AccountSchema,
         RecurringRuleSchema,
         TagSchema,
