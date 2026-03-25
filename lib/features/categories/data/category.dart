@@ -11,6 +11,9 @@ class Category {
   late int colorValue; // raw Color int — harmonized at render time
   bool isDefault = false; // default categories cannot be deleted
   String type = 'both'; // 'expense' | 'income' | 'both'
+
+  @Index()
+  int? groupId;
 }
 
 extension CategoryTypeExt on Category {

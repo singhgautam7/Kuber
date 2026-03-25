@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/categories/data/category_group.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
@@ -40,9 +41,15 @@ class DataService {
     final accounts = await isar.accounts.where().findAll();
     final tags = await isar.tags.where().findAll();
     final transactionTags = await isar.transactionTags.where().findAll();
+    final groups = await isar.categoryGroups.where().findAll();
 
     final categoryNames = {for (var c in categories) c.id.toString(): c.name};
     final accountNames = {for (var a in accounts) a.id.toString(): a.name};
+    final groupNameMap = {for (var g in groups) g.id: g.name};
+    final categoryToGroupName = {
+      for (var c in categories)
+        if (c.groupId != null) c.id.toString(): groupNameMap[c.groupId] ?? ''
+    };
     final tagNameMap = {for (var t in tags) t.id: t.name};
 
     final Map<int, List<String>> txTagsMap = {};
@@ -57,6 +64,7 @@ class DataService {
       transactions: transactions,
       categoryNames: categoryNames,
       accountNames: accountNames,
+      groupNames: categoryToGroupName,
       transactionTags: txTagsMap,
     );
 
@@ -143,9 +151,11 @@ class DataService {
     // 1. Preload categories and accounts for name-to-id mapping
     final existingCategories = await isar.categorys.where().findAll();
     final existingAccounts = await isar.accounts.where().findAll();
+    final existingGroups = await isar.categoryGroups.where().findAll();
 
     final categoryMap = {for (var c in existingCategories) c.name.toLowerCase(): c};
     final accountMap = {for (var a in existingAccounts) a.name.toLowerCase(): a};
+    final groupMap = {for (var g in existingGroups) g.name.toLowerCase(): g};
 
     final List<Transaction> toInsert = [];
 
@@ -158,6 +168,13 @@ class DataService {
         final amount = double.tryParse(row['amount'] ?? '0') ?? 0.0;
         final type = (row['type']?.toLowerCase() ?? 'expense');
         final categoryName = row['category'] ?? 'Other';
+        final groupNameRaw = row['group'] ?? '';
+        final groupNameNormalized = groupNameRaw.trim().replaceAll(RegExp(r'\s+'), ' ');
+        // Enforce 15 char limit during import as well
+        final groupName = groupNameNormalized.length > 15 
+            ? groupNameNormalized.substring(0, 15).trim() 
+            : groupNameNormalized;
+
         final accountName = row['account'] ?? 'Cash';
         final notes = row['notes'];
         final fromAccName = row['from_account'];
@@ -168,6 +185,17 @@ class DataService {
            continue;
         }
 
+        // Resolve Group
+        CategoryGroup? group;
+        if (groupName.isNotEmpty) {
+           group = groupMap[groupName.toLowerCase()];
+           if (group == null) {
+              group = CategoryGroup()..name = groupName;
+              await isar.writeTxn(() => isar.categoryGroups.put(group!));
+              groupMap[groupName.toLowerCase()] = group;
+           }
+        }
+
         // Resolve Category
         Category? category = categoryMap[categoryName.toLowerCase()];
         if (category == null && type != 'transfer') {
@@ -175,12 +203,23 @@ class DataService {
             ..name = categoryName
             ..icon = 'category'
             ..colorValue = AppColorPalette.getRandomColor()
-            ..type = type;
+            ..type = type
+            ..groupId = group?.id;
           await isar.writeTxn(() => isar.categorys.put(category!));
           categoryMap[categoryName.toLowerCase()] = category;
-        } else if (category != null && category.colorValue == 0xFF90A4AE) {
-           category.colorValue = AppColorPalette.getRandomColor();
-           await isar.writeTxn(() => isar.categorys.put(category!));
+        } else if (category != null) {
+           bool updated = false;
+           if (category.colorValue == 0xFF90A4AE) {
+              category.colorValue = AppColorPalette.getRandomColor();
+              updated = true;
+           }
+           if (group != null && category.groupId == null) {
+              category.groupId = group.id;
+              updated = true;
+           }
+           if (updated) {
+              await isar.writeTxn(() => isar.categorys.put(category!));
+           }
         }
 
         // Resolve Account

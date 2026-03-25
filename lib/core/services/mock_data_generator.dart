@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:isar/isar.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
+import '../../features/categories/data/category_group.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/tags/data/tag.dart';
@@ -17,6 +18,14 @@ class MockDataGenerator {
     await isar.writeTxn(() async {
       await isar.clear();
       final now = DateTime.now();
+
+      // 0. Create Category Groups
+      final gFood = CategoryGroup()..name = 'Food & Dining';
+      final gTransport = CategoryGroup()..name = 'Transport';
+      final gShopping = CategoryGroup()..name = 'Shopping';
+      final gPersonal = CategoryGroup()..name = 'Personal';
+      
+      await isar.categoryGroups.putAll([gFood, gTransport, gShopping, gPersonal]);
 
       // 1. Create Accounts
       final cash = Account()
@@ -42,14 +51,15 @@ class MockDataGenerator {
       await isar.accounts.putAll([cash, hdfc, icici]);
 
       // 2. Create Categories
-      final food = _cat('Food', 'restaurant', AppColorPalette.colors[4], 'expense');
-      final transport = _cat('Transport', 'directions_car', AppColorPalette.colors[0], 'expense');
-      final shopping = _cat('Shopping', 'shopping_bag', AppColorPalette.colors[3], 'expense');
-      final bills = _cat('Bills', 'receipt_long', AppColorPalette.colors[5], 'expense');
+      final food = _cat('Food', 'restaurant', AppColorPalette.colors[4], 'expense')..groupId = gFood.id;
+      final fastFood = _cat('Fast Food', 'lunch_dining', AppColorPalette.colors[5], 'expense')..groupId = gFood.id;
+      final transport = _cat('Transport', 'directions_car', AppColorPalette.colors[0], 'expense')..groupId = gTransport.id;
+      final shopping = _cat('Shopping', 'shopping_bag', AppColorPalette.colors[3], 'expense')..groupId = gShopping.id;
+      final bills = _cat('Bills', 'receipt_long', AppColorPalette.colors[6], 'expense')..groupId = gPersonal.id;
       final income = _cat('Salary', 'trending_up', AppColorPalette.colors[8], 'income');
       final other = _cat('Other', 'category', AppColorPalette.colors[10], 'both');
 
-      await isar.categorys.putAll([food, transport, shopping, bills, income, other]);
+      await isar.categorys.putAll([food, fastFood, transport, shopping, bills, income, other]);
 
       // 2.5 Create Tags
       final tagVacation = Tag()..name = 'vacation'..createdAt = now;
