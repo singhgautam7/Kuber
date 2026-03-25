@@ -5,14 +5,14 @@ import '../../../core/theme/app_theme.dart';
 import '../../insights/models/insight.dart';
 import '../../insights/providers/insight_provider.dart';
 
-class SmartInsightsCard extends ConsumerStatefulWidget {
-  const SmartInsightsCard({super.key});
+class HomeSmartInsights extends ConsumerStatefulWidget {
+  const HomeSmartInsights({super.key});
 
   @override
-  ConsumerState<SmartInsightsCard> createState() => _SmartInsightsCardState();
+  ConsumerState<HomeSmartInsights> createState() => _HomeSmartInsightsState();
 }
 
-class _SmartInsightsCardState extends ConsumerState<SmartInsightsCard> {
+class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
   bool _showAllInsights = false;
 
   @override
@@ -29,33 +29,31 @@ class _SmartInsightsCardState extends ConsumerState<SmartInsightsCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Smart Insights',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (hasMore)
-              GestureDetector(
-                onTap: () => setState(() => _showAllInsights = !_showAllInsights),
-                child: Text(
-                  _showAllInsights ? 'Show less' : 'Show more',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: cs.primary,
-                  ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Smart Insights',
+                style: textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-          ],
+              if (hasMore)
+                GestureDetector(
+                  onTap: () => setState(() => _showAllInsights = !_showAllInsights),
+                  child: Text(
+                    _showAllInsights ? 'Show less' : 'Show more',
+                    style: textTheme.labelMedium?.copyWith(
+                      color: cs.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
-        Column(
-          children: visible
-              .map((insight) => _InsightTile(insight: insight))
-              .toList(),
-        ),
+        ...visible.map((insight) => _InsightTile(insight: insight)),
         const SizedBox(height: KuberSpacing.md),
       ],
     );
@@ -83,33 +81,26 @@ class _InsightTile extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: 12,
-      ),
+      margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: borderColor, width: 0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Row(
         children: [
           Text(
             insight.emoji,
-            style: const TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 18),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               insight.message,
               style: textTheme.bodyMedium?.copyWith(
-                color: cs.onSurface,
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
+                height: 1.4,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
