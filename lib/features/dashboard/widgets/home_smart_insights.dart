@@ -54,7 +54,6 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
           ),
         ),
         ...visible.map((insight) => _InsightTile(insight: insight)),
-        const SizedBox(height: KuberSpacing.md),
       ],
     );
   }

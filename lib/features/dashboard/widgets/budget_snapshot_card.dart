@@ -82,7 +82,6 @@ class BudgetSnapshotCard extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
       ],
     );
   }
@@ -91,7 +90,7 @@ class BudgetSnapshotCard extends ConsumerWidget {
 class _BudgetRow extends ConsumerWidget {
   final ({dynamic budget, dynamic progress}) snapshot;
   final bool isLast;
-  
+
   const _BudgetRow({required this.snapshot, required this.isLast});
 
   @override
@@ -100,7 +99,7 @@ class _BudgetRow extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final budget = snapshot.budget;
     final progress = snapshot.progress;
-    
+
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
     final category = categoryMap[int.tryParse(budget.categoryId)];
 
