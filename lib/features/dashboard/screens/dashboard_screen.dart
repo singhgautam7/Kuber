@@ -23,6 +23,7 @@ import '../../recurring/widgets/recurring_detail_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/home_smart_insights.dart';
+import '../widgets/spending_stats_card.dart';
 import '../widgets/budget_snapshot_card.dart';
 
 const _subtitles = [
@@ -119,7 +120,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             const SizedBox(height: KuberSpacing.md),
 
-            // Smart Insights
+            // [A.1] Spending Stats
+            const SpendingStatsCard(),
+
+            // [A.2] Smart Insights
             const HomeSmartInsights(),
 
             // Budget Snapshot
