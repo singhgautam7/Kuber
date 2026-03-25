@@ -22,9 +22,8 @@ import '../../recurring/providers/recurring_provider.dart';
 import '../../recurring/widgets/recurring_detail_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
-import '../widgets/smart_insights_card.dart';
+import '../../insights/providers/insight_provider.dart';
 import '../widgets/budget_snapshot_card.dart';
-import '../widgets/burn_rate_card.dart';
 
 const _subtitles = [
   'Let\'s manage your money wisely',
@@ -52,6 +51,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   late final String _subtitle;
+  bool _showAllInsights = false;
 
   @override
   void initState() {
@@ -120,11 +120,61 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             const SizedBox(height: KuberSpacing.md),
 
-            // Daily Burn Rate
-            const BurnRateCard(),
-
             // Smart Insights
-            const SmartInsightsCard(),
+            Consumer(builder: (context, ref, _) {
+              final insights = ref.watch(smartInsightsProvider);
+              if (insights.isEmpty) return const SizedBox.shrink();
+
+              final visible = _showAllInsights ? insights : insights.take(3).toList();
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Smart Insights',
+                          style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700)),
+                        if (insights.length > 3)
+                          GestureDetector(
+                            onTap: () => setState(() =>
+                              _showAllInsights = !_showAllInsights),
+                            child: Text(
+                              _showAllInsights ? 'Show less' : 'Show more',
+                              style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(color: Theme.of(context).colorScheme.primary)),
+                          ),
+                      ],
+                    ),
+                  ),
+                  ...visible.map((insight) => Container(
+                    margin: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: insight.isPositive
+                          ? Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.08)
+                          : Theme.of(context).colorScheme.error.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: insight.isPositive
+                            ? Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.2)
+                            : Theme.of(context).colorScheme.error.withValues(alpha: 0.15),
+                        width: 1),
+                    ),
+                    child: Row(children: [
+                      Text(insight.emoji, style: const TextStyle(fontSize: 18)),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(insight.message,
+                        style: Theme.of(context).textTheme.bodyMedium
+                          ?.copyWith(height: 1.4))),
+                    ]),
+                  )),
+                ],
+              );
+            }),
 
             // Budget Snapshot
             const BudgetSnapshotCard(),

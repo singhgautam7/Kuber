@@ -1,25 +1,29 @@
 enum InsightType {
-  budget,
-  trend,
-  behavior,
+  weekdayPattern,
+  topCategory,
+  categoryTrend,
+  monthComparison,
+  weekendVsWeekday,
+  biggestExpense,
+  savingsTrend,
+  recurringBurden,
+  spendingFreeStreak,
+  fallbackTotal,
+  fallbackTip,
 }
 
-enum InsightPriority {
-  high,
-  medium,
-  low,
-}
-
-class Insight {
-  final String id;
-  final String message;
+class KuberInsight {
   final InsightType type;
-  final InsightPriority priority;
+  final String message;
+  final String emoji;
+  final double confidence;
+  final bool isPositive;
 
-  Insight({
-    required this.id,
-    required this.message,
+  const KuberInsight({
     required this.type,
-    required this.priority,
+    required this.message,
+    required this.emoji,
+    required this.confidence,
+    required this.isPositive,
   });
 }

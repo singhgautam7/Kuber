@@ -1,71 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
-import '../../insights/providers/insight_provider.dart';
-import '../../insights/models/insight.dart';
-import '../../../core/theme/app_theme.dart';
 
-class SmartInsightsCard extends ConsumerWidget {
+import '../../../core/theme/app_theme.dart';
+import '../../insights/models/insight.dart';
+import '../../insights/providers/insight_provider.dart';
+
+class SmartInsightsCard extends ConsumerStatefulWidget {
   const SmartInsightsCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final insightsAsync = ref.watch(smartInsightsProvider);
+  ConsumerState<SmartInsightsCard> createState() => _SmartInsightsCardState();
+}
 
-    return insightsAsync.when(
-      loading: () => _buildLoading(context),
-      error: (e, _) => const SizedBox.shrink(),
-      data: (insights) {
-        if (insights.isEmpty) return const SizedBox.shrink();
+class _SmartInsightsCardState extends ConsumerState<SmartInsightsCard> {
+  bool _showAllInsights = false;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Text(
-            //   'Smart Insights',
-            //   style: textTheme.titleMedium?.copyWith(
-            //     fontWeight: FontWeight.w700,
-            //     letterSpacing: -0.3,
-            //   ),
-            // ),
-            // const SizedBox(height: KuberSpacing.sm),
-            Column(
-              children: insights.map((insight) => _InsightTile(insight: insight)).toList(),
-            ),
-            const SizedBox(height: KuberSpacing.md),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildLoading(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    final insights = ref.watch(smartInsightsProvider);
+    final textTheme = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+
+    if (insights.isEmpty) return const SizedBox.shrink();
+
+    final visible = _showAllInsights ? insights : insights.take(3).toList();
+    final hasMore = insights.length > 3;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text(
-        //   'Smart Insights',
-        //   style: textTheme.titleMedium?.copyWith(
-        //     fontWeight: FontWeight.w700,
-        //     letterSpacing: -0.3,
-        //     color: cs.onSurface.withValues(alpha: 0.1),
-        //   ),
-        // ),
-        // const SizedBox(height: KuberSpacing.sm),
-        Shimmer.fromColors(
-          baseColor: cs.surfaceContainerHigh,
-          highlightColor: cs.surfaceContainerLowest,
-          child: Column(
-            children: List.generate(2, (i) => Container(
-              height: 48,
-              margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Smart Insights',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
               ),
-            )),
-          ),
+            ),
+            if (hasMore)
+              GestureDetector(
+                onTap: () => setState(() => _showAllInsights = !_showAllInsights),
+                child: Text(
+                  _showAllInsights ? 'Show less' : 'Show more',
+                  style: textTheme.labelMedium?.copyWith(
+                    color: cs.primary,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+        Column(
+          children: visible
+              .map((insight) => _InsightTile(insight: insight))
+              .toList(),
         ),
         const SizedBox(height: KuberSpacing.md),
       ],
@@ -74,7 +63,7 @@ class SmartInsightsCard extends ConsumerWidget {
 }
 
 class _InsightTile extends StatelessWidget {
-  final Insight insight;
+  final KuberInsight insight;
   const _InsightTile({required this.insight});
 
   @override
@@ -82,38 +71,34 @@ class _InsightTile extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    Color bgColor;
-    Color iconColor;
-    IconData icon;
+    final Color bgColor;
+    final Color borderColor;
 
-    switch (insight.type) {
-      case InsightType.budget:
-        bgColor = Colors.orange.withValues(alpha: 0.08); // Warning color
-        iconColor = Colors.orange.shade700;
-        icon = Icons.warning_amber_rounded;
-        break;
-      case InsightType.trend:
-        bgColor = cs.primary.withValues(alpha: 0.08); // Accent color
-        iconColor = cs.primary;
-        icon = Icons.trending_up_rounded;
-        break;
-      case InsightType.behavior:
-        bgColor = cs.secondary.withValues(alpha: 0.08); // Neutral/info color
-        iconColor = cs.secondary;
-        icon = Icons.lightbulb_outline_rounded;
-        break;
+    if (insight.isPositive) {
+      bgColor = cs.tertiary.withValues(alpha: 0.08);
+      borderColor = cs.tertiary.withValues(alpha: 0.2);
+    } else {
+      bgColor = cs.error.withValues(alpha: 0.06);
+      borderColor = cs.error.withValues(alpha: 0.15);
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.md,
+        vertical: 12,
+      ),
       decoration: BoxDecoration(
-        color: bgColor.withValues(alpha: 0.05),
+        color: bgColor,
         borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: borderColor, width: 0.5),
       ),
       child: Row(
         children: [
-          Icon(icon, color: iconColor, size: 16),
+          Text(
+            insight.emoji,
+            style: const TextStyle(fontSize: 16),
+          ),
           const SizedBox(width: KuberSpacing.md),
           Expanded(
             child: Text(
@@ -123,7 +108,7 @@ class _InsightTile extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 fontSize: 13,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),
