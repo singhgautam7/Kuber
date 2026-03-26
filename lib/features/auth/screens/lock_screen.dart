@@ -22,10 +22,13 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   }
 
   Future<void> _triggerAuth() async {
-    // Add small delay for smoother transition
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (mounted) {
-      ref.read(authProvider.notifier).authenticate();
+    // Only trigger if currently locked and biometrics is actually enabled
+    if (ref.read(authProvider)) {
+      // Add small delay for smoother transition
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mounted && ref.read(authProvider)) {
+        ref.read(authProvider.notifier).authenticate();
+      }
     }
   }
 

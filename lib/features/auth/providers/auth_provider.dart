@@ -16,6 +16,23 @@ class AuthNotifier extends StateNotifier<bool> with WidgetsBindingObserver {
   AuthNotifier(this._ref) : super(false) {
     WidgetsBinding.instance.addObserver(this);
     _initialize();
+    
+    // Listen for setting changes
+    _ref.listen(settingsProvider, (previous, next) {
+      final oldEnabled = previous?.valueOrNull?.biometricsEnabled;
+      final newEnabled = next.valueOrNull?.biometricsEnabled;
+      
+      if (oldEnabled == true && newEnabled == false) {
+        // Just disabled: unlock immediately and reset session
+        state = false;
+        _isAuthenticatedInSession = false;
+      } else if (oldEnabled == false && newEnabled == true) {
+        // Just enabled: ensure we mark it as authenticated in session 
+        // because the user must have authenticated to turn it on
+        _isAuthenticatedInSession = true;
+        state = false;
+      }
+    });
   }
 
   void _initialize() async {
@@ -29,8 +46,10 @@ class AuthNotifier extends StateNotifier<bool> with WidgetsBindingObserver {
         return;
       }
       
-      // Start locked on launch
+      // Start locked on launch if enabled and supported
       state = true;
+    } else {
+      state = false;
     }
   }
 
@@ -72,6 +91,12 @@ class AuthNotifier extends StateNotifier<bool> with WidgetsBindingObserver {
   }
 
   Future<void> authenticate() async {
+    final settings = _ref.read(settingsProvider).valueOrNull;
+    if (settings?.biometricsEnabled != true) {
+      state = false;
+      return;
+    }
+
     final success = await _biometricService.authenticate();
     if (success) {
       state = false;
