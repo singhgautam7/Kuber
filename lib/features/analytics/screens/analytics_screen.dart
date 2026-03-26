@@ -1,8 +1,6 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -17,8 +15,6 @@ import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../providers/analytics_provider.dart';
-import '../widgets/category_group_stats.dart';
-import '../widgets/budget_vs_actual.dart';
 import '../widgets/analytics_toggle.dart';
 
 // ---------------------------------------------------------------------------
