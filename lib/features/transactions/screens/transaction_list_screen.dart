@@ -8,9 +8,11 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
+import '../../settings/providers/data_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -210,7 +212,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         slivers: [
           // App bar
           const SliverToBoxAdapter(
-            child: KuberAppBar(title: 'Transactions'),
+            child: KuberAppBar(title: 'History'),
+          ),
+
+          // Page header
+          SliverToBoxAdapter(
+            child: KuberPageHeader(
+              title: 'Transaction\nHistory',
+              description: 'Your past expenses, incomes and transfers',
+              actionIcon: Icons.file_download_outlined,
+              actionTooltip: 'Export',
+              onAction: () => ref.read(dataControllerProvider.notifier).exportData(),
+            ),
           ),
 
           // Search bar
@@ -357,7 +370,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               if (filtered.isEmpty) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
-                  child: EmptyState(
+                  child: KuberEmptyState(
                     icon: Icons.receipt_long_outlined,
                     title: transactions.isEmpty
                         ? 'No transactions yet'

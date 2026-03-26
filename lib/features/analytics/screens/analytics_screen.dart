@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -8,13 +8,16 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
+import '../../settings/providers/data_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../providers/analytics_provider.dart';
+import '../widgets/category_group_stats.dart';
 import '../widgets/analytics_toggle.dart';
 
 // ---------------------------------------------------------------------------
@@ -277,7 +280,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const KuberAppBar(title: 'Analytics'),
-            const SizedBox(height: KuberSpacing.sm),
+            KuberPageHeader(
+              title: 'Spending\nAnalytics',
+              description: 'Visualize your spending patterns',
+              actionIcon: Icons.file_download_outlined,
+              actionTooltip: 'Export',
+              onAction: () => ref.read(dataControllerProvider.notifier).exportData(),
+            ),
 
             // [A] Period selector
             SingleChildScrollView(
@@ -318,7 +327,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             // If no data for this period, show inline empty state
             if (isEmpty) ...[
               const SizedBox(height: KuberSpacing.xl),
-              const EmptyState(
+              const KuberEmptyState(
                 icon: Icons.bar_chart,
                 title: 'No data',
                 description: 'No transactions found for this period',
