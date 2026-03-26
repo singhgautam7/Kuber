@@ -91,7 +91,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.05),
+                                    color: cs.onSurface.withValues(alpha: 0.05),
                                     borderRadius: BorderRadius.circular(KuberRadius.md),
                                   ),
                                   child: Text(
@@ -142,7 +142,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                   child: Container(
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.1),
+                                      color: cs.onSurface.withValues(alpha: 0.08),
                                       borderRadius: BorderRadius.circular(KuberRadius.full),
                                     ),
                                   ),
@@ -183,9 +183,9 @@ class TagWiseAnalytics extends ConsumerWidget {
                             margin: EdgeInsets.only(right: index < 2 ? KuberSpacing.sm : 0),
                             padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.03),
+                              color: cs.onSurface.withValues(alpha: 0.03),
                               borderRadius: BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(color: Colors.white10),
+                              border: Border.all(color: cs.outlineVariant),
                             ),
                             child: Column(
                               children: [

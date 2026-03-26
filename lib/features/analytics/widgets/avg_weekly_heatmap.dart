@@ -81,7 +81,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
               children: List.generate(7, (index) {
                 final dayName = _getDayName(index);
                 final avg = dailyAverages[dayName] ?? 0;
-                final opacity = maxAvg > 0 ? (0.1 + (avg / maxAvg) * 0.6) : 0.05;
+                final opacity = maxAvg > 0 ? (0.1 + (avg / maxAvg) * 0.8) : 0.05;
 
                 return Expanded(
                   child: Column(
@@ -146,8 +146,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                   ),
                 ),
                 Row(
-                  children: List.generate(4, (index) {
-                    final opacity = 0.1 + (index * 0.2);
+                  children: [0.1, 0.35, 0.6, 0.9].map((opacity) {
                     return Container(
                       width: 12,
                       height: 12,
@@ -157,7 +156,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     );
-                  }),
+                  }).toList(),
                 ),
               ],
             ),
@@ -173,10 +172,10 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                   margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
                   padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
                   decoration: BoxDecoration(
-                    color: isSelected ? cs.primary.withValues(alpha: 0.1) : Colors.black, // Dark background as per screenshot
+                    color: isSelected ? cs.primary.withValues(alpha: 0.1) : cs.surfaceContainerHighest.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                     border: Border.all(
-                      color: isSelected ? cs.primary.withValues(alpha: 0.3) : Colors.white10,
+                      color: isSelected ? cs.primary.withValues(alpha: 0.3) : cs.outlineVariant.withValues(alpha: 0.5),
                     ),
                   ),
                   child: Row(
