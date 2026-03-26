@@ -9,6 +9,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../core/services/biometric_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -19,6 +20,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late TextEditingController _userNameController;
+  final _biometricService = BiometricService();
   ThemeMode? _tempThemeMode;
   String? _tempCurrencyCode;
   SwipeMode? _tempSwipeMode;
@@ -362,7 +364,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: 'FaceID or Fingerprint',
                       trailing: Switch(
                         value: currentBiometricsEnabled,
-                        onChanged: (val) => setState(() => _tempBiometricsEnabled = val),
+                        onChanged: (val) async {
+                          if (val) {
+                            final messenger = ScaffoldMessenger.of(context);
+                            // Only authenticate if turning ON
+                            if (!await _biometricService.canAuthenticate()) {
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Biometric or device authentication is not available'),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+                            
+                            final success = await _biometricService.authenticate();
+                            if (success && mounted) {
+                              setState(() => _tempBiometricsEnabled = true);
+                            }
+                          } else {
+                            setState(() => _tempBiometricsEnabled = false);
+                          }
+                        },
                         activeTrackColor: cs.primary,
                       ),
                     ),
