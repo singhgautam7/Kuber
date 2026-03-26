@@ -19,6 +19,9 @@ import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../providers/analytics_provider.dart';
 import '../widgets/category_group_stats.dart';
 import '../widgets/analytics_toggle.dart';
+import '../widgets/avg_weekly_heatmap.dart';
+import '../widgets/transaction_size_distribution.dart';
+import '../widgets/tag_wise_analytics.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -348,8 +351,20 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
             const SizedBox(height: KuberSpacing.lg),
 
-            // [D] Spending Distribution (Category/Group Toggle)
+            // [D] Avg Weekly Heatmap
+            AvgWeeklyHeatmap(transactions: periodTxns),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [E] Transaction Size Distribution
+            TransactionSizeDistribution(transactions: periodTxns),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [F] Spending Distribution (Category/Group Toggle)
             CategoryGroupStatsWidget(period: _period),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [G] Tag-wise Analytics
+            TagWiseAnalytics(transactions: periodTxns),
             const SizedBox(height: KuberSpacing.lg),
 
             // // [E] Budget vs Actual
