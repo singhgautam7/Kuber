@@ -36,20 +36,16 @@ class BudgetSnapshotCard extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.sm),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(KuberSpacing.lg),
+              padding: const EdgeInsets.all(KuberSpacing.md),
               decoration: BoxDecoration(
                 color: cs.surfaceContainer,
                 borderRadius: BorderRadius.circular(KuberRadius.md),
                 border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
               ),
               child: Column(
-                children: snapshots.asMap().entries.map((entry) {
-                  final isLast = entry.key == snapshots.length - 1;
-                  return _BudgetRow(snapshot: entry.value, isLast: isLast);
-                }).toList(),
+                children: snapshots.map((s) => _BudgetRow(snapshot: s)).toList(),
               ),
             ),
-            const SizedBox(height: KuberSpacing.md),
           ],
         );
       },
@@ -89,9 +85,8 @@ class BudgetSnapshotCard extends ConsumerWidget {
 
 class _BudgetRow extends ConsumerWidget {
   final ({dynamic budget, dynamic progress}) snapshot;
-  final bool isLast;
 
-  const _BudgetRow({required this.snapshot, required this.isLast});
+  const _BudgetRow({required this.snapshot});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -103,23 +98,40 @@ class _BudgetRow extends ConsumerWidget {
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
     final category = categoryMap[int.tryParse(budget.categoryId)];
 
-    final catColor = category != null
+    final Color catColor = category != null
         ? harmonizeCategory(context, Color(category.colorValue))
         : cs.primary;
 
+    Color badgeColor;
+    String statusLabel;
+    if (progress.percentage >= 100) {
+      badgeColor = cs.error;
+      statusLabel = 'Exceeded';
+    } else if (progress.percentage >= 80) {
+      badgeColor = cs.error;
+      statusLabel = 'High usage';
+    } else if (progress.percentage >= 50) {
+      badgeColor = Colors.orange.shade600;
+      statusLabel = 'Near limit';
+    } else {
+      badgeColor = Colors.green.shade600;
+      statusLabel = 'On track';
+    }
+
+    final remaining = (progress.limit - progress.spent).clamp(0, double.infinity);
+
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : KuberSpacing.lg),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              // Category Icon
               Container(
-                width: 32,
-                height: 32,
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: catColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(KuberRadius.sm),
                 ),
                 child: Icon(
                   category != null ? IconMapper.fromString(category.icon) : Icons.category_outlined,
@@ -128,47 +140,93 @@ class _BudgetRow extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: KuberSpacing.md),
+
+              // Main Info
               Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category?.name ?? 'Category',
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${CurrencyFormatter.format(progress.spent)} ',
+                            style: textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: cs.onSurface,
+                              fontSize: 11,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '/ ${CurrencyFormatter.format(progress.limit)}',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      '${CurrencyFormatter.format(remaining)} remaining',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Percentage Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: badgeColor.withValues(alpha: 0.2)),
+                ),
                 child: Text(
-                  category?.name ?? 'Category',
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+                  '${progress.percentage.toInt()}%',
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: badgeColor,
+                    fontSize: 10,
                   ),
                 ),
               ),
-              Text(
-                '${progress.percentage.toInt()}% used',
-                style: textTheme.labelSmall?.copyWith(
-                  color: progress.percentage >= 100 ? cs.error : cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 10,
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${CurrencyFormatter.format(progress.spent)} / ${CurrencyFormatter.format(progress.limit)}',
-                style: textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: LinearProgressIndicator(
               value: (progress.percentage / 100).clamp(0, 1),
               backgroundColor: cs.outline.withValues(alpha: 0.2),
-              color: cs.primary, // Static accent color
-              minHeight: 5,
+              color: cs.primary, 
+              minHeight: 6,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              statusLabel,
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
+                fontSize: 9,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ],

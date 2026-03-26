@@ -29,7 +29,7 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 20, bottom: 8),
+          padding: const EdgeInsets.only(bottom: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

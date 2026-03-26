@@ -97,7 +97,6 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
                             percentage: s.percentage,
                             icon: IconMapper.fromString(s.category.icon),
                             color: harmonizeCategory(context, Color(s.category.colorValue)),
-                            onTap: () => context.go('/history?categoryId=${s.category.id}'),
                           );
                         } else if (s is GroupStat) {
                           return _StatRow(
@@ -106,7 +105,6 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
                             percentage: s.percentage,
                             icon: Icons.folder_open_rounded,
                             color: cs.primary,
-                            onTap: () => context.go('/history?group=${s.groupName}'),
                           );
                         }
                         return const SizedBox.shrink();
@@ -213,7 +211,6 @@ class _StatRow extends StatelessWidget {
   final double percentage;
   final IconData icon;
   final Color color;
-  final VoidCallback onTap;
 
   const _StatRow({
     required this.label,
@@ -221,7 +218,6 @@ class _StatRow extends StatelessWidget {
     required this.percentage,
     required this.icon,
     required this.color,
-    required this.onTap,
   });
 
   @override
@@ -229,54 +225,51 @@ class _StatRow extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.md),
-        child: Row(
-          children: [
-            CategoryIcon.square(icon: icon, rawColor: color, size: 36),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(label, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
-                      Text(
-                        CurrencyFormatter.format(amount),
-                        style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: LinearProgressIndicator(
-                            value: (percentage / 100).clamp(0, 1),
-                            backgroundColor: color.withValues(alpha: 0.1),
-                            color: color,
-                            minHeight: 4,
-                          ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+      child: Row(
+        children: [
+          CategoryIcon.square(icon: icon, rawColor: color, size: 36),
+          const SizedBox(width: KuberSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(label, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+                    Text(
+                      CurrencyFormatter.format(amount),
+                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: LinearProgressIndicator(
+                          value: (percentage / 100).clamp(0, 1),
+                          backgroundColor: color.withValues(alpha: 0.1),
+                          color: color,
+                          minHeight: 4,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${percentage.toStringAsFixed(1)}%',
-                        style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant, fontSize: 10),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${percentage.toStringAsFixed(1)}%',
+                      style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant, fontSize: 10),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

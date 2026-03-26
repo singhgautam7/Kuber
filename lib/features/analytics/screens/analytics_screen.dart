@@ -346,10 +346,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             // [D] Spending Distribution (Category/Group Toggle)
             CategoryGroupStatsWidget(period: _period),
             const SizedBox(height: KuberSpacing.lg),
-            
-            // [E] Budget vs Actual
-            const BudgetVsActualCard(),
-            const SizedBox(height: KuberSpacing.lg),
+
+            // // [E] Budget vs Actual
+            // const BudgetVsActualCard(),
+            // const SizedBox(height: KuberSpacing.lg),
 
             // // [G] Highlights (2x3 grid)
             // _AnalyticsCard(

@@ -92,19 +92,18 @@ final budgetSnapshotProvider = FutureProvider<List<({Budget budget, BudgetProgre
   final budgets = await ref.watch(budgetListProvider.future);
   final activeBudgets = budgets.where((b) => b.isActive).toList();
 
-  final List<({Budget budget, BudgetProgress progress})> snapshots = [];
+  final List<({Budget budget, BudgetProgress progress})> results = [];
 
   for (final budget in activeBudgets) {
     final progress = await ref.watch(budgetProgressProvider(budget).future);
-    if (progress.percentage >= 45) { // Slightly lower than 50% to catch near-limit ones
-      snapshots.add((budget: budget, progress: progress));
-    }
+    results.add((budget: budget, progress: progress));
   }
 
   // Sort by usage DESC
-  snapshots.sort((a, b) => b.progress.percentage.compareTo(a.progress.percentage));
+  results.sort((a, b) => b.progress.percentage.compareTo(a.progress.percentage));
 
-  return snapshots.take(3).toList();
+  // Take top 3 budgets regardless of percentage
+  return results.take(3).toList();
 });
 
 final budgetVsActualProvider = FutureProvider<List<({Budget budget, BudgetProgress progress})>>((ref) async {

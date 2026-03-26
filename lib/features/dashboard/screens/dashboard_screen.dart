@@ -2,28 +2,21 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
-import '../../../shared/widgets/transaction_detail_sheet.dart';
-import '../../../shared/widgets/transaction_list_item.dart';
-import '../../categories/providers/category_provider.dart';
-import '../../recurring/providers/recurring_provider.dart';
-import '../../recurring/widgets/recurring_detail_sheet.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
 import '../../settings/providers/settings_provider.dart';
-import '../providers/dashboard_provider.dart';
 import '../widgets/home_smart_insights.dart';
 import '../widgets/spending_stats_card.dart';
 import '../widgets/budget_snapshot_card.dart';
 import '../widgets/home_accounts_card.dart';
+import '../widgets/home_recurring_card.dart';
+import '../widgets/home_recent_transactions.dart';
 
 const _subtitles = [
   'Let\'s manage your money wisely',
@@ -60,14 +53,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userName = ref.watch(settingsProvider).valueOrNull?.userName ?? '';
     final cs = Theme.of(context).colorScheme;
-    final colorScheme = cs;
     final textTheme = Theme.of(context).textTheme;
     final summaryAsync = ref.watch(monthlySummaryProvider);
-    final recentAsync = ref.watch(recentTransactionsProvider);
     final chartAsync = ref.watch(last7DaysSummaryProvider);
-    final categoryMapAsync = ref.watch(categoryMapProvider);
-    final userName = ref.watch(settingsProvider).valueOrNull?.userName ?? '';
 
     return Scaffold(
       body: ListView(
@@ -107,293 +97,69 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           const SizedBox(height: KuberSpacing.xl),
 
-            // [A] Balance Hero Card
-            summaryAsync.when(
-              loading: () => const SizedBox(
-                height: 180,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (summary) => _BalanceHeroCard(summary: summary),
+          // [A] Balance Hero Card
+          summaryAsync.when(
+            loading: () => const SizedBox(
+              height: 180,
+              child: Center(child: CircularProgressIndicator()),
             ),
-            const SizedBox(height: KuberSpacing.md),
+            error: (e, _) => Center(child: Text('Error: $e')),
+            data: (summary) => _BalanceHeroCard(summary: summary),
+          ),
+          const SizedBox(height: KuberSpacing.md),
 
-            // [A.1] Spending Stats
-            const SpendingStatsCard(),
-            const SizedBox(height: KuberSpacing.md),
+          // [A.1] Spending Stats
+          const SpendingStatsCard(),
+          const SizedBox(height: KuberSpacing.md),
 
-            // [B] Bank Accounts
-            const HomeAccountsCard(),
-            const SizedBox(height: KuberSpacing.xl),
+          // [B] Bank Accounts
+          const HomeAccountsCard(),
+          const SizedBox(height: KuberSpacing.xl),
 
-            // [C] 7-Day Chart
-            chartAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (e, _) => const SizedBox.shrink(),
-              data: (days) => KuberBarChart(
-                title: 'Spending Analysis',
-                subtitle: 'Last 7 Days Activity',
-                buckets: _buildLast7DaysBuckets(days),
-                height: 200,
-                currencySymbol: ref.watch(currencyProvider).symbol,
-              ),
+          // [C] 7-Day Chart
+          chartAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (e, _) => const SizedBox.shrink(),
+            data: (days) => KuberBarChart(
+              title: 'Spending Analysis',
+              subtitle: 'Last 7 Days Activity',
+              buckets: _buildLast7DaysBuckets(days),
+              height: 200,
+              currencySymbol: ref.watch(currencyProvider).symbol,
             ),
+          ),
+          const SizedBox(height: KuberSpacing.xl),
 
-            // [A.2] Smart Insights
-            const HomeSmartInsights(),
-            // const SizedBox(height: KuberSpacing.md),
+          // [A.2] Smart Insights
+          const HomeSmartInsights(),
+          const SizedBox(height: KuberSpacing.xl),
 
-            // Budget Snapshot
-            const BudgetSnapshotCard(),
-            const SizedBox(height: KuberSpacing.md),
+          // Budget Snapshot
+          const BudgetSnapshotCard(),
+          const SizedBox(height: KuberSpacing.xl),
 
-            // [C.5] Upcoming Recurring
-            _UpcomingRecurringSection(ref: ref),
-            const SizedBox(height: KuberSpacing.xl),
+          // [C.5] Upcoming Recurring
+          const HomeRecurringCard(),
+          const SizedBox(height: KuberSpacing.xl),
 
-            // [D] Recent Transactions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Recent Transactions',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    )),
-                TextButton(
-                  onPressed: () => context.go('/history'),
-                  child: Text('View All',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colorScheme.primary,
-                      )),
-                ),
-              ],
-            ),
-            const SizedBox(height: KuberSpacing.md),
-            recentAsync.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (transactions) {
-                if (transactions.isEmpty) {
-                  return Container(
-                    padding: const EdgeInsets.all(KuberSpacing.xl),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainer,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'No transactions yet',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                    vertical: KuberSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  child: categoryMapAsync.when(
-                    loading: () => const SizedBox.shrink(),
-                    error: (e, _) => const SizedBox.shrink(),
-                    data: (categories) => Column(
-                      children: transactions.map((t) {
-                        final catId = int.tryParse(t.categoryId);
-                        final cat =
-                            catId != null ? categories[catId] : null;
-                        return DashboardTransactionItem(
-                          transaction: t,
-                          category: cat,
-                          onTap: () => showTransactionDetailSheet(
-                            context,
-                            ref,
-                            t,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
+          // [D] Recent Transactions
+          const HomeRecentTransactionsCard(),
+        ],
       ),
     );
   }
 
-}
-
-class _UpcomingRecurringSection extends StatelessWidget {
-  final WidgetRef ref;
-
-  const _UpcomingRecurringSection({required this.ref});
-
-  @override
-  Widget build(BuildContext context) {
-    final upcomingAsync = ref.watch(upcomingRecurringProvider);
-    final categoryMapAsync = ref.watch(categoryMapProvider);
-    final textTheme = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
-    final colorScheme = cs;
-
-    return upcomingAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, _) => const SizedBox.shrink(),
-      data: (rules) {
-        if (rules.isEmpty) return const SizedBox.shrink();
-
-        return Column(
-          children: [
-            const SizedBox(height: KuberSpacing.xl),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Recurring Transactions',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    )),
-                TextButton(
-                  onPressed: () => GoRouter.of(context).push('/more/recurring'),
-                  child: Text('View All',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colorScheme.primary,
-                      )),
-                ),
-              ],
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-            categoryMapAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (catMap) => Column(
-                children: rules.map((rule) {
-                  final catId = int.tryParse(rule.categoryId);
-                  final cat = catId != null ? catMap[catId] : null;
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final dueDay = DateTime(
-                      rule.nextDueAt.year, rule.nextDueAt.month, rule.nextDueAt.day);
-
-                  String statusLabel;
-                  Color statusColor;
-                  if (dueDay.isBefore(today)) {
-                    statusLabel = 'PROCESSED';
-                    statusColor = cs.tertiary;
-                  } else if (dueDay.isAtSameMomentAs(today)) {
-                    statusLabel = 'PENDING';
-                    statusColor = cs.primary;
-                  } else {
-                    statusLabel = 'SCHEDULED';
-                    statusColor = cs.onSurfaceVariant;
-                  }
-
-                  final catColor = cat != null
-                      ? harmonizeCategory(context, Color(cat.colorValue))
-                      : cs.onSurfaceVariant;
-
-                  return GestureDetector(
-                    onTap: () => showRecurringDetailSheet(context, ref, rule),
-                    child: Container(
-                    margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                    padding: const EdgeInsets.all(KuberSpacing.md),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainer,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(color: cs.outline),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: catColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            cat != null
-                                ? IconMapper.fromString(cat.icon)
-                                : Icons.category_outlined,
-                            color: catColor,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      rule.name,
-                                      style: textTheme.bodyMedium?.copyWith(
-                                        color: cs.onSurface,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: KuberSpacing.sm),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 5,
-                                      vertical: 1,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withValues(alpha: 0.15),
-                                      borderRadius:
-                                          BorderRadius.circular(KuberRadius.sm),
-                                    ),
-                                    child: Text(
-                                      statusLabel,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w700,
-                                        color: statusColor,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                DateFormat('MMM d').format(rule.nextDueAt),
-                                style: textTheme.labelSmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          CurrencyFormatter.format(rule.amount),
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: rule.type == 'income'
-                                ? cs.tertiary
-                                : cs.onSurface,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+  List<KuberBarBucket> _buildLast7DaysBuckets(List<DaySummary> days) {
+    return List.generate(days.length, (i) {
+      final d = days[i];
+      return KuberBarBucket(
+        dayLabel: DateFormat('d').format(d.date),
+        monthLabel: DateFormat('MMM').format(d.date).toUpperCase(),
+        income: d.income,
+        expense: d.expense,
+        isHighlighted: i == days.length - 1,
+      );
+    });
   }
 }
 
@@ -432,12 +198,12 @@ class _BalanceHeroCard extends ConsumerWidget {
 
               return RichText(
                 text: TextSpan(
-                  style: GoogleFonts.inter(
-                    fontSize: 36,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    fontSize: 36,
                     letterSpacing: -0.05,
                     color: cs.onSurface,
-                  ),
+                  ) ?? const TextStyle(),
                   children: [
                     TextSpan(text: prefix),
                     TextSpan(
@@ -540,16 +306,3 @@ class _BalanceTile extends StatelessWidget {
     );
   }
 }
-
-  List<KuberBarBucket> _buildLast7DaysBuckets(List<DaySummary> days) {
-    return List.generate(days.length, (i) {
-      final d = days[i];
-      return KuberBarBucket(
-        dayLabel: DateFormat('d').format(d.date),
-        monthLabel: DateFormat('MMM').format(d.date).toUpperCase(),
-        income: d.income,
-        expense: d.expense,
-        isHighlighted: i == days.length - 1,
-      );
-    });
-  }
