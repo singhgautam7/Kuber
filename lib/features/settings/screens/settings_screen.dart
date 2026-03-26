@@ -26,7 +26,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   SwipeMode? _tempSwipeMode;
   NumberSystem? _tempNumberSystem;
   bool? _tempBiometricsEnabled;
-  bool _isSaving = false;
 
   @override
   void initState() {
@@ -46,39 +45,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     super.dispose();
   }
 
-  bool get _hasChanges {
-    final settings = ref.read(settingsProvider).valueOrNull;
-    if (settings == null) return false;
-    return _userNameController.text.trim() != settings.userName ||
-        (_tempThemeMode != null && _tempThemeMode != settings.themeMode) ||
-        (_tempCurrencyCode != null && _tempCurrencyCode != settings.currency) ||
-        (_tempSwipeMode != null && _tempSwipeMode != settings.swipeMode) ||
-        (_tempNumberSystem != null && _tempNumberSystem != settings.numberSystem) ||
-        (_tempBiometricsEnabled != null && _tempBiometricsEnabled != settings.biometricsEnabled);
-  }
-
-  Future<void> _saveSettings() async {
-    setState(() => _isSaving = true);
-    final notifier = ref.read(settingsProvider.notifier);
-    await notifier.setUserName(_userNameController.text.trim());
-    if (_tempThemeMode != null) await notifier.setThemeMode(_tempThemeMode!);
-    if (_tempCurrencyCode != null) await notifier.setCurrency(_tempCurrencyCode!);
-    if (_tempSwipeMode != null) await notifier.setSwipeMode(_tempSwipeMode!);
-    if (_tempNumberSystem != null) await notifier.setNumberSystem(_tempNumberSystem!);
-    if (_tempBiometricsEnabled != null) await notifier.setBiometricsEnabled(_tempBiometricsEnabled!);
-
+  Future<void> _updateName(String name) async {
+    await ref.read(settingsProvider.notifier).setUserName(name);
     if (mounted) {
-      showKuberSnackBar(context, 'Settings saved successfully');
-      setState(() => _isSaving = false);
+      showKuberSnackBar(context, 'Name updated');
     }
   }
 
-  void _revertTheme() {
-    final settings = ref.read(settingsProvider).valueOrNull;
-    if (settings != null) {
-      ref.read(themeModeProvider.notifier).state = settings.themeMode;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,13 +66,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentBiometricsEnabled = _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
     final currency = currencyFromCode(currencyCode);
 
-    return PopScope(
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop && !_isSaving) {
-          _revertTheme();
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: cs.surface,
         body: CustomScrollView(
           slivers: [
@@ -189,20 +156,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               selectedValue: currentTheme,
                               onSelected: (val) {
                                 setState(() => _tempThemeMode = val);
-                                ref.read(themeModeProvider.notifier).state = val;
+                                ref.read(settingsProvider.notifier).setThemeMode(val);
                               },
                             ),
-                            if (_tempThemeMode != settings?.themeMode) ...[
-                              const SizedBox(height: KuberSpacing.sm),
-                              Text(
-                                'Save the settings to apply this theme',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: cs.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),
@@ -323,6 +279,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             selectedValue: currentNumberSystem,
                             onSelected: (val) {
                               setState(() => _tempNumberSystem = val);
+                              ref.read(settingsProvider.notifier).setNumberSystem(val);
                             },
                           ),
                         ],
@@ -341,14 +298,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: 'Horizontal swipe to change tabs',
                       subtitle: 'Quickly switch between main app sections by swiping across the screen.',
                       isSelected: currentSwipeMode == SwipeMode.changeTabs,
-                      onTap: () => setState(() => _tempSwipeMode = SwipeMode.changeTabs),
+                      onTap: () {
+                        setState(() => _tempSwipeMode = SwipeMode.changeTabs);
+                        ref.read(settingsProvider.notifier).setSwipeMode(SwipeMode.changeTabs);
+                      },
                     ),
                     const SizedBox(height: KuberSpacing.sm),
                     _SelectableCard(
                       title: 'Swipe left/right on transactions',
                       subtitle: 'Perform quick actions like edit or delete by swiping on individual history items.',
                       isSelected: currentSwipeMode == SwipeMode.performActions,
-                      onTap: () => setState(() => _tempSwipeMode = SwipeMode.performActions),
+                      onTap: () {
+                        setState(() => _tempSwipeMode = SwipeMode.performActions);
+                        ref.read(settingsProvider.notifier).setSwipeMode(SwipeMode.performActions);
+                      },
                     ),
                   ],
                 ),
@@ -367,13 +330,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       trailing: Switch(
                         value: currentBiometricsEnabled,
                         onChanged: (val) async {
+                          final messenger = ScaffoldMessenger.of(context);
                           if (val) {
-                            final messenger = ScaffoldMessenger.of(context);
                             // Only authenticate if turning ON
                             if (!await _biometricService.canAuthenticate()) {
                               messenger.showSnackBar(
                                 const SnackBar(
-                                  content: Text('Biometric or device authentication is not available'),
+                                  content: Text('Device authentication is not available or set up'),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -383,9 +346,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             final success = await _biometricService.authenticate();
                             if (success && mounted) {
                               setState(() => _tempBiometricsEnabled = true);
+                              await ref.read(settingsProvider.notifier).setBiometricsEnabled(true);
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Biometric lock enabled'),
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
                             }
                           } else {
                             setState(() => _tempBiometricsEnabled = false);
+                            await ref.read(settingsProvider.notifier).setBiometricsEnabled(false);
+                            messenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Biometric lock disabled'),
+                                behavior: SnackBarBehavior.floating,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
                           }
                         },
                         activeTrackColor: cs.primary,
@@ -424,35 +403,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ],
-      ),
-      bottomNavigationBar: _hasChanges
-          ? SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(KuberSpacing.lg),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: _saveSettings,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: cs.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                    ),
-                    child: Text(
-                      'Save Settings',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : null,
       ),
     );
   }
@@ -552,6 +502,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             : null,
                         onTap: () {
                           setState(() => _tempCurrencyCode = c.code);
+                          ref.read(settingsProvider.notifier).setCurrency(c.code);
                           Navigator.pop(ctx);
                         },
                       );
@@ -665,9 +616,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: FilledButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
+                        final newName = controller.text.trim();
                         setState(() {
-                          _userNameController.text = controller.text.trim();
+                          _userNameController.text = newName;
                         });
+                        _updateName(newName);
                         Navigator.pop(ctx);
                       }
                     },
@@ -788,7 +741,7 @@ class _SettingsTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: KuberSpacing.sm),
-            ?trailing,
+            if (trailing != null) trailing!,
           ],
         ),
       ),
