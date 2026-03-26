@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../settings/widgets/settings_widgets.dart';
 
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
@@ -217,7 +218,7 @@ class _MenuItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: cs.onSurfaceVariant, size: 22),
+            SquircleIcon(icon: icon, color: cs.primary),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Column(
@@ -226,11 +227,12 @@ class _MenuItem extends StatelessWidget {
                   Text(
                     label,
                     style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: GoogleFonts.inter(
@@ -242,7 +244,7 @@ class _MenuItem extends StatelessWidget {
               ),
             ),
             Icon(Icons.chevron_right_rounded,
-                color: cs.onSurfaceVariant, size: 20),
+                color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
           ],
         ),
       ),
