@@ -325,12 +325,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _SettingsTile(
                       icon: Icons.info_outline_rounded,
                       label: 'App Version',
-                      trailing: Text(
-                        'v1.0.0',
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: cs.onSurfaceVariant,
-                        ),
+                      trailing: Consumer(
+                        builder: (context, ref, _) {
+                          final version = ref.watch(appVersionProvider).valueOrNull ?? '1.0.0';
+                          return Text(
+                            'v$version',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
