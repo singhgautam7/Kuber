@@ -126,21 +126,19 @@ class TransactionSizeDistribution extends ConsumerWidget {
   }
 
   Map<String, int> _calculateDistribution() {
-    final expenses = transactions.where((t) => t.type == 'expense').toList();
-    if (expenses.isEmpty) return {};
+    final (s, m, l) = transactions.fold<(int, int, int)>(
+      (0, 0, 0),
+      (acc, tx) {
+        if (tx.type != 'expense') return acc;
+        return tx.amount < 500
+            ? (acc.$1 + 1, acc.$2, acc.$3)
+            : tx.amount <= 2000
+                ? (acc.$1, acc.$2 + 1, acc.$3)
+                : (acc.$1, acc.$2, acc.$3 + 1);
+      },
+    );
 
-    int small = 0, medium = 0, large = 0;
-    for (final tx in expenses) {
-      if (tx.amount < 500) {
-        small++;
-      } else if (tx.amount <= 2000) {
-        medium++;
-      } else {
-        large++;
-      }
-    }
-
-    return {'small': small, 'medium': medium, 'large': large};
+    return {'small': s, 'medium': m, 'large': l};
   }
 
   Widget _buildSkeleton() {

@@ -741,7 +741,7 @@ class _SettingsTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: KuberSpacing.sm),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
       ),
