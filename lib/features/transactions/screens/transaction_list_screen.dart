@@ -12,7 +12,6 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
-import '../../settings/providers/data_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show settingsProvider, formatterProvider, SwipeMode;
@@ -20,6 +19,7 @@ import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
+import '../../../shared/widgets/wip_bottom_sheet.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -222,7 +222,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               description: 'Your past expenses, incomes and transfers',
               actionIcon: Icons.file_download_outlined,
               actionTooltip: 'Export',
-              onAction: () => ref.read(dataControllerProvider.notifier).exportData(),
+              onAction: () {
+                final cs = Theme.of(context).colorScheme;
+                showWIPBottomSheet(
+                  context: context,
+                  icon: Icons.rocket_launch_rounded,
+                  title: 'Export Report',
+                  content: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      children: [
+                        const TextSpan(text: "We are currently building this feature to help you export your financial reports in "),
+                        TextSpan(
+                          text: "PDF",
+                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: " and "),
+                        TextSpan(
+                          text: "CSV",
+                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: " formats. Stay tuned!"),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
 
