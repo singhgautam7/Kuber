@@ -13,6 +13,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../budgets/providers/budget_provider.dart';
 import '../../budgets/widgets/budget_details_sheet.dart';
 import 'add_edit_category_screen.dart';
@@ -822,11 +823,11 @@ class _BudgetStatusSection extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '₹${p.spent.toStringAsFixed(0)} / ₹${p.limit.toStringAsFixed(0)}',
+                            '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
                             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                           Text(
-                            '${p.percentage.toStringAsFixed(0)}%',
+                            ref.watch(formatterProvider).formatPercentage(p.percentage),
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,

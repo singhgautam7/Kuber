@@ -10,7 +10,7 @@ import '../../core/utils/icon_mapper.dart';
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/transactions/data/transaction.dart';
-import '../../features/settings/providers/settings_provider.dart' show currencyProvider;
+import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
 import '../../features/transactions/providers/transaction_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
@@ -130,12 +130,15 @@ class TransactionDetailSheet extends ConsumerWidget {
           ?.name;
     }
 
-    final symbol = ref.watch(currencyProvider).symbol;
     final isIncome = transaction.type == 'income';
     final amountColor = isTransfer
         ? cs.onSurface
         : (isIncome ? cs.tertiary : cs.error);
-    final amountPrefix = isTransfer ? symbol : (isIncome ? '+$symbol' : '−$symbol');
+    
+    final formattedAmount = ref.watch(formatterProvider).formatCurrency(transaction.amount);
+    final amountText = isTransfer 
+        ? formattedAmount 
+        : (isIncome ? '+$formattedAmount' : '−$formattedAmount');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
         : (category != null
@@ -260,7 +263,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '$amountPrefix${transaction.amount.toStringAsFixed(2)}',
+                amountText,
                 style: GoogleFonts.inter(
                   fontSize: 36,
                   fontWeight: FontWeight.w800,

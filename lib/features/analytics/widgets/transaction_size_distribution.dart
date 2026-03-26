@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../../../core/theme/app_theme.dart';
+
 import '../../transactions/data/transaction.dart';
+import '../../settings/providers/settings_provider.dart';
 
 class TransactionSizeDistribution extends ConsumerWidget {
   final List<Transaction> transactions;
@@ -24,6 +25,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
     final distribution = _calculateDistribution();
     final total = distribution.values.fold<int>(0, (sum, val) => sum + val);
     final cs = Theme.of(context).colorScheme;
+    final formatter = ref.watch(formatterProvider);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -64,11 +66,11 @@ class TransactionSizeDistribution extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.xl),
             
             // Legend
-            _buildLegendItem(cs.primary, 'Small (<₹500)', distribution['small'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary, 'Small (<${formatter.formatCurrency(500)})', distribution['small'] ?? 0, total, cs),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.6), 'Medium (₹500 - ₹2000)', distribution['medium'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.6), 'Medium (${formatter.formatCurrency(500)} - ${formatter.formatCurrency(2000)})', distribution['medium'] ?? 0, total, cs),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.3), 'Large (>₹2000)', distribution['large'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.3), 'Large (>${formatter.formatCurrency(2000)})', distribution['large'] ?? 0, total, cs),
           ],
         ),
       ),

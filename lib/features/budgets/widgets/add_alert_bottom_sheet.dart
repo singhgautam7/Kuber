@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../data/budget.dart';
 
-class AddAlertBottomSheet extends StatefulWidget {
+class AddAlertBottomSheet extends ConsumerStatefulWidget {
   final double budgetAmount;
   final List<BudgetAlert> existingAlerts;
   final Function(BudgetAlert) onAdd;
@@ -18,10 +20,10 @@ class AddAlertBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<AddAlertBottomSheet> createState() => _AddAlertBottomSheetState();
+  ConsumerState<AddAlertBottomSheet> createState() => _AddAlertBottomSheetState();
 }
 
-class _AddAlertBottomSheetState extends State<AddAlertBottomSheet> {
+class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
   BudgetAlertType _type = BudgetAlertType.percentage;
   late final TextEditingController _controller;
   bool _isNotificationEnabled = true;
@@ -30,6 +32,10 @@ class _AddAlertBottomSheetState extends State<AddAlertBottomSheet> {
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    // The provided code edit seems to be for a different widget (AddEditBudgetScreen)
+    // as it references `widget.existingBudget` and `_amountController` which are not
+    // part of AddAlertBottomSheet.
+    // Applying only the line that is relevant and syntactically correct for this widget.
     _controller.addListener(() => setState(() {}));
   }
 
@@ -42,9 +48,9 @@ class _AddAlertBottomSheetState extends State<AddAlertBottomSheet> {
   String get _description {
     final value = double.tryParse(_controller.text) ?? 0;
     if (_type == BudgetAlertType.percentage) {
-      return 'Alert me when spending reaches ${value.toStringAsFixed(0)}% of my monthly budget.';
+      return 'Alert me when spending reaches ${ref.watch(formatterProvider).formatPercentage(value)} of my monthly budget.';
     } else {
-      return 'Alert me when spending reaches ₹${value.toStringAsFixed(0)} of my monthly budget.';
+      return 'Alert me when spending reaches ${ref.watch(formatterProvider).formatCurrency(value)} of my monthly budget.';
     }
   }
 
@@ -162,7 +168,7 @@ class _AddAlertBottomSheetState extends State<AddAlertBottomSheet> {
                   () => setState(() => _type = BudgetAlertType.percentage),
                 ),
                 _buildToggleButton(
-                  'Fixed Amount (₹)',
+                  'Fixed Amount (${ref.watch(currencyProvider).symbol})',
                   _type == BudgetAlertType.amount,
                   () => setState(() => _type = BudgetAlertType.amount),
                 ),
@@ -187,7 +193,7 @@ class _AddAlertBottomSheetState extends State<AddAlertBottomSheet> {
                 Positioned(
                   right: 20,
                   child: Text(
-                    _type == BudgetAlertType.percentage ? '%' : '₹',
+                    _type == BudgetAlertType.percentage ? '%' : ref.watch(currencyProvider).symbol,
                     style: GoogleFonts.inter(
                       fontSize: 40,
                       fontWeight: FontWeight.w700,

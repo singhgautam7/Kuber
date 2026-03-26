@@ -15,7 +15,7 @@ import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../settings/providers/data_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../providers/analytics_provider.dart';
 import '../widgets/category_group_stats.dart';
 import '../widgets/analytics_toggle.dart';
@@ -211,22 +211,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     });
   }
 
-
-
-  // ---- format helpers -----------------------------------------------------
-
-  String _formatAmount(double v) {
-    final symbol = ref.read(currencyProvider).symbol;
-    if (v >= 100000) {
-      return '$symbol${(v / 1000).toStringAsFixed(0)}K';
-    }
-    return '$symbol${v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)}';
-  }
-
-
-
-
-
   // ---- build --------------------------------------------------------------
 
   @override
@@ -347,7 +331,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: 'Spending Trend',
               buckets: buckets,
               height: 200,
-              currencySymbol: ref.watch(currencyProvider).symbol,
             ),
             const SizedBox(height: KuberSpacing.lg),
 
@@ -507,7 +490,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 ),
                               ),
                               Text(
-                                '${isExpense ? '-' : '+'}${_formatAmount(t.amount)}',
+                                '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: isExpense
@@ -577,7 +560,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Income',
-                  amount: _formatAmount(income),
+                  amount: ref.watch(formatterProvider).formatCurrency(income),
                   color: cs.tertiary,
                   icon: Icons.arrow_downward,
                 ),
@@ -586,7 +569,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Expense',
-                  amount: _formatAmount(expense),
+                  amount: ref.watch(formatterProvider).formatCurrency(expense),
                   color: cs.error,
                   icon: Icons.arrow_upward,
                 ),
@@ -613,7 +596,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
                 Text(
-                  '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
+                  '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}',
                   style: GoogleFonts.inter(
                     color: net >= 0 ? cs.tertiary : cs.error,
                     fontSize: 16,

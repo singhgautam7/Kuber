@@ -62,7 +62,9 @@ class _AccountFormSheetState extends ConsumerState<AccountFormSheet> {
     final a = widget.account;
     _nameController = TextEditingController(text: a?.name ?? '');
     _balanceController = TextEditingController(
-      text: a != null ? a.initialBalance.toStringAsFixed(2) : '',
+      text: a != null 
+          ? (a.initialBalance % 1 == 0 ? a.initialBalance.toStringAsFixed(0) : a.initialBalance.toStringAsFixed(2))
+          : '',
     );
     _limitController = TextEditingController(
       text: a?.creditLimit?.toStringAsFixed(0) ?? '',

@@ -10,7 +10,7 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/transfer_helpers.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -348,7 +348,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                               ),
                                             ),
                                             Text(
-                                              '${ref.watch(currencyProvider).symbol}${s.amount.toStringAsFixed(0)}',
+                                              ref.watch(formatterProvider).formatCurrency(s.amount),
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .bodySmall
@@ -1030,7 +1030,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (mounted) {
         showKuberSnackBar(
           context,
-          'Insufficient balance: ${ref.read(currencyProvider).symbol}${e.available.toStringAsFixed(2)} available',
+          'Insufficient balance: ${ref.read(formatterProvider).formatCurrency(e.available)} available',
           isError: true,
         );
       }
@@ -1769,7 +1769,7 @@ class _BudgetProgressIndicator extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '₹${p.spent.toStringAsFixed(0)} / ₹${p.limit.toStringAsFixed(0)} (${p.percentage.toStringAsFixed(0)}% used)',
+                    '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)} (${p.percentage.toStringAsFixed(0)}% used)',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,

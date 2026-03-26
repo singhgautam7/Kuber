@@ -5,4 +5,5 @@ class PrefsKeys {
   static const themeMode = 'theme_mode';
   static const swipeMode = 'swipe_mode';
   static const biometricsEnabled = 'biometrics_enabled';
+  static const numberSystem = 'number_system';
 }

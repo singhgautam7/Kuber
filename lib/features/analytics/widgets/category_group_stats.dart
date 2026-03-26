@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../transactions/providers/stats_provider.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../analytics/providers/analytics_provider.dart';
 import 'analytics_toggle.dart';
 
@@ -168,7 +168,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
           return PieChartSectionData(
             color: color,
             value: percentage,
-            title: isTouched ? '$name\n${percentage.toStringAsFixed(1)}%' : '',
+            title: isTouched ? '$name\n${ref.watch(formatterProvider).formatPercentage(percentage)}' : '',
             radius: radius,
             titlePositionPercentageOffset: 0.55,
             titleStyle: TextStyle(
@@ -204,7 +204,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
 
 
 
-class _StatRow extends StatelessWidget {
+class _StatRow extends ConsumerWidget {
   final String label;
   final double amount;
   final double percentage;
@@ -220,7 +220,7 @@ class _StatRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -239,7 +239,7 @@ class _StatRow extends StatelessWidget {
                   children: [
                     Text(label, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                     Text(
-                      CurrencyFormatter.format(amount),
+                      ref.watch(formatterProvider).formatCurrency(amount),
                       style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ],
@@ -260,7 +260,7 @@ class _StatRow extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${percentage.toStringAsFixed(1)}%',
+                      ref.watch(formatterProvider).formatPercentage(percentage),
                       style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant, fontSize: 10),
                     ),
                   ],

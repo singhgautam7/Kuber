@@ -10,6 +10,7 @@ import '../../../shared/widgets/kuber_page_header.dart';
 import '../../categories/providers/category_provider.dart';
 import '../data/budget.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../providers/budget_provider.dart';
 import '../widgets/budget_details_sheet.dart';
 
@@ -176,7 +177,7 @@ class BudgetCard extends ConsumerWidget {
                             : isDisabled
                               ? 'BUDGET IS CURRENTLY PAUSED'
                               : p.percentage >= 100
-                                ? 'EXCEEDED BY ₹${(p.spent - p.limit).toStringAsFixed(0)}'
+                                ? 'EXCEEDED BY ${ref.watch(formatterProvider).formatCurrency(p.spent - p.limit)}'
                                 : 'RESETS IN ${p.daysRemaining} DAYS',
                           style: GoogleFonts.inter(
                             fontSize: 11,
@@ -214,7 +215,7 @@ class BudgetCard extends ConsumerWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '₹${p.spent.toStringAsFixed(0)} ',
+                              text: '${ref.watch(formatterProvider).formatCurrency(p.spent)} ',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -222,7 +223,7 @@ class BudgetCard extends ConsumerWidget {
                               ),
                             ),
                             TextSpan(
-                              text: '/ ₹${p.limit.toStringAsFixed(0)}',
+                              text: '/ ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: cs.onSurfaceVariant,
@@ -309,8 +310,8 @@ class _AlertChips extends ConsumerWidget {
                 : (a.value / budgetAmount) * 100;
             
             final label = a.type == BudgetAlertType.percentage
-                ? '${a.value.toStringAsFixed(0)}%'
-                : '₹${a.value.toStringAsFixed(0)}';
+                ? ref.watch(formatterProvider).formatPercentage(a.value)
+                : ref.watch(formatterProvider).formatCurrency(a.value);
             
             Color badgeColor;
             if (percentage >= 66) {

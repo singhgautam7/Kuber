@@ -6,7 +6,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/utils/currency_data.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
+
+final formatterProvider = Provider((ref) {
+  final settings = ref.watch(settingsProvider).valueOrNull;
+  final system = settings?.numberSystem ?? NumberSystem.indian;
+  return AppFormatter(system: system);
+});
 
 final appVersionProvider = FutureProvider<String>((ref) async {
   final packageInfo = await PackageInfo.fromPlatform();
@@ -29,6 +36,11 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return settings?.themeMode ?? ThemeMode.system;
 });
 
+enum NumberSystem {
+  indian,
+  international,
+}
+
 
 enum SwipeMode {
   changeTabs,
@@ -42,6 +54,7 @@ class SettingsState {
   final String userName;
   final SwipeMode swipeMode;
   final bool biometricsEnabled;
+  final NumberSystem numberSystem;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -50,6 +63,7 @@ class SettingsState {
     this.userName = '',
     this.swipeMode = SwipeMode.changeTabs,
     this.biometricsEnabled = false,
+    this.numberSystem = NumberSystem.indian,
   });
 
   SettingsState copyWith({
@@ -59,6 +73,7 @@ class SettingsState {
     String? userName,
     SwipeMode? swipeMode,
     bool? biometricsEnabled,
+    NumberSystem? numberSystem,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -67,6 +82,7 @@ class SettingsState {
       userName: userName ?? this.userName,
       swipeMode: swipeMode ?? this.swipeMode,
       biometricsEnabled: biometricsEnabled ?? this.biometricsEnabled,
+      numberSystem: numberSystem ?? this.numberSystem,
     );
   }
 }
@@ -81,6 +97,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final userName = prefs.getString(PrefsKeys.userName) ?? '';
     final swipeModeIndex = prefs.getInt(PrefsKeys.swipeMode) ?? 0;
     final biometricsEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
+    final numberSystemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -89,6 +106,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       userName: userName,
       swipeMode: SwipeMode.values[swipeModeIndex],
       biometricsEnabled: biometricsEnabled,
+      numberSystem: NumberSystem.values[numberSystemIndex],
     );
   }
 
@@ -126,6 +144,12 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PrefsKeys.biometricsEnabled, enabled);
     state = AsyncData(state.requireValue.copyWith(biometricsEnabled: enabled));
+  }
+
+  Future<void> setNumberSystem(NumberSystem system) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.numberSystem, system.index);
+    state = AsyncData(state.requireValue.copyWith(numberSystem: system));
   }
 
   Future<void> clearAllData() async {

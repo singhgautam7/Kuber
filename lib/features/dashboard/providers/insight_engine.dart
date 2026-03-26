@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import '../../../core/utils/insight_helpers.dart';
+import '../../../core/utils/formatters.dart';
 import '../../categories/data/category.dart';
 import '../../insights/models/insight.dart';
 import '../../transactions/data/transaction.dart';
@@ -8,11 +9,13 @@ class InsightEngine {
   final List<Transaction> allTransactions;
   final List<Category> categories;
   final String currencySymbol;
+  final AppFormatter formatter;
 
   InsightEngine({
     required this.allTransactions,
     required this.categories,
     required this.currencySymbol,
+    required this.formatter,
   });
 
   List<KuberInsight> generate() {
@@ -282,7 +285,7 @@ class InsightEngine {
       KuberInsight(
         type: InsightType.biggestExpense,
         message:
-            '${biggest.name} ($currencySymbol${biggest.amount.toStringAsFixed(0)}) was ${ratio.toStringAsFixed(1)}× your typical spend',
+            '${biggest.name} (${formatter.formatCurrency(biggest.amount)}) was ${ratio.toStringAsFixed(1)}× your typical spend',
         emoji: '💸',
         confidence: (ratio / 10).clamp(0.4, 0.9),
         isPositive: false,
@@ -373,7 +376,7 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.recurringBurden,
-        message: '${pct.toInt()}% of spending is from recurring transactions',
+        message: '${formatter.formatPercentage(pct)} of spending is from recurring transactions',
         emoji: '🔄',
         confidence: (pct / 100).clamp(0.4, 0.85),
         isPositive: false,
@@ -432,7 +435,7 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.fallbackTotal,
-        message: 'You\'ve spent $currencySymbol${total.toStringAsFixed(0)} in the last 30 days',
+        message: 'You\'ve spent ${formatter.formatCurrency(total)} in the last 30 days',
         emoji: '💰',
         confidence: 0.15,
         isPositive: false,

@@ -17,6 +17,7 @@ final smartInsightsProvider = Provider<List<KuberInsight>>((ref) {
     allTransactions: transactions,
     categories: categories,
     currencySymbol: currency.symbol,
+    formatter: ref.watch(formatterProvider),
   );
 
   return engine.generate();

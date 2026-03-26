@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
-import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../categories/providers/category_provider.dart';
@@ -100,7 +100,7 @@ class TransactionListItem extends ConsumerWidget {
                   ),
                   // Amount
                   Text(
-                    '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+                    ref.watch(formatterProvider).formatCurrency(transaction.amount, symbol: isIncome ? '+' : '-'),
                     style: textTheme.titleMedium?.copyWith(
                       color:
                           isIncome ? cs.tertiary : cs.onSurface,

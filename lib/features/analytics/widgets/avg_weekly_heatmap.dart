@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../transactions/data/transaction.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart';
 
 class AvgWeeklyHeatmap extends ConsumerStatefulWidget {
   final List<Transaction> transactions;
@@ -34,7 +34,6 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
     final dailyAverages = _calculateDailyAverages();
     final maxAvg = dailyAverages.values.fold<double>(0, (max, val) => val > max ? val : max);
     final cs = Theme.of(context).colorScheme;
-    final currency = ref.watch(currencyProvider);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -203,7 +202,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                       ],
                       const Spacer(),
                       Text(
-                        '${currency.symbol}${NumberFormat('#,##0').format(avg)}',
+                        ref.watch(formatterProvider).formatCurrency(avg),
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -236,7 +235,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
     };
 
     for (final tx in expenses) {
-      final day = DateFormat('EEEE').format(tx.createdAt);
+      final day = DateFormat('EEEE').format(tx.createdAt.toLocal());
       dayAmounts[day]?.add(tx.amount);
     }
 

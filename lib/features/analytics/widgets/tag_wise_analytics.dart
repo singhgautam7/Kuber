@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../transactions/data/transaction.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/data/tag.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart';
 
 class TagWiseAnalytics extends ConsumerWidget {
   final List<Transaction> transactions;
@@ -22,7 +21,6 @@ class TagWiseAnalytics extends ConsumerWidget {
     final tagsAsync = ref.watch(tagListProvider);
     final txTagsMapAsync = ref.watch(transactionTagsMapProvider);
     final cs = Theme.of(context).colorScheme;
-    final currency = ref.watch(currencyProvider);
 
     return tagsAsync.when(
       data: (allTags) {
@@ -83,7 +81,6 @@ class TagWiseAnalytics extends ConsumerWidget {
                     ...sortedTags.map((entry) {
                       final tag = allTags.firstWhere((t) => t.id == entry.key);
                       final amount = entry.value;
-                      final percentage = totalExpense > 0 ? (amount / totalExpense * 100).round() : 0;
                       
                       return Padding(
                         padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
@@ -108,7 +105,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: KuberSpacing.sm),
                                 Text(
-                                  '$percentage%',
+                                  ref.watch(formatterProvider).formatPercentage(amount / totalExpense * 100),
                                   style: GoogleFonts.inter(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -117,7 +114,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 ),
                                 const Spacer(),
                                 Text(
-                                  '${currency.symbol}${NumberFormat('#,##0').format(amount)}',
+                                  ref.watch(formatterProvider).formatCurrency(amount),
                                   style: GoogleFonts.inter(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -179,7 +176,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                         
                         final entry = top3[index];
                         final tag = allTags.firstWhere((t) => t.id == entry.key);
-                        final percentage = totalExpense > 0 ? (entry.value / totalExpense * 100).round() : 0;
+                        
 
                         return Expanded(
                           child: Container(
@@ -202,7 +199,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '$percentage%',
+                                  ref.watch(formatterProvider).formatPercentage(entry.value / totalExpense * 100),
                                   style: GoogleFonts.inter(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,

@@ -15,7 +15,7 @@ import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../settings/providers/data_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart';
+import '../../settings/providers/settings_provider.dart' show settingsProvider, formatterProvider, SwipeMode;
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
@@ -486,11 +486,11 @@ class _DateGroupHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final symbol = ref.watch(currencyProvider).symbol;
+    final formatter = ref.watch(formatterProvider);
     final isPositive = dayTotal >= 0;
     final totalText = isPositive
-        ? '+$symbol${dayTotal.toStringAsFixed(2)}'
-        : '-$symbol${dayTotal.abs().toStringAsFixed(2)}';
+        ? '+${formatter.formatCurrency(dayTotal)}'
+        : '−${formatter.formatCurrency(dayTotal.abs())}';
     final totalColor =
         isPositive ? cs.tertiary : cs.onSurfaceVariant;
 
@@ -700,7 +700,7 @@ class _TransactionRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
+                    '$amountPrefix${ref.watch(formatterProvider).formatCurrency(transaction.amount)}',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,

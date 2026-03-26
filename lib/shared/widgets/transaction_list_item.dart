@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/currency_formatter.dart';
+import '../../features/settings/providers/settings_provider.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/icon_mapper.dart';
 import '../../features/categories/data/category.dart';
@@ -10,7 +10,7 @@ import 'category_icon.dart';
 
 /// Simplified transaction list item for dashboard use.
 /// Takes resolved Transaction + Category directly (no Consumer/Dismissible).
-class DashboardTransactionItem extends StatelessWidget {
+class DashboardTransactionItem extends ConsumerWidget {
   final Transaction transaction;
   final Category? category;
   final String? accountName;
@@ -25,7 +25,7 @@ class DashboardTransactionItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isIncome = transaction.type == 'income';
@@ -76,7 +76,7 @@ class DashboardTransactionItem extends StatelessWidget {
             ),
           ),
           Text(
-            '${isIncome ? '+' : '-'}${CurrencyFormatter.format(transaction.amount)}',
+            '${isIncome ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(transaction.amount)}',
             style: textTheme.titleMedium?.copyWith(
               color: isIncome ? colorScheme.tertiary : colorScheme.onSurface,
               fontWeight: FontWeight.w600,

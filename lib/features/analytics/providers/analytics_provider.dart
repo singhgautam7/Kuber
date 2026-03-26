@@ -51,8 +51,9 @@ final analyticsTransactionsProvider =
 
   return all.where((t) {
     if (t.type == 'transfer') return false;
-    final isAfterStart = from == null || !t.createdAt.isBefore(from);
-    final isBeforeEnd = to == null || t.createdAt.isBefore(to);
+    final localCreated = t.createdAt.toLocal();
+    final isAfterStart = from == null || !localCreated.isBefore(from);
+    final isBeforeEnd = to == null || localCreated.isBefore(to);
     return isAfterStart && isBeforeEnd;
   }).toList();
 });

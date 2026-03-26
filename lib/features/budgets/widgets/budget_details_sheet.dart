@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../categories/data/category.dart';
 import '../data/budget.dart';
 import '../providers/budget_provider.dart';
+import '../../settings/providers/settings_provider.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final Budget budget;
@@ -123,7 +124,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: '₹${p.spent.toStringAsFixed(0)}',
+                                text: ref.watch(formatterProvider).formatCurrency(p.spent),
                                 style: GoogleFonts.inter(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w700,
@@ -131,7 +132,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                                 ),
                               ),
                               TextSpan(
-                                text: ' / ₹${p.limit.toStringAsFixed(0)}',
+                                text: ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   color: cs.onSurfaceVariant,
@@ -156,7 +157,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${p.percentage.toStringAsFixed(0)}%',
+                          ref.watch(formatterProvider).formatPercentage(p.percentage),
                           style: GoogleFonts.inter(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
@@ -181,8 +182,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('₹0', style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
-                    Text('₹${(p.limit / 1000).toStringAsFixed(0)}K', style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
+                    Text(ref.watch(formatterProvider).formatCurrency(0), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
+                    Text(ref.watch(formatterProvider).formatCompactCurrency(p.limit), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
                   ],
                 ),
               ],
@@ -316,17 +317,17 @@ class BudgetDetailsSheet extends ConsumerWidget {
   }
 }
 
-class _AlertRow extends StatelessWidget {
+class _AlertRow extends ConsumerWidget {
   final BudgetAlert alert;
   final double currentPercentage;
   const _AlertRow({required this.alert, required this.currentPercentage});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final label = alert.type == BudgetAlertType.percentage 
-        ? 'At ${alert.value.toStringAsFixed(0)}%' 
-        : 'At ₹${alert.value.toStringAsFixed(0)}';
+        ? 'At ${ref.watch(formatterProvider).formatPercentage(alert.value)}' 
+        : 'At ${ref.watch(formatterProvider).formatCurrency(alert.value)}';
     
     String status;
     Color statusColor;
