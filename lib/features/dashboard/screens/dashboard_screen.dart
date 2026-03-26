@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -125,7 +124,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               subtitle: 'Last 7 Days Activity',
               buckets: _buildLast7DaysBuckets(days),
               height: 200,
-              currencySymbol: ref.watch(currencyProvider).symbol,
             ),
           ),
           const SizedBox(height: KuberSpacing.xl),
@@ -193,7 +191,8 @@ class _BalanceHeroCard extends ConsumerWidget {
           const SizedBox(height: KuberSpacing.sm),
           Builder(
             builder: (context) {
-              final formattedRaw = CurrencyFormatter.format(summary.net.abs()).replaceAll(symbol, '');
+              final formatter = ref.watch(formatterProvider);
+              final formattedRaw = formatter.formatCurrency(summary.net.abs(), symbol: '').trim();
               final prefix = summary.net < 0 ? '-' : '';
 
               return RichText(
@@ -244,7 +243,7 @@ class _BalanceHeroCard extends ConsumerWidget {
   }
 }
 
-class _BalanceTile extends StatelessWidget {
+class _BalanceTile extends ConsumerWidget {
   final String label;
   final double amount;
   final IconData icon;
@@ -258,7 +257,7 @@ class _BalanceTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -291,7 +290,7 @@ class _BalanceTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  CurrencyFormatter.format(amount),
+                  ref.watch(formatterProvider).formatCurrency(amount),
                   style: textTheme.bodyMedium?.copyWith(
                     color: cs.onSurface,
                     fontWeight: FontWeight.w600,

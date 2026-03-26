@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
 
-class KuberCalculator extends StatefulWidget {
+class KuberCalculator extends ConsumerStatefulWidget {
   final double initialValue;
   final ValueChanged<double> onConfirm;
 
@@ -15,10 +17,10 @@ class KuberCalculator extends StatefulWidget {
   });
 
   @override
-  State<KuberCalculator> createState() => _KuberCalculatorState();
+  ConsumerState<KuberCalculator> createState() => _KuberCalculatorState();
 }
 
-class _KuberCalculatorState extends State<KuberCalculator> {
+class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   String _expression = '';
   String? _previewResult;
   String _rawExpression = '';
@@ -166,24 +168,9 @@ class _KuberCalculatorState extends State<KuberCalculator> {
 
   String _formatNumber(double val) {
     if (val == val.truncateToDouble()) {
-      return _addIndianCommas(val.toInt().toString());
+      return ref.read(formatterProvider).formatNumber(val, decimalDigits: 0);
     }
-    final parts = val.toStringAsFixed(2).split('.');
-    return '${_addIndianCommas(parts[0])}.${parts[1]}';
-  }
-
-  String _addIndianCommas(String number) {
-    if (number.startsWith('-')) {
-      return '-${_addIndianCommas(number.substring(1))}';
-    }
-    if (number.length <= 3) return number;
-    final last3 = number.substring(number.length - 3);
-    final rest = number.substring(0, number.length - 3);
-    final formatted = rest.replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{2})+$)'),
-      (m) => '${m[1]},',
-    );
-    return '$formatted,$last3';
+    return ref.read(formatterProvider).formatNumber(val, decimalDigits: 2);
   }
 
   @override

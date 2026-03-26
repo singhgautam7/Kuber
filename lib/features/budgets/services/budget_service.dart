@@ -4,6 +4,7 @@ import '../data/budget_repository.dart';
 import '../providers/budget_provider.dart';
 import '../../../core/services/notification_service.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {
   return BudgetService(ref);
@@ -51,7 +52,7 @@ class BudgetService {
           if (alert.type == BudgetAlertType.percentage) {
             body = 'You have used ${alert.value.toInt()}% of your ${cat.name} budget.';
           } else {
-            body = 'You have used ₹${alert.value.toInt()} of your ${cat.name} budget.';
+            body = 'You have used ${ref.read(formatterProvider).formatCurrency(alert.value)} of your ${cat.name} budget.';
           }
 
           await ref.read(notificationServiceProvider).showBudgetAlertNotification(

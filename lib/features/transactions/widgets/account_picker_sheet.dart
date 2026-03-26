@@ -6,7 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../shared/widgets/add_new_button.dart';
 import '../../accounts/providers/account_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 
 class AccountPickerSheet extends ConsumerWidget {
   final int? selectedAccountId;
@@ -155,7 +155,7 @@ class AccountPickerSheet extends ConsumerWidget {
   }
 }
 
-class _AccountTile extends StatelessWidget {
+class _AccountTile extends ConsumerWidget {
   final String name;
   final String type;
   final IconData icon;
@@ -181,7 +181,7 @@ class _AccountTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -244,10 +244,10 @@ class _AccountTile extends StatelessWidget {
               ),
               error: (_, _) => const SizedBox.shrink(),
               data: (bal) {
-                final sym = currencySymbol;
+                final formatter = ref.watch(formatterProvider);
                 final display = isCreditCard && creditLimit != null
-                    ? '$sym${bal.abs().toStringAsFixed(0)} / $sym${creditLimit!.toStringAsFixed(0)}'
-                    : '$sym${bal.abs().toStringAsFixed(0)}';
+                    ? '${formatter.formatCurrency(bal.abs())} / ${formatter.formatCurrency(creditLimit!)}'
+                    : formatter.formatCurrency(bal.abs());
                 return Text(
                   display,
                   style: textTheme.bodyMedium?.copyWith(

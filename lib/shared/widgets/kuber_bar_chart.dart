@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../features/settings/providers/settings_provider.dart';
 
 class KuberBarBucket {
   final String dayLabel;    // e.g. "21"
@@ -21,13 +23,12 @@ class KuberBarBucket {
   });
 }
 
-class KuberBarChart extends StatefulWidget {
+class KuberBarChart extends ConsumerStatefulWidget {
   final List<KuberBarBucket> buckets;
   final String title;
   final String? subtitle;
   final double height;
   final String Function(double)? formatAmount;
-  final String currencySymbol;
 
   const KuberBarChart({
     super.key,
@@ -36,14 +37,13 @@ class KuberBarChart extends StatefulWidget {
     this.subtitle,
     this.height = 200,
     this.formatAmount,
-    this.currencySymbol = '₹',
   });
 
   @override
-  State<KuberBarChart> createState() => _KuberBarChartState();
+  ConsumerState<KuberBarChart> createState() => _KuberBarChartState();
 }
 
-class _KuberBarChartState extends State<KuberBarChart> {
+class _KuberBarChartState extends ConsumerState<KuberBarChart> {
   int _touchedGroupIndex = -1;
 
   // Visual gap in logical pixels
@@ -151,17 +151,14 @@ class _KuberBarChartState extends State<KuberBarChart> {
                             if (value == meta.max && (value % _gridInterval) != 0) {
                               return const SizedBox.shrink();
                             }
-                            final sym = widget.currencySymbol;
+                            final formatter = ref.watch(formatterProvider);
                             if (value == meta.min) {
-                              return Text('${sym}0',
+                              return Text(formatter.formatCurrency(0),
                                 style: GoogleFonts.inter(
                                   fontSize: 10,
                                   color: cs.onSurfaceVariant));
                             }
-                            final label = value >= 1000
-                                ? '$sym${(value / 1000).toStringAsFixed(1)}k'
-                                : '$sym${value.toInt()}';
-                            return Text(label,
+                            return Text(formatter.formatCompactCurrency(value),
                               style: GoogleFonts.inter(
                                 fontSize: 10,
                                 color: cs.onSurfaceVariant));
@@ -238,9 +235,7 @@ class _KuberBarChartState extends State<KuberBarChart> {
 
     String formatAmt(double val) {
       if (widget.formatAmount != null) return widget.formatAmount!(val);
-      final sym = widget.currencySymbol;
-      if (val >= 1000) return '$sym${(val / 1000).toStringAsFixed(1)}k';
-      return '$sym${val.toStringAsFixed(0)}';
+      return ref.watch(formatterProvider).formatCurrency(val);
     }
 
     return Padding(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -8,14 +8,20 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../providers/analytics_provider.dart';
+import '../widgets/category_group_stats.dart';
 import '../widgets/analytics_toggle.dart';
+import '../widgets/avg_weekly_heatmap.dart';
+import '../widgets/transaction_size_distribution.dart';
+import '../widgets/tag_wise_analytics.dart';
+import '../../../shared/widgets/wip_bottom_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -205,22 +211,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     });
   }
 
-
-
-  // ---- format helpers -----------------------------------------------------
-
-  String _formatAmount(double v) {
-    final symbol = ref.read(currencyProvider).symbol;
-    if (v >= 100000) {
-      return '$symbol${(v / 1000).toStringAsFixed(0)}K';
-    }
-    return '$symbol${v.toStringAsFixed(v.truncateToDouble() == v ? 0 : 2)}';
-  }
-
-
-
-
-
   // ---- build --------------------------------------------------------------
 
   @override
@@ -277,7 +267,44 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const KuberAppBar(title: 'Analytics'),
-            const SizedBox(height: KuberSpacing.sm),
+            KuberPageHeader(
+              title: 'Spending\nAnalytics',
+              description: 'Visualize your spending patterns',
+              actionIcon: Icons.file_download_outlined,
+              actionTooltip: 'Export',
+              onAction: () {
+                final cs = Theme.of(context).colorScheme;
+                showWIPBottomSheet(
+                  context: context,
+                  icon: Icons.rocket_launch_rounded,
+                  title: 'Export Report',
+                  content: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      children: [
+                        const TextSpan(text: "We are currently building this feature to help you export your financial reports in "),
+                        TextSpan(
+                          text: "PDF",
+                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: " and "),
+                        TextSpan(
+                          text: "CSV",
+                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: " formats. Stay tuned!"),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
 
             // [A] Period selector
             SingleChildScrollView(
@@ -318,7 +345,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             // If no data for this period, show inline empty state
             if (isEmpty) ...[
               const SizedBox(height: KuberSpacing.xl),
-              const EmptyState(
+              const KuberEmptyState(
                 icon: Icons.bar_chart,
                 title: 'No data',
                 description: 'No transactions found for this period',
@@ -335,12 +362,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               title: 'Spending Trend',
               buckets: buckets,
               height: 200,
-              currencySymbol: ref.watch(currencyProvider).symbol,
             ),
             const SizedBox(height: KuberSpacing.lg),
 
-            // [D] Spending Distribution (Category/Group Toggle)
+            // [D] Avg Weekly Heatmap
+            AvgWeeklyHeatmap(transactions: periodTxns),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [E] Transaction Size Distribution
+            TransactionSizeDistribution(transactions: periodTxns),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [F] Spending Distribution (Category/Group Toggle)
             CategoryGroupStatsWidget(period: _period),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // [G] Tag-wise Analytics
+            TagWiseAnalytics(transactions: periodTxns),
             const SizedBox(height: KuberSpacing.lg),
 
             // // [E] Budget vs Actual
@@ -483,7 +521,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 ),
                               ),
                               Text(
-                                '${isExpense ? '-' : '+'}${_formatAmount(t.amount)}',
+                                '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
                                 style: textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: isExpense
@@ -553,7 +591,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Income',
-                  amount: _formatAmount(income),
+                  amount: ref.watch(formatterProvider).formatCurrency(income),
                   color: cs.tertiary,
                   icon: Icons.arrow_downward,
                 ),
@@ -562,7 +600,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Expense',
-                  amount: _formatAmount(expense),
+                  amount: ref.watch(formatterProvider).formatCurrency(expense),
                   color: cs.error,
                   icon: Icons.arrow_upward,
                 ),
@@ -589,7 +627,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
                 Text(
-                  '${net >= 0 ? '+' : ''}${_formatAmount(net)}',
+                  '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}',
                   style: GoogleFonts.inter(
                     color: net >= 0 ? cs.tertiary : cs.error,
                     fontSize: 16,

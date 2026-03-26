@@ -7,13 +7,13 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
@@ -47,54 +47,11 @@ class RecurringScreen extends ConsumerWidget {
 
               // Page header
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Manage\nAutomations',
-                              style: GoogleFonts.inter(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: cs.onSurface,
-                                height: 1.15,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Automated scheduled transactions',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.push('/recurring/add'),
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            color: cs.onPrimary,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: KuberPageHeader(
+                  title: 'Manage\nAutomations',
+                  description: 'Automated scheduled transactions',
+                  actionTooltip: 'Add Recurring',
+                  onAction: () => context.push('/recurring/add'),
                 ),
               ),
 
@@ -102,7 +59,7 @@ class RecurringScreen extends ConsumerWidget {
               if (rules.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: EmptyState(
+                  child: KuberEmptyState(
                     icon: Icons.repeat_rounded,
                     title: 'No recurring transactions',
                     description: 'Automate subscriptions and repeated payments',
@@ -145,7 +102,7 @@ class RecurringScreen extends ConsumerWidget {
                                 Expanded(
                                   child: _StatTile(
                                     label: 'Monthly Total',
-                                    value: CurrencyFormatter.format(monthlyTotal),
+                                    value: ref.watch(formatterProvider).formatCurrency(monthlyTotal),
                                   ),
                                 ),
                                 Expanded(
@@ -290,7 +247,7 @@ class RecurringScreen extends ConsumerWidget {
                                             ),
                                           ),
                                           Text(
-                                            CurrencyFormatter.format(t.amount),
+                                            ref.watch(formatterProvider).formatCurrency(t.amount),
                                             style: textTheme.bodyMedium?.copyWith(
                                               color: t.type == 'income'
                                                   ? cs.tertiary
@@ -470,15 +427,17 @@ class _RuleCard extends StatelessWidget {
             ),
 
             // Amount
-            Text(
-              CurrencyFormatter.format(rule.amount),
-              style: textTheme.bodyMedium?.copyWith(
-                color: rule.type == 'income'
-                    ? cs.tertiary
-                    : cs.error,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Consumer(builder: (context, ref, _) {
+              return Text(
+                ref.watch(formatterProvider).formatCurrency(rule.amount),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: rule.type == 'income'
+                      ? cs.tertiary
+                      : cs.error,
+                  fontWeight: FontWeight.w600,
+                ),
+              );
+            }),
             const SizedBox(width: KuberSpacing.sm),
 
             // Actions

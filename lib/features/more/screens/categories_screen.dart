@@ -6,12 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../budgets/providers/budget_provider.dart';
 import '../../budgets/widgets/budget_details_sheet.dart';
 import 'add_edit_category_screen.dart';
@@ -42,61 +44,18 @@ class CategoriesScreen extends ConsumerWidget {
 
               // Page header
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Manage\nCategories',
-                              style: GoogleFonts.inter(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: cs.onSurface,
-                                height: 1.15,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Organize your transactions with custom categories and group those categories.',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => _showAddSelectionSheet(context),
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                child: KuberPageHeader(
+                  title: 'Manage\nCategories',
+                  description: 'Organize your transactions with custom categories and group those categories.',
+                  actionTooltip: 'Add Category/Group',
+                  onAction: () => _showAddSelectionSheet(context),
                 ),
               ),
 
               if (categories.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: EmptyState(
+                  child: KuberEmptyState(
                     icon: Icons.category_outlined,
                     title: 'No categories yet',
                     description: 'Create categories to organize your expenses',
@@ -864,11 +823,11 @@ class _BudgetStatusSection extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '₹${p.spent.toStringAsFixed(0)} / ₹${p.limit.toStringAsFixed(0)}',
+                            '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
                             style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                           Text(
-                            '${p.percentage.toStringAsFixed(0)}%',
+                            ref.watch(formatterProvider).formatPercentage(p.percentage),
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,

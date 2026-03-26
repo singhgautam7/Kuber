@@ -10,6 +10,7 @@ import '../../categories/providers/category_provider.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/budget.dart';
 import '../providers/budget_provider.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../widgets/add_alert_bottom_sheet.dart';
 
 class AddEditBudgetScreen extends ConsumerStatefulWidget {
@@ -31,7 +32,9 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
   void initState() {
     super.initState();
     if (widget.existingBudget != null) {
-      _amountController.text = widget.existingBudget!.amount.toStringAsFixed(0);
+      _amountController.text = widget.existingBudget!.amount % 1 == 0
+          ? widget.existingBudget!.amount.toStringAsFixed(0)
+          : widget.existingBudget!.amount.toStringAsFixed(2);
       _isEveryMonth = widget.existingBudget!.isRecurring;
       // Load selected category once categories are available
       WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -123,7 +126,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
               keyboardType: TextInputType.number,
               style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w700),
               decoration: InputDecoration(
-                prefixText: '₹ ',
+                prefixText: '${ref.watch(currencyProvider).symbol} ',
                 hintText: '0',
                 filled: true,
                 fillColor: cs.surfaceContainer,
@@ -398,18 +401,18 @@ class _OptionCard extends StatelessWidget {
   }
 }
 
-class _AlertChip extends StatelessWidget {
+class _AlertChip extends ConsumerWidget {
   final BudgetAlert alert;
   final VoidCallback onDelete;
 
   const _AlertChip({required this.alert, required this.onDelete});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final label = alert.type == BudgetAlertType.percentage 
-        ? '${alert.value.toStringAsFixed(0)}%' 
-        : '₹${alert.value.toStringAsFixed(0)}';
+        ? ref.watch(formatterProvider).formatPercentage(alert.value)
+        : ref.watch(formatterProvider).formatCurrency(alert.value);
     
     return Chip(
       label: Text(label, style: GoogleFonts.inter(fontSize: 12)),

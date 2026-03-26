@@ -10,7 +10,6 @@ class SpendingStatsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionsAsync = ref.watch(transactionListProvider);
-    final currency = ref.watch(currencyProvider);
 
     return transactionsAsync.when(
       loading: () => const SizedBox.shrink(),
@@ -59,7 +58,7 @@ class SpendingStatsCard extends ConsumerWidget {
                     Text('AVG DAILY', style: _captionStyle(context)),
                     const SizedBox(height: 4),
                     Text(
-                      '${currency.symbol}${avgDaily.toStringAsFixed(0)}',
+                      ref.watch(formatterProvider).formatCurrency(avgDaily),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -77,7 +76,7 @@ class SpendingStatsCard extends ConsumerWidget {
                     Text('THIS MONTH', style: _captionStyle(context)),
                     const SizedBox(height: 4),
                     Text(
-                      '${currency.symbol}${monthTotal.toStringAsFixed(0)}',
+                      ref.watch(formatterProvider).formatCurrency(monthTotal),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -95,7 +94,7 @@ class SpendingStatsCard extends ConsumerWidget {
                     Text('PROJECTED', style: _captionStyle(context)),
                     const SizedBox(height: 4),
                     Text(
-                      '${currency.symbol}${projected.toStringAsFixed(0)}',
+                      ref.watch(formatterProvider).formatCurrency(projected),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: projected > monthTotal * 1.2

@@ -68,7 +68,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     final rule = widget.existingRule;
     if (rule != null) {
       _nameController.text = rule.name;
-      _amountController.text = rule.amount.toStringAsFixed(2);
+      _amountController.text = rule.amount % 1 == 0 
+          ? rule.amount.toStringAsFixed(0) 
+          : rule.amount.toStringAsFixed(2);
       _notesController.text = rule.notes ?? '';
       _type = rule.type;
       _selectedCategoryId = int.tryParse(rule.categoryId);

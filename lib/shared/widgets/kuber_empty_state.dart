@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 
-class EmptyState extends StatelessWidget {
+class KuberEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
   final String? actionLabel;
   final VoidCallback? onAction;
 
-  const EmptyState({
+  const KuberEmptyState({
     super.key,
     required this.icon,
     required this.title,

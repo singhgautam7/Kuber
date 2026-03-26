@@ -8,16 +8,18 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart';
+import '../../settings/providers/settings_provider.dart' show settingsProvider, formatterProvider, SwipeMode;
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
+import '../../../shared/widgets/wip_bottom_sheet.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -210,7 +212,49 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         slivers: [
           // App bar
           const SliverToBoxAdapter(
-            child: KuberAppBar(title: 'Transactions'),
+            child: KuberAppBar(title: 'History'),
+          ),
+
+          // Page header
+          SliverToBoxAdapter(
+            child: KuberPageHeader(
+              title: 'Transaction\nHistory',
+              description: 'Your past expenses, incomes and transfers',
+              actionIcon: Icons.file_download_outlined,
+              actionTooltip: 'Export',
+              onAction: () {
+                final cs = Theme.of(context).colorScheme;
+                showWIPBottomSheet(
+                  context: context,
+                  icon: Icons.rocket_launch_rounded,
+                  title: 'Export Report',
+                  content: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      children: [
+                        const TextSpan(text: "We are currently building this feature to help you export your financial reports in "),
+                        TextSpan(
+                          text: "PDF",
+                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: " and "),
+                        TextSpan(
+                          text: "CSV",
+                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
+                        ),
+                        const TextSpan(text: " formats. Stay tuned!"),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
 
           // Search bar
@@ -357,7 +401,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               if (filtered.isEmpty) {
                 return SliverFillRemaining(
                   hasScrollBody: false,
-                  child: EmptyState(
+                  child: KuberEmptyState(
                     icon: Icons.receipt_long_outlined,
                     title: transactions.isEmpty
                         ? 'No transactions yet'
@@ -473,11 +517,11 @@ class _DateGroupHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final symbol = ref.watch(currencyProvider).symbol;
+    final formatter = ref.watch(formatterProvider);
     final isPositive = dayTotal >= 0;
     final totalText = isPositive
-        ? '+$symbol${dayTotal.toStringAsFixed(2)}'
-        : '-$symbol${dayTotal.abs().toStringAsFixed(2)}';
+        ? '+${formatter.formatCurrency(dayTotal)}'
+        : '−${formatter.formatCurrency(dayTotal.abs())}';
     final totalColor =
         isPositive ? cs.tertiary : cs.onSurfaceVariant;
 
@@ -687,7 +731,7 @@ class _TransactionRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$amountPrefix${ref.watch(currencyProvider).symbol}${transaction.amount.toStringAsFixed(2)}',
+                    '$amountPrefix${ref.watch(formatterProvider).formatCurrency(transaction.amount)}',
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,

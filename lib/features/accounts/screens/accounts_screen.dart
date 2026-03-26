@@ -6,9 +6,10 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../../shared/widgets/kuber_page_header.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../widgets/account_form_sheet.dart';
@@ -96,7 +97,6 @@ class _AccountsBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     // Compute net worth from all account balances
     double totalAssets = 0;
     double totalDebt = 0;
@@ -124,54 +124,11 @@ class _AccountsBody extends ConsumerWidget {
 
         // Page header
         SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Manage\nAccounts',
-                        style: GoogleFonts.inter(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          height: 1.15,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Overview of your linked financial institutions.',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _openAccountSheet(context),
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add_rounded,
-                      color: cs.onPrimary,
-                      size: 24,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          child: KuberPageHeader(
+            title: 'Manage\nAccounts',
+            description: 'Overview of your linked financial institutions.',
+            actionTooltip: 'Add Account',
+            onAction: () => _openAccountSheet(context),
           ),
         ),
 
@@ -189,7 +146,7 @@ class _AccountsBody extends ConsumerWidget {
         if (accounts.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
-            child: EmptyState(
+            child: KuberEmptyState(
               icon: Icons.account_balance_wallet_outlined,
               title: 'No accounts yet',
               description: 'Add your first account to start tracking',
@@ -229,11 +186,9 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final symbol = ref.watch(currencyProvider).symbol;
-    final isCreditCard = account.isCreditCard;
-    final balanceLabel = isCreditCard ? 'Credit Utilized' : 'Available Balance';
+    final balanceLabel = account.isCreditCard ? 'Credit Utilized' : 'Available Balance';
     final Color balanceColor;
-    if (isCreditCard) {
+    if (account.isCreditCard) {
       balanceColor = balance > 0
           ? cs.error
           : balance < 0
@@ -308,7 +263,7 @@ class _AccountCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${balance < 0 ? '-' : ''}$symbol${balance.abs().toStringAsFixed(2)}',
+                '${balance < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(balance.abs())}',
                 style: GoogleFonts.inter(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
@@ -316,9 +271,9 @@ class _AccountCard extends ConsumerWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              if (isCreditCard && account.creditLimit != null)
+              if (account.isCreditCard && account.creditLimit != null)
                 Text(
-                  'Limit  $symbol${account.creditLimit!.toStringAsFixed(0)}',
+                  'Limit  ${ref.watch(formatterProvider).formatCurrency(account.creditLimit!)}',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: cs.onSurfaceVariant,
@@ -456,7 +411,7 @@ class _NetWorthCard extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${netWorth < 0 ? '-' : ''}$symbol${netWorth.abs().toStringAsFixed(2)}',
+            '${netWorth < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(netWorth.abs())}',
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -513,14 +468,16 @@ class _NetWorthLegend extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
-        Text(
-          '$label: $symbol${amount.toStringAsFixed(2)}',
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: cs.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        Consumer(builder: (context, ref, _) {
+          return Text(
+            '$label: ${ref.watch(formatterProvider).formatCurrency(amount)}',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          );
+        }),
       ],
     );
   }

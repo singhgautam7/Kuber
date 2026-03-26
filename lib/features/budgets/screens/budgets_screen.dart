@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../categories/providers/category_provider.dart';
 import '../data/budget.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../providers/budget_provider.dart';
 import '../widgets/budget_details_sheet.dart';
 
@@ -21,100 +24,62 @@ class BudgetsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: budgetsAsync.when(
-        data: (budgets) {
-          return CustomScrollView(
-            slivers: [
-              // App bar
-              const SliverToBoxAdapter(
-                child: KuberAppBar(showBack: true, title: 'Budgets'),
-              ),
+      body: CustomScrollView(
+        slivers: [
+          // App bar
+          const SliverToBoxAdapter(
+            child: KuberAppBar(showBack: true, title: 'Budgets'),
+          ),
 
-              // Page header
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Track\nBudgets',
-                              style: GoogleFonts.inter(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: cs.onSurface,
-                                height: 1.15,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Monitor and control your monthly spending limits per category.',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.push('/budgets/add'),
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+          // Page header
+          SliverToBoxAdapter(
+            child: KuberPageHeader(
+              title: 'Track\nBudgets',
+              description: 'Monitor and control your monthly spending limits per category.',
+              actionTooltip: 'Create Budget',
+              onAction: () => context.push('/budgets/add'),
+            ),
+          ),
 
-              if (budgets.isEmpty)
-                SliverFillRemaining(
+          budgetsAsync.when(
+            data: (budgets) {
+              if (budgets.isEmpty) {
+                return SliverFillRemaining(
                   hasScrollBody: false,
-                  child: EmptyState(
+                  child: KuberEmptyState(
                     icon: Icons.account_balance_rounded,
                     title: 'No budgets yet',
                     description: 'Create budgets to control your spending per category',
                     actionLabel: 'Create Budget',
                     onAction: () => context.push('/budgets/add'),
                   ),
-                )
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  sliver: SliverList.separated(
-                    itemCount: budgets.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      return BudgetCard(budget: budgets[index]);
-                    },
-                  ),
-                ),
+                );
+              }
 
-              // Bottom padding
-              SliverToBoxAdapter(
-                child: SizedBox(height: MediaQuery.of(context).padding.bottom + 40),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+              return SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList.separated(
+                  itemCount: budgets.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    return BudgetCard(budget: budgets[index]);
+                  },
+                ),
+              );
+            },
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (err, stack) => SliverFillRemaining(
+              child: Center(child: Text('Error: $err')),
+            ),
+          ),
+
+          // Bottom padding
+          SliverToBoxAdapter(
+            child: SizedBox(height: MediaQuery.of(context).padding.bottom + 40),
+          ),
+        ],
       ),
     );
   }
@@ -128,19 +93,23 @@ class BudgetCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsync = ref.watch(budgetProgressProvider(budget));
-    final categories = ref.watch(categoryListProvider).valueOrNull ?? [];
-    final category = categories.firstWhere(
-      (c) => c.id.toString() == budget.categoryId,
-      orElse: () => categories.first,
-    );
+    final categoriesAsync = ref.watch(categoryListProvider);
+    final categories = categoriesAsync.valueOrNull ?? [];
     final cs = Theme.of(context).colorScheme;
+
+    final category = categories.isEmpty 
+        ? null 
+        : categories.firstWhere(
+            (c) => c.id.toString() == budget.categoryId,
+            orElse: () => categories.first,
+          );
 
     final isExpired = !budget.isRecurring && budget.endDate != null && budget.endDate!.isBefore(DateTime.now());
     final isDisabled = !budget.isActive;
     final isInactive = isExpired || isDisabled;
 
     return GestureDetector(
-      onTap: isExpired ? null : () {
+      onTap: (isExpired || category == null) ? null : () {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
@@ -168,12 +137,12 @@ class BudgetCard extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: isInactive 
                         ? cs.onSurfaceVariant.withValues(alpha: 0.1)
-                        : Color(category.colorValue).withValues(alpha: 0.1),
+                        : Color(category?.colorValue ?? 0).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(KuberRadius.sm),
                   ),
                   child: Icon(
-                    Icons.shopping_bag_outlined,
-                    color: isInactive ? cs.onSurfaceVariant : Color(category.colorValue),
+                    category != null ? IconMapper.fromString(category.icon) : Icons.shopping_bag_outlined,
+                    color: isInactive ? cs.onSurfaceVariant : Color(category?.colorValue ?? 0xFF000000),
                     size: 20,
                   ),
                 ),
@@ -185,7 +154,7 @@ class BudgetCard extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            category.name,
+                            category?.name ?? 'Budget',
                             style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -208,7 +177,7 @@ class BudgetCard extends ConsumerWidget {
                             : isDisabled
                               ? 'BUDGET IS CURRENTLY PAUSED'
                               : p.percentage >= 100
-                                ? 'EXCEEDED BY ₹${(p.spent - p.limit).toStringAsFixed(0)}'
+                                ? 'EXCEEDED BY ${ref.watch(formatterProvider).formatCurrency(p.spent - p.limit)}'
                                 : 'RESETS IN ${p.daysRemaining} DAYS',
                           style: GoogleFonts.inter(
                             fontSize: 11,
@@ -246,7 +215,7 @@ class BudgetCard extends ConsumerWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '₹${p.spent.toStringAsFixed(0)} ',
+                              text: '${ref.watch(formatterProvider).formatCurrency(p.spent)} ',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -254,7 +223,7 @@ class BudgetCard extends ConsumerWidget {
                               ),
                             ),
                             TextSpan(
-                              text: '/ ₹${p.limit.toStringAsFixed(0)}',
+                              text: '/ ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: cs.onSurfaceVariant,
@@ -341,8 +310,8 @@ class _AlertChips extends ConsumerWidget {
                 : (a.value / budgetAmount) * 100;
             
             final label = a.type == BudgetAlertType.percentage
-                ? '${a.value.toStringAsFixed(0)}%'
-                : '₹${a.value.toStringAsFixed(0)}';
+                ? ref.watch(formatterProvider).formatPercentage(a.value)
+                : ref.watch(formatterProvider).formatCurrency(a.value);
             
             Color badgeColor;
             if (percentage >= 66) {

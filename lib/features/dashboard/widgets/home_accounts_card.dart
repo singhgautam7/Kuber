@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
-import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 
 class HomeAccountsCard extends ConsumerWidget {
@@ -120,9 +120,8 @@ class HomeAccountsCard extends ConsumerWidget {
                               } else {
                                 balanceColor = balance < 0 ? cs.error : null;
                               }
-                              final prefix = balance < 0 ? '-' : '';
                               return Text(
-                                '$prefix${CurrencyFormatter.format(balance)}',
+                                ref.watch(formatterProvider).formatCurrency(balance),
                                 style: textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color: balanceColor,

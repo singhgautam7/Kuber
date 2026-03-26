@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -20,9 +19,11 @@ class AboutScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'About'),
       body: CustomScrollView(
         slivers: [
+          const SliverToBoxAdapter(
+            child: KuberAppBar(showBack: true, title: 'About'),
+          ),
           // Header section
           SliverToBoxAdapter(
             child: Padding(
@@ -124,73 +125,6 @@ class AboutScreen extends ConsumerWidget {
                 _DeveloperLetter(userName: userName),
                 const SizedBox(height: KuberSpacing.xxl),
 
-                // Developer Section
-                // _AboutCard(
-                //   child: Column(
-                //     children: [
-                //       Row(
-                //         children: [
-                //           Container(
-                //             width: 48,
-                //             height: 48,
-                //             decoration: BoxDecoration(
-                //               color: cs.primaryContainer,
-                //               borderRadius: BorderRadius.circular(KuberRadius.sm),
-                //             ),
-                //             child: Center(
-                //               child: Text(
-                //                 "GS",
-                //                 style: GoogleFonts.inter(
-                //                   fontWeight: FontWeight.w700,
-                //                   color: cs.primary,
-                //                 ),
-                //               ),
-                //             ),
-                //           ),
-                //           const SizedBox(width: KuberSpacing.md),
-                //           Expanded(
-                //             child: Column(
-                //               crossAxisAlignment: CrossAxisAlignment.start,
-                //               children: [
-                //                 Text(
-                //                   "Gautam Rajeev Singh",
-                //                   style: GoogleFonts.inter(
-                //                     fontSize: 16,
-                //                     fontWeight: FontWeight.w700,
-                //                     color: cs.onSurface,
-                //                   ),
-                //                 ),
-                //                 Text(
-                //                   "SOFTWARE ENGINEER",
-                //                   style: GoogleFonts.inter(
-                //                     fontSize: 11,
-                //                     fontWeight: FontWeight.w600,
-                //                     letterSpacing: 0.5,
-                //                     color: cs.onSurfaceVariant,
-                //                   ),
-                //                 ),
-                //               ],
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //       const SizedBox(height: KuberSpacing.lg),
-                //       SingleChildScrollView(
-                //         scrollDirection: Axis.horizontal,
-                //         child: Row(
-                //           children: [
-                //             _SocialButton(
-                //               label: "Website",
-                //               onPressed: () => _launchURL("https://singhgautam.com"),
-                //             ),
-                //           ],
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // const SizedBox(height: KuberSpacing.xl),
-
                 // App Info Section
                 _AboutCard(
                   child: Column(
@@ -207,10 +141,9 @@ class AboutScreen extends ConsumerWidget {
                               color: cs.onSurface,
                             ),
                           ),
-                          FutureBuilder<PackageInfo>(
-                            future: PackageInfo.fromPlatform(),
-                            builder: (context, snapshot) {
-                              final version = snapshot.data?.version ?? "1.0.0";
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final version = ref.watch(appVersionProvider).valueOrNull ?? '1.0.0';
                               return Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -456,14 +389,7 @@ class _DeveloperLetter extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  "Hey $name,",
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
+                  "Hey $name,\n\n"
                   "First of all, thank you for installing Kuber.\n\n"
                   "Finance is one of the hardest things to stay consistent with.\n"
                   "I realized this quite late myself how important it is to simply track where your money goes.\n"
