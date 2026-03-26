@@ -22,10 +22,10 @@ class DataManagementScreen extends ConsumerWidget {
     ref.listen(dataControllerProvider, (previous, next) {
       if (next.status == DataOpStatus.success && next.message != null) {
         String msg = next.message!;
-        
+
         final filePath = next.filePath;
         showKuberSnackBar(
-          context, 
+          context,
           msg,
           actionLabel: filePath != null ? 'OPEN' : null,
           onAction: filePath != null ? () => OpenFilex.open(filePath) : null,

@@ -330,41 +330,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       trailing: Switch(
                         value: currentBiometricsEnabled,
                         onChanged: (val) async {
-                          final messenger = ScaffoldMessenger.of(context);
                           if (val) {
                             // Only authenticate if turning ON
-                            if (!await _biometricService.canAuthenticate()) {
-                              messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Device authentication is not available or set up'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
+                            final canAuth = await _biometricService.canAuthenticate();
+                            if (!context.mounted) return;
+                            
+                            if (!canAuth) {
+                              showKuberSnackBar(
+                                context,
+                                'Device authentication is not available or set up',
+                                isError: true,
                               );
                               return;
                             }
                             
                             final success = await _biometricService.authenticate();
-                            if (success && mounted) {
+                            if (!context.mounted) return;
+                            
+                            if (success) {
                               setState(() => _tempBiometricsEnabled = true);
                               await ref.read(settingsProvider.notifier).setBiometricsEnabled(true);
-                              messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Biometric lock enabled'),
-                                  behavior: SnackBarBehavior.floating,
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
+                              if (!context.mounted) return;
+                              showKuberSnackBar(context, 'Biometric lock enabled');
                             }
                           } else {
                             setState(() => _tempBiometricsEnabled = false);
                             await ref.read(settingsProvider.notifier).setBiometricsEnabled(false);
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('Biometric lock disabled'),
-                                behavior: SnackBarBehavior.floating,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
+                            if (!context.mounted) return;
+                            showKuberSnackBar(context, 'Biometric lock disabled');
                           }
                         },
                         activeTrackColor: cs.primary,

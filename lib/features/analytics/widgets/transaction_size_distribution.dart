@@ -55,22 +55,22 @@ class TransactionSizeDistribution extends ConsumerWidget {
             // Segmented Bar
             Row(
               children: [
-                _buildBarSegment(cs.primary, distribution['small'] ?? 0, total),
+                _buildBarSegment(cs.primary.withValues(alpha: 0.9), distribution['small'] ?? 0, total),
                 const SizedBox(width: 4),
-                _buildBarSegment(cs.primary.withValues(alpha: 0.6), distribution['medium'] ?? 0, total),
+                _buildBarSegment(cs.primary.withValues(alpha: 0.5), distribution['medium'] ?? 0, total),
                 const SizedBox(width: 4),
-                _buildBarSegment(cs.primary.withValues(alpha: 0.3), distribution['large'] ?? 0, total),
+                _buildBarSegment(cs.primary.withValues(alpha: 0.1), distribution['large'] ?? 0, total),
               ],
             ),
             
             const SizedBox(height: KuberSpacing.xl),
             
             // Legend
-            _buildLegendItem(cs.primary, 'Small (<${formatter.formatCurrency(500)})', distribution['small'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.9), 'Small (<${formatter.formatCurrency(500)})', distribution['small'] ?? 0, total, cs),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.6), 'Medium (${formatter.formatCurrency(500)} - ${formatter.formatCurrency(2000)})', distribution['medium'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.5), 'Medium (${formatter.formatCurrency(500)} - ${formatter.formatCurrency(2000)})', distribution['medium'] ?? 0, total, cs),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.3), 'Large (>${formatter.formatCurrency(2000)})', distribution['large'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.1), 'Large (>${formatter.formatCurrency(2000)})', distribution['large'] ?? 0, total, cs),
           ],
         ),
       ),
