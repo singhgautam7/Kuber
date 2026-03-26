@@ -16,128 +16,104 @@ class MoreScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(title: 'More'),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: KuberSpacing.lg,
-          right: KuberSpacing.lg,
-          top: KuberSpacing.sm,
-          bottom: navBarBottomPadding(context),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Text(
-            //   'More',
-            //   style: GoogleFonts.inter(
-            //     fontSize: 22,
-            //     fontWeight: FontWeight.w700,
-            //     color: cs.onSurface,
-            //     letterSpacing: -0.3,
-            //   ),
-            // ),
-            // const SizedBox(height: KuberSpacing.xs),
-            // Text(
-            //   'Manage your data and app preferences',
-            //   style: GoogleFonts.inter(
-            //     fontSize: 13,
-            //     color: cs.onSurfaceVariant,
-            //   ),
-            // ),
-            const SizedBox(height: KuberSpacing.xl),
-
-            // Manage section
-            _MenuSection(
-              title: 'Manage',
-              items: [
-                _MenuItem(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'Accounts',
-                  subtitle: 'Your wallets and bank accounts',
-                  onTap: () => context.push('/more/accounts'),
-                ),
-                _MenuItem(
-                  icon: Icons.category_outlined,
-                  label: 'Categories',
-                  subtitle: 'Organize your transactions',
-                  onTap: () => context.push('/more/categories'),
-                ),
-                _MenuItem(
-                  icon: Icons.label_outlined,
-                  label: 'Tags',
-                  subtitle: 'Organize the labels for your transactions',
-                  onTap: () => context.push('/more/tags'),
-                ),
-                _MenuItem(
-                  icon: Icons.account_balance_rounded,
-                  label: 'Budgets',
-                  subtitle: 'Track and control your monthly spending',
-                  onTap: () => context.push('/more/budgets'),
-                ),
-                _MenuItem(
-                  icon: Icons.sync_rounded,
-                  label: 'Recurring Transactions',
-                  subtitle: 'Automated scheduled transactions',
-                  onTap: () => context.push('/more/recurring'),
-                ),
-              ],
+      body: CustomScrollView(
+        slivers: [
+          const SliverToBoxAdapter(
+            child: KuberAppBar(title: 'More'),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.only(
+              left: KuberSpacing.lg,
+              right: KuberSpacing.lg,
+              top: KuberSpacing.sm,
+              bottom: navBarBottomPadding(context),
             ),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const SizedBox(height: KuberSpacing.xl),
 
-            const SizedBox(height: KuberSpacing.xl),
+                // Manage section
+                _MenuSection(
+                  title: 'Manage',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.account_balance_wallet_outlined,
+                      label: 'Accounts',
+                      subtitle: 'Your wallets and bank accounts',
+                      onTap: () => context.push('/more/accounts'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.category_outlined,
+                      label: 'Categories',
+                      subtitle: 'Organize your transactions',
+                      onTap: () => context.push('/more/categories'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.label_outlined,
+                      label: 'Tags',
+                      subtitle: 'Organize the labels for your transactions',
+                      onTap: () => context.push('/more/tags'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.account_balance_rounded,
+                      label: 'Budgets',
+                      subtitle: 'Track and control your monthly spending',
+                      onTap: () => context.push('/more/budgets'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.sync_rounded,
+                      label: 'Recurring Transactions',
+                      subtitle: 'Automated scheduled transactions',
+                      onTap: () => context.push('/more/recurring'),
+                    ),
+                  ],
+                ),
 
-            // App section
-            _MenuSection(
-              title: 'App',
-              items: [
-                _MenuItem(
-                  icon: Icons.settings_outlined,
-                  label: 'Settings',
-                  subtitle: 'Theme, currency, and profile',
-                  onTap: () => context.push('/more/settings'),
+                const SizedBox(height: KuberSpacing.xl),
+
+                // App section
+                _MenuSection(
+                  title: 'App',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.settings_outlined,
+                      label: 'Settings',
+                      subtitle: 'Theme, currency, and profile',
+                      onTap: () => context.push('/more/settings'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.storage_rounded,
+                      label: 'Data',
+                      subtitle: 'Export and clear your data',
+                      onTap: () => context.push('/more/data'),
+                    ),
+                  ],
                 ),
-                _MenuItem(
-                  icon: Icons.storage_rounded,
-                  label: 'Data',
-                  subtitle: 'Export and clear your data',
-                  onTap: () => context.push('/more/data'),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // About section
+                _MenuSection(
+                  title: 'About',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.info_outline_rounded,
+                      label: 'About Kuber',
+                      subtitle: 'Vision, origin, and developer',
+                      onTap: () => context.pushNamed('about'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.security_outlined,
+                      label: 'Permissions',
+                      subtitle: 'App limits and security',
+                      onTap: () => context.pushNamed('permissions'),
+                    ),
+                  ],
                 ),
-                // _MenuItem(
-                //   icon: Icons.help_outline_rounded,
-                //   label: 'How to Use',
-                //   subtitle: 'Tips and FAQs',
-                //   onTap: () => context.push('/more/how-to-use'),
-                // ),
-              ],
+              ]),
             ),
-
-            const SizedBox(height: KuberSpacing.xl),
-
-            // About section
-            _MenuSection(
-              title: 'About',
-              items: [
-                // _MenuItem(
-                //   icon: Icons.waving_hand_outlined,
-                //   label: 'Show Welcome Screen',
-                //   subtitle: 'View the onboarding experience again',
-                //   onTap: () => context.push('/onboarding'),
-                // ),
-                _MenuItem(
-                  icon: Icons.info_outline_rounded,
-                  label: 'About Kuber',
-                  subtitle: 'Vision, origin, and developer',
-                  onTap: () => context.pushNamed('about'),
-                ),
-                _MenuItem(
-                  icon: Icons.security_outlined,
-                  label: 'Permissions',
-                  subtitle: 'App limits and security',
-                  onTap: () => context.pushNamed('permissions'),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -50,11 +50,13 @@ class DataManagementScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'Data'),
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
+              const SliverToBoxAdapter(
+                child: KuberAppBar(showBack: true, title: 'Data'),
+              ),
               // Page header
               SliverToBoxAdapter(
                 child: Padding(

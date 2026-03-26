@@ -101,9 +101,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       },
       child: Scaffold(
         backgroundColor: cs.surface,
-        appBar: const KuberAppBar(showBack: true, title: 'Settings'),
         body: CustomScrollView(
           slivers: [
+            const SliverToBoxAdapter(
+              child: KuberAppBar(showBack: true, title: 'Settings'),
+            ),
             // Page header
             SliverToBoxAdapter(
               child: Padding(

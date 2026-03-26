@@ -19,9 +19,11 @@ class AboutScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'About'),
       body: CustomScrollView(
         slivers: [
+          const SliverToBoxAdapter(
+            child: KuberAppBar(showBack: true, title: 'About'),
+          ),
           // Header section
           SliverToBoxAdapter(
             child: Padding(
