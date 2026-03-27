@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../data/budget.dart';
 
@@ -179,49 +180,54 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
 
           // Input Box
           Container(
-            height: 160,
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(vertical: 28),
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
+              color: cs.surfaceContainerHigh.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Stack(
-              alignment: Alignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Icon (Right aligned)
-                Positioned(
-                  right: 20,
-                  child: Text(
-                    _type == BudgetAlertType.percentage ? '%' : ref.watch(currencyProvider).symbol,
-                    style: GoogleFonts.inter(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                Flexible(
+                  child: IntrinsicWidth(
+                    child: TextField(
+                      controller: _controller,
+                      autofocus: true,
+                      textAlign: TextAlign.center,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        if (_type == BudgetAlertType.amount)
+                          CurrencyInputFormatter(
+                            isIndian: ref.watch(settingsProvider).valueOrNull?.numberSystem == NumberSystem.indian,
+                          )
+                        else
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        hintText: "0",
+                        hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.2)),
+                      ),
+                      style: GoogleFonts.inter(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
                     ),
                   ),
                 ),
-                
-                // Centered Numeric Input
-                TextField(
-                  controller: _controller,
-                  autofocus: true,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  textAlign: TextAlign.center,
+                const SizedBox(width: 8),
+                Text(
+                  _type == BudgetAlertType.percentage ? '%' : ref.watch(currencyProvider).symbol,
                   style: GoogleFonts.inter(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                  ],
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    hintText: 'Enter value',
-                    hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.2), fontSize: 32),
+                    fontSize: 28,
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
               ],
