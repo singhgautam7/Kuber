@@ -162,7 +162,7 @@ class _AnalyticsFilterScreenState extends ConsumerState<AnalyticsFilterScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_rounded),
+                    icon: const Icon(Icons.close_rounded),
                   ),
                   const SizedBox(width: 8),
                   Text(
