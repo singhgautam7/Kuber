@@ -63,12 +63,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 height: 64,
                 decoration: BoxDecoration(
                   color: cs.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: cs.primary,
-                  size: 32,
+                child: Center(
+                  child: Image.asset(
+                    'assets/icon/app_icon_transparent.png',
+                    width: 64,
+                    height: 64,
+                  ),
                 ),
               ),
               const SizedBox(height: KuberSpacing.xl),

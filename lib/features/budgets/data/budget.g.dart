@@ -1583,19 +1583,24 @@ const BudgetAlertSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'isTriggered': PropertySchema(
+    r'isNotificationEnabled': PropertySchema(
       id: 2,
+      name: r'isNotificationEnabled',
+      type: IsarType.bool,
+    ),
+    r'isTriggered': PropertySchema(
+      id: 3,
       name: r'isTriggered',
       type: IsarType.bool,
     ),
     r'type': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'type',
       type: IsarType.byte,
       enumMap: _BudgetAlerttypeEnumValueMap,
     ),
     r'value': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'value',
       type: IsarType.double,
     )
@@ -1645,9 +1650,10 @@ void _budgetAlertSerialize(
 ) {
   writer.writeLong(offsets[0], object.budgetId);
   writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeBool(offsets[2], object.isTriggered);
-  writer.writeByte(offsets[3], object.type.index);
-  writer.writeDouble(offsets[4], object.value);
+  writer.writeBool(offsets[2], object.isNotificationEnabled);
+  writer.writeBool(offsets[3], object.isTriggered);
+  writer.writeByte(offsets[4], object.type.index);
+  writer.writeDouble(offsets[5], object.value);
 }
 
 BudgetAlert _budgetAlertDeserialize(
@@ -1660,11 +1666,12 @@ BudgetAlert _budgetAlertDeserialize(
   object.budgetId = reader.readLong(offsets[0]);
   object.createdAt = reader.readDateTime(offsets[1]);
   object.id = id;
-  object.isTriggered = reader.readBool(offsets[2]);
+  object.isNotificationEnabled = reader.readBool(offsets[2]);
+  object.isTriggered = reader.readBool(offsets[3]);
   object.type =
-      _BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offsets[3])] ??
+      _BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
           BudgetAlertType.percentage;
-  object.value = reader.readDouble(offsets[4]);
+  object.value = reader.readDouble(offsets[5]);
   return object;
 }
 
@@ -1682,9 +1689,11 @@ P _budgetAlertDeserializeProp<P>(
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
       return (_BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offset)] ??
           BudgetAlertType.percentage) as P;
-    case 4:
+    case 5:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2056,6 +2065,16 @@ extension BudgetAlertQueryFilter
   }
 
   QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition>
+      isNotificationEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isNotificationEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition>
       isTriggeredEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -2214,6 +2233,20 @@ extension BudgetAlertQuerySortBy
     });
   }
 
+  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
+      sortByIsNotificationEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
+      sortByIsNotificationEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByIsTriggered() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isTriggered', Sort.asc);
@@ -2289,6 +2322,20 @@ extension BudgetAlertQuerySortThenBy
     });
   }
 
+  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
+      thenByIsNotificationEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
+      thenByIsNotificationEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isNotificationEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByIsTriggered() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isTriggered', Sort.asc);
@@ -2340,6 +2387,13 @@ extension BudgetAlertQueryWhereDistinct
     });
   }
 
+  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct>
+      distinctByIsNotificationEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isNotificationEnabled');
+    });
+  }
+
   QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> distinctByIsTriggered() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isTriggered');
@@ -2376,6 +2430,13 @@ extension BudgetAlertQueryProperty
   QueryBuilder<BudgetAlert, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<BudgetAlert, bool, QQueryOperations>
+      isNotificationEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isNotificationEnabled');
     });
   }
 

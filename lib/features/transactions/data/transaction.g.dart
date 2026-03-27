@@ -42,38 +42,43 @@ const TransactionSchema = CollectionSchema(
       name: r'fromAccountId',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(
+    r'isRecurring': PropertySchema(
       id: 5,
+      name: r'isRecurring',
+      type: IsarType.bool,
+    ),
+    r'name': PropertySchema(
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
     r'nameLower': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'nameLower',
       type: IsarType.string,
     ),
     r'notes': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'notes',
       type: IsarType.string,
     ),
     r'recurringRuleId': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'recurringRuleId',
       type: IsarType.long,
     ),
     r'toAccountId': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'toAccountId',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'type',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -112,6 +117,19 @@ const TransactionSchema = CollectionSchema(
           name: r'accountId',
           type: IndexType.hash,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'isRecurring': IndexSchema(
+      id: 1211429805563284888,
+      name: r'isRecurring',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'isRecurring',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     ),
@@ -198,13 +216,14 @@ void _transactionSerialize(
   writer.writeString(offsets[2], object.categoryId);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeString(offsets[4], object.fromAccountId);
-  writer.writeString(offsets[5], object.name);
-  writer.writeString(offsets[6], object.nameLower);
-  writer.writeString(offsets[7], object.notes);
-  writer.writeLong(offsets[8], object.recurringRuleId);
-  writer.writeString(offsets[9], object.toAccountId);
-  writer.writeString(offsets[10], object.type);
-  writer.writeDateTime(offsets[11], object.updatedAt);
+  writer.writeBool(offsets[5], object.isRecurring);
+  writer.writeString(offsets[6], object.name);
+  writer.writeString(offsets[7], object.nameLower);
+  writer.writeString(offsets[8], object.notes);
+  writer.writeLong(offsets[9], object.recurringRuleId);
+  writer.writeString(offsets[10], object.toAccountId);
+  writer.writeString(offsets[11], object.type);
+  writer.writeDateTime(offsets[12], object.updatedAt);
 }
 
 Transaction _transactionDeserialize(
@@ -220,13 +239,14 @@ Transaction _transactionDeserialize(
   object.createdAt = reader.readDateTime(offsets[3]);
   object.fromAccountId = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.name = reader.readString(offsets[5]);
-  object.nameLower = reader.readString(offsets[6]);
-  object.notes = reader.readStringOrNull(offsets[7]);
-  object.recurringRuleId = reader.readLongOrNull(offsets[8]);
-  object.toAccountId = reader.readStringOrNull(offsets[9]);
-  object.type = reader.readString(offsets[10]);
-  object.updatedAt = reader.readDateTime(offsets[11]);
+  object.isRecurring = reader.readBool(offsets[5]);
+  object.name = reader.readString(offsets[6]);
+  object.nameLower = reader.readString(offsets[7]);
+  object.notes = reader.readStringOrNull(offsets[8]);
+  object.recurringRuleId = reader.readLongOrNull(offsets[9]);
+  object.toAccountId = reader.readStringOrNull(offsets[10]);
+  object.type = reader.readString(offsets[11]);
+  object.updatedAt = reader.readDateTime(offsets[12]);
   return object;
 }
 
@@ -248,18 +268,20 @@ P _transactionDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset)) as P;
-    case 8:
-      return (reader.readLongOrNull(offset)) as P;
-    case 9:
-      return (reader.readStringOrNull(offset)) as P;
-    case 10:
       return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readLongOrNull(offset)) as P;
+    case 10:
+      return (reader.readStringOrNull(offset)) as P;
     case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -284,6 +306,14 @@ extension TransactionQueryWhereSort
   QueryBuilder<Transaction, Transaction, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhere> anyIsRecurring() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'isRecurring'),
+      );
     });
   }
 
@@ -545,6 +575,51 @@ extension TransactionQueryWhere
               indexName: r'accountId',
               lower: [],
               upper: [accountId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause> isRecurringEqualTo(
+      bool isRecurring) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'isRecurring',
+        value: [isRecurring],
+      ));
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterWhereClause>
+      isRecurringNotEqualTo(bool isRecurring) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isRecurring',
+              lower: [],
+              upper: [isRecurring],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isRecurring',
+              lower: [isRecurring],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isRecurring',
+              lower: [isRecurring],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isRecurring',
+              lower: [],
+              upper: [isRecurring],
               includeUpper: false,
             ));
       }
@@ -1381,6 +1456,16 @@ extension TransactionQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+      isRecurringEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isRecurring',
+        value: value,
       ));
     });
   }
@@ -2286,6 +2371,18 @@ extension TransactionQuerySortBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByIsRecurring() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRecurring', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByIsRecurringDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRecurring', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -2447,6 +2544,18 @@ extension TransactionQuerySortThenBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByIsRecurring() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRecurring', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByIsRecurringDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isRecurring', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -2569,6 +2678,12 @@ extension TransactionQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QDistinct> distinctByIsRecurring() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isRecurring');
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2653,6 +2768,12 @@ extension TransactionQueryProperty
   QueryBuilder<Transaction, String?, QQueryOperations> fromAccountIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fromAccountId');
+    });
+  }
+
+  QueryBuilder<Transaction, bool, QQueryOperations> isRecurringProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isRecurring');
     });
   }
 

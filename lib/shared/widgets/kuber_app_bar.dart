@@ -36,18 +36,18 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
               if (title == null) ...[
                 Container(
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainer,
-                    borderRadius:
-                        BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline),
+                    color: cs.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: cs.primary,
-                    size: 15,
+                  child: Center(
+                    child: Image.asset(
+                      'assets/icon/app_icon_transparent.png',
+                      width: 32,
+                      height: 32,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

@@ -334,7 +334,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             // Only authenticate if turning ON
                             final canAuth = await _biometricService.canAuthenticate();
                             if (!context.mounted) return;
-                            
+
                             if (!canAuth) {
                               showKuberSnackBar(
                                 context,
@@ -343,10 +343,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               );
                               return;
                             }
-                            
+
                             final success = await _biometricService.authenticate();
                             if (!context.mounted) return;
-                            
+
                             if (success) {
                               setState(() => _tempBiometricsEnabled = true);
                               await ref.read(settingsProvider.notifier).setBiometricsEnabled(true);
@@ -734,7 +734,7 @@ class _SettingsTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: KuberSpacing.sm),
-            ?trailing,
+            if (trailing case final Widget t) t,
           ],
         ),
       ),

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
+import '../../features/analytics/screens/analytics_filter_screen.dart';
+import '../../features/history/screens/advanced_filter_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/onboarding/screens/welcome_screen.dart';
 import '../../features/onboarding/screens/setup_screen.dart';
-import '../../features/splash/screens/splash_screen.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
@@ -27,7 +28,9 @@ import '../../features/settings/screens/data_management_screen.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
 import '../../features/budgets/screens/add_edit_budget_screen.dart';
-
+import '../../core/utils/prefs_keys.dart';
+import '../../main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -39,13 +42,25 @@ final _shellMoreKey = GlobalKey<NavigatorState>(debugLabel: 'more');
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: '/',
+    redirect: (context, state) async {
+      final prefs = await SharedPreferences.getInstance();
+      final onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
+
+      // If opening for the first time, go to onboarding
+      if (!onboarded && !state.matchedLocation.startsWith('/onboarding')) {
+        return '/onboarding';
+      }
+
+      // If onboarded and trying to go to root, check for recurring transactions
+      if (onboarded && state.matchedLocation == '/') {
+        final missedCount = ref.read(recurringProcessResultProvider);
+        if (missedCount > 0) return '/recurring-loader';
+      }
+
+      return null;
+    },
     routes: [
-      GoRoute(
-        path: '/splash',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SplashScreen(),
-      ),
       GoRoute(
         path: '/onboarding',
         parentNavigatorKey: _rootNavigatorKey,
@@ -63,6 +78,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           transaction: state.extra as Transaction?,
           initialType: state.uri.queryParameters['type'],
         ),
+      ),
+      GoRoute(
+        path: '/analytics/filter',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AnalyticsFilterScreen(),
+      ),
+      GoRoute(
+        path: '/history/filter',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AdvancedFilterScreen(),
       ),
 
       GoRoute(

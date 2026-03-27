@@ -38,20 +38,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             children: [
               const Spacer(flex: 2),
 
-              // App icon
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet_outlined,
-                  color: cs.primary,
-                  size: 44,
-                ),
-              ),
+              // Animated App icon
+              const AnimatedAppIcon(),
               const SizedBox(height: KuberSpacing.xl),
 
               // Headline
@@ -202,6 +190,66 @@ class _FeatureTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AnimatedAppIcon extends StatefulWidget {
+  final double size;
+  const AnimatedAppIcon({super.key, this.size = 80});
+
+  @override
+  State<AnimatedAppIcon> createState() => _AnimatedAppIconState();
+}
+
+class _AnimatedAppIconState extends State<AnimatedAppIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _scale = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return ScaleTransition(
+      scale: _scale,
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(
+          color: cs.primary.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(
+          child: Image.asset(
+            'assets/icon/app_icon_transparent.png',
+            width: widget.size,
+            height: widget.size,
+          ),
+        ),
       ),
     );
   }
