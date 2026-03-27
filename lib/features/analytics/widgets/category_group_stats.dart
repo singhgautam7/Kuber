@@ -8,12 +8,10 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../transactions/providers/stats_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
-import '../../analytics/providers/analytics_provider.dart';
 import 'analytics_toggle.dart';
 
 class CategoryGroupStatsWidget extends ConsumerStatefulWidget {
-  final AnalyticsPeriod period;
-  const CategoryGroupStatsWidget({super.key, required this.period});
+  const CategoryGroupStatsWidget({super.key});
 
   @override
   ConsumerState<CategoryGroupStatsWidget> createState() => _CategoryGroupStatsWidgetState();
@@ -26,8 +24,8 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
   @override
   Widget build(BuildContext context) {
     final statsAsync = _isGroupView
-        ? ref.watch(analyticsGroupStatsProvider(widget.period))
-        : ref.watch(analyticsCategoryStatsProvider(widget.period));
+        ? ref.watch(analyticsGroupStatsProvider)
+        : ref.watch(analyticsCategoryStatsProvider);
 
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;

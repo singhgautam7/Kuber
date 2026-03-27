@@ -32,9 +32,9 @@ class CategoryStat {
   CategoryStat({required this.category, required this.total, required this.percentage});
 }
 
-final analyticsCategoryStatsProvider = FutureProvider.family<List<CategoryStat>, AnalyticsPeriod>((ref, period) async {
+final analyticsCategoryStatsProvider = FutureProvider<List<CategoryStat>>((ref) async {
   try {
-    final transactions = ref.watch(analyticsTransactionsProvider(period));
+    final transactions = ref.watch(analyticsTransactionsProvider);
     final categoryMap = await ref.watch(categoryMapProvider.future);
     
     final Map<int, double> totals = {};
@@ -72,9 +72,9 @@ class GroupStat {
   GroupStat({required this.groupName, required this.total, required this.percentage});
 }
 
-final analyticsGroupStatsProvider = FutureProvider.family<List<GroupStat>, AnalyticsPeriod>((ref, period) async {
+final analyticsGroupStatsProvider = FutureProvider<List<GroupStat>>((ref) async {
   try {
-    final transactions = ref.watch(analyticsTransactionsProvider(period));
+    final transactions = ref.watch(analyticsTransactionsProvider);
     final categoryMap = await ref.watch(categoryMapProvider.future);
     final groupList = await ref.watch(categoryGroupListProvider.future);
     final groupMap = {for (var g in groupList) g.id: g.name};

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
+import '../../features/analytics/screens/analytics_filter_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/onboarding/screens/welcome_screen.dart';
 import '../../features/onboarding/screens/setup_screen.dart';
@@ -76,6 +77,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           transaction: state.extra as Transaction?,
           initialType: state.uri.queryParameters['type'],
         ),
+      ),
+      GoRoute(
+        path: '/analytics/filter',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AnalyticsFilterScreen(),
       ),
 
       GoRoute(

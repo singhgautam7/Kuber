@@ -21,6 +21,7 @@ import '../widgets/analytics_toggle.dart';
 import '../widgets/avg_weekly_heatmap.dart';
 import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
+import '../widgets/top_filter_row.dart';
 import '../../../shared/widgets/wip_bottom_sheet.dart';
 
 // ---------------------------------------------------------------------------
@@ -47,18 +48,16 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  AnalyticsPeriod _period = AnalyticsPeriod.today;
   int _biggestTab = 0; // 0 = expense, 1 = income
 
   // ---- bucket helpers -----------------------------------------------------
 
-  List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns) {
+  List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns, AnalyticsFilter filter) {
     txns = txns.where((t) => t.type != 'transfer').toList();
-    final now = DateTime.now();
-    List<_MutableBucket> buckets;
+    List<_MutableBucket> buckets = [];
 
-    switch (_period) {
-      case AnalyticsPeriod.today:
+    switch (filter.type) {
+      case FilterType.today:
         final labels = ['Dawn', 'Morning', 'Noon', 'Evening', 'Night'];
         buckets = labels.map((l) => _MutableBucket(l, '')).toList();
         for (final t in txns) {
@@ -83,17 +82,35 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         }
         break;
 
-      case AnalyticsPeriod.week:
-        buckets = List.generate(7, (i) {
-          final d = now.subtract(Duration(days: 6 - i));
+      case FilterType.thisWeek:
+      case FilterType.lastWeek:
+        // Show 7 days range
+        final daysCount = filter.to.difference(filter.from).inDays + 1;
+        buckets = List.generate(daysCount, (i) {
+          final d = filter.from.add(Duration(days: i));
           return _MutableBucket(DateFormat('d').format(d), DateFormat('MMM').format(d).toUpperCase());
         });
-        final todayStart = DateTime(now.year, now.month, now.day);
         for (final t in txns) {
-          final txnDay = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
-          final diff = todayStart.difference(txnDay).inDays;
-          if (diff < 0 || diff > 6) continue;
-          final idx = 6 - diff;
+          final diff = t.createdAt.difference(filter.from).inDays;
+          if (diff < 0 || diff >= daysCount) continue;
+          if (t.type == 'income') {
+            buckets[diff].income += t.amount;
+          } else {
+            buckets[diff].expense += t.amount;
+          }
+        }
+        break;
+
+      case FilterType.thisMonth:
+      case FilterType.lastMonth:
+        // Divide into 4 or 5 weeks
+        final daysInMonth = filter.to.difference(filter.from).inDays + 1;
+        final weekCount = (daysInMonth / 7).ceil();
+        buckets = List.generate(weekCount, (i) => _MutableBucket('Week', '${i + 1}'));
+        for (final t in txns) {
+          final dayDiff = t.createdAt.difference(filter.from).inDays;
+          final week = (dayDiff / 7).floor();
+          final idx = week.clamp(0, weekCount - 1);
           if (t.type == 'income') {
             buckets[idx].income += t.amount;
           } else {
@@ -102,98 +119,59 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         }
         break;
 
-      case AnalyticsPeriod.month:
-      case AnalyticsPeriod.lastMonth:
-        buckets = List.generate(5, (i) => _MutableBucket('Week', '${i + 1}'));
-        for (final t in txns) {
-          final week = ((t.createdAt.day - 1) / 7).floor();
-          final idx = week.clamp(0, 4);
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
-          }
-        }
-        break;
-
-      case AnalyticsPeriod.threeMonths:
-        buckets = List.generate(3, (i) {
-          final m = DateTime(now.year, now.month - 2 + i, 1);
-          return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m));
-        });
-        for (final t in txns) {
-          final monthDiff = (now.year - t.createdAt.year) * 12 + now.month - t.createdAt.month;
-          final idx = 2 - monthDiff;
-          if (idx < 0 || idx > 2) continue;
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
-          }
-        }
-        break;
-
-      case AnalyticsPeriod.year:
-        buckets = List.generate(4, (i) => _MutableBucket('Q${i + 1}', '${now.year}'));
-        for (final t in txns) {
-          if (t.createdAt.year != now.year) continue;
-          final idx = ((t.createdAt.month - 1) / 3).floor();
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
-          }
-        }
-        break;
-
-      case AnalyticsPeriod.all:
-        buckets = List.generate(4, (i) {
-          final qOffset = 3 - i;
-          final qStartMonth = now.month - qOffset * 3;
-          final qStart = DateTime(now.year, qStartMonth, 1);
-          final labelDay = "Q${((qStart.month - 1) / 3).floor() + 1}";
-          final labelMonth = DateFormat('yy').format(qStart);
-          return _MutableBucket(labelDay, labelMonth);
-        });
-        for (final t in txns) {
-          bool placed = false;
-          for (int i = 0; i < 4 && !placed; i++) {
-            final qOffset = 3 - i;
-            final qStartMonth = now.month - qOffset * 3;
-            final qStart = DateTime(now.year, qStartMonth, 1);
-            final qEnd = DateTime(now.year, qStartMonth + 3, 1);
-            if (!t.createdAt.isBefore(qStart) && t.createdAt.isBefore(qEnd)) {
-              if (t.type == 'income') {
-                buckets[i].income += t.amount;
-              } else {
-                buckets[i].expense += t.amount;
-              }
-              placed = true;
+      case FilterType.thisYear:
+      case FilterType.all:
+      case FilterType.custom:
+        // If > 6 months, show months. Otherwise show weeks.
+        final monthsDiff = (filter.to.year - filter.from.year) * 12 + filter.to.month - filter.from.month;
+        if (monthsDiff >= 6 || filter.type == FilterType.all || filter.type == FilterType.thisYear) {
+             // Quarterly or monthly depending on range
+             if (monthsDiff > 12) {
+               // Show Quarters
+               final quarters = (monthsDiff / 3).ceil().clamp(1, 12);
+               buckets = List.generate(quarters, (i) {
+                  final m = DateTime(filter.from.year, filter.from.month + i * 3, 1);
+                  return _MutableBucket('Q${((m.month - 1) / 3).floor() + 1}', DateFormat('yy').format(m));
+               });
+               for (final t in txns) {
+                 final mDiff = (t.createdAt.year - filter.from.year) * 12 + t.createdAt.month - filter.from.month;
+                 final idx = (mDiff / 3).floor().clamp(0, quarters - 1);
+                 if (t.type == 'income') {
+                   buckets[idx].income += t.amount;
+                 } else {
+                   buckets[idx].expense += t.amount;
+                 }
+               }
+             } else {
+               // Show Months
+               final count = monthsDiff + 1;
+               buckets = List.generate(count, (i) {
+                 final m = DateTime(filter.from.year, filter.from.month + i, 1);
+                 return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m));
+               });
+               for (final t in txns) {
+                 final idx = (t.createdAt.year - filter.from.year) * 12 + t.createdAt.month - filter.from.month;
+                 if (idx >= 0 && idx < count) {
+                   if (t.type == 'income') {
+                     buckets[idx].income += t.amount;
+                   } else {
+                     buckets[idx].expense += t.amount;
+                   }
+                 }
+               }
+             }
+        } else {
+          // Show weeks
+          final days = filter.to.difference(filter.from).inDays + 1;
+          final weeks = (days / 7).ceil();
+          buckets = List.generate(weeks, (i) => _MutableBucket('Week', '${i + 1}'));
+          for (final t in txns) {
+            final idx = (t.createdAt.difference(filter.from).inDays / 7).floor().clamp(0, weeks - 1);
+            if (t.type == 'income') {
+              buckets[idx].income += t.amount;
+            } else {
+              buckets[idx].expense += t.amount;
             }
-          }
-        }
-        break;
-
-      case AnalyticsPeriod.custom:
-        if (txns.isEmpty) {
-          buckets = [];
-          break;
-        }
-        final sorted = List<Transaction>.from(txns)..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-        final first = sorted.first.createdAt;
-        final last = sorted.last.createdAt;
-        final monthCount = (last.year - first.year) * 12 + last.month - first.month + 1;
-        buckets = List.generate(monthCount, (i) {
-          final m = DateTime(first.year, first.month + i, 1);
-          return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m));
-        });
-        for (final t in txns) {
-          final idx = (t.createdAt.year - first.year) * 12 + t.createdAt.month - first.month;
-          if (idx < 0 || idx >= buckets.length) continue;
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
           }
         }
         break;
@@ -211,11 +189,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     });
   }
 
-  // ---- build --------------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
-    final periodTxns = ref.watch(analyticsTransactionsProvider(_period));
+    final filter = ref.watch(analyticsFilterProvider);
+    final periodTxns = ref.watch(analyticsTransactionsProvider);
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
 
     final cs = Theme.of(context).colorScheme;
@@ -236,7 +213,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final netAmount = totalIncome - totalExpense;
 
     // Buckets
-    final buckets = _buildPeriodBuckets(periodTxns);
+    final buckets = _buildPeriodBuckets(periodTxns, filter);
 
     // Category totals (expense only)
     final catMap = <int, double>{};
@@ -245,8 +222,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       final catId = int.tryParse(t.categoryId) ?? -1;
       catMap[catId] = (catMap[catId] ?? 0) + t.amount;
     }
-    // Key stats
-
 
     // Top 5 biggest transactions (filtered by tab)
     final biggestType = _biggestTab == 0 ? 'expense' : 'income';
@@ -306,40 +281,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               },
             ),
 
-            // [A] Period selector
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: AnalyticsPeriod.values.map((p) {
-                  final isCustom = p == AnalyticsPeriod.custom;
-                  final isCustomActive = isCustom && _period == AnalyticsPeriod.custom;
-                  final label = isCustomActive
-                      ? _customRangeLabel()
-                      : _periodLabel(p);
-                  final isSelected = _period == p;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(right: KuberSpacing.sm),
-                    child: _KuberFilterChip(
-                      label: label,
-                      selected: isSelected,
-                      onTap: isCustom
-                          ? () => _pickCustomRange()
-                          : () {
-                              if (_period == p) return;
-                              setState(() {
-                                _period = p;
-                              });
-                            },
-                      icon: isCustom
-                          ? Icon(Icons.date_range, size: 14,
-                              color: isSelected ? cs.primary : cs.onSurfaceVariant)
-                          : null,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
+            // [A] New Unified Filter Row
+            const TopFilterRow(),
             const SizedBox(height: KuberSpacing.lg),
 
             // If no data for this period, show inline empty state
@@ -374,7 +317,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             const SizedBox(height: KuberSpacing.lg),
 
             // [F] Spending Distribution (Category/Group Toggle)
-            CategoryGroupStatsWidget(period: _period),
+            const CategoryGroupStatsWidget(),
             const SizedBox(height: KuberSpacing.lg),
 
             // [G] Tag-wise Analytics
@@ -544,33 +487,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     );
   }
 
-  // ---- custom range helpers -----------------------------------------------
-
-  Future<void> _pickCustomRange() async {
-    final now = DateTime.now();
-    final range = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: now,
-      initialDateRange: ref.read(customDateRangeProvider) ??
-          DateTimeRange(
-            start: now.subtract(const Duration(days: 30)),
-            end: now,
-          ),
-    );
-    if (range != null) {
-      ref.read(customDateRangeProvider.notifier).state = range;
-      setState(() {
-        _period = AnalyticsPeriod.custom;
-      });
-    }
-  }
-
-  String _customRangeLabel() {
-    final range = ref.read(customDateRangeProvider);
-    if (range == null) return 'Custom Range';
-    final fmt = DateFormat('MMM d');
-    return '${fmt.format(range.start)} - ${fmt.format(range.end)}';
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   // ---- summary card -------------------------------------------------------
@@ -638,84 +557,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // ---- period label -------------------------------------------------------
-
-  String _periodLabel(AnalyticsPeriod p) {
-    switch (p) {
-      case AnalyticsPeriod.all:
-        return 'All';
-      case AnalyticsPeriod.today:
-        return 'Today';
-      case AnalyticsPeriod.week:
-        return 'Week';
-      case AnalyticsPeriod.month:
-        return 'Month';
-      case AnalyticsPeriod.lastMonth:
-        return 'Last Month';
-      case AnalyticsPeriod.threeMonths:
-        return '3 Months';
-      case AnalyticsPeriod.year:
-        return 'Year';
-      case AnalyticsPeriod.custom:
-        return 'Custom Range';
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Private widgets
-// ---------------------------------------------------------------------------
-
-class _KuberFilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  final Widget? icon;
-
-  const _KuberFilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.18)
-              : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              icon!,
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? cs.primary : cs.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
