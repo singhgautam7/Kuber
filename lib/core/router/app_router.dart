@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
 import '../../features/analytics/screens/analytics_filter_screen.dart';
+import '../../features/history/screens/advanced_filter_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/onboarding/screens/welcome_screen.dart';
 import '../../features/onboarding/screens/setup_screen.dart';
@@ -82,6 +83,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/analytics/filter',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const AnalyticsFilterScreen(),
+      ),
+      GoRoute(
+        path: '/history/filter',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AdvancedFilterScreen(),
       ),
 
       GoRoute(

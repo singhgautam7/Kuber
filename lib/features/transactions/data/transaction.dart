@@ -22,6 +22,9 @@ class Transaction {
   String? toAccountId;   // only set when type == 'transfer'
 
   int? recurringRuleId; // set when created by recurring processor
+  
+  @Index()
+  late bool isRecurring;
 
   @Index()
   late DateTime createdAt;

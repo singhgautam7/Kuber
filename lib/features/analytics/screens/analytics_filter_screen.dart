@@ -9,7 +9,7 @@ import '../widgets/quick_filter_chips_row.dart';
 import '../widgets/kuber_calendar_widget.dart';
 import '../widgets/month_picker_bottom_sheet.dart';
 import '../widgets/manual_date_range_bottom_sheet.dart';
-import '../widgets/horizontal_fade_wrapper.dart';
+import '../../../shared/widgets/horizontal_fade_wrapper.dart';
 
 class AnalyticsFilterScreen extends ConsumerStatefulWidget {
   const AnalyticsFilterScreen({super.key});
