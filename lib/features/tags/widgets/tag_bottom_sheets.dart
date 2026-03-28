@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/tag.dart';
 import '../providers/tag_providers.dart';
+import '../../../core/utils/date_formatter.dart';
+import '../../../shared/widgets/app_button.dart';
 
 class AddEditTagBottomSheet extends ConsumerStatefulWidget {
   final Tag? tag;
@@ -172,24 +174,11 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
             onSubmitted: (_) => _save(),
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton(
-              onPressed: _save,
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-              ),
-              child: Text(
-                isEdit ? "Update Tag" : "Create Tag",
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
+          AppButton(
+            label: isEdit ? "Update Tag" : "Create Tag",
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: _save,
           ),
         ],
       ),
@@ -304,41 +293,52 @@ class ViewTagBottomSheet extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          // Last Transaction Activity
+          Consumer(
+            builder: (context, ref, _) {
+              final latestTxnAsync = ref.watch(tagRecentTransactionProvider(tag.id));
+              return latestTxnAsync.when(
+                data: (txn) => Row(
+                  children: [
+                    Icon(Icons.access_time_rounded, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Text(
+                      txn != null
+                          ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
+                          : 'No transactions yet',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
           const SizedBox(height: 32),
           
-          // Actions
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppButton(
+                  label: "Edit",
+                  icon: Icons.edit_outlined,
+                  type: AppButtonType.normal,
                   onPressed: () => _edit(context),
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: const Text("Edit"),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: OutlinedButton.icon(
+                child: AppButton(
+                  label: tag.isEnabled ? "Disable" : "Enable",
+                  icon: tag.isEnabled ? Icons.block_flipped : Icons.check_circle_outline_rounded,
+                  type: tag.isEnabled ? AppButtonType.danger : AppButtonType.normal,
                   onPressed: () => _toggleEnabled(context, ref),
-                  icon: Icon(
-                    tag.isEnabled ? Icons.block_flipped : Icons.check_circle_outline_rounded,
-                    size: 18,
-                  ),
-                  label: Text(tag.isEnabled ? "Disable" : "Enable"),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    foregroundColor: tag.isEnabled ? cs.error : cs.primary,
-                    side: BorderSide(color: tag.isEnabled ? cs.error.withValues(alpha: 0.5) : cs.primary.withValues(alpha: 0.5)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                  ),
                 ),
               ),
             ],

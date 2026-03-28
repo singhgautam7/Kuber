@@ -11,6 +11,7 @@ import '../../settings/providers/settings_provider.dart'
     show currencyProvider, formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
+import '../../../shared/widgets/app_button.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -47,7 +48,7 @@ class AccountDetailSheet extends ConsumerWidget {
             child: Container(
               width: 36,
               height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
+              margin: const EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
@@ -61,7 +62,7 @@ class AccountDetailSheet extends ConsumerWidget {
               CategoryIcon.square(
                 icon: resolveAccountIcon(account),
                 rawColor: resolveAccountColor(account),
-                size: 48,
+                size: 56,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -71,16 +72,27 @@ class AccountDetailSheet extends ConsumerWidget {
                     Text(
                       account.name,
                       style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
                         color: cs.onSurface,
+                        letterSpacing: -0.5,
                       ),
                     ),
+                    const SizedBox(height: 4),
                     Text(
                       _accountTypeLabel(account),
                       style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Initial Balance: ${ref.watch(formatterProvider).formatCurrency(account.initialBalance)}',
+                      style: GoogleFonts.inter(
                         fontSize: 13,
-                        color: cs.onSurfaceVariant,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -129,7 +141,7 @@ class AccountDetailSheet extends ConsumerWidget {
                   Text(
                     txn != null
                         ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
-                        : 'No recent transactions',
+                        : 'No transactions yet',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: cs.onSurfaceVariant,
@@ -143,54 +155,40 @@ class AccountDetailSheet extends ConsumerWidget {
 
           const SizedBox(height: 32),
 
-          // Action Buttons
           Row(
             children: [
               Expanded(
-                child: _ActionButton(
+                child: AppButton(
+                  label: 'Edit account',
+                  icon: Icons.edit_rounded,
+                  type: AppButtonType.normal,
                   onPressed: () {
                     Navigator.pop(context);
                     context.push('/accounts/edit', extra: account);
                   },
-                  icon: Icons.edit_rounded,
-                  label: 'Edit account',
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _ActionButton(
+                child: AppButton(
+                  label: 'Edit balance',
+                  icon: Icons.account_balance_wallet_rounded,
+                  type: AppButtonType.normal,
                   onPressed: () {
                     Navigator.pop(context);
                     _showEditBalancePrompt(context, ref, balanceAsync.valueOrNull ?? 0.0);
                   },
-                  icon: Icons.account_balance_wallet_rounded,
-                  label: 'Edit balance',
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _confirmDelete(context, ref),
-              icon: const Icon(Icons.delete_outline_rounded, size: 18),
-              label: Text(
-                'Delete Account',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: cs.error,
-                side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
+          AppButton(
+            label: 'Delete Account',
+            icon: Icons.delete_outline_rounded,
+            type: AppButtonType.danger,
+            fullWidth: true,
+            onPressed: () => _confirmDelete(context, ref),
           ),
           const SizedBox(height: KuberSpacing.xl),
         ],
@@ -329,35 +327,60 @@ class AccountDetailSheet extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref) {
+  void _confirmDelete(BuildContext context, WidgetRef ref) async {
     final cs = Theme.of(context).colorScheme;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text('Delete Account?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-        content: Text(
-            'Are you sure you want to delete ${account.name}? This will unlink all transactions.',
-            style: GoogleFonts.inter()),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: cs.error),
-            onPressed: () {
-              ref.read(accountListProvider.notifier).delete(account.id);
-              Navigator.pop(ctx); // Close dialog
-              Navigator.pop(context); // Close sheet
-            },
-            child: Text('Delete',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
+    final repo = ref.read(accountRepositoryProvider);
+    final hasTxns = await repo.hasTransactions(account.id);
+
+    if (!context.mounted) return;
+
+    if (hasTxns) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: cs.surface,
+          title: Text('Cannot delete account',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          content: Text(
+              'This account has transactions linked to it. To delete this account, delete the linked transactions first.',
+              style: GoogleFonts.inter()),
+          actions: [
+            AppButton(
+              label: 'OK',
+              type: AppButtonType.primary,
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: cs.surface,
+          title: Text('Delete Account?',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          content: Text(
+              'Are you sure you want to delete ${account.name}? This action cannot be undone.',
+              style: GoogleFonts.inter()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Cancel', style: GoogleFonts.inter()),
+            ),
+            AppButton(
+              label: 'Delete',
+              type: AppButtonType.primary,
+              onPressed: () {
+                ref.read(accountListProvider.notifier).delete(account.id);
+                Navigator.pop(ctx); // Close dialog
+                Navigator.pop(context); // Close sheet
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _showEditBalancePrompt(BuildContext context, WidgetRef ref, double currentBalance) {
@@ -391,14 +414,15 @@ class AccountDetailSheet extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel', style: GoogleFonts.inter()),
           ),
-          FilledButton(
+          AppButton(
+            label: 'Update',
+            type: AppButtonType.primary,
             onPressed: () {
               final newBal = double.tryParse(controller.text) ?? currentBalance;
               final updated = account..initialBalance = newBal;
               ref.read(accountListProvider.notifier).add(updated);
               Navigator.pop(ctx);
             },
-            child: Text('Update', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -406,46 +430,3 @@ class AccountDetailSheet extends ConsumerWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final String label;
-
-  const _ActionButton({
-    required this.onPressed,
-    required this.icon,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 18, color: cs.onSurface),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

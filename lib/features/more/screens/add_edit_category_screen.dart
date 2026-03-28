@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/category_presets.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
@@ -132,21 +133,13 @@ class _AddEditCategoryScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: FilledButton(
-                  onPressed: _canSave ? _save : null,
-                  child: Text(
-                    widget.existingCategory != null
-                        ? 'Save Changes'
-                        : 'Save Category',
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+              AppButton(
+                label: widget.existingCategory != null
+                    ? 'Save Changes'
+                    : 'Save Category',
+                type: AppButtonType.primary,
+                fullWidth: true,
+                onPressed: _canSave ? _save : null,
               ),
             ],
           ),
@@ -719,17 +712,12 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
                       ),
                     ],
                   )
-                : SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => setState(() => _isAdding = true),
-                      icon: const Icon(Icons.add_rounded),
-                      label: const Text('Add New Group'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: cs.primary),
-                      ),
-                    ),
+                : AppButton(
+                    label: 'Add New Group',
+                    icon: Icons.add_rounded,
+                    type: AppButtonType.outline,
+                    fullWidth: true,
+                    onPressed: () => setState(() => _isAdding = true),
                   ),
           ),
           const SizedBox(height: 16),

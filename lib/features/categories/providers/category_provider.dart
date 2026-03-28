@@ -8,6 +8,8 @@ import '../data/category.dart';
 import '../data/category_group.dart';
 import '../data/category_group_repository.dart';
 import '../data/category_repository.dart';
+import '../../transactions/data/transaction.dart';
+import '../../transactions/providers/transaction_provider.dart';
 
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
   return CategoryRepository(ref.watch(isarProvider));
@@ -71,3 +73,20 @@ final categoryMapProvider = FutureProvider<Map<int, Category>>((ref) async {
   final categories = await ref.watch(categoryListProvider.future);
   return {for (final c in categories) c.id: c};
 });
+
+final categoryRecentTransactionProvider =
+    FutureProvider.family<Transaction?, int>((ref, categoryId) async {
+  // Watch transactionListProvider to re-compute when transactions change
+  ref.watch(transactionListProvider);
+  final isar = ref.watch(isarProvider);
+  final categoryIdStr = categoryId.toString();
+
+  return await isar.transactions
+      .filter()
+      .categoryIdEqualTo(categoryIdStr)
+      .sortByCreatedAtDesc()
+      .findFirst();
+});
+
+// Alias for backward compatibility during hot-reload
+final categoryLatestTransactionProvider = categoryRecentTransactionProvider;

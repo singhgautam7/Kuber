@@ -9,6 +9,7 @@ import '../../../core/utils/color_palette.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
+import '../../../shared/widgets/app_button.dart';
 
 const _accountIcons = [
   'account_balance',
@@ -313,27 +314,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ],
         const SizedBox(height: 24),
 
-        // Save button
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: FilledButton(
-            onPressed: _save,
-            style: FilledButton.styleFrom(
-              backgroundColor: cs.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-              ),
-            ),
-            child: Text(
-              'Save Account',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
+        AppButton(
+          label: 'Save Account',
+          type: AppButtonType.primary,
+          fullWidth: true,
+          onPressed: _save,
         ),
       ],
     );
