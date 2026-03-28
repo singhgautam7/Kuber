@@ -131,7 +131,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final transactionsAsync = ref.watch(transactionListProvider);
     final filter = ref.watch(historyFilterProvider);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        context.go('/');
+      },
+      child: Scaffold(
       body: CustomScrollView(
         slivers: [
           // App bar
@@ -290,6 +296,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }
