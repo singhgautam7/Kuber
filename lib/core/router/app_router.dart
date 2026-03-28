@@ -11,7 +11,9 @@ import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
+import '../../features/accounts/data/account.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
+import '../../features/accounts/screens/add_edit_account_screen.dart';
 import '../../features/more/screens/more_screen.dart';
 import '../../features/more/screens/about_screen.dart';
 import '../../features/more/screens/permissions_screen.dart';
@@ -111,6 +113,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             returnToCategoryPicker: args?.returnToCategoryPicker ?? false,
           );
         },
+      ),
+
+
+      GoRoute(
+        path: '/accounts/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AddEditAccountScreen(),
+      ),
+      GoRoute(
+        path: '/accounts/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => AddEditAccountScreen(
+          account: state.extra as Account?,
+        ),
       ),
 
 

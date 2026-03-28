@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -12,7 +13,7 @@ import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
-import '../widgets/account_form_sheet.dart';
+import '../widgets/account_detail_sheet.dart';
 
 
 
@@ -45,18 +46,14 @@ Color _resolveColor(Account account) {
   return resolveAccountColor(account);
 }
 
-void _openAccountSheet(BuildContext context, {Account? account}) {
-  final cs = Theme.of(context).colorScheme;
+void _openAccountDetailSheet(BuildContext context, Account account) {
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: cs.surfaceContainer,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-    ),
-    builder: (_) => AccountFormSheet(account: account),
+    backgroundColor: Colors.transparent,
+    builder: (_) => AccountDetailSheet(account: account),
   );
 }
 
@@ -72,7 +69,7 @@ class AccountsScreen extends ConsumerWidget {
     ref.listen<bool>(triggerAddAccountProvider, (_, triggered) {
       if (triggered) {
         ref.read(triggerAddAccountProvider.notifier).state = false;
-        _openAccountSheet(context);
+        context.push('/accounts/add');
       }
     });
 
@@ -128,7 +125,7 @@ class _AccountsBody extends ConsumerWidget {
             title: 'Manage\nAccounts',
             description: 'Overview of your linked financial institutions.',
             actionTooltip: 'Add Account',
-            onAction: () => _openAccountSheet(context),
+            onAction: () => context.push('/accounts/add'),
           ),
         ),
 
@@ -151,7 +148,7 @@ class _AccountsBody extends ConsumerWidget {
               title: 'No accounts yet',
               description: 'Add your first account to start tracking',
               actionLabel: 'Add Account',
-              onAction: () => _openAccountSheet(context),
+              onAction: () => context.push('/accounts/add'),
             ),
           )
         else
@@ -186,7 +183,8 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final balanceLabel = account.isCreditCard ? 'Credit Utilized' : 'Available Balance';
+    final balanceLabel =
+        account.isCreditCard ? 'Credit Utilized' : 'Available Balance';
     final Color balanceColor;
     if (account.isCreditCard) {
       balanceColor = balance > 0
@@ -199,181 +197,97 @@ class _AccountCard extends ConsumerWidget {
     }
     final accentColor = _resolveColor(account);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top row: icon + name/type + menu
-          Row(
-            children: [
-              CategoryIcon.square(
-                icon: _resolveIcon(account),
-                rawColor: accentColor,
-                size: 44,
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _accountTypeLabel(account),
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
+    return InkWell(
+      onTap: () => _openAccountDetailSheet(context, account),
+      borderRadius: BorderRadius.circular(KuberRadius.md),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top row: icon + name/type
+            Row(
+              children: [
+                CategoryIcon.square(
+                  icon: _resolveIcon(account),
+                  rawColor: accentColor,
+                  size: 44,
                 ),
-              ),
-              _AccountMenu(account: account),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Balance label
-          Text(
-            balanceLabel,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 6),
-
-          // Balance amount + credit limit
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${balance < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(balance.abs())}',
-                style: GoogleFonts.inter(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: balanceColor,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              if (account.isCreditCard && account.creditLimit != null)
-                Text(
-                  'Limit  ${ref.watch(formatterProvider).formatCurrency(account.creditLimit!)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: cs.onSurfaceVariant,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        account.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _accountTypeLabel(account),
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
+              ],
+            ),
+            const SizedBox(height: 16),
 
-class _AccountMenu extends ConsumerWidget {
-  final Account account;
-
-  const _AccountMenu({required this.account});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_horiz_rounded,
-        color: cs.onSurfaceVariant,
-        size: 20,
-      ),
-      color: cs.surfaceContainerHigh,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
-      onSelected: (val) => _handleAction(context, ref, val),
-      itemBuilder: (_) => [
-        PopupMenuItem(
-          value: 'edit',
-          child: Text('Edit',
+            // Balance label
+            Text(
+              balanceLabel,
               style: GoogleFonts.inter(
-                  color: cs.onSurface)),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Text('Delete',
-              style:
-                  GoogleFonts.inter(color: cs.error)),
-        ),
-      ],
-    );
-  }
-
-  void _handleAction(BuildContext context, WidgetRef ref, String action) {
-    final cs = Theme.of(context).colorScheme;
-    if (action == 'edit') {
-      _openAccountSheet(context, account: account);
-    } else if (action == 'delete') {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          backgroundColor: cs.surfaceContainer,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
-          title: Text(
-            'Delete account?',
-            style: GoogleFonts.inter(
-              color: cs.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: Text(
-            'All transactions linked to "${account.name}" will be unlinked.',
-            style:
-                GoogleFonts.inter(color: cs.onSurfaceVariant),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel',
-                  style: GoogleFonts.inter(
-                      color: cs.onSurfaceVariant)),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.error,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
+                fontSize: 12,
+                color: cs.onSurfaceVariant,
               ),
-              onPressed: () {
-                ref
-                    .read(accountListProvider.notifier)
-                    .delete(account.id);
-                Navigator.pop(context);
-              },
-              child: Text('Delete',
+            ),
+            const SizedBox(height: 6),
+
+            // Balance amount + credit limit
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${balance < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(balance.abs())}',
                   style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600)),
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: balanceColor,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                if (account.isCreditCard && account.creditLimit != null)
+                  Text(
+                    'Limit  ${ref.watch(formatterProvider).formatCurrency(account.creditLimit!)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
-      );
-    }
+      ),
+    );
   }
 }
+
 
 class _NetWorthCard extends ConsumerWidget {
   final double netWorth;

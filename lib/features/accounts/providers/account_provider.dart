@@ -82,3 +82,21 @@ final accountBalanceProvider =
   final isCreditCard = account.isCreditCard;
   return isCreditCard ? -balance : balance;
 });
+
+final accountLatestTransactionProvider =
+    FutureProvider.family<Transaction?, int>((ref, accountId) async {
+  ref.watch(transactionListProvider);
+  final isar = ref.watch(isarProvider);
+  final accountIdStr = accountId.toString();
+
+  return await isar.transactions
+      .filter()
+      .group((q) => q
+          .accountIdEqualTo(accountIdStr)
+          .or()
+          .fromAccountIdEqualTo(accountIdStr)
+          .or()
+          .toAccountIdEqualTo(accountIdStr))
+      .sortByCreatedAtDesc()
+      .findFirst();
+});

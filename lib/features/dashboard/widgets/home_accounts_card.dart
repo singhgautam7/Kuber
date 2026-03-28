@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../accounts/widgets/account_detail_sheet.dart';
 
 class HomeAccountsCard extends ConsumerWidget {
   const HomeAccountsCard({super.key});
@@ -28,7 +29,7 @@ class HomeAccountsCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Bank Accounts',
+                  'Accounts',
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -63,81 +64,94 @@ class HomeAccountsCard extends ConsumerWidget {
                       2;
                   return SizedBox(
                     width: cardWidth,
-                    child: Container(
-                      padding: const EdgeInsets.all(KuberSpacing.lg),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(
-                          color: cs.outline,
-                          width: 0.5,
+                    child: InkWell(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          useRootNavigator: true,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => AccountDetailSheet(account: account),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                      child: Container(
+                        padding: const EdgeInsets.all(KuberSpacing.lg),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainer,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(
+                            color: cs.outline,
+                            width: 0.5,
+                          ),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: acctColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  resolveAccountIcon(account),
-                                  size: 18,
-                                  color: acctColor,
-                                ),
-                              ),
-                              const SizedBox(width: KuberSpacing.sm),
-                              Expanded(
-                                child: Text(
-                                  account.name,
-                                  style: textTheme.labelMedium?.copyWith(
-                                    color: cs.onSurfaceVariant,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: acctColor.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
+                                  child: Icon(
+                                    resolveAccountIcon(account),
+                                    size: 18,
+                                    color: acctColor,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          balanceAsync.when(
-                            loading: () =>
-                                Text('...', style: textTheme.titleMedium),
-                            error: (e, _) =>
-                                Text('-', style: textTheme.titleMedium),
-                            data: (balance) {
-                              final Color? balanceColor;
-                              if (account.isCreditCard) {
-                                balanceColor = balance > 0
-                                    ? cs.error
-                                    : balance < 0
-                                        ? cs.tertiary
-                                        : null;
-                              } else {
-                                balanceColor = balance < 0 ? cs.error : null;
-                              }
-                              return Text(
-                                ref.watch(formatterProvider).formatCurrency(balance),
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: balanceColor,
+                                const SizedBox(width: KuberSpacing.sm),
+                                Expanded(
+                                  child: Text(
+                                    account.name,
+                                    style: textTheme.labelMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
-                          if (account.last4Digits != null)
-                            Text(
-                              '**** ${account.last4Digits}',
-                              style: textTheme.labelSmall?.copyWith(
-                                color: cs.onSurfaceVariant,
-                              ),
+                              ],
                             ),
-                          const Spacer(),
-                        ],
+                            const SizedBox(height: KuberSpacing.sm),
+                            balanceAsync.when(
+                              loading: () =>
+                                  Text('...', style: textTheme.titleMedium),
+                              error: (e, _) =>
+                                  Text('-', style: textTheme.titleMedium),
+                              data: (balance) {
+                                final Color? balanceColor;
+                                if (account.isCreditCard) {
+                                  balanceColor = balance > 0
+                                      ? cs.error
+                                      : balance < 0
+                                          ? cs.tertiary
+                                          : null;
+                                } else {
+                                  balanceColor = balance < 0 ? cs.error : null;
+                                }
+                                return Text(
+                                  ref.watch(formatterProvider).formatCurrency(balance),
+                                  style: textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: balanceColor,
+                                  ),
+                                );
+                              },
+                            ),
+                            if (account.last4Digits != null)
+                              Text(
+                                '**** ${account.last4Digits}',
+                                style: textTheme.labelSmall?.copyWith(
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            const Spacer(),
+                          ],
+                        ),
                       ),
                     ),
                   );

@@ -34,6 +34,26 @@ class DateFormatter {
     }
   }
 
+  static String timeAgo(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inMinutes < 1) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      final mins = difference.inMinutes;
+      return '$mins ${mins == 1 ? 'min' : 'mins'} ago';
+    } else if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      return '$hours ${hours == 1 ? 'hour' : 'hours'} ago';
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return '$days ${days == 1 ? 'day' : 'days'} ago';
+    } else {
+      return DateFormat('MMM d, h:mm a').format(date);
+    }
+  }
+
   static String full(DateTime date, {String format = 'dd/MM/yyyy'}) {
     return DateFormat(format).format(date);
   }
