@@ -64,7 +64,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     final a = widget.account;
     _nameController = TextEditingController(text: a?.name ?? '');
     _balanceController = TextEditingController(
-      text: a != null 
+      text: a != null
           ? (a.initialBalance % 1 == 0 ? a.initialBalance.toStringAsFixed(0) : a.initialBalance.toStringAsFixed(2))
           : '',
     );
@@ -105,7 +105,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ..isCreditCard = _isCreditCard
       ..icon = _selectedIcon
       ..colorValue = _selectedColor
-      ..initialBalance = double.tryParse(_balanceController.text) ?? 0.0
+      ..initialBalance = _isEditing
+          ? account.initialBalance
+          : (double.tryParse(_balanceController.text) ?? 0.0)
       ..creditLimit =
           _isCreditCard ? double.tryParse(_limitController.text) : null
       ..last4Digits = _last4Controller.text.isNotEmpty
@@ -124,7 +126,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,9 +256,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: GoogleFonts.inter(color: cs.onSurface),
               decoration: InputDecoration(
-                labelText: 'Last 4 digits',
+                labelText: 'Last 4 digits (Optional)',
                 helperText:
-                    'Just to help you identify your account — stored only on your device',
+                    'Not shared anywhere',
                 helperMaxLines: 2,
                 labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
                 helperStyle: GoogleFonts.inter(
@@ -267,14 +269,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
           ),
 
-        // Balance / Credit fields
-        if (!_isCreditCard)
+        // Balance / Credit fields — only shown when creating, not editing
+        if (!_isEditing && !_isCreditCard)
           TextField(
             controller: _balanceController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-            ],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             style: GoogleFonts.inter(color: cs.onSurface),
             decoration: InputDecoration(
               labelText: 'Initial Balance',
@@ -283,13 +283,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
             ),
           )
-        else ...[
+        else if (!_isEditing && _isCreditCard) ...[
           TextField(
             controller: _balanceController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
-            ],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             style: GoogleFonts.inter(color: cs.onSurface),
             decoration: InputDecoration(
               labelText: 'Credit Utilized',
@@ -299,6 +297,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
           ),
           const SizedBox(height: 16),
+        ],
+
+        // Total Limit — always shown for credit cards (both add & edit)
+        if (_isCreditCard)
           TextField(
             controller: _limitController,
             keyboardType: TextInputType.number,
@@ -311,7 +313,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
             ),
           ),
-        ],
         const SizedBox(height: 24),
 
         AppButton(

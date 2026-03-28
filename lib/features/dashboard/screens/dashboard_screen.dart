@@ -119,26 +119,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           chartAsync.when(
             loading: () => const SizedBox.shrink(),
             error: (e, _) => const SizedBox.shrink(),
-            data: (days) => KuberBarChart(
-              title: 'Spending Analysis',
-              subtitle: 'Last 7 Days Activity',
-              buckets: _buildLast7DaysBuckets(days),
-              height: 200,
-            ),
+            data: (days) {
+              final hasData = days.any((d) => d.income > 0 || d.expense > 0);
+              if (!hasData) {
+                return const _SpendingAnalysisEmpty();
+              }
+              return KuberBarChart(
+                title: 'SPENDING ANALYSIS',
+                subtitle: 'Last 7 Days Activity',
+                buckets: _buildLast7DaysBuckets(days),
+                height: 200,
+              );
+            },
           ),
           const SizedBox(height: KuberSpacing.xl),
 
           // [A.2] Smart Insights
           const HomeSmartInsights(),
-          const SizedBox(height: KuberSpacing.xl),
 
           // Budget Snapshot
           const BudgetSnapshotCard(),
-          const SizedBox(height: KuberSpacing.xl),
 
           // [C.5] Upcoming Recurring
           const HomeRecurringCard(),
-          const SizedBox(height: KuberSpacing.xl),
 
           // [D] Recent Transactions
           const HomeRecentTransactionsCard(),
@@ -300,6 +303,60 @@ class _BalanceTile extends ConsumerWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpendingAnalysisEmpty extends StatelessWidget {
+  const _SpendingAnalysisEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.5), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SPENDING ANALYSIS',
+            style: textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'Last 7 Days Activity',
+            style: textTheme.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              child: Text(
+                'No income or expense transactions in the last 7 days. '
+                'Add a transaction to see your spending analysis here.'
+                '\n\nNote: Transfers are not included.',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );

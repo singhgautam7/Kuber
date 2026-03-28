@@ -74,8 +74,9 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart> {
                 children: [
                   Text(
                     widget.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
                         ),
                   ),
                   if (widget.subtitle != null) ...[

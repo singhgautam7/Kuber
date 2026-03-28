@@ -26,6 +26,8 @@ class Transaction {
   @Index()
   late bool isRecurring;
 
+  bool isBalanceAdjustment = false;
+
   @Index()
   late DateTime createdAt;
 

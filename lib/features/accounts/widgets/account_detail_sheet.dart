@@ -8,10 +8,11 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider;
+    show formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/app_button.dart';
+import 'edit_balance_sheet.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -85,15 +86,6 @@ class AccountDetailSheet extends ConsumerWidget {
                         fontSize: 14,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.8),
                         fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Initial Balance: ${ref.watch(formatterProvider).formatCurrency(account.initialBalance)}',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -171,12 +163,28 @@ class AccountDetailSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Edit balance',
+                  label: account.isCreditCard ? 'Edit limit spent' : 'Edit balance',
                   icon: Icons.account_balance_wallet_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
                     Navigator.pop(context);
-                    _showEditBalancePrompt(context, ref, balanceAsync.valueOrNull ?? 0.0);
+                    final balance = balanceAsync.valueOrNull ?? 0.0;
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(KuberRadius.lg),
+                        ),
+                      ),
+                      builder: (_) => EditBalanceSheet(
+                        account: account,
+                        currentValue: balance,
+                        isCredit: account.isCreditCard,
+                      ),
+                    );
                   },
                 ),
               ),
@@ -383,50 +391,5 @@ class AccountDetailSheet extends ConsumerWidget {
     }
   }
 
-  void _showEditBalancePrompt(BuildContext context, WidgetRef ref, double currentBalance) {
-    final controller = TextEditingController(text: currentBalance.abs().toString());
-    final cs = Theme.of(context).colorScheme;
-    
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text('Update Balance', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Enter the new initial balance for this account:', style: GoogleFonts.inter()),
-            const SizedBox(height: 16),
-            TextField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              autofocus: true,
-              style: GoogleFonts.inter(),
-              decoration: InputDecoration(
-                prefixText: '${ref.read(currencyProvider).symbol} ',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
-          ),
-          AppButton(
-            label: 'Update',
-            type: AppButtonType.primary,
-            onPressed: () {
-              final newBal = double.tryParse(controller.text) ?? currentBalance;
-              final updated = account..initialBalance = newBal;
-              ref.read(accountListProvider.notifier).add(updated);
-              Navigator.pop(ctx);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 }
 

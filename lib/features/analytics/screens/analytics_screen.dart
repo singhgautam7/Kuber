@@ -53,7 +53,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   // ---- bucket helpers -----------------------------------------------------
 
   List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns, AnalyticsFilter filter) {
-    txns = txns.where((t) => t.type != 'transfer').toList();
+    txns = txns.where((t) => t.type != 'transfer' && !t.isBalanceAdjustment).toList();
     List<_MutableBucket> buckets = [];
 
     switch (filter.type) {

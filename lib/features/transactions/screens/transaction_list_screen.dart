@@ -99,7 +99,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       double dayTotal = 0;
       for (final t in txns) {
-        if (t.type == 'transfer') continue;
+        if (t.type == 'transfer' || t.isBalanceAdjustment) continue;
         dayTotal += t.type == 'income' ? t.amount : -t.amount;
       }
 
@@ -401,6 +401,7 @@ class _TransactionRow extends ConsumerWidget {
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
     final isTransfer = transaction.type == 'transfer';
+    final isAdjustment = transaction.isBalanceAdjustment;
 
     final category = categoriesAsync.whenOrNull(
       data: (cats) {
@@ -442,25 +443,41 @@ class _TransactionRow extends ConsumerWidget {
     }
 
     final isIncome = transaction.type == 'income';
-    final amountColor = isTransfer
-        ? cs.onSurface
-        : (isIncome ? cs.tertiary : cs.onSurface);
-    final amountPrefix = isTransfer ? '' : (isIncome ? '+' : '-');
-    final iconData = isTransfer
-        ? Icons.swap_horiz_rounded
-        : (category != null
-            ? IconMapper.fromString(category.icon)
-            : Icons.category);
-    final iconColor = isTransfer
-        ? const Color(0xFF78909C)
-        : (category != null ? Color(category.colorValue) : cs.primary);
 
-    final displayName = isTransfer
-        ? '${fromName ?? "Unknown"} → ${toName ?? "Unknown"}'
-        : transaction.name;
-    final subtitle = isTransfer
-        ? 'Transfer · ${toName ?? "Unknown"}'
-        : '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
+    // Adjustment-specific styling
+    final IconData iconData;
+    final Color iconColor;
+    final String displayName;
+    final String subtitle;
+    final Color amountColor;
+    final String amountPrefix;
+
+    if (isAdjustment) {
+      iconData = Icons.account_balance_rounded;
+      iconColor = cs.onSurfaceVariant;
+      displayName = transaction.name;
+      subtitle = 'Account correction · excluded from analytics';
+      amountColor = cs.onSurface;
+      amountPrefix = isIncome ? '+' : '-';
+    } else if (isTransfer) {
+      iconData = Icons.swap_horiz_rounded;
+      iconColor = const Color(0xFF78909C);
+      displayName = '${fromName ?? "Unknown"} → ${toName ?? "Unknown"}';
+      subtitle = 'Transfer · ${toName ?? "Unknown"}';
+      amountColor = cs.onSurface;
+      amountPrefix = '';
+    } else {
+      iconData = category != null
+          ? IconMapper.fromString(category.icon)
+          : Icons.category;
+      iconColor =
+          category != null ? Color(category.colorValue) : cs.primary;
+      displayName = transaction.name;
+      subtitle =
+          '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
+      amountColor = isIncome ? cs.tertiary : cs.onSurface;
+      amountPrefix = isIncome ? '+' : '-';
+    }
 
     final swipeMode = ref.watch(settingsProvider).valueOrNull?.swipeMode ?? SwipeMode.changeTabs;
 
@@ -501,15 +518,46 @@ class _TransactionRow extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            subtitle,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isAdjustment) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(KuberRadius.sm),
+                              border: Border.all(
+                                color: cs.outline.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Text(
+                              'ADJUSTMENT',
+                              style: GoogleFonts.inter(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                color: cs.onSurfaceVariant,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
