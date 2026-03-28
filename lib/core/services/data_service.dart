@@ -248,6 +248,7 @@ class DataService {
           ..categoryId = category?.id.toString() ?? ''
           ..accountId = account.id.toString()
           ..notes = notes
+          ..isRecurring = false
           ..createdAt = DateTime.tryParse(dateStr) ?? DateTime.now()
           ..updatedAt = DateTime.now();
         

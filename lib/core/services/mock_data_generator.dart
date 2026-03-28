@@ -155,6 +155,7 @@ class MockDataGenerator {
                 ..accountId = hdfc.id.toString()
                 ..fromAccountId = hdfc.id.toString()
                 ..toAccountId = cash.id.toString()
+                ..isRecurring = false
                 ..createdAt = date
                 ..updatedAt = date);
            } else {
@@ -168,6 +169,7 @@ class MockDataGenerator {
                 ..accountId = hdfc.id.toString()
                 ..fromAccountId = hdfc.id.toString()
                 ..toAccountId = icici.id.toString()
+                ..isRecurring = false
                 ..createdAt = date
                 ..updatedAt = date);
            }
@@ -212,6 +214,7 @@ class MockDataGenerator {
       ..type = type
       ..categoryId = cat.id.toString()
       ..accountId = acc.id.toString()
+      ..isRecurring = false
       ..createdAt = date
       ..updatedAt = date;
   }
