@@ -1,17 +1,97 @@
-# Kuber
+# Kubera
 
-A new Flutter project.
+Kubera is a modern, local-first personal finance app designed to help you track expenses, analyze spending, and gain meaningful insights into your financial habits — all while keeping your data completely private.
+
+---
+
+## Features
+
+### Expense Tracking
+- Add, edit, and manage transactions easily
+- Support for income, expense, and transfers
+- Recurring transactions support
+
+---
+
+### Smart Analytics
+- Spending breakdown by category and group
+- Budget vs actual insights
+- Monthly comparisons and trends
+- Transaction size distribution
+- Tag-wise analytics
+
+---
+
+### Smart Insights
+- Automatically generated financial insights such as:
+  - Top spending categories
+  - Weekday vs weekend spending patterns
+  - Month-over-month comparisons
+  - Savings trends
+
+---
+
+### Accounts Management
+- Manage bank, cash, and credit accounts
+- Track balances and credit utilization
+- View last transaction activity per account
+
+---
+
+### Budgets
+- Create category-based budgets
+- Track progress with alerts
+- Monitor spending against limits
+
+---
+
+### Powerful Filtering
+- Unified command bar for:
+  - Search
+  - Quick filters (Expense / Income)
+  - Advanced filters
+- Real-time transaction count updates
+
+---
+
+### Privacy First
+- 100% local-first architecture
+- No cloud sync
+- No data collection
+- No tracking
+
+Your financial data never leaves your device.
+
+---
+
+### Modern UI/UX
+- Clean, consistent design system
+- Smooth animations and transitions
+- Dark theme support
+- Optimized for speed and usability
+
+---
+
+## Tech Stack
+
+- Flutter
+- Isar (local database)
+- Zustand-like state management patterns
+- Material Design (customized)
+
+---
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
+- Flutter SDK installed
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+### Run Locally
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+git clone https://github.com/your-username/kubera.git
+cd kubera
+flutter pub get
+flutter run
