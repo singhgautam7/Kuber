@@ -13,27 +13,18 @@ class HomeSmartInsights extends ConsumerStatefulWidget {
 }
 
 class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
-  final _scrollController = ScrollController();
+  late final PageController _pageController;
   int _currentIndex = 0;
-  double _lastCardWidth = 1;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    final newIndex = (_scrollController.offset / _lastCardWidth).round();
-    if (newIndex != _currentIndex && newIndex >= 0) {
-      setState(() => _currentIndex = newIndex);
-    }
+    _pageController = PageController(viewportFraction: 0.85);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -73,34 +64,24 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
             ),
           ),
 
-          // Horizontal cards
           SizedBox(
             height: 200,
             child: insights.isEmpty
                 ? const _InsightsEmptyState()
-                : LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cardWidth = constraints.maxWidth * 0.8;
-                      _lastCardWidth = cardWidth + 8; // card + gap for scroll math
-                      return ListView.builder(
-                        controller: _scrollController,
-                        scrollDirection: Axis.horizontal,
-                        physics: const PageScrollPhysics(),
-                        itemCount: insights.length,
-                        itemBuilder: (ctx, i) => SizedBox(
-                          width: cardWidth,
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              right: i == insights.length - 1 ? 0 : 8,
-                            ),
-                            child: _InsightCard(
-                              insight: insights[i],
-                              isFirst: i == 0,
-                            ),
-                          ),
-                        ),
-                      );
+                : PageView.builder(
+                    controller: _pageController,
+                    padEnds: false, // Keeps the first card left-aligned
+                    onPageChanged: (index) {
+                      setState(() => _currentIndex = index);
                     },
+                    itemCount: insights.length,
+                    itemBuilder: (ctx, i) => Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _InsightCard(
+                        insight: insights[i],
+                        isFirst: i == 0,
+                      ),
+                    ),
                   ),
           ),
         ],
