@@ -47,6 +47,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _notesController = TextEditingController();
   final _nameFocusNode = FocusNode();
   final _amountFocusNode = FocusNode();
+  final _notesFocusNode = FocusNode();
 
   String _type = 'expense';
   int? _selectedCategoryId;
@@ -133,6 +134,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _notesController.dispose();
     _nameFocusNode.dispose();
     _amountFocusNode.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 
@@ -183,10 +185,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
         centerTitle: true,
       ),
-      body: Column(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -720,6 +726,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   // Notes field
                   TextField(
                     controller: _notesController,
+                    focusNode: _notesFocusNode,
                     maxLines: 2,
                     style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurface,
@@ -778,6 +785,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -811,8 +819,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   void _openCalculator() {
-    _nameFocusNode.unfocus();
-    _amountFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -834,12 +841,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           });
         },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 
   void _showCategoryPicker() {
-    _nameFocusNode.unfocus();
-    _amountFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -856,16 +866,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         onSelected: (id) {
           setState(() => _selectedCategoryId = id);
           Navigator.pop(context);
-          _nameFocusNode.unfocus();
-          _amountFocusNode.unfocus();
         },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 
   void _showAccountPicker() {
-    _nameFocusNode.unfocus();
-    _amountFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -881,16 +892,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         onSelected: (id) {
           setState(() => _selectedAccountId = id);
           Navigator.pop(context);
-          _nameFocusNode.unfocus();
-          _amountFocusNode.unfocus();
         },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 
   Future<void> _pickDate() async {
-    _nameFocusNode.unfocus();
-    _amountFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -912,8 +924,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           time?.minute ?? _selectedDate.minute,
         );
       });
-      _nameFocusNode.unfocus();
-      _amountFocusNode.unfocus();
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
     }
   }
 
@@ -1472,8 +1485,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     required bool isFrom,
     int? excludeId,
   }) {
-    _nameFocusNode.unfocus();
-    _amountFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -1499,12 +1511,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           Navigator.pop(context);
         },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 
   void _showTagSelector() {
-    _nameFocusNode.unfocus();
-    _amountFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
@@ -1520,7 +1535,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           setState(() => _selectedTags = tags);
         },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 }
 

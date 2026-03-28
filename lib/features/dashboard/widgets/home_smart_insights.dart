@@ -13,24 +13,42 @@ class HomeSmartInsights extends ConsumerStatefulWidget {
 }
 
 class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
-  bool _showAllInsights = false;
+  final _scrollController = ScrollController();
+  int _currentIndex = 0;
+  double _lastCardWidth = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final newIndex = (_scrollController.offset / _lastCardWidth).round();
+    if (newIndex != _currentIndex && newIndex >= 0) {
+      setState(() => _currentIndex = newIndex);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final insights = ref.watch(smartInsightsProvider);
-    final textTheme = Theme.of(context).textTheme;
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-
-    if (insights.isEmpty) return const SizedBox.shrink();
-
-    final visible = _showAllInsights ? insights : insights.take(3).toList();
-    final hasMore = insights.length > 3;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header row
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
@@ -38,42 +56,52 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
               children: [
                 Text(
                   'SMART INSIGHTS',
-                  style: textTheme.labelSmall?.copyWith(
+                  style: tt.labelSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
                   ),
                 ),
-                if (hasMore)
-                  GestureDetector(
-                    onTap: () =>
-                        setState(() => _showAllInsights = !_showAllInsights),
-                    child: Text(
-                      _showAllInsights ? 'SHOW LESS' : 'VIEW ALL',
-                      style: textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                        color: cs.primary,
-                      ),
+                if (insights.isNotEmpty)
+                  Text(
+                    '${_currentIndex + 1}/${insights.length}',
+                    style: tt.labelSmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      letterSpacing: 0.5,
                     ),
                   ),
               ],
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: cs.outline),
-            ),
-            child: Column(
-              children: [
-                for (int i = 0; i < visible.length; i++) ...[
-                  _InsightTile(insight: visible[i]),
-                  if (i < visible.length - 1)
-                    Container(height: 1, color: cs.outline),
-                ],
-              ],
-            ),
+
+          // Horizontal cards
+          SizedBox(
+            height: 200,
+            child: insights.isEmpty
+                ? const _InsightsEmptyState()
+                : LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cardWidth = constraints.maxWidth * 0.8;
+                      _lastCardWidth = cardWidth + 8; // card + gap for scroll math
+                      return ListView.builder(
+                        controller: _scrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const PageScrollPhysics(),
+                        itemCount: insights.length,
+                        itemBuilder: (ctx, i) => SizedBox(
+                          width: cardWidth,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: i == insights.length - 1 ? 0 : 8,
+                            ),
+                            child: _InsightCard(
+                              insight: insights[i],
+                              isFirst: i == 0,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -81,80 +109,114 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
   }
 }
 
-class _InsightTile extends StatelessWidget {
+class _InsightCard extends StatelessWidget {
   final KuberInsight insight;
-  const _InsightTile({required this.insight});
+  final bool isFirst;
+
+  const _InsightCard({required this.insight, required this.isFirst});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final tt = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
+    final bgColor = isFirst ? cs.primary : cs.surfaceContainer;
+    final labelColor =
+        isFirst ? Colors.white.withValues(alpha: 0.55) : cs.onSurfaceVariant;
+    final iconColor = isFirst
+        ? Colors.white.withValues(alpha: 0.85)
+        : (insight.iconColor ?? cs.primary);
+    final textColor = isFirst ? Colors.white : cs.onSurface;
+    final borderColor = isFirst ? Colors.transparent : cs.outline;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildIconContainer(cs),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (insight.typeLabel.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      insight.typeLabel,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ),
-                _HighlightedText(
-                  message: insight.message,
-                  highlights: insight.highlights,
-                  highlightColor: insight.highlightIsWarning
-                      ? cs.error
-                      : cs.primary,
-                  baseStyle: textTheme.bodyMedium?.copyWith(height: 1.4),
-                ),
-              ],
+          // Type label
+          Text(
+            insight.typeLabel,
+            style: tt.labelSmall?.copyWith(
+              color: labelColor,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
             ),
           ),
+          const SizedBox(height: 10),
+          // Icon
+          if (insight.iconData != null)
+            Icon(insight.iconData, color: iconColor, size: 28)
+          else
+            Text(insight.emoji, style: const TextStyle(fontSize: 24)),
+          const Spacer(),
+          // Message
+          if (isFirst)
+            Text(
+              insight.message,
+              style: tt.bodyMedium?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            )
+          else
+            _HighlightedText(
+              message: insight.message,
+              highlights: insight.highlights,
+              highlightColor:
+                  insight.highlightIsWarning ? cs.error : cs.primary,
+              baseStyle: tt.bodyMedium?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+              maxLines: 4,
+            ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildIconContainer(ColorScheme cs) {
-    if (insight.iconData != null) {
-      final color = insight.iconColor ?? cs.primary;
-      return Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(insight.iconData, color: color, size: 22),
-      );
-    }
+class _InsightsEmptyState extends StatelessWidget {
+  const _InsightsEmptyState();
 
-    // Fallback to emoji
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Container(
-      width: 44,
-      height: 44,
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outline),
       ),
-      child: Center(
-        child: Text(
-          insight.emoji,
-          style: const TextStyle(fontSize: 20),
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.insights_outlined,
+              color: cs.onSurfaceVariant, size: 32),
+          const SizedBox(height: 12),
+          Text(
+            'Keep adding transactions to unlock\ninsights about your finances.',
+            textAlign: TextAlign.center,
+            style: tt.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -165,38 +227,38 @@ class _HighlightedText extends StatelessWidget {
   final List<String> highlights;
   final Color highlightColor;
   final TextStyle? baseStyle;
+  final int maxLines;
 
   const _HighlightedText({
     required this.message,
     required this.highlights,
     required this.highlightColor,
     this.baseStyle,
+    this.maxLines = 4,
   });
 
   @override
   Widget build(BuildContext context) {
     if (highlights.isEmpty) {
-      return Text(message, style: baseStyle);
+      return Text(message, style: baseStyle, maxLines: maxLines,
+          overflow: TextOverflow.ellipsis);
     }
 
-    // Find all highlight positions, sorted by index, no overlaps
     final spans = <({int start, int end, String text})>[];
     for (final h in highlights) {
       if (h.isEmpty) continue;
       final idx = message.indexOf(h);
       if (idx == -1) continue;
-      // Check for overlap with existing spans
       final end = idx + h.length;
-      final overlaps = spans.any(
-        (s) => idx < s.end && end > s.start,
-      );
+      final overlaps = spans.any((s) => idx < s.end && end > s.start);
       if (!overlaps) {
         spans.add((start: idx, end: end, text: h));
       }
     }
 
     if (spans.isEmpty) {
-      return Text(message, style: baseStyle);
+      return Text(message, style: baseStyle, maxLines: maxLines,
+          overflow: TextOverflow.ellipsis);
     }
 
     spans.sort((a, b) => a.start.compareTo(b.start));
@@ -209,10 +271,7 @@ class _HighlightedText extends StatelessWidget {
       }
       children.add(TextSpan(
         text: span.text,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: highlightColor,
-        ),
+        style: TextStyle(fontWeight: FontWeight.w700, color: highlightColor),
       ));
       cursor = span.end;
     }
@@ -222,6 +281,8 @@ class _HighlightedText extends StatelessWidget {
 
     return RichText(
       text: TextSpan(style: baseStyle, children: children),
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
