@@ -1,29 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../features/settings/providers/settings_provider.dart';
+import '../../core/utils/icon_mapper.dart';
 
-class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
+class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
   final bool showBack;
+  final double? horizontalPadding;
 
-  const KuberAppBar({super.key, this.title, this.actions, this.showBack = false});
+  const KuberAppBar({
+    super.key,
+    this.title,
+    this.actions,
+    this.showBack = false,
+    this.horizontalPadding,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final currency = ref.watch(currencyProvider);
+    final padding = horizontalPadding ?? KuberSpacing.lg;
 
     return SafeArea(
       bottom: false,
       child: SizedBox(
         height: kToolbarHeight,
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+          padding: EdgeInsets.symmetric(horizontal: padding),
           child: Row(
             children: [
               if (showBack) ...[
@@ -43,10 +53,10 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
-                    child: Image.asset(
-                      'assets/icon/app_icon_transparent.png',
-                      width: 32,
-                      height: 32,
+                    child: Icon(
+                      IconMapper.fromCurrencyCode(currency.code),
+                      color: cs.primary,
+                      size: 20,
                     ),
                   ),
                 ),

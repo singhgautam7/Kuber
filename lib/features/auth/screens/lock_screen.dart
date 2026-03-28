@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart';
 
 class LockScreen extends ConsumerStatefulWidget {
   final Widget child;
@@ -36,6 +39,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   Widget build(BuildContext context) {
     final isLocked = ref.watch(authProvider);
     final cs = Theme.of(context).colorScheme;
+    final currency = ref.watch(currencyProvider);
 
     if (!isLocked) return widget.child;
 
@@ -48,40 +52,42 @@ class _LockScreenState extends ConsumerState<LockScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            // App Logo placeholder - assuming an icon for now
+            // App Logo
             Container(
-              padding: const EdgeInsets.all(24),
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
-                color: cs.primaryContainer.withValues(alpha: 0.2),
-                shape: BoxShape.circle,
+                color: cs.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(KuberRadius.md),
               ),
               child: Icon(
-                Icons.account_balance_wallet_rounded,
-                size: 64,
+                IconMapper.fromCurrencyCode(currency.code),
+                color: cs.primary,
+                size: 44,
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+            Text(
+              'Kuber',
+              style: GoogleFonts.inter(
+                fontSize: 36,
+                fontWeight: FontWeight.w800,
                 color: cs.primary,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: KuberSpacing.sm),
             Text(
-              'Kuber',
-              style: GoogleFonts.outfit(
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Your Finance, Secured.',
+              'your personal financial log',
               style: GoogleFonts.inter(
-                fontSize: 14,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
                 color: cs.onSurfaceVariant,
               ),
             ),
             const Spacer(),
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 52,
               child: FilledButton.icon(
                 onPressed: () => ref.read(authProvider.notifier).authenticate(),
                 icon: const Icon(Icons.lock_open_rounded),

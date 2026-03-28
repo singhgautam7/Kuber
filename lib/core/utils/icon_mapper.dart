@@ -56,4 +56,38 @@ class IconMapper {
   static IconData fromString(String name) {
     return _iconMap[name] ?? Icons.category;
   }
+
+  static IconData fromCurrencyCode(String code) {
+    switch (code) {
+      case 'INR':
+        return Icons.currency_rupee_rounded;
+      case 'USD':
+      case 'AUD':
+      case 'CAD':
+      case 'SGD':
+      case 'HKD':
+      case 'MXN':
+      case 'BRL':
+        return Icons.attach_money_rounded;
+      case 'EUR':
+        return Icons.euro_rounded;
+      case 'GBP':
+        return Icons.currency_pound_rounded;
+      case 'JPY':
+      case 'CNY':
+        return Icons.currency_yen_rounded;
+      case 'KRW':
+        return Icons.payments_rounded;
+      case 'TRY':
+        return Icons.currency_lira_rounded;
+      case 'RUB':
+        return Icons.currency_ruble_rounded;
+      case 'BTC':
+        return Icons.currency_bitcoin_rounded;
+      case 'THB':
+        return Icons.payments_rounded;
+      default:
+        return Icons.payments_rounded;
+    }
+  }
 }

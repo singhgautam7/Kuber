@@ -33,6 +33,8 @@ import '../../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/splash/screens/splash_screen.dart';
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
 final _shellHistoryKey = GlobalKey<NavigatorState>(debugLabel: 'history');
@@ -42,10 +44,13 @@ final _shellMoreKey = GlobalKey<NavigatorState>(debugLabel: 'more');
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
+    initialLocation: '/splash',
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
       final onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
+
+      // Allow splash screen to show
+      if (state.matchedLocation == '/splash') return null;
 
       // If opening for the first time, go to onboarding
       if (!onboarded && !state.matchedLocation.startsWith('/onboarding')) {
@@ -61,6 +66,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/onboarding',
         parentNavigatorKey: _rootNavigatorKey,

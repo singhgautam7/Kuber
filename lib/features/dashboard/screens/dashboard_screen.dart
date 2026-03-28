@@ -66,7 +66,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           bottom: navBarBottomPadding(context),
         ),
         children: [
-          const KuberAppBar(),
+          const KuberAppBar(horizontalPadding: 0),
           const SizedBox(height: KuberSpacing.lg),
 
           // Greeting
