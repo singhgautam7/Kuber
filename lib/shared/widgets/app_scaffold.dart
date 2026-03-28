@@ -25,6 +25,7 @@ class AppScaffold extends ConsumerStatefulWidget {
 class _AppScaffoldState extends ConsumerState<AppScaffold>
     with SingleTickerProviderStateMixin {
   bool _showSpeedDial = false;
+  bool _isAnimatingProgrammatically = false;
   late final PageController _pageController;
   late final AnimationController _dialController;
   late final Animation<double> _dialAnimation;
@@ -58,11 +59,30 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (widget.navigationShell!.currentIndex != oldWidget.navigationShell!.currentIndex) {
       if (_pageController.hasClients &&
           _pageController.page?.round() != widget.navigationShell!.currentIndex) {
-        _pageController.animateToPage(
-          widget.navigationShell!.currentIndex,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        final currentPage = _pageController.page?.round() ?? 0;
+        final targetIndex = widget.navigationShell!.currentIndex;
+        final distance = (targetIndex - currentPage).abs();
+        if (distance > 1) {
+          _isAnimatingProgrammatically = true;
+          final jumpTo = targetIndex > currentPage ? targetIndex - 1 : targetIndex + 1;
+          _pageController.jumpToPage(jumpTo);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _pageController.animateToPage(
+              targetIndex,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            ).then((_) {
+              _isAnimatingProgrammatically = false;
+            });
+          });
+        } else {
+          _pageController.animateToPage(
+            targetIndex,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
       }
     }
   }
@@ -75,15 +95,34 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       initialLocation: index == widget.navigationShell!.currentIndex,
     );
     if (_pageController.hasClients) {
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      final currentPage = _pageController.page?.round() ?? 0;
+      final distance = (index - currentPage).abs();
+      if (distance > 1) {
+        _isAnimatingProgrammatically = true;
+        final jumpTo = index > currentPage ? index - 1 : index + 1;
+        _pageController.jumpToPage(jumpTo);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          ).then((_) {
+            _isAnimatingProgrammatically = false;
+          });
+        });
+      } else {
+        _pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
   void _onPageChanged(int index) {
+    if (_isAnimatingProgrammatically) return;
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
     widget.navigationShell!.goBranch(index);

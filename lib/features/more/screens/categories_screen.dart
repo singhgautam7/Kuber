@@ -16,6 +16,8 @@ import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../budgets/providers/budget_provider.dart';
 import '../../budgets/widgets/budget_details_sheet.dart';
+import '../../../core/utils/date_formatter.dart';
+import '../../../shared/widgets/app_button.dart';
 import 'add_edit_category_screen.dart';
 
 class CategoriesScreen extends ConsumerWidget {
@@ -367,14 +369,15 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
                 actions: [
                   TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-                  FilledButton(
+                  AppButton(
+                    label: 'Save',
+                    type: AppButtonType.primary,
                     onPressed: canSave
                         ? () {
                             onSave(ref, normalized);
                             Navigator.pop(context);
                           }
                         : null,
-                    child: const Text('Save'),
                   ),
                 ],
               );
@@ -395,13 +398,13 @@ class CategoriesScreen extends ConsumerWidget {
         content: Text('Categories in "${group.name}" will be moved to "Ungrouped".'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: cs.error),
+          AppButton(
+            label: 'Delete',
+            type: AppButtonType.primary,
             onPressed: () {
               ref.read(categoryGroupListProvider.notifier).delete(group.id);
               Navigator.pop(context);
             },
-            child: const Text('Delete'),
           ),
         ],
       ),
@@ -484,6 +487,34 @@ class CategoriesScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+              // Last Transaction Activity
+              Consumer(
+                builder: (context, ref, _) {
+                  final latestTxnAsync = ref.watch(categoryRecentTransactionProvider(cat.id));
+                 
+                  return latestTxnAsync.when(
+                    data: (txn) => Row(
+                      children: [
+                        Icon(Icons.access_time_rounded, size: 14, color: cs.onSurfaceVariant),
+                        const SizedBox(width: 6),
+                        Text(
+                          txn != null
+                              ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
+                              : 'No transactions yet',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  );
+                },
+              ),
               const SizedBox(height: 32),
               _buildDetailItem(context, label: 'GROUP', value: groupName ?? 'None'),
               const SizedBox(height: 16),
@@ -500,25 +531,26 @@ class CategoriesScreen extends ConsumerWidget {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: AppButton(
+                      label: 'Edit',
+                      icon: Icons.edit_outlined,
+                      type: AppButtonType.normal,
                       onPressed: () {
                         Navigator.pop(context);
                         context.push('/category/add', extra: CategoryRouteArgs(category: cat));
                       },
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: const Text('Edit'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(backgroundColor: cs.errorContainer, foregroundColor: cs.onErrorContainer),
+                    child: AppButton(
+                      label: 'Delete',
+                      icon: Icons.delete_outline_rounded,
+                      type: AppButtonType.danger,
                       onPressed: () {
                         Navigator.pop(context);
                         _confirmDelete(context, ref, cat);
                       },
-                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: const Text('Delete'),
                     ),
                   ),
                 ],
@@ -569,16 +601,10 @@ class CategoriesScreen extends ConsumerWidget {
             style: GoogleFonts.inter(color: cs.onSurfaceVariant),
           ),
           actions: [
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+            AppButton(
+              label: 'OK',
+              type: AppButtonType.primary,
               onPressed: () => Navigator.pop(context),
-              child: Text('OK',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
             ),
           ],
         ),
@@ -607,20 +633,14 @@ class CategoriesScreen extends ConsumerWidget {
               child: Text('Cancel',
                   style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
             ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: cs.error,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
+            AppButton(
+              label: 'Delete',
+              type: AppButtonType.primary,
               onPressed: () {
                 ref.read(categoryRepositoryProvider).delete(cat.id);
                 ref.invalidate(categoryListProvider);
                 Navigator.pop(context);
               },
-              child: Text('Delete',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
             ),
           ],
         ),

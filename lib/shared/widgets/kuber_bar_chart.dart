@@ -7,6 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart';
 
+// ---------------------------------------------------------------------------
+// Data model
+// ---------------------------------------------------------------------------
+
 class KuberBarBucket {
   final String dayLabel;    // e.g. "21"
   final String monthLabel;  // e.g. "OCT"
@@ -23,12 +27,21 @@ class KuberBarBucket {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Chart type enum
+// ---------------------------------------------------------------------------
+
+enum KuberChartType { bar, line }
+
+// ---------------------------------------------------------------------------
+// Main widget
+// ---------------------------------------------------------------------------
+
 class KuberBarChart extends ConsumerStatefulWidget {
   final List<KuberBarBucket> buckets;
   final String title;
   final String? subtitle;
   final double height;
-  final String Function(double)? formatAmount;
 
   const KuberBarChart({
     super.key,
@@ -36,286 +49,359 @@ class KuberBarChart extends ConsumerStatefulWidget {
     required this.title,
     this.subtitle,
     this.height = 200,
-    this.formatAmount,
   });
 
   @override
   ConsumerState<KuberBarChart> createState() => _KuberBarChartState();
 }
 
-class _KuberBarChartState extends ConsumerState<KuberBarChart> {
-  int _touchedGroupIndex = -1;
+class _KuberBarChartState extends ConsumerState<KuberBarChart>
+    with SingleTickerProviderStateMixin {
+  int _touchedIndex = -1;
+  KuberChartType _chartType = KuberChartType.bar;
 
-  // Visual gap in logical pixels
-  static const double _visualGapPx = 3.0;
-  // Black overlay blended into bar color when dimmed
-  static const Color _dimOverlay  = Color(0x99000000); // 60% black
+  late final AnimationController _detailAnim;
+  late final Animation<double> _detailFade;
+  late final Animation<Offset> _detailSlide;
+
+  // Visual gap between stacked bar segments (data-space units)
+  static const double _segmentGap = 2.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _detailAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _detailFade = CurvedAnimation(parent: _detailAnim, curve: Curves.easeOut);
+    _detailSlide = Tween<Offset>(
+      begin: const Offset(0, -0.15),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _detailAnim, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _detailAnim.dispose();
+    super.dispose();
+  }
+
+  void _onTap(int index) {
+    setState(() {
+      if (_touchedIndex == index) {
+        _touchedIndex = -1;
+        _detailAnim.reverse();
+      } else {
+        _touchedIndex = index;
+        _detailAnim.forward();
+      }
+    });
+  }
+
+  void _switchChartType(KuberChartType type) {
+    if (type == _chartType) return;
+    setState(() {
+      _chartType = type;
+      _touchedIndex = -1;
+      _detailAnim.reverse();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Computed helpers
+  // ---------------------------------------------------------------------------
+
+  double get _maxY {
+    if (widget.buckets.isEmpty) return 100;
+    double maxVal = 0;
+    for (final b in widget.buckets) {
+      final highest = max(b.income, b.expense);
+      if (highest > maxVal) maxVal = highest;
+    }
+    return (maxVal * 1.15).ceilToDouble();
+  }
+
+  double get _gridInterval {
+    final m = _maxY;
+    if (m <= 100) return 25;
+    if (m <= 500) return 100;
+    if (m <= 2000) return 500;
+    if (m <= 10000) return 2000;
+    return (m / 4).roundToDouble();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Build
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.5), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  if (widget.subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(widget.subtitle!,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        color: cs.onSurfaceVariant)),
-                  ],
-                ],
-              ),
-              // Legend
-              Row(children: [
-                _LegendDot(color: cs.tertiary, label: 'INC'),
-                const SizedBox(width: 12),
-                _LegendDot(color: cs.error, label: 'EXP'),
-              ]),
-            ],
+    final tt = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title + subtitle ABOVE the card
+        Text(
+          widget.title,
+          style: tt.labelSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
           ),
-          const SizedBox(height: 20),
-
-          // Chart
-          SizedBox(
-            height: widget.height,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final cs = Theme.of(context).colorScheme;
-                final slotWidth =
-                    constraints.maxWidth / widget.buckets.length;
-                final barWidth =
-                    (slotWidth * 0.55).clamp(12.0, 32.0);
-
-                return BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: _maxY,
-                    barTouchData: BarTouchData(
-                      enabled: true,
-                      touchTooltipData: BarTouchTooltipData(
-                        getTooltipColor: (_) => Colors.transparent,
-                        tooltipPadding: EdgeInsets.zero,
-                        getTooltipItem: (_, _, _, _) => null,
-                      ),
-                      touchCallback: (FlTouchEvent event, response) {
-                        if (event is FlTapUpEvent) {
-                          setState(() {
-                            if (response?.spot == null) {
-                              _touchedGroupIndex = -1;
-                            } else {
-                              final idx = response!.spot!.touchedBarGroupIndex;
-                              _touchedGroupIndex = _touchedGroupIndex == idx ? -1 : idx;
-                            }
-                          });
-                        }
-                      },
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: _gridInterval,
-                      getDrawingHorizontalLine: (_) => FlLine(
-                        color: cs.outline,
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 44,
-                          getTitlesWidget: (value, meta) {
-                            if (value == meta.max && (value % _gridInterval) != 0) {
-                              return const SizedBox.shrink();
-                            }
-                            final formatter = ref.watch(formatterProvider);
-                            if (value == meta.min) {
-                              return Text(formatter.formatCurrency(0),
-                                style: GoogleFonts.inter(
-                                  fontSize: 10,
-                                  color: cs.onSurfaceVariant));
-                            }
-                            return Text(formatter.formatCompactCurrency(value),
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: cs.onSurfaceVariant));
-                          },
-                        ),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false)),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 36,
-                          getTitlesWidget: (value, meta) {
-                            final i = value.toInt();
-                            if (i < 0 || i >= widget.buckets.length) {
-                              return const SizedBox.shrink();
-                            }
-                            final b = widget.buckets[i];
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(b.dayLabel,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11,
-                                      fontWeight: b.isHighlighted
-                                          ? FontWeight.w700
-                                          : FontWeight.w400,
-                                      color: b.isHighlighted
-                                          ? cs.onSurface
-                                          : cs.onSurfaceVariant)),
-                                  Text(b.monthLabel,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 10,
-                                      fontWeight: b.isHighlighted
-                                          ? FontWeight.w700
-                                          : FontWeight.w400,
-                                      color: b.isHighlighted
-                                          ? cs.onSurface
-                                          : cs.onSurfaceVariant)),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    barGroups: _buildGroups(barWidth, cs),
-                  ),
-                );
-              },
+        ),
+        if (widget.subtitle != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            widget.subtitle!,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: cs.onSurfaceVariant,
             ),
           ),
-
-          // Detail panel
-          AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            child: _touchedGroupIndex != -1 && _touchedGroupIndex < widget.buckets.length
-                ? _buildDetailPanel(widget.buckets[_touchedGroupIndex], cs)
-                : const SizedBox.shrink(),
-          ),
         ],
-      ),
-    );
-  }
+        const SizedBox(height: KuberSpacing.sm),
 
-  Widget _buildDetailPanel(KuberBarBucket bucket, ColorScheme cs) {
-    final net = bucket.income - bucket.expense;
-    final maxVal = max(bucket.income, bucket.expense).clamp(1.0, double.infinity);
-
-    String formatAmt(double val) {
-      if (widget.formatAmount != null) return widget.formatAmount!(val);
-      return ref.watch(formatterProvider).formatCurrency(val);
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        children: [
-          _DetailBar(
-            label: 'Income',
-            amount: formatAmt(bucket.income),
-            ratio: bucket.income / maxVal,
-            color: cs.tertiary,
+        // Card container
+        Container(
+          padding: const EdgeInsets.all(KuberSpacing.lg),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(
+              color: cs.outline.withValues(alpha: 0.5),
+              width: 1,
+            ),
           ),
-          const SizedBox(height: 12),
-          _DetailBar(
-            label: 'Expense',
-            amount: formatAmt(bucket.expense),
-            ratio: bucket.expense / maxVal,
-            color: cs.error,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
             children: [
-              Text(
-                'Net',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: cs.onSurfaceVariant,
-                ),
+              // Legend (left) + chart type tabs (right)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(children: [
+                    _LegendDot(color: cs.tertiary, label: 'INC'),
+                    const SizedBox(width: KuberSpacing.md),
+                    _LegendDot(color: cs.error, label: 'EXP'),
+                  ]),
+                  _ChartTypeTabs(
+                    current: _chartType,
+                    onChanged: _switchChartType,
+                  ),
+                ],
               ),
-              Text(
-                '${net >= 0 ? '+' : ''}${formatAmt(net)}',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: net >= 0 ? cs.tertiary : cs.error,
+
+              const SizedBox(height: KuberSpacing.lg),
+
+              // Chart area with floating tooltip overlay
+              SizedBox(
+                height: widget.height,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Chart fills the stack
+                    Positioned.fill(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return _chartType == KuberChartType.bar
+                              ? _buildBarChart(constraints, cs)
+                              : _buildLineChart(cs);
+                        },
+                      ),
+                    ),
+                    // Tooltip overlay at top
+                    if (_touchedIndex >= 0 &&
+                        _touchedIndex < widget.buckets.length)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: SlideTransition(
+                          position: _detailSlide,
+                          child: FadeTransition(
+                            opacity: _detailFade,
+                            child: _DetailPanel(
+                              bucket: widget.buckets[_touchedIndex],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Shared axis titles
+  // ---------------------------------------------------------------------------
+
+  FlTitlesData _titlesData(ColorScheme cs) {
+    return FlTitlesData(
+      leftTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 44,
+          getTitlesWidget: (value, meta) {
+            if (value == meta.max && (value % _gridInterval) != 0) {
+              return const SizedBox.shrink();
+            }
+            final formatter = ref.watch(formatterProvider);
+            if (value == meta.min) {
+              return Text(
+                formatter.formatCurrency(0),
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  color: cs.onSurfaceVariant,
+                ),
+              );
+            }
+            return Text(
+              formatter.formatCompactCurrency(value),
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                color: cs.onSurfaceVariant,
+              ),
+            );
+          },
+        ),
+      ),
+      rightTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+      topTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+      bottomTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 36,
+          getTitlesWidget: (value, meta) {
+            final i = value.toInt();
+            if (i < 0 || i >= widget.buckets.length) {
+              return const SizedBox.shrink();
+            }
+            final b = widget.buckets[i];
+            return Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    b.dayLabel,
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: b.isHighlighted
+                          ? FontWeight.w700
+                          : FontWeight.w400,
+                      color: b.isHighlighted
+                          ? cs.onSurface
+                          : cs.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    b.monthLabel,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: b.isHighlighted
+                          ? FontWeight.w700
+                          : FontWeight.w400,
+                      color: b.isHighlighted
+                          ? cs.onSurface
+                          : cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  List<BarChartGroupData> _buildGroups(double barWidth, ColorScheme cs) {
-    // Gap in data terms based on the max Y value and chart height
-    final double dataGap = (_maxY * _visualGapPx) / widget.height;
+  FlGridData _gridData(ColorScheme cs) {
+    return FlGridData(
+      show: true,
+      drawVerticalLine: false,
+      horizontalInterval: _gridInterval,
+      getDrawingHorizontalLine: (_) => FlLine(
+        color: cs.outline,
+        strokeWidth: 1,
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Bar chart
+  // ---------------------------------------------------------------------------
+
+  Widget _buildBarChart(BoxConstraints constraints, ColorScheme cs) {
+    final slotWidth = constraints.maxWidth / widget.buckets.length;
+    final barWidth = (slotWidth * 0.55).clamp(12.0, 32.0);
+    final double dataGap = (_maxY * _segmentGap) / widget.height;
+
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: _maxY,
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            getTooltipColor: (_) => Colors.transparent,
+            tooltipPadding: EdgeInsets.zero,
+            getTooltipItem: (_, _, _, _) => null,
+          ),
+          touchCallback: (FlTouchEvent event, response) {
+            if (event is FlTapUpEvent) {
+              if (response?.spot == null) {
+                _onTap(-1);
+              } else {
+                _onTap(response!.spot!.touchedBarGroupIndex);
+              }
+            }
+          },
+        ),
+        gridData: _gridData(cs),
+        borderData: FlBorderData(show: false),
+        titlesData: _titlesData(cs),
+        barGroups: _buildBarGroups(barWidth, dataGap, cs),
+      ),
+    );
+  }
+
+  List<BarChartGroupData> _buildBarGroups(
+      double barWidth, double dataGap, ColorScheme cs) {
+    final dimOverlay = cs.surface.withValues(alpha: 0.5);
 
     return widget.buckets.asMap().entries.map((entry) {
       final i = entry.key;
       final b = entry.value;
-      final isDimmed =
-          _touchedGroupIndex != -1 && _touchedGroupIndex != i;
+      final isDimmed = _touchedIndex != -1 && _touchedIndex != i;
 
-      // Determine which segment goes on top (larger value)
       final bool expenseOnTop = b.expense >= b.income;
-      final double bottomVal  = expenseOnTop ? b.income   : b.expense;
-      final double topVal     = expenseOnTop ? b.expense  : b.income;
-      final Color  bottomColor = expenseOnTop
-          ? cs.tertiary
-          : cs.error;
-      final Color  topColor    = expenseOnTop
-          ? cs.error
-          : cs.tertiary;
+      final double bottomVal = expenseOnTop ? b.income : b.expense;
+      final double topVal = expenseOnTop ? b.expense : b.income;
+      final Color bottomColor = expenseOnTop ? cs.tertiary : cs.error;
+      final Color topColor = expenseOnTop ? cs.error : cs.tertiary;
 
-      // Apply dim overlay by blending black into the color
-      Color applyDim(Color c) => isDimmed
-          ? Color.alphaBlend(_dimOverlay, c)
-          : c;
+      Color applyDim(Color c) =>
+          isDimmed ? Color.alphaBlend(dimOverlay, c) : c;
 
       final bool hasBottom = bottomVal > 0;
       final bool hasTop = topVal > 0;
-      final double gap = (hasBottom && hasTop && topVal > bottomVal) ? dataGap : 0.0;
+      final double gap =
+          (hasBottom && hasTop && topVal > bottomVal) ? dataGap : 0.0;
 
       double adjustedTopFrom = bottomVal + gap;
       double adjustedTopTo = topVal;
-
       if (hasTop && hasBottom && adjustedTopTo <= adjustedTopFrom) {
-         adjustedTopTo = adjustedTopFrom + (dataGap * 0.5);
+        adjustedTopTo = adjustedTopFrom + (dataGap * 0.5);
       }
 
       return BarChartGroupData(
@@ -327,7 +413,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart> {
                   toY: 0,
                   color: Colors.transparent,
                   width: barWidth,
-                )
+                ),
               ]
             : [
                 if (hasBottom)
@@ -351,26 +437,106 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart> {
     }).toList();
   }
 
-  double get _maxY {
-    if (widget.buckets.isEmpty) return 100;
-    double maxVal = 0;
-    for (final b in widget.buckets) {
-      final highest = max(b.income, b.expense);
-      if (highest > maxVal) maxVal = highest;
-    }
-    // ensure gap logic doesn't inflate max bound endlessly
-    return (maxVal * 1.15).ceilToDouble();
+  // ---------------------------------------------------------------------------
+  // Line chart
+  // ---------------------------------------------------------------------------
+
+  Widget _buildLineChart(ColorScheme cs) {
+    return LineChart(
+      LineChartData(
+        maxY: _maxY,
+        lineTouchData: LineTouchData(
+          enabled: true,
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (_) => Colors.transparent,
+            getTooltipItems: (_) => [null, null],
+          ),
+          touchCallback: (FlTouchEvent event, response) {
+            if (event is FlTapUpEvent) {
+              if (response?.lineBarSpots == null ||
+                  response!.lineBarSpots!.isEmpty) {
+                _onTap(-1);
+              } else {
+                _onTap(response.lineBarSpots!.first.spotIndex);
+              }
+            } else if (event is FlPanUpdateEvent) {
+              if (response?.lineBarSpots != null &&
+                  response!.lineBarSpots!.isNotEmpty) {
+                final idx = response.lineBarSpots!.first.spotIndex;
+                if (idx != _touchedIndex) {
+                  setState(() {
+                    _touchedIndex = idx;
+                  });
+                  _detailAnim.forward();
+                }
+              }
+            } else if (event is FlPanEndEvent) {
+              setState(() {
+                _touchedIndex = -1;
+              });
+              _detailAnim.reverse();
+            }
+          },
+        ),
+        gridData: _gridData(cs),
+        borderData: FlBorderData(show: false),
+        titlesData: _titlesData(cs),
+        lineBarsData: [
+          _lineData(
+            cs.tertiary,
+            widget.buckets.map((b) => b.income).toList(),
+          ),
+          _lineData(
+            cs.error,
+            widget.buckets.map((b) => b.expense).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
-  double get _gridInterval {
-    final max = _maxY;
-    if (max <= 100)    return 25;
-    if (max <= 500)    return 100;
-    if (max <= 2000)   return 500;
-    if (max <= 10000)  return 2000;
-    return (max / 4).roundToDouble();
+  LineChartBarData _lineData(Color color, List<double> values) {
+    return LineChartBarData(
+      isCurved: false,
+      color: color,
+      barWidth: 2.5,
+      isStrokeCapRound: true,
+      dotData: FlDotData(
+        show: true,
+        getDotPainter: (spot, _, __, ___) {
+          final isSelected = spot.x.toInt() == _touchedIndex;
+          final cs = Theme.of(context).colorScheme;
+          return FlDotCirclePainter(
+            radius: isSelected ? 5 : 3,
+            color: color,
+            strokeWidth: isSelected ? 2 : 0,
+            strokeColor: cs.surface,
+          );
+        },
+      ),
+      belowBarData: BarAreaData(
+        show: true,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            color.withValues(alpha: 0.18),
+            color.withValues(alpha: 0.0),
+          ],
+        ),
+      ),
+      spots: values
+          .asMap()
+          .entries
+          .map((e) => FlSpot(e.key.toDouble(), e.value))
+          .toList(),
+    );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Private sub-widgets
+// ---------------------------------------------------------------------------
 
 class _LegendDot extends StatelessWidget {
   final Color color;
@@ -379,63 +545,188 @@ class _LegendDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(children: [
-    Container(width: 8, height: 8,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-    const SizedBox(width: 5),
-    Text(label,
-      style: GoogleFonts.inter(
-        fontSize: 10, fontWeight: FontWeight.w600,
-        color: color)),
-  ]);
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ]);
 }
 
-class _DetailBar extends StatelessWidget {
-  final String label;
-  final String amount;
-  final double ratio;
-  final Color color;
+class _ChartTypeTabs extends StatelessWidget {
+  final KuberChartType current;
+  final ValueChanged<KuberChartType> onChanged;
 
-  const _DetailBar({
-    required this.label,
-    required this.amount,
-    required this.ratio,
-    required this.color,
+  const _ChartTypeTabs({required this.current, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ChartTypeTab(
+            icon: Icons.bar_chart_rounded,
+            isActive: current == KuberChartType.bar,
+            onTap: () => onChanged(KuberChartType.bar),
+          ),
+          _ChartTypeTab(
+            icon: Icons.show_chart_rounded,
+            isActive: current == KuberChartType.line,
+            onTap: () => onChanged(KuberChartType.line),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartTypeTab extends StatelessWidget {
+  final IconData icon;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _ChartTypeTab({
+    required this.icon,
+    required this.isActive,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            Text(
-              amount,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-            ),
-          ],
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpacing.sm,
+          vertical: KuberSpacing.xs,
         ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(3),
-          child: LinearProgressIndicator(
-            value: ratio.clamp(0, 1),
-            backgroundColor: color.withValues(alpha: 0.15),
-            color: color,
-            minHeight: 5,
+        decoration: BoxDecoration(
+          color: isActive ? cs.surfaceContainer : Colors.transparent,
+          borderRadius: BorderRadius.circular(KuberRadius.sm),
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: isActive ? cs.primary : cs.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailPanel extends ConsumerWidget {
+  final KuberBarBucket bucket;
+
+  const _DetailPanel({required this.bucket});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final formatter = ref.watch(formatterProvider);
+    final net = bucket.income - bucket.expense;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.md,
+        vertical: KuberSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: cs.inverseSurface,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(
+          color: cs.outline.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cs.shadow.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _DetailRow(
+            label: 'Expense',
+            amount: formatter.formatCurrency(bucket.expense),
+            color: cs.error,
+            labelColor: cs.onInverseSurface,
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          _DetailRow(
+            label: 'Income',
+            amount: formatter.formatCurrency(bucket.income),
+            color: cs.tertiary,
+            labelColor: cs.onInverseSurface,
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          _DetailRow(
+            label: 'Net',
+            amount:
+                '${net >= 0 ? '+' : ''}${formatter.formatCurrency(net.abs())}',
+            color: net >= 0 ? cs.tertiary : cs.error,
+            labelColor: cs.onInverseSurface,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String amount;
+  final Color color;
+  final Color labelColor;
+
+  const _DetailRow({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.labelColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 11,
+            color: labelColor,
+          ),
+        ),
+        Text(
+          amount,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

@@ -143,7 +143,7 @@ class AboutScreen extends ConsumerWidget {
                           ),
                           Consumer(
                             builder: (context, ref, _) {
-                              final version = ref.watch(appVersionProvider).valueOrNull ?? '1.0.0';
+                              final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
                               return Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,

@@ -21,21 +21,27 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
 
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Recent Transactions',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                )),
-            TextButton(
-              onPressed: () => context.go('/history'),
-              child: Text('View All',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colorScheme.primary,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('RECENT TRANSACTIONS',
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
                   )),
-            ),
-          ],
+              GestureDetector(
+                onTap: () => context.go('/history'),
+                child: Text('VIEW ALL',
+                    style: textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: colorScheme.primary,
+                    )),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: KuberSpacing.md),
         recentAsync.when(

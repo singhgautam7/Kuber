@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -53,7 +54,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   // ---- bucket helpers -----------------------------------------------------
 
   List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns, AnalyticsFilter filter) {
-    txns = txns.where((t) => t.type != 'transfer').toList();
+    txns = txns.where((t) => t.type != 'transfer' && !t.isBalanceAdjustment).toList();
     List<_MutableBucket> buckets = [];
 
     switch (filter.type) {
@@ -231,7 +232,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ..sort((a, b) => b.amount.compareTo(a.amount));
     final top5 = biggest.take(5).toList();
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        context.go('/');
+      },
+      child: Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(
           left: KuberSpacing.lg,
@@ -484,6 +491,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 

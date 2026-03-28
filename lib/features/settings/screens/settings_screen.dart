@@ -378,7 +378,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       label: 'App Version',
                       trailing: Consumer(
                         builder: (context, ref, _) {
-                          final version = ref.watch(appVersionProvider).valueOrNull ?? '1.0.0';
+                          final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
                           return Text(
                             'v$version',
                             style: GoogleFonts.inter(

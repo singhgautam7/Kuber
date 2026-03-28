@@ -42,43 +42,48 @@ const TransactionSchema = CollectionSchema(
       name: r'fromAccountId',
       type: IsarType.string,
     ),
-    r'isRecurring': PropertySchema(
+    r'isBalanceAdjustment': PropertySchema(
       id: 5,
+      name: r'isBalanceAdjustment',
+      type: IsarType.bool,
+    ),
+    r'isRecurring': PropertySchema(
+      id: 6,
       name: r'isRecurring',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'name',
       type: IsarType.string,
     ),
     r'nameLower': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'nameLower',
       type: IsarType.string,
     ),
     r'notes': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'notes',
       type: IsarType.string,
     ),
     r'recurringRuleId': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'recurringRuleId',
       type: IsarType.long,
     ),
     r'toAccountId': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'toAccountId',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'type',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -216,14 +221,15 @@ void _transactionSerialize(
   writer.writeString(offsets[2], object.categoryId);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeString(offsets[4], object.fromAccountId);
-  writer.writeBool(offsets[5], object.isRecurring);
-  writer.writeString(offsets[6], object.name);
-  writer.writeString(offsets[7], object.nameLower);
-  writer.writeString(offsets[8], object.notes);
-  writer.writeLong(offsets[9], object.recurringRuleId);
-  writer.writeString(offsets[10], object.toAccountId);
-  writer.writeString(offsets[11], object.type);
-  writer.writeDateTime(offsets[12], object.updatedAt);
+  writer.writeBool(offsets[5], object.isBalanceAdjustment);
+  writer.writeBool(offsets[6], object.isRecurring);
+  writer.writeString(offsets[7], object.name);
+  writer.writeString(offsets[8], object.nameLower);
+  writer.writeString(offsets[9], object.notes);
+  writer.writeLong(offsets[10], object.recurringRuleId);
+  writer.writeString(offsets[11], object.toAccountId);
+  writer.writeString(offsets[12], object.type);
+  writer.writeDateTime(offsets[13], object.updatedAt);
 }
 
 Transaction _transactionDeserialize(
@@ -239,14 +245,15 @@ Transaction _transactionDeserialize(
   object.createdAt = reader.readDateTime(offsets[3]);
   object.fromAccountId = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.isRecurring = reader.readBool(offsets[5]);
-  object.name = reader.readString(offsets[6]);
-  object.nameLower = reader.readString(offsets[7]);
-  object.notes = reader.readStringOrNull(offsets[8]);
-  object.recurringRuleId = reader.readLongOrNull(offsets[9]);
-  object.toAccountId = reader.readStringOrNull(offsets[10]);
-  object.type = reader.readString(offsets[11]);
-  object.updatedAt = reader.readDateTime(offsets[12]);
+  object.isBalanceAdjustment = reader.readBool(offsets[5]);
+  object.isRecurring = reader.readBool(offsets[6]);
+  object.name = reader.readString(offsets[7]);
+  object.nameLower = reader.readString(offsets[8]);
+  object.notes = reader.readStringOrNull(offsets[9]);
+  object.recurringRuleId = reader.readLongOrNull(offsets[10]);
+  object.toAccountId = reader.readStringOrNull(offsets[11]);
+  object.type = reader.readString(offsets[12]);
+  object.updatedAt = reader.readDateTime(offsets[13]);
   return object;
 }
 
@@ -270,18 +277,20 @@ P _transactionDeserializeProp<P>(
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
-    case 9:
-      return (reader.readLongOrNull(offset)) as P;
-    case 10:
-      return (reader.readStringOrNull(offset)) as P;
-    case 11:
       return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readLongOrNull(offset)) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
     case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1461,6 +1470,16 @@ extension TransactionQueryFilter
   }
 
   QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+      isBalanceAdjustmentEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isBalanceAdjustment',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
       isRecurringEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -2371,6 +2390,20 @@ extension TransactionQuerySortBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+      sortByIsBalanceAdjustment() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBalanceAdjustment', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+      sortByIsBalanceAdjustmentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBalanceAdjustment', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByIsRecurring() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isRecurring', Sort.asc);
@@ -2544,6 +2577,20 @@ extension TransactionQuerySortThenBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+      thenByIsBalanceAdjustment() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBalanceAdjustment', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+      thenByIsBalanceAdjustmentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isBalanceAdjustment', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByIsRecurring() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isRecurring', Sort.asc);
@@ -2678,6 +2725,13 @@ extension TransactionQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QDistinct>
+      distinctByIsBalanceAdjustment() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isBalanceAdjustment');
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QDistinct> distinctByIsRecurring() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isRecurring');
@@ -2768,6 +2822,13 @@ extension TransactionQueryProperty
   QueryBuilder<Transaction, String?, QQueryOperations> fromAccountIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fromAccountId');
+    });
+  }
+
+  QueryBuilder<Transaction, bool, QQueryOperations>
+      isBalanceAdjustmentProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isBalanceAdjustment');
     });
   }
 

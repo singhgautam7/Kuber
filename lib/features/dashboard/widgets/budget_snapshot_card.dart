@@ -23,30 +23,35 @@ class BudgetSnapshotCard extends ConsumerWidget {
       data: (snapshots) {
         if (snapshots.isEmpty) return const SizedBox.shrink();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Budget Snapshot',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
+        return Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'BUDGET SNAPSHOT',
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(KuberSpacing.md),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(KuberSpacing.md),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainer,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+                ),
+                child: Column(
+                  children: snapshots.map((s) => _BudgetRow(snapshot: s)).toList(),
+                ),
               ),
-              child: Column(
-                children: snapshots.map((s) => _BudgetRow(snapshot: s)).toList(),
-              ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -55,30 +60,35 @@ class BudgetSnapshotCard extends ConsumerWidget {
   Widget _buildLoading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Budget Snapshot',
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.3,
-            color: cs.onSurface.withValues(alpha: 0.1),
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.sm),
-        Shimmer.fromColors(
-          baseColor: cs.surfaceContainerHigh,
-          highlightColor: cs.surfaceContainerLowest,
-          child: Container(
-            height: 180,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              'BUDGET SNAPSHOT',
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+                color: cs.onSurface.withValues(alpha: 0.1),
+              ),
             ),
           ),
-        ),
-      ],
+          Shimmer.fromColors(
+            baseColor: cs.surfaceContainerHigh,
+            highlightColor: cs.surfaceContainerLowest,
+            child: Container(
+              height: 180,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

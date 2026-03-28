@@ -25,25 +25,31 @@ class HomeAccountsCard extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Accounts',
-                  style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/more/accounts'),
-                  child: Text(
-                    'View All',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: cs.primary,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'ACCOUNTS',
+                    style: textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                ),
-              ],
+                  GestureDetector(
+                    onTap: () => context.push('/more/accounts'),
+                    child: Text(
+                      'VIEW ALL',
+                      style: textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.0,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: KuberSpacing.sm),
             SizedBox(

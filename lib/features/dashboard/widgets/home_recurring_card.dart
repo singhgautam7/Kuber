@@ -29,27 +29,35 @@ class HomeRecurringCard extends ConsumerWidget {
       data: (rules) {
         if (rules.isEmpty) return const SizedBox.shrink();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Recurring Transactions',
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    )),
-                TextButton(
-                  onPressed: () => GoRouter.of(context).push('/more/recurring'),
-                  child: Text('View All',
-                      style: textTheme.labelMedium?.copyWith(
-                        color: colorScheme.primary,
-                      )),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('RECURRING',
+                        style: textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
+                        )),
+                    GestureDetector(
+                      onTap: () => GoRouter.of(context).push('/more/recurring'),
+                      child: Text('VIEW ALL',
+                          style: textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.0,
+                            color: colorScheme.primary,
+                          )),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-            categoryMapAsync.when(
+              ),
+              const SizedBox(height: KuberSpacing.sm),
+              categoryMapAsync.when(
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
               data: (catMap) => Column(
@@ -169,8 +177,9 @@ class HomeRecurringCard extends ConsumerWidget {
                   );
                 }).toList(),
               ),
-            ),
-          ],
+              ),
+            ],
+          ),
         );
       },
     );

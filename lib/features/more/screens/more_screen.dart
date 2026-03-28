@@ -14,7 +14,13 @@ class MoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        context.go('/');
+      },
+      child: Scaffold(
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
@@ -115,6 +121,7 @@ class MoreScreen extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

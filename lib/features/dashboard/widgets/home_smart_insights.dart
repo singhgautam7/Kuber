@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../insights/models/insight.dart';
 import '../../insights/providers/insight_provider.dart';
 
@@ -12,97 +13,257 @@ class HomeSmartInsights extends ConsumerStatefulWidget {
 }
 
 class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
-  bool _showAllInsights = false;
+  late final PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.85);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final insights = ref.watch(smartInsightsProvider);
-    final textTheme = Theme.of(context).textTheme;
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
-    if (insights.isEmpty) return const SizedBox.shrink();
-
-    final visible = _showAllInsights ? insights : insights.take(3).toList();
-    final hasMore = insights.length > 3;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Smart Insights',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              if (hasMore)
-                GestureDetector(
-                  onTap: () => setState(() => _showAllInsights = !_showAllInsights),
-                  child: Text(
-                    _showAllInsights ? 'Show less' : 'Show more',
-                    style: textTheme.labelMedium?.copyWith(
-                      color: cs.primary,
-                    ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'SMART INSIGHTS',
+                  style: tt.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
                   ),
                 ),
-            ],
+                if (insights.isNotEmpty)
+                  Text(
+                    '${_currentIndex + 1}/${insights.length}',
+                    style: tt.labelSmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-        ...visible.map((insight) => _InsightTile(insight: insight)),
-      ],
+
+          SizedBox(
+            height: 200,
+            child: insights.isEmpty
+                ? const _InsightsEmptyState()
+                : PageView.builder(
+                    controller: _pageController,
+                    padEnds: false, // Keeps the first card left-aligned
+                    onPageChanged: (index) {
+                      setState(() => _currentIndex = index);
+                    },
+                    itemCount: insights.length,
+                    itemBuilder: (ctx, i) => Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _InsightCard(
+                        insight: insights[i],
+                        isFirst: i == 0,
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _InsightTile extends StatelessWidget {
+class _InsightCard extends StatelessWidget {
   final KuberInsight insight;
-  const _InsightTile({required this.insight});
+  final bool isFirst;
+
+  const _InsightCard({required this.insight, required this.isFirst});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final tt = Theme.of(context).textTheme;
 
-    final Color bgColor;
-    final Color borderColor;
-
-    if (insight.isPositive) {
-      bgColor = cs.tertiary.withValues(alpha: 0.08);
-      borderColor = cs.tertiary.withValues(alpha: 0.2);
-    } else {
-      bgColor = cs.error.withValues(alpha: 0.06);
-      borderColor = cs.error.withValues(alpha: 0.15);
-    }
+    final bgColor = isFirst ? cs.primary : cs.surfaceContainer;
+    final labelColor =
+        isFirst ? Colors.white.withValues(alpha: 0.55) : cs.onSurfaceVariant;
+    final iconColor = isFirst
+        ? Colors.white.withValues(alpha: 0.85)
+        : (insight.iconColor ?? cs.primary);
+    final textColor = isFirst ? Colors.white : cs.onSurface;
+    final borderColor = isFirst ? Colors.transparent : cs.outline;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor, width: 1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Type label
           Text(
-            insight.emoji,
-            style: const TextStyle(fontSize: 18),
+            insight.typeLabel,
+            style: tt.labelSmall?.copyWith(
+              color: labelColor,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+            ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
+          const SizedBox(height: 10),
+          // Icon
+          if (insight.iconData != null)
+            Icon(insight.iconData, color: iconColor, size: 28)
+          else
+            Text(insight.emoji, style: const TextStyle(fontSize: 24)),
+          const Spacer(),
+          // Message
+          if (isFirst)
+            Text(
               insight.message,
-              style: textTheme.bodyMedium?.copyWith(
+              style: tt.bodyMedium?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w700,
                 height: 1.4,
               ),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            )
+          else
+            _HighlightedText(
+              message: insight.message,
+              highlights: insight.highlights,
+              highlightColor:
+                  insight.highlightIsWarning ? cs.error : cs.primary,
+              baseStyle: tt.bodyMedium?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+              maxLines: 4,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsightsEmptyState extends StatelessWidget {
+  const _InsightsEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.insights_outlined,
+              color: cs.onSurfaceVariant, size: 32),
+          const SizedBox(height: 12),
+          Text(
+            'Keep adding transactions to unlock\ninsights about your finances.',
+            textAlign: TextAlign.center,
+            style: tt.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+              height: 1.5,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HighlightedText extends StatelessWidget {
+  final String message;
+  final List<String> highlights;
+  final Color highlightColor;
+  final TextStyle? baseStyle;
+  final int maxLines;
+
+  const _HighlightedText({
+    required this.message,
+    required this.highlights,
+    required this.highlightColor,
+    this.baseStyle,
+    this.maxLines = 4,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (highlights.isEmpty) {
+      return Text(message, style: baseStyle, maxLines: maxLines,
+          overflow: TextOverflow.ellipsis);
+    }
+
+    final spans = <({int start, int end, String text})>[];
+    for (final h in highlights) {
+      if (h.isEmpty) continue;
+      final idx = message.indexOf(h);
+      if (idx == -1) continue;
+      final end = idx + h.length;
+      final overlaps = spans.any((s) => idx < s.end && end > s.start);
+      if (!overlaps) {
+        spans.add((start: idx, end: end, text: h));
+      }
+    }
+
+    if (spans.isEmpty) {
+      return Text(message, style: baseStyle, maxLines: maxLines,
+          overflow: TextOverflow.ellipsis);
+    }
+
+    spans.sort((a, b) => a.start.compareTo(b.start));
+
+    final children = <TextSpan>[];
+    int cursor = 0;
+    for (final span in spans) {
+      if (span.start > cursor) {
+        children.add(TextSpan(text: message.substring(cursor, span.start)));
+      }
+      children.add(TextSpan(
+        text: span.text,
+        style: TextStyle(fontWeight: FontWeight.w700, color: highlightColor),
+      ));
+      cursor = span.end;
+    }
+    if (cursor < message.length) {
+      children.add(TextSpan(text: message.substring(cursor)));
+    }
+
+    return RichText(
+      text: TextSpan(style: baseStyle, children: children),
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

@@ -14,7 +14,7 @@ final burnRateProvider = FutureProvider<({double avgDaily, double projected})>((
   final daysElapsed = now.day;
 
   final monthlyExpenses = transactions.where((t) {
-    return t.type == 'expense' && t.createdAt.isAfter(monthStart.subtract(const Duration(seconds: 1)));
+    return t.type == 'expense' && !t.isBalanceAdjustment && t.createdAt.isAfter(monthStart.subtract(const Duration(seconds: 1)));
   }).toList();
 
   final totalSpend = monthlyExpenses.fold<double>(0, (sum, t) => sum + t.amount);
@@ -41,7 +41,7 @@ final analyticsCategoryStatsProvider = FutureProvider<List<CategoryStat>>((ref) 
     double overallTotal = 0;
 
     for (final t in transactions) {
-      if (t.type != 'expense') continue;
+      if (t.type != 'expense' || t.isBalanceAdjustment) continue;
       final catId = int.tryParse(t.categoryId) ?? -1;
       if (catId == -1) continue;
       totals[catId] = (totals[catId] ?? 0) + t.amount;
@@ -83,7 +83,7 @@ final analyticsGroupStatsProvider = FutureProvider<List<GroupStat>>((ref) async 
     double overallTotal = 0;
 
     for (final t in transactions) {
-      if (t.type != 'expense') continue;
+      if (t.type != 'expense' || t.isBalanceAdjustment) continue;
       final catId = int.tryParse(t.categoryId) ?? -1;
       if (catId == -1) continue;
       final cat = categoryMap[catId];
