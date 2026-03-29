@@ -58,3 +58,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - android/play_store_512.png
