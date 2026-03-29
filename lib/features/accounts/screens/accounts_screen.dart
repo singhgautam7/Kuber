@@ -184,12 +184,12 @@ class _AccountCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final balanceLabel =
-        account.isCreditCard ? 'Credit Utilized' : 'Available Balance';
+        account.isCreditCard ? 'Limit Spent' : 'Available Balance';
     final Color balanceColor;
     if (account.isCreditCard) {
-      balanceColor = balance > 0
+      balanceColor = balance < 0
           ? cs.error
-          : balance < 0
+          : balance > 0
               ? cs.tertiary
               : cs.onSurface;
     } else {

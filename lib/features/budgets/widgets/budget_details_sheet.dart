@@ -286,10 +286,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
           const SizedBox(height: KuberSpacing.sm),
           Center(
             child: TextButton.icon(
-              onPressed: () {
-                ref.read(budgetListProvider.notifier).delete(budget.id);
-                context.pop();
-              },
+              onPressed: () => _confirmDeleteBudget(context, ref),
               icon: const Icon(Icons.delete_outline, size: 18),
               label: Text(
                 'Delete Budget',
@@ -304,6 +301,50 @@ class BudgetDetailsSheet extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteBudget(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.sm),
+          side: BorderSide(color: cs.outline, width: 1),
+        ),
+        title: Text('Delete budget?',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          )),
+        content: Text(
+          'The budget for "${category.name}" will be permanently deleted.',
+          style: GoogleFonts.inter(
+            color: cs.onSurfaceVariant,
+          )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: GoogleFonts.inter()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.sm),
+              ),
+            ),
+            onPressed: () {
+              ref.read(budgetListProvider.notifier).delete(budget.id);
+              Navigator.pop(ctx);   // close dialog
+              context.pop();        // close sheet
+            },
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );

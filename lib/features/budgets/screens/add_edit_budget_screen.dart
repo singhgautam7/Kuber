@@ -225,6 +225,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
         .where((id) => id != -1)
         .toList();
 
+    FocusScope.of(context).unfocus();
     final result = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
@@ -236,6 +237,10 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
         disabledCategoryIds: disabledIds,
       ),
     );
+    if (!mounted) return;
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) FocusScope.of(context).unfocus();
+    });
     if (result != null) {
       final categories = await ref.read(categoryListProvider.future);
       setState(() {
@@ -257,6 +262,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
         // Just a precaution if someone tries to add alert before amount
     }
 
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -274,7 +280,11 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
           });
         },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 }
 

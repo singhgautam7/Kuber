@@ -290,7 +290,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             style: GoogleFonts.inter(color: cs.onSurface),
             decoration: InputDecoration(
-              labelText: 'Credit Utilized',
+              labelText: 'Limit Spent',
               prefixText: '$symbol ',
               prefixStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
               labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),

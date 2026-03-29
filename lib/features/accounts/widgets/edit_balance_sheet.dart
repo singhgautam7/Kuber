@@ -47,7 +47,11 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
     super.dispose();
   }
 
-  double? get _newValue => double.tryParse(_controller.text);
+  double? get _newValue {
+    final raw = double.tryParse(_controller.text);
+    if (raw == null) return null;
+    return widget.isCredit ? -raw : raw;
+  }
 
   double get _diff => (_newValue ?? widget.currentValue) - widget.currentValue;
 
@@ -59,11 +63,12 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
     setState(() => _saving = true);
 
     final diff = _diff;
-    final isPositive = diff > 0;
+    final transactionDiff = widget.isCredit ? -diff : diff;
+    final isPositive = transactionDiff > 0;
 
     final adjustment = Transaction()
       ..name = widget.isCredit ? 'Limit Spent Adjustment' : 'Balance Adjustment'
-      ..amount = diff.abs()
+      ..amount = transactionDiff.abs()
       ..type = isPositive ? 'income' : 'expense'
       ..accountId = widget.account.id.toString()
       ..categoryId = ''
@@ -206,11 +211,11 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
             ),
             decoration: InputDecoration(
               labelText: widget.isCredit ? 'New Limit Spent' : 'New Balance',
-              prefixText: '$symbol ',
+              prefixText: widget.isCredit ? '-$symbol ' : '$symbol ',
               prefixStyle: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
+                color: widget.isCredit ? cs.error : cs.onSurfaceVariant,
               ),
               labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
               border: OutlineInputBorder(

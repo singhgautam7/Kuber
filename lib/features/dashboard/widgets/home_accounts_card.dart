@@ -131,9 +131,9 @@ class HomeAccountsCard extends ConsumerWidget {
                               data: (balance) {
                                 final Color? balanceColor;
                                 if (account.isCreditCard) {
-                                  balanceColor = balance > 0
+                                  balanceColor = balance < 0
                                       ? cs.error
-                                      : balance < 0
+                                      : balance > 0
                                           ? cs.tertiary
                                           : null;
                                 } else {
