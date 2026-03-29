@@ -255,10 +255,8 @@ class DataService {
         // Temporarily store tags for post-save mapping
         tx.tempTags = row['tags'];
 
-        // Handle Transfer
+        // Handle Transfer — create two linked legs
         if (type == 'transfer' || (fromAccName != null && toAccName != null && fromAccName.isNotEmpty && toAccName.isNotEmpty)) {
-          tx.type = 'transfer';
-          
           Account? fromAcc = accountMap[fromAccName?.toLowerCase()];
           if (fromAcc == null && fromAccName != null && fromAccName.isNotEmpty) {
              fromAcc = Account()
@@ -289,12 +287,36 @@ class DataService {
              await isar.writeTxn(() => isar.accounts.put(toAcc!));
           }
 
-          tx.fromAccountId = fromAcc?.id.toString();
-          tx.toAccountId = toAcc?.id.toString();
-          tx.accountId = fromAcc?.id.toString() ?? account.id.toString(); // primary account is 'from'
-        }
+          final transferId = DateTime.now().millisecondsSinceEpoch.toString();
+          final createdAt = DateTime.tryParse(dateStr) ?? DateTime.now();
 
-        toInsert.add(tx);
+          // Expense leg (FROM)
+          tx.type = 'expense';
+          tx.accountId = fromAcc?.id.toString() ?? account.id.toString();
+          tx.categoryId = '';
+          tx.isTransfer = true;
+          tx.transferId = transferId;
+          toInsert.add(tx);
+
+          // Income leg (TO)
+          final toTx = Transaction()
+            ..id = Isar.autoIncrement
+            ..name = name
+            ..nameLower = name.toLowerCase()
+            ..amount = amount
+            ..type = 'income'
+            ..categoryId = ''
+            ..accountId = toAcc?.id.toString() ?? account.id.toString()
+            ..isTransfer = true
+            ..transferId = transferId
+            ..notes = notes
+            ..isRecurring = false
+            ..createdAt = createdAt
+            ..updatedAt = DateTime.now();
+          toInsert.add(toTx);
+        } else {
+          toInsert.add(tx);
+        }
         success++;
       } catch (e) {
         debugPrint('Row import failed: $e');

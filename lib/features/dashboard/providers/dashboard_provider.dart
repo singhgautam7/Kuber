@@ -33,7 +33,7 @@ final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
   final categorySpending = <String, double>{};
 
   for (final t in transactions) {
-    if (t.type == 'transfer' || t.isBalanceAdjustment) continue;
+    if (t.isTransfer || t.isBalanceAdjustment) continue;
     if (t.type == 'income') {
       income += t.amount;
     } else {
@@ -54,7 +54,10 @@ final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
 final recentTransactionsProvider =
     FutureProvider<List<Transaction>>((ref) async {
   final all = await ref.watch(transactionListProvider.future);
-  return all.take(5).toList();
+  // Filter out income legs of transfers (show only expense/FROM leg)
+  final filtered =
+      all.where((t) => !(t.isTransfer && t.type == 'income')).toList();
+  return filtered.take(10).toList();
 });
 
 class DaySummary {
@@ -85,7 +88,7 @@ final last7DaysSummaryProvider =
   }
 
   for (final t in all) {
-    if (t.type == 'transfer' || t.isBalanceAdjustment) continue;
+    if (t.isTransfer || t.isBalanceAdjustment) continue;
     final d = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
     if (d.isBefore(sevenDaysAgo) || d.isAfter(today)) continue;
     final key = '${d.year}-${d.month}-${d.day}';

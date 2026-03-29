@@ -112,7 +112,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
                 const SizedBox(height: KuberSpacing.sm),
                 Text(
-                  'Track expenses, manage budgets, and get smart financial insights',
+                  'Your personal finance manager',
                   style: GoogleFonts.inter(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,

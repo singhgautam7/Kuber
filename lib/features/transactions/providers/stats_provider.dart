@@ -14,7 +14,7 @@ final burnRateProvider = FutureProvider<({double avgDaily, double projected})>((
   final daysElapsed = now.day;
 
   final monthlyExpenses = transactions.where((t) {
-    return t.type == 'expense' && !t.isBalanceAdjustment && t.createdAt.isAfter(monthStart.subtract(const Duration(seconds: 1)));
+    return t.type == 'expense' && !t.isTransfer && !t.isBalanceAdjustment && t.createdAt.isAfter(monthStart.subtract(const Duration(seconds: 1)));
   }).toList();
 
   final totalSpend = monthlyExpenses.fold<double>(0, (sum, t) => sum + t.amount);

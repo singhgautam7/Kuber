@@ -240,9 +240,9 @@ class AccountDetailSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final limit = account.creditLimit ?? 0.1; // avoid div by 0
-    final utilized = balance; // balance is negated in provider for CC
-    final remaining = (account.creditLimit ?? 0) - utilized.abs();
-    final percent = (utilized.abs() / limit).clamp(0.0, 1.0);
+    final utilized = balance.abs();
+    final remaining = (account.creditLimit ?? 0) - utilized;
+    final percent = (utilized / limit).clamp(0.0, 1.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +268,7 @@ class AccountDetailSheet extends ConsumerWidget {
                   style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: utilized < 0 ? cs.error : utilized > 0 ? cs.tertiary : cs.onSurface,
+                    color: utilized > 0 ? cs.error : cs.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),

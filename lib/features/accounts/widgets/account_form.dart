@@ -107,7 +107,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ..colorValue = _selectedColor
       ..initialBalance = _isEditing
           ? account.initialBalance
-          : (double.tryParse(_balanceController.text) ?? 0.0)
+          : _isCreditCard
+              ? -(double.tryParse(_balanceController.text) ?? 0.0).abs()
+              : (double.tryParse(_balanceController.text) ?? 0.0)
       ..creditLimit =
           _isCreditCard ? double.tryParse(_limitController.text) : null
       ..last4Digits = _last4Controller.text.isNotEmpty

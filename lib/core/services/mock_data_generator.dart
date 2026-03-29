@@ -46,7 +46,8 @@ class MockDataGenerator {
         ..isCreditCard = true
         ..icon = 'credit_card'
         ..colorValue = AppColorPalette.colors[2] // violet
-        ..creditLimit = 100000;
+        ..creditLimit = 100000
+        ..initialBalance = -5000;
 
       await isar.accounts.putAll([cash, hdfc, icici]);
 
@@ -145,33 +146,35 @@ class MockDataGenerator {
            } else if (r < 0.8) {
              transactions.add(_tx('Amazon Shopping', (random.nextInt(3000) + 500).toDouble(), 'expense', shopping, icici, date));
            } else if (r < 0.9) {
-             // A transfer
-             transactions.add(Transaction()
-                ..name = 'ATM Withdrawal'
-                ..nameLower = 'atm withdrawal'
-                ..amount = 5000
-                ..type = 'transfer'
-                ..categoryId = other.id.toString()
-                ..accountId = hdfc.id.toString()
-                ..fromAccountId = hdfc.id.toString()
-                ..toAccountId = cash.id.toString()
-                ..isRecurring = false
-                ..createdAt = date
-                ..updatedAt = date);
+             // ATM Withdrawal (two legs)
+             final transferId1 = '${date.millisecondsSinceEpoch}_atm';
+             transactions.addAll([
+               Transaction()
+                 ..name = ''..nameLower = ''..amount = 5000
+                 ..type = 'expense'..accountId = hdfc.id.toString()
+                 ..categoryId = ''..isTransfer = true..transferId = transferId1
+                 ..isRecurring = false..createdAt = date..updatedAt = date,
+               Transaction()
+                 ..name = ''..nameLower = ''..amount = 5000
+                 ..type = 'income'..accountId = cash.id.toString()
+                 ..categoryId = ''..isTransfer = true..transferId = transferId1
+                 ..isRecurring = false..createdAt = date..updatedAt = date,
+             ]);
            } else {
-             // Credit Card Payment
-             transactions.add(Transaction()
-                ..name = 'CC Bill Payment'
-                ..nameLower = 'cc bill payment'
-                ..amount = 15000
-                ..type = 'transfer'
-                ..categoryId = other.id.toString()
-                ..accountId = hdfc.id.toString()
-                ..fromAccountId = hdfc.id.toString()
-                ..toAccountId = icici.id.toString()
-                ..isRecurring = false
-                ..createdAt = date
-                ..updatedAt = date);
+             // Credit Card Payment (two legs)
+             final transferId2 = '${date.millisecondsSinceEpoch}_cc';
+             transactions.addAll([
+               Transaction()
+                 ..name = ''..nameLower = ''..amount = 15000
+                 ..type = 'expense'..accountId = hdfc.id.toString()
+                 ..categoryId = ''..isTransfer = true..transferId = transferId2
+                 ..isRecurring = false..createdAt = date..updatedAt = date,
+               Transaction()
+                 ..name = ''..nameLower = ''..amount = 15000
+                 ..type = 'income'..accountId = icici.id.toString()
+                 ..categoryId = ''..isTransfer = true..transferId = transferId2
+                 ..isRecurring = false..createdAt = date..updatedAt = date,
+             ]);
            }
         }
       }

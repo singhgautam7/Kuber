@@ -36,7 +36,7 @@ List<Transaction> window(
 }) {
   final cutoff = DateTime.now().subtract(Duration(days: days));
   return all.where((t) {
-    if (t.type == 'transfer' || t.isBalanceAdjustment) return false;
+    if (t.isTransfer || t.isBalanceAdjustment) return false;
     if (expenseOnly && t.type != 'expense') return false;
     return t.createdAt.isAfter(cutoff);
   }).toList();
