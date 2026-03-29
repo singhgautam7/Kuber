@@ -41,13 +41,20 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
   }
 
   Future<void> delete(int id) async {
+    final t = await ref.read(transactionRepositoryProvider).getById(id);
     await ref.read(transactionRepositoryProvider).delete(id);
     ref.invalidateSelf();
+    if (t != null && t.type == 'expense') {
+      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+    }
   }
 
   Future<void> restore(Transaction t) async {
     await ref.read(transactionRepositoryProvider).restore(t);
     ref.invalidateSelf();
+    if (t.type == 'expense') {
+      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+    }
   }
 
   Future<int> saveTransfer({

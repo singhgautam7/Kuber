@@ -24,52 +24,50 @@ class BudgetService {
     if (budget == null || !budget.isActive) return;
 
     final progress = await ref.read(budgetProgressProvider(budget).future);
-    bool anyTriggered = false;
+    bool statusChanged = false;
 
     for (int i = 0; i < budget.alerts.length; i++) {
       final alert = budget.alerts[i];
-      if (alert.isTriggered) continue;
+      
+      final threshold = alert.type == BudgetAlertType.percentage
+          ? budget.amount * (alert.value / 100)
+          : alert.value;
 
-      bool shouldTrigger = false;
-      if (alert.type == BudgetAlertType.percentage) {
-        if (progress.percentage >= alert.value) {
-          shouldTrigger = true;
-        }
-      } else {
-        if (progress.spent >= alert.value) {
-          shouldTrigger = true;
-        }
-      }
+      final isAboveThreshold = progress.spent >= threshold;
 
-      if (shouldTrigger) {
+      // TRIGGER logic
+      if (isAboveThreshold && !alert.isTriggered) {
         alert.isTriggered = true;
-        anyTriggered = true;
+        statusChanged = true;
         
         if (alert.enableNotification) {
           final categories = await ref.read(categoryListProvider.future);
           final cat = categories.firstWhere((c) => c.id.toString() == budget.categoryId);
           
-          final title = 'Budget Alert: ${cat.name}';
+          final title = 'Budget Alert';
           String body;
           if (alert.type == BudgetAlertType.percentage) {
-            body = 'You have used ${alert.value.toInt()}% of your ${cat.name} budget.';
+            body = "You've reached ${alert.value.toInt()}% of your ${cat.name} budget";
           } else {
-            body = 'You have used ${ref.read(formatterProvider).formatCurrency(alert.value)} of your ${cat.name} budget.';
+            body = "You've spent ${ref.read(formatterProvider).formatCurrency(alert.value)} in ${cat.name} category";
           }
 
-          // Use a stable ID for the notification: budget.id * 10 + index
           final notificationId = budget.id * 10 + i;
-
           await ref.read(notificationServiceProvider).showBudgetAlertNotification(
             id: notificationId,
             title: title,
             body: body,
           );
         }
+      } 
+      // RESET logic: If spending drops below threshold again
+      else if (!isAboveThreshold && alert.isTriggered) {
+        alert.isTriggered = false;
+        statusChanged = true;
       }
     }
 
-    if (anyTriggered) {
+    if (statusChanged) {
       await ref.read(budgetRepositoryProvider).saveBudget(budget, budget.alerts);
     }
   }
