@@ -214,7 +214,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
                 Column(
                   children: alerts.map((a) => _AlertRow(
                     alert: a, 
-                    currentPercentage: progressAsync.valueOrNull?.percentage ?? 0,
+                    currentSpent: progressAsync.valueOrNull?.spent ?? 0,
+                    budgetAmount: budget.amount,
                   )).toList(),
                 ),
               const SizedBox(height: 32),
@@ -363,8 +364,13 @@ class BudgetDetailsSheet extends ConsumerWidget {
 
 class _AlertRow extends ConsumerWidget {
   final BudgetAlert alert;
-  final double currentPercentage;
-  const _AlertRow({required this.alert, required this.currentPercentage});
+  final double currentSpent;
+  final double budgetAmount;
+  const _AlertRow({
+    required this.alert, 
+    required this.currentSpent,
+    required this.budgetAmount,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -373,44 +379,13 @@ class _AlertRow extends ConsumerWidget {
         ? 'At ${ref.watch(formatterProvider).formatPercentage(alert.value)}' 
         : 'At ${ref.watch(formatterProvider).formatCurrency(alert.value)}';
     
-    String status;
-    Color statusColor;
+    final threshold = alert.type == BudgetAlertType.percentage
+        ? budgetAmount * (alert.value / 100)
+        : alert.value;
     
-    if (alert.isTriggered) {
-      status = 'TRIGGERED';
-      statusColor = Colors.green;
-    } else if (currentPercentage >= alert.value) { // This is a bit simplified, but logically if it's not triggered yet but we are past it
-       status = 'ACTIVE';
-       statusColor = cs.primary;
-    } else if (alert.type == BudgetAlertType.percentage && currentPercentage < alert.value) {
-      status = 'UPCOMING';
-      statusColor = cs.onSurfaceVariant;
-    } else {
-      status = 'ACTIVE';
-      statusColor = cs.primary;
-    }
-
-    // Explicit colors from requirement: TRIGGERED (Green), ACTIVE (Blue), UPCOMING (Grey)
-    if (alert.isTriggered) {
-      status = 'TRIGGERED';
-      statusColor = Colors.green;
-    } else {
-      // Logic for ACTIVE vs UPCOMING
-      // For percentage alerts:
-      if (alert.type == BudgetAlertType.percentage) {
-        if (currentPercentage < alert.value) {
-          status = 'UPCOMING';
-          statusColor = cs.onSurfaceVariant;
-        } else {
-          status = 'ACTIVE';
-          statusColor = cs.primary;
-        }
-      } else {
-        // For amount alerts, we'd need budget progress to be accurate
-        status = 'ACTIVE';
-        statusColor = cs.primary;
-      }
-    }
+    final isReached = currentSpent >= threshold;
+    final status = isReached ? 'REACHED' : 'UPCOMING';
+    final statusColor = isReached ? cs.primary : cs.onSurfaceVariant;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -422,7 +397,7 @@ class _AlertRow extends ConsumerWidget {
       child: Row(
         children: [
           Icon(
-            alert.isTriggered ? Icons.check_circle_outline_rounded : Icons.notifications_outlined,
+            isReached ? Icons.check_circle_outline_rounded : Icons.notifications_outlined,
             size: 20,
             color: statusColor,
           ),
