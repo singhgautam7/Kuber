@@ -45,7 +45,7 @@ class BudgetService {
         alert.isTriggered = true;
         anyTriggered = true;
         
-        if (alert.isNotificationEnabled) {
+        if (alert.enableNotification) {
           final categories = await ref.read(categoryListProvider.future);
           final cat = categories.firstWhere((c) => c.id.toString() == budget.categoryId);
           

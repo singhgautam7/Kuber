@@ -386,6 +386,14 @@ class _AlertRow extends ConsumerWidget {
     final isReached = currentSpent >= threshold;
     final status = isReached ? 'REACHED' : 'UPCOMING';
     final statusColor = isReached ? cs.primary : cs.onSurfaceVariant;
+    
+    // Notification Icon & Color
+    final notificationIcon = alert.enableNotification 
+        ? Icons.notifications_active_outlined 
+        : Icons.notifications_off_outlined;
+    final notificationColor = alert.enableNotification 
+        ? cs.primary 
+        : cs.onSurfaceVariant;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -397,9 +405,9 @@ class _AlertRow extends ConsumerWidget {
       child: Row(
         children: [
           Icon(
-            isReached ? Icons.check_circle_outline_rounded : Icons.notifications_outlined,
+            notificationIcon,
             size: 20,
-            color: statusColor,
+            color: notificationColor,
           ),
           const SizedBox(width: 12),
           Expanded(

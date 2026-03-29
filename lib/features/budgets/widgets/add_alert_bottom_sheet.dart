@@ -26,7 +26,7 @@ class AddAlertBottomSheet extends ConsumerStatefulWidget {
 class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
   BudgetAlertType _type = BudgetAlertType.percentage;
   late final TextEditingController _controller;
-  bool _isNotificationEnabled = true;
+  bool _enableNotification = true;
 
   @override
   void initState() {
@@ -80,7 +80,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
     final alert = BudgetAlert()
       ..type = _type
       ..value = double.parse(_controller.text)
-      ..isNotificationEnabled = _isNotificationEnabled;
+      ..enableNotification = _enableNotification;
     
     widget.onAdd(alert);
     Navigator.pop(context);
@@ -278,8 +278,8 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                   ),
                 ),
                 Switch(
-                  value: _isNotificationEnabled,
-                  onChanged: (v) => setState(() => _isNotificationEnabled = v),
+                  value: _enableNotification,
+                  onChanged: (v) => setState(() => _enableNotification = v),
                   activeThumbColor: cs.primary,
                   activeTrackColor: cs.primary.withValues(alpha: 0.3),
                   inactiveThumbColor: Colors.white,

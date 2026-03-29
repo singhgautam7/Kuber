@@ -1710,9 +1710,9 @@ const BudgetAlertSchema = Schema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'isNotificationEnabled': PropertySchema(
+    r'enableNotification': PropertySchema(
       id: 1,
-      name: r'isNotificationEnabled',
+      name: r'enableNotification',
       type: IsarType.bool,
     ),
     r'isTriggered': PropertySchema(
@@ -1754,7 +1754,7 @@ void _budgetAlertSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeDateTime(offsets[0], object.createdAt);
-  writer.writeBool(offsets[1], object.isNotificationEnabled);
+  writer.writeBool(offsets[1], object.enableNotification);
   writer.writeBool(offsets[2], object.isTriggered);
   writer.writeByte(offsets[3], object.type.index);
   writer.writeDouble(offsets[4], object.value);
@@ -1768,7 +1768,7 @@ BudgetAlert _budgetAlertDeserialize(
 ) {
   final object = BudgetAlert();
   object.createdAt = reader.readDateTime(offsets[0]);
-  object.isNotificationEnabled = reader.readBool(offsets[1]);
+  object.enableNotification = reader.readBool(offsets[1]);
   object.isTriggered = reader.readBool(offsets[2]);
   object.type =
       _BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offsets[3])] ??
@@ -1868,10 +1868,10 @@ extension BudgetAlertQueryFilter
   }
 
   QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition>
-      isNotificationEnabledEqualTo(bool value) {
+      enableNotificationEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isNotificationEnabled',
+        property: r'enableNotification',
         value: value,
       ));
     });

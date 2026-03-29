@@ -59,7 +59,7 @@ class BudgetAlert {
 
   bool isTriggered = false;
 
-  bool isNotificationEnabled = true;
+  bool enableNotification = true;
 
   DateTime createdAt = DateTime.now();
   
