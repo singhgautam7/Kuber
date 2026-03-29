@@ -245,7 +245,7 @@ class _AnimatedAppIconState extends State<AnimatedAppIcon>
         ),
         child: Center(
           child: Image.asset(
-            'assets/icon/app_icon_transparent.png',
+            'android/play_store_512.png',
             width: widget.size,
             height: widget.size,
           ),

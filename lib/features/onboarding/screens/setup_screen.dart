@@ -67,7 +67,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                 ),
                 child: Center(
                   child: Image.asset(
-                    'assets/icon/app_icon_transparent.png',
+                    'android/play_store_512.png',
                     width: 64,
                     height: 64,
                   ),
