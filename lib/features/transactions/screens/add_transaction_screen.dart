@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,13 +82,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _nameController.text = t.name;
       _amountController.text = t.amount.toString();
       _notesController.text = t.notes ?? '';
-      _type = t.type;
+      _type = t.isTransfer ? 'transfer' : t.type;
       _selectedCategoryId = int.tryParse(t.categoryId);
       _selectedAccountId = int.tryParse(t.accountId);
       _selectedDate = t.createdAt;
-      if (t.type == 'transfer') {
-        _selectedFromAccountId = int.tryParse(t.fromAccountId ?? '');
-        _selectedToAccountId = int.tryParse(t.toAccountId ?? '');
+      if (t.isTransfer) {
+        // This transaction is the expense (FROM) leg
+        _selectedFromAccountId = int.tryParse(t.accountId);
+        // Find TO leg — will be resolved after provider loads
+        _loadTransferPair(t);
       }
       _loadTags();
     } else {
@@ -143,6 +146,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final tags = await ref.read(tagRepositoryProvider).getTagsForTransaction(widget.transaction!.id);
     if (mounted) {
       setState(() => _selectedTags = tags);
+    }
+  }
+
+  Future<void> _loadTransferPair(Transaction t) async {
+    if (t.transferId == null) return;
+    final allTxns = await ref.read(transactionListProvider.future);
+    final pair = allTxns.firstWhereOrNull(
+        (tx) => tx.transferId == t.transferId && tx.id != t.id);
+    if (pair != null && mounted) {
+      setState(() => _selectedToAccountId = int.tryParse(pair.accountId));
     }
   }
 
@@ -1001,44 +1014,29 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (_selectedFromAccountId == null || _selectedToAccountId == null) return;
     if (_selectedFromAccountId == _selectedToAccountId) return;
 
-    final accounts = ref.read(accountListProvider).valueOrNull ?? [];
-    final fromAccount = accounts
-        .where((a) => a.id == _selectedFromAccountId)
-        .firstOrNull;
-    final fromIsCreditCard = fromAccount?.isCreditCard ?? false;
-
     final notes = _notesController.text.trim().isEmpty
         ? null
         : _notesController.text.trim();
 
     try {
-      final int resultId;
       if (_isEditing) {
-        resultId = await ref.read(transactionListProvider.notifier).updateTransfer(
+        await ref.read(transactionListProvider.notifier).updateTransfer(
           id: widget.transaction!.id,
           fromAccountId: _selectedFromAccountId.toString(),
           toAccountId: _selectedToAccountId.toString(),
           amount: amount,
           createdAt: _selectedDate,
           notes: notes,
-          fromIsCreditCard: fromIsCreditCard,
         );
       } else {
-        resultId = await ref.read(transactionListProvider.notifier).saveTransfer(
+        await ref.read(transactionListProvider.notifier).saveTransfer(
           fromAccountId: _selectedFromAccountId.toString(),
           toAccountId: _selectedToAccountId.toString(),
           amount: amount,
           createdAt: _selectedDate,
           notes: notes,
-          fromIsCreditCard: fromIsCreditCard,
         );
       }
-
-      // Save tags
-      await ref.read(tagRepositoryProvider).updateTransactionTags(
-        resultId, 
-        _selectedTags.map((tag) => tag.id).toList(),
-      );
     } on InsufficientBalanceException catch (e) {
       if (mounted) {
         showKuberSnackBar(

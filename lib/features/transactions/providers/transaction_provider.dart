@@ -42,9 +42,13 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
 
   Future<void> delete(int id) async {
     final t = await ref.read(transactionRepositoryProvider).getById(id);
-    await ref.read(transactionRepositoryProvider).delete(id);
+    if (t != null && t.isTransfer && t.transferId != null) {
+      await ref.read(transactionRepositoryProvider).deleteTransferPair(t.transferId!);
+    } else {
+      await ref.read(transactionRepositoryProvider).delete(id);
+    }
     ref.invalidateSelf();
-    if (t != null && t.type == 'expense') {
+    if (t != null && t.type == 'expense' && !t.isTransfer) {
       await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
     }
   }
@@ -57,46 +61,42 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     }
   }
 
-  Future<int> saveTransfer({
+  Future<List<int>> saveTransfer({
     required String fromAccountId,
     required String toAccountId,
     required double amount,
     required DateTime createdAt,
     String? notes,
-    bool fromIsCreditCard = false,
   }) async {
-    final id = await ref.read(transactionRepositoryProvider).saveTransfer(
+    final ids = await ref.read(transactionRepositoryProvider).saveTransfer(
       fromAccountId: fromAccountId,
       toAccountId: toAccountId,
       amount: amount,
       createdAt: createdAt,
       notes: notes,
-      fromIsCreditCard: fromIsCreditCard,
     );
     ref.invalidateSelf();
-    return id;
+    return ids;
   }
 
-  Future<int> updateTransfer({
+  Future<List<int>> updateTransfer({
     required int id,
     required String fromAccountId,
     required String toAccountId,
     required double amount,
     required DateTime createdAt,
     String? notes,
-    bool fromIsCreditCard = false,
   }) async {
-    final resultId = await ref.read(transactionRepositoryProvider).updateTransfer(
+    final ids = await ref.read(transactionRepositoryProvider).updateTransfer(
       id: id,
       fromAccountId: fromAccountId,
       toAccountId: toAccountId,
       amount: amount,
       createdAt: createdAt,
       notes: notes,
-      fromIsCreditCard: fromIsCreditCard,
     );
     ref.invalidateSelf();
-    return resultId;
+    return ids;
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -48,8 +49,16 @@ void showTransactionDetailSheet(
 
 /// Deletes the transaction and shows an undo snackbar.
 void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction t) {
+  // If transfer, find pair BEFORE deleting
+  Transaction? pair;
+  if (t.isTransfer && t.transferId != null) {
+    final allTxns = ref.read(transactionListProvider).valueOrNull ?? [];
+    pair = allTxns.firstWhereOrNull(
+        (tx) => tx.transferId == t.transferId && tx.id != t.id);
+  }
+
   ref.read(transactionListProvider.notifier).delete(t.id);
-  final label = t.type == 'transfer' ? 'Deleted transfer' : 'Deleted "${t.name}"';
+  final label = t.isTransfer ? 'Deleted transfer' : 'Deleted "${t.name}"';
   showKuberSnackBar(
     context,
     label,
@@ -61,13 +70,28 @@ void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction 
         ..type = t.type
         ..categoryId = t.categoryId
         ..accountId = t.accountId
-        ..fromAccountId = t.fromAccountId
-        ..toAccountId = t.toAccountId
+        ..isTransfer = t.isTransfer
+        ..transferId = t.transferId
         ..notes = t.notes
         ..createdAt = t.createdAt
         ..updatedAt = t.updatedAt
         ..nameLower = t.nameLower;
       ref.read(transactionListProvider.notifier).restore(restored);
+      if (pair != null) {
+        final restoredPair = Transaction()
+          ..name = pair.name
+          ..amount = pair.amount
+          ..type = pair.type
+          ..categoryId = pair.categoryId
+          ..accountId = pair.accountId
+          ..isTransfer = pair.isTransfer
+          ..transferId = pair.transferId
+          ..notes = pair.notes
+          ..createdAt = pair.createdAt
+          ..updatedAt = pair.updatedAt
+          ..nameLower = pair.nameLower;
+        ref.read(transactionListProvider.notifier).restore(restoredPair);
+      }
     },
   );
 }
@@ -89,7 +113,7 @@ class TransactionDetailSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
-    final isTransfer = transaction.type == 'transfer';
+    final isTransfer = transaction.isTransfer;
 
     final category = categoriesAsync.whenOrNull(
       data: (cats) {
@@ -120,14 +144,14 @@ class TransactionDetailSheet extends ConsumerWidget {
     String? toAccountName;
     if (isTransfer) {
       final accs = accountsAsync.valueOrNull ?? [];
-      fromAccountName = accs
-          .where((a) => a.id.toString() == transaction.fromAccountId)
-          .firstOrNull
-          ?.name;
-      toAccountName = accs
-          .where((a) => a.id.toString() == transaction.toAccountId)
-          .firstOrNull
-          ?.name;
+      fromAccountName = account?.name;
+      // Find TO leg by transferId
+      final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
+      final pair = allTxns.firstWhereOrNull(
+          (t) => t.transferId == transaction.transferId && t.id != transaction.id);
+      toAccountName = pair != null
+          ? accs.firstWhereOrNull((a) => a.id.toString() == pair.accountId)?.name
+          : null;
     }
 
     final isIncome = transaction.type == 'income';

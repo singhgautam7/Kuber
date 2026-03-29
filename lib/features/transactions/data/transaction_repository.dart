@@ -66,13 +66,12 @@ class TransactionRepository extends BaseRepository<Transaction> {
     return getByDateRange(start, end);
   }
 
-  Future<int> saveTransfer({
+  Future<List<int>> saveTransfer({
     required String fromAccountId,
     required String toAccountId,
     required double amount,
     required DateTime createdAt,
     String? notes,
-    bool fromIsCreditCard = false,
   }) async {
     if (fromAccountId == toAccountId) {
       throw ArgumentError('FROM and TO accounts must be different');
@@ -81,116 +80,106 @@ class TransactionRepository extends BaseRepository<Transaction> {
       throw ArgumentError('Amount must be greater than 0');
     }
 
-    // Check balance for non-credit-card FROM accounts
-    if (!fromIsCreditCard) {
-      final balance = await _computeBalance(fromAccountId);
-      if (balance < amount) {
-        throw InsufficientBalanceException(
-          available: balance,
-          required_: amount,
-        );
-      }
+    // Balance check on FROM account
+    final balance = await _computeBalance(fromAccountId);
+    if (balance < amount) {
+      throw InsufficientBalanceException(
+        available: balance,
+        required_: amount,
+      );
     }
 
-    final t = Transaction()
+    final transferId = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final fromTxn = Transaction()
       ..name = ''
       ..nameLower = ''
       ..amount = amount
-      ..type = 'transfer'
-      ..categoryId = ''
+      ..type = 'expense'
       ..accountId = fromAccountId
-      ..fromAccountId = fromAccountId
-      ..toAccountId = toAccountId
+      ..categoryId = ''
+      ..isTransfer = true
+      ..transferId = transferId
       ..notes = notes
       ..isRecurring = false
       ..createdAt = createdAt
       ..updatedAt = DateTime.now();
 
-    return isar.writeTxn(() => isar.transactions.put(t));
+    final toTxn = Transaction()
+      ..name = ''
+      ..nameLower = ''
+      ..amount = amount
+      ..type = 'income'
+      ..accountId = toAccountId
+      ..categoryId = ''
+      ..isTransfer = true
+      ..transferId = transferId
+      ..notes = notes
+      ..isRecurring = false
+      ..createdAt = createdAt
+      ..updatedAt = DateTime.now();
+
+    late int fromId, toId;
+    await isar.writeTxn(() async {
+      fromId = await isar.transactions.put(fromTxn);
+      toId = await isar.transactions.put(toTxn);
+    });
+    return [fromId, toId];
   }
 
-  Future<int> updateTransfer({
+  Future<List<int>> updateTransfer({
     required int id,
     required String fromAccountId,
     required String toAccountId,
     required double amount,
     required DateTime createdAt,
     String? notes,
-    bool fromIsCreditCard = false,
   }) async {
-    if (fromAccountId == toAccountId) {
-      throw ArgumentError('FROM and TO accounts must be different');
-    }
-    if (amount <= 0) {
-      throw ArgumentError('Amount must be greater than 0');
-    }
-
+    // Find existing pair
     final existing = await isar.transactions.get(id);
-    if (existing == null) {
-      throw ArgumentError('Transaction not found');
+    if (existing == null) throw ArgumentError('Transaction not found');
+
+    // Delete old pair
+    if (existing.transferId != null) {
+      await deleteTransferPair(existing.transferId!);
+    } else {
+      await isar.writeTxn(() => isar.transactions.delete(id));
     }
 
-    // Check balance for non-credit-card FROM accounts (exclude current transfer amount)
-    if (!fromIsCreditCard) {
-      final balance = await _computeBalance(fromAccountId, excludeTransactionId: id);
-      if (balance < amount) {
-        throw InsufficientBalanceException(
-          available: balance,
-          required_: amount,
-        );
-      }
-    }
+    // Create new pair
+    return saveTransfer(
+      fromAccountId: fromAccountId,
+      toAccountId: toAccountId,
+      amount: amount,
+      createdAt: createdAt,
+      notes: notes,
+    );
+  }
 
-    existing
-      ..name = ''
-      ..nameLower = ''
-      ..amount = amount
-      ..type = 'transfer'
-      ..categoryId = ''
-      ..accountId = fromAccountId
-      ..fromAccountId = fromAccountId
-      ..toAccountId = toAccountId
-      ..notes = notes
-      ..isRecurring = false
-      ..createdAt = createdAt
-      ..updatedAt = DateTime.now();
-
-    return isar.writeTxn(() => isar.transactions.put(existing));
+  Future<void> deleteTransferPair(String transferId) async {
+    final pair = await isar.transactions
+        .filter()
+        .transferIdEqualTo(transferId)
+        .findAll();
+    await isar.writeTxn(() async {
+      await isar.transactions.deleteAll(pair.map((t) => t.id).toList());
+    });
   }
 
   Future<double> _computeBalance(String accountId, {int? excludeTransactionId}) async {
     final accountObj = await isar.accounts.get(int.parse(accountId));
     if (accountObj == null) return 0.0;
 
-    final regularTxns = await isar.transactions
+    final txns = await isar.transactions
         .filter()
         .accountIdEqualTo(accountId)
-        .not()
-        .typeEqualTo('transfer')
-        .findAll();
-
-    final transferTxns = await isar.transactions
-        .filter()
-        .typeEqualTo('transfer')
-        .group((q) => q
-            .fromAccountIdEqualTo(accountId)
-            .or()
-            .toAccountIdEqualTo(accountId))
         .findAll();
 
     double balance = accountObj.initialBalance;
-
-    for (final t in regularTxns) {
+    for (final t in txns) {
       if (excludeTransactionId != null && t.id == excludeTransactionId) continue;
       balance += t.type == 'income' ? t.amount : -t.amount;
     }
-
-    for (final t in transferTxns) {
-      if (excludeTransactionId != null && t.id == excludeTransactionId) continue;
-      if (t.fromAccountId == accountId) balance -= t.amount;
-      if (t.toAccountId == accountId) balance += t.amount;
-    }
-
-    return accountObj.isCreditCard ? -balance : balance;
+    return balance;
   }
 }

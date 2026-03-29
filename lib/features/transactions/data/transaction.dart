@@ -8,7 +8,7 @@ class Transaction {
 
   late String name;
   late double amount;
-  late String type; // 'income' | 'expense' | 'transfer'
+  late String type; // 'income' | 'expense' ONLY — never 'transfer'
 
   @Index(composite: [CompositeIndex('createdAt')])
   late String categoryId;
@@ -18,15 +18,16 @@ class Transaction {
 
   String? notes;
 
-  String? fromAccountId; // only set when type == 'transfer'
-  String? toAccountId;   // only set when type == 'transfer'
-
   int? recurringRuleId; // set when created by recurring processor
-  
+
   @Index()
   late bool isRecurring;
 
   bool isBalanceAdjustment = false;
+
+  // Transfer fields
+  bool isTransfer = false;          // true for both legs of a transfer
+  String? transferId;               // same value on both legs (timestamp-based)
 
   @Index()
   late DateTime createdAt;

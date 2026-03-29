@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:csv/csv.dart';
 import '../../features/transactions/data/transaction.dart';
 
@@ -33,7 +34,32 @@ class CsvService {
   }) {
     final List<List<dynamic>> rows = [headers];
 
+    final seenTransferIds = <String>{};
     for (final tx in transactions) {
+      // For transfers, only export the expense (FROM) leg as one row
+      if (tx.isTransfer) {
+        if (tx.transferId == null || seenTransferIds.contains(tx.transferId)) continue;
+        seenTransferIds.add(tx.transferId!);
+        final toLeg = transactions.firstWhereOrNull(
+            (t) => t.transferId == tx.transferId && t.id != tx.id);
+        final tags = transactionTags[tx.id] ?? [];
+        rows.add([
+          tx.id,
+          tx.createdAt.toIso8601String(),
+          tx.name,
+          tx.amount,
+          'transfer',
+          '',
+          accountNames[tx.accountId] ?? '',
+          tx.notes ?? '',
+          accountNames[tx.accountId] ?? '',
+          toLeg != null ? accountNames[toLeg.accountId] ?? '' : '',
+          tags.join('|'),
+          '',
+          '',
+        ]);
+        continue;
+      }
       final tags = transactionTags[tx.id] ?? [];
       rows.add([
         tx.id,
@@ -44,11 +70,11 @@ class CsvService {
         categoryNames[tx.categoryId] ?? '',
         accountNames[tx.accountId] ?? '',
         tx.notes ?? '',
-        tx.fromAccountId != null ? accountNames[tx.fromAccountId] ?? '' : '',
-        tx.toAccountId != null ? accountNames[tx.toAccountId] ?? '' : '',
+        '',
+        '',
         tags.join('|'),
         groupNames[tx.categoryId] ?? '',
-        '', // frequency - for now, standard transactions don't have it in this export
+        '',
       ]);
     }
 

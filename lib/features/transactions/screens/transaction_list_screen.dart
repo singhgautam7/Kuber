@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -43,7 +44,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     // Type filter
     if (filter.types.isNotEmpty) {
-      filtered = filtered.where((t) => filter.types.contains(t.type)).toList();
+      filtered = filtered.where((t) {
+        if (t.isTransfer) return filter.types.contains('transfer');
+        return filter.types.contains(t.type);
+      }).toList();
     }
 
     // Recurring filter
@@ -84,8 +88,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   List<_DateGroup> _groupByDate(List<Transaction> transactions) {
+    // Filter out income legs of transfers (show only expense/FROM leg)
+    final displayList = transactions.where((t) =>
+        !(t.isTransfer && t.type == 'income')).toList();
+
     final groups = <String, List<Transaction>>{};
-    for (final t in transactions) {
+    for (final t in displayList) {
       final key =
           DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day)
               .toIso8601String();
@@ -99,7 +107,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       double dayTotal = 0;
       for (final t in txns) {
-        if (t.type == 'transfer' || t.isBalanceAdjustment) continue;
+        if (t.isTransfer || t.isBalanceAdjustment) continue;
         dayTotal += t.type == 'income' ? t.amount : -t.amount;
       }
 
@@ -407,7 +415,7 @@ class _TransactionRow extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
     final accountsAsync = ref.watch(accountListProvider);
-    final isTransfer = transaction.type == 'transfer';
+    final isTransfer = transaction.isTransfer;
     final isAdjustment = transaction.isBalanceAdjustment;
 
     final category = categoriesAsync.whenOrNull(
@@ -438,15 +446,18 @@ class _TransactionRow extends ConsumerWidget {
     String? fromName;
     String? toName;
     if (isTransfer) {
+      // This is the expense (FROM) leg. Find the income (TO) leg by transferId.
+      final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
+      final pair = allTxns.firstWhereOrNull(
+          (t) => t.transferId == transaction.transferId && t.id != transaction.id);
       final accs = accountsAsync.valueOrNull ?? [];
       fromName = accs
-          .where((a) => a.id.toString() == transaction.fromAccountId)
+          .where((a) => a.id.toString() == transaction.accountId)
           .firstOrNull
           ?.name;
-      toName = accs
-          .where((a) => a.id.toString() == transaction.toAccountId)
-          .firstOrNull
-          ?.name;
+      toName = pair != null
+          ? accs.where((a) => a.id.toString() == pair.accountId).firstOrNull?.name
+          : null;
     }
 
     final isIncome = transaction.type == 'income';

@@ -24,15 +24,10 @@ class AccountRepository extends BaseRepository<Account> {
   }
 
   Future<bool> hasTransactions(int accountId) async {
-    final accountIdStr = accountId.toString();
     final count = await isar.transactions
         .where()
         .filter()
-        .accountIdEqualTo(accountIdStr)
-        .or()
-        .fromAccountIdEqualTo(accountIdStr)
-        .or()
-        .toAccountIdEqualTo(accountIdStr)
+        .accountIdEqualTo(accountId.toString())
         .count();
     return count > 0;
   }

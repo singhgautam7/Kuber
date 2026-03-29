@@ -39,11 +39,10 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
 }
 
 /// Computed balance for an account.
-/// Regular accounts: initialBalance + income - expenses (available balance).
-/// Credit cards: initialBalance + expenses - income (credit utilized).
+/// Unified formula: initialBalance + income - expense.
+/// CC initial balance is stored as negative (debt), so negative balance = debt.
 final accountBalanceProvider =
     FutureProvider.family<double, int>((ref, accountId) async {
-  // Watch these so balance recomputes when transactions or accounts change
   ref.watch(transactionListProvider);
   ref.watch(accountListProvider);
   final isar = ref.watch(isarProvider);
@@ -51,52 +50,23 @@ final accountBalanceProvider =
   if (account == null) return 0.0;
 
   final accountIdStr = accountId.toString();
-
-  // Regular income/expense
-  final regularTxns = await isar.transactions
+  final txns = await isar.transactions
       .filter()
       .accountIdEqualTo(accountIdStr)
-      .not()
-      .typeEqualTo('transfer')
       .findAll();
 
-  // Transfers involving this account
-  final transferTxns = await isar.transactions
-      .filter()
-      .typeEqualTo('transfer')
-      .group((q) => q
-          .fromAccountIdEqualTo(accountIdStr)
-          .or()
-          .toAccountIdEqualTo(accountIdStr))
-      .findAll();
-
-  double balance = account.initialBalance +
-      regularTxns.fold<double>(0.0, (sum, t) =>
+  return account.initialBalance +
+      txns.fold<double>(0.0, (sum, t) =>
           t.type == 'income' ? sum + t.amount : sum - t.amount);
-
-  for (final t in transferTxns) {
-    if (t.fromAccountId == accountIdStr) balance -= t.amount;
-    if (t.toAccountId == accountIdStr) balance += t.amount;
-  }
-
-  final isCreditCard = account.isCreditCard;
-  return isCreditCard ? -balance : balance;
 });
 
 final accountLatestTransactionProvider =
     FutureProvider.family<Transaction?, int>((ref, accountId) async {
   ref.watch(transactionListProvider);
   final isar = ref.watch(isarProvider);
-  final accountIdStr = accountId.toString();
-
   return await isar.transactions
       .filter()
-      .group((q) => q
-          .accountIdEqualTo(accountIdStr)
-          .or()
-          .fromAccountIdEqualTo(accountIdStr)
-          .or()
-          .toAccountIdEqualTo(accountIdStr))
+      .accountIdEqualTo(accountId.toString())
       .sortByCreatedAtDesc()
       .findFirst();
 });
