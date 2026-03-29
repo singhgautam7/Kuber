@@ -105,9 +105,15 @@ class _AccountsBody extends ConsumerWidget {
       balanceMap[a.id] = balance;
 
       if (a.isCreditCard) {
-        if (balance > 0) totalDebt += balance; // positive utilized = debt
+        // Credit cards represent debt when negative (limit spent)
+        if (balance < 0) totalDebt += balance.abs();
       } else {
-        totalAssets += balance;
+        // Bank accounts: positive = asset, negative = debt (overdraft)
+        if (balance > 0) {
+          totalAssets += balance;
+        } else if (balance < 0) {
+          totalDebt += balance.abs();
+        }
       }
     }
     final netWorth = totalAssets - totalDebt;

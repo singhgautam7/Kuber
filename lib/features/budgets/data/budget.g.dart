@@ -17,64 +17,70 @@ const BudgetSchema = CollectionSchema(
   name: r'Budget',
   id: -3383598594604670326,
   properties: {
-    r'amount': PropertySchema(
+    r'alerts': PropertySchema(
       id: 0,
+      name: r'alerts',
+      type: IsarType.objectList,
+      target: r'BudgetAlert',
+    ),
+    r'amount': PropertySchema(
+      id: 1,
       name: r'amount',
       type: IsarType.double,
     ),
     r'anchorDay': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'anchorDay',
       type: IsarType.long,
     ),
     r'categoryId': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'categoryId',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'durationDays': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'durationDays',
       type: IsarType.long,
     ),
     r'endDate': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'endDate',
       type: IsarType.dateTime,
     ),
     r'isActive': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'isActive',
       type: IsarType.bool,
     ),
     r'isRecurring': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'isRecurring',
       type: IsarType.bool,
     ),
     r'lastEvaluatedAt': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'lastEvaluatedAt',
       type: IsarType.dateTime,
     ),
     r'periodType': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'periodType',
       type: IsarType.byte,
       enumMap: _BudgetperiodTypeEnumValueMap,
     ),
     r'startDate': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
     r'updatedAt': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -100,7 +106,7 @@ const BudgetSchema = CollectionSchema(
     )
   },
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r'BudgetAlert': BudgetAlertSchema},
   getId: _budgetGetId,
   getLinks: _budgetGetLinks,
   attach: _budgetAttach,
@@ -113,6 +119,14 @@ int _budgetEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  bytesCount += 3 + object.alerts.length * 3;
+  {
+    final offsets = allOffsets[BudgetAlert]!;
+    for (var i = 0; i < object.alerts.length; i++) {
+      final value = object.alerts[i];
+      bytesCount += BudgetAlertSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
   bytesCount += 3 + object.categoryId.length * 3;
   return bytesCount;
 }
@@ -123,18 +137,24 @@ void _budgetSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDouble(offsets[0], object.amount);
-  writer.writeLong(offsets[1], object.anchorDay);
-  writer.writeString(offsets[2], object.categoryId);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeLong(offsets[4], object.durationDays);
-  writer.writeDateTime(offsets[5], object.endDate);
-  writer.writeBool(offsets[6], object.isActive);
-  writer.writeBool(offsets[7], object.isRecurring);
-  writer.writeDateTime(offsets[8], object.lastEvaluatedAt);
-  writer.writeByte(offsets[9], object.periodType.index);
-  writer.writeDateTime(offsets[10], object.startDate);
-  writer.writeDateTime(offsets[11], object.updatedAt);
+  writer.writeObjectList<BudgetAlert>(
+    offsets[0],
+    allOffsets,
+    BudgetAlertSchema.serialize,
+    object.alerts,
+  );
+  writer.writeDouble(offsets[1], object.amount);
+  writer.writeLong(offsets[2], object.anchorDay);
+  writer.writeString(offsets[3], object.categoryId);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeLong(offsets[5], object.durationDays);
+  writer.writeDateTime(offsets[6], object.endDate);
+  writer.writeBool(offsets[7], object.isActive);
+  writer.writeBool(offsets[8], object.isRecurring);
+  writer.writeDateTime(offsets[9], object.lastEvaluatedAt);
+  writer.writeByte(offsets[10], object.periodType.index);
+  writer.writeDateTime(offsets[11], object.startDate);
+  writer.writeDateTime(offsets[12], object.updatedAt);
 }
 
 Budget _budgetDeserialize(
@@ -144,21 +164,28 @@ Budget _budgetDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Budget();
-  object.amount = reader.readDouble(offsets[0]);
-  object.anchorDay = reader.readLongOrNull(offsets[1]);
-  object.categoryId = reader.readString(offsets[2]);
-  object.createdAt = reader.readDateTime(offsets[3]);
-  object.durationDays = reader.readLongOrNull(offsets[4]);
-  object.endDate = reader.readDateTimeOrNull(offsets[5]);
+  object.alerts = reader.readObjectList<BudgetAlert>(
+        offsets[0],
+        BudgetAlertSchema.deserialize,
+        allOffsets,
+        BudgetAlert(),
+      ) ??
+      [];
+  object.amount = reader.readDouble(offsets[1]);
+  object.anchorDay = reader.readLongOrNull(offsets[2]);
+  object.categoryId = reader.readString(offsets[3]);
+  object.createdAt = reader.readDateTime(offsets[4]);
+  object.durationDays = reader.readLongOrNull(offsets[5]);
+  object.endDate = reader.readDateTimeOrNull(offsets[6]);
   object.id = id;
-  object.isActive = reader.readBool(offsets[6]);
-  object.isRecurring = reader.readBool(offsets[7]);
-  object.lastEvaluatedAt = reader.readDateTimeOrNull(offsets[8]);
+  object.isActive = reader.readBool(offsets[7]);
+  object.isRecurring = reader.readBool(offsets[8]);
+  object.lastEvaluatedAt = reader.readDateTimeOrNull(offsets[9]);
   object.periodType =
-      _BudgetperiodTypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+      _BudgetperiodTypeValueEnumMap[reader.readByteOrNull(offsets[10])] ??
           BudgetPeriodType.monthly;
-  object.startDate = reader.readDateTime(offsets[10]);
-  object.updatedAt = reader.readDateTime(offsets[11]);
+  object.startDate = reader.readDateTime(offsets[11]);
+  object.updatedAt = reader.readDateTime(offsets[12]);
   return object;
 }
 
@@ -170,29 +197,37 @@ P _budgetDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readObjectList<BudgetAlert>(
+            offset,
+            BudgetAlertSchema.deserialize,
+            allOffsets,
+            BudgetAlert(),
+          ) ??
+          []) as P;
     case 1:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
-      return (reader.readDateTime(offset)) as P;
-    case 4:
       return (reader.readLongOrNull(offset)) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readDateTime(offset)) as P;
     case 5:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 6:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 7:
       return (reader.readBool(offset)) as P;
     case 8:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 9:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 10:
       return (_BudgetperiodTypeValueEnumMap[reader.readByteOrNull(offset)] ??
           BudgetPeriodType.monthly) as P;
-    case 10:
-      return (reader.readDateTime(offset)) as P;
     case 11:
+      return (reader.readDateTime(offset)) as P;
+    case 12:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -343,6 +378,90 @@ extension BudgetQueryWhere on QueryBuilder<Budget, Budget, QWhereClause> {
 }
 
 extension BudgetQueryFilter on QueryBuilder<Budget, Budget, QFilterCondition> {
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'alerts',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'alerts',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'alerts',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'alerts',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'alerts',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'alerts',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<Budget, Budget, QAfterFilterCondition> amountEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -1098,7 +1217,14 @@ extension BudgetQueryFilter on QueryBuilder<Budget, Budget, QFilterCondition> {
   }
 }
 
-extension BudgetQueryObject on QueryBuilder<Budget, Budget, QFilterCondition> {}
+extension BudgetQueryObject on QueryBuilder<Budget, Budget, QFilterCondition> {
+  QueryBuilder<Budget, Budget, QAfterFilterCondition> alertsElement(
+      FilterQuery<BudgetAlert> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'alerts');
+    });
+  }
+}
 
 extension BudgetQueryLinks on QueryBuilder<Budget, Budget, QFilterCondition> {}
 
@@ -1488,6 +1614,12 @@ extension BudgetQueryProperty on QueryBuilder<Budget, Budget, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Budget, List<BudgetAlert>, QQueryOperations> alertsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'alerts');
+    });
+  }
+
   QueryBuilder<Budget, double, QQueryOperations> amountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'amount');
@@ -1562,45 +1694,40 @@ extension BudgetQueryProperty on QueryBuilder<Budget, Budget, QQueryProperty> {
   }
 }
 
+// **************************************************************************
+// IsarEmbeddedGenerator
+// **************************************************************************
+
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetBudgetAlertCollection on Isar {
-  IsarCollection<BudgetAlert> get budgetAlerts => this.collection();
-}
-
-const BudgetAlertSchema = CollectionSchema(
+const BudgetAlertSchema = Schema(
   name: r'BudgetAlert',
   id: -5787243906163010099,
   properties: {
-    r'budgetId': PropertySchema(
-      id: 0,
-      name: r'budgetId',
-      type: IsarType.long,
-    ),
     r'createdAt': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'isNotificationEnabled': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'isNotificationEnabled',
       type: IsarType.bool,
     ),
     r'isTriggered': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'isTriggered',
       type: IsarType.bool,
     ),
     r'type': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'type',
       type: IsarType.byte,
       enumMap: _BudgetAlerttypeEnumValueMap,
     ),
     r'value': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'value',
       type: IsarType.double,
     )
@@ -1609,28 +1736,6 @@ const BudgetAlertSchema = CollectionSchema(
   serialize: _budgetAlertSerialize,
   deserialize: _budgetAlertDeserialize,
   deserializeProp: _budgetAlertDeserializeProp,
-  idName: r'id',
-  indexes: {
-    r'budgetId': IndexSchema(
-      id: 1954233043883219522,
-      name: r'budgetId',
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'budgetId',
-          type: IndexType.value,
-          caseSensitive: false,
-        )
-      ],
-    )
-  },
-  links: {},
-  embeddedSchemas: {},
-  getId: _budgetAlertGetId,
-  getLinks: _budgetAlertGetLinks,
-  attach: _budgetAlertAttach,
-  version: '3.1.0+1',
 );
 
 int _budgetAlertEstimateSize(
@@ -1648,12 +1753,11 @@ void _budgetAlertSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.budgetId);
-  writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeBool(offsets[2], object.isNotificationEnabled);
-  writer.writeBool(offsets[3], object.isTriggered);
-  writer.writeByte(offsets[4], object.type.index);
-  writer.writeDouble(offsets[5], object.value);
+  writer.writeDateTime(offsets[0], object.createdAt);
+  writer.writeBool(offsets[1], object.isNotificationEnabled);
+  writer.writeBool(offsets[2], object.isTriggered);
+  writer.writeByte(offsets[3], object.type.index);
+  writer.writeDouble(offsets[4], object.value);
 }
 
 BudgetAlert _budgetAlertDeserialize(
@@ -1663,15 +1767,13 @@ BudgetAlert _budgetAlertDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = BudgetAlert();
-  object.budgetId = reader.readLong(offsets[0]);
-  object.createdAt = reader.readDateTime(offsets[1]);
-  object.id = id;
-  object.isNotificationEnabled = reader.readBool(offsets[2]);
-  object.isTriggered = reader.readBool(offsets[3]);
+  object.createdAt = reader.readDateTime(offsets[0]);
+  object.isNotificationEnabled = reader.readBool(offsets[1]);
+  object.isTriggered = reader.readBool(offsets[2]);
   object.type =
-      _BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+      _BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offsets[3])] ??
           BudgetAlertType.percentage;
-  object.value = reader.readDouble(offsets[5]);
+  object.value = reader.readDouble(offsets[4]);
   return object;
 }
 
@@ -1683,17 +1785,15 @@ P _budgetAlertDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
-    case 1:
       return (reader.readDateTime(offset)) as P;
+    case 1:
+      return (reader.readBool(offset)) as P;
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readBool(offset)) as P;
-    case 4:
       return (_BudgetAlerttypeValueEnumMap[reader.readByteOrNull(offset)] ??
           BudgetAlertType.percentage) as P;
-    case 5:
+    case 4:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1709,252 +1809,8 @@ const _BudgetAlerttypeValueEnumMap = {
   1: BudgetAlertType.amount,
 };
 
-Id _budgetAlertGetId(BudgetAlert object) {
-  return object.id;
-}
-
-List<IsarLinkBase<dynamic>> _budgetAlertGetLinks(BudgetAlert object) {
-  return [];
-}
-
-void _budgetAlertAttach(
-    IsarCollection<dynamic> col, Id id, BudgetAlert object) {
-  object.id = id;
-}
-
-extension BudgetAlertQueryWhereSort
-    on QueryBuilder<BudgetAlert, BudgetAlert, QWhere> {
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhere> anyId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhere> anyBudgetId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'budgetId'),
-      );
-    });
-  }
-}
-
-extension BudgetAlertQueryWhere
-    on QueryBuilder<BudgetAlert, BudgetAlert, QWhereClause> {
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> idEqualTo(Id id) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> idNotEqualTo(
-      Id id) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            )
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            );
-      } else {
-        return query
-            .addWhereClause(
-              IdWhereClause.greaterThan(lower: id, includeLower: false),
-            )
-            .addWhereClause(
-              IdWhereClause.lessThan(upper: id, includeUpper: false),
-            );
-      }
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.greaterThan(lower: id, includeLower: include),
-      );
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IdWhereClause.lessThan(upper: id, includeUpper: include),
-      );
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> idBetween(
-    Id lowerId,
-    Id upperId, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> budgetIdEqualTo(
-      int budgetId) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'budgetId',
-        value: [budgetId],
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> budgetIdNotEqualTo(
-      int budgetId) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'budgetId',
-              lower: [],
-              upper: [budgetId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'budgetId',
-              lower: [budgetId],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'budgetId',
-              lower: [budgetId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'budgetId',
-              lower: [],
-              upper: [budgetId],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> budgetIdGreaterThan(
-    int budgetId, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'budgetId',
-        lower: [budgetId],
-        includeLower: include,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> budgetIdLessThan(
-    int budgetId, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'budgetId',
-        lower: [],
-        upper: [budgetId],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterWhereClause> budgetIdBetween(
-    int lowerBudgetId,
-    int upperBudgetId, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'budgetId',
-        lower: [lowerBudgetId],
-        includeLower: includeLower,
-        upper: [upperBudgetId],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-}
-
 extension BudgetAlertQueryFilter
     on QueryBuilder<BudgetAlert, BudgetAlert, QFilterCondition> {
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition> budgetIdEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'budgetId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition>
-      budgetIdGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'budgetId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition>
-      budgetIdLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'budgetId',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition> budgetIdBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'budgetId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition>
       createdAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -2003,59 +1859,6 @@ extension BudgetAlertQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'createdAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition> idEqualTo(
-      Id value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterFilterCondition> idBetween(
-    Id lower,
-    Id upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -2203,258 +2006,3 @@ extension BudgetAlertQueryFilter
 
 extension BudgetAlertQueryObject
     on QueryBuilder<BudgetAlert, BudgetAlert, QFilterCondition> {}
-
-extension BudgetAlertQueryLinks
-    on QueryBuilder<BudgetAlert, BudgetAlert, QFilterCondition> {}
-
-extension BudgetAlertQuerySortBy
-    on QueryBuilder<BudgetAlert, BudgetAlert, QSortBy> {
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByBudgetId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'budgetId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByBudgetIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'budgetId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByCreatedAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByCreatedAtDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
-      sortByIsNotificationEnabled() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isNotificationEnabled', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
-      sortByIsNotificationEnabledDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isNotificationEnabled', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByIsTriggered() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTriggered', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByIsTriggeredDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTriggered', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'value', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> sortByValueDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'value', Sort.desc);
-    });
-  }
-}
-
-extension BudgetAlertQuerySortThenBy
-    on QueryBuilder<BudgetAlert, BudgetAlert, QSortThenBy> {
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByBudgetId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'budgetId', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByBudgetIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'budgetId', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByCreatedAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByCreatedAtDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'createdAt', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenById() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByIdDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'id', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
-      thenByIsNotificationEnabled() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isNotificationEnabled', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy>
-      thenByIsNotificationEnabledDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isNotificationEnabled', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByIsTriggered() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTriggered', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByIsTriggeredDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTriggered', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByTypeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.desc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'value', Sort.asc);
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QAfterSortBy> thenByValueDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'value', Sort.desc);
-    });
-  }
-}
-
-extension BudgetAlertQueryWhereDistinct
-    on QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> {
-  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> distinctByBudgetId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'budgetId');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> distinctByCreatedAt() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'createdAt');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct>
-      distinctByIsNotificationEnabled() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isNotificationEnabled');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> distinctByIsTriggered() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isTriggered');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> distinctByType() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'type');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlert, QDistinct> distinctByValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'value');
-    });
-  }
-}
-
-extension BudgetAlertQueryProperty
-    on QueryBuilder<BudgetAlert, BudgetAlert, QQueryProperty> {
-  QueryBuilder<BudgetAlert, int, QQueryOperations> idProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'id');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, int, QQueryOperations> budgetIdProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'budgetId');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, DateTime, QQueryOperations> createdAtProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'createdAt');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, bool, QQueryOperations>
-      isNotificationEnabledProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isNotificationEnabled');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, bool, QQueryOperations> isTriggeredProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isTriggered');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, BudgetAlertType, QQueryOperations> typeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'type');
-    });
-  }
-
-  QueryBuilder<BudgetAlert, double, QQueryOperations> valueProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'value');
-    });
-  }
-}

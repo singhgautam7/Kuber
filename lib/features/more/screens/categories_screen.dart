@@ -827,7 +827,7 @@ class _BudgetStatusSection extends ConsumerWidget {
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => BudgetDetailsSheet(budget: budget, category: category),
+                    builder: (context) => BudgetDetailsSheet(budgetId: budget.id, category: category),
                   );
                 },
                 borderRadius: BorderRadius.circular(12),

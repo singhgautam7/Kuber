@@ -115,7 +115,7 @@ class BudgetCard extends ConsumerWidget {
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
           builder: (context) => BudgetDetailsSheet(
-            budget: budget,
+            budgetId: budget.id,
             category: category,
           ),
         );
@@ -194,7 +194,7 @@ class BudgetCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-                if (!isInactive) _AlertChips(budgetId: budget.id, budgetAmount: budget.amount),
+                if (!isInactive) _AlertChips(alerts: budget.alerts, budgetAmount: budget.amount),
               ],
             ),
             const SizedBox(height: KuberSpacing.lg),
@@ -288,54 +288,46 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class _AlertChips extends ConsumerWidget {
-  final int budgetId;
+  final List<BudgetAlert> alerts;
   final double budgetAmount;
-  const _AlertChips({required this.budgetId, required this.budgetAmount});
+  const _AlertChips({required this.alerts, required this.budgetAmount});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final alertsAsync = ref.watch(budgetAlertsProvider(budgetId));
+    if (alerts.isEmpty) return const SizedBox.shrink();
     final cs = Theme.of(context).colorScheme;
 
-    return alertsAsync.when(
-      data: (alerts) {
-        if (alerts.isEmpty) return const SizedBox.shrink();
+    // Show first 2 alerts
+    final displayAlerts = alerts.take(2).toList();
+    return Row(
+      children: displayAlerts.map((a) {
+        final percentage = a.type == BudgetAlertType.percentage
+            ? a.value
+            : (a.value / budgetAmount) * 100;
+        
+        final label = a.type == BudgetAlertType.percentage
+            ? ref.watch(formatterProvider).formatPercentage(a.value)
+            : ref.watch(formatterProvider).formatCurrency(a.value);
+        
+        Color badgeColor;
+        if (percentage >= 66) {
+          badgeColor = Colors.orangeAccent;
+        } else if (percentage >= 33) {
+          badgeColor = Colors.amber;
+        } else {
+          badgeColor = Colors.green;
+        }
 
-        // Show first 2 alerts
-        final displayAlerts = alerts.take(2).toList();
-        return Row(
-          children: displayAlerts.map((a) {
-            final percentage = a.type == BudgetAlertType.percentage
-                ? a.value
-                : (a.value / budgetAmount) * 100;
-            
-            final label = a.type == BudgetAlertType.percentage
-                ? ref.watch(formatterProvider).formatPercentage(a.value)
-                : ref.watch(formatterProvider).formatCurrency(a.value);
-            
-            Color badgeColor;
-            if (percentage >= 66) {
-              badgeColor = Colors.orangeAccent;
-            } else if (percentage >= 33) {
-              badgeColor = Colors.amber;
-            } else {
-              badgeColor = Colors.green;
-            }
+        if (a.isTriggered) badgeColor = cs.error;
 
-            if (a.isTriggered) badgeColor = cs.error;
-
-            return Padding(
-              padding: const EdgeInsets.only(left: 4),
-              child: _Chip(
-                label: label,
-                color: badgeColor,
-              ),
-            );
-          }).toList(),
+        return Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: _Chip(
+            label: label,
+            color: badgeColor,
+          ),
         );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      }).toList(),
     );
   }
 }

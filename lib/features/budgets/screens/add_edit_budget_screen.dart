@@ -36,20 +36,19 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
           ? widget.existingBudget!.amount.toStringAsFixed(0)
           : widget.existingBudget!.amount.toStringAsFixed(2);
       _isEveryMonth = widget.existingBudget!.isRecurring;
+      _alerts = List<BudgetAlert>.from(widget.existingBudget?.alerts ?? []);
+      
       // Load selected category once categories are available
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final categories = await ref.read(categoryListProvider.future);
-        setState(() {
-          _selectedCategory = categories.firstWhere(
-            (c) => c.id.toString() == widget.existingBudget!.categoryId,
-            orElse: () => categories.first,
-          );
-        });
-        
-        final alerts = await ref.read(budgetAlertsProvider(widget.existingBudget!.id).future);
-        setState(() {
-          _alerts = List.from(alerts);
-        });
+        if (mounted) {
+          setState(() {
+            _selectedCategory = categories.firstWhere(
+              (c) => c.id.toString() == widget.existingBudget!.categoryId,
+              orElse: () => categories.first,
+            );
+          });
+        }
       });
     }
   }
@@ -69,7 +68,13 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
     budget.isActive = true;
     budget.updatedAt = DateTime.now();
 
-    await ref.read(budgetListProvider.notifier).save(budget, _alerts);
+    debugPrint('BUDGET_SAVE: Saving budget with ${_alerts.length} alerts');
+    await ref.read(budgetListProvider.notifier).save(budget, List<BudgetAlert>.from(_alerts));
+    
+    // Check if alerts were saved (if possible)
+    if (widget.existingBudget != null) {
+      debugPrint('BUDGET_SAVE: Verifying. Budget ID: ${budget.id}, Alerts in model: ${budget.alerts.length}');
+    }
     if (mounted) context.pop();
   }
 
@@ -176,7 +181,9 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
               spacing: 8,
               children: _alerts.map((a) => _AlertChip(
                 alert: a, 
-                onDelete: () => setState(() => _alerts.remove(a)),
+                onDelete: () => setState(() {
+                  _alerts = _alerts.where((item) => item != a).toList();
+                }),
               )).toList(),
             ),
           ],
@@ -272,11 +279,12 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
         existingAlerts: _alerts,
         onAdd: (alert) {
           setState(() {
-            _alerts.add(alert);
-            _alerts.sort((a, b) {
+            final updated = [..._alerts, alert];
+            updated.sort((a, b) {
               if (a.type == b.type) return a.value.compareTo(b.value);
               return a.type == BudgetAlertType.percentage ? -1 : 1;
             });
+            _alerts = updated;
           });
         },
       ),

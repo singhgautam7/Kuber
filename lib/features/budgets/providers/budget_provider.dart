@@ -2,38 +2,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/budget.dart';
 import '../data/budget_repository.dart';
 
-final budgetListProvider = AsyncNotifierProvider<BudgetListNotifier, List<Budget>>(() {
+final budgetListProvider = StreamNotifierProvider<BudgetListNotifier, List<Budget>>(() {
   return BudgetListNotifier();
 });
 
-class BudgetListNotifier extends AsyncNotifier<List<Budget>> {
+class BudgetListNotifier extends StreamNotifier<List<Budget>> {
   @override
-  Future<List<Budget>> build() async {
-    return ref.watch(budgetRepositoryProvider).getAll();
+  Stream<List<Budget>> build() {
+    return ref.watch(budgetRepositoryProvider).watchBudgets();
   }
 
   Future<void> save(Budget budget, List<BudgetAlert> alerts) async {
     await ref.read(budgetRepositoryProvider).saveBudget(budget, alerts);
-    ref.invalidateSelf();
   }
 
   Future<void> delete(int id) async {
     await ref.read(budgetRepositoryProvider).deleteBudget(id);
-    ref.invalidateSelf();
   }
 
   Future<void> toggleActive(int id, bool active) async {
     await ref.read(budgetRepositoryProvider).setBudgetActive(id, active);
-    ref.invalidateSelf();
   }
 }
 
-final budgetByCategoryProvider = FutureProvider.family<Budget?, String>((ref, categoryId) async {
-  return ref.watch(budgetRepositoryProvider).getByCategory(categoryId);
+final budgetByIdProvider = Provider.family<AsyncValue<Budget?>, int>((ref, budgetId) {
+  final budgetsAsync = ref.watch(budgetListProvider);
+  return budgetsAsync.whenData((budgets) => 
+    budgets.cast<Budget?>().firstWhere((b) => b?.id == budgetId, orElse: () => null)
+  );
 });
 
-final budgetAlertsProvider = FutureProvider.family<List<BudgetAlert>, int>((ref, budgetId) async {
-  return ref.watch(budgetRepositoryProvider).getAlerts(budgetId);
+final budgetByCategoryProvider = FutureProvider.family<Budget?, String>((ref, categoryId) async {
+  return ref.watch(budgetRepositoryProvider).getByCategory(categoryId);
 });
 
 class BudgetProgress {

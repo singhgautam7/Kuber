@@ -38,6 +38,8 @@ class Budget {
 
   late DateTime updatedAt;
 
+  List<BudgetAlert> alerts = [];
+
   Budget() {
     updatedAt = DateTime.now();
   }
@@ -48,13 +50,8 @@ enum BudgetAlertType {
   amount,
 }
 
-@collection
+@embedded
 class BudgetAlert {
-  Id id = Isar.autoIncrement;
-
-  @Index()
-  late int budgetId;
-
   @enumerated
   late BudgetAlertType type;
 

@@ -31,7 +31,6 @@ class IsarService {
         TagSchema,
         TransactionTagSchema,
         BudgetSchema,
-        BudgetAlertSchema,
       ],
       directory: dir.path,
     );

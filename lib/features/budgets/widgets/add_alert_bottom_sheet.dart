@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/formatters.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../data/budget.dart';
 
@@ -197,12 +196,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                       textAlign: TextAlign.center,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
-                        if (_type == BudgetAlertType.amount)
-                          CurrencyInputFormatter(
-                            isIndian: ref.watch(settingsProvider).valueOrNull?.numberSystem == NumberSystem.indian,
-                          )
-                        else
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                       ],
                       decoration: InputDecoration(
                         border: InputBorder.none,

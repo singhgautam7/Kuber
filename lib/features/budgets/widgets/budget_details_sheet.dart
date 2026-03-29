@@ -10,303 +10,306 @@ import '../providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
-  final Budget budget;
+  final int budgetId;
   final Category category;
 
   const BudgetDetailsSheet({
     super.key, 
-    required this.budget, 
+    required this.budgetId, 
     required this.category,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final progressAsync = ref.watch(budgetProgressProvider(budget));
-    final alertsAsync = ref.watch(budgetAlertsProvider(budget.id));
+    final budgetAsync = ref.watch(budgetByIdProvider(budgetId));
 
-    return Container(
-      padding: EdgeInsets.all(KuberSpacing.xl),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+    return budgetAsync.when(
+      data: (budget) {
+        if (budget == null) return const SizedBox.shrink();
+        
+        final progressAsync = ref.watch(budgetProgressProvider(budget));
+        final alerts = budget.alerts;
+
+        return Container(
+          padding: const EdgeInsets.all(KuberSpacing.xl),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
           ),
-          const SizedBox(height: KuberSpacing.xl),
-
-          // Header row: icon + name + close
-          Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Color(category.colorValue).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.shopping_bag_outlined, color: Color(category.colorValue), size: 24),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category.name,
-                      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: cs.onSurface),
-                    ),
-                    Text(
-                      'MONTHLY BUDGET PLAN',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+              // Drag handle
+              Center(
                 child: Container(
-                  width: 36,
-                  height: 36,
+                  width: 40,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    size: 18,
-                    color: cs.onSurfaceVariant,
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          progressAsync.when(
-            data: (p) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Column(
+              const SizedBox(height: KuberSpacing.xl),
+
+              // Header row: icon + name + close
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Color(category.colorValue).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.shopping_bag_outlined, color: Color(category.colorValue), size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'CURRENT SPENDING',
+                          category.name,
+                          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: cs.onSurface),
+                        ),
+                        Text(
+                          'MONTHLY BUDGET PLAN',
                           style: GoogleFonts.inter(
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: cs.onSurfaceVariant,
                             letterSpacing: 1.0,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: ref.watch(formatterProvider).formatCurrency(p.spent),
-                                style: GoogleFonts.inter(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  color: cs.onSurface,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
-                    Column(
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close,
+                        size: 18,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              progressAsync.when(
+                data: (p) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          'UTILIZATION',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 1.0,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'CURRENT SPENDING',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurfaceVariant,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: ref.watch(formatterProvider).formatCurrency(p.spent),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w700,
+                                      color: cs.onSurface,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          ref.watch(formatterProvider).formatPercentage(p.percentage),
-                          style: GoogleFonts.inter(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
-                            color: _getUtilizationColor(p.percentage, cs),
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'UTILIZATION',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurfaceVariant,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              ref.watch(formatterProvider).formatPercentage(p.percentage),
+                              style: GoogleFonts.inter(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: _getUtilizationColor(p.percentage, cs),
+                              ),
+                            ),
+                          ],
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: (p.percentage / 100).clamp(0.0, 1.0),
+                        minHeight: 12,
+                        backgroundColor: cs.outline.withValues(alpha: 0.1),
+                        color: cs.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(ref.watch(formatterProvider).formatCurrency(0), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
+                        Text(ref.watch(formatterProvider).formatCompactCurrency(p.limit), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: (p.percentage / 100).clamp(0.0, 1.0),
-                    minHeight: 12,
-                    backgroundColor: cs.outline.withValues(alpha: 0.1),
-                    color: cs.primary,
+                loading: () => const LinearProgressIndicator(),
+                error: (err, _) => Text('Error: $err'),
+              ),
+              const SizedBox(height: 32),
+              Text(
+                'ACTIVE ALERTS',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (alerts.isEmpty)
+                Text('No alerts set', style: GoogleFonts.inter(color: cs.onSurfaceVariant))
+              else
+                Column(
+                  children: alerts.map((a) => _AlertRow(
+                    alert: a, 
+                    currentPercentage: progressAsync.valueOrNull?.percentage ?? 0,
+                  )).toList(),
+                ),
+              const SizedBox(height: 32),
+              Text(
+                'BUDGET CONTROLS',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    context.pop();
+                    context.push('/budgets/edit', extra: budget);
+                  },
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: Text(
+                    'Edit Budget',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: cs.onSurface,
+                    side: BorderSide(color: cs.outline),
+                    padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(ref.watch(formatterProvider).formatCurrency(0), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
-                    Text(ref.watch(formatterProvider).formatCompactCurrency(p.limit), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
-                  ],
-                ),
-              ],
-            ),
-            loading: () => const LinearProgressIndicator(),
-            error: (err, _) => Text('Error: $err'),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'ACTIVE ALERTS',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 12),
-          alertsAsync.when(
-            data: (alerts) {
-              if (alerts.isEmpty) {
-                return Text('No alerts set', style: GoogleFonts.inter(color: cs.onSurfaceVariant));
-              }
-              final progress = progressAsync.valueOrNull;
-              return Column(
-                children: alerts.map((a) => _AlertRow(
-                  alert: a, 
-                  currentPercentage: progress?.percentage ?? 0,
-                )).toList(),
-              );
-            },
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'BUDGET CONTROLS',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                context.pop();
-                context.push('/budgets/edit', extra: budget);
-              },
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              label: Text(
-                'Edit Budget',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
+              ),
+              const SizedBox(height: KuberSpacing.sm),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    ref.read(budgetListProvider.notifier).toggleActive(budget.id, !budget.isActive);
+                    // Sheet will auto-refresh due to stream notifier
+                  },
+                  icon: Icon(
+                    budget.isActive ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                    size: 18,
+                  ),
+                  label: Text(
+                    budget.isActive ? 'Disable Budget' : 'Enable Budget',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: cs.onSurface,
+                    side: BorderSide(color: cs.outline),
+                    padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                    ),
+                  ),
                 ),
               ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: cs.onSurface,
-                side: BorderSide(color: cs.outline),
-                padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+              const SizedBox(height: KuberSpacing.sm),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => _confirmDeleteBudget(context, ref, budget.id),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: Text(
+                    'Delete Budget',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: cs.error,
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(height: 16),
+            ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                ref.read(budgetListProvider.notifier).toggleActive(budget.id, !budget.isActive);
-                context.pop();
-              },
-              icon: Icon(
-                budget.isActive ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                size: 18,
-              ),
-              label: Text(
-                budget.isActive ? 'Disable Budget' : 'Enable Budget',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: cs.onSurface,
-                side: BorderSide(color: cs.outline),
-                padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Center(
-            child: TextButton.icon(
-              onPressed: () => _confirmDeleteBudget(context, ref),
-              icon: const Icon(Icons.delete_outline, size: 18),
-              label: Text(
-                'Delete Budget',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                foregroundColor: cs.error,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Center(child: Text('Error loading budget details: $err')),
     );
   }
 
-  void _confirmDeleteBudget(BuildContext context, WidgetRef ref) {
+  void _confirmDeleteBudget(BuildContext context, WidgetRef ref, int id) {
     final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -339,7 +342,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
               ),
             ),
             onPressed: () {
-              ref.read(budgetListProvider.notifier).delete(budget.id);
+              ref.read(budgetListProvider.notifier).delete(id);
               Navigator.pop(ctx);   // close dialog
               context.pop();        // close sheet
             },

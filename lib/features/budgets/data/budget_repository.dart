@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/database/isar_service.dart';
@@ -22,27 +23,26 @@ class BudgetRepository {
     return isar.budgets.filter().categoryIdEqualTo(categoryId).isActiveEqualTo(true).findFirst();
   }
 
+  Stream<List<Budget>> watchBudgets() {
+    return isar.budgets.where().watch(fireImmediately: true);
+  }
+
   Future<Id> saveBudget(Budget budget, List<BudgetAlert> alerts) async {
     return isar.writeTxn(() async {
-      final budgetId = await isar.budgets.put(budget);
+      debugPrint('BUDGET_REPO: Writing budget ${budget.id} with ${alerts.length} alerts');
+      budget.alerts = alerts;
+      final id = await isar.budgets.put(budget);
       
-      // Delete old alerts
-      await isar.budgetAlerts.filter().budgetIdEqualTo(budgetId).deleteAll();
+      final saved = await isar.budgets.get(id);
+      debugPrint('BUDGET_REPO: Successfully saved budget. ID: $id. Alerts in DB: ${saved?.alerts.length}');
       
-      // Add new alerts
-      for (final alert in alerts) {
-        alert.budgetId = budgetId;
-      }
-      await isar.budgetAlerts.putAll(alerts);
-      
-      return budgetId;
+      return id;
     });
   }
 
   Future<void> deleteBudget(int id) async {
     await isar.writeTxn(() async {
       await isar.budgets.delete(id);
-      await isar.budgetAlerts.filter().budgetIdEqualTo(id).deleteAll();
     });
   }
 
@@ -58,7 +58,8 @@ class BudgetRepository {
   }
 
   Future<List<BudgetAlert>> getAlerts(int budgetId) async {
-    return isar.budgetAlerts.filter().budgetIdEqualTo(budgetId).findAll();
+    final budget = await isar.budgets.get(budgetId);
+    return budget?.alerts ?? [];
   }
 
   Future<double> calculateUsage(String categoryId, DateTime start, DateTime end) async {
@@ -101,11 +102,9 @@ class BudgetRepository {
         }
 
         if (periodChanged) {
-          final alerts = await isar.budgetAlerts.filter().budgetIdEqualTo(budget.id).findAll();
-          for (final alert in alerts) {
+          for (final alert in budget.alerts) {
             alert.isTriggered = false;
           }
-          await isar.budgetAlerts.putAll(alerts);
           budget.lastEvaluatedAt = now;
         }
 
@@ -115,16 +114,6 @@ class BudgetRepository {
         }
         
         await isar.budgets.put(budget);
-      }
-    });
-  }
-  
-  Future<void> markAlertTriggered(int alertId) async {
-    await isar.writeTxn(() async {
-      final alert = await isar.budgetAlerts.get(alertId);
-      if (alert != null) {
-        alert.isTriggered = true;
-        await isar.budgetAlerts.put(alert);
       }
     });
   }

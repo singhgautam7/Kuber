@@ -24,9 +24,10 @@ class BudgetService {
     if (budget == null || !budget.isActive) return;
 
     final progress = await ref.read(budgetProgressProvider(budget).future);
-    final alerts = await ref.read(budgetAlertsProvider(budget.id).future);
+    bool anyTriggered = false;
 
-    for (final alert in alerts) {
+    for (int i = 0; i < budget.alerts.length; i++) {
+      final alert = budget.alerts[i];
       if (alert.isTriggered) continue;
 
       bool shouldTrigger = false;
@@ -41,7 +42,8 @@ class BudgetService {
       }
 
       if (shouldTrigger) {
-        await ref.read(budgetRepositoryProvider).markAlertTriggered(alert.id);
+        alert.isTriggered = true;
+        anyTriggered = true;
         
         if (alert.isNotificationEnabled) {
           final categories = await ref.read(categoryListProvider.future);
@@ -55,13 +57,20 @@ class BudgetService {
             body = 'You have used ${ref.read(formatterProvider).formatCurrency(alert.value)} of your ${cat.name} budget.';
           }
 
+          // Use a stable ID for the notification: budget.id * 10 + index
+          final notificationId = budget.id * 10 + i;
+
           await ref.read(notificationServiceProvider).showBudgetAlertNotification(
-            id: alert.id,
+            id: notificationId,
             title: title,
             body: body,
           );
         }
       }
+    }
+
+    if (anyTriggered) {
+      await ref.read(budgetRepositoryProvider).saveBudget(budget, budget.alerts);
     }
   }
 }

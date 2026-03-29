@@ -63,12 +63,11 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
     setState(() => _saving = true);
 
     final diff = _diff;
-    final transactionDiff = widget.isCredit ? -diff : diff;
-    final isPositive = transactionDiff > 0;
+    final isPositive = diff > 0;
 
     final adjustment = Transaction()
       ..name = widget.isCredit ? 'Limit Spent Adjustment' : 'Balance Adjustment'
-      ..amount = transactionDiff.abs()
+      ..amount = diff.abs()
       ..type = isPositive ? 'income' : 'expense'
       ..accountId = widget.account.id.toString()
       ..categoryId = ''
