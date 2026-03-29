@@ -54,7 +54,10 @@ final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
 final recentTransactionsProvider =
     FutureProvider<List<Transaction>>((ref) async {
   final all = await ref.watch(transactionListProvider.future);
-  return all.take(5).toList();
+  // Filter out income legs of transfers (show only expense/FROM leg)
+  final filtered =
+      all.where((t) => !(t.isTransfer && t.type == 'income')).toList();
+  return filtered.take(10).toList();
 });
 
 class DaySummary {

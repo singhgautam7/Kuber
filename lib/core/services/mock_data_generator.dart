@@ -46,7 +46,8 @@ class MockDataGenerator {
         ..isCreditCard = true
         ..icon = 'credit_card'
         ..colorValue = AppColorPalette.colors[2] // violet
-        ..creditLimit = 100000;
+        ..creditLimit = 100000
+        ..initialBalance = -5000;
 
       await isar.accounts.putAll([cash, hdfc, icici]);
 
