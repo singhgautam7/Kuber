@@ -88,12 +88,12 @@ final budgetProgressProvider = FutureProvider.family<BudgetProgress, Budget>((
   if (budget.periodType == BudgetPeriodType.monthly) {
     final now = DateTime.now();
     startDate = DateTime(now.year, now.month, 1);
-    endDate = DateTime(now.year, now.month + 1, 0);
+    endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59, 999);
   } else if (budget.periodType == BudgetPeriodType.weekly) {
-    // Current week logic
     final now = DateTime.now();
-    startDate = now.subtract(Duration(days: now.weekday - 1));
-    endDate = startDate.add(const Duration(days: 6));
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    startDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    endDate = DateTime(weekStart.year, weekStart.month, weekStart.day + 6, 23, 59, 59, 999);
   } else {
     startDate = budget.startDate;
     endDate = budget.endDate ?? DateTime.now();

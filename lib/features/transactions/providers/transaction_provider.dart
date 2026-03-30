@@ -34,11 +34,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      try {
-        await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
-      } catch (_) {
-        // Alert check is best-effort; don't fail the save
-      }
+      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
     }
     return id;
   }
@@ -48,11 +44,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      try {
-        await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
-      } catch (_) {
-        // Alert check is best-effort; don't fail the save
-      }
+      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
     }
     return id;
   }
@@ -69,7 +61,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t != null && t.type == 'expense' && !t.isTransfer) {
-      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
     }
   }
 
@@ -78,7 +70,7 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
     }
   }
 

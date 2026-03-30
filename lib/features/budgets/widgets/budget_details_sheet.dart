@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -192,6 +193,30 @@ class BudgetDetailsSheet extends ConsumerWidget {
                         Text(ref.watch(formatterProvider).formatCompactCurrency(p.limit), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
                       ],
                     ),
+                    const SizedBox(height: 32),
+                    Text(
+                      'BUDGET DETAILS',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurfaceVariant,
+                        letterSpacing: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: _DetailCell(
+                          label: 'CREATED ON',
+                          value: DateFormat('MMM d, yyyy').format(budget.createdAt),
+                        )),
+                        const SizedBox(width: KuberSpacing.sm),
+                        Expanded(child: _DetailCell(
+                          label: budget.isRecurring ? 'RENEWS ON' : 'EXPIRES ON',
+                          value: DateFormat('MMM d, yyyy').format(p.endDate),
+                        )),
+                      ],
+                    ),
                   ],
                 ),
                 loading: () => const LinearProgressIndicator(),
@@ -375,24 +400,24 @@ class _AlertRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final label = alert.type == BudgetAlertType.percentage 
-        ? 'At ${ref.watch(formatterProvider).formatPercentage(alert.value)}' 
+    final label = alert.type == BudgetAlertType.percentage
+        ? 'At ${ref.watch(formatterProvider).formatPercentage(alert.value)}'
         : 'At ${ref.watch(formatterProvider).formatCurrency(alert.value)}';
-    
+
     final threshold = alert.type == BudgetAlertType.percentage
         ? budgetAmount * (alert.value / 100)
         : alert.value;
-    
+
     final isReached = currentSpent >= threshold;
     final status = isReached ? 'REACHED' : 'UPCOMING';
     final statusColor = isReached ? cs.primary : cs.onSurfaceVariant;
-    
+
     // Notification Icon & Color
-    final notificationIcon = alert.enableNotification 
-        ? Icons.notifications_active_outlined 
+    final notificationIcon = alert.enableNotification
+        ? Icons.notifications_active_outlined
         : Icons.notifications_off_outlined;
-    final notificationColor = alert.enableNotification 
-        ? cs.primary 
+    final notificationColor = alert.enableNotification
+        ? cs.primary
         : cs.onSurfaceVariant;
 
     return Container(
@@ -431,6 +456,52 @@ class _AlertRow extends ConsumerWidget {
                 letterSpacing: 0.5,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailCell extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _DetailCell({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.lg,
+        vertical: KuberSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
