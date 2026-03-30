@@ -34,7 +34,11 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+      try {
+        await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+      } catch (_) {
+        // Alert check is best-effort; don't fail the save
+      }
     }
     return id;
   }
@@ -44,7 +48,11 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+      try {
+        await ref.read(budgetServiceProvider).checkAlerts(t.categoryId);
+      } catch (_) {
+        // Alert check is best-effort; don't fail the save
+      }
     }
     return id;
   }

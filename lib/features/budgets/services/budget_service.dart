@@ -42,8 +42,9 @@ class BudgetService {
         
         if (alert.enableNotification) {
           final categories = await ref.read(categoryListProvider.future);
-          final cat = categories.firstWhere((c) => c.id.toString() == budget.categoryId);
-          
+          final cat = categories.where((c) => c.id.toString() == budget.categoryId).firstOrNull;
+          if (cat == null) return;
+
           final title = 'Budget Alert';
           String body;
           if (alert.type == BudgetAlertType.percentage) {
