@@ -9,6 +9,7 @@ import '../../categories/data/category.dart';
 import '../data/budget.dart';
 import '../providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../../shared/widgets/app_button.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final int budgetId;
@@ -254,76 +255,55 @@ class BudgetDetailsSheet extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    context.pop();
-                    context.push('/budgets/edit', extra: budget);
-                  },
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  label: Text(
-                    'Edit Budget',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'Edit',
+                      icon: Icons.edit_outlined,
+                      type: AppButtonType.normal,
+                      onPressed: () {
+                        context.pop();
+                        context.push('/budgets/edit', extra: budget);
+                      },
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: cs.onSurface,
-                    side: BorderSide(color: cs.outline),
-                    padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppButton(
+                      label: budget.isActive ? 'Disable' : 'Enable',
+                      icon: budget.isActive ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      type: AppButtonType.normal,
+                      onPressed: () {
+                        ref.read(budgetListProvider.notifier).toggleActive(budget.id, !budget.isActive);
+                      },
                     ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: KuberSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ref.read(budgetListProvider.notifier).toggleActive(budget.id, !budget.isActive);
-                    // Sheet will auto-refresh due to stream notifier
-                  },
-                  icon: Icon(
-                    budget.isActive ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    size: 18,
-                  ),
-                  label: Text(
-                    budget.isActive ? 'Disable Budget' : 'Enable Budget',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'History',
+                      icon: Icons.history_rounded,
+                      type: AppButtonType.primary,
+                      onPressed: () {
+                        // TODO: Implement history view
+                      },
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: cs.onSurface,
-                    side: BorderSide(color: cs.outline),
-                    padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Delete',
+                      icon: Icons.delete_outline_rounded,
+                      type: AppButtonType.danger,
+                      onPressed: () => _confirmDeleteBudget(context, ref, budget.id),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.sm),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () => _confirmDeleteBudget(context, ref, budget.id),
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  label: Text(
-                    'Delete Budget',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: cs.error,
-                  ),
-                ),
+                ],
               ),
               const SizedBox(height: 16),
             ],
