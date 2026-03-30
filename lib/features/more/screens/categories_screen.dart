@@ -983,7 +983,9 @@ class _CategoryListItem extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  '${stats.transactionCount} txns',
+                  stats.transactionCount == 1
+                      ? '1 transaction'
+                      : '${stats.transactionCount} transactions',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
