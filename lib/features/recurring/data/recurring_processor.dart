@@ -37,6 +37,7 @@ class RecurringProcessor {
           ..accountId = rule.accountId
           ..notes = rule.notes
           ..recurringRuleId = rule.id
+          ..isRecurring = true
           ..createdAt = dueDate
           ..updatedAt = DateTime.now();
 

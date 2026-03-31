@@ -1,7 +1,7 @@
 name: kuber
 description: "Kuber — local-first expense manager"
 publish_to: 'none'
-version: 1.2.1+4
+version: 1.3.1+5
 
 environment:
   sdk: ^3.11.1
@@ -55,6 +55,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.13
   isar_generator: ^3.1.0+1
+  mocktail: ^1.0.4
+  fake_async: ^1.3.2
 
 flutter:
   uses-material-design: true

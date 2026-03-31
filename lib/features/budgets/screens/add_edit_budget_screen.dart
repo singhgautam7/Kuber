@@ -15,11 +15,17 @@ import '../widgets/add_alert_bottom_sheet.dart';
 
 class AddEditBudgetScreen extends ConsumerStatefulWidget {
   final Budget? existingBudget;
+  final Category? preselectedCategory;
 
-  const AddEditBudgetScreen({super.key, this.existingBudget});
+  const AddEditBudgetScreen({
+    super.key,
+    this.existingBudget,
+    this.preselectedCategory,
+  });
 
   @override
-  ConsumerState<AddEditBudgetScreen> createState() => _AddEditBudgetScreenState();
+  ConsumerState<AddEditBudgetScreen> createState() =>
+      _AddEditBudgetScreenState();
 }
 
 class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
@@ -37,7 +43,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
           : widget.existingBudget!.amount.toStringAsFixed(2);
       _isEveryMonth = widget.existingBudget!.isRecurring;
       _alerts = List<BudgetAlert>.from(widget.existingBudget?.alerts ?? []);
-      
+
       // Load selected category once categories are available
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final categories = await ref.read(categoryListProvider.future);
@@ -50,6 +56,8 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
           });
         }
       });
+    } else if (widget.preselectedCategory != null) {
+      _selectedCategory = widget.preselectedCategory;
     }
   }
 
@@ -69,11 +77,15 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
     budget.updatedAt = DateTime.now();
 
     debugPrint('BUDGET_SAVE: Saving budget with ${_alerts.length} alerts');
-    await ref.read(budgetListProvider.notifier).save(budget, List<BudgetAlert>.from(_alerts));
-    
+    await ref
+        .read(budgetListProvider.notifier)
+        .save(budget, List<BudgetAlert>.from(_alerts));
+
     // Check if alerts were saved (if possible)
     if (widget.existingBudget != null) {
-      debugPrint('BUDGET_SAVE: Verifying. Budget ID: ${budget.id}, Alerts in model: ${budget.alerts.length}');
+      debugPrint(
+        'BUDGET_SAVE: Verifying. Budget ID: ${budget.id}, Alerts in model: ${budget.alerts.length}',
+      );
     }
     if (mounted) context.pop();
   }
@@ -102,11 +114,14 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             if (_selectedCategory != null)
               Consumer(
                 builder: (context, ref, _) {
-                  final budgets = ref.watch(budgetListProvider).valueOrNull ?? [];
-                  final isDuplicate = budgets.any((b) =>
-                      b.isActive &&
-                      b.categoryId == _selectedCategory!.id.toString() &&
-                      b.id != widget.existingBudget?.id);
+                  final budgets =
+                      ref.watch(budgetListProvider).valueOrNull ?? [];
+                  final isDuplicate = budgets.any(
+                    (b) =>
+                        b.isActive &&
+                        b.categoryId == _selectedCategory!.id.toString() &&
+                        b.id != widget.existingBudget?.id,
+                  );
                   if (isDuplicate) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8, left: 4),
@@ -129,7 +144,10 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w700),
+              style: GoogleFonts.inter(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+              ),
               decoration: InputDecoration(
                 prefixText: '${ref.watch(currencyProvider).symbol} ',
                 hintText: '0',
@@ -179,12 +197,16 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             ),
             Wrap(
               spacing: 8,
-              children: _alerts.map((a) => _AlertChip(
-                alert: a, 
-                onDelete: () => setState(() {
-                  _alerts = _alerts.where((item) => item != a).toList();
-                }),
-              )).toList(),
+              children: _alerts
+                  .map(
+                    (a) => _AlertChip(
+                      alert: a,
+                      onDelete: () => setState(() {
+                        _alerts = _alerts.where((item) => item != a).toList();
+                      }),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ),
@@ -199,12 +221,16 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
         child: Consumer(
           builder: (context, ref, _) {
             final budgets = ref.watch(budgetListProvider).valueOrNull ?? [];
-            final isDuplicate = _selectedCategory != null &&
-                budgets.any((b) =>
-                    b.isActive &&
-                    b.categoryId == _selectedCategory!.id.toString() &&
-                    b.id != widget.existingBudget?.id);
-            final isValid = _selectedCategory != null &&
+            final isDuplicate =
+                _selectedCategory != null &&
+                budgets.any(
+                  (b) =>
+                      b.isActive &&
+                      b.categoryId == _selectedCategory!.id.toString() &&
+                      b.id != widget.existingBudget?.id,
+                );
+            final isValid =
+                _selectedCategory != null &&
                 _amountController.text.isNotEmpty &&
                 !isDuplicate;
 
@@ -212,8 +238,12 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
               onPressed: isValid ? _save : null,
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
-                backgroundColor: isValid ? cs.primary : cs.surfaceContainerHighest,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                ),
+                backgroundColor: isValid
+                    ? cs.primary
+                    : cs.surfaceContainerHighest,
               ),
               icon: const Icon(Icons.save_rounded),
               label: const Text('SAVE BUDGET'),
@@ -266,7 +296,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     if (amount <= 0 && _alerts.isEmpty) {
-        // Just a precaution if someone tries to add alert before amount
+      // Just a precaution if someone tries to add alert before amount
     }
 
     FocusScope.of(context).unfocus();
@@ -275,7 +305,9 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => AddAlertBottomSheet(
-        budgetAmount: amount > 0 ? amount : 1000000, // Fallback high value if amount not set
+        budgetAmount: amount > 0
+            ? amount
+            : 1000000, // Fallback high value if amount not set
         existingAlerts: _alerts,
         onAdd: (alert) {
           setState(() {
@@ -341,7 +373,11 @@ class _CategorySelector extends StatelessWidget {
                   color: Color(selected!.colorValue).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(Icons.category, color: Color(selected!.colorValue), size: 20),
+                child: Icon(
+                  Icons.category,
+                  color: Color(selected!.colorValue),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -354,7 +390,10 @@ class _CategorySelector extends StatelessWidget {
                     ),
                     Text(
                       'Tap to change category',
-                      style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -395,7 +434,9 @@ class _OptionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? cs.primaryContainer.withValues(alpha: 0.1) : cs.surfaceContainer,
+          color: isSelected
+              ? cs.primaryContainer.withValues(alpha: 0.1)
+              : cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(color: isSelected ? cs.primary : cs.outline),
         ),
@@ -428,10 +469,10 @@ class _AlertChip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final label = alert.type == BudgetAlertType.percentage 
+    final label = alert.type == BudgetAlertType.percentage
         ? ref.watch(formatterProvider).formatPercentage(alert.value)
         : ref.watch(formatterProvider).formatCurrency(alert.value);
-    
+
     return Chip(
       label: Text(label, style: GoogleFonts.inter(fontSize: 12)),
       onDeleted: onDelete,

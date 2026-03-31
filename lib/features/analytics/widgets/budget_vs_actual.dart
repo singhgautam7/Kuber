@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../budgets/data/budget.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -85,7 +86,7 @@ class BudgetVsActualCard extends ConsumerWidget {
 }
 
 class _BudgetVsActualRow extends ConsumerWidget {
-  final ({dynamic budget, dynamic progress}) result;
+  final ({Budget budget, BudgetProgress progress}) result;
   const _BudgetVsActualRow({required this.result});
 
   @override
@@ -118,7 +119,7 @@ class _BudgetVsActualRow extends ConsumerWidget {
       statusLabel = 'On track';
     }
 
-    final remaining = (progress.limit - progress.spent).clamp(0, double.infinity);
+    final remaining = (progress.limit - progress.spent).clamp(0.0, double.infinity);
 
     return InkWell(
       onTap: () => context.go('/history?categoryId=${budget.categoryId}'),
@@ -210,7 +211,7 @@ class _BudgetVsActualRow extends ConsumerWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(100),
               child: LinearProgressIndicator(
-                value: (progress.percentage / 100).clamp(0, 1),
+                value: (progress.percentage / 100).clamp(0.0, 1.0),
                 backgroundColor: cs.outline.withValues(alpha: 0.2),
                 color: cs.primary, // Static primary color as requested
                 minHeight: 8,

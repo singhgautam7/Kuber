@@ -178,7 +178,7 @@ class BudgetCard extends ConsumerWidget {
                               ? 'BUDGET IS CURRENTLY PAUSED'
                               : p.percentage >= 100
                                 ? 'EXCEEDED BY ${ref.watch(formatterProvider).formatCurrency(p.spent - p.limit)}'
-                                : 'RESETS IN ${p.daysRemaining} DAYS',
+                                : '${budget.isRecurring ? 'RESETS' : 'EXPIRES'} IN ${p.daysRemaining} ${p.daysRemaining == 1 ? 'DAY' : 'DAYS'}',
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,

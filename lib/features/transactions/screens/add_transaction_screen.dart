@@ -987,10 +987,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       } else {
         resultId = await ref.read(transactionListProvider.notifier).add(t);
       }
-      
+
       // Save tags
       await ref.read(tagRepositoryProvider).updateTransactionTags(
-        resultId, 
+        resultId,
         _selectedTags.map((tag) => tag.id).toList(),
       );
     } catch (e) {
@@ -1001,7 +1001,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     if (!mounted) return;
+
     context.pop();
+
     showKuberSnackBar(
       context,
       _isEditing ? 'Transaction updated' : 'Transaction saved',
@@ -1054,7 +1056,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     if (!mounted) return;
+
     context.pop();
+
     showKuberSnackBar(
       context,
       _isEditing ? 'Transfer updated' : 'Transfer saved',

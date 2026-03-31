@@ -15,6 +15,7 @@ import '../../categories/data/category_group.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../budgets/providers/budget_provider.dart';
+import '../../budgets/data/budget.dart';
 import '../../budgets/widgets/budget_details_sheet.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -48,11 +49,15 @@ class CategoriesScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: KuberPageHeader(
                   title: 'Manage\nCategories',
-                  description: 'Organize your transactions with custom categories and group those categories.',
+                  description:
+                      'Organize your transactions with custom categories and group those categories.',
                   actionTooltip: 'Add Category/Group',
                   onAction: () => _showAddSelectionSheet(context),
                 ),
               ),
+
+              // KPI Grid
+              const SliverToBoxAdapter(child: _CategoryKpisGrid()),
 
               if (categories.isEmpty)
                 SliverFillRemaining(
@@ -87,25 +92,29 @@ class CategoriesScreen extends ConsumerWidget {
                         SliverToBoxAdapter(
                           child: _GroupHeader(
                             name: group.name,
-                            onEdit: () => _showEditGroupDialog(context, ref, group),
-                            onDelete: () => _confirmDeleteGroup(context, ref, group),
+                            onEdit: () =>
+                                _showEditGroupDialog(context, ref, group),
+                            onDelete: () =>
+                                _confirmDeleteGroup(context, ref, group),
                           ),
                         ),
                       );
                       slivers.add(
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
-                          sliver: SliverGrid(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 1.0,
-                            ),
+                          sliver: SliverList(
                             delegate: SliverChildBuilderDelegate(
-                              (context, index) => _CategoryGridItem(
-                                category: groupCategories[index],
-                                onTap: () => _showCategoryDetails(context, ref, groupCategories[index], group.name),
+                              (context, index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _CategoryListItem(
+                                  category: groupCategories[index],
+                                  onTap: () => _showCategoryDetails(
+                                    context,
+                                    ref,
+                                    groupCategories[index],
+                                    group.name,
+                                  ),
+                                ),
                               ),
                               childCount: groupCategories.length,
                             ),
@@ -127,17 +136,19 @@ class CategoriesScreen extends ConsumerWidget {
                     slivers.add(
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
-                        sliver: SliverGrid(
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
-                            childAspectRatio: 1.0,
-                          ),
+                        sliver: SliverList(
                           delegate: SliverChildBuilderDelegate(
-                            (context, index) => _CategoryGridItem(
-                              category: ungrouped[index],
-                              onTap: () => _showCategoryDetails(context, ref, ungrouped[index], null),
+                            (context, index) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _CategoryListItem(
+                                category: ungrouped[index],
+                                onTap: () => _showCategoryDetails(
+                                  context,
+                                  ref,
+                                  ungrouped[index],
+                                  null,
+                                ),
+                              ),
                             ),
                             childCount: ungrouped.length,
                           ),
@@ -167,7 +178,9 @@ class CategoriesScreen extends ConsumerWidget {
       context: context,
       backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -201,7 +214,8 @@ class CategoriesScreen extends ConsumerWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                    onTap: () =>
+                        Navigator.of(context, rootNavigator: true).pop(),
                     child: Container(
                       width: 36,
                       height: 36,
@@ -226,7 +240,12 @@ class CategoriesScreen extends ConsumerWidget {
                 description: 'Classify your transactions for better tracking',
                 onTap: () {
                   Navigator.pop(context);
-                  context.push('/category/add', extra: const CategoryRouteArgs(returnToCategoryPicker: false));
+                  context.push(
+                    '/category/add',
+                    extra: const CategoryRouteArgs(
+                      returnToCategoryPicker: false,
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 16),
@@ -234,7 +253,8 @@ class CategoriesScreen extends ConsumerWidget {
                 context,
                 icon: Icons.grid_view_rounded,
                 title: 'Add Group',
-                description: 'Organize categories into sections for better clarity',
+                description:
+                    'Organize categories into sections for better clarity',
                 onTap: () {
                   Navigator.pop(context);
                   _showAddGroupDialog(context);
@@ -279,8 +299,21 @@ class CategoriesScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 16, color: cs.onSurface)),
-                  Text(description, style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  Text(
+                    description,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -299,7 +332,11 @@ class CategoriesScreen extends ConsumerWidget {
     }, null);
   }
 
-  void _showEditGroupDialog(BuildContext context, WidgetRef ref, CategoryGroup group) {
+  void _showEditGroupDialog(
+    BuildContext context,
+    WidgetRef ref,
+    CategoryGroup group,
+  ) {
     final controller = TextEditingController(text: group.name);
     _showGroupDialog(context, controller, 'Edit Group', (ref, name) {
       group.name = name;
@@ -321,30 +358,35 @@ class CategoriesScreen extends ConsumerWidget {
         builder: (context, ref, _) {
           final cs = Theme.of(context).colorScheme;
           final groups = ref.watch(categoryGroupListProvider).valueOrNull ?? [];
-          
+
           return StatefulBuilder(
             builder: (context, setDialogState) {
               // Normalize: trim and replace multiple spaces with one
               final raw = controller.text;
               final normalized = raw.trim().replaceAll(RegExp(r'\s+'), ' ');
-              
+
               final isDuplicate = groups.any((g) {
-                if (editingGroupId != null && g.id == editingGroupId) return false;
+                if (editingGroupId != null && g.id == editingGroupId) {
+                  return false;
+                }
                 return g.name.toLowerCase() == normalized.toLowerCase();
               });
-              
+
               final canSave = normalized.isNotEmpty && !isDuplicate;
-              
+
               String? errorText;
               if (raw.trim().isNotEmpty && isDuplicate) {
                 errorText = 'This group already exists';
               } else if (raw.isNotEmpty && normalized.isEmpty) {
-                 errorText = 'Group name cannot be empty';
+                errorText = 'Group name cannot be empty';
               }
 
               return AlertDialog(
                 backgroundColor: cs.surfaceContainer,
-                title: Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                title: Text(
+                  title,
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,7 +402,9 @@ class CategoriesScreen extends ConsumerWidget {
                         counterText: '${raw.length} / 15',
                         counterStyle: GoogleFonts.inter(
                           fontSize: 10,
-                          color: raw.length >= 15 ? cs.error : cs.onSurfaceVariant,
+                          color: raw.length >= 15
+                              ? cs.error
+                              : cs.onSurfaceVariant,
                         ),
                       ),
                       onChanged: (_) => setDialogState(() {}),
@@ -368,7 +412,10 @@ class CategoriesScreen extends ConsumerWidget {
                   ],
                 ),
                 actions: [
-                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
                   AppButton(
                     label: 'Save',
                     type: AppButtonType.primary,
@@ -388,16 +435,28 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDeleteGroup(BuildContext context, WidgetRef ref, CategoryGroup group) {
+  void _confirmDeleteGroup(
+    BuildContext context,
+    WidgetRef ref,
+    CategoryGroup group,
+  ) {
     final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: cs.surfaceContainer,
-        title: Text('Delete Group?', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-        content: Text('Categories in "${group.name}" will be moved to "Ungrouped".'),
+        title: Text(
+          'Delete Group?',
+          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Categories in "${group.name}" will be moved to "Ungrouped".',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           AppButton(
             label: 'Delete',
             type: AppButtonType.primary,
@@ -411,13 +470,20 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  void _showCategoryDetails(BuildContext context, WidgetRef ref, Category cat, String? groupName) {
+  void _showCategoryDetails(
+    BuildContext context,
+    WidgetRef ref,
+    Category cat,
+    String? groupName,
+  ) {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       backgroundColor: cs.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (context) => SafeArea(
         child: SingleChildScrollView(
@@ -454,7 +520,11 @@ class CategoriesScreen extends ConsumerWidget {
                       children: [
                         Text(
                           cat.name,
-                          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: cs.onSurface),
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
@@ -470,7 +540,8 @@ class CategoriesScreen extends ConsumerWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                    onTap: () =>
+                        Navigator.of(context, rootNavigator: true).pop(),
                     child: Container(
                       width: 36,
                       height: 36,
@@ -491,12 +562,18 @@ class CategoriesScreen extends ConsumerWidget {
               // Last Transaction Activity
               Consumer(
                 builder: (context, ref, _) {
-                  final latestTxnAsync = ref.watch(categoryRecentTransactionProvider(cat.id));
-                 
+                  final latestTxnAsync = ref.watch(
+                    categoryRecentTransactionProvider(cat.id),
+                  );
+
                   return latestTxnAsync.when(
                     data: (txn) => Row(
                       children: [
-                        Icon(Icons.access_time_rounded, size: 14, color: cs.onSurfaceVariant),
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 14,
+                          color: cs.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           txn != null
@@ -516,14 +593,19 @@ class CategoriesScreen extends ConsumerWidget {
                 },
               ),
               const SizedBox(height: 32),
-              _buildDetailItem(context, label: 'GROUP', value: groupName ?? 'None'),
+              _buildDetailItem(
+                context,
+                label: 'GROUP',
+                value: groupName ?? 'None',
+              ),
               const SizedBox(height: 16),
               _buildDetailItem(
                 context,
                 label: 'TYPE',
                 value: cat.effectiveType == 'both'
                     ? 'Income & Expense'
-                    : cat.effectiveType[0].toUpperCase() + cat.effectiveType.substring(1),
+                    : cat.effectiveType[0].toUpperCase() +
+                          cat.effectiveType.substring(1),
               ),
               const SizedBox(height: 24),
               _BudgetStatusSection(category: cat),
@@ -537,7 +619,10 @@ class CategoriesScreen extends ConsumerWidget {
                       type: AppButtonType.normal,
                       onPressed: () {
                         Navigator.pop(context);
-                        context.push('/category/add', extra: CategoryRouteArgs(category: cat));
+                        context.push(
+                          '/category/add',
+                          extra: CategoryRouteArgs(category: cat),
+                        );
                       },
                     ),
                   ),
@@ -562,14 +647,33 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDetailItem(BuildContext context, {required String label, required String value}) {
+  Widget _buildDetailItem(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
     final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: cs.onSurfaceVariant, letterSpacing: 1.1)),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurfaceVariant,
+            letterSpacing: 1.1,
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: GoogleFonts.inter(fontSize: 15, color: cs.onSurface, fontWeight: FontWeight.w500)),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 15,
+            color: cs.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
@@ -590,11 +694,13 @@ class CategoriesScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(color: cs.outline, width: 1),
           ),
-          title: Text('Cannot delete category',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              )),
+          title: Text(
+            'Cannot delete category',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
           content: Text(
             'This category has transactions linked to it. '
             'To delete this category, delete the linked transactions first.',
@@ -618,11 +724,13 @@ class CategoriesScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(color: cs.outline, width: 1),
           ),
-          title: Text('Delete category?',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              )),
+          title: Text(
+            'Delete category?',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
           content: Text(
             '"${cat.name}" will be permanently deleted.',
             style: GoogleFonts.inter(color: cs.onSurfaceVariant),
@@ -630,8 +738,10 @@ class CategoriesScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel',
-                  style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+              ),
             ),
             AppButton(
               label: 'Delete',
@@ -654,11 +764,7 @@ class _GroupHeader extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  const _GroupHeader({
-    required this.name,
-    this.onEdit,
-    this.onDelete,
-  });
+  const _GroupHeader({required this.name, this.onEdit, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -680,12 +786,20 @@ class _GroupHeader extends StatelessWidget {
           ),
           if (onEdit != null) ...[
             IconButton(
-              icon: Icon(Icons.edit_outlined, size: 16, color: cs.onSurfaceVariant),
+              icon: Icon(
+                Icons.edit_outlined,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
               onPressed: onEdit,
               visualDensity: VisualDensity.compact,
             ),
             IconButton(
-              icon: Icon(Icons.delete_outline_rounded, size: 16, color: cs.onSurfaceVariant),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                size: 16,
+                color: cs.onSurfaceVariant,
+              ),
               onPressed: onDelete,
               visualDensity: VisualDensity.compact,
             ),
@@ -696,72 +810,356 @@ class _GroupHeader extends StatelessWidget {
   }
 }
 
-class _CategoryGridItem extends StatelessWidget {
+class _CategoryKpisGrid extends ConsumerWidget {
+  const _CategoryKpisGrid();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final kpiAsync = ref.watch(categoryKpiProvider);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+      child: kpiAsync.when(
+        data: (kpis) => Row(
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  _buildKpiCard(
+                    context,
+                    'TOTAL CATEGORIES',
+                    kpis.totalCategories.toString(),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildKpiCard(
+                    context,
+                    'UNUSED CATEGORIES',
+                    kpis.unusedCategories.toString(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                children: [
+                  _buildKpiCard(
+                    context,
+                    'TOTAL GROUPS',
+                    kpis.totalGroups.toString(),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildKpiCard(
+                    context,
+                    'TOP EXPENSE',
+                    kpis.topExpenseCategory,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        loading: () => const SizedBox(
+          height: 150,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, st) => const Text('Error loading KPIs'),
+      ),
+    );
+  }
+
+  Widget _buildKpiCard(BuildContext context, String label, String value) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryListItem extends ConsumerWidget {
   final Category category;
   final VoidCallback onTap;
 
-  const _CategoryGridItem({
-    required this.category,
-    required this.onTap,
-  });
+  const _CategoryListItem({required this.category, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final color = Color(category.colorValue);
+
+    final statsAsync = ref.watch(categoryStatsProvider);
+    final stats =
+        statsAsync.valueOrNull?[category.id] ??
+        CategoryStats.empty(category.id);
+
+    final budgetAsync = ref.watch(
+      budgetByCategoryProvider(category.id.toString()),
+    );
+    final budget = budgetAsync.valueOrNull;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cs.outlineVariant, width: 1),
+          border: Border.all(
+            color: cs.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CategoryIcon.square(
-              icon: IconMapper.fromString(category.icon),
-              rawColor: color,
-              size: 40,
+            // Top Row
+            Row(
+              children: [
+                CategoryIcon.square(
+                  icon: IconMapper.fromString(category.icon),
+                  rawColor: color,
+                  size: 40,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        category.effectiveType.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                          letterSpacing: 1.1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  stats.transactionCount == 1
+                      ? '1 transaction'
+                      : '${stats.transactionCount} transactions',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                category.name,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+            const SizedBox(height: 16),
+            // Bottom Row (Budget)
+            if (budget == null || !budget.isActive)
+              _buildNoBudget(context)
+            else
+              _buildBudgetProgress(context, ref, budget, stats),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoBudget(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: cs.onSurfaceVariant.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.remove_circle_outline,
+                size: 12,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'NO BUDGET',
                 style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Container(
+            height: 6,
+            decoration: BoxDecoration(
+              color: cs.onSurfaceVariant.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(3),
             ),
-            const SizedBox(height: 4),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Empty percentage placeholder for alignment if needed
+        const SizedBox(width: 40),
+      ],
+    );
+  }
+
+  Widget _buildBudgetProgress(
+    BuildContext context,
+    WidgetRef ref,
+    Budget budget,
+    CategoryStats stats,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final progressAsync = ref.watch(budgetProgressProvider(budget));
+
+    return progressAsync.when(
+      data: (p) {
+        final progressNum = p.percentage / 100.0;
+        final isOverBudget = progressNum >= 1.0;
+
+        final trackColor = cs.outlineVariant.withValues(alpha: 0.3);
+        final barColor = isOverBudget ? cs.error : cs.primary;
+        final iconData = isOverBudget
+            ? Icons.warning_amber_rounded
+            : Icons.check_circle_outline_rounded;
+
+        return Row(
+          children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: cs.onSurface.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5), width: 0.5),
+                color: barColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: barColor.withValues(alpha: 0.2)),
               ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(iconData, size: 12, color: barColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    'BUDGET',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: barColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final maxWidth = constraints.maxWidth;
+                  return Stack(
+                    children: [
+                      Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: trackColor,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: 0.0,
+                          end: progressNum.clamp(0.0, 1.0),
+                        ),
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOut,
+                        builder: (context, value, child) {
+                          // very small values minimally visible (~6px)
+                          final width = value == 0
+                              ? 0.0
+                              : (maxWidth * value).clamp(6.0, maxWidth);
+                          return Container(
+                            width: width,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 40,
               child: Text(
-                category.effectiveType,
+                '${p.percentage.round()}%',
+                textAlign: TextAlign.right,
                 style: GoogleFonts.inter(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurfaceVariant,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: barColor,
                 ),
               ),
             ),
           ],
-        ),
+        );
+      },
+      loading: () => const SizedBox(
+        height: 24,
+        child: Center(child: LinearProgressIndicator()),
       ),
+      error: (_, __) => const Text('Error'),
     );
   }
 }
@@ -772,7 +1170,9 @@ class _BudgetStatusSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final budgetAsync = ref.watch(budgetByCategoryProvider(category.id.toString()));
+    final budgetAsync = ref.watch(
+      budgetByCategoryProvider(category.id.toString()),
+    );
     final cs = Theme.of(context).colorScheme;
 
     return Column(
@@ -794,7 +1194,7 @@ class _BudgetStatusSection extends ConsumerWidget {
               return InkWell(
                 onTap: () {
                   Navigator.pop(context);
-                  context.push('/budgets/add');
+                  context.push('/budgets/add', extra: category);
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
@@ -802,15 +1202,25 @@ class _BudgetStatusSection extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+                    border: Border.all(
+                      color: cs.outline.withValues(alpha: 0.5),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.add_circle_outline_rounded, size: 20, color: cs.primary),
+                      Icon(
+                        Icons.add_circle_outline_rounded,
+                        size: 20,
+                        color: cs.primary,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         'Set a budget for this category',
-                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: cs.primary),
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: cs.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -827,7 +1237,10 @@ class _BudgetStatusSection extends ConsumerWidget {
                     context: context,
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                    builder: (context) => BudgetDetailsSheet(budgetId: budget.id, category: category),
+                    builder: (context) => BudgetDetailsSheet(
+                      budgetId: budget.id,
+                      category: category,
+                    ),
                   );
                 },
                 borderRadius: BorderRadius.circular(12),
@@ -844,14 +1257,21 @@ class _BudgetStatusSection extends ConsumerWidget {
                         children: [
                           Text(
                             '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           Text(
-                            ref.watch(formatterProvider).formatPercentage(p.percentage),
+                            ref
+                                .watch(formatterProvider)
+                                .formatPercentage(p.percentage),
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
-                              color: p.percentage >= 100 ? cs.error : cs.primary,
+                              color: p.percentage >= 100
+                                  ? cs.error
+                                  : cs.primary,
                             ),
                           ),
                         ],

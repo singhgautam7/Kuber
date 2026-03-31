@@ -78,12 +78,12 @@ class TagRepository {
           .where()
           .transactionIdEqualTo(transactionId)
           .deleteAll();
-      
+
       // 2. Add new relations
       final newRelations = tagIds.map((tagId) => TransactionTag()
         ..transactionId = transactionId
         ..tagId = tagId).toList();
-      
+
       await isar.transactionTags.putAll(newRelations);
     });
   }

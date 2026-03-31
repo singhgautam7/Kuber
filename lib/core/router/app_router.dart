@@ -20,6 +20,7 @@ import '../../features/more/screens/permissions_screen.dart';
 import '../../features/more/screens/categories_screen.dart';
 import '../../features/more/screens/tags_screen.dart';
 import '../../features/more/screens/how_to_use_screen.dart';
+import '../../features/categories/data/category.dart';
 import '../../features/more/screens/add_edit_category_screen.dart';
 import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/recurring/screens/add_recurring_screen.dart';
@@ -115,7 +116,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-
       GoRoute(
         path: '/accounts/add',
         parentNavigatorKey: _rootNavigatorKey,
@@ -124,11 +124,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/accounts/edit',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => AddEditAccountScreen(
-          account: state.extra as Account?,
-        ),
+        builder: (context, state) =>
+            AddEditAccountScreen(account: state.extra as Account?),
       ),
-
 
       GoRoute(
         path: '/recurring/add',
@@ -138,9 +136,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/recurring/edit',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) => AddRecurringScreen(
-          existingRule: state.extra as RecurringRule?,
-        ),
+        builder: (_, state) =>
+            AddRecurringScreen(existingRule: state.extra as RecurringRule?),
       ),
 
       GoRoute(
@@ -164,10 +161,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             navigationShell, // The shell is rendered via navigatorContainerBuilder
         navigatorContainerBuilder: (context, navigationShell, children) =>
-            AppScaffold(
-          navigationShell: navigationShell,
-          children: children,
-        ),
+            AppScaffold(navigationShell: navigationShell, children: children),
         branches: [
           StatefulShellBranch(
             navigatorKey: _shellDashboardKey,
@@ -252,14 +246,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/budgets/add',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const AddEditBudgetScreen(),
+        builder: (_, state) =>
+            AddEditBudgetScreen(preselectedCategory: state.extra as Category?),
       ),
       GoRoute(
         path: '/budgets/edit',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) => AddEditBudgetScreen(
-          existingBudget: state.extra as Budget?,
-        ),
+        builder: (_, state) =>
+            AddEditBudgetScreen(existingBudget: state.extra as Budget?),
       ),
     ],
   );
