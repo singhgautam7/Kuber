@@ -10,6 +10,7 @@ import '../data/budget.dart';
 import '../providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../../shared/widgets/app_button.dart';
+import 'budget_history_sheet.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final int budgetId;
@@ -298,7 +299,22 @@ class BudgetDetailsSheet extends ConsumerWidget {
                       icon: Icons.history_rounded,
                       type: AppButtonType.primary,
                       onPressed: () {
-                        // TODO: Implement history view
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          useRootNavigator: true,
+                          backgroundColor: cs.surfaceContainer,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(KuberRadius.lg),
+                            ),
+                          ),
+                          builder: (_) => BudgetHistorySheet(
+                            budget: budget,
+                            category: category,
+                          ),
+                        );
                       },
                     ),
                   ),

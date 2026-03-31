@@ -161,3 +161,95 @@ final budgetVsActualProvider =
 
       return results;
     });
+
+// ── Budget History ─────────────────────────────────────────────────────────
+
+/// Data model for a single month's budget performance.
+class BudgetMonthHistory {
+  final int year;
+  final int month;
+  final double spent;
+  final double budgetAmount;
+  final double percentage; // spent / budgetAmount * 100
+  final DateTime startDate;
+  final DateTime endDate;
+
+  BudgetMonthHistory({
+    required this.year,
+    required this.month,
+    required this.spent,
+    required this.budgetAmount,
+    required this.percentage,
+    required this.startDate,
+    required this.endDate,
+  });
+
+  bool get isOverBudget => spent > budgetAmount;
+}
+
+/// Computes month-by-month history for a budget.
+///
+/// Walks every calendar month from [budget.startDate] up to and including
+/// the current month. For each month it calls the same [calculateUsage]
+/// that drives the live budget progress — only the date window differs.
+///
+/// Date-fix applied: end of month is [DateTime(year, month+1, 0, 23, 59, 59, 999)]
+/// (last millisecond of the month) so transactions on the final day are
+/// always included — matching [budgetProgressProvider]'s endDate pattern.
+///
+/// Results are sorted latest-month-first.
+final budgetHistoryProvider =
+    FutureProvider.family<List<BudgetMonthHistory>, Budget>((
+  ref,
+  budget,
+) async {
+  // React to transaction changes
+  ref.watch(transactionListProvider);
+  final repo = ref.watch(budgetRepositoryProvider);
+
+  final now = DateTime.now();
+  final results = <BudgetMonthHistory>[];
+
+  // Walk from budget's start month → current month (inclusive)
+  int walkYear = budget.startDate.year;
+  int walkMonth = budget.startDate.month;
+
+  while (walkYear < now.year ||
+      (walkYear == now.year && walkMonth <= now.month)) {
+    final startDate = DateTime(walkYear, walkMonth, 1);
+    // Last millisecond of the month (DateTime(y, m+1, 0) = last day of month)
+    final endDate = DateTime(walkYear, walkMonth + 1, 0, 23, 59, 59, 999);
+
+    final spent = await repo.calculateUsage(
+      budget.categoryId,
+      startDate,
+      endDate,
+    );
+
+    results.add(BudgetMonthHistory(
+      year: walkYear,
+      month: walkMonth,
+      spent: spent,
+      budgetAmount: budget.amount,
+      percentage: budget.amount > 0 ? (spent / budget.amount) * 100 : 0,
+      startDate: startDate,
+      endDate: endDate,
+    ));
+
+    // Advance to next month
+    walkMonth++;
+    if (walkMonth > 12) {
+      walkMonth = 1;
+      walkYear++;
+    }
+  }
+
+  // Latest month first
+  results.sort((a, b) {
+    final yearCmp = b.year.compareTo(a.year);
+    if (yearCmp != 0) return yearCmp;
+    return b.month.compareTo(a.month);
+  });
+
+  return results;
+});
