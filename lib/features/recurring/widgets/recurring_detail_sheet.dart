@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -14,6 +15,7 @@ import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
+import 'recurring_history_sheet.dart';
 
 /// Shows the recurring rule detail bottom sheet.
 void showRecurringDetailSheet(
@@ -54,16 +56,17 @@ class RecurringDetailSheet extends ConsumerWidget {
     );
 
     final accountName = accountsAsync.whenOrNull(
-      data: (accs) {
-        try {
-          return accs
-              .firstWhere((a) => a.id.toString() == rule.accountId)
-              .name;
-        } catch (_) {
-          return null;
-        }
-      },
-    ) ?? 'Unknown';
+          data: (accs) {
+            try {
+              return accs
+                  .firstWhere((a) => a.id.toString() == rule.accountId)
+                  .name;
+            } catch (_) {
+              return null;
+            }
+          },
+        ) ??
+        'Unknown';
 
     final iconData = cat != null
         ? IconMapper.fromString(cat.icon)
@@ -96,13 +99,16 @@ class RecurringDetailSheet extends ConsumerWidget {
         ? 'Every ${rule.customDays ?? 1} days'
         : rule.frequency[0].toUpperCase() + rule.frequency.substring(1);
 
+    final createdDateStr =
+        DateFormat('MMM d, yyyy').format(rule.createdAt).toUpperCase();
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(KuberSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag handle
+            // ── Drag handle ──────────────────────────────────────────────
             Container(
               width: 40,
               height: 4,
@@ -113,7 +119,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // Header row: icon + name + close
+            // ── Header row: icon + name + close ──────────────────────────
             Row(
               children: [
                 CategoryIcon.square(
@@ -137,7 +143,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'TRANSACTION DETAIL',
+                        'CREATED ON $createdDateStr',
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -148,27 +154,20 @@ class RecurringDetailSheet extends ConsumerWidget {
                     ],
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context, rootNavigator: true).pop(),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: cs.onSurfaceVariant,
-                    ),
+                IconButton(
+                  onPressed: () =>
+                      Navigator.of(context, rootNavigator: true).pop(),
+                  icon: const Icon(Icons.close_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: cs.surfaceContainerHigh,
+                    padding: const EdgeInsets.all(8),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // Recurring amount label
+            // ── Recurring amount label ────────────────────────────────────
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -183,7 +182,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.xs),
 
-            // Amount
+            // ── Amount ───────────────────────────────────────────────────
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -197,7 +196,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // 2×2 detail grid
+            // ── 2×2 detail grid ──────────────────────────────────────────
             Row(
               children: [
                 Expanded(
@@ -235,7 +234,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.sm),
 
-            // Status row
+            // ── Status row ───────────────────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(
@@ -282,92 +281,125 @@ class RecurringDetailSheet extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.xl),
 
-            // Edit button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  context.push('/recurring/edit', extra: rule);
-                },
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: Text(
-                  'Edit Transaction',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
+            // ── Row 1: Edit + Pause/Resume ───────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: 'Edit',
+                    icon: Icons.edit_outlined,
+                    type: AppButtonType.normal,
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      context.push('/recurring/edit', extra: rule);
+                    },
                   ),
                 ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: cs.onSurface,
-                  side: BorderSide(color: cs.outline),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-
-            // Pause/Resume button
-            if (!isExpired)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    ref
-                        .read(recurringListProvider.notifier)
-                        .togglePause(rule);
-                    Navigator.of(context, rootNavigator: true).pop();
-                  },
-                  icon: Icon(
-                    isPaused
-                        ? Icons.play_arrow_rounded
-                        : Icons.pause_rounded,
-                    size: 18,
-                  ),
-                  label: Text(
-                    isPaused ? 'Resume Automation' : 'Pause Automation',
-                    style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
+                const SizedBox(width: KuberSpacing.md),
+                if (!isExpired)
+                  Expanded(
+                    child: AppButton(
+                      label: isPaused ? 'Resume' : 'Pause',
+                      icon: isPaused
+                          ? Icons.play_arrow_rounded
+                          : Icons.pause_rounded,
+                      type: AppButtonType.normal,
+                      onPressed: () {
+                        ref
+                            .read(recurringListProvider.notifier)
+                            .togglePause(rule);
+                        Navigator.of(context, rootNavigator: true).pop();
+                      },
                     ),
                   ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: cs.onSurface,
-                    side: BorderSide(color: cs.outline),
-                    padding:
-                        const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
+              ],
+            ),
+            const SizedBox(height: KuberSpacing.md),
+
+            // ── Row 2: History + Delete ──────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: 'History',
+                    icon: Icons.history_rounded,
+                    type: AppButtonType.primary,
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        useSafeArea: true,
+                        useRootNavigator: true,
+                        backgroundColor: cs.surfaceContainer,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(KuberRadius.lg),
+                          ),
+                        ),
+                        builder: (_) => RecurringHistorySheet(rule: rule),
+                      );
+                    },
                   ),
                 ),
-              ),
-            const SizedBox(height: KuberSpacing.sm),
-
-            // Delete button
-            TextButton.icon(
-              onPressed: () {
-                ref.read(recurringListProvider.notifier).delete(rule.id);
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-              icon: const Icon(Icons.delete_outline, size: 18),
-              label: Text(
-                'Delete Transaction',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                const SizedBox(width: KuberSpacing.md),
+                Expanded(
+                  child: AppButton(
+                    label: 'Delete',
+                    icon: Icons.delete_outline_rounded,
+                    type: AppButtonType.danger,
+                    onPressed: () => _confirmDelete(context, ref),
+                  ),
                 ),
-              ),
-              style: TextButton.styleFrom(
-                foregroundColor: cs.error,
-              ),
+              ],
             ),
+            const SizedBox(height: KuberSpacing.lg),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.sm),
+          side: BorderSide(color: cs.outline, width: 1),
+        ),
+        title: Text(
+          'Delete automation?',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          'The recurring rule for "${rule.name}" will be permanently deleted.',
+          style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: GoogleFonts.inter()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.sm),
+              ),
+            ),
+            onPressed: () {
+              ref.read(recurringListProvider.notifier).delete(rule.id);
+              Navigator.pop(ctx);
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }
