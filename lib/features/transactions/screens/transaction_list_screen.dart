@@ -18,9 +18,10 @@ import '../../settings/providers/settings_provider.dart' show settingsProvider, 
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
-import '../../../shared/widgets/wip_bottom_sheet.dart';
+import '../../export/widgets/export_bottom_sheet.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../history/models/history_filter.dart';
+import '../../history/utils/filter_utils.dart';
 import '../../history/widgets/history_filter_widget.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
@@ -34,57 +35,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   // No local search state, moved to HistoryFilterProvider
 
   List<Transaction> _applyFilters(List<Transaction> transactions, HistoryFilter filter) {
-    var filtered = transactions;
-
-    // Search filter
-    if (filter.searchQuery != null && filter.searchQuery!.isNotEmpty) {
-      final query = filter.searchQuery!.toLowerCase();
-      filtered = filtered.where((t) => t.name.toLowerCase().contains(query)).toList();
-    }
-
-    // Type filter
-    if (filter.types.isNotEmpty) {
-      filtered = filtered.where((t) {
-        if (t.isTransfer) return filter.types.contains('transfer');
-        return filter.types.contains(t.type);
-      }).toList();
-    }
-
-    // Recurring filter
-    if (filter.isRecurring != null) {
-      filtered = filtered.where((t) => t.isRecurring == filter.isRecurring).toList();
-    }
-
-    // Date Range
-    if (filter.from != null && filter.to != null) {
-      filtered = filtered.where((t) =>
-          !t.createdAt.isBefore(filter.from!) &&
-          t.createdAt.isBefore(filter.to!.add(const Duration(days: 1)))).toList();
-    }
-
-    // Accounts
-    if (filter.accountIds.isNotEmpty) {
-      filtered = filtered.where((t) =>
-          filter.accountIds.contains(t.accountId)).toList();
-    }
-
-    // Categories
-    if (filter.categoryIds.isNotEmpty) {
-      filtered = filtered.where((t) =>
-          filter.categoryIds.contains(t.categoryId)).toList();
-    }
-
-    // Tags
-    if (filter.tagIds.isNotEmpty) {
-      final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
-      filtered = filtered.where((t) {
-        final txnTags = txnTagsMap[t.id] ?? {};
-        // AND logic: transaction must have ALL selected tags
-        return filter.tagIds.every((tagId) => txnTags.contains(tagId));
-      }).toList();
-    }
-
-    return filtered;
+    final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+    return applyHistoryFilters(transactions, filter, txnTagsMap: txnTagsMap);
   }
 
   List<_DateGroup> _groupByDate(List<Transaction> transactions) {
@@ -160,38 +112,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               description: 'Your past expenses, incomes and transfers',
               actionIcon: Icons.file_download_outlined,
               actionTooltip: 'Export',
-              onAction: () {
-                final cs = Theme.of(context).colorScheme;
-                showWIPBottomSheet(
-                  context: context,
-                  icon: Icons.rocket_launch_rounded,
-                  title: 'Export Report',
-                  content: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        height: 1.6,
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      children: [
-                        const TextSpan(text: "We are currently building this feature to help you export your financial reports in "),
-                        TextSpan(
-                          text: "PDF",
-                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
-                        ),
-                        const TextSpan(text: " and "),
-                        TextSpan(
-                          text: "CSV",
-                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
-                        ),
-                        const TextSpan(text: " formats. Stay tuned!"),
-                      ],
-                    ),
-                  ),
-                );
-              },
+              onAction: () => showExportBottomSheet(
+                context: context,
+                exportType: ExportType.transactions,
+              ),
             ),
           ),
 
