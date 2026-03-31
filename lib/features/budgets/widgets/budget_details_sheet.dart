@@ -34,15 +34,17 @@ class BudgetDetailsSheet extends ConsumerWidget {
         final alerts = budget.alerts;
 
         return Container(
-          padding: const EdgeInsets.all(KuberSpacing.xl),
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
             borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(KuberSpacing.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // Drag handle
               Center(
                 child: Container(
@@ -112,67 +114,73 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'CURRENT SPENDING',
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurfaceVariant,
-                                letterSpacing: 1.0,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'CURRENT SPENDING',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurfaceVariant,
+                                  letterSpacing: 1.0,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: ref.watch(formatterProvider).formatCurrency(p.spent),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w700,
-                                      color: cs.onSurface,
+                              const SizedBox(height: 4),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: ref.watch(formatterProvider).formatCurrency(p.spent),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.w700,
+                                        color: cs.onSurface,
+                                      ),
                                     ),
-                                  ),
-                                  TextSpan(
-                                    text: ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 16,
-                                      color: cs.onSurfaceVariant,
+                                    TextSpan(
+                                      text: ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 16,
+                                        color: cs.onSurfaceVariant,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'UTILIZATION',
-                              style: GoogleFonts.inter(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurfaceVariant,
-                                letterSpacing: 1.0,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'UTILIZATION',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurfaceVariant,
+                                  letterSpacing: 1.0,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              ref.watch(formatterProvider).formatPercentage(p.percentage),
-                              style: GoogleFonts.inter(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                color: _getUtilizationColor(p.percentage, cs),
+                              const SizedBox(height: 4),
+                              Text(
+                                ref.watch(formatterProvider).formatPercentage(p.percentage),
+                                style: GoogleFonts.inter(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: _getUtilizationColor(p.percentage, cs),
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -308,7 +316,10 @@ class BudgetDetailsSheet extends ConsumerWidget {
               const SizedBox(height: 16),
             ],
           ),
-        );
+        ),
+      ),
+    );
+
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) => Center(child: Text('Error loading budget details: $err')),
