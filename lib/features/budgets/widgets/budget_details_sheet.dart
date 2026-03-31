@@ -227,6 +227,20 @@ class BudgetDetailsSheet extends ConsumerWidget {
                         )),
                       ],
                     ),
+                    const SizedBox(height: KuberSpacing.sm),
+                    Row(
+                      children: [
+                        Expanded(child: _DetailCell(
+                          label: 'STARTED ON',
+                          value: DateFormat('MMM d, yyyy').format(budget.startDate),
+                        )),
+                        const SizedBox(width: KuberSpacing.sm),
+                        Expanded(child: _DetailCell(
+                          label: 'STATUS',
+                          value: budget.isActive ? 'Active' : 'Paused',
+                        )),
+                      ],
+                    ),
                   ],
                 ),
                 loading: () => const LinearProgressIndicator(),
@@ -280,11 +294,12 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: AppButton(
-                      label: budget.isActive ? 'Disable' : 'Enable',
+                      label: budget.isActive ? 'Pause' : 'Resume',
                       icon: budget.isActive ? Icons.pause_rounded : Icons.play_arrow_rounded,
                       type: AppButtonType.normal,
                       onPressed: () {
                         ref.read(budgetListProvider.notifier).toggleActive(budget.id, !budget.isActive);
+                        Navigator.of(context, rootNavigator: true).pop();
                       },
                     ),
                   ),

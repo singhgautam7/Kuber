@@ -140,7 +140,7 @@ class RecurringScreen extends ConsumerWidget {
                               children: rules.map((rule) {
                                 final catId = int.tryParse(rule.categoryId);
                                 final cat = catId != null ? catMap[catId] : null;
-                                return _RuleCard(
+                              return _RuleCard(
                                   rule: rule,
                                   categoryIcon: cat != null
                                       ? IconMapper.fromString(cat.icon)
@@ -151,16 +151,6 @@ class RecurringScreen extends ConsumerWidget {
                                   symbol: symbol,
                                   onTap: () => showRecurringDetailSheet(
                                     context, ref, rule,
-                                  ),
-                                  onPause: () => ref
-                                      .read(recurringListProvider.notifier)
-                                      .togglePause(rule),
-                                  onDelete: () => ref
-                                      .read(recurringListProvider.notifier)
-                                      .delete(rule.id),
-                                  onEdit: () => context.push(
-                                    '/recurring/edit',
-                                    extra: rule,
                                   ),
                                 );
                               }).toList(),
@@ -337,9 +327,6 @@ class _RuleCard extends StatelessWidget {
   final Color categoryColor;
   final String symbol;
   final VoidCallback onTap;
-  final VoidCallback onPause;
-  final VoidCallback onDelete;
-  final VoidCallback onEdit;
 
   const _RuleCard({
     required this.rule,
@@ -347,9 +334,6 @@ class _RuleCard extends StatelessWidget {
     required this.categoryColor,
     required this.symbol,
     required this.onTap,
-    required this.onPause,
-    required this.onDelete,
-    required this.onEdit,
   });
 
   @override
@@ -388,32 +372,13 @@ class _RuleCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          rule.name,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: cs.onSurface,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: KuberSpacing.sm),
-                      _StatusBadge(
-                        label: isPaused
-                            ? 'PAUSED'
-                            : isExpired
-                                ? 'EXPIRED'
-                                : 'ACTIVE',
-                        color: isPaused
-                            ? cs.onSurfaceVariant
-                            : isExpired
-                                ? cs.error
-                                : cs.tertiary,
-                      ),
-                    ],
+                  Text(
+                    rule.name,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -425,50 +390,35 @@ class _RuleCard extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Amount
-            Consumer(builder: (context, ref, _) {
-              return Text(
-                ref.watch(formatterProvider).formatCurrency(rule.amount),
-                style: textTheme.bodyMedium?.copyWith(
-                  color: rule.type == 'income'
-                      ? cs.tertiary
-                      : cs.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              );
-            }),
             const SizedBox(width: KuberSpacing.sm),
 
-            // Actions
-            PopupMenuButton<String>(
-              icon: Icon(
-                Icons.more_vert,
-                color: cs.onSurfaceVariant,
-                size: 20,
-              ),
-              onSelected: (value) {
-                switch (value) {
-                  case 'pause':
-                    onPause();
-                  case 'edit':
-                    onEdit();
-                  case 'delete':
-                    onDelete();
-                }
-              },
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: 'pause',
-                  child: Text(isPaused ? 'Resume' : 'Pause'),
-                ),
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: Text('Edit'),
-                ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text('Delete'),
+            // Amount + status badge stacked on the right
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Consumer(builder: (context, ref, _) {
+                  return Text(
+                    ref.watch(formatterProvider).formatCurrency(rule.amount),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: rule.type == 'income'
+                          ? cs.tertiary
+                          : cs.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  );
+                }),
+                const SizedBox(height: 4),
+                _StatusBadge(
+                  label: isPaused
+                      ? 'PAUSED'
+                      : isExpired
+                          ? 'EXPIRED'
+                          : 'ACTIVE',
+                  color: isPaused
+                      ? cs.onSurfaceVariant
+                      : isExpired
+                          ? cs.error
+                          : cs.tertiary,
                 ),
               ],
             ),
