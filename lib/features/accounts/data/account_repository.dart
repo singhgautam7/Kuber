@@ -31,31 +31,4 @@ class AccountRepository extends BaseRepository<Account> {
         .count();
     return count > 0;
   }
-
-  Future<void> seedDefaults() async {
-    final count = await isar.accounts.count();
-    if (count > 0) return;
-
-    final defaults = [
-      Account()
-        ..name = 'Cash'
-        ..type = 'bank'
-        ..icon = 'payments'
-        ..colorValue = 0xFF66BB6A,
-      Account()
-        ..name = 'Bank Account'
-        ..type = 'bank'
-        ..icon = 'account_balance'
-        ..colorValue = 0xFF5C6BC0,
-      Account()
-        ..name = 'Credit Card'
-        ..type = 'bank'
-        ..isCreditCard = true
-        ..icon = 'credit_card'
-        ..colorValue = 0xFFAB47BC
-        ..creditLimit = 0,
-    ];
-
-    await isar.writeTxn(() => isar.accounts.putAll(defaults));
-  }
 }

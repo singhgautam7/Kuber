@@ -65,32 +65,4 @@ void main() {
       expect(await repo.hasTransactions(accounts.first.id), false);
     });
   });
-
-  group('seedDefaults', () {
-    test('creates Cash, Bank Account, and Credit Card', () async {
-      await repo.seedDefaults();
-      final all = await repo.getAll();
-      expect(all.length, 3);
-
-      final names = all.map((a) => a.name).toSet();
-      expect(names, contains('Cash'));
-      expect(names, contains('Bank Account'));
-      expect(names, contains('Credit Card'));
-    });
-
-    test('Credit Card has correct properties', () async {
-      await repo.seedDefaults();
-      final all = await repo.getAll();
-      final cc = all.firstWhere((a) => a.name == 'Credit Card');
-      expect(cc.isCreditCard, true);
-      expect(cc.creditLimit, 0);
-    });
-
-    test('is idempotent', () async {
-      await repo.seedDefaults();
-      await repo.seedDefaults();
-      final all = await repo.getAll();
-      expect(all.length, 3);
-    });
-  });
 }

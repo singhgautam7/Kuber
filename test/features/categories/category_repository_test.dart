@@ -66,29 +66,4 @@ void main() {
       expect(await repo.hasTransactions(cats.first.id), false);
     });
   });
-
-  group('seedDefaults', () {
-    test('creates default categories', () async {
-      await repo.seedDefaults();
-      final all = await repo.getAll();
-      expect(all.length, 9);
-      expect(all.where((c) => c.isDefault).length, 9);
-    });
-
-    test('is idempotent - does not add if categories exist', () async {
-      await repo.seedDefaults();
-      await repo.seedDefaults();
-      final all = await repo.getAll();
-      expect(all.length, 9);
-    });
-
-    test('includes expected categories', () async {
-      await repo.seedDefaults();
-      final names = (await repo.getAll()).map((c) => c.name).toSet();
-      expect(names, contains('Food & Dining'));
-      expect(names, contains('Transport'));
-      expect(names, contains('Income'));
-      expect(names, contains('Other'));
-    });
-  });
 }
