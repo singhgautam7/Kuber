@@ -308,8 +308,9 @@ class _NetWorthCard extends ConsumerWidget {
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

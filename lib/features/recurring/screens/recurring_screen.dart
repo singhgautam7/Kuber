@@ -13,7 +13,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
@@ -30,7 +30,6 @@ class RecurringScreen extends ConsumerWidget {
     final categoryMapAsync = ref.watch(categoryMapProvider);
     final recentlyProcessedAsync = ref.watch(recentlyProcessedProvider);
     final accountsAsync = ref.watch(accountListProvider);
-    final symbol = ref.watch(currencyProvider).symbol;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -77,69 +76,36 @@ class RecurringScreen extends ConsumerWidget {
                       navBarBottomPadding(context) + KuberSpacing.lg,
                     ),
                     child: Builder(builder: (context) {
-                      final activeRules = rules
-                          .where((r) => !r.isPaused && !RecurringRepository.isExpired(r))
-                          .toList();
-                      final monthlyTotal = _computeMonthlyTotal(activeRules);
-                      final upcomingCount = activeRules
-                          .where((r) => r.nextDueAt
-                              .isBefore(DateTime.now().add(const Duration(days: 7))))
-                          .length;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _RecurringKpisGrid(rules: rules),
+                                  const SizedBox(height: KuberSpacing.lg),
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Stats card
-                          Container(
-                            padding: const EdgeInsets.all(KuberSpacing.lg),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainer,
-                              borderRadius: BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(color: cs.outline),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _StatTile(
-                                    label: 'Monthly Total',
-                                    value: ref.watch(formatterProvider).formatCurrency(monthlyTotal),
+                                  // Rule cards
+                                  Text(
+                                    'RULES',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onSurfaceVariant,
+                                      letterSpacing: 1.0,
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: _StatTile(
-                                    label: 'Active',
-                                    value: '${activeRules.length}',
-                                  ),
-                                ),
-                                Expanded(
-                                  child: _StatTile(
-                                    label: 'Upcoming 7d',
-                                    value: '$upcomingCount',
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: KuberSpacing.xl),
-
-                          // Rule cards
-                          Text(
-                            'RULES',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          categoryMapAsync.when(
-                            loading: () => const SizedBox.shrink(),
-                            error: (_, _) => const SizedBox.shrink(),
-                            data: (catMap) => Column(
-                              children: rules.map((rule) {
-                                final catId = int.tryParse(rule.categoryId);
-                                final cat = catId != null ? catMap[catId] : null;
+                                  const SizedBox(height: KuberSpacing.sm),
+                                  categoryMapAsync.when(
+                                    loading: () => const SizedBox.shrink(),
+                                    error: (_, _) => const SizedBox.shrink(),
+                                    data: (catMap) {
+                                      final accounts = accountsAsync.valueOrNull ?? [];
+                                      return Column(
+                                        children: rules.map((rule) {
+                                          final catId = int.tryParse(rule.categoryId);
+                                          final cat = catId != null ? catMap[catId] : null;
+                                          final accountName = accounts
+                                              .where((a) => a.id.toString() == rule.accountId)
+                                              .firstOrNull
+                                              ?.name;
                               return _RuleCard(
                                   rule: rule,
                                   categoryIcon: cat != null
@@ -148,17 +114,18 @@ class RecurringScreen extends ConsumerWidget {
                                   categoryColor: cat != null
                                       ? harmonizeCategory(context, Color(cat.colorValue))
                                       : cs.onSurfaceVariant,
-                                  symbol: symbol,
-                                  onTap: () => showRecurringDetailSheet(
-                                    context, ref, rule,
+                                              accountName: accountName,
+                                              onTap: () => showRecurringDetailSheet(
+                                                context, ref, rule,
+                                              ),
+                                            );
+                                        }).toList(),
+                                      );
+                                    },
                                   ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
 
-                          // Recently Processed
-                          const SizedBox(height: KuberSpacing.xl),
+                                  // Recently Processed
+                                  const SizedBox(height: KuberSpacing.lg),
                           recentlyProcessedAsync.when(
                             loading: () => const SizedBox.shrink(),
                             error: (_, _) => const SizedBox.shrink(),
@@ -185,9 +152,7 @@ class RecurringScreen extends ConsumerWidget {
                                     final catIcon = cat != null
                                         ? IconMapper.fromString(cat.icon)
                                         : Icons.category_outlined;
-                                    final catColor = cat != null
-                                        ? harmonizeCategory(context, Color(cat.colorValue))
-                                        : cs.onSurfaceVariant;
+                                    final catColor = cs.onSurfaceVariant;
                                     final accountName = accounts
                                         .where((a) => a.id.toString() == t.accountId)
                                         .firstOrNull
@@ -237,11 +202,9 @@ class RecurringScreen extends ConsumerWidget {
                                             ),
                                           ),
                                           Text(
-                                            ref.watch(formatterProvider).formatCurrency(t.amount),
+                                            '${t.type == 'expense' ? '-' : ''}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
                                             style: textTheme.bodyMedium?.copyWith(
-                                              color: t.type == 'income'
-                                                  ? cs.tertiary
-                                                  : cs.error,
+                                              color: cs.onSurfaceVariant,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -265,58 +228,110 @@ class RecurringScreen extends ConsumerWidget {
     );
   }
 
-  double _computeMonthlyTotal(List<RecurringRule> rules) {
-    double total = 0;
-    for (final r in rules) {
-      switch (r.frequency) {
-        case 'daily':
-          total += r.amount * 30;
-        case 'weekly':
-          total += r.amount * 4.33;
-        case 'biweekly':
-          total += r.amount * 2.17;
-        case 'monthly':
-          total += r.amount;
-        case 'yearly':
-          total += r.amount / 12;
-        case 'custom':
-          if (r.customDays != null && r.customDays! > 0) {
-            total += r.amount * (30 / r.customDays!);
-          }
-      }
-    }
-    return total;
-  }
 }
 
-
-class _StatTile extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _StatTile({required this.label, required this.value});
+class _RecurringKpisGrid extends ConsumerWidget {
+  final List<RecurringRule> rules;
+  const _RecurringKpisGrid({required this.rules});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeRules = rules.where((r) => !r.isPaused && !RecurringRepository.isExpired(r)).toList();
+    
+    double activeAutoIncome = 0;
+    double activeAutoExpense = 0;
+    for (final r in activeRules) {
+      if (r.type == 'income') {
+        activeAutoIncome += r.amount;
+      } else {
+        activeAutoExpense += r.amount;
+      }
+    }
+
+    final upcomingCount = activeRules
+        .where((r) => r.nextDueAt.isBefore(DateTime.now().add(const Duration(days: 7))))
+        .length;
+
+    return Row(
       children: [
-        Text(
-          value,
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: cs.onSurface,
+        Expanded(
+          child: Column(
+            children: [
+              _buildKpiCard(
+                context,
+                title: 'ACTIVE AUTO INC.',
+                value: '+${ref.watch(formatterProvider).formatCurrency(activeAutoIncome)}',
+                valueColor: Theme.of(context).colorScheme.tertiary,
+              ),
+              const SizedBox(height: 12),
+              _buildKpiCard(
+                context,
+                title: 'ACTIVE RULES',
+                value: '${activeRules.length}',
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: textTheme.labelSmall?.copyWith(
-            color: cs.onSurfaceVariant,
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            children: [
+              _buildKpiCard(
+                context,
+                title: 'ACTIVE AUTO EXP.',
+                value: '-${ref.watch(formatterProvider).formatCurrency(activeAutoExpense)}',
+                valueColor: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 12),
+              _buildKpiCard(
+                context,
+                title: 'UPCOMING (7d)',
+                value: '$upcomingCount',
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildKpiCard(BuildContext context, {required String title, required String value, Color? valueColor}) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? cs.onSurface,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -325,14 +340,14 @@ class _RuleCard extends StatelessWidget {
   final RecurringRule rule;
   final IconData categoryIcon;
   final Color categoryColor;
-  final String symbol;
+  final String? accountName;
   final VoidCallback onTap;
 
   const _RuleCard({
     required this.rule,
     required this.categoryIcon,
     required this.categoryColor,
-    required this.symbol,
+    this.accountName,
     required this.onTap,
   });
 
@@ -343,87 +358,106 @@ class _RuleCard extends StatelessWidget {
     final isPaused = rule.isPaused;
     final isExpired = RecurringRepository.isExpired(rule);
 
+    final statusLabel = isPaused ? 'PAUSED' : isExpired ? 'EXPIRED' : 'ACTIVE';
+    final statusColor = isPaused ? cs.onSurfaceVariant : isExpired ? cs.error : cs.tertiary;
+
+    final amountColor = rule.type == 'income' ? cs.tertiary : cs.error;
+    final amountSign = rule.type == 'income' ? '+' : '-';
+    
+    final freqText = rule.frequency.toUpperCase();
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            // Category icon
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(categoryIcon, color: categoryColor, size: 22),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-
-            // Name & next date
-            Expanded(
-              child: Column(
+      child: Opacity(
+        opacity: (isPaused || isExpired) ? 0.4 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
+          padding: const EdgeInsets.all(KuberSpacing.lg),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(color: cs.outline),
+          ),
+          child: Column(
+            children: [
+              // Top Row
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    rule.name,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface,
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: categoryColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    child: Icon(categoryIcon, color: categoryColor, size: 28),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Next: ${DateFormat('MMM d, yyyy').format(rule.nextDueAt)}',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
+                const SizedBox(width: KuberSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        rule.name,
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: cs.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'NEXT: ${DateFormat('MMM d, yyyy').format(rule.nextDueAt).toUpperCase()}',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (accountName != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          accountName!,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: KuberSpacing.sm),
+                _StatusBadge(label: statusLabel, color: statusColor),
+              ],
             ),
-            const SizedBox(width: KuberSpacing.sm),
-
-            // Amount + status badge stacked on the right
-            Column(
+            const SizedBox(height: KuberSpacing.lg),
+            
+            // Bottom Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Consumer(builder: (context, ref, _) {
                   return Text(
-                    ref.watch(formatterProvider).formatCurrency(rule.amount),
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: rule.type == 'income'
-                          ? cs.tertiary
-                          : cs.error,
-                      fontWeight: FontWeight.w600,
+                    '$amountSign${ref.watch(formatterProvider).formatCurrency(rule.amount)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: amountColor,
+                      letterSpacing: -1,
+                      height: 1,
                     ),
                   );
                 }),
-                const SizedBox(height: 4),
-                _StatusBadge(
-                  label: isPaused
-                      ? 'PAUSED'
-                      : isExpired
-                          ? 'EXPIRED'
-                          : 'ACTIVE',
-                  color: isPaused
-                      ? cs.onSurfaceVariant
-                      : isExpired
-                          ? cs.error
-                          : cs.tertiary,
-                ),
+                _StatusBadge(label: freqText, color: cs.primary),
               ],
             ),
           ],
         ),
+      ),
       ),
     );
   }
