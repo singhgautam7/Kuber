@@ -22,6 +22,13 @@ import '../../tags/providers/tag_providers.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
+class ExportResult {
+  final File? file;
+  final Uint8List? bytes;
+
+  ExportResult({this.file, this.bytes});
+}
+
 // ---------------------------------------------------------------------------
 // Build transaction export data from Riverpod state
 // ---------------------------------------------------------------------------
@@ -326,7 +333,7 @@ String _analyticsFilterLabel(AnalyticsFilter filter) {
 // Perform export (compute + file save)
 // ---------------------------------------------------------------------------
 
-Future<File?> performExport({
+Future<ExportResult?> performExport({
   required ExportType type,
   required ExportFormat format,
   required dynamic data, // TransactionExportData or AnalyticsExportData
@@ -387,7 +394,7 @@ Future<File?> performExport({
     return null; // User cancelled
   }
 
-  return File(filePath);
+  return ExportResult(file: File(filePath), bytes: bytes);
 }
 
 // ---------------------------------------------------------------------------

@@ -6,8 +6,8 @@ import 'core/database/isar_service.dart';
 import 'core/services/notification_service.dart';
 import 'features/recurring/data/recurring_processor.dart';
 
-final recurringProcessResultProvider = Provider<int>((ref) {
-  throw UnimplementedError('Must be overridden in ProviderScope');
+final recurringProcessResultProvider = StateProvider<int>((ref) {
+  return 0;
 });
 
 class RestartWidget extends StatefulWidget {
@@ -53,7 +53,7 @@ void main() async {
       child: ProviderScope(
         overrides: [
           isarProvider.overrideWithValue(isar),
-          recurringProcessResultProvider.overrideWithValue(missedCount),
+          recurringProcessResultProvider.overrideWith((ref) => missedCount),
         ],
         child: const KuberApp(),
       ),

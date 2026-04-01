@@ -35,6 +35,7 @@ import '../../core/utils/prefs_keys.dart';
 import '../../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 
 import '../../features/splash/screens/splash_screen.dart';
 
@@ -44,10 +45,31 @@ final _shellHistoryKey = GlobalKey<NavigatorState>(debugLabel: 'history');
 final _shellAnalyticsKey = GlobalKey<NavigatorState>(debugLabel: 'analytics');
 final _shellMoreKey = GlobalKey<NavigatorState>(debugLabel: 'more');
 
+/// A [Listenable] that notifies when a [Stream] emits a value.
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+        );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
+    refreshListenable: GoRouterRefreshStream(
+      ref.watch(recurringProcessResultProvider.notifier).stream,
+    ),
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
       final onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;

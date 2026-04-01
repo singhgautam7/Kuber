@@ -1,15 +1,18 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:open_filex/open_filex.dart';
+import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/export_data.dart';
 export '../../../core/models/export_data.dart' show ExportType;
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/timed_snackbar.dart'; // showKuberSnackBar
+import '../../analytics/providers/analytics_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
+import '../../settings/widgets/settings_widgets.dart';
 import '../providers/export_provider.dart';
 
 // ---------------------------------------------------------------------------
@@ -48,7 +51,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   _ExportStage _stage = _ExportStage.options;
   ExportFormat _format = ExportFormat.csv;
   bool _applyFilters = true;
-  File? _exportedFile;
+  ExportResult? _exportResult;
   String _errorMessage = '';
 
   bool get _isTransactions => widget.exportType == ExportType.transactions;
@@ -131,129 +134,90 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   // ---- Options state -------------------------------------------------------
 
   Widget _buildOptions(ColorScheme cs) {
-    final title = _isTransactions ? 'Export Transactions' : 'Export Report';
+    final title = _isTransactions ? 'Export History' : 'Export Analytics';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title
-        Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-            letterSpacing: -0.3,
+        Center(
+          child: Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
         const SizedBox(height: KuberSpacing.xl),
 
-        // Format toggle (Only show for Transactions since Analytics is PDF-only now)
-        if (_isTransactions) ...[
-          Text('Format',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 0.5,
-              )),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
-            children: [
-              Expanded(child: _formatChip(cs, ExportFormat.csv, 'CSV')),
-              const SizedBox(width: KuberSpacing.sm),
-              Expanded(child: _formatChip(cs, ExportFormat.pdf, 'PDF')),
-            ],
+        // FORMAT Section
+        Text(
+          _isTransactions ? 'SELECT FORMAT' : 'FORMAT',
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: cs.onSurfaceVariant,
+            letterSpacing: 0.8,
           ),
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        if (_isTransactions)
+          SettingsCardSelector<ExportFormat>(
+            options: const [
+              SelectorOption(
+                value: ExportFormat.csv,
+                label: 'CSV',
+                subtitle: 'SPREADSHEET',
+                icon: Icons.description_outlined,
+              ),
+              SelectorOption(
+                value: ExportFormat.pdf,
+                label: 'PDF',
+                subtitle: 'DOCUMENT',
+                icon: Icons.picture_as_pdf_outlined,
+              ),
+            ],
+            selectedValue: _format,
+            onSelected: (val) => setState(() => _format = val),
+          )
+        else
+          // Analytics is PDF only
+          SettingsCardSelector<ExportFormat>(
+            options: const [
+              SelectorOption(
+                value: ExportFormat.pdf,
+                label: 'PDF Document',
+                subtitle: 'Universal format for high-fidelity printing.',
+                icon: Icons.picture_as_pdf_outlined,
+              ),
+            ],
+            selectedValue: ExportFormat.pdf,
+            onSelected: (_) {},
+          ),
+        const SizedBox(height: KuberSpacing.xl),
+
+        if (_isTransactions && _hasActiveFilters) ...[
+          // APPLY FILTERS Card
+          _buildFiltersCard(cs),
+          const SizedBox(height: KuberSpacing.xl),
+        ] else if (!_isTransactions) ...[
+          // SELECTED PERIOD Card for Analytics
+          _buildPeriodCard(cs),
+          const SizedBox(height: KuberSpacing.md),
+          // Info Box
+          _buildInfoBox(cs),
           const SizedBox(height: KuberSpacing.xl),
         ],
 
-        // Apply filters checkbox (only for transactions with active filters)
-        if (_isTransactions && _hasActiveFilters) ...[
-          GestureDetector(
-            onTap: () => setState(() => _applyFilters = !_applyFilters),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Checkbox(
-                    value: _applyFilters,
-                    onChanged: (v) => setState(() => _applyFilters = v ?? true),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                Text(
-                  'Apply current filters',
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_applyFilters) ...[
-            const SizedBox(height: KuberSpacing.sm),
-            _buildFilterSummary(cs),
-          ],
-          const SizedBox(height: KuberSpacing.lg),
-        ],
-
-        // Info for analytics
-        if (!_isTransactions && _format == ExportFormat.pdf) ...[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(KuberSpacing.md),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'PDF includes:',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.xs),
-                ...[
-                  'Summary overview',
-                  'Spending bar chart',
-                  'Category breakdown',
-                  'Smart insights',
-                  'Daily totals',
-                ].map((item) => Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Row(
-                        children: [
-                          Icon(Icons.check, size: 14, color: cs.primary),
-                          const SizedBox(width: KuberSpacing.xs),
-                          Text(item,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: cs.onSurfaceVariant,
-                              )),
-                        ],
-                      ),
-                    )),
-              ],
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-        ],
-
-        // Export button
+        // CTA
         AppButton(
-          label: 'Export',
-          icon: Icons.file_download_outlined,
+          label: 'Generate Report',
+          icon: _isTransactions ? null : Icons.arrow_forward_rounded,
+          iconAfterLabel: !_isTransactions,
           type: AppButtonType.primary,
           fullWidth: true,
           onPressed: _startExport,
@@ -262,78 +226,128 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     );
   }
 
-  Widget _formatChip(ColorScheme cs, ExportFormat format, String label) {
-    final selected = _format == format;
-    return GestureDetector(
-      onTap: () => setState(() => _format = format),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: selected ? cs.primary : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: selected ? cs.primary : cs.outline.withValues(alpha: 0.3),
+  Widget _buildFiltersCard(ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Apply current filters',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Generate report using the active filters from the history page.',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: selected ? cs.onPrimary : cs.onSurface,
+          const SizedBox(width: KuberSpacing.md),
+          Switch.adaptive(
+            value: _applyFilters,
+            onChanged: (val) => setState(() => _applyFilters = val),
+            activeTrackColor: cs.primary,
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildFilterSummary(ColorScheme cs) {
-    final filter = ref.read(historyFilterProvider);
-    final chips = <String>[];
+  Widget _buildPeriodCard(ColorScheme cs) {
+    final filter = ref.read(analyticsFilterProvider);
+    final rangeText = filter.type == FilterType.all
+        ? 'All Time'
+        : '${DateFormat('MMM d, yyyy').format(filter.from)} \u2013 ${DateFormat('MMM d, yyyy').format(filter.to)}';
 
-    if (filter.from != null && filter.to != null) {
-      chips.add(
-          '${_shortDate(filter.from!)} \u2013 ${_shortDate(filter.to!)}');
-    }
-    if (filter.types.isNotEmpty) {
-      chips.addAll(filter.types.map((t) => t[0].toUpperCase() + t.substring(1)));
-    }
-    if (filter.searchQuery != null && filter.searchQuery!.isNotEmpty) {
-      chips.add('"${filter.searchQuery}"');
-    }
-
-    if (chips.isEmpty) return const SizedBox.shrink();
-
-    return Wrap(
-      spacing: KuberSpacing.xs,
-      runSpacing: KuberSpacing.xs,
-      children: chips
-          .map((c) => Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.sm, vertical: KuberSpacing.xs),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'SELECTED PERIOD',
+          style: GoogleFonts.inter(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: cs.onSurfaceVariant,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(KuberSpacing.lg),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 18, color: cs.onSurfaceVariant),
+              const SizedBox(width: KuberSpacing.md),
+              Text(
+                rangeText,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
                 ),
-                child: Text(c,
-                    style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w500)),
-              ))
-          .toList(),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
-  String _shortDate(DateTime d) {
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${d.day} ${months[d.month - 1]}';
+  Widget _buildInfoBox(ColorScheme cs) {
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, size: 18, color: cs.primary),
+          const SizedBox(width: KuberSpacing.md),
+          Expanded(
+            child: Text(
+              'Date filters from your current analytics view are automatically applied to this report.',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: cs.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
+
+
+
+
 
   // ---- Progress state ------------------------------------------------------
 
@@ -360,65 +374,227 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   // ---- Complete state ------------------------------------------------------
 
   Widget _buildComplete(ColorScheme cs) {
-    final fileName = _exportedFile?.path.split('/').last ?? '';
-    final dirPath = _exportedFile?.parent.path ?? '';
-    final shortPath = dirPath.split('/').lastWhere((e) => e.isNotEmpty, orElse: () => 'Storage');
+    final result = _exportResult;
+    final file = result?.file;
+    if (result == null || file == null) return const SizedBox.shrink();
+
+    final fileName = file.path.split('/').last;
+    final fileExt = fileName.split('.').last.toUpperCase();
+    final isPdf = fileExt == 'PDF';
+
+    // File size formatting
+    String sizeText = '-- KB';
+    try {
+      final bytes = result.bytes;
+      if (bytes != null) {
+        final bLength = bytes.length;
+        if (bLength < 1024 * 1024) {
+          sizeText = '${(bLength / 1024).toStringAsFixed(1)} KB';
+        } else {
+          sizeText = '${(bLength / (1024 * 1024)).toStringAsFixed(1)} MB';
+        }
+      } else if (file.existsSync()) {
+        final bytesLength = file.lengthSync();
+        if (bytesLength < 1024 * 1024) {
+          sizeText = '${(bytesLength / 1024).toStringAsFixed(1)} KB';
+        } else {
+          sizeText = '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)} MB';
+        }
+      }
+    } catch (_) {}
+
+    // Location detection - now generic as promised
+    const String location = 'Saved to selected folder';
 
     return Column(
       children: [
+        // Success Icon
         Container(
-          width: 64,
-          height: 64,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
-            color: Colors.green.shade50,
+            color: cs.primary.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.check_rounded, size: 36, color: Colors.green.shade600),
+          child: Icon(Icons.check_circle_rounded, size: 32, color: cs.primary),
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
-          'Export Complete',
+          'Export Successful',
           style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: 4),
         Text(
-          fileName,
+          'Your report is ready and has been saved to your device.',
           style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.xs),
-        Text(
-          'Saved to $shortPath',
-          style: GoogleFonts.inter(
-            fontSize: 12,
+            fontSize: 13,
             color: cs.onSurfaceVariant,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: KuberSpacing.xl),
-        AppButton(
-          label: 'Open File',
-          icon: Icons.open_in_new,
-          type: AppButtonType.outline,
-          fullWidth: true,
-          onPressed: () => OpenFilex.open(_exportedFile!.path),
+
+        // File Info Card
+        Container(
+          padding: const EdgeInsets.all(KuberSpacing.lg),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      isPdf ? Icons.picture_as_pdf_outlined : Icons.description_outlined,
+                      size: 20,
+                      color: cs.primary,
+                    ),
+                  ),
+                  const SizedBox(width: KuberSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'FILE NAME',
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          fileName,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: KuberSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'FILE SIZE',
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          sizeText,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'LOCATION',
+                          style: GoogleFonts.inter(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          location,
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpacing.xl),
+
+        // Actions
         AppButton(
-          label: 'Done',
+          label: 'Open / Share File',
+          icon: Icons.share_outlined,
           type: AppButtonType.primary,
           fullWidth: true,
-          onPressed: () => Navigator.pop(context),
+          onPressed: _shareReport,
         ),
       ],
     );
+  }
+
+
+  Future<void> _shareReport() async {
+    final result = _exportResult;
+    if (result == null || result.bytes == null) return;
+
+    final fileName = result.file?.path.split('/').last ?? 
+                    'Kuber_Export_${DateTime.now().millisecondsSinceEpoch}.${widget.exportType == ExportType.transactions ? (_format == ExportFormat.csv ? "csv" : "pdf") : "pdf"}';
+    
+    final isPdf = fileName.toLowerCase().endsWith('.pdf');
+    final mimeType = isPdf ? 'application/pdf' : 'text/csv';
+
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(
+              result.bytes!,
+              name: fileName,
+              mimeType: mimeType,
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        showKuberSnackBar(context, 'Could not share file: $e');
+      }
+    }
   }
 
   // ---- Error state ---------------------------------------------------------
@@ -433,7 +609,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
             color: cs.error.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.error_outline, size: 36, color: cs.error),
+          child: Icon(Icons.error_outline_rounded, size: 36, color: cs.error),
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
@@ -462,17 +638,12 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
             setState(() => _stage = _ExportStage.options);
           },
         ),
-        const SizedBox(height: KuberSpacing.sm),
-        TextButton(
+        const SizedBox(height: KuberSpacing.md),
+        AppButton(
+          label: 'Cancel',
+          type: AppButtonType.normal,
+          fullWidth: true,
           onPressed: () => Navigator.pop(context),
-          child: Text(
-            'Cancel',
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
         ),
       ],
     );
@@ -492,7 +663,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         data = buildAnalyticsExportData(ref);
       }
 
-      final file = await performExport(
+      final result = await performExport(
         type: widget.exportType,
         format: _format,
         data: data,
@@ -500,14 +671,14 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
       if (!mounted) return;
 
-      if (file == null) {
+      if (result == null) {
         // User cancelled file selection
         setState(() => _stage = _ExportStage.options);
         return;
       }
 
       setState(() {
-        _exportedFile = file;
+        _exportResult = result;
         _stage = _ExportStage.complete;
       });
     } catch (e) {

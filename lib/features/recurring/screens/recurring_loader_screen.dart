@@ -43,6 +43,8 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
     Future.delayed(const Duration(milliseconds: 2000), () {
       if (mounted && !_navigating) {
         _navigating = true;
+        // Reset the state so the router doesn't redirect us back here
+        ref.read(recurringProcessResultProvider.notifier).state = 0;
         context.go('/');
       }
     });
