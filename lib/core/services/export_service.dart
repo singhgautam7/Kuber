@@ -41,7 +41,15 @@ class ExportService {
     Directory? dir = await getExternalStorageDirectory();
     dir ??= await getApplicationDocumentsDirectory();
 
-    final exportDir = Directory('${dir.path}/Kuber');
+    // On Android, move from internal app folder to public root storage (/Kuber)
+    // if storage permission exists. This makes it visible in any File Manager.
+    String exportPath = '${dir.path}/Kuber';
+    if (Platform.isAndroid && dir.path.contains('/Android/data')) {
+      final rootPath = dir.path.split('/Android')[0];
+      exportPath = '$rootPath/Kuber';
+    }
+
+    final exportDir = Directory(exportPath);
     if (!exportDir.existsSync()) {
       exportDir.createSync(recursive: true);
     }
@@ -55,123 +63,103 @@ class ExportService {
   // ---------------------------------------------------------------------------
 
   static String exportTransactionsCsv(TransactionExportData data) {
-  final lines = <String>[];
+    // CSV data should be pure and rectangular – no # comments
+    final csvRows = <List<dynamic>>[
+      ['Date', 'Name', 'Type', 'Category', 'Account', 'Amount (${data.currencyCode})', 'Notes'],
+    ];
 
-  // Comment header
-  lines.add('# Kuber Export');
-  if (data.userName.isNotEmpty) {
-    lines.add('# Exported by: ${data.userName}');
+    for (final row in data.rows) {
+      final typeLabel = row.isTransfer
+          ? 'Transfer'
+          : row.type == 'income'
+              ? 'Income'
+              : 'Expense';
+
+      final signedAmount = row.type == 'expense' || (row.isTransfer && row.type == 'expense')
+          ? -row.amount
+          : row.amount;
+
+      csvRows.add([
+        DateFormat('yyyy-MM-dd').format(row.date),
+        row.name,
+        typeLabel,
+        row.isTransfer ? 'Transfer' : row.categoryName,
+        row.accountName,
+        signedAmount.toStringAsFixed(2),
+        row.notes ?? '',
+      ]);
+    }
+
+    // Use CRLF (\r\n) for maximum compatibility with Excel
+    // Manual replace to handle v8.0.0's varied parameter naming
+    return Csv().encode(csvRows).replaceAll('\n', '\r\n');
   }
-  lines.add('# Period: ${data.periodLabel}');
-  if (data.accountFilter != null) {
-    lines.add('# Account: ${data.accountFilter}');
-  }
-  if (data.categoryFilter != null) {
-    lines.add('# Category: ${data.categoryFilter}');
-  }
-  if (data.searchFilter != null) {
-    lines.add('# Search: ${data.searchFilter}');
-  }
-  lines.add('# Transactions: ${data.totalCount}');
-  lines.add('#');
-
-  // CSV data
-  final csvRows = <List<dynamic>>[
-    ['Date', 'Name', 'Type', 'Category', 'Account', 'Amount (${data.currencyCode})', 'Notes'],
-  ];
-
-  for (final row in data.rows) {
-    final typeLabel = row.isTransfer
-        ? 'Transfer'
-        : row.type == 'income'
-            ? 'Income'
-            : 'Expense';
-
-    final signedAmount = row.type == 'expense' || (row.isTransfer && row.type == 'expense')
-        ? -row.amount
-        : row.amount;
-
-    csvRows.add([
-      DateFormat('yyyy-MM-dd').format(row.date),
-      row.name,
-      typeLabel,
-      row.isTransfer ? 'Transfer' : row.categoryName,
-      row.accountName,
-      signedAmount.toStringAsFixed(2),
-      row.notes ?? '',
-    ]);
-  }
-
-  final csvString = Csv().encode(csvRows);
-  lines.add(csvString);
-  return lines.join('\n');
-}
 
   // ---------------------------------------------------------------------------
   // Analytics CSV
   // ---------------------------------------------------------------------------
 
   static String exportAnalyticsCsv(AnalyticsExportData data) {
-  final lines = <String>[];
+    final segments = <String>[];
 
-  lines.add('# Kuber Analytics Export');
-  lines.add('# Period: ${data.periodLabel}');
-  if (data.userName.isNotEmpty) {
-    lines.add('# Exported by: ${data.userName}');
+    // Summary table
+    final summaryRows = <List<dynamic>>[
+      ['METRIC', 'VALUE'],
+      ['Total Income', data.totalIncome.toStringAsFixed(2)],
+      ['Total Expenses', data.totalExpense.toStringAsFixed(2)],
+      ['Net', data.netAmount.toStringAsFixed(2)],
+      ['Savings Rate', '${data.savingsRate.toStringAsFixed(1)}%'],
+    ];
+    segments.add(Csv().encode(summaryRows).replaceAll('\n', '\r\n'));
+
+    // Category Breakdown table
+    final catRows = <List<dynamic>>[
+      [], // Spacer
+      ['CATEGORY BREAKDOWN', 'Type', 'Amount (${data.currencyCode})', '% of Total', 'Transactions'],
+    ];
+    for (final c in data.categoryBreakdown) {
+      catRows.add([
+        c.name,
+        c.type == 'income' ? 'Income' : 'Expense',
+        c.amount.toStringAsFixed(2),
+        '${c.percentage.toStringAsFixed(1)}%',
+        c.txnCount,
+      ]);
+    }
+    segments.add(Csv().encode(catRows).replaceAll('\n', '\r\n'));
+
+    // Daily Totals table
+    final dailyRows = <List<dynamic>>[
+      [], // Spacer
+      ['DAILY TOTALS', 'Income (${data.currencyCode})', 'Expense (${data.currencyCode})', 'Net (${data.currencyCode})'],
+    ];
+    for (final d in data.dailyTotals) {
+      dailyRows.add([
+        DateFormat('yyyy-MM-dd').format(d.date),
+        d.income.toStringAsFixed(2),
+        d.expense.toStringAsFixed(2),
+        d.net.toStringAsFixed(2),
+      ]);
+    }
+    segments.add(Csv().encode(dailyRows).replaceAll('\n', '\r\n'));
+
+    return segments.join('\r\n\r\n');
   }
-  lines.add('');
-
-  // Summary
-  lines.add('SUMMARY');
-  lines.add('Total Income,${data.totalIncome.toStringAsFixed(2)}');
-  lines.add('Total Expenses,${data.totalExpense.toStringAsFixed(2)}');
-  lines.add('Net,${data.netAmount.toStringAsFixed(2)}');
-  lines.add('Savings Rate,${data.savingsRate.toStringAsFixed(1)}%');
-  lines.add('');
-
-  // Category Breakdown
-  final catRows = <List<dynamic>>[
-    ['Category', 'Type', 'Amount (${data.currencyCode})', '% of Total', 'Transactions'],
-  ];
-  for (final c in data.categoryBreakdown) {
-    catRows.add([
-      c.name,
-      c.type == 'income' ? 'Income' : 'Expense',
-      c.amount.toStringAsFixed(2),
-      '${c.percentage.toStringAsFixed(1)}%',
-      c.txnCount,
-    ]);
-  }
-  lines.add('CATEGORY BREAKDOWN');
-  lines.add(Csv().encode(catRows));
-  lines.add('');
-
-  // Daily Totals
-  final dailyRows = <List<dynamic>>[
-    ['Date', 'Income (${data.currencyCode})', 'Expense (${data.currencyCode})', 'Net (${data.currencyCode})'],
-  ];
-  for (final d in data.dailyTotals) {
-    dailyRows.add([
-      DateFormat('yyyy-MM-dd').format(d.date),
-      d.income.toStringAsFixed(2),
-      d.expense.toStringAsFixed(2),
-      d.net.toStringAsFixed(2),
-    ]);
-  }
-  lines.add('DAILY TOTALS');
-  lines.add(Csv().encode(dailyRows));
-
-  return lines.join('\n');
-}
 
   // ---------------------------------------------------------------------------
   // Transaction PDF
   // ---------------------------------------------------------------------------
 
-  static Future<Uint8List> exportTransactionsPdf(TransactionExportData data) async {
-  final doc = pw.Document();
-  final headerFont = pw.Font.helveticaBold();
-  final bodyFont = pw.Font.helvetica();
+  static Future<Uint8List> exportTransactionsPdf(
+    TransactionExportData data, {
+    required Uint8List fontRegular,
+    required Uint8List fontBold,
+  }) async {
+    final doc = pw.Document();
+    final headerFont = pw.Font.ttf(fontBold.buffer
+        .asByteData(fontBold.offsetInBytes, fontBold.lengthInBytes));
+    final bodyFont = pw.Font.ttf(fontRegular.buffer
+        .asByteData(fontRegular.offsetInBytes, fontRegular.lengthInBytes));
 
   doc.addPage(
     pw.MultiPage(
@@ -275,7 +263,7 @@ class ExportService {
   static pw.Widget _pdfCell(String text, pw.Font font, PdfColor color,
       {bool flex = false, pw.TextAlign align = pw.TextAlign.left}) {
   final child = pw.Text(
-    text,
+    _s(text),
     style: pw.TextStyle(font: font, fontSize: 8, color: color),
     textAlign: align,
     maxLines: 1,
@@ -284,6 +272,13 @@ class ExportService {
     padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 4),
     child: child,
   );
+}
+
+/// Sanitizes text for PDF export by stripping emojis and normalizing special characters.
+static String _s(String? text) {
+  if (text == null || text.isEmpty) return '';
+  // Strip characters outside BMP (most emojis) but keep standard symbols
+  return text.replaceAll(RegExp(r'[^\u0000-\uFFFF]'), '').trim();
 }
 
   static pw.Widget _buildTxnPdfHeader(
@@ -297,23 +292,23 @@ class ExportService {
     child: pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Kuber \u2014 Transaction Statement',
+        pw.Text(_s('Kuber - Transaction Statement'),
             style: pw.TextStyle(font: headerFont, fontSize: 16, color: _pdfTextPrimary)),
         pw.SizedBox(height: 4),
         pw.Text(
-          [
+          _s([
             if (data.userName.isNotEmpty) 'Exported by: ${data.userName}',
             'Period: ${data.periodLabel}',
-          ].join('  |  '),
+          ].join('  |  ')),
           style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted),
         ),
         if (filterParts.isNotEmpty) ...[
           pw.SizedBox(height: 2),
-          pw.Text(filterParts.join('  |  '),
+          pw.Text(_s(filterParts.join('  |  ')),
               style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted)),
         ],
         pw.SizedBox(height: 2),
-        pw.Text('${data.totalCount} transactions',
+        pw.Text(_s('${data.totalCount} transactions'),
             style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted)),
         pw.SizedBox(height: 8),
         pw.Divider(color: _pdfBorder, thickness: 0.5),
@@ -363,9 +358,9 @@ class ExportService {
       String label, String value, PdfColor color, pw.Font bold, pw.Font regular) {
   return pw.Column(
     children: [
-      pw.Text(label, style: pw.TextStyle(font: regular, fontSize: 9, color: _pdfTextMuted)),
+      pw.Text(_s(label), style: pw.TextStyle(font: regular, fontSize: 9, color: _pdfTextMuted)),
       pw.SizedBox(height: 4),
-      pw.Text(value, style: pw.TextStyle(font: bold, fontSize: 12, color: color)),
+      pw.Text(_s(value), style: pw.TextStyle(font: bold, fontSize: 12, color: color)),
     ],
   );
 }
@@ -374,10 +369,16 @@ class ExportService {
   // Analytics PDF
   // ---------------------------------------------------------------------------
 
-  static Future<Uint8List> exportAnalyticsPdf(AnalyticsExportData data) async {
-  final doc = pw.Document();
-  final headerFont = pw.Font.helveticaBold();
-  final bodyFont = pw.Font.helvetica();
+  static Future<Uint8List> exportAnalyticsPdf(
+    AnalyticsExportData data, {
+    required Uint8List fontRegular,
+    required Uint8List fontBold,
+  }) async {
+    final doc = pw.Document();
+    final headerFont = pw.Font.ttf(fontBold.buffer
+        .asByteData(fontBold.offsetInBytes, fontBold.lengthInBytes));
+    final bodyFont = pw.Font.ttf(fontRegular.buffer
+        .asByteData(fontRegular.offsetInBytes, fontRegular.lengthInBytes));
 
   // Page 1 — Overview + bar chart
   doc.addPage(pw.Page(
@@ -386,11 +387,11 @@ class ExportService {
     build: (context) => pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Kuber Report \u2014 ${data.periodLabel}',
+        pw.Text(_s('Kuber Report - ${data.periodLabel}'),
             style: pw.TextStyle(font: headerFont, fontSize: 18, color: _pdfTextPrimary)),
         if (data.userName.isNotEmpty) ...[
           pw.SizedBox(height: 4),
-          pw.Text('Exported by ${data.userName}',
+          pw.Text(_s('Exported by ${data.userName}'),
               style: pw.TextStyle(font: bodyFont, fontSize: 10, color: _pdfTextMuted)),
         ],
         pw.SizedBox(height: 20),
@@ -427,7 +428,7 @@ class ExportService {
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(32),
       build: (context) => [
-        pw.Text('Category Breakdown',
+        pw.Text(_s('Category Breakdown'),
             style: pw.TextStyle(font: headerFont, fontSize: 14, color: _pdfTextPrimary)),
         pw.SizedBox(height: 12),
         _buildCategoryTable(data, headerFont, bodyFont),
@@ -441,7 +442,7 @@ class ExportService {
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(32),
       build: (context) => [
-        pw.Text('Smart Insights',
+        pw.Text(_s('Smart Insights'),
             style: pw.TextStyle(font: headerFont, fontSize: 14, color: _pdfTextPrimary)),
         pw.SizedBox(height: 12),
         ...data.insights.map((insight) => pw.Container(
@@ -451,12 +452,12 @@ class ExportService {
                 color: _pdfSurface,
                 border: pw.Border(
                     left: pw.BorderSide(color: _pdfPrimary, width: 3)),
-                borderRadius: pw.BorderRadius.circular(4),
+                // borderRadius removed: not supported with non-uniform borders (left side accent)
               ),
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('${insight.emoji} ${insight.typeLabel}',
+                  pw.Text(_s(insight.typeLabel),
                       style: pw.TextStyle(
                           font: headerFont, fontSize: 9, color: _pdfPrimary)),
                   pw.SizedBox(height: 4),
@@ -517,7 +518,7 @@ class ExportService {
         }
 
         return [
-          pw.Text('Daily Totals',
+          pw.Text(_s('Daily Totals'),
               style: pw.TextStyle(font: headerFont, fontSize: 14, color: _pdfTextPrimary)),
           pw.SizedBox(height: 12),
           pw.Table(
@@ -545,7 +546,7 @@ class ExportService {
       decoration: pw.BoxDecoration(
         color: _pdfSurface,
         border: pw.Border(top: pw.BorderSide(color: accent, width: 3)),
-        borderRadius: pw.BorderRadius.circular(4),
+        // borderRadius removed: not supported with non-uniform borders (top side accent)
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -563,7 +564,7 @@ class ExportService {
   static pw.Widget _buildBarChart(
       List<BarBucketRow> buckets, String symbol, pw.Font font) {
   if (buckets.isEmpty) {
-    return pw.Text('No data',
+    return pw.Text(_s('No data'),
         style: pw.TextStyle(font: font, fontSize: 10, color: _pdfTextMuted));
   }
 

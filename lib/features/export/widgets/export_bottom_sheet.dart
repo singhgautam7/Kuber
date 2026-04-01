@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/export_data.dart';
@@ -53,6 +55,13 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   String _errorMessage = '';
 
   bool get _isTransactions => widget.exportType == ExportType.transactions;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default to PDF for Analytics since CSV is no longer an option there
+    _format = _isTransactions ? ExportFormat.csv : ExportFormat.pdf;
+  }
 
   bool get _hasActiveFilters {
     if (!_isTransactions) return false;
@@ -142,23 +151,25 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.xl),
 
-        // Format toggle
-        Text('Format',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.5,
-            )),
-        const SizedBox(height: KuberSpacing.sm),
-        Row(
-          children: [
-            Expanded(child: _formatChip(cs, ExportFormat.csv, 'CSV')),
-            const SizedBox(width: KuberSpacing.sm),
-            Expanded(child: _formatChip(cs, ExportFormat.pdf, 'PDF')),
-          ],
-        ),
-        const SizedBox(height: KuberSpacing.xl),
+        // Format toggle (Only show for Transactions since Analytics is PDF-only now)
+        if (_isTransactions) ...[
+          Text('Format',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 0.5,
+              )),
+          const SizedBox(height: KuberSpacing.sm),
+          Row(
+            children: [
+              Expanded(child: _formatChip(cs, ExportFormat.csv, 'CSV')),
+              const SizedBox(width: KuberSpacing.sm),
+              Expanded(child: _formatChip(cs, ExportFormat.pdf, 'PDF')),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.xl),
+        ],
 
         // Apply filters checkbox (only for transactions with active filters)
         if (_isTransactions && _hasActiveFilters) ...[
@@ -466,10 +477,18 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.xl),
         AppButton(
-          label: 'Try Again',
+          label: _errorMessage.contains('permission')
+              ? 'Open System Settings'
+              : 'Try Again',
           type: AppButtonType.primary,
           fullWidth: true,
-          onPressed: () => setState(() => _stage = _ExportStage.options),
+          onPressed: () {
+            if (_errorMessage.contains('permission')) {
+              openAppSettings();
+            } else {
+              setState(() => _stage = _ExportStage.options);
+            }
+          },
         ),
         const SizedBox(height: KuberSpacing.sm),
         TextButton(
@@ -490,6 +509,43 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   // ---- Export logic ---------------------------------------------------------
 
   Future<void> _startExport() async {
+    // 1. Check permissions first using targeted logic for Android versions
+    var status = PermissionStatus.denied;
+
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+
+      if (androidInfo.version.sdkInt >= 30) {
+        // API 30+ (Android 11+) requires MANAGE_EXTERNAL_STORAGE for root folder access
+        status = await Permission.manageExternalStorage.status;
+        if (!status.isGranted) {
+          status = await Permission.manageExternalStorage.request();
+        }
+      } else {
+        // API 29 and below (Android 10 and below) use standard storage
+        status = await Permission.storage.status;
+        if (!status.isGranted) {
+          status = await Permission.storage.request();
+        }
+      }
+    } else {
+      // iOS uses standard documents access
+      status = await Permission.storage.status;
+      if (!status.isGranted) {
+        status = await Permission.storage.request();
+      }
+    }
+
+    if (!status.isGranted) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'You need to provide storage permission for this';
+        _stage = _ExportStage.error;
+      });
+      return;
+    }
+
     setState(() => _stage = _ExportStage.progress);
 
     try {

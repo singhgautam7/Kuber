@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/export_data.dart';
@@ -56,6 +58,14 @@ TransactionExportData buildTransactionExportData(
   // Sort by date descending
   transactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
+  // Pre-compute transfer lookup map for O(1) matching later
+  final transferLegsMap = <String, List<Transaction>>{};
+  for (final t in allTransactions) {
+    if (t.isTransfer && t.transferId != null) {
+      transferLegsMap.putIfAbsent(t.transferId!, () => []).add(t);
+    }
+  }
+
   // Build rows — include both legs of transfers
   final rows = <TransactionRow>[];
   final seenTransferIds = <String>{};
@@ -65,15 +75,10 @@ TransactionExportData buildTransactionExportData(
       if (tx.transferId == null || seenTransferIds.contains(tx.transferId)) continue;
       seenTransferIds.add(tx.transferId!);
 
-      // Find both legs
-      final expenseLeg = tx.type == 'expense'
-          ? tx
-          : allTransactions.firstWhereOrNull(
-              (t) => t.transferId == tx.transferId && t.type == 'expense');
-      final incomeLeg = tx.type == 'income'
-          ? tx
-          : allTransactions.firstWhereOrNull(
-              (t) => t.transferId == tx.transferId && t.type == 'income');
+      // Find legs in O(1) from map instead of O(N^2) list search
+      final legs = transferLegsMap[tx.transferId] ?? [];
+      final expenseLeg = legs.firstWhereOrNull((t) => t.type == 'expense');
+      final incomeLeg = legs.firstWhereOrNull((t) => t.type == 'income');
 
       final fromName = expenseLeg != null
           ? accountNames[expenseLeg.accountId] ?? 'Unknown'
@@ -81,7 +86,7 @@ TransactionExportData buildTransactionExportData(
       final toName = incomeLeg != null
           ? accountNames[incomeLeg.accountId] ?? 'Unknown'
           : 'Unknown';
-      final transferName = '$fromName \u2192 $toName';
+      final transferName = '$fromName -> $toName';
 
       // FROM leg (expense)
       if (expenseLeg != null) {
@@ -135,12 +140,12 @@ TransactionExportData buildTransactionExportData(
   String periodLabel;
   if (applyFilters && filter.from != null && filter.to != null) {
     periodLabel =
-        '${DateFormat('dd MMM yyyy').format(filter.from!)} \u2013 ${DateFormat('dd MMM yyyy').format(filter.to!)}';
+        '${DateFormat('dd MMM yyyy').format(filter.from!)} - ${DateFormat('dd MMM yyyy').format(filter.to!)}';
   } else if (transactions.isNotEmpty) {
     final earliest = transactions.last.createdAt;
     final latest = transactions.first.createdAt;
     periodLabel =
-        '${DateFormat('dd MMM yyyy').format(earliest)} \u2013 ${DateFormat('dd MMM yyyy').format(latest)}';
+        '${DateFormat('dd MMM yyyy').format(earliest)} - ${DateFormat('dd MMM yyyy').format(latest)}';
   } else {
     periodLabel = 'All Time';
   }
@@ -297,7 +302,7 @@ AnalyticsExportData buildAnalyticsExportData(WidgetRef ref) {
 String _analyticsFilterLabel(AnalyticsFilter filter) {
   switch (filter.type) {
     case FilterType.today:
-      return 'Today \u2013 ${DateFormat('dd MMM yyyy').format(filter.from)}';
+      return 'Today - ${DateFormat('dd MMM yyyy').format(filter.from)}';
     case FilterType.thisWeek:
       return 'This Week';
     case FilterType.lastWeek:
@@ -311,7 +316,7 @@ String _analyticsFilterLabel(AnalyticsFilter filter) {
     case FilterType.all:
       return 'All Time';
     case FilterType.custom:
-      return '${DateFormat('dd MMM yyyy').format(filter.from)} \u2013 ${DateFormat('dd MMM yyyy').format(filter.to)}';
+      return '${DateFormat('dd MMM yyyy').format(filter.from)} - ${DateFormat('dd MMM yyyy').format(filter.to)}';
   }
 }
 
@@ -342,16 +347,61 @@ Future<File> performExport({
     final csvString = type == ExportType.transactions
         ? await compute(ExportService.exportTransactionsCsv, data as TransactionExportData)
         : await compute(ExportService.exportAnalyticsCsv, data as AnalyticsExportData);
-    bytes = csvString.codeUnits;
+    
+    // Use standard UTF-8 encoding (BOM-free for better mobile compatibility)
+    bytes = utf8.encode(csvString);
   } else {
+    // Load font assets with proper slicing for isolate safety
+    final fontRegularData = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
+    final fontRegular = fontRegularData.buffer.asUint8List(
+        fontRegularData.offsetInBytes, fontRegularData.lengthInBytes);
+
+    final fontBoldData = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
+    final fontBold = fontBoldData.buffer.asByteData().buffer.asUint8List(
+        fontBoldData.offsetInBytes, fontBoldData.lengthInBytes);
+
     // PDF generation is now also handled in compute() to ensure smooth UI
-    final pdfBytes = type == ExportType.transactions
-        ? await compute(ExportService.exportTransactionsPdf, data as TransactionExportData)
-        : await compute(ExportService.exportAnalyticsPdf, data as AnalyticsExportData);
-    bytes = pdfBytes;
+    if (type == ExportType.transactions) {
+      bytes = await compute(
+        _exportTransactionsPdfWrapper,
+        _PdfExportParams(data as TransactionExportData, fontRegular, fontBold),
+      );
+    } else {
+      bytes = await compute(
+        _exportAnalyticsPdfWrapper,
+        _PdfExportParams(data as AnalyticsExportData, fontRegular, fontBold),
+      );
+    }
   }
 
   return ExportService.saveExportFile(fileName: fileName, bytes: bytes);
+}
+
+// ---------------------------------------------------------------------------
+// Private helpers for compute
+// ---------------------------------------------------------------------------
+
+class _PdfExportParams {
+  final dynamic data;
+  final Uint8List fontRegular;
+  final Uint8List fontBold;
+  _PdfExportParams(this.data, this.fontRegular, this.fontBold);
+}
+
+Future<Uint8List> _exportTransactionsPdfWrapper(_PdfExportParams params) {
+  return ExportService.exportTransactionsPdf(
+    params.data as TransactionExportData,
+    fontRegular: params.fontRegular,
+    fontBold: params.fontBold,
+  );
+}
+
+Future<Uint8List> _exportAnalyticsPdfWrapper(_PdfExportParams params) {
+  return ExportService.exportAnalyticsPdf(
+    params.data as AnalyticsExportData,
+    fontRegular: params.fontRegular,
+    fontBold: params.fontBold,
+  );
 }
 
 // ---------------------------------------------------------------------------
