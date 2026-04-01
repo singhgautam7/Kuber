@@ -49,7 +49,7 @@ class RecurringScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: KuberPageHeader(
                   title: 'Manage\nAutomations',
-                  description: 'Automated scheduled transactions',
+                  description: 'Your active subscriptions and bill automations',
                   actionTooltip: 'Add Recurring',
                   onAction: () => context.push('/recurring/add'),
                 ),
