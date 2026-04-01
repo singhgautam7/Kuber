@@ -8,7 +8,6 @@ import '../providers/data_provider.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../shared/widgets/loading_widgets.dart';
-import 'package:open_filex/open_filex.dart';
 
 class DataManagementScreen extends ConsumerWidget {
   const DataManagementScreen({super.key});
@@ -27,14 +26,20 @@ class DataManagementScreen extends ConsumerWidget {
         showKuberSnackBar(
           context,
           msg,
-          actionLabel: filePath != null ? 'OPEN' : null,
-          onAction: filePath != null ? () => OpenFilex.open(filePath) : null,
+          // Removed OPEN since we are moving away from OpenFilex
+          actionLabel: null,
+          onAction: null,
           secondaryActionLabel: filePath != null ? 'SHARE' : null,
           onSecondaryAction: (next.filePaths != null && next.filePaths!.isNotEmpty)
               ? () => SharePlus.instance.share(
-                  ShareParams(files: next.filePaths!.map((p) => XFile(p)).toList()))
+                    ShareParams(
+                      files: next.filePaths!.map((p) => XFile(p)).toList(),
+                    ),
+                  )
               : (filePath != null
-                  ? () => SharePlus.instance.share(ShareParams(files: [XFile(filePath)]))
+                  ? () => SharePlus.instance.share(
+                        ShareParams(files: [XFile(filePath)]),
+                      )
                   : null),
         );
         ref.read(dataControllerProvider.notifier).reset();

@@ -15,6 +15,7 @@ class AppButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final AppButtonType type;
   final IconData? icon;
+  final bool iconAfterLabel;
   final bool fullWidth;
   final double? width;
   final double height;
@@ -26,6 +27,7 @@ class AppButton extends StatelessWidget {
     this.onPressed,
     this.type = AppButtonType.normal,
     this.icon,
+    this.iconAfterLabel = false,
     this.fullWidth = false,
     this.width,
     this.height = 52,
@@ -68,7 +70,7 @@ class AppButton extends StatelessWidget {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       elevation: 0,
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: KuberSpacing.lg,
         vertical: 12,
       ),
@@ -93,7 +95,7 @@ class AppButton extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
             ),
           )
-        else if (icon != null) ...[
+        else if (icon != null && !iconAfterLabel) ...[
           Icon(icon, size: 18),
           const SizedBox(width: 8),
         ],
@@ -109,6 +111,10 @@ class AppButton extends StatelessWidget {
             maxLines: 1,
           ),
         ),
+        if (!isLoading && icon != null && iconAfterLabel) ...[
+          const SizedBox(width: 8),
+          Icon(icon, size: 18),
+        ],
       ],
     );
 

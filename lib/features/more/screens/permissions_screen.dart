@@ -68,8 +68,9 @@ class PermissionsScreen extends ConsumerWidget {
                   const SizedBox(height: KuberSpacing.lg),
                   _PermissionCard(
                     icon: Icons.folder_open_rounded,
-                    title: 'Files & Storage',
-                    description: 'Used to export transaction data and import CSV files.',
+                    title: 'Storage',
+                    description:
+                        'Exports (CSV and PDF) are saved to your device under Android/data/com.kuber/files/Kuber/. No storage permission is requested on Android 10 and above. Older devices may see a one-time prompt.',
                     status: state.storage,
                     onTap: () => ref
                         .read(permissionProvider.notifier)

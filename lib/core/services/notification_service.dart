@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:open_filex/open_filex.dart';
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -34,23 +33,8 @@ class NotificationService {
 
       await _notificationsPlugin.initialize(
         initializationSettings,
-        onDidReceiveNotificationResponse: (NotificationResponse response) {
-          final payload = response.payload;
-          if (payload != null && payload.isNotEmpty) {
-            OpenFilex.open(payload);
-          }
-        },
       );
 
-      // Handle notification if app was launched from it
-      final NotificationAppLaunchDetails? launchDetails = 
-          await _notificationsPlugin.getNotificationAppLaunchDetails();
-      if (launchDetails != null && launchDetails.didNotificationLaunchApp) {
-        final payload = launchDetails.notificationResponse?.payload;
-        if (payload != null && payload.isNotEmpty) {
-          OpenFilex.open(payload);
-        }
-      }
 
       _isInitialized = true;
     } catch (e) {

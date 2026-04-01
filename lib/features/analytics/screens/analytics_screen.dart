@@ -23,7 +23,7 @@ import '../widgets/avg_weekly_heatmap.dart';
 import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
 import '../widgets/top_filter_row.dart';
-import '../../../shared/widgets/wip_bottom_sheet.dart';
+import '../../export/widgets/export_bottom_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -254,38 +254,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               description: 'Visualize your spending patterns',
               actionIcon: Icons.file_download_outlined,
               actionTooltip: 'Export',
-              onAction: () {
-                final cs = Theme.of(context).colorScheme;
-                showWIPBottomSheet(
-                  context: context,
-                  icon: Icons.rocket_launch_rounded,
-                  title: 'Export Report',
-                  content: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        height: 1.6,
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      children: [
-                        const TextSpan(text: "We are currently building this feature to help you export your financial reports in "),
-                        TextSpan(
-                          text: "PDF",
-                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
-                        ),
-                        const TextSpan(text: " and "),
-                        TextSpan(
-                          text: "CSV",
-                          style: TextStyle(color: cs.onSurface, fontWeight: FontWeight.w800),
-                        ),
-                        const TextSpan(text: " formats. Stay tuned!"),
-                      ],
-                    ),
-                  ),
-                );
-              },
+              onAction: () => showExportBottomSheet(
+                context: context,
+                exportType: ExportType.analytics,
+              ),
             ),
 
             // [A] New Unified Filter Row
