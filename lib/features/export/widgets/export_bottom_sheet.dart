@@ -1,12 +1,9 @@
 import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/export_data.dart';
 export '../../../core/models/export_data.dart' show ExportType;
@@ -365,10 +362,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   Widget _buildComplete(ColorScheme cs) {
     final fileName = _exportedFile?.path.split('/').last ?? '';
     final dirPath = _exportedFile?.parent.path ?? '';
-    // Show only the last meaningful part of the path
-    final shortPath = dirPath.contains('Kuber')
-        ? dirPath.substring(dirPath.indexOf('Android'))
-        : dirPath;
+    final shortPath = dirPath.split('/').lastWhere((e) => e.isNotEmpty, orElse: () => 'Storage');
 
     return Column(
       children: [
@@ -409,28 +403,12 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: KuberSpacing.xl),
-        Row(
-          children: [
-            Expanded(
-              child: AppButton(
-                label: 'Open',
-                icon: Icons.open_in_new,
-                type: AppButtonType.outline,
-                onPressed: () => OpenFilex.open(_exportedFile!.path),
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Expanded(
-              child: AppButton(
-                label: 'Share',
-                icon: Icons.share_outlined,
-                type: AppButtonType.outline,
-                onPressed: () => SharePlus.instance.share(
-                  ShareParams(files: [XFile(_exportedFile!.path)]),
-                ),
-              ),
-            ),
-          ],
+        AppButton(
+          label: 'Open File',
+          icon: Icons.open_in_new,
+          type: AppButtonType.outline,
+          fullWidth: true,
+          onPressed: () => OpenFilex.open(_exportedFile!.path),
         ),
         const SizedBox(height: KuberSpacing.sm),
         AppButton(
@@ -477,17 +455,11 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.xl),
         AppButton(
-          label: _errorMessage.contains('permission')
-              ? 'Open System Settings'
-              : 'Try Again',
+          label: 'Try Again',
           type: AppButtonType.primary,
           fullWidth: true,
           onPressed: () {
-            if (_errorMessage.contains('permission')) {
-              openAppSettings();
-            } else {
-              setState(() => _stage = _ExportStage.options);
-            }
+            setState(() => _stage = _ExportStage.options);
           },
         ),
         const SizedBox(height: KuberSpacing.sm),
@@ -509,43 +481,6 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   // ---- Export logic ---------------------------------------------------------
 
   Future<void> _startExport() async {
-    // 1. Check permissions first using targeted logic for Android versions
-    var status = PermissionStatus.denied;
-
-    if (Platform.isAndroid) {
-      final deviceInfo = DeviceInfoPlugin();
-      final androidInfo = await deviceInfo.androidInfo;
-
-      if (androidInfo.version.sdkInt >= 30) {
-        // API 30+ (Android 11+) requires MANAGE_EXTERNAL_STORAGE for root folder access
-        status = await Permission.manageExternalStorage.status;
-        if (!status.isGranted) {
-          status = await Permission.manageExternalStorage.request();
-        }
-      } else {
-        // API 29 and below (Android 10 and below) use standard storage
-        status = await Permission.storage.status;
-        if (!status.isGranted) {
-          status = await Permission.storage.request();
-        }
-      }
-    } else {
-      // iOS uses standard documents access
-      status = await Permission.storage.status;
-      if (!status.isGranted) {
-        status = await Permission.storage.request();
-      }
-    }
-
-    if (!status.isGranted) {
-      if (!mounted) return;
-      setState(() {
-        _errorMessage = 'You need to provide storage permission for this';
-        _stage = _ExportStage.error;
-      });
-      return;
-    }
-
     setState(() => _stage = _ExportStage.progress);
 
     try {
@@ -564,6 +499,13 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       );
 
       if (!mounted) return;
+
+      if (file == null) {
+        // User cancelled file selection
+        setState(() => _stage = _ExportStage.options);
+        return;
+      }
+
       setState(() {
         _exportedFile = file;
         _stage = _ExportStage.complete;
@@ -571,7 +513,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = 'Unable to save file. Please try again.';
         _stage = _ExportStage.error;
       });
     }

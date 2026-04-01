@@ -1,9 +1,6 @@
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:csv/csv.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -24,7 +21,7 @@ class ExportService {
   static final _pdfTransfer = PdfColor.fromHex('#71717A');
 
   // ---------------------------------------------------------------------------
-  // File naming & saving
+  // File naming
   // ---------------------------------------------------------------------------
 
   static String buildFileName(ExportType type, ExportFormat format, DateTime refDate) {
@@ -34,116 +31,51 @@ class ExportService {
     return 'Kuber_${prefix}_$monthStr.$ext';
   }
 
-  static Future<File> saveExportFile({
-    required String fileName,
-    required List<int> bytes,
-  }) async {
-    Directory? dir = await getExternalStorageDirectory();
-    dir ??= await getApplicationDocumentsDirectory();
-
-    // On Android, move from internal app folder to public root storage (/Kuber)
-    // if storage permission exists. This makes it visible in any File Manager.
-    String exportPath = '${dir.path}/Kuber';
-    if (Platform.isAndroid && dir.path.contains('/Android/data')) {
-      final rootPath = dir.path.split('/Android')[0];
-      exportPath = '$rootPath/Kuber';
-    }
-
-    final exportDir = Directory(exportPath);
-    if (!exportDir.existsSync()) {
-      exportDir.createSync(recursive: true);
-    }
-
-    final file = File('${exportDir.path}/$fileName');
-    return file.writeAsBytes(bytes);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Transaction CSV
-  // ---------------------------------------------------------------------------
-
   static String exportTransactionsCsv(TransactionExportData data) {
-    // CSV data should be pure and rectangular – no # comments
-    final csvRows = <List<dynamic>>[
-      ['Date', 'Name', 'Type', 'Category', 'Account', 'Amount (${data.currencyCode})', 'Notes'],
-    ];
+    final buffer = StringBuffer();
+
+    // Headers as requested by user
+    buffer.writeln('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes');
+
+    String escape(String value) {
+      if (value.contains(',') || value.contains('"')) {
+        return '"${value.replaceAll('"', '""')}"';
+      }
+      return value;
+    }
 
     for (final row in data.rows) {
+      // Handle Transfers: only export ONE row per transfer (the expense leg)
+      if (row.isTransfer && row.type == 'income') {
+        continue; // skip second leg
+      }
+
       final typeLabel = row.isTransfer
           ? 'Transfer'
           : row.type == 'income'
               ? 'Income'
               : 'Expense';
 
-      final signedAmount = row.type == 'expense' || (row.isTransfer && row.type == 'expense')
-          ? -row.amount
-          : row.amount;
+      // Format transfer name: "HDFC -> Cash"
+      final displayName = (row.isTransfer && row.fromAccountName != null && row.toAccountName != null)
+          ? '${row.fromAccountName} \u2192 ${row.toAccountName}'
+          : row.name;
 
-      csvRows.add([
+      // Standardize amount for CSV: usually negative for expenses
+      final signedAmount = row.type == 'expense' ? -row.amount : row.amount;
+
+      buffer.writeln([
         DateFormat('yyyy-MM-dd').format(row.date),
-        row.name,
+        escape(displayName),
         typeLabel,
-        row.isTransfer ? 'Transfer' : row.categoryName,
-        row.accountName,
+        escape(row.isTransfer ? 'Transfer' : row.categoryName),
+        escape(row.accountName),
         signedAmount.toStringAsFixed(2),
-        row.notes ?? '',
-      ]);
+        escape(row.notes ?? ''),
+      ].join(','));
     }
 
-    // Use CRLF (\r\n) for maximum compatibility with Excel
-    // Manual replace to handle v8.0.0's varied parameter naming
-    return Csv().encode(csvRows).replaceAll('\n', '\r\n');
-  }
-
-  // ---------------------------------------------------------------------------
-  // Analytics CSV
-  // ---------------------------------------------------------------------------
-
-  static String exportAnalyticsCsv(AnalyticsExportData data) {
-    final segments = <String>[];
-
-    // Summary table
-    final summaryRows = <List<dynamic>>[
-      ['METRIC', 'VALUE'],
-      ['Total Income', data.totalIncome.toStringAsFixed(2)],
-      ['Total Expenses', data.totalExpense.toStringAsFixed(2)],
-      ['Net', data.netAmount.toStringAsFixed(2)],
-      ['Savings Rate', '${data.savingsRate.toStringAsFixed(1)}%'],
-    ];
-    segments.add(Csv().encode(summaryRows).replaceAll('\n', '\r\n'));
-
-    // Category Breakdown table
-    final catRows = <List<dynamic>>[
-      [], // Spacer
-      ['CATEGORY BREAKDOWN', 'Type', 'Amount (${data.currencyCode})', '% of Total', 'Transactions'],
-    ];
-    for (final c in data.categoryBreakdown) {
-      catRows.add([
-        c.name,
-        c.type == 'income' ? 'Income' : 'Expense',
-        c.amount.toStringAsFixed(2),
-        '${c.percentage.toStringAsFixed(1)}%',
-        c.txnCount,
-      ]);
-    }
-    segments.add(Csv().encode(catRows).replaceAll('\n', '\r\n'));
-
-    // Daily Totals table
-    final dailyRows = <List<dynamic>>[
-      [], // Spacer
-      ['DAILY TOTALS', 'Income (${data.currencyCode})', 'Expense (${data.currencyCode})', 'Net (${data.currencyCode})'],
-    ];
-    for (final d in data.dailyTotals) {
-      dailyRows.add([
-        DateFormat('yyyy-MM-dd').format(d.date),
-        d.income.toStringAsFixed(2),
-        d.expense.toStringAsFixed(2),
-        d.net.toStringAsFixed(2),
-      ]);
-    }
-    segments.add(Csv().encode(dailyRows).replaceAll('\n', '\r\n'));
-
-    return segments.join('\r\n\r\n');
+    return buffer.toString();
   }
 
   // ---------------------------------------------------------------------------

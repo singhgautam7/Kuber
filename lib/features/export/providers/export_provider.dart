@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -324,12 +326,12 @@ String _analyticsFilterLabel(AnalyticsFilter filter) {
 // Perform export (compute + file save)
 // ---------------------------------------------------------------------------
 
-Future<File> performExport({
+Future<File?> performExport({
   required ExportType type,
   required ExportFormat format,
   required dynamic data, // TransactionExportData or AnalyticsExportData
 }) async {
-  List<int> bytes;
+  Uint8List bytes;
   String fileName;
 
   // Pick a reference date for file naming
@@ -344,12 +346,9 @@ Future<File> performExport({
   fileName = ExportService.buildFileName(type, format, refDate);
 
   if (format == ExportFormat.csv) {
-    final csvString = type == ExportType.transactions
-        ? await compute(ExportService.exportTransactionsCsv, data as TransactionExportData)
-        : await compute(ExportService.exportAnalyticsCsv, data as AnalyticsExportData);
-    
-    // Use standard UTF-8 encoding (BOM-free for better mobile compatibility)
-    bytes = utf8.encode(csvString);
+    // Only history transactions support CSV now
+    final csvString = await compute(ExportService.exportTransactionsCsv, data as TransactionExportData);
+    bytes = Uint8List.fromList(utf8.encode(csvString));
   } else {
     // Load font assets with proper slicing for isolate safety
     final fontRegularData = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
@@ -374,7 +373,21 @@ Future<File> performExport({
     }
   }
 
-  return ExportService.saveExportFile(fileName: fileName, bytes: bytes);
+  // Use system file picker to save file (SAF - no permissions needed)
+  // On mobile, we MUST pass bytes to saveFile for it to handle the SAF write internally
+  final filePath = await FilePicker.platform.saveFile(
+    dialogTitle: 'Save export file',
+    fileName: fileName,
+    bytes: bytes,
+    type: format == ExportFormat.csv ? FileType.custom : FileType.any,
+    allowedExtensions: format == ExportFormat.csv ? ['csv'] : ['pdf'],
+  );
+
+  if (filePath == null) {
+    return null; // User cancelled
+  }
+
+  return File(filePath);
 }
 
 // ---------------------------------------------------------------------------
