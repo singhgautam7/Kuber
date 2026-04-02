@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/export_data.dart';
@@ -53,14 +54,21 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   bool _applyFilters = true;
   ExportResult? _exportResult;
   String _errorMessage = '';
+  bool _isSaving = false; // tracks "Save to folder" in-progress
 
   bool get _isTransactions => widget.exportType == ExportType.transactions;
 
   @override
   void initState() {
     super.initState();
-    // Default to PDF for Analytics since CSV is no longer an option there
     _format = _isTransactions ? ExportFormat.csv : ExportFormat.pdf;
+  }
+
+  @override
+  void dispose() {
+    // Clean up the temp file whenever the sheet is closed
+    deleteTempExportFile(_exportResult);
+    super.dispose();
   }
 
   bool get _hasActiveFilters {
@@ -375,40 +383,26 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
   Widget _buildComplete(ColorScheme cs) {
     final result = _exportResult;
-    final file = result?.file;
-    if (result == null || file == null) return const SizedBox.shrink();
+    if (result == null) return const SizedBox.shrink();
 
-    final fileName = file.path.split('/').last;
+    final fileName = result.tempFile.path.split('/').last;
     final fileExt = fileName.split('.').last.toUpperCase();
     final isPdf = fileExt == 'PDF';
 
-    // File size formatting
+    // File size
     String sizeText = '-- KB';
     try {
-      final bytes = result.bytes;
-      if (bytes != null) {
-        final bLength = bytes.length;
-        if (bLength < 1024 * 1024) {
-          sizeText = '${(bLength / 1024).toStringAsFixed(1)} KB';
-        } else {
-          sizeText = '${(bLength / (1024 * 1024)).toStringAsFixed(1)} MB';
-        }
-      } else if (file.existsSync()) {
-        final bytesLength = file.lengthSync();
-        if (bytesLength < 1024 * 1024) {
-          sizeText = '${(bytesLength / 1024).toStringAsFixed(1)} KB';
-        } else {
-          sizeText = '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)} MB';
-        }
+      final bLength = result.bytes.length;
+      if (bLength < 1024 * 1024) {
+        sizeText = '${(bLength / 1024).toStringAsFixed(1)} KB';
+      } else {
+        sizeText = '${(bLength / (1024 * 1024)).toStringAsFixed(1)} MB';
       }
     } catch (_) {}
 
-    // Location detection - now generic as promised
-    const String location = 'Saved to selected folder';
-
     return Column(
       children: [
-        // Success Icon
+        // Success icon
         Container(
           width: 56,
           height: 56,
@@ -429,7 +423,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Your report is ready and has been saved to your device.',
+          'Your report is ready.',
           style: GoogleFonts.inter(
             fontSize: 13,
             color: cs.onSurfaceVariant,
@@ -438,7 +432,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.xl),
 
-        // File Info Card
+        // File info card
         Container(
           padding: const EdgeInsets.all(KuberSpacing.lg),
           decoration: BoxDecoration(
@@ -446,120 +440,73 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
             borderRadius: BorderRadius.circular(KuberRadius.md),
             border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
           ),
-          child: Column(
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      isPdf ? Icons.picture_as_pdf_outlined : Icons.description_outlined,
-                      size: 20,
-                      color: cs.primary,
-                    ),
-                  ),
-                  const SizedBox(width: KuberSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'FILE NAME',
-                          style: GoogleFonts.inter(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          fileName,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isPdf ? Icons.picture_as_pdf_outlined : Icons.description_outlined,
+                  size: 20,
+                  color: cs.primary,
+                ),
               ),
-              const SizedBox(height: KuberSpacing.lg),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'FILE SIZE',
-                          style: GoogleFonts.inter(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          sizeText,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                      ],
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      fileName,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'LOCATION',
-                          style: GoogleFonts.inter(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          location,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    const SizedBox(height: 2),
+                    Text(
+                      sizeText,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: KuberSpacing.xl),
 
-        // Actions
+        // Action buttons
         AppButton(
-          label: 'Open / Share File',
-          icon: Icons.share_outlined,
+          label: 'Open File',
+          icon: Icons.open_in_new_rounded,
           type: AppButtonType.primary,
+          fullWidth: true,
+          onPressed: _openFile,
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        AppButton(
+          label: _isSaving ? 'Saving…' : 'Save to Folder',
+          icon: Icons.save_alt_rounded,
+          type: AppButtonType.normal,
+          fullWidth: true,
+          onPressed: _isSaving ? null : _saveToFolder,
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        AppButton(
+          label: 'Share',
+          icon: Icons.share_outlined,
+          type: AppButtonType.normal,
           fullWidth: true,
           onPressed: _shareReport,
         ),
@@ -568,13 +515,37 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   }
 
 
+  Future<void> _openFile() async {
+    final result = _exportResult;
+    if (result == null) return;
+    final openResult = await OpenFile.open(result.tempFile.path);
+    if (openResult.type != ResultType.done && mounted) {
+      showKuberSnackBar(context, 'No app found to open this file type.');
+    }
+  }
+
+  Future<void> _saveToFolder() async {
+    final result = _exportResult;
+    if (result == null) return;
+    setState(() => _isSaving = true);
+    try {
+      final saved = await saveToFolder(result: result, format: _format);
+      if (!mounted) return;
+      if (saved) {
+        showKuberSnackBar(context, 'File saved successfully.');
+      }
+    } catch (_) {
+      if (mounted) showKuberSnackBar(context, 'Failed to save file.');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   Future<void> _shareReport() async {
     final result = _exportResult;
-    if (result == null || result.bytes == null) return;
+    if (result == null) return;
 
-    final fileName = result.file?.path.split('/').last ?? 
-                    'Kuber_Export_${DateTime.now().millisecondsSinceEpoch}.${widget.exportType == ExportType.transactions ? (_format == ExportFormat.csv ? "csv" : "pdf") : "pdf"}';
-    
+    final fileName = result.tempFile.path.split('/').last;
     final isPdf = fileName.toLowerCase().endsWith('.pdf');
     final mimeType = isPdf ? 'application/pdf' : 'text/csv';
 
@@ -583,7 +554,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ShareParams(
           files: [
             XFile.fromData(
-              result.bytes!,
+              result.bytes,
               name: fileName,
               mimeType: mimeType,
             ),
@@ -671,12 +642,6 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
       if (!mounted) return;
 
-      if (result == null) {
-        // User cancelled file selection
-        setState(() => _stage = _ExportStage.options);
-        return;
-      }
-
       setState(() {
         _exportResult = result;
         _stage = _ExportStage.complete;
@@ -684,7 +649,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Unable to save file. Please try again.';
+        _errorMessage = 'Unable to generate file. Please try again.';
         _stage = _ExportStage.error;
       });
     }
