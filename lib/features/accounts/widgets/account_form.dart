@@ -121,12 +121,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ? _last4Controller.text
           : null;
 
-    ref.read(accountListProvider.notifier).add(account);
-    if (widget.onSave != null) {
-      widget.onSave!();
-    } else {
-      Navigator.pop(context);
-    }
+    ref.read(accountListProvider.notifier).add(account).then((id) {
+      if (!_isEditing) {
+        ref.read(pendingAccountSelectionProvider.notifier).state = id;
+      }
+      if (widget.onSave != null) {
+        widget.onSave!();
+      } else if (mounted) {
+        Navigator.pop(context);
+      }
+    });
   }
 
   @override

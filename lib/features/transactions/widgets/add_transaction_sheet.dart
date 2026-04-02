@@ -33,6 +33,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   int? _selectedCategoryId;
   int? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
+  bool _shouldAutofocus = true;
 
   bool get _isEditing => widget.transaction != null;
 
@@ -67,6 +68,21 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     final categories = ref.watch(categoryListProvider);
     final accounts = ref.watch(accountListProvider);
 
+    // Listen for pending account selection from Add Account flow
+    ref.listen<int?>(pendingAccountSelectionProvider, (_, accId) {
+      if (accId != null) {
+        setState(() => _selectedAccountId = accId);
+        ref.read(pendingAccountSelectionProvider.notifier).state = null;
+      }
+    });
+
+    // After the first build, we stop auto-focussing to prevent focus jumps on rebuilds
+    if (_shouldAutofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _shouldAutofocus = false);
+      });
+    }
+
     return Padding(
       padding: EdgeInsets.only(
         left: KuberSpacing.lg,
@@ -100,7 +116,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             // 1. Name field
             TextField(
               controller: _nameController,
-              autofocus: !_isEditing,
+              autofocus: !_isEditing && _shouldAutofocus,
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Transaction Name',

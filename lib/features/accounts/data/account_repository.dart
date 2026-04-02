@@ -15,8 +15,8 @@ class AccountRepository extends BaseRepository<Account> {
     return isar.accounts.get(id);
   }
 
-  Future<void> save(Account a) async {
-    await isar.writeTxn(() => isar.accounts.put(a));
+  Future<Id> save(Account a) async {
+    return await isar.writeTxn(() => isar.accounts.put(a));
   }
 
   Future<void> delete(Id id) async {

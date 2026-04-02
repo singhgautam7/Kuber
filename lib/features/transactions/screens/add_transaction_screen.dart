@@ -59,6 +59,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   bool _suppressSuggestions = false;
   List<Tag> _selectedTags = [];
+  bool _shouldAutofocus = true;
 
   bool get _isEditing => widget.transaction != null;
 
@@ -163,6 +164,34 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     });
 
+    // Listen for pending account selection from Add Account flow
+    ref.listen<int?>(pendingAccountSelectionProvider, (_, accId) {
+      if (accId != null) {
+        setState(() {
+          if (_type == 'transfer') {
+            // If we're in transfer mode and we don't have a selection yet, 
+            // assign it to the first empty slot.
+            if (_selectedFromAccountId == null) {
+              _selectedFromAccountId = accId;
+            } else {
+              _selectedToAccountId ??= accId;
+            }
+          } else {
+            _selectedAccountId = accId;
+          }
+        });
+        ref.read(pendingAccountSelectionProvider.notifier).state = null;
+      }
+    }
+    );
+
+    // After the first build, we stop auto-focussing to prevent focus jumps on rebuilds
+    if (_shouldAutofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _shouldAutofocus = false);
+      });
+    }
+
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: AppBar(
@@ -234,7 +263,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       return TextField(
                         controller: controller,
                         focusNode: focusNode,
-                        autofocus: !_isEditing,
+                        autofocus: !_isEditing && _shouldAutofocus,
                         textCapitalization: TextCapitalization.sentences,
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
