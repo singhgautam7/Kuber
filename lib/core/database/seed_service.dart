@@ -30,7 +30,8 @@ class SeedService {
           ..initialBalance = 0,
         Account()
           ..name = 'Credit Card'
-          ..type = 'card'
+          ..type = 'credit'
+          ..isCreditCard = true
           ..icon = 'credit_card_outlined'
           ..colorValue = 0xFF9C27B0
           ..initialBalance = 0
