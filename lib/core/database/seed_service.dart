@@ -43,8 +43,6 @@ class SeedService {
         'FOOD': [
           _cat('Dining', 'restaurant', 0xFFFF5722, 'expense'),
           _cat('Fast Food', 'fastfood', 0xFFFFC107, 'expense'),
-          _cat('Groceries', 'shopping_basket', 0xFF4CAF50, 'expense'),
-          _cat('Coffee', 'local_cafe', 0xFF795548, 'expense'),
           _cat('Drinks', 'local_bar', 0xFF673AB7, 'expense'),
         ],
         'ENTERTAINMENT': [
@@ -65,21 +63,19 @@ class SeedService {
           _cat('Utilities', 'power', 0xFFFF5252, 'expense'),
           _cat('Internet', 'wifi', 0xFF448AFF, 'expense'),
           _cat('Maintenance', 'build', 0xFF757575, 'expense'),
+          _cat('Groceries', 'shopping_basket', 0xFF4CAF50, 'expense'),
         ],
         'BILLS': [
           _cat('Electricity', 'electrical_services', 0xFFFFC107, 'expense'),
           _cat('Mobile', 'phone_android', 0xFF536DFE, 'expense'),
-          _cat('Subscriptions', 'subscriptions', 0xFFE040FB, 'expense'),
         ],
         'HEALTH': [
           _cat('Medicines', 'medication', 0xFF18FFFF, 'expense'),
-          _cat('Doctor', 'medical_services', 0xFF00E676, 'expense'),
           _cat('Fitness', 'fitness_center', 0xFFFF4081, 'expense'),
         ],
         'SHOPPING': [
           _cat('Clothing', 'checkroom', 0xFFE91E63, 'expense'),
           _cat('Electronics', 'devices', 0xFF607D8B, 'expense'),
-          _cat('General', 'shopping_bag', 0xFF8D6E63, 'expense'),
         ],
         'PERSONAL': [
           _cat('Personal', 'person', 0xFF00BCD4, 'both'),

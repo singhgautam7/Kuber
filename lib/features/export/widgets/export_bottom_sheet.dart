@@ -518,7 +518,13 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   Future<void> _openFile() async {
     final result = _exportResult;
     if (result == null) return;
-    final openResult = await OpenFile.open(result.tempFile.path);
+    final fileName = result.tempFile.path.split('/').last;
+    // Explicitly pass MIME type — open_file defaults .csv → text/comma-separated-values
+    // (Android MimeTypeMap), but Google Sheets only accepts text/csv via ACTION_VIEW.
+    final mimeType = fileName.toLowerCase().endsWith('.csv')
+        ? 'text/csv'
+        : 'application/pdf';
+    final openResult = await OpenFile.open(result.tempFile.path, type: mimeType);
     if (openResult.type != ResultType.done && mounted) {
       showKuberSnackBar(context, 'No app found to open this file type.');
     }

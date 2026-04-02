@@ -359,7 +359,11 @@ Future<ExportResult> performExport({
 
   if (format == ExportFormat.csv) {
     final csvString = await compute(ExportService.exportTransactionsCsv, data as TransactionExportData);
-    bytes = Uint8List.fromList(utf8.encode(csvString));
+    // Prepend UTF-8 BOM (EF BB BF) — required by Google Sheets (and Excel) to
+    // correctly detect encoding when a file is opened directly via a content URI.
+    // Without it, Sheets reports the file as "corrupted".
+    const utf8Bom = [0xEF, 0xBB, 0xBF];
+    bytes = Uint8List.fromList([...utf8Bom, ...utf8.encode(csvString)]);
   } else {
     final fontRegularData = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
     final fontRegular = fontRegularData.buffer.asUint8List(
