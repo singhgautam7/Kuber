@@ -10,6 +10,7 @@ import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 
 const _accountIcons = [
   'account_balance',
@@ -97,7 +98,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   void _save() {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      showKuberSnackBar(context, 'Please enter an account name', isError: true);
+      return;
+    }
 
     final account = widget.account ?? Account();
     account
