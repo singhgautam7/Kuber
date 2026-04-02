@@ -18,6 +18,7 @@ import '../../categories/providers/category_provider.dart';
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/account_picker_sheet.dart';
@@ -58,21 +59,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   bool _suppressSuggestions = false;
   List<Tag> _selectedTags = [];
+  bool _shouldAutofocus = true;
 
   bool get _isEditing => widget.transaction != null;
-
-  bool get _isValid =>
-      _type == 'transfer' ? _isTransferValid : (
-      _amountController.text.trim().isNotEmpty &&
-      (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
-      _selectedCategoryId != null &&
-      _selectedAccountId != null);
-
-  bool get _isTransferValid =>
-      (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
-      _selectedFromAccountId != null &&
-      _selectedToAccountId != null &&
-      _selectedFromAccountId != _selectedToAccountId;
 
   @override
   void initState() {
@@ -96,11 +85,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     } else {
       _type = widget.initialType ?? 'expense';
     }
-    _nameController.addListener(_onFieldChanged);
-    _amountController.addListener(_onFieldChanged);
   }
-
-  void _onFieldChanged() => setState(() {});
 
   void _onTypeChanged(String newType) {
     setState(() {
@@ -130,8 +115,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   @override
   void dispose() {
-    _nameController.removeListener(_onFieldChanged);
-    _amountController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _amountController.dispose();
     _notesController.dispose();
@@ -180,6 +163,34 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ref.read(pendingCategorySelectionProvider.notifier).state = null;
       }
     });
+
+    // Listen for pending account selection from Add Account flow
+    ref.listen<int?>(pendingAccountSelectionProvider, (_, accId) {
+      if (accId != null) {
+        setState(() {
+          if (_type == 'transfer') {
+            // If we're in transfer mode and we don't have a selection yet, 
+            // assign it to the first empty slot.
+            if (_selectedFromAccountId == null) {
+              _selectedFromAccountId = accId;
+            } else {
+              _selectedToAccountId ??= accId;
+            }
+          } else {
+            _selectedAccountId = accId;
+          }
+        });
+        ref.read(pendingAccountSelectionProvider.notifier).state = null;
+      }
+    }
+    );
+
+    // After the first build, we stop auto-focussing to prevent focus jumps on rebuilds
+    if (_shouldAutofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _shouldAutofocus = false);
+      });
+    }
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -252,7 +263,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       return TextField(
                         controller: controller,
                         focusNode: focusNode,
-                        autofocus: !_isEditing,
+                        autofocus: !_isEditing && _shouldAutofocus,
+                        textCapitalization: TextCapitalization.sentences,
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
@@ -773,27 +785,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 top: BorderSide(color: cs.outline),
               ),
             ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: FilledButton(
-                onPressed: _isValid ? _save : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: _typeColor,
-                  disabledBackgroundColor:
-                      cs.surfaceContainerHigh,
-                  disabledForegroundColor: cs.onSurfaceVariant,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  textStyle: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                child: Text(_isEditing
-                    ? (_type == 'transfer' ? 'Update Transfer' : 'Update Transaction')
-                    : (_type == 'transfer' ? 'Save Transfer' : 'Save Transaction')),
-              ),
+            child: AppButton(
+              label: _isEditing
+                  ? (_type == 'expense'
+                      ? 'Update Expense'
+                      : _type == 'income'
+                          ? 'Update Income'
+                          : 'Update Transfer')
+                  : (_type == 'expense'
+                      ? 'Save Expense'
+                      : _type == 'income'
+                          ? 'Save Income'
+                          : 'Save Transfer'),
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: _save,
             ),
           ),
         ],
@@ -964,8 +970,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
-    if (amount == null || amount <= 0) return;
-    if (_selectedCategoryId == null || _selectedAccountId == null) return;
+
+    if (name.isEmpty) {
+      showKuberSnackBar(context, 'Please enter a transaction name', isError: true);
+      return;
+    }
+    if (amount == null || amount <= 0) {
+      showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
+      return;
+    }
+    if (_selectedCategoryId == null) {
+      showKuberSnackBar(context, 'Please select a category', isError: true);
+      return;
+    }
+    if (_selectedAccountId == null) {
+      showKuberSnackBar(context, 'Please select an account', isError: true);
+      return;
+    }
 
     final t = _isEditing ? widget.transaction! : Transaction();
     t.name = name;
@@ -1012,9 +1033,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _saveTransfer() async {
     final amount = double.tryParse(_amountController.text.trim());
-    if (amount == null || amount <= 0) return;
-    if (_selectedFromAccountId == null || _selectedToAccountId == null) return;
-    if (_selectedFromAccountId == _selectedToAccountId) return;
+    if (amount == null || amount <= 0) {
+      showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
+      return;
+    }
+    if (_selectedFromAccountId == null) {
+      showKuberSnackBar(context, 'Please select a source account', isError: true);
+      return;
+    }
+    if (_selectedToAccountId == null) {
+      showKuberSnackBar(context, 'Please select a destination account', isError: true);
+      return;
+    }
+    if (_selectedFromAccountId == _selectedToAccountId) {
+      showKuberSnackBar(context, 'Source and destination accounts must be different', isError: true);
+      return;
+    }
 
     final notes = _notesController.text.trim().isEmpty
         ? null

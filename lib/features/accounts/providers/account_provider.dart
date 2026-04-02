@@ -12,6 +12,9 @@ import '../data/account_repository.dart';
 /// Set to true from AppScaffold to trigger the account form sheet on the Accounts tab.
 final triggerAddAccountProvider = StateProvider<bool>((ref) => false);
 
+/// Set this provider when a new account is created to auto-select it in picking flows.
+final pendingAccountSelectionProvider = StateProvider<int?>((ref) => null);
+
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository(ref.watch(isarProvider));
 });
@@ -27,9 +30,10 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
     return ref.watch(accountRepositoryProvider).getAll();
   }
 
-  Future<void> add(Account a) async {
-    await ref.read(accountRepositoryProvider).save(a);
+  Future<int> add(Account a) async {
+    final id = await ref.read(accountRepositoryProvider).save(a);
     ref.invalidateSelf();
+    return id;
   }
 
   Future<void> delete(int id) async {

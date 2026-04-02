@@ -34,11 +34,13 @@ class ExportService {
   static String exportTransactionsCsv(TransactionExportData data) {
     final buffer = StringBuffer();
 
-    // Headers as requested by user
-    buffer.writeln('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes');
+    // RFC 4180 requires \r\n line endings. StringBuffer.writeln() only gives \n,
+    // which some Android CSV viewers don't split on correctly, causing rows to appear
+    // merged or missing. Using explicit \r\n throughout.
+    buffer.write('Date,Name,Type,Category,Account,Amount (${data.currencyCode}),Notes\r\n');
 
     String escape(String value) {
-      if (value.contains(',') || value.contains('"')) {
+      if (value.contains(',') || value.contains('"') || value.contains('\r') || value.contains('\n')) {
         return '"${value.replaceAll('"', '""')}"';
       }
       return value;
@@ -61,10 +63,10 @@ class ExportService {
           ? '${row.fromAccountName} \u2192 ${row.toAccountName}'
           : row.name;
 
-      // Standardize amount for CSV: usually negative for expenses
+      // Standardize amount for CSV: positive for income, negative for expense
       final signedAmount = row.type == 'expense' ? -row.amount : row.amount;
 
-      buffer.writeln([
+      buffer.write([
         DateFormat('yyyy-MM-dd').format(row.date),
         escape(displayName),
         typeLabel,
@@ -73,6 +75,7 @@ class ExportService {
         signedAmount.toStringAsFixed(2),
         escape(row.notes ?? ''),
       ].join(','));
+      buffer.write('\r\n');
     }
 
     return buffer.toString();

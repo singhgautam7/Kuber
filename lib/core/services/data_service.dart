@@ -11,8 +11,8 @@ import '../../features/categories/data/category_group.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
-import 'mock_data_generator.dart';
-import '../database/isar_service.dart';
+import 'mock_data_service.dart';
+import '../database/seed_service.dart';
 import '../utils/color_palette.dart';
 
 
@@ -369,13 +369,13 @@ class DataService {
 
   /// Generates mock data.
   Future<void> generateMockData() async {
-    await MockDataGenerator(isar).generate();
+    await MockDataService.generate(isar);
   }
 
   /// Clears all data and re-seeds defaults.
   Future<void> clearAllData() async {
     await isar.writeTxn(() => isar.clear());
-    await IsarService.seedIfNeeded(isar);
+    await SeedService().seedInitialData(isar);
   }
 
 

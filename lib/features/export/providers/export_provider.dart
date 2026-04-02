@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -23,10 +24,11 @@ import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
 class ExportResult {
-  final File? file;
-  final Uint8List? bytes;
+  /// The temp file written to app cache — has a real POSIX path, can be opened.
+  final File tempFile;
+  final Uint8List bytes;
 
-  ExportResult({this.file, this.bytes});
+  ExportResult({required this.tempFile, required this.bytes});
 }
 
 // ---------------------------------------------------------------------------
@@ -333,13 +335,16 @@ String _analyticsFilterLabel(AnalyticsFilter filter) {
 // Perform export (compute + file save)
 // ---------------------------------------------------------------------------
 
-Future<ExportResult?> performExport({
+/// Generate the export bytes and save them to the app's temp cache directory.
+/// Returns an [ExportResult] with a real POSIX path — no permissions needed.
+/// The temp file is auto-cleared by Android when storage is low, and we also
+/// delete it explicitly when the export bottom sheet is dismissed.
+Future<ExportResult> performExport({
   required ExportType type,
   required ExportFormat format,
   required dynamic data, // TransactionExportData or AnalyticsExportData
 }) async {
   Uint8List bytes;
-  String fileName;
 
   // Pick a reference date for file naming
   DateTime refDate;
@@ -350,14 +355,16 @@ Future<ExportResult?> performExport({
     refDate = DateTime.now();
   }
 
-  fileName = ExportService.buildFileName(type, format, refDate);
+  final fileName = ExportService.buildFileName(type, format, refDate);
 
   if (format == ExportFormat.csv) {
-    // Only history transactions support CSV now
     final csvString = await compute(ExportService.exportTransactionsCsv, data as TransactionExportData);
-    bytes = Uint8List.fromList(utf8.encode(csvString));
+    // Prepend UTF-8 BOM (EF BB BF) — required by Google Sheets (and Excel) to
+    // correctly detect encoding when a file is opened directly via a content URI.
+    // Without it, Sheets reports the file as "corrupted".
+    const utf8Bom = [0xEF, 0xBB, 0xBF];
+    bytes = Uint8List.fromList([...utf8Bom, ...utf8.encode(csvString)]);
   } else {
-    // Load font assets with proper slicing for isolate safety
     final fontRegularData = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
     final fontRegular = fontRegularData.buffer.asUint8List(
         fontRegularData.offsetInBytes, fontRegularData.lengthInBytes);
@@ -366,7 +373,6 @@ Future<ExportResult?> performExport({
     final fontBold = fontBoldData.buffer.asByteData().buffer.asUint8List(
         fontBoldData.offsetInBytes, fontBoldData.lengthInBytes);
 
-    // PDF generation is now also handled in compute() to ensure smooth UI
     if (type == ExportType.transactions) {
       bytes = await compute(
         _exportTransactionsPdfWrapper,
@@ -380,21 +386,41 @@ Future<ExportResult?> performExport({
     }
   }
 
-  // Use system file picker to save file (SAF - no permissions needed)
-  // On mobile, we MUST pass bytes to saveFile for it to handle the SAF write internally
-  final filePath = await FilePicker.platform.saveFile(
-    dialogTitle: 'Save export file',
+  // Write to app cache — real POSIX path, zero permissions needed.
+  // Android clears this automatically under storage pressure.
+  final cacheDir = await getTemporaryDirectory();
+  final tempFile = File('${cacheDir.path}/$fileName');
+  await tempFile.writeAsBytes(bytes, flush: true);
+
+  return ExportResult(tempFile: tempFile, bytes: bytes);
+}
+
+/// Opens the system file-picker (SAF) so the user can choose where to save
+/// a permanent copy. Does NOT return a usable path (SAF limitation on Android).
+/// Returns true if the user confirmed, false if they cancelled.
+Future<bool> saveToFolder({
+  required ExportResult result,
+  required ExportFormat format,
+}) async {
+  final fileName = result.tempFile.path.split('/').last;
+  final savedPath = await FilePicker.platform.saveFile(
+    dialogTitle: 'Save a copy',
     fileName: fileName,
-    bytes: bytes,
+    bytes: result.bytes,
     type: format == ExportFormat.csv ? FileType.custom : FileType.any,
     allowedExtensions: format == ExportFormat.csv ? ['csv'] : ['pdf'],
   );
+  return savedPath != null;
+}
 
-  if (filePath == null) {
-    return null; // User cancelled
-  }
-
-  return ExportResult(file: File(filePath), bytes: bytes);
+/// Deletes the temp export file. Called when the export sheet is dismissed.
+void deleteTempExportFile(ExportResult? result) {
+  try {
+    final file = result?.tempFile;
+    if (file != null && file.existsSync()) {
+      file.deleteSync();
+    }
+  } catch (_) {}
 }
 
 // ---------------------------------------------------------------------------

@@ -11,6 +11,7 @@ import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'suggestion_list.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 
 class AddTransactionSheet extends ConsumerStatefulWidget {
@@ -32,6 +33,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   int? _selectedCategoryId;
   int? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
+  bool _shouldAutofocus = true;
 
   bool get _isEditing => widget.transaction != null;
 
@@ -66,6 +68,21 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     final categories = ref.watch(categoryListProvider);
     final accounts = ref.watch(accountListProvider);
 
+    // Listen for pending account selection from Add Account flow
+    ref.listen<int?>(pendingAccountSelectionProvider, (_, accId) {
+      if (accId != null) {
+        setState(() => _selectedAccountId = accId);
+        ref.read(pendingAccountSelectionProvider.notifier).state = null;
+      }
+    });
+
+    // After the first build, we stop auto-focussing to prevent focus jumps on rebuilds
+    if (_shouldAutofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _shouldAutofocus = false);
+      });
+    }
+
     return Padding(
       padding: EdgeInsets.only(
         left: KuberSpacing.lg,
@@ -99,7 +116,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             // 1. Name field
             TextField(
               controller: _nameController,
-              autofocus: !_isEditing,
+              autofocus: !_isEditing && _shouldAutofocus,
+              textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Transaction Name',
                 border: OutlineInputBorder(),
@@ -236,16 +254,27 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: AppButton(
+                    label: 'Cancel',
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
                   ),
                 ),
                 const SizedBox(width: KuberSpacing.md),
                 Expanded(
-                  child: FilledButton(
+                  child: AppButton(
+                    label: _isEditing
+                        ? (_type == 'expense'
+                            ? 'Update Expense'
+                            : _type == 'income'
+                                ? 'Update Income'
+                                : 'Update Transfer')
+                        : (_type == 'expense'
+                            ? 'Save Expense'
+                            : _type == 'income'
+                                ? 'Save Income'
+                                : 'Save Transfer'),
+                    type: AppButtonType.primary,
                     onPressed: _save,
-                    child: const Text('Save'),
                   ),
                 ),
               ],
@@ -273,12 +302,21 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   void _save() {
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
+
+    if (name.isEmpty) {
+      showKuberSnackBar(context, 'Please enter a transaction name', isError: true);
+      return;
+    }
     if (amount == null || amount <= 0) {
       showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
       return;
     }
-    if (_selectedCategoryId == null || _selectedAccountId == null) {
-      showKuberSnackBar(context, 'Please select a category and account', isError: true);
+    if (_selectedCategoryId == null) {
+      showKuberSnackBar(context, 'Please select a category', isError: true);
+      return;
+    }
+    if (_selectedAccountId == null) {
+      showKuberSnackBar(context, 'Please select an account', isError: true);
       return;
     }
 

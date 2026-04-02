@@ -29,6 +29,16 @@ class RecurringProcessor {
           // Check if rule has expired after incrementing execution count
           if (RecurringRepository.isExpired(rule)) break;
 
+          final combinedDate = DateTime(
+            dueDate.year,
+            dueDate.month,
+            dueDate.day,
+            now.hour,
+            now.minute,
+            now.second,
+            now.millisecond,
+          );
+
           final t = Transaction()
             ..name = rule.name
             ..nameLower = rule.name.toLowerCase()
@@ -39,7 +49,7 @@ class RecurringProcessor {
             ..notes = rule.notes
             ..recurringRuleId = rule.id
             ..isRecurring = true
-            ..createdAt = dueDate
+            ..createdAt = combinedDate
             ..updatedAt = DateTime.now();
 
           await isar.transactions.put(t);

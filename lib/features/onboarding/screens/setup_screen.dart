@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../core/database/isar_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/prefs_keys.dart';
@@ -35,9 +33,6 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
     await notifier.setUserName(_nameController.text.trim());
     await notifier.setCurrency(_selectedCurrencyCode);
     await notifier.setThemeMode(_selectedTheme);
-
-    final isar = ref.read(isarProvider);
-    await IsarService.seedIfNeeded(isar);
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PrefsKeys.onboarded, true);

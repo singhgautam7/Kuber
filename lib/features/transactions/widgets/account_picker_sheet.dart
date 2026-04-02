@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../shared/widgets/add_new_button.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../accounts/widgets/account_form.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 
 class AccountPickerSheet extends ConsumerWidget {
@@ -146,8 +146,34 @@ class AccountPickerSheet extends ConsumerWidget {
         AddNewButton(
           label: 'Add new account',
           onTap: () {
-            Navigator.pop(context);
-            GoRouter.of(context).push('/more/accounts');
+            Navigator.pop(context); // Close picker
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(KuberRadius.lg),
+                  ),
+                ),
+                padding: EdgeInsets.fromLTRB(
+                  KuberSpacing.lg,
+                  KuberSpacing.lg,
+                  KuberSpacing.lg,
+                  MediaQuery.of(context).viewInsets.bottom + KuberSpacing.xl,
+                ),
+                child: const SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AccountForm(),
+                    ],
+                  ),
+                ),
+              ),
+            );
           },
         ),
       ],

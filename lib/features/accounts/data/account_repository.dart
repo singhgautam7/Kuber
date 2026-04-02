@@ -15,8 +15,8 @@ class AccountRepository extends BaseRepository<Account> {
     return isar.accounts.get(id);
   }
 
-  Future<void> save(Account a) async {
-    await isar.writeTxn(() => isar.accounts.put(a));
+  Future<Id> save(Account a) async {
+    return await isar.writeTxn(() => isar.accounts.put(a));
   }
 
   Future<void> delete(Id id) async {
@@ -30,32 +30,5 @@ class AccountRepository extends BaseRepository<Account> {
         .accountIdEqualTo(accountId.toString())
         .count();
     return count > 0;
-  }
-
-  Future<void> seedDefaults() async {
-    final count = await isar.accounts.count();
-    if (count > 0) return;
-
-    final defaults = [
-      Account()
-        ..name = 'Cash'
-        ..type = 'bank'
-        ..icon = 'payments'
-        ..colorValue = 0xFF66BB6A,
-      Account()
-        ..name = 'Bank Account'
-        ..type = 'bank'
-        ..icon = 'account_balance'
-        ..colorValue = 0xFF5C6BC0,
-      Account()
-        ..name = 'Credit Card'
-        ..type = 'bank'
-        ..isCreditCard = true
-        ..icon = 'credit_card'
-        ..colorValue = 0xFFAB47BC
-        ..creditLimit = 0,
-    ];
-
-    await isar.writeTxn(() => isar.accounts.putAll(defaults));
   }
 }

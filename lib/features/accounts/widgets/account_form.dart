@@ -10,6 +10,7 @@ import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 
 const _accountIcons = [
   'account_balance',
@@ -57,6 +58,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   bool get _isEditing => widget.account != null;
   bool get _isCreditCard => _selectedType == 'credit';
+  bool get _isCash => _selectedType == 'cash';
 
   @override
   void initState() {
@@ -73,8 +75,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     );
     _last4Controller = TextEditingController(text: a?.last4Digits ?? '');
     _selectedType = a?.type ?? 'bank';
-    // Normalize old 'card'/'upi'/'cash' types for editing
-    if (_selectedType == 'card' || _selectedType == 'upi' || _selectedType == 'cash') {
+    // Normalize old 'card' types for editing (keep 'cash' and 'bank')
+    if (_selectedType == 'card') {
       _selectedType = 'bank';
     }
     // If editing a credit card, show 'credit' type
@@ -96,7 +98,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   void _save() {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty) {
+      showKuberSnackBar(context, 'Please enter an account name', isError: true);
+      return;
+    }
 
     final account = widget.account ?? Account();
     account
@@ -116,12 +121,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ? _last4Controller.text
           : null;
 
-    ref.read(accountListProvider.notifier).add(account);
-    if (widget.onSave != null) {
-      widget.onSave!();
-    } else {
-      Navigator.pop(context);
-    }
+    ref.read(accountListProvider.notifier).add(account).then((id) {
+      if (!_isEditing) {
+        ref.read(pendingAccountSelectionProvider.notifier).state = id;
+      }
+      if (widget.onSave != null) {
+        widget.onSave!();
+      } else if (mounted) {
+        Navigator.pop(context);
+      }
+    });
   }
 
   @override
@@ -137,7 +146,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           controller: _nameController,
           style: GoogleFonts.inter(color: cs.onSurface),
           decoration: InputDecoration(
-            labelText: _selectedType == 'credit' ? 'Credit Card Name' : 'Cash or Bank Name',
+            labelText: _selectedType == 'credit'
+                ? 'Credit Card Name'
+                : _selectedType == 'cash'
+                    ? 'Cash Name'
+                    : 'Bank Name',
             labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
           ),
         ),
@@ -240,7 +253,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         // Type selector
         Row(
           children: [
-            _buildTypeChip('bank', Icons.account_balance_rounded, 'Bank / Cash'),
+            _buildTypeChip('cash', Icons.payments_rounded, 'Cash'),
+            const SizedBox(width: 8),
+            _buildTypeChip('bank', Icons.account_balance_rounded, 'Bank'),
             const SizedBox(width: 8),
             _buildTypeChip('credit', Icons.credit_card_rounded, 'Credit Card'),
           ],
@@ -248,7 +263,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         const SizedBox(height: 16),
 
         // Last 4 digits
-        if (_selectedType == 'bank' || _selectedType == 'credit')
+        if (!_isCash)
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: TextField(
@@ -258,7 +273,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: GoogleFonts.inter(color: cs.onSurface),
               decoration: InputDecoration(
-                labelText: 'Last 4 digits (Optional)',
+                labelText: 'Card\'s Last 4 digits (Optional)',
                 helperText:
                     'Not shared anywhere',
                 helperMaxLines: 2,
