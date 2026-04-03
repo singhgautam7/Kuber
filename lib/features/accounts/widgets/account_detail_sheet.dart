@@ -4,15 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/date_formatter.dart';
-import '../../../shared/widgets/category_icon.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import 'edit_balance_sheet.dart';
+
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -34,73 +34,13 @@ class AccountDetailSheet extends ConsumerWidget {
     final latestTxnAsync =
         ref.watch(accountLatestTransactionProvider(account.id));
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-      ),
+    return KuberBottomSheet(
+      title: account.name,
+      subtitle: _accountTypeLabel(account),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // Header
-          Row(
-            children: [
-              CategoryIcon.square(
-                icon: resolveAccountIcon(account),
-                rawColor: resolveAccountColor(account),
-                size: 56,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _accountTypeLabel(account),
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded),
-                style: IconButton.styleFrom(
-                  backgroundColor: cs.surfaceContainerHigh,
-                  padding: const EdgeInsets.all(8),
-                ),
-              ),
-            ],
-          ),
+          // Primary Value Section
 
           const SizedBox(height: 32),
 

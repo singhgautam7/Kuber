@@ -8,6 +8,7 @@ import '../data/tag.dart';
 import '../providers/tag_providers.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 
 class AddEditTagBottomSheet extends ConsumerStatefulWidget {
   final Tag? tag;
@@ -67,7 +68,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + KuberSpacing.xl,
@@ -103,20 +104,11 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
                   color: cs.onSurface,
                 ),
               ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    size: 18,
-                    color: cs.onSurfaceVariant,
-                  ),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded),
+                style: IconButton.styleFrom(
+                  backgroundColor: cs.surfaceContainerHigh,
                 ),
               ),
             ],
@@ -127,10 +119,6 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
             autofocus: true,
             onChanged: (val) {
               if (_errorText != null) setState(() => _errorText = null);
-              final normalized = Tag.normalize(val);
-              if (normalized != val.toLowerCase().replaceAll(' ', '-')) {
-                // Potential feedback if needed
-              }
             },
             style: GoogleFonts.inter(
               fontSize: 16,
@@ -197,10 +185,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => AddEditTagBottomSheet(tag: tag),
     );
   }
@@ -215,29 +200,12 @@ class ViewTagBottomSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final dateStr = DateFormat('MMM dd, yyyy').format(tag.createdAt);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
-      padding: const EdgeInsets.all(KuberSpacing.xl),
+    return KuberBottomSheet(
+      title: tag.name,
+      subtitle: "TAG DETAIL",
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-
           Row(
             children: [
               Text(
@@ -273,22 +241,6 @@ class ViewTagBottomSheet extends ConsumerWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    size: 18,
-                    color: cs.onSurfaceVariant,
-                  ),
                 ),
               ),
             ],
@@ -342,6 +294,61 @@ class ViewTagBottomSheet extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: "Delete Tag",
+            icon: Icons.delete_outline_rounded,
+            type: AppButtonType.danger,
+            fullWidth: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDelete(context, ref);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.sm),
+          side: BorderSide(color: cs.outline, width: 1),
+        ),
+        title: Text(
+          'Delete tag?',
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        content: Text(
+          'The tag "#${tag.name}" will be permanently deleted.',
+          style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: GoogleFonts.inter()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.error,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.sm),
+              ),
+            ),
+            onPressed: () {
+              ref.read(tagRepositoryProvider).deleteTag(tag.id);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Delete'),
           ),
         ],
       ),

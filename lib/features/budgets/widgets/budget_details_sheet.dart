@@ -11,14 +11,15 @@ import '../providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import 'budget_history_sheet.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final int budgetId;
   final Category category;
 
   const BudgetDetailsSheet({
-    super.key, 
-    required this.budgetId, 
+    super.key,
+    required this.budgetId,
     required this.category,
   });
 
@@ -30,330 +31,280 @@ class BudgetDetailsSheet extends ConsumerWidget {
     return budgetAsync.when(
       data: (budget) {
         if (budget == null) return const SizedBox.shrink();
-        
+
         final progressAsync = ref.watch(budgetProgressProvider(budget));
         final alerts = budget.alerts;
 
-        return Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-          ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(KuberSpacing.xl),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.xl),
-
-              // Header row: icon + name + close
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Color(category.colorValue).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(Icons.shopping_bag_outlined, color: Color(category.colorValue), size: 24),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          category.name,
-                          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700, color: cs.onSurface),
-                        ),
-                        Text(
-                          'MONTHLY BUDGET PLAN',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        size: 18,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              progressAsync.when(
-                data: (p) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return KuberBottomSheet(
+          title: category.name,
+          subtitle: 'MONTHLY BUDGET PLAN',
+          child: progressAsync.when(
+            data: (p) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'CURRENT SPENDING',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurfaceVariant,
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: ref.watch(formatterProvider).formatCurrency(p.spent),
-                                      style: GoogleFonts.inter(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                        color: cs.onSurface,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 16,
-                                        color: cs.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'CURRENT SPENDING',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurfaceVariant,
+                              letterSpacing: 1.0,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                'UTILIZATION',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurfaceVariant,
-                                  letterSpacing: 1.0,
+                          const SizedBox(height: 4),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: ref
+                                      .watch(formatterProvider)
+                                      .formatCurrency(p.spent),
+                                  style: GoogleFonts.inter(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w700,
+                                    color: cs.onSurface,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                ref.watch(formatterProvider).formatPercentage(p.percentage),
-                                style: GoogleFonts.inter(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  color: _getUtilizationColor(p.percentage, cs),
+                                TextSpan(
+                                  text:
+                                      ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    color: cs.onSurfaceVariant,
+                                  ),
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                              ],
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: (p.percentage / 100).clamp(0.0, 1.0),
-                        minHeight: 12,
-                        backgroundColor: cs.outline.withValues(alpha: 0.1),
-                        color: cs.primary,
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(ref.watch(formatterProvider).formatCurrency(0), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
-                        Text(ref.watch(formatterProvider).formatCompactCurrency(p.limit), style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant)),
-                      ],
-                    ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'BUDGET DETAILS',
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.0,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'UTILIZATION',
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurfaceVariant,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            ref
+                                .watch(formatterProvider)
+                                .formatPercentage(p.percentage),
+                            style: GoogleFonts.inter(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: _getUtilizationColor(p.percentage, cs),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(child: _DetailCell(
-                          label: 'CREATED ON',
-                          value: DateFormat('MMM d, yyyy').format(budget.createdAt),
-                        )),
-                        const SizedBox(width: KuberSpacing.sm),
-                        Expanded(child: _DetailCell(
-                          label: budget.isRecurring ? 'RENEWS ON' : 'EXPIRES ON',
-                          value: DateFormat('MMM d, yyyy').format(p.endDate),
-                        )),
-                      ],
-                    ),
-                    const SizedBox(height: KuberSpacing.sm),
-                    Row(
-                      children: [
-                        Expanded(child: _DetailCell(
-                          label: 'STARTED ON',
-                          value: DateFormat('MMM d, yyyy').format(budget.startDate),
-                        )),
-                        const SizedBox(width: KuberSpacing.sm),
-                        Expanded(child: _DetailCell(
-                          label: 'STATUS',
-                          value: budget.isActive ? 'Active' : 'Paused',
-                        )),
-                      ],
                     ),
                   ],
                 ),
-                loading: () => const LinearProgressIndicator(),
-                error: (err, _) => Text('Error: $err'),
-              ),
-              const SizedBox(height: 32),
-              Text(
-                'ACTIVE ALERTS',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (alerts.isEmpty)
-                Text('No alerts set', style: GoogleFonts.inter(color: cs.onSurfaceVariant))
-              else
-                Column(
-                  children: alerts.map((a) => _AlertRow(
-                    alert: a, 
-                    currentSpent: progressAsync.valueOrNull?.spent ?? 0,
-                    budgetAmount: budget.amount,
-                  )).toList(),
-                ),
-              const SizedBox(height: 32),
-              Text(
-                'BUDGET CONTROLS',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1.0,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Edit',
-                      icon: Icons.edit_outlined,
-                      type: AppButtonType.normal,
-                      onPressed: () {
-                        context.pop();
-                        context.push('/budgets/edit', extra: budget);
-                      },
-                    ),
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: LinearProgressIndicator(
+                    value: (p.percentage / 100).clamp(0.0, 1.0),
+                    minHeight: 12,
+                    backgroundColor: cs.outline.withValues(alpha: 0.1),
+                    color: cs.primary,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppButton(
-                      label: budget.isActive ? 'Pause' : 'Resume',
-                      icon: budget.isActive ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                      type: AppButtonType.normal,
-                      onPressed: () {
-                        ref.read(budgetListProvider.notifier).toggleActive(budget.id, !budget.isActive);
-                        Navigator.of(context, rootNavigator: true).pop();
-                      },
-                    ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(ref.watch(formatterProvider).formatCurrency(0),
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: cs.onSurfaceVariant)),
+                    Text(
+                        ref
+                            .watch(formatterProvider)
+                            .formatCompactCurrency(p.limit),
+                        style: GoogleFonts.inter(
+                            fontSize: 12, color: cs.onSurfaceVariant)),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'BUDGET DETAILS',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 1.0,
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'History',
-                      icon: Icons.history_rounded,
-                      type: AppButtonType.primary,
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          useRootNavigator: true,
-                          backgroundColor: cs.surfaceContainer,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(KuberRadius.lg),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                        child: _DetailCell(
+                      label: 'CREATED ON',
+                      value:
+                          DateFormat('MMM d, yyyy').format(budget.createdAt),
+                    )),
+                    const SizedBox(width: KuberSpacing.sm),
+                    Expanded(
+                        child: _DetailCell(
+                      label: budget.isRecurring ? 'RENEWS ON' : 'EXPIRES ON',
+                      value: DateFormat('MMM d, yyyy').format(p.endDate),
+                    )),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                        child: _DetailCell(
+                      label: 'STARTED ON',
+                      value: DateFormat('MMM d, yyyy').format(budget.startDate),
+                    )),
+                    const SizedBox(width: KuberSpacing.sm),
+                    Expanded(
+                        child: _DetailCell(
+                      label: 'STATUS',
+                      value: budget.isActive ? 'Active' : 'Paused',
+                    )),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'ACTIVE ALERTS',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (alerts.isEmpty)
+                  Text('No alerts set',
+                      style: GoogleFonts.inter(color: cs.onSurfaceVariant))
+                else
+                  Column(
+                    children: alerts
+                        .map((a) => _AlertRow(
+                              alert: a,
+                              currentSpent:
+                                  progressAsync.valueOrNull?.spent ?? 0,
+                              budgetAmount: budget.amount,
+                            ))
+                        .toList(),
+                  ),
+                const SizedBox(height: 32),
+                Text(
+                  'BUDGET CONTROLS',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        label: 'Edit',
+                        icon: Icons.edit_outlined,
+                        type: AppButtonType.normal,
+                        onPressed: () {
+                          context.pop();
+                          context.push('/budgets/edit', extra: budget);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppButton(
+                        label: budget.isActive ? 'Pause' : 'Resume',
+                        icon: budget.isActive
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        type: AppButtonType.normal,
+                        onPressed: () {
+                          ref
+                              .read(budgetListProvider.notifier)
+                              .toggleActive(budget.id, !budget.isActive);
+                          Navigator.of(context, rootNavigator: true).pop();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        label: 'History',
+                        icon: Icons.history_rounded,
+                        type: AppButtonType.primary,
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            useRootNavigator: true,
+                            backgroundColor: cs.surfaceContainer,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(KuberRadius.lg),
+                              ),
                             ),
-                          ),
-                          builder: (_) => BudgetHistorySheet(
-                            budget: budget,
-                            category: category,
-                          ),
-                        );
-                      },
+                            builder: (_) => BudgetHistorySheet(
+                              budget: budget,
+                              category: category,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppButton(
-                      label: 'Delete',
-                      icon: Icons.delete_outline_rounded,
-                      type: AppButtonType.danger,
-                      onPressed: () => _confirmDeleteBudget(context, ref, budget.id),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppButton(
+                        label: 'Delete',
+                        icon: Icons.delete_outline_rounded,
+                        type: AppButtonType.danger,
+                        onPressed: () => _confirmDeleteBudget(
+                            context, ref, budget.id),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+            loading: () => const LinearProgressIndicator(),
+            error: (err, _) => Text('Error: $err'),
           ),
-        ),
-      ),
-    );
-
+        );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, _) => Center(child: Text('Error loading budget details: $err')),
+      error: (err, _) =>
+          Center(child: Text('Error loading budget details: $err')),
     );
   }
 
@@ -368,15 +319,14 @@ class BudgetDetailsSheet extends ConsumerWidget {
           side: BorderSide(color: cs.outline, width: 1),
         ),
         title: Text('Delete budget?',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          )),
-        content: Text(
-          'The budget for "${category.name}" will be permanently deleted.',
-          style: GoogleFonts.inter(
-            color: cs.onSurfaceVariant,
-          )),
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            )),
+        content: Text('The budget for "${category.name}" will be permanently deleted.',
+            style: GoogleFonts.inter(
+              color: cs.onSurfaceVariant,
+            )),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -391,8 +341,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
             ),
             onPressed: () {
               ref.read(budgetListProvider.notifier).delete(id);
-              Navigator.pop(ctx);   // close dialog
-              context.pop();        // close sheet
+              Navigator.pop(ctx); // close dialog
+              context.pop(); // close sheet
             },
             child: const Text('Delete'),
           ),
@@ -414,7 +364,7 @@ class _AlertRow extends ConsumerWidget {
   final double currentSpent;
   final double budgetAmount;
   const _AlertRow({
-    required this.alert, 
+    required this.alert,
     required this.currentSpent,
     required this.budgetAmount,
   });
@@ -438,9 +388,8 @@ class _AlertRow extends ConsumerWidget {
     final notificationIcon = alert.enableNotification
         ? Icons.notifications_active_outlined
         : Icons.notifications_off_outlined;
-    final notificationColor = alert.enableNotification
-        ? cs.primary
-        : cs.onSurfaceVariant;
+    final notificationColor =
+        alert.enableNotification ? cs.primary : cs.onSurfaceVariant;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -460,7 +409,8 @@ class _AlertRow extends ConsumerWidget {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.inter(fontWeight: FontWeight.w500, color: cs.onSurface),
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w500, color: cs.onSurface),
             ),
           ),
           Container(
@@ -530,4 +480,3 @@ class _DetailCell extends StatelessWidget {
     );
   }
 }
-

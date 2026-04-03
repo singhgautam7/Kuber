@@ -126,4 +126,13 @@ class TagRepository {
       return map;
     });
   }
+
+  /// Delete a tag and all its relationships.
+  Future<void> deleteTag(int tagId) async {
+    await isar.writeTxn(() async {
+      await isar.tags.delete(tagId);
+      // Also delete junction records
+      await isar.transactionTags.where().tagIdEqualTo(tagId).deleteAll();
+    });
+  }
 }

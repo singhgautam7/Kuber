@@ -9,6 +9,7 @@ import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
@@ -195,15 +196,18 @@ class CategoriesScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      backgroundColor: cs.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(KuberSpacing.xl),
+          padding: EdgeInsets.fromLTRB(
+            KuberSpacing.xl,
+            0,
+            KuberSpacing.xl,
+            KuberSpacing.xl,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -212,13 +216,14 @@ class CategoriesScreen extends ConsumerWidget {
                 child: Container(
                   width: 40,
                   height: 4,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
                     color: cs.onSurfaceVariant.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: 8),
 
               // Header with Title + Close
               Row(
@@ -498,169 +503,135 @@ class CategoriesScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      backgroundColor: cs.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
-      builder: (context) => SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(KuberSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => KuberBottomSheet(
+        title: cat.name,
+        subtitle: 'Category Detail',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row: icon + name + close
+            Row(
+              children: [
+                CategoryIcon.square(
+                  icon: IconMapper.fromString(cat.icon),
+                  rawColor: Color(cat.colorValue),
+                  size: 48,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cat.name,
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'CATEGORY DETAIL',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: KuberSpacing.xl),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Last Transaction Activity
+            Consumer(
+              builder: (context, ref, _) {
+                final latestTxnAsync = ref.watch(
+                  categoryRecentTransactionProvider(cat.id),
+                );
 
-              // Header row: icon + name + close
-              Row(
-                children: [
-                  CategoryIcon.square(
-                    icon: IconMapper.fromString(cat.icon),
-                    rawColor: Color(cat.colorValue),
-                    size: 48,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          cat.name,
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'CATEGORY DETAIL',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () =>
-                        Navigator.of(context, rootNavigator: true).pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        size: 18,
+                return latestTxnAsync.when(
+                  data: (txn) => Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 14,
                         color: cs.onSurfaceVariant,
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Last Transaction Activity
-              Consumer(
-                builder: (context, ref, _) {
-                  final latestTxnAsync = ref.watch(
-                    categoryRecentTransactionProvider(cat.id),
-                  );
-
-                  return latestTxnAsync.when(
-                    data: (txn) => Row(
-                      children: [
-                        Icon(
-                          Icons.access_time_rounded,
-                          size: 14,
+                      const SizedBox(width: 6),
+                      Text(
+                        txn != null
+                            ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
+                            : 'No transactions yet',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
                           color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          txn != null
-                              ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
-                              : 'No transactions yet',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
-                  );
-                },
-              ),
-              const SizedBox(height: 32),
-              _buildDetailItem(
-                context,
-                label: 'GROUP',
-                value: groupName ?? 'None',
-              ),
-              const SizedBox(height: 16),
-              _buildDetailItem(
-                context,
-                label: 'TYPE',
-                value: cat.effectiveType == 'both'
-                    ? 'Income & Expense'
-                    : cat.effectiveType[0].toUpperCase() +
-                          cat.effectiveType.substring(1),
-              ),
-              const SizedBox(height: 24),
-              _BudgetStatusSection(category: cat),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton(
-                      label: 'Edit',
-                      icon: Icons.edit_outlined,
-                      type: AppButtonType.normal,
-                      onPressed: () {
-                        Navigator.pop(context);
-                        context.push(
-                          '/category/add',
-                          extra: CategoryRouteArgs(category: cat),
-                        );
-                      },
-                    ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppButton(
-                      label: 'Delete',
-                      icon: Icons.delete_outline_rounded,
-                      type: AppButtonType.danger,
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _confirmDelete(context, ref, cat);
-                      },
-                    ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+            _buildDetailItem(
+              context,
+              label: 'GROUP',
+              value: groupName ?? 'None',
+            ),
+            const SizedBox(height: 16),
+            _buildDetailItem(
+              context,
+              label: 'TYPE',
+              value: cat.effectiveType == 'both'
+                  ? 'Income & Expense'
+                  : cat.effectiveType[0].toUpperCase() +
+                        cat.effectiveType.substring(1),
+            ),
+            const SizedBox(height: 24),
+            _BudgetStatusSection(category: cat),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: 'Edit',
+                    icon: Icons.edit_outlined,
+                    type: AppButtonType.normal,
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.push(
+                        '/category/add',
+                        extra: CategoryRouteArgs(category: cat),
+                      );
+                    },
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppButton(
+                    label: 'Delete',
+                    icon: Icons.delete_outline_rounded,
+                    type: AppButtonType.danger,
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _confirmDelete(context, ref, cat);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

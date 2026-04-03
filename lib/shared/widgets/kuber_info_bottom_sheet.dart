@@ -1,76 +1,58 @@
 import 'package:flutter/material.dart';
-
-import '../../core/models/info_config.dart';
-import 'app_button.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../core/models/info_config.dart';
 import 'kuber_bottom_sheet.dart';
 
 class KuberInfoBottomSheet extends StatelessWidget {
   final KuberInfoConfig config;
 
-  const KuberInfoBottomSheet({
-    super.key,
-    required this.config,
-  });
-
-  static Future<void> show(BuildContext context, KuberInfoConfig config) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => KuberInfoBottomSheet(config: config),
-    );
-  }
+  const KuberInfoBottomSheet({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
 
     return KuberBottomSheet(
       title: config.title,
+      subtitle: "LEARN MORE",
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Description
           Text(
             config.description,
-            style: tt.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+            style: GoogleFonts.inter(
+              fontSize: 15,
+              color: cs.onSurfaceVariant,
               height: 1.5,
             ),
           ),
           const SizedBox(height: 24),
-
-          // Items List
           ...config.items.map((item) => Padding(
-                padding: const EdgeInsets.only(bottom: 24),
+                padding: const EdgeInsets.only(bottom: 16),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Icon with subtle tint
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
+                        color: cs.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         item.icon,
-                        size: 22,
-                        color: cs.primary.withValues(alpha: 0.8),
+                        size: 20,
+                        color: cs.primary,
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    // Content
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             item.title,
-                            style: tt.titleSmall?.copyWith(
+                            style: GoogleFonts.inter(
+                              fontSize: 15,
                               fontWeight: FontWeight.w700,
                               color: cs.onSurface,
                             ),
@@ -78,8 +60,9 @@ class KuberInfoBottomSheet extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             item.description,
-                            style: tt.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: cs.onSurfaceVariant,
                               height: 1.4,
                             ),
                           ),
@@ -89,18 +72,19 @@ class KuberInfoBottomSheet extends StatelessWidget {
                   ],
                 ),
               )),
-
-          const SizedBox(height: 8),
-
-          // Got it button
-          AppButton(
-            label: 'Got it',
-            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-            type: AppButtonType.primary,
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  static void show(BuildContext context, KuberInfoConfig config) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => KuberInfoBottomSheet(config: config),
     );
   }
 }
