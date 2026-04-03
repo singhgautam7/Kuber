@@ -13,6 +13,10 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../providers/budget_provider.dart';
 import '../widgets/budget_details_sheet.dart';
+import '../../../core/constants/info_constants.dart';
+import '../../../core/utils/prefs_keys.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../settings/providers/info_provider.dart';
 
 class BudgetsScreen extends ConsumerWidget {
   const BudgetsScreen({super.key});
@@ -22,13 +26,28 @@ class BudgetsScreen extends ConsumerWidget {
     final budgetsAsync = ref.watch(budgetListProvider);
     final cs = Theme.of(context).colorScheme;
 
+    // Auto-trigger info sheet
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoBudgets), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.budgets);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoBudgets).notifier).markSeen();
+        });
+      }
+    });
+
     return Scaffold(
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
           // App bar
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, title: 'Budgets'),
+            child: KuberAppBar(
+              showBack: true, 
+              title: 'Budgets',
+              infoConfig: InfoConstants.budgets,
+            ),
           ),
 
           // Page header

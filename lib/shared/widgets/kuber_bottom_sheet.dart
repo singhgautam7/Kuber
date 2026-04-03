@@ -8,25 +8,6 @@ import '../../core/theme/app_theme.dart';
 /// Provides a consistent structure: drag handle, header (title + optional
 /// subtitle + close button), a thin divider boundary, and a scrollable
 /// content area. Follows the same visual language as AccountDetailSheet.
-///
-/// Usage:
-/// ```dart
-/// showModalBottomSheet(
-///   context: context,
-///   isScrollControlled: true,
-///   useSafeArea: true,
-///   useRootNavigator: true,
-///   backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-///   shape: const RoundedRectangleBorder(
-///     borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-///   ),
-///   builder: (_) => KuberBottomSheet(
-///     title: 'My Sheet',
-///     subtitle: 'SUBTITLE',
-///     child: MyContent(),
-///   ),
-/// );
-/// ```
 class KuberBottomSheet extends StatelessWidget {
   /// Primary title shown large and bold.
   final String title;
@@ -34,14 +15,22 @@ class KuberBottomSheet extends StatelessWidget {
   /// Optional uppercase caption below the title (e.g. category name).
   final String? subtitle;
 
+  /// Optional leading icon Widget in the header.
+  final Widget? leadingIcon;
+
   /// Body content placed inside the scrollable area.
   final Widget child;
+
+  /// Optional actions widget pinned at the bottom.
+  final Widget? actions;
 
   const KuberBottomSheet({
     super.key,
     required this.title,
     this.subtitle,
+    this.leadingIcon,
     required this.child,
+    this.actions,
   });
 
   @override
@@ -77,45 +66,67 @@ class KuberBottomSheet extends StatelessWidget {
 
             // ── Header row ───────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 16, 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(24, 16, 16, 12),
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: GoogleFonts.inter(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurface,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle!.toUpperCase(),
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                        ],
+                  Row(
+                    children: [
+                      if (leadingIcon != null) ...[
+                        leadingIcon!,
+                        const SizedBox(width: 16),
                       ],
-                    ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              title,
+                              textAlign: TextAlign.start,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: cs.onSurface,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                subtitle!.toUpperCase(),
+                                textAlign: TextAlign.start,
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.onSurfaceVariant,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 48), // Balance for close button
+                    ],
                   ),
-                  IconButton(
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).pop(),
-                    icon: const Icon(Icons.close_rounded),
-                    style: IconButton.styleFrom(
-                      backgroundColor: cs.surfaceContainerHigh,
-                      padding: const EdgeInsets.all(8),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        onPressed: () =>
+                            Navigator.of(context, rootNavigator: true).pop(),
+                        icon: const Icon(Icons.close_rounded),
+                        style: IconButton.styleFrom(
+                          backgroundColor: cs.surfaceContainerHigh,
+                          padding: const EdgeInsets.all(8),
+                          shape: const CircleBorder(),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -132,10 +143,17 @@ class KuberBottomSheet extends StatelessWidget {
             // ── Scrollable body ──────────────────────────────────────────
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                 child: child,
               ),
             ),
+
+            if (actions != null) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                child: actions!,
+              ),
+            ],
           ],
         ),
       ),

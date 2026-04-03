@@ -16,6 +16,8 @@ import '../../features/transactions/providers/transaction_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
 import '../../features/tags/providers/tag_providers.dart';
+import 'kuber_bottom_sheet.dart';
+import 'app_button.dart';
 
 /// Shows the transaction detail bottom sheet with edit/delete actions.
 void showTransactionDetailSheet(
@@ -23,16 +25,12 @@ void showTransactionDetailSheet(
   WidgetRef ref,
   Transaction t,
 ) {
-  final cs = Theme.of(context).colorScheme;
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
-    backgroundColor: cs.surfaceContainer,
+    backgroundColor: Colors.transparent,
     isScrollControlled: true,
     useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-    ),
     builder: (_) => TransactionDetailSheet(
       transaction: t,
       onEdit: () {
@@ -58,39 +56,14 @@ void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction 
   }
 
   ref.read(transactionListProvider.notifier).delete(t.id);
-  final label = t.isTransfer ? 'Deleted transfer' : 'Deleted "${t.name}"';
   showKuberSnackBar(
     context,
-    label,
-    actionLabel: 'Undo',
+    t.isTransfer ? 'Transfer deleted' : 'Transaction deleted',
+    actionLabel: 'UNDO',
     onAction: () {
-      final restored = Transaction()
-        ..name = t.name
-        ..amount = t.amount
-        ..type = t.type
-        ..categoryId = t.categoryId
-        ..accountId = t.accountId
-        ..isTransfer = t.isTransfer
-        ..transferId = t.transferId
-        ..notes = t.notes
-        ..createdAt = t.createdAt
-        ..updatedAt = t.updatedAt
-        ..nameLower = t.nameLower;
-      ref.read(transactionListProvider.notifier).restore(restored);
+      ref.read(transactionListProvider.notifier).restore(t);
       if (pair != null) {
-        final restoredPair = Transaction()
-          ..name = pair.name
-          ..amount = pair.amount
-          ..type = pair.type
-          ..categoryId = pair.categoryId
-          ..accountId = pair.accountId
-          ..isTransfer = pair.isTransfer
-          ..transferId = pair.transferId
-          ..notes = pair.notes
-          ..createdAt = pair.createdAt
-          ..updatedAt = pair.updatedAt
-          ..nameLower = pair.nameLower;
-        ref.read(transactionListProvider.notifier).restore(restoredPair);
+        ref.read(transactionListProvider.notifier).restore(pair);
       }
     },
   );
@@ -171,12 +144,11 @@ class TransactionDetailSheet extends ConsumerWidget {
     final iconColor = isTransfer
         ? const Color(0xFF78909C)
         : (category != null ? Color(category.colorValue) : cs.primary);
-    final categoryName = category?.name ?? 'Unknown';
     final displayName = isTransfer
         ? '${fromAccountName ?? "Unknown"} → ${toAccountName ?? "Unknown"}'
         : transaction.name;
 
-    // Account display with last4Digits
+    // Account display
     String accountDisplay = account?.name ?? 'Unknown';
     if (account?.last4Digits != null && account!.last4Digits!.isNotEmpty) {
       accountDisplay += ' •••• ${account.last4Digits}';
@@ -185,59 +157,110 @@ class TransactionDetailSheet extends ConsumerWidget {
     final dateLabel =
         '${DateFormatter.groupHeader(transaction.createdAt)}, ${DateFormat('d MMM').format(transaction.createdAt)} • ${DateFormatter.time(transaction.createdAt)}';
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Container(
-              width: 40,
-              height: 4,
+    return KuberBottomSheet(
+      title: displayName,
+      subtitle: 'TRANSACTION DETAIL',
+      leadingIcon: isTransfer
+          ? Container(
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+                color: iconColor.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
               ),
+              child: Icon(iconData, size: 24, color: iconColor),
+            )
+          : CategoryIcon.square(
+              icon: iconData,
+              rawColor: iconColor,
+              size: 48,
             ),
-            const SizedBox(height: KuberSpacing.xl),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Amount ────────────────────────────────────────────────────
+          Text(
+            'TRANSACTION AMOUNT',
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            amountText,
+            style: GoogleFonts.inter(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: amountColor,
+              letterSpacing: -1,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xl),
 
-            // Header row: icon + name + close
-            Row(
-              children: [
-                if (isTransfer)
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(iconData, size: 24, color: iconColor),
-                  )
-                else
-                  CategoryIcon.square(
-                    icon: iconData,
-                    rawColor: iconColor,
-                    size: 48,
-                  ),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: Column(
+          // ── Details Grid ─────────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: _DetailCell(
+                  label: 'DATE & TIME',
+                  value: dateLabel.toUpperCase(),
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Expanded(
+                child: _DetailCell(
+                  label: 'ACCOUNT',
+                  value: accountDisplay.toUpperCase(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: _DetailCell(
+                  label: 'TYPE',
+                  value: isTransfer ? 'TRANSFER' : transaction.type.toUpperCase(),
+                  valueColor: amountColor,
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Expanded(
+                child: _DetailCell(
+                  label: 'CATEGORY',
+                  value: transaction.type == 'income' ? 'INCOME' : (category?.name.toUpperCase() ?? 'NONE'),
+                ),
+              ),
+            ],
+          ),
+
+          if (transaction.notes != null && transaction.notes!.isNotEmpty) ...[
+            const SizedBox(height: KuberSpacing.sm),
+            _DetailCell(
+              label: 'NOTES',
+              value: transaction.notes!,
+              fullWidth: true,
+            ),
+          ],
+
+          const SizedBox(height: KuberSpacing.xl),
+
+          // ── Tags ─────────────────────────────────────────────────────
+          Consumer(
+            builder: (context, ref, _) {
+              final tagsAsync = ref.watch(transactionTagsProvider(transaction.id));
+              return tagsAsync.when(
+                data: (tags) {
+                  if (tags.isEmpty) return const SizedBox.shrink();
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        displayName,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'TRANSACTION DETAIL',
+                        'ATTACHED TAGS',
                         style: GoogleFonts.inter(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -245,241 +268,61 @@ class TransactionDetailSheet extends ConsumerWidget {
                           letterSpacing: 1.0,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context, rootNavigator: true).pop(),
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: KuberSpacing.xl),
-
-            // Amount label
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'AMOUNT',
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.xs),
-
-            // Amount value
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                amountText,
-                style: GoogleFonts.inter(
-                  fontSize: 36,
-                  fontWeight: FontWeight.w800,
-                  color: amountColor,
-                ),
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.xl),
-
-            // 2×2 detail grid
-            if (isTransfer) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: _DetailCell(
-                      label: 'FROM ACCOUNT',
-                      value: fromAccountName ?? 'Unknown',
-                    ),
-                  ),
-                  const SizedBox(width: KuberSpacing.sm),
-                  Expanded(
-                    child: _DetailCell(
-                      label: 'TO ACCOUNT',
-                      value: toAccountName ?? 'Unknown',
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: KuberSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: _DetailCell(
-                  label: 'DATE & TIME',
-                  value: dateLabel,
-                ),
-              ),
-            ] else ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: _DetailCell(
-                      label: 'CATEGORY',
-                      value: categoryName,
-                    ),
-                  ),
-                  const SizedBox(width: KuberSpacing.sm),
-                  Expanded(
-                    child: _DetailCell(
-                      label: 'ACCOUNT',
-                      value: accountDisplay,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: KuberSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: _DetailCell(
-                  label: 'DATE & TIME',
-                  value: dateLabel,
-                ),
-              ),
-            ],
-
-            // Tags (full-width row)
-            ref.watch(transactionTagsProvider(transaction.id)).when(
-                  data: (tags) {
-                    if (tags.isEmpty) return const SizedBox.shrink();
-                    return Column(
-                      children: [
-                        const SizedBox(height: KuberSpacing.sm),
-                        SizedBox(
-                          width: double.infinity,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: KuberSpacing.lg,
-                              vertical: KuberSpacing.md,
-                            ),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(KuberRadius.md),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'TAGS',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurfaceVariant,
-                                    letterSpacing: 1.0,
-                                  ),
-                                ),
-                                const SizedBox(height: KuberSpacing.sm),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: tags.map((tag) {
-                                    return Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: cs.primary.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                        border: Border.all(
-                                          color: cs.primary.withValues(alpha: 0.2),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        '#${tag.name}',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: cs.primary,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ],
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: tags.map((tag) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: cs.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
+                          ),
+                          child: Text(
+                            '#${tag.name}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: cs.primary,
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
+                        )).toList(),
+                      ),
+                      const SizedBox(height: KuberSpacing.xl),
+                    ],
+                  );
+                },
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              );
+            },
+          ),
 
-            // Notes (full-width row)
-            if (transaction.notes != null &&
-                transaction.notes!.isNotEmpty) ...[
-              const SizedBox(height: KuberSpacing.sm),
-              SizedBox(
-                width: double.infinity,
-                child: _DetailCell(
-                  label: 'NOTES',
-                  value: transaction.notes!,
+          // ── Actions ──────────────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'Edit',
+                  icon: Icons.edit_outlined,
+                  type: AppButtonType.normal,
+                  onPressed: onEdit,
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: AppButton(
+                  label: 'Delete',
+                  icon: Icons.delete_outline_rounded,
+                  type: AppButtonType.danger,
+                  onPressed: onDelete,
                 ),
               ),
             ],
-
-            const SizedBox(height: KuberSpacing.xl),
-
-            // Edit button (muted/outlined)
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: Text(
-                  'Edit Transaction',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: cs.onSurface,
-                  side: BorderSide(color: cs.outline),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-
-            // Delete button
-            TextButton.icon(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline, size: 18),
-              label: Text(
-                'Delete Transaction',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                foregroundColor: cs.error,
-              ),
-            ),
-
-          ],
-        ),
+          ),
+          const SizedBox(height: KuberSpacing.xl),
+        ],
       ),
     );
   }
@@ -488,13 +331,21 @@ class TransactionDetailSheet extends ConsumerWidget {
 class _DetailCell extends StatelessWidget {
   final String label;
   final String value;
+  final Color? valueColor;
+  final bool fullWidth;
 
-  const _DetailCell({required this.label, required this.value});
+  const _DetailCell({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.fullWidth = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
+      width: fullWidth ? double.infinity : null,
       padding: const EdgeInsets.symmetric(
         horizontal: KuberSpacing.lg,
         vertical: KuberSpacing.md,
@@ -521,9 +372,10 @@ class _DetailCell extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: cs.onSurface,
+              color: valueColor ?? cs.onSurface,
             ),
             overflow: TextOverflow.ellipsis,
+            maxLines: fullWidth ? 3 : 1,
           ),
         ],
       ),

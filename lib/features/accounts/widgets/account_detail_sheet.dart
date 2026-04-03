@@ -4,14 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/date_formatter.dart';
-import '../../../shared/widgets/category_icon.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
+import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../history/providers/history_filter_provider.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../core/utils/icon_mapper.dart';
 import 'edit_balance_sheet.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
@@ -34,76 +36,31 @@ class AccountDetailSheet extends ConsumerWidget {
     final latestTxnAsync =
         ref.watch(accountLatestTransactionProvider(account.id));
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+    return KuberBottomSheet(
+      title: account.name,
+      subtitle: _accountTypeLabel(account),
+      leadingIcon: CategoryIcon.square(
+        icon: account.icon != null ? IconMapper.fromString(account.icon!) : Icons.account_balance,
+        rawColor: account.colorValue != null ? Color(account.colorValue!) : cs.primary,
+        size: 48,
+      ),
+      actions: AppButton(
+        label: 'View Transactions',
+        icon: Icons.receipt_long_rounded,
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: () {
+          Navigator.of(context).pop();
+          ref.read(historyFilterProvider.notifier).clearAll();
+          ref.read(historyFilterProvider.notifier).setFilters(
+                accountIds: {account.id.toString()},
+              );
+          context.push('/history');
+        },
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
-          // Header
-          Row(
-            children: [
-              CategoryIcon.square(
-                icon: resolveAccountIcon(account),
-                rawColor: resolveAccountColor(account),
-                size: 56,
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      account.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _accountTypeLabel(account),
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded),
-                style: IconButton.styleFrom(
-                  backgroundColor: cs.surfaceContainerHigh,
-                  padding: const EdgeInsets.all(8),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-
           // Primary Value Section
           balanceAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -198,11 +155,10 @@ class AccountDetailSheet extends ConsumerWidget {
             fullWidth: true,
             onPressed: () => _confirmDelete(context, ref),
           ),
-          const SizedBox(height: KuberSpacing.xl),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   Widget _buildBankSection(BuildContext context, WidgetRef ref, double balance) {
     final cs = Theme.of(context).colorScheme;
