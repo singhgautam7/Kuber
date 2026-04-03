@@ -55,3 +55,12 @@ final tagRecentTransactionProvider =
   validTxns.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   return validTxns.first;
 });
+
+final tagTransactionCountProvider = StreamProvider.family<int, int>((ref, tagId) {
+  final isar = ref.watch(isarProvider);
+  return isar.transactionTags
+      .filter()
+      .tagIdEqualTo(tagId)
+      .watch(fireImmediately: true)
+      .map((records) => records.length);
+});

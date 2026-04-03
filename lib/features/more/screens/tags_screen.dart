@@ -167,8 +167,10 @@ class _TagListItem extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                   Text(
                     tag.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -187,10 +189,23 @@ class _TagListItem extends ConsumerWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+            const SizedBox(width: 8),
+            Consumer(
+              builder: (context, ref, _) {
+                final countAsync = ref.watch(tagTransactionCountProvider(tag.id));
+                return countAsync.when(
+                  data: (count) => Text(
+                    count == 0 ? 'No transactions' : '$count transactions',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                );
+              },
             ),
           ],
         ),
