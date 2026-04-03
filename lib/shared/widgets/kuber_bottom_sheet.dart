@@ -77,16 +77,19 @@ class KuberBottomSheet extends StatelessWidget {
 
             // ── Header row ───────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 16, 16),
+              padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           title,
+                          textAlign: TextAlign.start,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -98,6 +101,7 @@ class KuberBottomSheet extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             subtitle!.toUpperCase(),
+                            textAlign: TextAlign.start,
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -109,6 +113,7 @@ class KuberBottomSheet extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
                   IconButton(
                     onPressed: () =>
                         Navigator.of(context, rootNavigator: true).pop(),
@@ -116,6 +121,7 @@ class KuberBottomSheet extends StatelessWidget {
                     style: IconButton.styleFrom(
                       backgroundColor: cs.surfaceContainerHigh,
                       padding: const EdgeInsets.all(8),
+                      shape: const CircleBorder(),
                     ),
                   ),
                 ],
