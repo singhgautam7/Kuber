@@ -10,6 +10,10 @@ import '../../../shared/widgets/kuber_page_header.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_bottom_sheets.dart';
+import '../../../core/constants/info_constants.dart';
+import '../../../core/utils/prefs_keys.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../settings/providers/info_provider.dart';
 
 class TagsScreen extends ConsumerWidget {
   const TagsScreen({super.key});
@@ -32,6 +36,17 @@ class TagsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final tagsAsync = ref.watch(tagListProvider);
+
+    // Auto-trigger info sheet
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoTags), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.tags);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoTags).notifier).markSeen();
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -59,7 +74,11 @@ class _TagsBody extends StatelessWidget {
     return CustomScrollView(
       slivers: [
         const SliverToBoxAdapter(
-          child: KuberAppBar(showBack: true, title: 'Tags'),
+          child: KuberAppBar(
+            showBack: true, 
+            title: 'Tags',
+            infoConfig: InfoConstants.tags,
+          ),
         ),
         SliverToBoxAdapter(
           child: KuberPageHeader(

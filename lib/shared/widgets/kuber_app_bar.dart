@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart';
 import '../../core/utils/icon_mapper.dart';
+import '../../core/models/info_config.dart';
+import 'kuber_info_bottom_sheet.dart';
 
 class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String? title;
@@ -17,7 +19,10 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.actions,
     this.showBack = false,
     this.horizontalPadding,
+    this.infoConfig,
   });
+
+  final KuberInfoConfig? infoConfig;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -81,6 +86,16 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                 ),
               const Spacer(),
+              if (infoConfig != null) ...[
+                IconButton(
+                  onPressed: () => KuberInfoBottomSheet.show(context, infoConfig!),
+                  icon: const Icon(Icons.help_outline),
+                  color: cs.onSurfaceVariant,
+                  iconSize: 22,
+                  visualDensity: VisualDensity.compact,
+                ),
+                const SizedBox(width: 4),
+              ],
               if (actions != null) ...actions!,
             ],
           ),

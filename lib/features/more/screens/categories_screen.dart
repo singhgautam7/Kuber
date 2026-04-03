@@ -20,6 +20,10 @@ import '../../budgets/widgets/budget_details_sheet.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
 import 'add_edit_category_screen.dart';
+import '../../../core/constants/info_constants.dart';
+import '../../../core/utils/prefs_keys.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../settings/providers/info_provider.dart';
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
@@ -29,6 +33,17 @@ class CategoriesScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
     final groupsAsync = ref.watch(categoryGroupListProvider);
+
+    // Auto-trigger info sheet
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoCategories), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.categories);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoCategories).notifier).markSeen();
+        });
+      }
+    });
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -42,7 +57,11 @@ class CategoriesScreen extends ConsumerWidget {
             slivers: [
               // App bar
               const SliverToBoxAdapter(
-                child: KuberAppBar(showBack: true, title: 'Categories'),
+                child: KuberAppBar(
+                  showBack: true, 
+                  title: 'Categories',
+                  infoConfig: InfoConstants.categories,
+                ),
               ),
 
               // Page header

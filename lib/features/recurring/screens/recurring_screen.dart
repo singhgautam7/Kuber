@@ -18,6 +18,10 @@ import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
 import '../widgets/recurring_detail_sheet.dart';
+import '../../../core/constants/info_constants.dart';
+import '../../../core/utils/prefs_keys.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
+import '../../settings/providers/info_provider.dart';
 
 class RecurringScreen extends ConsumerWidget {
   const RecurringScreen({super.key});
@@ -31,6 +35,17 @@ class RecurringScreen extends ConsumerWidget {
     final recentlyProcessedAsync = ref.watch(recentlyProcessedProvider);
     final accountsAsync = ref.watch(accountListProvider);
 
+    // Auto-trigger info sheet
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoRecurring), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.recurring);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoRecurring).notifier).markSeen();
+        });
+      }
+    });
+
     return Scaffold(
       backgroundColor: cs.surface,
       body: rulesAsync.when(
@@ -41,7 +56,11 @@ class RecurringScreen extends ConsumerWidget {
             slivers: [
               // App bar
               const SliverToBoxAdapter(
-                child: KuberAppBar(showBack: true, title: 'Recurring'),
+                child: KuberAppBar(
+                  showBack: true, 
+                  title: 'Recurring',
+                  infoConfig: InfoConstants.recurring,
+                ),
               ),
 
               // Page header

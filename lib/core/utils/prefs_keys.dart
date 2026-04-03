@@ -6,4 +6,11 @@ class PrefsKeys {
   static const swipeMode = 'swipe_mode';
   static const biometricsEnabled = 'biometrics_enabled';
   static const numberSystem = 'number_system';
+
+  // Info Seen Keys
+  static const seenInfoAccounts = 'seen_info_accounts';
+  static const seenInfoCategories = 'seen_info_categories';
+  static const seenInfoTags = 'seen_info_tags';
+  static const seenInfoBudgets = 'seen_info_budgets';
+  static const seenInfoRecurring = 'seen_info_recurring';
 }
