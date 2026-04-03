@@ -97,48 +97,36 @@ class RecurringDetailSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: rule.name,
-      subtitle: "RECURRING AUTOMATION",
+      subtitle: 'CREATED ON $createdDateStr',
+      leadingIcon: CategoryIcon.square(
+        icon: iconData,
+        rawColor: iconColor,
+        size: 48,
+      ),
+      actions: AppButton(
+        label: 'View Transactions',
+        icon: Icons.history_rounded,
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            useRootNavigator: true,
+            backgroundColor: cs.surfaceContainer,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(KuberRadius.lg),
+              ),
+            ),
+            builder: (_) => RecurringHistorySheet(rule: rule),
+          );
+        },
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              CategoryIcon.square(
-                icon: iconData,
-                rawColor: iconColor,
-                size: 48,
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      rule.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'CREATED ON $createdDateStr',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-
           // ── Recurring amount label ────────────────────────────────────
           Text(
             'RECURRING ${rule.type.toUpperCase()} AMOUNT',
@@ -209,7 +197,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                   icon: Icons.edit_outlined,
                   type: AppButtonType.normal,
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                   },
                 ),
               ),
@@ -225,47 +213,19 @@ class RecurringDetailSheet extends ConsumerWidget {
                     ref
                         .read(recurringListProvider.notifier)
                         .togglePause(rule);
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                   },
                 ),
               ),
             ],
           ),
           const SizedBox(height: KuberSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: 'History',
-                  icon: Icons.history_rounded,
-                  type: AppButtonType.primary,
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      useRootNavigator: true,
-                      backgroundColor: cs.surfaceContainer,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(KuberRadius.lg),
-                        ),
-                      ),
-                      builder: (_) => RecurringHistorySheet(rule: rule),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: AppButton(
-                  label: 'Delete',
-                  icon: Icons.delete_outline_rounded,
-                  type: AppButtonType.danger,
-                  onPressed: () => _confirmDelete(context, ref),
-                ),
-              ),
-            ],
+          AppButton(
+            label: 'Delete',
+            icon: Icons.delete_outline_rounded,
+            type: AppButtonType.danger,
+            fullWidth: true,
+            onPressed: () => _confirmDelete(context, ref),
           ),
           const SizedBox(height: KuberSpacing.lg),
         ],

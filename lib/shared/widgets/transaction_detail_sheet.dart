@@ -160,58 +160,24 @@ class TransactionDetailSheet extends ConsumerWidget {
     return KuberBottomSheet(
       title: displayName,
       subtitle: 'TRANSACTION DETAIL',
+      leadingIcon: isTransfer
+          ? Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, size: 24, color: iconColor),
+            )
+          : CategoryIcon.square(
+              icon: iconData,
+              rawColor: iconColor,
+              size: 48,
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              if (isTransfer)
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(iconData, size: 24, color: iconColor),
-                )
-              else
-                CategoryIcon.square(
-                  icon: iconData,
-                  rawColor: iconColor,
-                  size: 48,
-                ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'TRANSACTION DETAIL',
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-
           // ── Amount ────────────────────────────────────────────────────
           Text(
             'TRANSACTION AMOUNT',

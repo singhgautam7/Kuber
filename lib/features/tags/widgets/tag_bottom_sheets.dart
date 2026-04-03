@@ -59,7 +59,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
     }
 
     await repo.saveTag(tag);
-    if (mounted) Navigator.pop(context);
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -107,7 +107,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
                 ),
               ),
               IconButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded),
                 style: IconButton.styleFrom(
                   backgroundColor: cs.surfaceContainerHigh,
@@ -181,7 +181,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
   const ViewTagBottomSheet({super.key, required this.tag});
 
   void _edit(BuildContext context) {
-    Navigator.pop(context);
+    Navigator.of(context).pop();
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
@@ -203,51 +203,41 @@ class ViewTagBottomSheet extends ConsumerWidget {
     final dateStr = DateFormat('MMM dd, yyyy').format(tag.createdAt);
 
     return KuberBottomSheet(
-      title: "",
-      subtitle: "",
+      title: tag.name,
+      subtitle: "CREATED ON ${dateStr.toUpperCase()}",
+      leadingIcon: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: cs.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          "#",
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: cs.primary,
+          ),
+        ),
+      ),
+      actions: AppButton(
+        label: 'View Transactions',
+        icon: Icons.receipt_long_rounded,
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: () {
+          ref.read(historyFilterProvider.notifier).clearAll();
+          ref.read(historyFilterProvider.notifier).setFilters(
+                tagIds: {tag.id},
+              );
+          context.go('/history');
+        },
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "#",
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: cs.primary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tag.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        letterSpacing: -0.5,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      "CREATED ON ${dateStr.toUpperCase()}",
-                      style: GoogleFonts.inter(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
           // Last Transaction Activity
           Consumer(
             builder: (context, ref, _) {
@@ -303,22 +293,8 @@ class ViewTagBottomSheet extends ConsumerWidget {
             type: AppButtonType.danger,
             fullWidth: true,
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.of(context).pop();
               _confirmDelete(context, ref);
-            },
-          ),
-          const SizedBox(height: 12),
-          AppButton(
-            label: 'View Transactions',
-            icon: Icons.receipt_long_rounded,
-            type: AppButtonType.primary,
-            fullWidth: true,
-            onPressed: () {
-              ref.read(historyFilterProvider.notifier).clearAll();
-              ref.read(historyFilterProvider.notifier).setFilters(
-                    tagIds: {tag.id},
-                  );
-              context.go('/history');
             },
           ),
         ],
@@ -361,7 +337,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
             ),
             onPressed: () {
               ref.read(tagRepositoryProvider).deleteTag(tag.id);
-              Navigator.pop(ctx);
+              Navigator.of(ctx).pop();
             },
             child: const Text('Delete'),
           ),

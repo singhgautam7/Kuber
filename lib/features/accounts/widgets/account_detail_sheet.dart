@@ -9,11 +9,12 @@ import '../../settings/providers/settings_provider.dart'
     show formatterProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
-import '../../../shared/widgets/app_button.dart';
-import 'edit_balance_sheet.dart';
-
+import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../history/providers/history_filter_provider.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../core/utils/icon_mapper.dart';
+import 'edit_balance_sheet.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -38,13 +39,28 @@ class AccountDetailSheet extends ConsumerWidget {
     return KuberBottomSheet(
       title: account.name,
       subtitle: _accountTypeLabel(account),
+      leadingIcon: CategoryIcon.square(
+        icon: account.icon != null ? IconMapper.fromString(account.icon!) : Icons.account_balance,
+        rawColor: account.colorValue != null ? Color(account.colorValue!) : cs.primary,
+        size: 48,
+      ),
+      actions: AppButton(
+        label: 'View Transactions',
+        icon: Icons.receipt_long_rounded,
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: () {
+          Navigator.of(context).pop();
+          ref.read(historyFilterProvider.notifier).clearAll();
+          ref.read(historyFilterProvider.notifier).setFilters(
+                accountIds: {account.id.toString()},
+              );
+          context.push('/history');
+        },
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Primary Value Section
-
-          const SizedBox(height: 32),
-
           // Primary Value Section
           balanceAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -139,25 +155,10 @@ class AccountDetailSheet extends ConsumerWidget {
             fullWidth: true,
             onPressed: () => _confirmDelete(context, ref),
           ),
-          const SizedBox(height: 12),
-          AppButton(
-            label: 'View Transactions',
-            icon: Icons.receipt_long_rounded,
-            type: AppButtonType.primary,
-            fullWidth: true,
-            onPressed: () {
-              ref.read(historyFilterProvider.notifier).clearAll();
-              ref.read(historyFilterProvider.notifier).setFilters(
-                    accountIds: {account.id.toString()},
-                  );
-              context.go('/history');
-            },
-          ),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   Widget _buildBankSection(BuildContext context, WidgetRef ref, double balance) {
     final cs = Theme.of(context).colorScheme;

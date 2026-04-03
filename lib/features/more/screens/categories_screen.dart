@@ -511,45 +511,27 @@ class CategoriesScreen extends ConsumerWidget {
       builder: (context) => KuberBottomSheet(
         title: cat.name,
         subtitle: 'Category Detail',
+        leadingIcon: CategoryIcon.square(
+          icon: IconMapper.fromString(cat.icon),
+          rawColor: Color(cat.colorValue),
+          size: 48,
+        ),
+        actions: AppButton(
+          label: 'View Transactions',
+          icon: Icons.receipt_long_rounded,
+          type: AppButtonType.primary,
+          fullWidth: true,
+          onPressed: () {
+            ref.read(historyFilterProvider.notifier).clearAll();
+            ref.read(historyFilterProvider.notifier).setFilters(
+                  categoryIds: {cat.id.toString()},
+                );
+            context.go('/history');
+          },
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header row: icon + name + close
-            Row(
-              children: [
-                CategoryIcon.square(
-                  icon: IconMapper.fromString(cat.icon),
-                  rawColor: Color(cat.colorValue),
-                  size: 48,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cat.name,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        'CATEGORY DETAIL',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 24),
             // Last Transaction Activity
             Consumer(
@@ -632,21 +614,6 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            AppButton(
-              label: 'View Transactions',
-              icon: Icons.receipt_long_rounded,
-              type: AppButtonType.primary,
-              fullWidth: true,
-              onPressed: () {
-                ref.read(historyFilterProvider.notifier).clearAll();
-                ref.read(historyFilterProvider.notifier).setFilters(
-                      categoryIds: {cat.id.toString()},
-                    );
-                context.go('/history');
-              },
-            ),
-            const SizedBox(height: 24),
           ],
         ),
       ),

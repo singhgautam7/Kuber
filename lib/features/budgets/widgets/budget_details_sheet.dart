@@ -10,8 +10,9 @@ import '../data/budget.dart';
 import '../providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../../shared/widgets/app_button.dart';
-import 'budget_history_sheet.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/category_icon.dart';
+import '../../../core/utils/icon_mapper.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final int budgetId;
@@ -38,6 +39,24 @@ class BudgetDetailsSheet extends ConsumerWidget {
         return KuberBottomSheet(
           title: category.name,
           subtitle: 'MONTHLY BUDGET PLAN',
+          leadingIcon: CategoryIcon.square(
+            icon: IconMapper.fromString(category.icon),
+            rawColor: Color(category.colorValue),
+            size: 48,
+          ),
+          actions: AppButton(
+            label: 'View Transactions',
+            icon: Icons.history_rounded,
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.push('/history', extra: {
+                'categoryId': category.id.toString(),
+                'budgetId': budget.id.toString(),
+              });
+            },
+          ),
           child: progressAsync.when(
             data: (p) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +163,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                             fontSize: 12, color: cs.onSurfaceVariant)),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Text(
                   'BUDGET DETAILS',
                   style: GoogleFonts.inter(
@@ -187,7 +206,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     )),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Text(
                   'ACTIVE ALERTS',
                   style: GoogleFonts.inter(
@@ -212,9 +231,9 @@ class BudgetDetailsSheet extends ConsumerWidget {
                             ))
                         .toList(),
                   ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 Text(
-                  'BUDGET CONTROLS',
+                  'ACTIONS',
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -231,7 +250,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                         icon: Icons.edit_outlined,
                         type: AppButtonType.normal,
                         onPressed: () {
-                          context.pop();
+                          Navigator.of(context).pop();
                           context.push('/budgets/edit', extra: budget);
                         },
                       ),
@@ -255,44 +274,13 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        label: 'History',
-                        icon: Icons.history_rounded,
-                        type: AppButtonType.primary,
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            useSafeArea: true,
-                            useRootNavigator: true,
-                            backgroundColor: cs.surfaceContainer,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(KuberRadius.lg),
-                              ),
-                            ),
-                            builder: (_) => BudgetHistorySheet(
-                              budget: budget,
-                              category: category,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: AppButton(
-                        label: 'Delete',
-                        icon: Icons.delete_outline_rounded,
-                        type: AppButtonType.danger,
-                        onPressed: () => _confirmDeleteBudget(
-                            context, ref, budget.id),
-                      ),
-                    ),
-                  ],
+                AppButton(
+                  label: 'Delete Budget',
+                  icon: Icons.delete_outline_rounded,
+                  type: AppButtonType.danger,
+                  fullWidth: true,
+                  onPressed: () => _confirmDeleteBudget(
+                      context, ref, budget.id),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -306,6 +294,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
       error: (err, _) =>
           Center(child: Text('Error loading budget details: $err')),
     );
+
   }
 
   void _confirmDeleteBudget(BuildContext context, WidgetRef ref, int id) {
@@ -329,8 +318,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
             )),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -341,8 +330,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
             ),
             onPressed: () {
               ref.read(budgetListProvider.notifier).delete(id);
-              Navigator.pop(ctx); // close dialog
-              context.pop(); // close sheet
+              Navigator.of(ctx).pop(); // close dialog
+              Navigator.of(context).pop(); // close sheet
             },
             child: const Text('Delete'),
           ),
