@@ -25,6 +25,7 @@ import '../../../core/constants/info_constants.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../settings/providers/info_provider.dart';
+import '../../history/providers/history_filter_provider.dart';
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
@@ -59,7 +60,7 @@ class CategoriesScreen extends ConsumerWidget {
               // App bar
               const SliverToBoxAdapter(
                 child: KuberAppBar(
-                  showBack: true, 
+                  showBack: true,
                   title: 'Categories',
                   infoConfig: InfoConstants.categories,
                 ),
@@ -631,6 +632,21 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            AppButton(
+              label: 'View Transactions',
+              icon: Icons.receipt_long_rounded,
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: () {
+                ref.read(historyFilterProvider.notifier).clearAll();
+                ref.read(historyFilterProvider.notifier).setFilters(
+                      categoryIds: {cat.id.toString()},
+                    );
+                context.go('/history');
+              },
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),

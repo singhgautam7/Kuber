@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/tag.dart';
@@ -9,6 +10,7 @@ import '../providers/tag_providers.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../history/providers/history_filter_provider.dart';
 
 class AddEditTagBottomSheet extends ConsumerStatefulWidget {
   final Tag? tag;
@@ -201,8 +203,8 @@ class ViewTagBottomSheet extends ConsumerWidget {
     final dateStr = DateFormat('MMM dd, yyyy').format(tag.createdAt);
 
     return KuberBottomSheet(
-      title: tag.name,
-      subtitle: "TAG DETAIL",
+      title: "",
+      subtitle: "",
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -273,7 +275,6 @@ class ViewTagBottomSheet extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 32),
-          
           Row(
             children: [
               Expanded(
@@ -304,6 +305,20 @@ class ViewTagBottomSheet extends ConsumerWidget {
             onPressed: () {
               Navigator.pop(context);
               _confirmDelete(context, ref);
+            },
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: 'View Transactions',
+            icon: Icons.receipt_long_rounded,
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: () {
+              ref.read(historyFilterProvider.notifier).clearAll();
+              ref.read(historyFilterProvider.notifier).setFilters(
+                    tagIds: {tag.id},
+                  );
+              context.go('/history');
             },
           ),
         ],
