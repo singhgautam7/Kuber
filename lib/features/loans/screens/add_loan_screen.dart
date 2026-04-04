@@ -34,6 +34,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   final _emiController = TextEditingController();
   final _interestController = TextEditingController();
   String? _rateType;
+  DateTime? _loanStartDate; // optional disbursement date
   int _billDate = 1;
   DateTime _startDate = DateTime.now();
   String? _selectedAccountId;
@@ -59,6 +60,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         _interestController.text = e.interestRate!.toString();
       }
       _rateType = e.rateType;
+      _loanStartDate = e.loanStartDate;
       _billDate = e.billDate;
       _startDate = e.startDate;
       _selectedAccountId = e.accountId;
@@ -256,7 +258,56 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Start date
+                  // Loan start date (optional)
+                  _FieldLabel('LOAN START DATE (OPTIONAL)'),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _pickLoanStartDate(context),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.event_outlined,
+                              size: 16, color: cs.onSurfaceVariant),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _loanStartDate != null
+                                  ? DateFormat('MMM d, yyyy')
+                                      .format(_loanStartDate!)
+                                  : 'No date set',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: _loanStartDate != null
+                                    ? cs.onSurface
+                                    : cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          if (_loanStartDate != null)
+                            GestureDetector(
+                              onTap: () => setState(
+                                  () => _loanStartDate = null),
+                              child: Icon(Icons.close,
+                                  size: 16,
+                                  color: cs.onSurfaceVariant),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Start date (repayment)
                   _FieldLabel('REPAYMENT START'),
                   const SizedBox(height: 8),
                   _buildDateField(
@@ -622,6 +673,18 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     }
   }
 
+  Future<void> _pickLoanStartDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _loanStartDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    );
+    if (picked != null) {
+      setState(() => _loanStartDate = picked);
+    }
+  }
+
   Future<void> _save(BuildContext context) async {
     // Find "Loan EMI" category
     final categories =
@@ -646,6 +709,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         ..emiAmount = emi
         ..rateType = _rateType
         ..interestRate = interest
+        ..loanStartDate = _loanStartDate
         ..billDate = _billDate
         ..startDate = _startDate
         ..accountId = _selectedAccountId!
@@ -668,6 +732,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             emiAmount: emi,
             rateType: _rateType,
             interestRate: interest,
+            loanStartDate: _loanStartDate,
             billDate: _billDate,
             startDate: _startDate,
             accountId: _selectedAccountId!,

@@ -516,6 +516,8 @@ class _InvestmentCard extends ConsumerWidget {
         return Icons.currency_bitcoin;
       case 'trading':
         return Icons.trending_up;
+      case 'real_estate':
+        return Icons.apartment_outlined;
       default:
         return Icons.show_chart;
     }
@@ -533,6 +535,8 @@ class _InvestmentCard extends ConsumerWidget {
         return 'Crypto';
       case 'trading':
         return 'Trading';
+      case 'real_estate':
+        return 'Real Estate';
       default:
         return 'Other';
     }

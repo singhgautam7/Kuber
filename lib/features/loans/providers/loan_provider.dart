@@ -35,6 +35,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
     required double emiAmount,
     String? rateType,
     double? interestRate,
+    DateTime? loanStartDate,
     required int billDate,
     required DateTime startDate,
     DateTime? endDate,
@@ -56,6 +57,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
       ..emiAmount = emiAmount
       ..rateType = rateType
       ..interestRate = interestRate
+      ..loanStartDate = loanStartDate
       ..billDate = billDate
       ..startDate = startDate
       ..endDate = endDate

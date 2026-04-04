@@ -11,6 +11,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
     show currencyProvider;
+import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
@@ -55,6 +56,23 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       _sipDate = e.sipDate;
       _selectedAccountId = e.accountId;
       _notesController.text = e.notes ?? '';
+
+      // Load total invested sum from transactions for display
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final allTxns =
+            ref.read(transactionListProvider).valueOrNull ?? [];
+        final sum = allTxns
+            .where((t) =>
+                t.linkedRuleId == e.uid && t.linkedRuleType == 'investment')
+            .fold(0.0, (s, t) => s + t.amount);
+        if (sum > 0 && mounted) {
+          setState(() {
+            _investedController.text = sum == sum.truncateToDouble()
+                ? sum.toInt().toString()
+                : sum.toStringAsFixed(2);
+          });
+        }
+      });
     }
   }
 
@@ -130,6 +148,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                           'Crypto', Icons.currency_bitcoin, 'crypto'),
                       _typeChip(
                           'Trading', Icons.trending_up, 'trading'),
+                      _typeChip(
+                          'Real Estate', Icons.apartment_outlined, 'real_estate'),
                       _typeChip('Other', Icons.show_chart, 'other'),
                     ],
                   ),
@@ -138,8 +158,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
 
                   // Amounts
                   _FieldLabel(_isEditing
-                      ? 'ADD TO INVESTED AMOUNT (OPTIONAL)'
-                      : 'INVESTED AMOUNT'),
+                      ? 'TOTAL INVESTED (INCL. NEW CONTRIBUTION)'
+                      : 'INVESTED AMOUNT (INITIAL)'),
                   const SizedBox(height: 8),
                   _buildTextField(
                     controller: _investedController,
@@ -565,20 +585,40 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       orElse: () => categories.first,
     );
 
-    final currentValue =
-        double.tryParse(_currentValueController.text.trim());
     final sipAmount =
         double.tryParse(_sipAmountController.text.trim());
 
     if (_isEditing) {
-      final inv = widget.existing!
+      final existing = widget.existing!;
+
+      // Compute current total invested from transactions
+      final allTxns =
+          ref.read(transactionListProvider).valueOrNull ?? [];
+      final currentTotalInvested = allTxns
+          .where((t) =>
+              t.linkedRuleId == existing.uid &&
+              t.linkedRuleType == 'investment')
+          .fold(0.0, (s, t) => s + t.amount);
+
+      // The field now shows the total desired invested; compute delta
+      final desiredTotal =
+          double.tryParse(_investedController.text.trim()) ?? currentTotalInvested;
+      final additionalAmount = (desiredTotal - currentTotalInvested)
+          .clamp(0.0, double.infinity);
+
+      // If currentValue field is empty, auto-fill with desiredTotal
+      double? currentValue =
+          double.tryParse(_currentValueController.text.trim());
+      currentValue ??= desiredTotal > 0 ? desiredTotal : existing.currentValue;
+
+      final inv = existing
         ..name = _nameController.text.trim()
         ..investmentType = _investmentType
         ..currentValue = currentValue
         ..autoDebit = _autoDebit
         ..sipAmount = _autoDebit ? sipAmount : null
         ..sipDate = _autoDebit ? _sipDate : null
-        ..accountId = _selectedAccountId ?? widget.existing!.accountId
+        ..accountId = _selectedAccountId ?? existing.accountId
         ..categoryId = investCat.id.toString()
         ..notes = _notesController.text.trim().isNotEmpty
             ? _notesController.text.trim()
@@ -586,9 +626,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
 
       await ref.read(investmentListProvider.notifier).updateInvestment(inv);
 
-      // Create a contribution if invested amount was entered during edit
-      final additionalAmount =
-          double.tryParse(_investedController.text.trim()) ?? 0;
+      // Create a contribution only for the delta
       if (additionalAmount > 0 && _selectedAccountId != null) {
         await ref.read(investmentListProvider.notifier).addContribution(
               investment: inv,
@@ -600,6 +638,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     } else {
       final initialAmount =
           double.tryParse(_investedController.text.trim()) ?? 0;
+
+      // Auto-fill currentValue with initialAmount if not explicitly set
+      double? currentValue =
+          double.tryParse(_currentValueController.text.trim());
+      if (currentValue == null && initialAmount > 0) {
+        currentValue = initialAmount;
+      }
 
       await ref.read(investmentListProvider.notifier).addInvestment(
             name: _nameController.text.trim(),

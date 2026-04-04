@@ -67,48 +67,53 @@ const LoanSchema = CollectionSchema(
       name: r'lenderName',
       type: IsarType.string,
     ),
-    r'loanType': PropertySchema(
+    r'loanStartDate': PropertySchema(
       id: 10,
+      name: r'loanStartDate',
+      type: IsarType.dateTime,
+    ),
+    r'loanType': PropertySchema(
+      id: 11,
       name: r'loanType',
       type: IsarType.string,
     ),
     r'name': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'name',
       type: IsarType.string,
     ),
     r'notes': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'notes',
       type: IsarType.string,
     ),
     r'principalAmount': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'principalAmount',
       type: IsarType.double,
     ),
     r'rateType': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'rateType',
       type: IsarType.string,
     ),
     r'referenceNumber': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'referenceNumber',
       type: IsarType.string,
     ),
     r'startDate': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
     r'uid': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'uid',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -176,15 +181,16 @@ void _loanSerialize(
   writer.writeDouble(offsets[7], object.interestRate);
   writer.writeBool(offsets[8], object.isCompleted);
   writer.writeString(offsets[9], object.lenderName);
-  writer.writeString(offsets[10], object.loanType);
-  writer.writeString(offsets[11], object.name);
-  writer.writeString(offsets[12], object.notes);
-  writer.writeDouble(offsets[13], object.principalAmount);
-  writer.writeString(offsets[14], object.rateType);
-  writer.writeString(offsets[15], object.referenceNumber);
-  writer.writeDateTime(offsets[16], object.startDate);
-  writer.writeString(offsets[17], object.uid);
-  writer.writeDateTime(offsets[18], object.updatedAt);
+  writer.writeDateTime(offsets[10], object.loanStartDate);
+  writer.writeString(offsets[11], object.loanType);
+  writer.writeString(offsets[12], object.name);
+  writer.writeString(offsets[13], object.notes);
+  writer.writeDouble(offsets[14], object.principalAmount);
+  writer.writeString(offsets[15], object.rateType);
+  writer.writeString(offsets[16], object.referenceNumber);
+  writer.writeDateTime(offsets[17], object.startDate);
+  writer.writeString(offsets[18], object.uid);
+  writer.writeDateTime(offsets[19], object.updatedAt);
 }
 
 Loan _loanDeserialize(
@@ -205,15 +211,16 @@ Loan _loanDeserialize(
   object.interestRate = reader.readDoubleOrNull(offsets[7]);
   object.isCompleted = reader.readBool(offsets[8]);
   object.lenderName = reader.readString(offsets[9]);
-  object.loanType = reader.readString(offsets[10]);
-  object.name = reader.readString(offsets[11]);
-  object.notes = reader.readStringOrNull(offsets[12]);
-  object.principalAmount = reader.readDouble(offsets[13]);
-  object.rateType = reader.readStringOrNull(offsets[14]);
-  object.referenceNumber = reader.readStringOrNull(offsets[15]);
-  object.startDate = reader.readDateTime(offsets[16]);
-  object.uid = reader.readString(offsets[17]);
-  object.updatedAt = reader.readDateTime(offsets[18]);
+  object.loanStartDate = reader.readDateTimeOrNull(offsets[10]);
+  object.loanType = reader.readString(offsets[11]);
+  object.name = reader.readString(offsets[12]);
+  object.notes = reader.readStringOrNull(offsets[13]);
+  object.principalAmount = reader.readDouble(offsets[14]);
+  object.rateType = reader.readStringOrNull(offsets[15]);
+  object.referenceNumber = reader.readStringOrNull(offsets[16]);
+  object.startDate = reader.readDateTime(offsets[17]);
+  object.uid = reader.readString(offsets[18]);
+  object.updatedAt = reader.readDateTime(offsets[19]);
   return object;
 }
 
@@ -245,22 +252,24 @@ P _loanDeserializeProp<P>(
     case 9:
       return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 11:
       return (reader.readString(offset)) as P;
     case 12:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 13:
-      return (reader.readDouble(offset)) as P;
-    case 14:
       return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readDouble(offset)) as P;
     case 15:
       return (reader.readStringOrNull(offset)) as P;
     case 16:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 17:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 18:
+      return (reader.readString(offset)) as P;
+    case 19:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1127,6 +1136,75 @@ extension LoanQueryFilter on QueryBuilder<Loan, Loan, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'lenderName',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> loanStartDateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'loanStartDate',
+      ));
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> loanStartDateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'loanStartDate',
+      ));
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> loanStartDateEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'loanStartDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> loanStartDateGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'loanStartDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> loanStartDateLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'loanStartDate',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterFilterCondition> loanStartDateBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'loanStartDate',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -2245,6 +2323,18 @@ extension LoanQuerySortBy on QueryBuilder<Loan, Loan, QSortBy> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByLoanStartDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loanStartDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> sortByLoanStartDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loanStartDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterSortBy> sortByLoanType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'loanType', Sort.asc);
@@ -2487,6 +2577,18 @@ extension LoanQuerySortThenBy on QueryBuilder<Loan, Loan, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByLoanStartDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loanStartDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Loan, Loan, QAfterSortBy> thenByLoanStartDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'loanStartDate', Sort.desc);
+    });
+  }
+
   QueryBuilder<Loan, Loan, QAfterSortBy> thenByLoanType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'loanType', Sort.asc);
@@ -2660,6 +2762,12 @@ extension LoanQueryWhereDistinct on QueryBuilder<Loan, Loan, QDistinct> {
     });
   }
 
+  QueryBuilder<Loan, Loan, QDistinct> distinctByLoanStartDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'loanStartDate');
+    });
+  }
+
   QueryBuilder<Loan, Loan, QDistinct> distinctByLoanType(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2786,6 +2894,12 @@ extension LoanQueryProperty on QueryBuilder<Loan, Loan, QQueryProperty> {
   QueryBuilder<Loan, String, QQueryOperations> lenderNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lenderName');
+    });
+  }
+
+  QueryBuilder<Loan, DateTime?, QQueryOperations> loanStartDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'loanStartDate');
     });
   }
 

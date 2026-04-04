@@ -24,6 +24,8 @@ class Loan {
 
   double? interestRate; // e.g. 8.45 (percent p.a.)
 
+  DateTime? loanStartDate; // Optional — loan disbursement / sanction date
+
   late int billDate; // Day of month EMI is due (1–28)
 
   late DateTime startDate; // Repayment start date

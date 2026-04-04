@@ -16,16 +16,31 @@ import '../providers/investment_provider.dart';
 import '../utils/investment_calculations.dart' as calc;
 import 'add_contribution_sheet.dart';
 
-class InvestmentDetailSheet extends ConsumerWidget {
+class InvestmentDetailSheet extends ConsumerStatefulWidget {
   final Investment investment;
 
   const InvestmentDetailSheet({super.key, required this.investment});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InvestmentDetailSheet> createState() =>
+      _InvestmentDetailSheetState();
+}
+
+class _InvestmentDetailSheetState
+    extends ConsumerState<InvestmentDetailSheet> {
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
     final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
+
+    // Watch the live list so the sheet updates when currentValue changes
+    final liveList = ref.watch(investmentListProvider).valueOrNull ?? [];
+    final investment = liveList
+            .where((i) => i.uid == widget.investment.uid)
+            .firstOrNull ??
+        widget.investment;
+
     final contributionsAsync =
         ref.watch(investmentTransactionsProvider(investment.uid));
 
@@ -300,7 +315,7 @@ class InvestmentDetailSheet extends ConsumerWidget {
         isScrollControlled: true,
         useSafeArea: true,
         backgroundColor: Colors.transparent,
-        builder: (_) => AddContributionSheet(investment: investment),
+        builder: (_) => AddContributionSheet(investment: widget.investment),
       );
     });
   }
@@ -308,7 +323,7 @@ class InvestmentDetailSheet extends ConsumerWidget {
   void _showUpdateValueDialog(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final controller = TextEditingController(
-      text: investment.currentValue?.toStringAsFixed(0) ?? '',
+      text: widget.investment.currentValue?.toStringAsFixed(0) ?? '',
     );
     final symbol = ref.read(currencyProvider).symbol;
 
@@ -352,7 +367,7 @@ class InvestmentDetailSheet extends ConsumerWidget {
               final value = double.tryParse(controller.text.trim());
               ref
                   .read(investmentListProvider.notifier)
-                  .updateCurrentValue(investment, value);
+                  .updateCurrentValue(widget.investment, value);
               Navigator.pop(ctx);
             },
           ),
@@ -384,7 +399,7 @@ class InvestmentDetailSheet extends ConsumerWidget {
             onPressed: () {
               ref
                   .read(investmentListProvider.notifier)
-                  .deleteInvestment(investment);
+                  .deleteInvestment(widget.investment);
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
@@ -406,6 +421,8 @@ class InvestmentDetailSheet extends ConsumerWidget {
         return Icons.currency_bitcoin;
       case 'trading':
         return Icons.trending_up;
+      case 'real_estate':
+        return Icons.apartment_outlined;
       default:
         return Icons.show_chart;
     }
@@ -423,6 +440,8 @@ class InvestmentDetailSheet extends ConsumerWidget {
         return 'CRYPTO';
       case 'trading':
         return 'TRADING';
+      case 'real_estate':
+        return 'REAL ESTATE';
       default:
         return 'OTHER';
     }

@@ -30,6 +30,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   late String _type; // 'lent' | 'borrowed'
   final _amountController = TextEditingController();
   final _nameController = TextEditingController();
+  final _nameFocusNode = FocusNode();
   String? _selectedAccountId;
   DateTime _entryDate = DateTime.now();
   DateTime? _expectedDate;
@@ -62,6 +63,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   void dispose() {
     _amountController.dispose();
     _nameController.dispose();
+    _nameFocusNode.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -175,7 +177,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   const SizedBox(height: 8),
                   RawAutocomplete<String>(
                     textEditingController: _nameController,
-                    focusNode: FocusNode(),
+                    focusNode: _nameFocusNode,
                     optionsBuilder: (textEditingValue) {
                       if (textEditingValue.text.isEmpty) return [];
                       final query = textEditingValue.text.toLowerCase();
@@ -644,14 +646,14 @@ class _DuplicateWarning extends ConsumerWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, size: 14, color: cs.error),
+          Icon(Icons.info_outline_rounded, size: 14, color: cs.onSurfaceVariant),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
-              'An active ${type == 'lent' ? 'lent' : 'borrow'} record for ${personName.trim()} already exists',
+              'Note: an active ${type == 'lent' ? 'lent' : 'borrow'} entry for ${personName.trim()} already exists — a new one will be created.',
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: cs.error,
+                color: cs.onSurfaceVariant,
               ),
             ),
           ),
