@@ -7,11 +7,12 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
+import 'package:flutter/services.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider;
+    show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/ledger.dart';
 import '../providers/ledger_provider.dart';
@@ -27,7 +28,7 @@ class AddLedgerScreen extends ConsumerStatefulWidget {
 
 class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   late String _type; // 'lent' | 'borrowed'
-  double _amount = 0;
+  final _amountController = TextEditingController();
   final _nameController = TextEditingController();
   String? _selectedAccountId;
   DateTime _entryDate = DateTime.now();
@@ -42,7 +43,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     if (e != null) {
       _isEditing = true;
       _type = e.type;
-      _amount = e.originalAmount;
+      _amountController.text = e.originalAmount == e.originalAmount.truncateToDouble()
+          ? e.originalAmount.toInt().toString()
+          : e.originalAmount.toStringAsFixed(2);
       _nameController.text = e.personName;
       _selectedAccountId = e.accountId;
       _entryDate = e.createdAt;
@@ -53,8 +56,11 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     }
   }
 
+  double get _amount => double.tryParse(_amountController.text.trim()) ?? 0;
+
   @override
   void dispose() {
+    _amountController.dispose();
     _nameController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -63,7 +69,6 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final fmt = ref.watch(formatterProvider);
     final symbol = ref.watch(currencyProvider).symbol;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
     final personNames = ref.watch(ledgerPersonNamesProvider).valueOrNull ?? [];
@@ -97,63 +102,69 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   const SizedBox(height: KuberSpacing.lg),
 
                   // Type toggle
-                  _TypeToggle(
-                    selected: _type,
-                    onSelected: (v) => setState(() => _type = v),
+                  IgnorePointer(
+                    ignoring: _isEditing,
+                    child: Opacity(
+                      opacity: _isEditing ? 0.5 : 1.0,
+                      child: _TypeToggle(
+                        selected: _type,
+                        onSelected: (v) => setState(() => _type = v),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: KuberSpacing.xl),
 
                   // Amount
                   _SectionLabel('AMOUNT TO RECORD'),
                   const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _openCalculator(context),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                  TextField(
+                    controller: _amountController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d{0,2}')),
+                    ],
+                    style: GoogleFonts.inter(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      hintStyle: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: cs.onSurfaceVariant,
                       ),
-                      child: Row(
-                        children: [
-                          Text(
-                            symbol,
-                            style: GoogleFonts.inter(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w300,
-                              color: cs.onSurfaceVariant,
-                            ),
+                      prefixText: '$symbol ',
+                      prefixStyle: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w300,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      suffixIcon: GestureDetector(
+                        onTap: () => _openCalculator(context),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(KuberRadius.md),
+                            border: Border.all(color: cs.outline),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _amount > 0
-                                  ? fmt.formatCurrency(_amount)
-                                  : '0',
-                              style: GoogleFonts.inter(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: _amount > 0
-                                    ? cs.onSurface
-                                    : cs.onSurfaceVariant,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(color: cs.outline),
-                            ),
-                            child: Icon(Icons.calculate_outlined,
-                                color: cs.onSurfaceVariant),
-                          ),
-                        ],
+                          child: Icon(Icons.calculate_outlined,
+                              color: cs.onSurfaceVariant),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: cs.surfaceContainerHighest,
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
+                        borderSide: BorderSide.none,
                       ),
                     ),
                   ),
@@ -222,11 +233,12 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     },
                   ),
 
-                  // Duplicate warning
-                  _DuplicateWarning(
-                    personName: _nameController.text,
-                    type: _type,
-                  ),
+                  // Duplicate warning (only for new entries)
+                  if (!_isEditing)
+                    _DuplicateWarning(
+                      personName: _nameController.text,
+                      type: _type,
+                    ),
 
                   const SizedBox(height: KuberSpacing.xl),
 
@@ -403,15 +415,32 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       _selectedAccountId != null;
 
   void _openCalculator(BuildContext context) {
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
       builder: (_) => KuberCalculator(
         initialValue: _amount,
-        onConfirm: (result) => setState(() => _amount = result),
+        onConfirm: (result) {
+          setState(() {
+            _amountController.text = result == result.truncateToDouble()
+                ? result.toInt().toString()
+                : result.toStringAsFixed(2);
+          });
+        },
       ),
-    );
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(this.context).unfocus();
+      });
+    });
   }
 
   void _pickAccount(BuildContext context) {

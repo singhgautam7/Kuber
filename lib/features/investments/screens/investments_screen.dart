@@ -30,22 +30,20 @@ class InvestmentsScreen extends ConsumerStatefulWidget {
 
 class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final seen = ref.read(infoSeenProvider(PrefsKeys.seenInfoInvestments));
-      if (seen.hasValue && seen.value == false) {
-        if (!mounted) return;
-        KuberInfoBottomSheet.show(context, InfoConstants.investments);
-        ref
-            .read(infoSeenProvider(PrefsKeys.seenInfoInvestments).notifier)
-            .markSeen();
-      }
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoInvestments), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.investments);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoInvestments).notifier).markSeen();
+        });
+      }
+    });
+
     final cs = Theme.of(context).colorScheme;
     final investmentsAsync = ref.watch(investmentListProvider);
     final txnsAsync = ref.watch(transactionListProvider);

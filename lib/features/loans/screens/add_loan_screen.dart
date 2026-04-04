@@ -11,7 +11,7 @@ import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider;
+    show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/loan.dart';
 import '../providers/loan_provider.dart';
@@ -26,7 +26,7 @@ class AddLoanScreen extends ConsumerStatefulWidget {
 }
 
 class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
-  double _principalAmount = 0;
+  final _principalController = TextEditingController();
   String _loanType = 'personal';
   final _nameController = TextEditingController();
   final _lenderController = TextEditingController();
@@ -47,7 +47,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final e = widget.existing;
     if (e != null) {
       _isEditing = true;
-      _principalAmount = e.principalAmount;
+      _principalController.text = e.principalAmount == e.principalAmount.truncateToDouble()
+          ? e.principalAmount.toInt().toString()
+          : e.principalAmount.toStringAsFixed(2);
       _loanType = e.loanType;
       _nameController.text = e.name;
       _lenderController.text = e.lenderName;
@@ -65,8 +67,12 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     }
   }
 
+  double get _principalAmount =>
+      double.tryParse(_principalController.text.trim()) ?? 0;
+
   @override
   void dispose() {
+    _principalController.dispose();
     _nameController.dispose();
     _lenderController.dispose();
     _refController.dispose();
@@ -79,7 +85,6 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final fmt = ref.watch(formatterProvider);
     final symbol = ref.watch(currencyProvider).symbol;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
     final selectedAccount = accounts
@@ -116,28 +121,28 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                   // Principal amount
                   _FieldLabel('TOTAL PRINCIPAL AMOUNT'),
                   const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _openCalculator(context),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Text(
-                        _principalAmount > 0
-                            ? '$symbol ${fmt.formatCurrency(_principalAmount)}'
-                            : 'Tap to enter amount',
-                        style: GoogleFonts.inter(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: _principalAmount > 0
-                              ? cs.onSurface
-                              : cs.onSurfaceVariant,
+                  _buildTextField(
+                    controller: _principalController,
+                    hint: '0',
+                    prefix: symbol,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}')),
+                    ],
+                    suffixIcon: GestureDetector(
+                      onTap: () => _openCalculator(context),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        margin: const EdgeInsets.only(right: 4),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline),
                         ),
+                        child: Icon(Icons.calculate_outlined,
+                            color: cs.onSurfaceVariant),
                       ),
                     ),
                   ),
@@ -207,6 +212,21 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                       FilteringTextInputFormatter.allow(
                           RegExp(r'^\d+\.?\d{0,2}')),
                     ],
+                    suffixIcon: GestureDetector(
+                      onTap: () => _openCalculatorFor(_emiController),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        margin: const EdgeInsets.only(right: 4),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                              BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline),
+                        ),
+                        child: Icon(Icons.calculate_outlined,
+                            color: cs.onSurfaceVariant),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
@@ -465,6 +485,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     int maxLines = 1,
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
+    Widget? suffixIcon,
   }) {
     final cs = Theme.of(context).colorScheme;
     return TextField(
@@ -483,6 +504,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           fontWeight: FontWeight.w600,
           color: cs.onSurface,
         ),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: cs.surfaceContainerHighest,
         border: OutlineInputBorder(
@@ -535,16 +557,36 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   }
 
   void _openCalculator(BuildContext context) {
+    _openCalculatorFor(_principalController);
+  }
+
+  void _openCalculatorFor(TextEditingController controller) {
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => KuberCalculator(
-        initialValue: _principalAmount,
-        onConfirm: (result) =>
-            setState(() => _principalAmount = result),
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
-    );
+      builder: (_) => KuberCalculator(
+        initialValue: double.tryParse(controller.text.trim()) ?? 0,
+        onConfirm: (result) {
+          setState(() {
+            controller.text = result == result.truncateToDouble()
+                ? result.toInt().toString()
+                : result.toStringAsFixed(2);
+          });
+        },
+      ),
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 
   void _pickAccount(BuildContext context) {

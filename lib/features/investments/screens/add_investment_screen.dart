@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
@@ -136,21 +137,22 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   const SizedBox(height: 24),
 
                   // Amounts
-                  if (!_isEditing) ...[
-                    _FieldLabel('INVESTED AMOUNT'),
-                    const SizedBox(height: 8),
-                    _buildTextField(
-                      controller: _investedController,
-                      hint: '0',
-                      prefix: symbol,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}')),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                  _FieldLabel(_isEditing
+                      ? 'ADD TO INVESTED AMOUNT (OPTIONAL)'
+                      : 'INVESTED AMOUNT'),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: _investedController,
+                    hint: '0',
+                    prefix: symbol,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}')),
+                    ],
+                    suffixIcon: _calcButton(_investedController),
+                  ),
+                  const SizedBox(height: 16),
 
                   _FieldLabel('CURRENT VALUE (OPTIONAL)'),
                   const SizedBox(height: 8),
@@ -163,6 +165,44 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                       FilteringTextInputFormatter.allow(
                           RegExp(r'^\d+\.?\d{0,2}')),
                     ],
+                    suffixIcon: _calcButton(_currentValueController),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Source account
+                  _FieldLabel('SOURCE ACCOUNT'),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => _pickAccount(context),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest,
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              selectedAccount?.name ?? 'Select account',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: selectedAccount != null
+                                    ? cs.onSurface
+                                    : cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          Icon(Icons.chevron_right,
+                              color: cs.onSurfaceVariant, size: 20),
+                        ],
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
@@ -233,6 +273,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                   FilteringTextInputFormatter.allow(
                                       RegExp(r'^\d+\.?\d{0,2}')),
                                 ],
+                                suffixIcon:
+                                    _calcButton(_sipAmountController),
                               ),
 
                               const SizedBox(height: 24),
@@ -406,6 +448,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     int maxLines = 1,
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
+    Widget? suffixIcon,
   }) {
     final cs = Theme.of(context).colorScheme;
     return TextField(
@@ -424,6 +467,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
           fontWeight: FontWeight.w600,
           color: cs.onSurface,
         ),
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: cs.surfaceContainerHighest,
         border: OutlineInputBorder(
@@ -432,6 +476,52 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         ),
       ),
     );
+  }
+
+  Widget _calcButton(TextEditingController controller) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => _openCalculatorFor(controller),
+      child: Container(
+        width: 44,
+        height: 44,
+        margin: const EdgeInsets.only(right: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Icon(Icons.calculate_outlined, color: cs.onSurfaceVariant),
+      ),
+    );
+  }
+
+  void _openCalculatorFor(TextEditingController controller) {
+    FocusScope.of(context).unfocus();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      builder: (_) => KuberCalculator(
+        initialValue: double.tryParse(controller.text.trim()) ?? 0,
+        onConfirm: (result) {
+          setState(() {
+            controller.text = result == result.truncateToDouble()
+                ? result.toInt().toString()
+                : result.toStringAsFixed(2);
+          });
+        },
+      ),
+    ).then((_) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (mounted) FocusScope.of(context).unfocus();
+      });
+    });
   }
 
   bool _canSave() {
@@ -488,13 +578,25 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         ..autoDebit = _autoDebit
         ..sipAmount = _autoDebit ? sipAmount : null
         ..sipDate = _autoDebit ? _sipDate : null
-        ..accountId = _autoDebit ? _selectedAccountId : widget.existing!.accountId
+        ..accountId = _selectedAccountId ?? widget.existing!.accountId
         ..categoryId = investCat.id.toString()
         ..notes = _notesController.text.trim().isNotEmpty
             ? _notesController.text.trim()
             : null;
 
       await ref.read(investmentListProvider.notifier).updateInvestment(inv);
+
+      // Create a contribution if invested amount was entered during edit
+      final additionalAmount =
+          double.tryParse(_investedController.text.trim()) ?? 0;
+      if (additionalAmount > 0 && _selectedAccountId != null) {
+        await ref.read(investmentListProvider.notifier).addContribution(
+              investment: inv,
+              amount: additionalAmount,
+              date: DateTime.now(),
+              accountId: _selectedAccountId!,
+            );
+      }
     } else {
       final initialAmount =
           double.tryParse(_investedController.text.trim()) ?? 0;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +10,7 @@ import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider;
+    show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
@@ -25,10 +26,12 @@ class AddContributionSheet extends ConsumerStatefulWidget {
 }
 
 class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
-  double _amount = 0;
+  final _amountController = TextEditingController();
   String? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
   final _noteController = TextEditingController();
+
+  double get _amount => double.tryParse(_amountController.text.trim()) ?? 0;
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
 
   @override
   void dispose() {
+    _amountController.dispose();
     _noteController.dispose();
     super.dispose();
   }
@@ -45,7 +49,6 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final fmt = ref.watch(formatterProvider);
     final symbol = ref.watch(currencyProvider).symbol;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
     final selectedAccount = accounts
@@ -77,25 +80,52 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             ),
           ),
           const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => _openCalculator(context),
-            child: Container(
-              width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+          TextField(
+            controller: _amountController,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(
+                  RegExp(r'^\d*\.?\d{0,2}')),
+            ],
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(
+              hintText: '0',
+              hintStyle: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: cs.onSurfaceVariant,
               ),
-              child: Text(
-                _amount > 0
-                    ? '$symbol ${fmt.formatCurrency(_amount)}'
-                    : 'Tap to enter amount',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: _amount > 0 ? cs.onSurface : cs.onSurfaceVariant,
+              prefixText: '$symbol ',
+              prefixStyle: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w300,
+                color: cs.onSurfaceVariant,
+              ),
+              suffixIcon: GestureDetector(
+                onTap: () => _openCalculator(context),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  margin: const EdgeInsets.only(right: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(color: cs.outline),
+                  ),
+                  child: Icon(Icons.calculate_outlined,
+                      color: cs.onSurfaceVariant),
                 ),
+              ),
+              filled: true,
+              fillColor: cs.surfaceContainerHighest,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderSide: BorderSide.none,
               ),
             ),
           ),
@@ -218,13 +248,25 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
   }
 
   void _openCalculator(BuildContext context) {
+    FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
       builder: (_) => KuberCalculator(
         initialValue: _amount,
-        onConfirm: (result) => setState(() => _amount = result),
+        onConfirm: (result) {
+          setState(() {
+            _amountController.text = result == result.truncateToDouble()
+                ? result.toInt().toString()
+                : result.toStringAsFixed(2);
+          });
+        },
       ),
     );
   }

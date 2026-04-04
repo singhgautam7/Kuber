@@ -33,20 +33,20 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
   String? _filterType; // null = all, 'lent', 'borrowed'
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final seen = ref.read(infoSeenProvider(PrefsKeys.seenInfoLedger));
-      if (seen.hasValue && seen.value == false) {
-        if (!mounted) return;
-        KuberInfoBottomSheet.show(context, InfoConstants.ledger);
-        ref.read(infoSeenProvider(PrefsKeys.seenInfoLedger).notifier).markSeen();
-      }
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoLedger), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.ledger);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoLedger).notifier).markSeen();
+        });
+      }
+    });
+
     final cs = Theme.of(context).colorScheme;
     final ledgersAsync = ref.watch(ledgerListProvider);
     final txnsAsync = ref.watch(transactionListProvider);
@@ -118,9 +118,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
 
               // Active section
               if (active.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: _SectionHeader(label: 'ACTIVE LEDGER'),
-                ),
+                // SliverToBoxAdapter(
+                //   child: _SectionHeader(label: 'ACTIVE LEDGER'),
+                // ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList.separated(
@@ -258,39 +258,61 @@ class _FilterRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final hasFilter = selected != null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Row(
-        children: [
-          Text(
-            'FILTERS',
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.2,
+      child: SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            Text(
+              'FILTERS',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          _FilterChip(
-            label: 'LENT',
-            isSelected: selected == 'lent',
-            onTap: () => onChanged(selected == 'lent' ? null : 'lent'),
-          ),
-          const SizedBox(width: 8),
-          _FilterChip(
-            label: 'BORROWED',
-            isSelected: selected == 'borrowed',
-            onTap: () => onChanged(selected == 'borrowed' ? null : 'borrowed'),
-          ),
-          if (selected != null) ...[
+            const Spacer(),
+            _FilterChip(
+              label: 'Lent',
+              isSelected: selected == 'lent',
+              onTap: () => onChanged(selected == 'lent' ? null : 'lent'),
+            ),
+            const SizedBox(width: 8),
+            _FilterChip(
+              label: 'Borrowed',
+              isSelected: selected == 'borrowed',
+              onTap: () =>
+                  onChanged(selected == 'borrowed' ? null : 'borrowed'),
+            ),
             const SizedBox(width: 8),
             GestureDetector(
-              onTap: () => onChanged(null),
-              child: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+              onTap: hasFilter ? () => onChanged(null) : null,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: hasFilter ? 1.0 : 0.3,
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: hasFilter
+                        ? Border.all(color: cs.error.withValues(alpha: 0.5))
+                        : null,
+                  ),
+                  child: Icon(
+                    Icons.delete_sweep_rounded,
+                    size: 20,
+                    color: hasFilter ? cs.error : cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -312,22 +334,23 @@ class _FilterChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? cs.surfaceContainerHighest : Colors.transparent,
+          color: isSelected ? cs.primary : cs.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(
-            color: isSelected ? cs.outline : cs.outlineVariant.withValues(alpha: 0.5),
+            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
           label,
           style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: isSelected ? cs.onSurface : cs.onSurfaceVariant,
-            letterSpacing: 0.8,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: isSelected ? Colors.white : cs.onSurfaceVariant,
+            letterSpacing: 0.5,
           ),
         ),
       ),
@@ -373,161 +396,173 @@ class _LedgerCard extends ConsumerWidget {
     final remaining = calc.computeRemaining(ledger, allTxns);
     final progress = calc.computeProgress(ledger, allTxns);
     final isLent = ledger.type == 'lent';
-    final progressColor = isLent ? cs.tertiary : cs.error;
+    final isSettled = ledger.isSettled;
+    final progressColor = isSettled
+        ? cs.onSurfaceVariant
+        : (isLent ? cs.tertiary : cs.error);
     final initials = _getInitials(ledger.personName);
 
     return GestureDetector(
       onTap: () => _openDetailSheet(context, ledger),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            // Top row
-            Row(
-              children: [
-                // Avatar
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    initials,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
+      child: Opacity(
+        opacity: isSettled ? 0.55 : 1.0,
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              // Top row
+              Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      initials,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                // Name + type badge
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ledger.personName,
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: (isLent ? cs.primary : cs.error)
-                              .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          isLent ? 'LENT' : 'BORROWED',
+                  const SizedBox(width: 10),
+                  // Name + type badge
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ledger.personName,
                           style: GoogleFonts.inter(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
-                            color: isLent ? cs.primary : cs.error,
-                            letterSpacing: 0.8,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Amount
-                Text(
-                  fmt.formatCurrency(ledger.originalAmount),
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                    decoration:
-                        ledger.isSettled ? TextDecoration.lineThrough : null,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // Second row: date + paid
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  ledger.isSettled
-                      ? 'SETTLED: ${DateFormat('MMM d').format(ledger.updatedAt).toUpperCase()}'
-                      : ledger.expectedDate != null
-                          ? 'DUE: ${DateFormat('MMM d').format(ledger.expectedDate!).toUpperCase()}'
-                          : 'NO DUE DATE',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-                Text(
-                  'Paid: ${fmt.formatCurrency(paid)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // Progress bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 4,
-                backgroundColor: cs.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation(progressColor),
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            // Bottom row: remaining + percentage
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'REMAINING: ${fmt.formatCurrency(remaining.clamp(0, double.infinity))}',
-                  style: GoogleFonts.inter(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                if (ledger.isSettled)
-                  Icon(Icons.check_circle, size: 16, color: cs.tertiary)
-                else
-                  Text(
-                    '${(progress * 100).toInt()}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: progress > 0 ? cs.tertiary : cs.error,
+                        const SizedBox(height: 2),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isSettled
+                                ? cs.onSurfaceVariant.withValues(alpha: 0.12)
+                                : (isLent ? cs.primary : cs.error)
+                                    .withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            isSettled
+                                ? 'SETTLED'
+                                : (isLent ? 'LENT' : 'BORROWED'),
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: isSettled
+                                  ? cs.onSurfaceVariant
+                                  : (isLent ? cs.primary : cs.error),
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-              ],
-            ),
-          ],
+                  // Amount
+                  Text(
+                    fmt.formatCurrency(ledger.originalAmount),
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                      decoration:
+                          isSettled ? TextDecoration.lineThrough : null,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Second row: date + paid
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isSettled
+                        ? 'SETTLED: ${DateFormat('MMM d').format(ledger.updatedAt).toUpperCase()}'
+                        : ledger.expectedDate != null
+                            ? 'DUE: ${DateFormat('MMM d').format(ledger.expectedDate!).toUpperCase()}'
+                            : 'NO DUE DATE',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  Text(
+                    'Paid: ${fmt.formatCurrency(paid)}',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(2),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 4,
+                  backgroundColor: cs.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation(progressColor),
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // Bottom row: remaining + percentage
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'REMAINING: ${fmt.formatCurrency(remaining.clamp(0, double.infinity))}',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                  if (isSettled)
+                    Icon(Icons.check_circle, size: 16, color: cs.onSurfaceVariant)
+                  else
+                    Text(
+                      '${(progress * 100).toInt()}%',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: progress > 0 ? cs.tertiary : cs.error,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

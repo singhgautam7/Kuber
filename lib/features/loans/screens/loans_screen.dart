@@ -33,20 +33,20 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
   bool _showCompleted = false;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final seen = ref.read(infoSeenProvider(PrefsKeys.seenInfoLoans));
-      if (seen.hasValue && seen.value == false) {
-        if (!mounted) return;
-        KuberInfoBottomSheet.show(context, InfoConstants.loans);
-        ref.read(infoSeenProvider(PrefsKeys.seenInfoLoans).notifier).markSeen();
-      }
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoLoans), (prev, next) {
+      if (next.hasValue && next.value == false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          KuberInfoBottomSheet.show(context, InfoConstants.loans);
+          ref.read(infoSeenProvider(PrefsKeys.seenInfoLoans).notifier).markSeen();
+        });
+      }
+    });
+
     final cs = Theme.of(context).colorScheme;
     final loansAsync = ref.watch(loanListProvider);
     final txnsAsync = ref.watch(transactionListProvider);
