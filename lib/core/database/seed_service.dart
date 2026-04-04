@@ -93,6 +93,8 @@ class SeedService {
           _cat('Transfer', 'swap_horiz', 0xFF9E9E9E, 'both'),
           _cat('Adjustment', 'tune', 0xFFBDBDBD, 'both'),
           _cat('Lent / Borrow', 'handshake', 0xFF78909C, 'both'),
+          _cat('Loan EMI', 'account_balance', 0xFF5C6BC0, 'expense'),
+          _cat('Investment', 'show_chart', 0xFF26A69A, 'expense'),
         ],
       };
 

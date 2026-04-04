@@ -9,6 +9,8 @@ import 'package:kuber/features/tags/data/tag.dart';
 import 'package:kuber/features/tags/data/transaction_tag.dart';
 import 'package:kuber/features/budgets/data/budget.dart';
 import 'package:kuber/features/ledger/data/ledger.dart';
+import 'package:kuber/features/loans/data/loan.dart';
+import 'package:kuber/features/investments/data/investment.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -20,6 +22,8 @@ const _allSchemas = [
   TransactionTagSchema,
   BudgetSchema,
   LedgerSchema,
+  LoanSchema,
+  InvestmentSchema,
 ];
 
 bool _isarInitialized = false;

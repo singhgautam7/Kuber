@@ -1,5 +1,7 @@
 import 'package:isar/isar.dart';
 
+import '../../investments/data/investment.dart';
+import '../../loans/data/loan.dart';
 import '../../transactions/data/transaction.dart';
 import 'recurring_repository.dart';
 import 'recurring_rule.dart';
@@ -67,6 +69,105 @@ class RecurringProcessor {
       }
     });
 
+    // Process loan auto-payments and investment SIP auto-debits
+    totalCreated += await _processLoanAutoPayments(now);
+    totalCreated += await _processInvestmentSipDebits(now);
+
     return totalCreated;
+  }
+
+  /// Creates EMI transactions for loans with autoAddTransaction on their bill date.
+  Future<int> _processLoanAutoPayments(DateTime now) async {
+    final today = now.day;
+    final loans = await isar.loans
+        .filter()
+        .autoAddTransactionEqualTo(true)
+        .isCompletedEqualTo(false)
+        .findAll();
+
+    int created = 0;
+
+    for (final loan in loans) {
+      if (loan.billDate != today) continue;
+
+      // Check if an EMI transaction already exists for this loan today
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      final existing = await isar.transactions
+          .filter()
+          .linkedRuleIdEqualTo(loan.uid)
+          .linkedRuleTypeEqualTo('loan')
+          .createdAtBetween(startOfDay, endOfDay, includeUpper: false)
+          .findAll();
+
+      if (existing.isNotEmpty) continue;
+
+      final txnName = 'EMI — ${loan.name}';
+      await isar.writeTxn(() async {
+        final t = Transaction()
+          ..name = txnName
+          ..nameLower = txnName.toLowerCase()
+          ..amount = loan.emiAmount
+          ..type = 'expense'
+          ..accountId = loan.accountId
+          ..categoryId = loan.categoryId
+          ..linkedRuleId = loan.uid
+          ..linkedRuleType = 'loan'
+          ..createdAt = now
+          ..updatedAt = now;
+        await isar.transactions.put(t);
+      });
+      created++;
+    }
+
+    return created;
+  }
+
+  /// Creates SIP contribution transactions for investments with autoDebit on their SIP date.
+  Future<int> _processInvestmentSipDebits(DateTime now) async {
+    final today = now.day;
+    final investments = await isar.investments
+        .filter()
+        .autoDebitEqualTo(true)
+        .findAll();
+
+    int created = 0;
+
+    for (final inv in investments) {
+      if (inv.sipDate != today) continue;
+      if (inv.sipAmount == null || inv.sipAmount! <= 0) continue;
+      if (inv.accountId == null) continue;
+
+      // Check if a contribution already exists for this investment today
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+      final existing = await isar.transactions
+          .filter()
+          .linkedRuleIdEqualTo(inv.uid)
+          .linkedRuleTypeEqualTo('investment')
+          .createdAtBetween(startOfDay, endOfDay, includeUpper: false)
+          .findAll();
+
+      if (existing.isNotEmpty) continue;
+
+      final txnName = 'Contribution — ${inv.name}';
+      await isar.writeTxn(() async {
+        final t = Transaction()
+          ..name = txnName
+          ..nameLower = txnName.toLowerCase()
+          ..amount = inv.sipAmount!
+          ..type = 'expense'
+          ..accountId = inv.accountId!
+          ..categoryId = inv.categoryId
+          ..linkedRuleId = inv.uid
+          ..linkedRuleType = 'investment'
+          ..createdAt = now
+          ..updatedAt = now;
+        await isar.transactions.put(t);
+      });
+      created++;
+    }
+
+    return created;
   }
 }

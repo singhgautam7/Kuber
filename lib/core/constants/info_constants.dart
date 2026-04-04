@@ -132,6 +132,60 @@ class InfoConstants {
     ],
   );
 
+  static const loans = KuberInfoConfig(
+    title: 'About Loans',
+    description: 'Track your EMIs, outstanding balances and repayment progress.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.account_balance_outlined,
+        title: 'EMI Tracking',
+        description: 'Record monthly EMI payments and track progress.',
+      ),
+      KuberInfoItem(
+        icon: Icons.trending_down,
+        title: 'Outstanding Balance',
+        description: 'See how much principal remains to be paid off.',
+      ),
+      KuberInfoItem(
+        icon: Icons.calendar_month_outlined,
+        title: 'Auto-Payment',
+        description: 'Automatically create EMI transactions on bill date.',
+      ),
+      KuberInfoItem(
+        icon: Icons.bar_chart_outlined,
+        title: 'Separate from Analytics',
+        description: 'Loan payments are excluded from spending analytics.',
+      ),
+    ],
+  );
+
+  static const investments = KuberInfoConfig(
+    title: 'About Investments',
+    description: 'Track your portfolio value, contributions and growth.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.show_chart,
+        title: 'Portfolio Tracking',
+        description: 'Track investments across SIP, stocks, crypto and more.',
+      ),
+      KuberInfoItem(
+        icon: Icons.add_chart,
+        title: 'Contributions',
+        description: 'Record buy-ins and monthly SIP contributions.',
+      ),
+      KuberInfoItem(
+        icon: Icons.trending_up,
+        title: 'Gain & Loss',
+        description: 'Compare current value against total invested for P&L.',
+      ),
+      KuberInfoItem(
+        icon: Icons.bar_chart_outlined,
+        title: 'Separate from Analytics',
+        description: 'Investment contributions are excluded from spending analytics.',
+      ),
+    ],
+  );
+
   static const recurring = KuberInfoConfig(
     title: 'How Recurring Works',
     description: 'Automate your regular income and expenses.',

@@ -78,6 +78,18 @@ class MoreScreen extends StatelessWidget {
                       subtitle: 'Track money you lent or borrowed',
                       onTap: () => context.push('/more/ledger'),
                     ),
+                    _MenuItem(
+                      icon: Icons.account_balance_outlined,
+                      label: 'Loans',
+                      subtitle: 'Track EMIs and repayment progress',
+                      onTap: () => context.push('/more/loans'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.show_chart,
+                      label: 'Investments',
+                      subtitle: 'Track portfolio value and growth',
+                      onTap: () => context.push('/more/investments'),
+                    ),
                   ],
                 ),
 

@@ -20,11 +20,58 @@ class MigrationService {
       await _seedLedgerCategory(isar);
       await prefs.setBool(PrefsKeys.migratedSeedLedgerCategoryV1, true);
     }
+
+    // Migration 3: Seed "Loan EMI" and "Investment" system categories
+    if (!(prefs.getBool(PrefsKeys.migratedSeedLoanInvestmentCategoryV1) ?? false)) {
+      await _seedLoanInvestmentCategories(isar);
+      await prefs.setBool(PrefsKeys.migratedSeedLoanInvestmentCategoryV1, true);
+    }
   }
 
   static Future<void> _migrateRecurringToLinked(Isar isar) async {
     // After schema migration, old recurringRuleId data is inaccessible.
     // The recurring processor will correctly link new transactions going forward.
+  }
+
+  static Future<void> _seedLoanInvestmentCategories(Isar isar) async {
+    final otherGroup = await isar.categoryGroups
+        .filter()
+        .nameEqualTo('OTHER')
+        .findFirst();
+
+    await isar.writeTxn(() async {
+      // Loan EMI category
+      final existingLoan = await isar.categorys
+          .filter()
+          .nameEqualTo('Loan EMI')
+          .findFirst();
+      if (existingLoan == null) {
+        final cat = Category()
+          ..name = 'Loan EMI'
+          ..icon = 'account_balance'
+          ..colorValue = 0xFF5C6BC0
+          ..type = 'expense'
+          ..isDefault = true
+          ..groupId = otherGroup?.id;
+        await isar.categorys.put(cat);
+      }
+
+      // Investment category
+      final existingInv = await isar.categorys
+          .filter()
+          .nameEqualTo('Investment')
+          .findFirst();
+      if (existingInv == null) {
+        final cat = Category()
+          ..name = 'Investment'
+          ..icon = 'show_chart'
+          ..colorValue = 0xFF26A69A
+          ..type = 'expense'
+          ..isDefault = true
+          ..groupId = otherGroup?.id;
+        await isar.categorys.put(cat);
+      }
+    });
   }
 
   static Future<void> _seedLedgerCategory(Isar isar) async {
