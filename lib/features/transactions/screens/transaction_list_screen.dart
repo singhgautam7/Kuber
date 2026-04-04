@@ -145,7 +145,90 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             data: (transactions) {
               final filtered = _applyFilters(transactions, filter);
 
+              // Compute EXP / INC / NET from filtered list
+              double totalExp = 0;
+              double totalInc = 0;
+              for (final t in filtered) {
+                if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
+                if (t.type == 'income') {
+                  totalInc += t.amount;
+                } else {
+                  totalExp += t.amount;
+                }
+              }
+              final totalNet = totalInc - totalExp;
+              final fmt = ref.watch(formatterProvider);
+
               return [
+                // EXP / INC / NET summary
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KuberSpacing.lg,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'EXP ',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '-${fmt.formatCurrency(totalExp)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: cs.error,
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.lg),
+                        Text(
+                          'INC ',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '+${fmt.formatCurrency(totalInc)}',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: cs.tertiary,
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.lg),
+                        Text(
+                          'NET ',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '${totalNet >= 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: totalNet >= 0 ? cs.tertiary : cs.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
                 // SHOWING N TRANSACTIONS row
                 SliverToBoxAdapter(
                   child: Padding(
