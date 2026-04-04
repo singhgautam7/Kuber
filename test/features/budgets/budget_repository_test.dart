@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:kuber/features/budgets/data/budget.dart';
 import 'package:kuber/features/budgets/data/budget_repository.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';

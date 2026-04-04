@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 import '../../../core/database/base_repository.dart';
 import '../../../core/utils/transfer_helpers.dart';

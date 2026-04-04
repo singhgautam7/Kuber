@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/budgets/data/budget.dart';
 import 'package:kuber/features/recurring/data/recurring_rule.dart';

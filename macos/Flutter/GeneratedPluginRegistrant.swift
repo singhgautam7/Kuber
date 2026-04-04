@@ -9,7 +9,7 @@ import device_info_plus
 import dynamic_color
 import file_picker
 import flutter_local_notifications
-import isar_flutter_libs
+import isar_community_flutter_libs
 import local_auth_darwin
 import open_file_mac
 import package_info_plus

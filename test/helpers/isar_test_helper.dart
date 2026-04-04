@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/categories/data/category_group.dart';

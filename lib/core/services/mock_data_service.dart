@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/transactions/data/transaction.dart';

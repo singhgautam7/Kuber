@@ -17,17 +17,14 @@ const TransactionTagSchema = CollectionSchema(
   name: r'TransactionTag',
   id: 3479730015666336660,
   properties: {
-    r'tagId': PropertySchema(
-      id: 0,
-      name: r'tagId',
-      type: IsarType.long,
-    ),
+    r'tagId': PropertySchema(id: 0, name: r'tagId', type: IsarType.long),
     r'transactionId': PropertySchema(
       id: 1,
       name: r'transactionId',
       type: IsarType.long,
-    )
+    ),
   },
+
   estimateSize: _transactionTagEstimateSize,
   serialize: _transactionTagSerialize,
   deserialize: _transactionTagDeserialize,
@@ -44,7 +41,7 @@ const TransactionTagSchema = CollectionSchema(
           name: r'transactionId',
           type: IndexType.value,
           caseSensitive: false,
-        )
+        ),
       ],
     ),
     r'tagId': IndexSchema(
@@ -57,16 +54,17 @@ const TransactionTagSchema = CollectionSchema(
           name: r'tagId',
           type: IndexType.value,
           caseSensitive: false,
-        )
+        ),
       ],
-    )
+    ),
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _transactionTagGetId,
   getLinks: _transactionTagGetLinks,
   attach: _transactionTagAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _transactionTagEstimateSize(
@@ -126,7 +124,10 @@ List<IsarLinkBase<dynamic>> _transactionTagGetLinks(TransactionTag object) {
 }
 
 void _transactionTagAttach(
-    IsarCollection<dynamic> col, Id id, TransactionTag object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  TransactionTag object,
+) {
   object.id = id;
 }
 
@@ -158,17 +159,16 @@ extension TransactionTagQueryWhereSort
 extension TransactionTagQueryWhere
     on QueryBuilder<TransactionTag, TransactionTag, QWhereClause> {
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause> idEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -191,8 +191,9 @@ extension TransactionTagQueryWhere
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause> idGreaterThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -201,8 +202,9 @@ extension TransactionTagQueryWhere
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -217,165 +219,184 @@ extension TransactionTagQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      transactionIdEqualTo(int transactionId) {
+  transactionIdEqualTo(int transactionId) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'transactionId',
-        value: [transactionId],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'transactionId',
+          value: [transactionId],
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      transactionIdNotEqualTo(int transactionId) {
+  transactionIdNotEqualTo(int transactionId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'transactionId',
-              lower: [],
-              upper: [transactionId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'transactionId',
-              lower: [transactionId],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'transactionId',
+                lower: [],
+                upper: [transactionId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'transactionId',
+                lower: [transactionId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'transactionId',
-              lower: [transactionId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'transactionId',
-              lower: [],
-              upper: [transactionId],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'transactionId',
+                lower: [transactionId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'transactionId',
+                lower: [],
+                upper: [transactionId],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      transactionIdGreaterThan(
-    int transactionId, {
-    bool include = false,
-  }) {
+  transactionIdGreaterThan(int transactionId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'transactionId',
-        lower: [transactionId],
-        includeLower: include,
-        upper: [],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'transactionId',
+          lower: [transactionId],
+          includeLower: include,
+          upper: [],
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      transactionIdLessThan(
-    int transactionId, {
-    bool include = false,
-  }) {
+  transactionIdLessThan(int transactionId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'transactionId',
-        lower: [],
-        upper: [transactionId],
-        includeUpper: include,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'transactionId',
+          lower: [],
+          upper: [transactionId],
+          includeUpper: include,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      transactionIdBetween(
+  transactionIdBetween(
     int lowerTransactionId,
     int upperTransactionId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'transactionId',
-        lower: [lowerTransactionId],
-        includeLower: includeLower,
-        upper: [upperTransactionId],
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'transactionId',
+          lower: [lowerTransactionId],
+          includeLower: includeLower,
+          upper: [upperTransactionId],
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause> tagIdEqualTo(
-      int tagId) {
+    int tagId,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'tagId',
-        value: [tagId],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'tagId', value: [tagId]),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      tagIdNotEqualTo(int tagId) {
+  tagIdNotEqualTo(int tagId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'tagId',
-              lower: [],
-              upper: [tagId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'tagId',
-              lower: [tagId],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'tagId',
+                lower: [],
+                upper: [tagId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'tagId',
+                lower: [tagId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'tagId',
-              lower: [tagId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'tagId',
-              lower: [],
-              upper: [tagId],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'tagId',
+                lower: [tagId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'tagId',
+                lower: [],
+                upper: [tagId],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterWhereClause>
-      tagIdGreaterThan(
-    int tagId, {
-    bool include = false,
-  }) {
+  tagIdGreaterThan(int tagId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'tagId',
-        lower: [tagId],
-        includeLower: include,
-        upper: [],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'tagId',
+          lower: [tagId],
+          includeLower: include,
+          upper: [],
+        ),
+      );
     });
   }
 
@@ -384,12 +405,14 @@ extension TransactionTagQueryWhere
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'tagId',
-        lower: [],
-        upper: [tagId],
-        includeUpper: include,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'tagId',
+          lower: [],
+          upper: [tagId],
+          includeUpper: include,
+        ),
+      );
     });
   }
 
@@ -400,13 +423,15 @@ extension TransactionTagQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'tagId',
-        lower: [lowerTagId],
-        includeLower: includeLower,
-        upper: [upperTagId],
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'tagId',
+          lower: [lowerTagId],
+          includeLower: includeLower,
+          upper: [upperTagId],
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -414,40 +439,38 @@ extension TransactionTagQueryWhere
 extension TransactionTagQueryFilter
     on QueryBuilder<TransactionTag, TransactionTag, QFilterCondition> {
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -458,125 +481,125 @@ extension TransactionTagQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      tagIdEqualTo(int value) {
+  tagIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'tagId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'tagId', value: value),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      tagIdGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  tagIdGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'tagId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'tagId',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      tagIdLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  tagIdLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'tagId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'tagId',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      tagIdBetween(
+  tagIdBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'tagId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'tagId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      transactionIdEqualTo(int value) {
+  transactionIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'transactionId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'transactionId', value: value),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      transactionIdGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  transactionIdGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'transactionId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'transactionId',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      transactionIdLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  transactionIdLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'transactionId',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'transactionId',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterFilterCondition>
-      transactionIdBetween(
+  transactionIdBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'transactionId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'transactionId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -602,14 +625,14 @@ extension TransactionTagQuerySortBy
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterSortBy>
-      sortByTransactionId() {
+  sortByTransactionId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transactionId', Sort.asc);
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterSortBy>
-      sortByTransactionIdDesc() {
+  sortByTransactionIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transactionId', Sort.desc);
     });
@@ -643,14 +666,14 @@ extension TransactionTagQuerySortThenBy
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterSortBy>
-      thenByTransactionId() {
+  thenByTransactionId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transactionId', Sort.asc);
     });
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QAfterSortBy>
-      thenByTransactionIdDesc() {
+  thenByTransactionIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transactionId', Sort.desc);
     });
@@ -666,7 +689,7 @@ extension TransactionTagQueryWhereDistinct
   }
 
   QueryBuilder<TransactionTag, TransactionTag, QDistinct>
-      distinctByTransactionId() {
+  distinctByTransactionId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'transactionId');
     });

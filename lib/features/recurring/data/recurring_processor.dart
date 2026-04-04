@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 import '../../investments/data/investment.dart';
 import '../../loans/data/loan.dart';

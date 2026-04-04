@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:kuber/features/recurring/data/recurring_processor.dart';
 import 'package:kuber/features/recurring/data/recurring_rule.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
