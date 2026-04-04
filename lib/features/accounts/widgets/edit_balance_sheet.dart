@@ -72,7 +72,6 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
       ..accountId = widget.account.id.toString()
       ..categoryId = ''
       ..isBalanceAdjustment = true
-      ..isRecurring = false
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now()
       ..nameLower = widget.isCredit

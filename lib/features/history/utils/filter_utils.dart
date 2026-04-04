@@ -25,7 +25,7 @@ List<Transaction> applyHistoryFilters(
 
   // Recurring filter
   if (filter.isRecurring != null) {
-    filtered = filtered.where((t) => t.isRecurring == filter.isRecurring).toList();
+    filtered = filtered.where((t) => (t.linkedRuleType == 'recurring') == filter.isRecurring).toList();
   }
 
   // Date Range

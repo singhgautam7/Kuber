@@ -248,7 +248,7 @@ class DataService {
           ..categoryId = category?.id.toString() ?? ''
           ..accountId = account.id.toString()
           ..notes = notes
-          ..isRecurring = false
+
           ..createdAt = DateTime.tryParse(dateStr) ?? DateTime.now()
           ..updatedAt = DateTime.now();
         
@@ -310,7 +310,7 @@ class DataService {
             ..isTransfer = true
             ..transferId = transferId
             ..notes = notes
-            ..isRecurring = false
+  
             ..createdAt = createdAt
             ..updatedAt = DateTime.now();
           toInsert.add(toTx);

@@ -19,7 +19,6 @@ class TransactionRepository extends BaseRepository<Transaction> {
   Future<int> save(Transaction t) async {
     t.nameLower = t.name.toLowerCase();
     t.updatedAt = DateTime.now();
-    t.isRecurring = t.recurringRuleId != null;
     if (t.id == Isar.autoIncrement) {
       t.createdAt = DateTime.now();
     }
@@ -101,7 +100,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
       ..isTransfer = true
       ..transferId = transferId
       ..notes = notes
-      ..isRecurring = false
+
       ..createdAt = createdAt
       ..updatedAt = DateTime.now();
 
@@ -115,7 +114,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
       ..isTransfer = true
       ..transferId = transferId
       ..notes = notes
-      ..isRecurring = false
+
       ..createdAt = createdAt
       ..updatedAt = DateTime.now();
 

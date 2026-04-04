@@ -126,7 +126,7 @@ final categoryStatsProvider = FutureProvider<Map<int, CategoryStats>>((
   Map<int, double> spent = {};
 
   for (final t in txns) {
-    if (t.isTransfer) continue;
+    if (t.isTransfer || t.linkedRuleType != null) continue;
     final catId = int.tryParse(t.categoryId) ?? -1;
     if (catId == -1) continue;
 

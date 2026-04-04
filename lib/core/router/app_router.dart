@@ -28,6 +28,15 @@ import '../../features/recurring/screens/recurring_loader_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
+import '../../features/ledger/data/ledger.dart';
+import '../../features/ledger/screens/ledger_screen.dart';
+import '../../features/ledger/screens/add_ledger_screen.dart';
+import '../../features/loans/data/loan.dart';
+import '../../features/loans/screens/loans_screen.dart';
+import '../../features/loans/screens/add_loan_screen.dart';
+import '../../features/investments/data/investment.dart';
+import '../../features/investments/screens/investments_screen.dart';
+import '../../features/investments/screens/add_investment_screen.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
 import '../../features/budgets/screens/add_edit_budget_screen.dart';
@@ -259,6 +268,21 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const BudgetsScreen(),
                   ),
+                  GoRoute(
+                    path: 'ledger',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const LedgerScreen(),
+                  ),
+                  GoRoute(
+                    path: 'loans',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const LoansScreen(),
+                  ),
+                  GoRoute(
+                    path: 'investments',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const InvestmentsScreen(),
+                  ),
                 ],
               ),
             ],
@@ -276,6 +300,39 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, state) =>
             AddEditBudgetScreen(existingBudget: state.extra as Budget?),
+      ),
+      GoRoute(
+        path: '/ledger/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddLedgerScreen(),
+      ),
+      GoRoute(
+        path: '/ledger/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) =>
+            AddLedgerScreen(existing: state.extra as Ledger?),
+      ),
+      GoRoute(
+        path: '/loans/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddLoanScreen(),
+      ),
+      GoRoute(
+        path: '/loans/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) =>
+            AddLoanScreen(existing: state.extra as Loan?),
+      ),
+      GoRoute(
+        path: '/investments/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddInvestmentScreen(),
+      ),
+      GoRoute(
+        path: '/investments/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) =>
+            AddInvestmentScreen(existing: state.extra as Investment?),
       ),
     ],
   );

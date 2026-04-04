@@ -124,7 +124,7 @@ final analyticsTransactionsProvider = Provider<List<Transaction>>((ref) {
   final to = DateTime(filter.to.year, filter.to.month, filter.to.day, 23, 59, 59);
 
   return all.where((t) {
-    if (t.isTransfer || t.isBalanceAdjustment) return false;
+    if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) return false;
     final date = t.createdAt;
     return !date.isBefore(from) && !date.isAfter(to);
   }).toList();

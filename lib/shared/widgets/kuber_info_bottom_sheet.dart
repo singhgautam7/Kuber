@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/info_config.dart';
 import 'kuber_bottom_sheet.dart';
+import 'app_button.dart';
 
 class KuberInfoBottomSheet extends StatelessWidget {
   final KuberInfoConfig config;
@@ -15,6 +16,12 @@ class KuberInfoBottomSheet extends StatelessWidget {
     return KuberBottomSheet(
       title: config.title,
       subtitle: "LEARN MORE",
+      actions: AppButton(
+        label: 'Got it',
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

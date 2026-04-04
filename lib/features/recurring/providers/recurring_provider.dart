@@ -63,7 +63,7 @@ final recentlyProcessedProvider =
     FutureProvider<List<Transaction>>((ref) async {
   final all = await ref.watch(transactionListProvider.future);
   return all
-      .where((t) => t.recurringRuleId != null)
+      .where((t) => t.linkedRuleType == 'recurring')
       .take(5)
       .toList();
 });
@@ -74,7 +74,7 @@ final recurringRuleTransactionsProvider =
   ref.watch(transactionListProvider);
   final all = await ref.watch(transactionListProvider.future);
   return all
-      .where((t) => t.recurringRuleId == ruleId)
+      .where((t) => t.linkedRuleId == ruleId.toString())
       .toList()
     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 });
