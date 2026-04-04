@@ -72,6 +72,12 @@ class MoreScreen extends StatelessWidget {
                       subtitle: 'Automated scheduled transactions',
                       onTap: () => context.push('/more/recurring'),
                     ),
+                    _MenuItem(
+                      icon: Icons.handshake_outlined,
+                      label: 'Lent / Borrow',
+                      subtitle: 'Track money you lent or borrowed',
+                      onTap: () => context.push('/more/ledger'),
+                    ),
                   ],
                 ),
 

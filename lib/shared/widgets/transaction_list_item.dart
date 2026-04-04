@@ -71,7 +71,7 @@ class DashboardTransactionItem extends ConsumerWidget {
       displayName = transaction.name;
       subtitle = [
         category?.name ?? 'Unknown',
-        ?accountName,
+        if (accountName != null) accountName,
         DateFormatter.relativeTime(transaction.createdAt),
       ].join(' · ');
       amountColor = isIncome ? colorScheme.tertiary : colorScheme.onSurface;

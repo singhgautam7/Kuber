@@ -105,6 +105,33 @@ class InfoConstants {
     ],
   );
 
+  static const ledger = KuberInfoConfig(
+    title: 'About Lent / Borrow',
+    description: 'Track money you lent to or borrowed from others.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.handshake_outlined,
+        title: 'Lend & Borrow',
+        description: 'Record when you lend money or borrow from someone.',
+      ),
+      KuberInfoItem(
+        icon: Icons.payments_outlined,
+        title: 'Track Payments',
+        description: 'Log partial or full repayments over time.',
+      ),
+      KuberInfoItem(
+        icon: Icons.check_circle_outline,
+        title: 'Settlement',
+        description: 'Mark entries as settled when fully repaid.',
+      ),
+      KuberInfoItem(
+        icon: Icons.bar_chart_outlined,
+        title: 'Separate from Analytics',
+        description: 'Lent and borrowed amounts are excluded from spending analytics.',
+      ),
+    ],
+  );
+
   static const recurring = KuberInfoConfig(
     title: 'How Recurring Works',
     description: 'Automate your regular income and expenses.',

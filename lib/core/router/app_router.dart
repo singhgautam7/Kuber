@@ -28,6 +28,9 @@ import '../../features/recurring/screens/recurring_loader_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
+import '../../features/ledger/data/ledger.dart';
+import '../../features/ledger/screens/ledger_screen.dart';
+import '../../features/ledger/screens/add_ledger_screen.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
 import '../../features/budgets/screens/add_edit_budget_screen.dart';
@@ -259,6 +262,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const BudgetsScreen(),
                   ),
+                  GoRoute(
+                    path: 'ledger',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const LedgerScreen(),
+                  ),
                 ],
               ),
             ],
@@ -276,6 +284,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, state) =>
             AddEditBudgetScreen(existingBudget: state.extra as Budget?),
+      ),
+      GoRoute(
+        path: '/ledger/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddLedgerScreen(),
+      ),
+      GoRoute(
+        path: '/ledger/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) =>
+            AddLedgerScreen(existing: state.extra as Ledger?),
       ),
     ],
   );

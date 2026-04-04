@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/database/isar_service.dart';
+import 'core/database/migrations.dart';
 import 'core/database/seed_service.dart';
 import 'core/services/notification_service.dart';
 import 'features/recurring/data/recurring_processor.dart';
@@ -47,6 +48,7 @@ void main() async {
 
   final isar = await IsarService.open();
   await SeedService().seedInitialData(isar);
+  await MigrationService.runAll(isar);
   await NotificationService().init();
   final missedCount = await RecurringProcessor(isar).processAll();
 

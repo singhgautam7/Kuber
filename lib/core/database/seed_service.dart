@@ -92,6 +92,7 @@ class SeedService {
         'OTHER': [
           _cat('Transfer', 'swap_horiz', 0xFF9E9E9E, 'both'),
           _cat('Adjustment', 'tune', 0xFFBDBDBD, 'both'),
+          _cat('Lent / Borrow', 'handshake', 0xFF78909C, 'both'),
         ],
       };
 

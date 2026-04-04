@@ -133,7 +133,8 @@ void main() {
     expect(t.categoryId, '5');
     expect(t.accountId, '2');
     expect(t.notes, 'Monthly rent');
-    expect(t.recurringRuleId, isNotNull);
+    expect(t.linkedRuleType, 'recurring');
+    expect(t.linkedRuleId, isNotNull);
   });
 
   test('updates rule nextDueAt and executionCount after processing', () async {

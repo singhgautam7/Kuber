@@ -59,7 +59,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       double dayTotal = 0;
       for (final t in txns) {
-        if (t.isTransfer || t.isBalanceAdjustment) continue;
+        if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
         dayTotal += t.type == 'income' ? t.amount : -t.amount;
       }
 

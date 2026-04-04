@@ -5,6 +5,7 @@ import 'package:kuber/features/recurring/data/recurring_rule.dart';
 import 'package:kuber/features/accounts/data/account.dart';
 import 'package:kuber/features/categories/data/category.dart';
 import 'package:kuber/features/tags/data/tag.dart';
+import 'package:kuber/features/ledger/data/ledger.dart';
 
 Transaction makeTransaction({
   int? id,
@@ -17,7 +18,8 @@ Transaction makeTransaction({
   bool isTransfer = false,
   String? transferId,
   String? notes,
-  int? recurringRuleId,
+  String? linkedRuleId,
+  String? linkedRuleType,
   bool isBalanceAdjustment = false,
 }) {
   final now = DateTime.now();
@@ -34,8 +36,8 @@ Transaction makeTransaction({
     ..isTransfer = isTransfer
     ..transferId = transferId
     ..notes = notes
-    ..recurringRuleId = recurringRuleId
-    ..isRecurring = recurringRuleId != null
+    ..linkedRuleId = linkedRuleId
+    ..linkedRuleType = linkedRuleType
     ..isBalanceAdjustment = isBalanceAdjustment;
 }
 
@@ -166,4 +168,34 @@ Tag makeTag({
     ..name = name
     ..isEnabled = isEnabled
     ..createdAt = createdAt ?? DateTime.now();
+}
+
+Ledger makeLedger({
+  int? id,
+  String uid = 'ledger-uid-1',
+  String personName = 'John Doe',
+  String type = 'lent',
+  double originalAmount = 5000.0,
+  String accountId = '1',
+  String categoryId = '1',
+  String? notes,
+  DateTime? expectedDate,
+  bool isSettled = false,
+  DateTime? createdAt,
+}) {
+  final now = DateTime.now();
+  return Ledger()
+    ..id = id ?? Isar.autoIncrement
+    ..uid = uid
+    ..personName = personName
+    ..personNameLower = personName.toLowerCase()
+    ..type = type
+    ..originalAmount = originalAmount
+    ..accountId = accountId
+    ..categoryId = categoryId
+    ..notes = notes
+    ..expectedDate = expectedDate
+    ..isSettled = isSettled
+    ..createdAt = createdAt ?? now
+    ..updatedAt = now;
 }

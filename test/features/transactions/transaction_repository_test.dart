@@ -34,18 +34,19 @@ void main() {
       expect(saved.updatedAt, isNotNull);
     });
 
-    test('save sets isRecurring based on recurringRuleId', () async {
-      final t = makeTransaction(recurringRuleId: 5);
+    test('save preserves linkedRuleType when set', () async {
+      final t = makeTransaction(linkedRuleId: '5', linkedRuleType: 'recurring');
       final id = await repo.save(t);
       final saved = await isar.transactions.get(id);
-      expect(saved!.isRecurring, true);
+      expect(saved!.linkedRuleType, 'recurring');
+      expect(saved.linkedRuleId, '5');
     });
 
-    test('save without recurringRuleId sets isRecurring false', () async {
+    test('save without linkedRuleType keeps it null', () async {
       final t = makeTransaction();
       final id = await repo.save(t);
       final saved = await isar.transactions.get(id);
-      expect(saved!.isRecurring, false);
+      expect(saved!.linkedRuleType, isNull);
     });
 
     test('getAll returns transactions sorted by createdAt desc', () async {

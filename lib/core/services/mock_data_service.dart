@@ -187,7 +187,6 @@ class MockDataService {
           ..categoryId = ''
           ..isTransfer = true
           ..transferId = transferId
-          ..isRecurring = false
           ..createdAt = date
           ..updatedAt = date);
 
@@ -200,7 +199,6 @@ class MockDataService {
           ..categoryId = ''
           ..isTransfer = true
           ..transferId = transferId
-          ..isRecurring = false
           ..createdAt = date.add(const Duration(minutes: 1))
           ..updatedAt = date);
       }
@@ -253,8 +251,8 @@ class MockDataService {
       ..type = type
       ..categoryId = cat.id.toString()
       ..accountId = acc.id.toString()
-      ..isRecurring = ruleId != null
-      ..recurringRuleId = ruleId
+      ..linkedRuleId = ruleId?.toString()
+      ..linkedRuleType = ruleId != null ? 'recurring' : null
       ..createdAt = date
       ..updatedAt = date;
   }

@@ -315,7 +315,7 @@ class InsightEngine {
     double lastSpend = 0;
 
     for (final t in allTransactions) {
-      if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) continue;
+      if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
       if (!t.createdAt.isBefore(currentMonthStart) &&
           t.createdAt.day <= dayOfMonth) {
         currentSpend += t.amount;
@@ -473,7 +473,7 @@ class InsightEngine {
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
 
     for (final t in allTransactions) {
-      if (t.isTransfer || t.isBalanceAdjustment) continue;
+      if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
       if (!t.createdAt.isBefore(currentMonthStart)) {
         if (t.type == 'income') thisIncome += t.amount;
         if (t.type == 'expense') thisExpense += t.amount;
@@ -547,7 +547,7 @@ class InsightEngine {
     double total = 0;
     for (final t in recent) {
       total += t.amount;
-      if (t.recurringRuleId != null) {
+      if (t.linkedRuleType == 'recurring') {
         recurringTotal += t.amount;
       }
     }
@@ -627,7 +627,7 @@ class InsightEngine {
 
     double todayTotal = 0;
     for (final t in allTransactions) {
-      if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) continue;
+      if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
       if (!t.createdAt.isBefore(todayStart)) {
         todayTotal += t.amount;
       }
@@ -641,7 +641,7 @@ class InsightEngine {
       final dayEnd = dayStart.add(const Duration(days: 1));
       double dayTotal = 0;
       for (final t in allTransactions) {
-        if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) continue;
+        if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
         if (!t.createdAt.isBefore(dayStart) && t.createdAt.isBefore(dayEnd)) {
           dayTotal += t.amount;
         }
@@ -696,7 +696,7 @@ class InsightEngine {
 
     double thisWeekTotal = 0;
     for (final t in allTransactions) {
-      if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) continue;
+      if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
       if (!t.createdAt.isBefore(mondayStart)) {
         thisWeekTotal += t.amount;
       }
@@ -712,7 +712,7 @@ class InsightEngine {
       final dayEnd = dayStart.add(const Duration(days: 1));
       double dayTotal = 0;
       for (final t in allTransactions) {
-        if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) continue;
+        if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
         if (!t.createdAt.isBefore(dayStart) && t.createdAt.isBefore(dayEnd)) {
           dayTotal += t.amount;
         }
@@ -849,7 +849,7 @@ class InsightEngine {
     final start = now.subtract(Duration(days: days));
     final end = now.subtract(Duration(days: excludeLastDays));
     return allTransactions.where((t) {
-      if (t.isTransfer || t.isBalanceAdjustment) return false;
+      if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) return false;
       if (t.type != 'expense') return false;
       return t.createdAt.isAfter(start) && t.createdAt.isBefore(end);
     }).toList();

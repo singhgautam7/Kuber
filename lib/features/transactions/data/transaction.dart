@@ -18,10 +18,10 @@ class Transaction {
 
   String? notes;
 
-  int? recurringRuleId; // set when created by recurring processor
+  String? linkedRuleId; // UUID string — works for all linked collections
 
   @Index()
-  late bool isRecurring;
+  String? linkedRuleType; // 'recurring' | 'lent' | 'borrowed' | 'loan' | 'investment'
 
   bool isBalanceAdjustment = false;
 

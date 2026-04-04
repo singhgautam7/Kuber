@@ -7,10 +7,15 @@ class PrefsKeys {
   static const biometricsEnabled = 'biometrics_enabled';
   static const numberSystem = 'number_system';
 
+  // Migration Keys
+  static const migratedTxnLinkedRuleV1 = 'kuber_migrated_txn_linked_rule_v1';
+  static const migratedSeedLedgerCategoryV1 = 'kuber_migrated_seed_ledger_category_v1';
+
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';
   static const seenInfoCategories = 'seen_info_categories';
   static const seenInfoTags = 'seen_info_tags';
   static const seenInfoBudgets = 'seen_info_budgets';
   static const seenInfoRecurring = 'seen_info_recurring';
+  static const seenInfoLedger = 'seen_info_ledger';
 }

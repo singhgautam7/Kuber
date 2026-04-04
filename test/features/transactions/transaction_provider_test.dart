@@ -27,7 +27,6 @@ void main() {
       ..type = 'expense'
       ..categoryId = ''
       ..accountId = ''
-      ..isRecurring = false
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now());
     registerFallbackValue(Budget());

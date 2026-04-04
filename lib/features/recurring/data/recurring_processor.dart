@@ -47,8 +47,8 @@ class RecurringProcessor {
             ..categoryId = rule.categoryId
             ..accountId = rule.accountId
             ..notes = rule.notes
-            ..recurringRuleId = rule.id
-            ..isRecurring = true
+            ..linkedRuleId = rule.id.toString()
+            ..linkedRuleType = 'recurring'
             ..createdAt = combinedDate
             ..updatedAt = DateTime.now();
 
