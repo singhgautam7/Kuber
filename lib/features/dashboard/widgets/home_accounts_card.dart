@@ -57,7 +57,7 @@ class HomeAccountsCard extends ConsumerWidget {
             SizedBox(
               height: 130,
               child: PageView.builder(
-                controller: PageController(viewportFraction: 0.85, padEnds: false),
+                controller: PageController(viewportFraction: 0.85),
                 itemCount: accounts.length,
                 padEnds: false,
                 itemBuilder: (context, i) {
@@ -162,7 +162,8 @@ class HomeAccountsCard extends ConsumerWidget {
                 },
               ),
             ),
-          ],
+            ],
+          ),
         );
       },
     );
