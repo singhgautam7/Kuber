@@ -148,6 +148,17 @@ final investmentTransactionsProvider =
     ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 });
 
+/// Total amount invested for a specific investment uid.
+final totalInvestedForProvider =
+    FutureProvider.family<double, String>((ref, investmentUid) async {
+  final all = await ref.watch(transactionListProvider.future);
+  return all
+      .where((t) =>
+          t.linkedRuleId == investmentUid &&
+          t.linkedRuleType == 'investment')
+      .fold<double>(0.0, (s, t) => s + t.amount);
+});
+
 /// Summary: total invested, current value, gain/loss.
 final investmentSummaryProvider = FutureProvider<
     ({double totalInvested, double currentValue, double gainLoss, int assetCount})>(

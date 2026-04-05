@@ -90,6 +90,7 @@ class SettingsState {
 class SettingsNotifier extends AsyncNotifier<SettingsState> {
   @override
   FutureOr<SettingsState> build() async {
+    ref.keepAlive();
     final prefs = await SharedPreferences.getInstance();
     final themeModeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
     final currency = prefs.getString(PrefsKeys.currency) ?? 'INR';

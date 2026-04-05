@@ -84,46 +84,47 @@ class TransactionDetailSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final categoriesAsync = ref.watch(categoryListProvider);
-    final accountsAsync = ref.watch(accountListProvider);
     final isTransfer = transaction.isTransfer;
 
-    final category = categoriesAsync.whenOrNull(
-      data: (cats) {
-        try {
-          return cats.firstWhere(
-            (c) => c.id.toString() == transaction.categoryId,
-          );
-        } catch (_) {
-          return null;
-        }
-      },
-    );
+    // Only rebuild when THIS specific category/account changes
+    final category = ref.watch(categoryListProvider.select(
+      (async) => async.whenOrNull(
+        data: (cats) => cats.firstWhereOrNull(
+          (c) => c.id.toString() == transaction.categoryId,
+        ),
+      ),
+    ));
 
-    final account = accountsAsync.whenOrNull(
-      data: (accs) {
-        try {
-          return accs.firstWhere(
-            (a) => a.id.toString() == transaction.accountId,
-          );
-        } catch (_) {
-          return null;
-        }
-      },
-    );
+    final account = ref.watch(accountListProvider.select(
+      (async) => async.whenOrNull(
+        data: (accs) => accs.firstWhereOrNull(
+          (a) => a.id.toString() == transaction.accountId,
+        ),
+      ),
+    ));
 
     // Transfer-specific lookups
     String? fromAccountName;
     String? toAccountName;
     if (isTransfer) {
-      final accs = accountsAsync.valueOrNull ?? [];
       fromAccountName = account?.name;
-      // Find TO leg by transferId
-      final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
-      final pair = allTxns.firstWhereOrNull(
-          (t) => t.transferId == transaction.transferId && t.id != transaction.id);
-      toAccountName = pair != null
-          ? accs.firstWhereOrNull((a) => a.id.toString() == pair.accountId)?.name
+      // Only extract the paired transaction's accountId
+      final pairAccountId = ref.watch(transactionListProvider.select(
+        (async) => async.whenOrNull(
+          data: (txns) => txns
+              .firstWhereOrNull(
+                  (t) => t.transferId == transaction.transferId && t.id != transaction.id)
+              ?.accountId,
+        ),
+      ));
+      toAccountName = pairAccountId != null
+          ? ref.watch(accountListProvider.select(
+              (async) => async.whenOrNull(
+                data: (accs) => accs.firstWhereOrNull(
+                  (a) => a.id.toString() == pairAccountId,
+                )?.name,
+              ),
+            ))
           : null;
     }
 

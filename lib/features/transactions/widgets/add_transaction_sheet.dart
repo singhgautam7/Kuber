@@ -12,6 +12,7 @@ import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
 import 'suggestion_list.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/skeleton_loader.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 
 class AddTransactionSheet extends ConsumerStatefulWidget {
@@ -68,11 +69,24 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     final categories = ref.watch(categoryListProvider);
     final accounts = ref.watch(accountListProvider);
 
+    // Show skeleton while providers are loading (rare cold-load case)
+    if (categories.isLoading || accounts.isLoading) {
+      return const FormSheetSkeleton();
+    }
+
     // Listen for pending account selection from Add Account flow
     ref.listen<int?>(pendingAccountSelectionProvider, (_, accId) {
       if (accId != null) {
         setState(() => _selectedAccountId = accId);
         ref.read(pendingAccountSelectionProvider.notifier).state = null;
+      }
+    });
+
+    // Listen for pending category selection from Add Category flow
+    ref.listen<int?>(pendingCategorySelectionProvider, (_, catId) {
+      if (catId != null) {
+        setState(() => _selectedCategoryId = catId);
+        ref.read(pendingCategorySelectionProvider.notifier).state = null;
       }
     });
 

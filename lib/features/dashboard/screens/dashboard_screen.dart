@@ -52,7 +52,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userName = ref.watch(settingsProvider).valueOrNull?.userName ?? '';
+    final userName = ref.watch(settingsProvider.select(
+      (async) => async.valueOrNull?.userName ?? '',
+    ));
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final summaryAsync = ref.watch(monthlySummaryProvider);
@@ -97,54 +99,58 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           const SizedBox(height: KuberSpacing.xl),
 
           // [A] Balance Hero Card
-          summaryAsync.when(
-            loading: () => const SizedBox(
-              height: 180,
-              child: Center(child: CircularProgressIndicator()),
+          RepaintBoundary(
+            child: summaryAsync.when(
+              loading: () => const SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => Center(child: Text('Error: $e')),
+              data: (summary) => _BalanceHeroCard(summary: summary),
             ),
-            error: (e, _) => Center(child: Text('Error: $e')),
-            data: (summary) => _BalanceHeroCard(summary: summary),
           ),
           const SizedBox(height: KuberSpacing.md),
 
           // [A.1] Spending Stats
-          const SpendingStatsCard(),
+          const RepaintBoundary(child: SpendingStatsCard()),
           const SizedBox(height: KuberSpacing.md),
 
           // [B] Bank Accounts
-          const HomeAccountsCard(),
+          const RepaintBoundary(child: HomeAccountsCard()),
           const SizedBox(height: KuberSpacing.xl),
 
           // [C] 7-Day Chart
-          chartAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (e, _) => const SizedBox.shrink(),
-            data: (days) {
-              final hasData = days.any((d) => d.income > 0 || d.expense > 0);
-              if (!hasData) {
-                return const _SpendingAnalysisEmpty();
-              }
-              return KuberBarChart(
-                title: 'SPENDING ANALYSIS',
-                subtitle: 'Last 7 Days Activity',
-                buckets: _buildLast7DaysBuckets(days),
-                height: 200,
-              );
-            },
+          RepaintBoundary(
+            child: chartAsync.when(
+              loading: () => const SizedBox.shrink(),
+              error: (e, _) => const SizedBox.shrink(),
+              data: (days) {
+                final hasData = days.any((d) => d.income > 0 || d.expense > 0);
+                if (!hasData) {
+                  return const _SpendingAnalysisEmpty();
+                }
+                return KuberBarChart(
+                  title: 'SPENDING ANALYSIS',
+                  subtitle: 'Last 7 Days Activity',
+                  buckets: _buildLast7DaysBuckets(days),
+                  height: 200,
+                );
+              },
+            ),
           ),
           const SizedBox(height: KuberSpacing.xl),
 
           // [A.2] Smart Insights
-          const HomeSmartInsights(),
+          const RepaintBoundary(child: HomeSmartInsights()),
 
           // Budget Snapshot
-          const BudgetSnapshotCard(),
+          const RepaintBoundary(child: BudgetSnapshotCard()),
 
           // [C.5] Upcoming Recurring
-          const HomeRecurringCard(),
+          const RepaintBoundary(child: HomeRecurringCard()),
 
           // [D] Recent Transactions
-          const HomeRecentTransactionsCard(),
+          const RepaintBoundary(child: HomeRecentTransactionsCard()),
         ],
       ),
     );

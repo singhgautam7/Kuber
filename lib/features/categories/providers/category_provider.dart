@@ -30,6 +30,7 @@ final categoryListProvider =
 class CategoryListNotifier extends AsyncNotifier<List<Category>> {
   @override
   FutureOr<List<Category>> build() {
+    ref.keepAlive();
     return ref.watch(categoryRepositoryProvider).getAll();
   }
 
@@ -56,6 +57,7 @@ final categoryGroupListProvider =
 class CategoryGroupListNotifier extends AsyncNotifier<List<CategoryGroup>> {
   @override
   FutureOr<List<CategoryGroup>> build() {
+    ref.keepAlive();
     return ref.watch(categoryGroupRepositoryProvider).getAll();
   }
 

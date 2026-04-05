@@ -12,6 +12,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../../shared/widgets/skeleton_loader.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/recurring_rule.dart';
@@ -208,6 +209,21 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     final categories = ref.watch(categoryListProvider);
     final accounts = ref.watch(accountListProvider);
     final symbol = ref.watch(currencyProvider).symbol;
+
+    // Show skeleton while providers are loading (rare cold-load case)
+    if (categories.isLoading || accounts.isLoading) {
+      return Scaffold(
+        backgroundColor: cs.surface,
+        appBar: AppBar(
+          title: Text(_isEdit ? 'Edit Recurring' : 'Add Recurring'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: const FormSheetSkeleton(),
+      );
+    }
 
     return Scaffold(
       backgroundColor: cs.surface,

@@ -27,6 +27,7 @@ final accountListProvider =
 class AccountListNotifier extends AsyncNotifier<List<Account>> {
   @override
   FutureOr<List<Account>> build() {
+    ref.keepAlive();
     return ref.watch(accountRepositoryProvider).getAll();
   }
 
