@@ -9,6 +9,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/currency_selector_sheet.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/services/biometric_service.dart';
 
@@ -472,6 +473,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: controller,
                     autofocus: true,
                     maxLength: 15,
+                    textCapitalization: TextCapitalization.words,
+                    inputFormatters: [TitleCaseInputFormatter()],
                     onChanged: (_) => setSheetState(() {}),
                     style: GoogleFonts.inter(fontSize: 16, color: cs.onSurface),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter your name' : null,
@@ -509,7 +512,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: FilledButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        final newName = controller.text.trim();
+                        final newName = controller.text.trim().toTitleCase();
                         setState(() {
                           _userNameController.text = newName;
                         });

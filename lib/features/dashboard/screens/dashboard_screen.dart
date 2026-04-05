@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
@@ -77,7 +78,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Text(
                 userName.isNotEmpty
-                    ? '${_timeGreeting()}, $userName'
+                    ? '${_timeGreeting()}, ${userName.toTitleCase()}'
                     : _timeGreeting(),
                 style: textTheme.displaySmall?.copyWith(
                   fontSize: 32,

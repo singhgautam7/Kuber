@@ -22,11 +22,9 @@ class HomeAccountsCard extends ConsumerWidget {
       error: (e, _) => const SizedBox.shrink(),
       data: (accounts) {
         if (accounts.isEmpty) return const SizedBox.shrink();
-        return Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -57,7 +55,7 @@ class HomeAccountsCard extends ConsumerWidget {
             SizedBox(
               height: 130,
               child: PageView.builder(
-                controller: PageController(viewportFraction: 0.85),
+                controller: PageController(viewportFraction: 0.45),
                 itemCount: accounts.length,
                 padEnds: false,
                 itemBuilder: (context, i) {
@@ -65,7 +63,7 @@ class HomeAccountsCard extends ConsumerWidget {
                   final balanceAsync =
                       ref.watch(accountBalanceProvider(account.id));
                   final acctColor = resolveAccountColor(account);
-                  
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: InkWell(
@@ -92,6 +90,7 @@ class HomeAccountsCard extends ConsumerWidget {
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Row(
                               children: [
@@ -153,7 +152,6 @@ class HomeAccountsCard extends ConsumerWidget {
                                   color: cs.onSurfaceVariant,
                                 ),
                               ),
-                            const Spacer(),
                           ],
                         ),
                       ),
@@ -163,8 +161,7 @@ class HomeAccountsCard extends ConsumerWidget {
               ),
             ),
             ],
-          ),
-        );
+          );
       },
     );
   }

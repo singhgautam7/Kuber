@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/prefs_keys.dart';
+import '../../../core/utils/formatters.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import '../../settings/widgets/currency_selector_sheet.dart';
@@ -32,7 +33,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
 
   Future<void> _saveAndStart() async {
     final notifier = ref.read(settingsProvider.notifier);
-    await notifier.setUserName(_nameController.text.trim());
+    final name = _nameController.text.trim().toTitleCase();
+    await notifier.setUserName(name);
     await notifier.setCurrency(_selectedCurrencyCode);
     await notifier.setThemeMode(_selectedTheme);
 
@@ -111,6 +113,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     TextField(
                       controller: _nameController,
                       onChanged: (_) => setState(() {}),
+                      textCapitalization: TextCapitalization.words,
+                      inputFormatters: [TitleCaseInputFormatter()],
                       style: GoogleFonts.inter(color: cs.onSurface),
                       decoration: InputDecoration(
                         hintText: 'Enter your name',
