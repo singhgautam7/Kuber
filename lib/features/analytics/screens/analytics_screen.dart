@@ -251,7 +251,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                   const TopFilterRow(),
                   const SizedBox(height: KuberSpacing.lg),
-                  
+
                   if (isEmpty) ...[
                     const SizedBox(height: KuberSpacing.xl),
                     const KuberEmptyState(
@@ -262,7 +262,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ] else ...[
                     _buildSummaryCard(ref, colorScheme, textTheme, totalIncome, totalExpense, netAmount),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     RepaintBoundary(
                       child: KuberBarChart(
                         title: 'Spending Trend',
@@ -271,27 +271,27 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     RepaintBoundary(
                       child: AvgWeeklyHeatmap(transactions: periodTxns),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     RepaintBoundary(
                       child: TransactionSizeDistribution(transactions: periodTxns),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     const RepaintBoundary(
                       child: CategoryGroupStatsWidget(),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     RepaintBoundary(
                       child: TagWiseAnalytics(transactions: periodTxns),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     _buildBiggestTransactionsSection(colorScheme, textTheme, top5, isMoreTab: false, biggestType: biggestType, categoryMap: categoryMap),
                     SizedBox(height: navBarBottomPadding(context)),
                   ],
@@ -499,15 +499,20 @@ class _AnalyticsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
                 style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
-              // ignore: use_null_aware_elements
-              if (trailing != null) trailing!,
+              if (trailing != null) ...[
+                const SizedBox(height: KuberSpacing.sm),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: trailing!,
+                ),
+              ],
             ],
           ),
           const SizedBox(height: KuberSpacing.xl),

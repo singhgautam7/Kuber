@@ -4,9 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
-import '../../../shared/widgets/transaction_list_item.dart';
+import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../history/utils/history_utils.dart';
+import '../../settings/providers/settings_provider.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../../transactions/widgets/transaction_row.dart';
 
 class HomeRecentTransactionsCard extends ConsumerWidget {
   const HomeRecentTransactionsCard({super.key});
@@ -15,9 +19,11 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final recentAsync = ref.watch(recentTransactionsProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
+    final accountMapAsync = ref.watch(accountMapProvider);
+    final allTransactionsAsync = ref.watch(transactionListProvider);
+    final fmt = ref.watch(formatterProvider);
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = cs;
 
     return Column(
       children: [
@@ -37,7 +43,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                     style: textTheme.labelSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.0,
-                      color: colorScheme.primary,
+                      color: cs.primary,
                     )),
               ),
             ],
@@ -60,41 +66,38 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                   child: Text(
                     'No transactions yet',
                     style: textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
               );
             }
-            return Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.lg,
-                vertical: KuberSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-              ),
-              child: categoryMapAsync.when(
-                loading: () => const SizedBox.shrink(),
-                error: (e, _) => const SizedBox.shrink(),
-                data: (categories) => Column(
-                  children: transactions.map((t) {
-                    final catId = int.tryParse(t.categoryId);
-                    final cat = catId != null ? categories[catId] : null;
-                    return DashboardTransactionItem(
-                      transaction: t,
-                      category: cat,
-                      onTap: () => showTransactionDetailSheet(
-                        context,
-                        ref,
-                        t,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+            final accountMap = accountMapAsync.valueOrNull ?? {};
+            final categoryMap = categoryMapAsync.valueOrNull ?? {};
+            final allTransactions = allTransactionsAsync.valueOrNull ?? [];
+            final groups = groupTransactionsByDate(transactions);
+
+            return Column(
+              children: groups.map((group) {
+                return Column(
+                  children: [
+                    DateGroupHeader(
+                      label: group.label,
+                      dayTotal: group.dayTotal,
+                    ),
+                    TransactionDayCard(
+                      transactions: group.transactions,
+                      onDelete: (t) => deleteTransactionWithUndo(context, ref, t),
+                      onTap: (t) => showTransactionDetailSheet(context, ref, t),
+                      onEdit: (t) => context.push('/add-transaction', extra: t),
+                      formatter: fmt,
+                      categoryMap: categoryMap,
+                      accountMap: accountMap,
+                      transactionList: allTransactions,
+                    ),
+                  ],
+                );
+              }).toList(),
             );
           },
         ),

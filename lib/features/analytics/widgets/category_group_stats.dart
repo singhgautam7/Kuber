@@ -42,20 +42,24 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(KuberSpacing.lg, KuberSpacing.lg, KuberSpacing.lg, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Spending Distribution',
                   style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                 ),
-                AnalyticsCardSmallTabs(
-                  labels: const ['Category', 'Group'],
-                  selectedIndex: _isGroupView ? 1 : 0,
-                  onChanged: (i) => setState(() {
-                    _isGroupView = i == 1;
-                    _touchedIndex = null;
-                  }),
+                const SizedBox(height: KuberSpacing.sm),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: AnalyticsCardSmallTabs(
+                    labels: const ['Category', 'Group'],
+                    selectedIndex: _isGroupView ? 1 : 0,
+                    onChanged: (i) => setState(() {
+                      _isGroupView = i == 1;
+                      _touchedIndex = null;
+                    }),
+                  ),
                 ),
               ],
             ),
@@ -119,7 +123,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
 
   Widget _buildPieChart(List<dynamic> stats) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return RepaintBoundary(
       child: PieChart(
       key: ValueKey(_isGroupView),
@@ -128,7 +132,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
           touchCallback: (FlTouchEvent event, pieTouchResponse) {
             // Only respond to actual user "actions" (tap up, pan end) to toggle
             final bool isAction = event is FlTapUpEvent || event is FlPanEndEvent;
-            
+
             if (isAction) {
               if (pieTouchResponse == null || pieTouchResponse.touchedSection == null) {
                 return;
@@ -148,7 +152,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
         sections: List.generate(stats.length, (i) {
           final isTouched = i == _touchedIndex;
           final double radius = isTouched ? 65.0 : 50.0;
-          
+
           final s = stats[i];
           Color color;
           String name;
