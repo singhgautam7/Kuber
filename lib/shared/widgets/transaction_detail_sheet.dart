@@ -159,7 +159,7 @@ class TransactionDetailSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: displayName,
-      subtitle: 'TRANSACTION DETAIL',
+      subtitle: (isTransfer ? 'TRANSFER' : transaction.type).toUpperCase(),
       leadingIcon: isTransfer
           ? Container(
               width: 48,
@@ -201,31 +201,21 @@ class TransactionDetailSheet extends ConsumerWidget {
           const SizedBox(height: KuberSpacing.xl),
 
           // ── Details Grid ─────────────────────────────────────────────
+          _DetailCell(
+            label: 'DATE & TIME',
+            value: dateLabel.toUpperCase(),
+            fullWidth: true,
+          ),
+          const SizedBox(height: KuberSpacing.sm),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _DetailCell(
-                  label: 'DATE & TIME',
-                  value: dateLabel.toUpperCase(),
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
               Expanded(
                 child: _DetailCell(
                   label: 'ACCOUNT',
                   value: accountDisplay.toUpperCase(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: _DetailCell(
-                  label: 'TYPE',
-                  value: isTransfer ? 'TRANSFER' : transaction.type.toUpperCase(),
-                  valueColor: amountColor,
+                  icon: Icons.account_balance_wallet_rounded,
+                  iconColor: cs.primary,
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
@@ -233,10 +223,13 @@ class TransactionDetailSheet extends ConsumerWidget {
                 child: _DetailCell(
                   label: 'CATEGORY',
                   value: transaction.type == 'income' ? 'INCOME' : (category?.name.toUpperCase() ?? 'NONE'),
+                  icon: isTransfer ? Icons.swap_horiz_rounded : (category != null ? IconMapper.fromString(category.icon) : Icons.category_rounded),
+                  iconColor: iconColor,
                 ),
               ),
             ],
           ),
+          const SizedBox(height: KuberSpacing.sm),
 
           if (transaction.notes != null && transaction.notes!.isNotEmpty) ...[
             const SizedBox(height: KuberSpacing.sm),
@@ -331,14 +324,16 @@ class TransactionDetailSheet extends ConsumerWidget {
 class _DetailCell extends StatelessWidget {
   final String label;
   final String value;
-  final Color? valueColor;
   final bool fullWidth;
+  final IconData? icon;
+  final Color? iconColor;
 
   const _DetailCell({
     required this.label,
     required this.value,
-    this.valueColor,
     this.fullWidth = false,
+    this.icon,
+    this.iconColor,
   });
 
   @override
@@ -351,11 +346,13 @@ class _DetailCell extends StatelessWidget {
         vertical: KuberSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
@@ -367,15 +364,25 @@ class _DetailCell extends StatelessWidget {
             ),
           ),
           const SizedBox(height: KuberSpacing.xs),
-          Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: valueColor ?? cs.onSurface,
-            ),
-            overflow: TextOverflow.ellipsis,
-            maxLines: fullWidth ? 3 : 1,
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 14, color: iconColor ?? cs.onSurfaceVariant),
+                const SizedBox(width: 6),
+              ],
+              Expanded(
+                child: Text(
+                  value,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                  overflow: fullWidth ? TextOverflow.visible : TextOverflow.ellipsis,
+                  maxLines: fullWidth ? null : 1,
+                ),
+              ),
+            ],
           ),
         ],
       ),

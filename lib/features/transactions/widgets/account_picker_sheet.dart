@@ -271,13 +271,15 @@ class _AccountTile extends ConsumerWidget {
               error: (_, _) => const SizedBox.shrink(),
               data: (bal) {
                 final formatter = ref.watch(formatterProvider);
+                final isNegative = bal < 0;
                 final display = isCreditCard && creditLimit != null
-                    ? '${formatter.formatCurrency(bal.abs())} / ${formatter.formatCurrency(creditLimit!)}'
-                    : formatter.formatCurrency(bal.abs());
+                    ? '${formatter.formatCurrency(bal)} / ${formatter.formatCurrency(creditLimit!)}'
+                    : formatter.formatCurrency(bal);
                 return Text(
                   display,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
+                    color: isNegative ? cs.error : cs.onSurfaceVariant,
+                    fontWeight: isNegative ? FontWeight.w600 : null,
                   ),
                 );
               },

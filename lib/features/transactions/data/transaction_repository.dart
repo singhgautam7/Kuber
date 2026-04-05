@@ -1,8 +1,6 @@
 import 'package:isar_community/isar.dart';
 
 import '../../../core/database/base_repository.dart';
-import '../../../core/utils/transfer_helpers.dart';
-import '../../accounts/data/account.dart';
 import 'transaction.dart';
 
 class TransactionRepository extends BaseRepository<Transaction> {
@@ -77,15 +75,6 @@ class TransactionRepository extends BaseRepository<Transaction> {
     }
     if (amount <= 0) {
       throw ArgumentError('Amount must be greater than 0');
-    }
-
-    // Balance check on FROM account
-    final balance = await _computeBalance(fromAccountId);
-    if (balance < amount) {
-      throw InsufficientBalanceException(
-        available: balance,
-        required_: amount,
-      );
     }
 
     final transferId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -163,22 +152,5 @@ class TransactionRepository extends BaseRepository<Transaction> {
     await isar.writeTxn(() async {
       await isar.transactions.deleteAll(pair.map((t) => t.id).toList());
     });
-  }
-
-  Future<double> _computeBalance(String accountId, {int? excludeTransactionId}) async {
-    final accountObj = await isar.accounts.get(int.parse(accountId));
-    if (accountObj == null) return 0.0;
-
-    final txns = await isar.transactions
-        .filter()
-        .accountIdEqualTo(accountId)
-        .findAll();
-
-    double balance = accountObj.initialBalance;
-    for (final t in txns) {
-      if (excludeTransactionId != null && t.id == excludeTransactionId) continue;
-      balance += t.type == 'income' ? t.amount : -t.amount;
-    }
-    return balance;
   }
 }

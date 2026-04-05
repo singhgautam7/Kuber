@@ -1073,15 +1073,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           notes: notes,
         );
       }
-    } on InsufficientBalanceException catch (e) {
-      if (mounted) {
-        showKuberSnackBar(
-          context,
-          'Insufficient balance: ${ref.read(formatterProvider).formatCurrency(e.available)} available',
-          isError: true,
-        );
-      }
-      return;
     } catch (e) {
       if (mounted) {
         showKuberSnackBar(context, 'Failed to save: $e', isError: true);
