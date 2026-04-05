@@ -149,7 +149,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               double totalExp = 0;
               double totalInc = 0;
               for (final t in filtered) {
-                if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
+                if (t.isTransfer || t.isBalanceAdjustment) continue;
                 if (t.type == 'income') {
                   totalInc += t.amount;
                 } else {
@@ -216,12 +216,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           ),
                         ),
                         Text(
-                          '${totalNet >= 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
+                          totalNet == 0
+                              ? fmt.formatCurrency(0)
+                              : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.8,
-                            color: totalNet >= 0 ? cs.tertiary : cs.error,
+                            color: totalNet > 0
+                                ? cs.tertiary
+                                : totalNet < 0
+                                    ? cs.error
+                                    : cs.onSurfaceVariant,
                           ),
                         ),
                       ],
