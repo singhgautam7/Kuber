@@ -53,7 +53,7 @@ class HomeAccountsCard extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.sm),
             SizedBox(
-              height: 130,
+              height: 110,
               child: PageView.builder(
                 controller: PageController(viewportFraction: 0.45),
                 itemCount: accounts.length,
@@ -79,7 +79,7 @@ class HomeAccountsCard extends ConsumerWidget {
                       },
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                       child: Container(
-                        padding: const EdgeInsets.all(KuberSpacing.lg),
+                        padding: const EdgeInsets.all(KuberSpacing.md),
                         decoration: BoxDecoration(
                           color: cs.surfaceContainer,
                           borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -90,7 +90,7 @@ class HomeAccountsCard extends ConsumerWidget {
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Row(
                               children: [
