@@ -123,9 +123,12 @@ final monthlyTransactionsProvider =
     FutureProvider.family<List<Transaction>, ({int year, int month})>((
       ref,
       params,
-    ) {
-      // Re-fetch when transactions are added/edited/deleted
-      ref.watch(transactionListProvider);
-      final repo = ref.watch(transactionRepositoryProvider);
-      return repo.getByMonth(params.year, params.month);
+    ) async {
+      final all = await ref.watch(transactionListProvider.future);
+      final start = DateTime(params.year, params.month);
+      final nextMonth = params.month == 12 ? 1 : params.month + 1;
+      final nextYear = params.month == 12 ? params.year + 1 : params.year;
+      final end = DateTime(nextYear, nextMonth);
+
+      return all.where((t) => !t.createdAt.isBefore(start) && t.createdAt.isBefore(end)).toList();
     });

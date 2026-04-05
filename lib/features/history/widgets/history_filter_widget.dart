@@ -22,7 +22,19 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   bool _isSearching = false;
 
   @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(_onFocusChange);
+  }
+
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus && _isSearching) {
+      setState(() => _isSearching = false);
+    }
+  }
+  @override
   void dispose() {
+    _focusNode.removeListener(_onFocusChange);
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -70,7 +82,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-        height: 48,
+        height: 52,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -230,7 +242,6 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   Widget _buildSearchInput(ColorScheme cs) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(KuberRadius.md),

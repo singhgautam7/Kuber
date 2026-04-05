@@ -59,7 +59,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
       double dayTotal = 0;
       for (final t in txns) {
-        if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) continue;
+        if (t.isTransfer || t.isBalanceAdjustment) continue;
         dayTotal += t.type == 'income' ? t.amount : -t.amount;
       }
 
@@ -97,227 +97,230 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         if (didPop) return;
         context.go('/');
       },
-      child: Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // App bar
-          const SliverToBoxAdapter(
-            child: KuberAppBar(title: 'History'),
-          ),
-
-          // Page header
-          SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'Transaction\nHistory',
-              description: 'Your past expenses, incomes and transfers',
-              actionIcon: Icons.file_download_outlined,
-              actionTooltip: 'Export',
-              onAction: () => showExportBottomSheet(
-                context: context,
-                exportType: ExportType.transactions,
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              // App bar
+              const SliverToBoxAdapter(
+                child: KuberAppBar(title: 'History'),
               ),
-            ),
-          ),
 
-
-          SliverToBoxAdapter(
-            child: HistoryFilterWidget(
-              onAdvancedTap: () => context.push('/history/filter'),
-            ),
-          ),
-
-          const SliverToBoxAdapter(
-            child: SizedBox(height: KuberSpacing.sm),
-          ),
-
-          // Transaction list
-          ...transactionsAsync.when(
-            loading: () => [
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            ],
-            error: (e, _) => [
-              SliverFillRemaining(
-                child: Center(child: Text('Error: $e')),
-              ),
-            ],
-            data: (transactions) {
-              final filtered = _applyFilters(transactions, filter);
-
-              // Compute EXP / INC / NET from filtered list
-              double totalExp = 0;
-              double totalInc = 0;
-              for (final t in filtered) {
-                if (t.isTransfer || t.isBalanceAdjustment) continue;
-                if (t.type == 'income') {
-                  totalInc += t.amount;
-                } else {
-                  totalExp += t.amount;
-                }
-              }
-              final totalNet = totalInc - totalExp;
-              final fmt = ref.watch(formatterProvider);
-
-              return [
-                // EXP / INC / NET summary
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: KuberSpacing.lg,
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          'EXP ',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          '-${fmt.formatCurrency(totalExp)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: cs.error,
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.lg),
-                        Text(
-                          'INC ',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          '+${fmt.formatCurrency(totalInc)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: cs.tertiary,
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.lg),
-                        Text(
-                          'NET ',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          totalNet == 0
-                              ? fmt.formatCurrency(0)
-                              : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: totalNet > 0
-                                ? cs.tertiary
-                                : totalNet < 0
-                                    ? cs.error
-                                    : cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
+              // Page header
+              SliverToBoxAdapter(
+                child: KuberPageHeader(
+                  title: 'Transaction\nHistory',
+                  description: 'Your past expenses, incomes and transfers',
+                  actionIcon: Icons.file_download_outlined,
+                  actionTooltip: 'Export',
+                  onAction: () => showExportBottomSheet(
+                    context: context,
+                    exportType: ExportType.transactions,
                   ),
                 ),
+              ),
 
-                // SHOWING N TRANSACTIONS row
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: KuberSpacing.lg,
-                      vertical: KuberSpacing.sm,
-                    ),
-                    child: RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.2,
-                          color: cs.onSurfaceVariant,
+              SliverToBoxAdapter(
+                child: HistoryFilterWidget(
+                  onAdvancedTap: () => context.push('/history/filter'),
+                ),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: KuberSpacing.sm),
+              ),
+
+              // Transaction list
+              ...transactionsAsync.when(
+                loading: () => [
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+                error: (e, _) => [
+                  SliverFillRemaining(
+                    child: Center(child: Text('Error: $e')),
+                  ),
+                ],
+                data: (transactions) {
+                  final filtered = _applyFilters(transactions, filter);
+
+                  // Compute EXP / INC / NET from filtered list
+                  double totalExp = 0;
+                  double totalInc = 0;
+                  for (final t in filtered) {
+                    if (t.isTransfer || t.isBalanceAdjustment) continue;
+                    if (t.type == 'income') {
+                      totalInc += t.amount;
+                    } else {
+                      totalExp += t.amount;
+                    }
+                  }
+                  final totalNet = totalInc - totalExp;
+                  final fmt = ref.watch(formatterProvider);
+
+                  return [
+                    // EXP / INC / NET summary
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
                         ),
-                        children: [
-                          const TextSpan(text: 'SHOWING '),
-                          TextSpan(
-                            text: '${filtered.length} ',
-                            style: TextStyle(color: cs.primary),
-                          ),
-                          const TextSpan(text: 'TRANSACTIONS'),
-                        ],
+                        child: Row(
+                          children: [
+                            Text(
+                              'EXP ',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              '-${fmt.formatCurrency(totalExp)}',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: cs.error,
+                              ),
+                            ),
+                            const SizedBox(width: KuberSpacing.lg),
+                            Text(
+                              'INC ',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              '+${fmt.formatCurrency(totalInc)}',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: cs.tertiary,
+                              ),
+                            ),
+                            const SizedBox(width: KuberSpacing.lg),
+                            Text(
+                              'NET ',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.8,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                            Text(
+                              totalNet == 0
+                                  ? fmt.formatCurrency(0)
+                                  : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: totalNet > 0
+                                    ? cs.tertiary
+                                    : totalNet < 0
+                                        ? cs.error
+                                        : cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
 
-                if (filtered.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: KuberEmptyState(
-                      icon: Icons.receipt_long_outlined,
-                      title: transactions.isEmpty
-                          ? 'No transactions yet'
-                          : 'No transactions found',
-                      description: transactions.isEmpty
-                          ? 'Start tracking your expenses'
-                          : 'Try adjusting your search or filters',
-                      actionLabel:
-                          transactions.isEmpty ? 'Add Transaction' : null,
-                      onAction: transactions.isEmpty
-                          ? () => context.push('/add-transaction')
-                          : null,
+                    // SHOWING N TRANSACTIONS row
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
+                          vertical: KuberSpacing.sm,
+                        ),
+                        child: RichText(
+                          text: TextSpan(
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                              color: cs.onSurfaceVariant,
+                            ),
+                            children: [
+                              const TextSpan(text: 'SHOWING '),
+                              TextSpan(
+                                text: '${filtered.length} ',
+                                style: TextStyle(color: cs.primary),
+                              ),
+                              const TextSpan(text: 'TRANSACTIONS'),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  )
-                else
-                  SliverPadding(
-                    padding: EdgeInsets.only(
-                      bottom: navBarBottomPadding(context),
-                      left: KuberSpacing.lg,
-                      right: KuberSpacing.lg,
-                    ),
-                    sliver: SliverList.builder(
-                      itemCount: _groupByDate(filtered).length * 2,
-                      itemBuilder: (context, index) {
-                        final groups = _groupByDate(filtered);
-                        final groupIndex = index ~/ 2;
-                        final group = groups[groupIndex];
 
-                        if (index.isEven) {
-                          return _DateGroupHeader(
-                            label: group.label,
-                            dayTotal: group.dayTotal,
-                          );
-                        } else {
-                          return _DayCard(
-                            transactions: group.transactions,
-                            onDelete: _deleteWithUndo,
-                            onTap: (t) => _showTransactionDetail(t),
-                            onEdit: (t) =>
-                                context.push('/add-transaction', extra: t),
-                          );
-                        }
-                      },
-                    ),
-                  ),
-              ];
-            },
+                    if (filtered.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: KuberEmptyState(
+                          icon: Icons.receipt_long_outlined,
+                          title: transactions.isEmpty
+                              ? 'No transactions yet'
+                              : 'No transactions found',
+                          description: transactions.isEmpty
+                              ? 'Start tracking your expenses'
+                              : 'Try adjusting your search or filters',
+                          actionLabel:
+                              transactions.isEmpty ? 'Add Transaction' : null,
+                          onAction: transactions.isEmpty
+                              ? () => context.push('/add-transaction')
+                              : null,
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: EdgeInsets.only(
+                          bottom: navBarBottomPadding(context),
+                          left: KuberSpacing.lg,
+                          right: KuberSpacing.lg,
+                        ),
+                        sliver: SliverList.builder(
+                          itemCount: _groupByDate(filtered).length * 2,
+                          itemBuilder: (context, index) {
+                            final groups = _groupByDate(filtered);
+                            final groupIndex = index ~/ 2;
+                            final group = groups[groupIndex];
+
+                            if (index.isEven) {
+                              return _DateGroupHeader(
+                                label: group.label,
+                                dayTotal: group.dayTotal,
+                              );
+                            } else {
+                              return _DayCard(
+                                transactions: group.transactions,
+                                onDelete: _deleteWithUndo,
+                                onTap: (t) => _showTransactionDetail(t),
+                                onEdit: (t) =>
+                                    context.push('/add-transaction', extra: t),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                  ];
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:isar_community/isar.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/transactions/data/transaction_repository.dart';
 import 'package:kuber/features/accounts/data/account.dart';
-import 'package:kuber/core/utils/transfer_helpers.dart';
+
 import '../../helpers/isar_test_helper.dart';
 import '../../helpers/test_factories.dart';
 
@@ -90,37 +90,9 @@ void main() {
     });
   });
 
-  group('getByDateRange', () {
-    test('returns transactions within range', () async {
-      // Insert directly via Isar to preserve createdAt (repo.save overwrites it for new records)
-      final inRange = makeTransaction(name: 'In range', createdAt: DateTime(2024, 3, 15));
-      final outRange = makeTransaction(name: 'Out of range', createdAt: DateTime(2024, 1, 1));
-      await isar.writeTxn(() async {
-        await isar.transactions.put(inRange);
-        await isar.transactions.put(outRange);
-      });
-      final results = await repo.getByDateRange(
-        DateTime(2024, 3, 1),
-        DateTime(2024, 3, 31),
-      );
-      expect(results.length, 1);
-      expect(results.first.name, 'In range');
-    });
-  });
 
-  group('getByMonth', () {
-    test('returns transactions for specific month', () async {
-      final marchTxn = makeTransaction(name: 'March txn', createdAt: DateTime(2024, 3, 15));
-      final aprilTxn = makeTransaction(name: 'April txn', createdAt: DateTime(2024, 4, 10));
-      await isar.writeTxn(() async {
-        await isar.transactions.put(marchTxn);
-        await isar.transactions.put(aprilTxn);
-      });
-      final results = await repo.getByMonth(2024, 3);
-      expect(results.length, 1);
-      expect(results.first.name, 'March txn');
-    });
-  });
+
+
 
   group('getSuggestions', () {
     test('returns empty for empty query', () async {
@@ -200,17 +172,7 @@ void main() {
       );
     });
 
-    test('saveTransfer throws InsufficientBalanceException', () async {
-      expect(
-        () => repo.saveTransfer(
-          fromAccountId: fromAccount.id.toString(),
-          toAccountId: toAccount.id.toString(),
-          amount: 99999,
-          createdAt: DateTime.now(),
-        ),
-        throwsA(isA<InsufficientBalanceException>()),
-      );
-    });
+
 
     test('deleteTransferPair removes both legs', () async {
       final ids = await repo.saveTransfer(

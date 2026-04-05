@@ -46,22 +46,7 @@ class TransactionRepository extends BaseRepository<Transaction> {
     return all.where((t) => seen.add(t.name.toLowerCase())).take(5).toList();
   }
 
-  Future<List<Transaction>> getByDateRange(
-    DateTime start,
-    DateTime end,
-  ) async {
-    return isar.transactions
-        .filter()
-        .createdAtBetween(start, end)
-        .sortByCreatedAtDesc()
-        .findAll();
-  }
 
-  Future<List<Transaction>> getByMonth(int year, int month) async {
-    final start = DateTime(year, month);
-    final end = DateTime(year, month + 1);
-    return getByDateRange(start, end);
-  }
 
   Future<List<int>> saveTransfer({
     required String fromAccountId,

@@ -30,8 +30,6 @@ void main() {
       ];
 
       when(() => mockRepo.getAll()).thenAnswer((_) async => txns);
-      when(() => mockRepo.getByMonth(any(), any()))
-          .thenAnswer((_) async => txns);
 
       final container = ProviderContainer(
         overrides: [
@@ -59,8 +57,6 @@ void main() {
       ];
 
       when(() => mockRepo.getAll()).thenAnswer((_) async => txns);
-      when(() => mockRepo.getByMonth(any(), any()))
-          .thenAnswer((_) async => txns);
 
       final container = ProviderContainer(
         overrides: [
@@ -84,8 +80,6 @@ void main() {
       ];
 
       when(() => mockRepo.getAll()).thenAnswer((_) async => txns);
-      when(() => mockRepo.getByMonth(any(), any()))
-          .thenAnswer((_) async => txns);
 
       final container = ProviderContainer(
         overrides: [
