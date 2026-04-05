@@ -120,7 +120,8 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
   Widget _buildPieChart(List<dynamic> stats) {
     final cs = Theme.of(context).colorScheme;
     
-    return PieChart(
+    return RepaintBoundary(
+      child: PieChart(
       key: ValueKey(_isGroupView),
       PieChartData(
         pieTouchData: PieTouchData(
@@ -178,6 +179,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
           );
         }),
       ),
+    ),
     );
   }
 

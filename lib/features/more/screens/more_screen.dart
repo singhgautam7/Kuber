@@ -74,7 +74,7 @@ class MoreScreen extends StatelessWidget {
                     ),
                     _MenuItem(
                       icon: Icons.handshake_outlined,
-                      label: 'Lent / Borrow',
+                      label: 'Lend / Borrow',
                       subtitle: 'Track money you lent or borrowed',
                       onTap: () => context.push('/more/ledger'),
                     ),

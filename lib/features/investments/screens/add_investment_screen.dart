@@ -11,7 +11,6 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
     show currencyProvider;
-import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
@@ -56,23 +55,6 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       _sipDate = e.sipDate;
       _selectedAccountId = e.accountId;
       _notesController.text = e.notes ?? '';
-
-      // Load total invested sum from transactions for display
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final allTxns =
-            ref.read(transactionListProvider).valueOrNull ?? [];
-        final sum = allTxns
-            .where((t) =>
-                t.linkedRuleId == e.uid && t.linkedRuleType == 'investment')
-            .fold(0.0, (s, t) => s + t.amount);
-        if (sum > 0 && mounted) {
-          setState(() {
-            _investedController.text = sum == sum.truncateToDouble()
-                ? sum.toInt().toString()
-                : sum.toStringAsFixed(2);
-          });
-        }
-      });
     }
   }
 
@@ -94,6 +76,18 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     final selectedAccount = accounts
         .where((a) => a.id.toString() == _selectedAccountId)
         .firstOrNull;
+
+    // Pre-fill invested amount from provider when editing
+    if (_isEditing) {
+      ref.listen(totalInvestedForProvider(widget.existing!.uid), (prev, next) {
+        final sum = next.valueOrNull ?? 0.0;
+        if (sum > 0 && _investedController.text.isEmpty) {
+          _investedController.text = sum == sum.truncateToDouble()
+              ? sum.toInt().toString()
+              : sum.toStringAsFixed(2);
+        }
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -591,14 +585,9 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     if (_isEditing) {
       final existing = widget.existing!;
 
-      // Compute current total invested from transactions
-      final allTxns =
-          ref.read(transactionListProvider).valueOrNull ?? [];
-      final currentTotalInvested = allTxns
-          .where((t) =>
-              t.linkedRuleId == existing.uid &&
-              t.linkedRuleType == 'investment')
-          .fold(0.0, (s, t) => s + t.amount);
+      // Read cached total from the dedicated provider
+      final currentTotalInvested =
+          ref.read(totalInvestedForProvider(existing.uid)).valueOrNull ?? 0.0;
 
       // The field now shows the total desired invested; compute delta
       final desiredTotal =

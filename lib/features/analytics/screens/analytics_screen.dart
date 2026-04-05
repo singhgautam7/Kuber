@@ -194,7 +194,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget build(BuildContext context) {
     final filter = ref.watch(analyticsFilterProvider);
     final periodTxns = ref.watch(analyticsTransactionsProvider);
-    final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
 
     final cs = Theme.of(context).colorScheme;
     final colorScheme = cs;
@@ -202,7 +201,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
     final isEmpty = periodTxns.isEmpty;
 
-    // Totals
+    // Totals — cached once per build
     double totalIncome = 0, totalExpense = 0;
     for (final t in periodTxns) {
       if (t.type == 'income') {
@@ -213,16 +212,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     }
     final netAmount = totalIncome - totalExpense;
 
-    // Buckets
+    // Buckets — cached once per build
     final buckets = _buildPeriodBuckets(periodTxns, filter);
 
-    // Category totals (expense only)
-    final catMap = <int, double>{};
-    for (final t in periodTxns) {
-      if (t.type != 'expense') continue;
-      final catId = int.tryParse(t.categoryId) ?? -1;
-      catMap[catId] = (catMap[catId] ?? 0) + t.amount;
-    }
+    // Category map — only watched when needed for biggest transactions
+    final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
 
     // Top 5 biggest transactions (filtered by tab)
     final biggestType = _biggestTab == 0 ? 'expense' : 'income';
@@ -280,10 +274,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             const SizedBox(height: KuberSpacing.lg),
 
             // [C] Spending Trend
-            KuberBarChart(
-              title: 'Spending Trend',
-              buckets: buckets,
-              height: 200,
+            RepaintBoundary(
+              child: KuberBarChart(
+                title: 'Spending Trend',
+                buckets: buckets,
+                height: 200,
+              ),
             ),
             const SizedBox(height: KuberSpacing.lg),
 

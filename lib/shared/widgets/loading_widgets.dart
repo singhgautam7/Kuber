@@ -21,17 +21,19 @@ class SweepRingWidget extends AnimatedWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: SweepRingPainter(
-          progress: controller.value,
-          primaryColor: cs.primary,
-          surfaceMutedColor: cs.surfaceContainerHigh,
-        ),
-        child: Center(
-          child: Icon(
-            Icons.sync_rounded,
-            color: cs.primary,
-            size: iconSize,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: SweepRingPainter(
+            progress: controller.value,
+            primaryColor: cs.primary,
+            surfaceMutedColor: cs.surfaceContainerHigh,
+          ),
+          child: Center(
+            child: Icon(
+              Icons.sync_rounded,
+              color: cs.primary,
+              size: iconSize,
+            ),
           ),
         ),
       ),

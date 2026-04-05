@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../features/accounts/providers/account_provider.dart';
+import '../../features/categories/providers/category_provider.dart';
 import '../../features/settings/providers/settings_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
@@ -43,6 +45,11 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       parent: _dialController,
       curve: Curves.easeOut,
     );
+    // Pre-warm keepAlive providers so form sheets find data in cache
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(accountListProvider.future).ignore();
+      ref.read(categoryListProvider.future).ignore();
+    });
   }
 
   @override

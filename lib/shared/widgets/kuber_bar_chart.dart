@@ -346,7 +346,8 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
     final barWidth = (slotWidth * 0.55).clamp(12.0, 32.0);
     final double dataGap = (_maxY * _segmentGap) / widget.height;
 
-    return BarChart(
+    return RepaintBoundary(
+      child: BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
         maxY: _maxY,
@@ -372,6 +373,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         titlesData: _titlesData(cs),
         barGroups: _buildBarGroups(barWidth, dataGap, cs),
       ),
+    ),
     );
   }
 
@@ -442,7 +444,8 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   // ---------------------------------------------------------------------------
 
   Widget _buildLineChart(ColorScheme cs) {
-    return LineChart(
+    return RepaintBoundary(
+      child: LineChart(
       LineChartData(
         maxY: _maxY,
         lineTouchData: LineTouchData(
@@ -492,6 +495,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
           ),
         ],
       ),
+    ),
     );
   }
 

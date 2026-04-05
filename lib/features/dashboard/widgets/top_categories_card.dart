@@ -43,7 +43,8 @@ class TopCategoriesCard extends ConsumerWidget {
               loading: () => const SizedBox.shrink(),
               error: (e, st) => const SizedBox.shrink(),
               data: (categories) {
-                return SizedBox(
+                return RepaintBoundary(
+                  child: SizedBox(
                   height: 200,
                   child: BarChart(
                     BarChartData(
@@ -113,6 +114,7 @@ class TopCategoriesCard extends ConsumerWidget {
                       }).toList(),
                     ),
                   ),
+                ),
                 );
               },
             ),

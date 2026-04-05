@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart' show DateUtils;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
@@ -118,6 +119,47 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     return ids;
   }
 }
+
+/// Pre-computed spending stats for the dashboard card.
+final spendingStatsProvider =
+    Provider<({double avgDaily, double monthTotal, double projected, int daysElapsed})>((ref) {
+  final txns = ref.watch(transactionListProvider).valueOrNull;
+  if (txns == null || txns.isEmpty) {
+    return (avgDaily: 0, monthTotal: 0, projected: 0, daysElapsed: 0);
+  }
+
+  final now = DateTime.now();
+  final cutoff90 = now.subtract(const Duration(days: 90));
+  final monthStart = DateTime(now.year, now.month, 1);
+  final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+
+  final expenses = txns.where((t) =>
+      t.type == 'expense' && !t.isTransfer && !t.isBalanceAdjustment);
+
+  final monthTotal = expenses
+      .where((t) => !t.createdAt.isBefore(monthStart))
+      .fold<double>(0.0, (s, t) => s + t.amount);
+
+  final last90 = expenses.where((t) => !t.createdAt.isBefore(cutoff90)).toList();
+  final last90Total = last90.fold<double>(0.0, (s, t) => s + t.amount);
+
+  double avgDaily = 0;
+  if (last90.isNotEmpty) {
+    final firstDate = last90
+        .map((e) => e.createdAt)
+        .reduce((min, e) => e.isBefore(min) ? e : min);
+    final diff = now.difference(firstDate).inDays + 1;
+    final daysActive = diff.clamp(1, 90);
+    avgDaily = last90Total / daysActive;
+  }
+
+  return (
+    avgDaily: avgDaily,
+    monthTotal: monthTotal,
+    projected: avgDaily * daysInMonth,
+    daysElapsed: now.day,
+  );
+});
 
 final monthlyTransactionsProvider =
     FutureProvider.family<List<Transaction>, ({int year, int month})>((

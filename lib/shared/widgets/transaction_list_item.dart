@@ -43,16 +43,22 @@ class DashboardTransactionItem extends ConsumerWidget {
     String amountPrefix;
 
     if (isTransfer) {
-      final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
-      final pair = allTxns.firstWhereOrNull(
-          (t) => t.transferId == transaction.transferId && t.id != transaction.id);
+      // Only extract the paired transaction's accountId — avoids rebuilding on every transaction change
+      final pairAccountId = ref.watch(transactionListProvider.select(
+        (async) => async.whenOrNull(
+          data: (txns) => txns
+              .firstWhereOrNull(
+                  (t) => t.transferId == transaction.transferId && t.id != transaction.id)
+              ?.accountId,
+        ),
+      ));
       final accs = ref.watch(accountListProvider).valueOrNull ?? [];
       final fromName = accs
           .where((a) => a.id.toString() == transaction.accountId)
           .firstOrNull
           ?.name;
-      final toName = pair != null
-          ? accs.where((a) => a.id.toString() == pair.accountId).firstOrNull?.name
+      final toName = pairAccountId != null
+          ? accs.where((a) => a.id.toString() == pairAccountId).firstOrNull?.name
           : null;
 
       iconData = Icons.swap_horiz_rounded;

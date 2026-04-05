@@ -160,6 +160,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   }
                   final totalNet = totalInc - totalExp;
                   final fmt = ref.watch(formatterProvider);
+                  final groups = _groupByDate(filtered);
 
                   return [
                     // EXP / INC / NET summary
@@ -291,9 +292,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           right: KuberSpacing.lg,
                         ),
                         sliver: SliverList.builder(
-                          itemCount: _groupByDate(filtered).length * 2,
+                          itemCount: groups.length * 2,
                           itemBuilder: (context, index) {
-                            final groups = _groupByDate(filtered);
                             final groupIndex = index ~/ 2;
                             final group = groups[groupIndex];
 
@@ -429,50 +429,45 @@ class _TransactionRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final categoriesAsync = ref.watch(categoryListProvider);
-    final accountsAsync = ref.watch(accountListProvider);
     final isTransfer = transaction.isTransfer;
     final isAdjustment = transaction.isBalanceAdjustment;
 
-    final category = categoriesAsync.whenOrNull(
-      data: (cats) {
-        try {
-          return cats.firstWhere(
-            (c) => c.id.toString() == transaction.categoryId,
-          );
-        } catch (_) {
-          return null;
-        }
-      },
-    );
+    final category = ref.watch(categoryListProvider.select(
+      (async) => async.whenOrNull(
+        data: (cats) => cats
+            .where((c) => c.id.toString() == transaction.categoryId)
+            .firstOrNull,
+      ),
+    ));
 
-    final account = accountsAsync.whenOrNull(
-      data: (accs) {
-        try {
-          return accs.firstWhere(
-            (a) => a.id.toString() == transaction.accountId,
-          );
-        } catch (_) {
-          return null;
-        }
-      },
-    );
+    final account = ref.watch(accountListProvider.select(
+      (async) => async.whenOrNull(
+        data: (accs) => accs
+            .where((a) => a.id.toString() == transaction.accountId)
+            .firstOrNull,
+      ),
+    ));
 
     // Transfer-specific: look up FROM and TO accounts
     String? fromName;
     String? toName;
     if (isTransfer) {
       // This is the expense (FROM) leg. Find the income (TO) leg by transferId.
-      final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
-      final pair = allTxns.firstWhereOrNull(
-          (t) => t.transferId == transaction.transferId && t.id != transaction.id);
-      final accs = accountsAsync.valueOrNull ?? [];
-      fromName = accs
+      final pairAccountId = ref.watch(transactionListProvider.select(
+        (async) => async.whenOrNull(
+          data: (txns) => txns
+              .firstWhereOrNull(
+                  (t) => t.transferId == transaction.transferId && t.id != transaction.id)
+              ?.accountId,
+        ),
+      ));
+      final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
+      fromName = accounts
           .where((a) => a.id.toString() == transaction.accountId)
           .firstOrNull
           ?.name;
-      toName = pair != null
-          ? accs.where((a) => a.id.toString() == pair.accountId).firstOrNull?.name
+      toName = pairAccountId != null
+          ? accounts.where((a) => a.id.toString() == pairAccountId).firstOrNull?.name
           : null;
     }
 
@@ -513,7 +508,9 @@ class _TransactionRow extends ConsumerWidget {
       amountPrefix = isIncome ? '+' : '-';
     }
 
-    final swipeMode = ref.watch(settingsProvider).valueOrNull?.swipeMode ?? SwipeMode.changeTabs;
+    final swipeMode = ref.watch(settingsProvider.select(
+      (async) => async.valueOrNull?.swipeMode ?? SwipeMode.changeTabs,
+    ));
 
     final content = Container(
       decoration: BoxDecoration(
