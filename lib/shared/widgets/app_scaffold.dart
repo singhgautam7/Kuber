@@ -97,6 +97,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   void _onTabTapped(int index) {
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
+    if (_showSpeedDial) _closeSpeedDial();
     widget.navigationShell!.goBranch(
       index,
       initialLocation: index == widget.navigationShell!.currentIndex,
@@ -271,12 +272,45 @@ class _SpeedDialMenu extends AnimatedWidget {
       children: [
         _buildOption(
           context,
-          index: 2,
+          index: 3,
           icon: Icons.sync_rounded,
-          label: 'Add Recurring Transaction',
+          label: 'Add a Recurring Transaction',
           onTap: () {
             onClose();
             context.push('/recurring/add');
+          },
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        _buildOption(
+          context,
+          index: 2,
+          icon: Icons.account_balance_rounded,
+          label: 'Add a Loan',
+          onTap: () {
+            onClose();
+            context.push('/loans/add');
+          },
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        _buildOption(
+          context,
+          index: 1,
+          icon: Icons.show_chart_rounded,
+          label: 'Add an Investment',
+          onTap: () {
+            onClose();
+            context.push('/investments/add');
+          },
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        _buildOption(
+          context,
+          index: 0,
+          icon: Icons.handshake_outlined,
+          label: 'Lend / Borrow Money',
+          onTap: () {
+            onClose();
+            context.push('/ledger/add');
           },
         ),
         // const SizedBox(height: KuberSpacing.md),

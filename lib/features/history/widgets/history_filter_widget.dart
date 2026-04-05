@@ -81,8 +81,11 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-        height: 52,
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpacing.lg,
+          vertical: 4,
+        ),
+        height: 56,
         child: Stack(
           alignment: Alignment.center,
           children: [
