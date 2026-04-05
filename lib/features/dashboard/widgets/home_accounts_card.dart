@@ -22,9 +22,11 @@ class HomeAccountsCard extends ConsumerWidget {
       error: (e, _) => const SizedBox.shrink(),
       data: (accounts) {
         if (accounts.isEmpty) return const SizedBox.shrink();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        return Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
@@ -54,22 +56,18 @@ class HomeAccountsCard extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.sm),
             SizedBox(
               height: 130,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
+              child: PageView.builder(
+                controller: PageController(viewportFraction: 0.85, padEnds: false),
                 itemCount: accounts.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: KuberSpacing.md),
+                padEnds: false,
                 itemBuilder: (context, i) {
                   final account = accounts[i];
                   final balanceAsync =
                       ref.watch(accountBalanceProvider(account.id));
                   final acctColor = resolveAccountColor(account);
-                  final cardWidth = (MediaQuery.of(context).size.width -
-                          2 * KuberSpacing.lg -
-                          KuberSpacing.md) /
-                      2;
-                  return SizedBox(
-                    width: cardWidth,
+                  
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
                     child: InkWell(
                       onTap: () {
                         showModalBottomSheet(

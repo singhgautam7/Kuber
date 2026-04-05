@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart';
@@ -68,7 +67,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Kuber',
-                  style: GoogleFonts.inter(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: cs.primary,
@@ -78,7 +77,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ] else
                 Text(
                   title!,
-                  style: GoogleFonts.inter(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: cs.onSurface,

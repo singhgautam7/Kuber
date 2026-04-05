@@ -1,7 +1,7 @@
 name: kuber
 description: "Kuber — local-first expense manager"
 publish_to: 'none'
-version: 1.5.2+12
+version: 1.5.3+13
 
 environment:
   sdk: ^3.11.1
@@ -66,11 +66,3 @@ flutter:
 
   assets:
     - android/play_store_512.png
-    - assets/fonts/
-
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/fonts/Inter-Regular.ttf
-        - asset: assets/fonts/Inter-Bold.ttf
-          weight: 700

@@ -7,6 +7,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../settings/widgets/settings_widgets.dart';
+import '../../settings/widgets/currency_selector_sheet.dart';
 
 class SetupScreen extends ConsumerStatefulWidget {
   const SetupScreen({super.key});
@@ -56,16 +58,16 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               Container(
                 width: 64,
                 height: 64,
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: cs.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(KuberRadius.lg),
                 ),
-                child: Center(
-                  child: Image.asset(
-                    'android/play_store_512.png',
-                    width: 64,
-                    height: 64,
-                  ),
+                child: Image.asset(
+                  'android/play_store_512.png',
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: KuberSpacing.xl),
@@ -132,33 +134,55 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     // Currency dropdown
                     const _FormLabel('Currency'),
                     const SizedBox(height: KuberSpacing.sm),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: KuberSpacing.lg,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedCurrencyCode,
-                          dropdownColor: cs.surfaceContainer,
-                          isExpanded: true,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: cs.onSurface,
+                    GestureDetector(
+                      onTap: () {
+                        showCurrencyPicker(
+                          context: context,
+                          ref: ref,
+                          currentCode: _selectedCurrencyCode,
+                          onSelected: (code) =>
+                              setState(() => _selectedCurrencyCode = code),
+                        );
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(
+                            color: cs.outline.withValues(alpha: 0.5),
                           ),
-                          items: kCurrencies.map((c) {
-                            return DropdownMenuItem(
-                              value: c.code,
-                              child: Text('${c.symbol}  ${c.code} — ${c.name}'),
-                            );
-                          }).toList(),
-                          onChanged: (v) {
-                            if (v != null) setState(() => _selectedCurrencyCode = v);
-                          },
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              currencyFromCode(_selectedCurrencyCode).symbol,
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: cs.primary,
+                              ),
+                            ),
+                            const SizedBox(width: KuberSpacing.md),
+                            Expanded(
+                              child: Text(
+                                '$_selectedCurrencyCode — ${currencyFromCode(_selectedCurrencyCode).name}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: cs.onSurface,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -167,32 +191,29 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                     // Theme selector
                     const _FormLabel('Theme'),
                     const SizedBox(height: KuberSpacing.sm),
-                    SizedBox(
-                      width: double.infinity,
-                      child: SegmentedButton<ThemeMode>(
-                        segments: const [
-                          ButtonSegment(
-                            value: ThemeMode.system,
-                            label: Text('System'),
-                            icon: Icon(Icons.brightness_auto, size: 18),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.light,
-                            label: Text('Light'),
-                            icon: Icon(Icons.light_mode, size: 18),
-                          ),
-                          ButtonSegment(
-                            value: ThemeMode.dark,
-                            label: Text('Dark'),
-                            icon: Icon(Icons.dark_mode, size: 18),
-                          ),
-                        ],
-                        selected: {_selectedTheme},
-                        onSelectionChanged: (v) {
-                          setState(() => _selectedTheme = v.first);
-                          ref.read(settingsProvider.notifier).setThemeMode(v.first);
-                        },
-                      ),
+                    SettingsCardSelector<ThemeMode>(
+                      options: const [
+                        SelectorOption(
+                          value: ThemeMode.light,
+                          label: 'LIGHT',
+                          icon: Icons.light_mode_outlined,
+                        ),
+                        SelectorOption(
+                          value: ThemeMode.dark,
+                          label: 'DARK',
+                          icon: Icons.dark_mode_outlined,
+                        ),
+                        SelectorOption(
+                          value: ThemeMode.system,
+                          label: 'SYSTEM',
+                          icon: Icons.settings_brightness_outlined,
+                        ),
+                      ],
+                      selectedValue: _selectedTheme,
+                      onSelected: (v) {
+                        setState(() => _selectedTheme = v);
+                        ref.read(settingsProvider.notifier).setThemeMode(v);
+                      },
                     ),
                   ],
                 ),

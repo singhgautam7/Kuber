@@ -2,8 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../accounts/data/account.dart';
+import '../../categories/data/category.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -173,7 +174,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           children: [
                             Text(
                               'EXP ',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -182,7 +183,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             ),
                             Text(
                               '-${fmt.formatCurrency(totalExp)}',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -192,7 +193,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             const SizedBox(width: KuberSpacing.lg),
                             Text(
                               'INC ',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -201,7 +202,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             ),
                             Text(
                               '+${fmt.formatCurrency(totalInc)}',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -211,7 +212,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             const SizedBox(width: KuberSpacing.lg),
                             Text(
                               'NET ',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -222,7 +223,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               totalNet == 0
                                   ? fmt.formatCurrency(0)
                                   : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -247,7 +248,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         ),
                         child: RichText(
                           text: TextSpan(
-                            style: GoogleFonts.inter(
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.2,
@@ -309,6 +310,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 onTap: (t) => _showTransactionDetail(t),
                                 onEdit: (t) =>
                                     context.push('/add-transaction', extra: t),
+                                formatter: fmt,
+                                categoryMap: ref.watch(categoryMapProvider).valueOrNull ?? {},
+                                accountMap: ref.watch(accountMapProvider).valueOrNull ?? {},
+                                transactionList: transactions, // For transfer lookup
                               );
                             }
                           },
@@ -353,7 +358,7 @@ class _DateGroupHeader extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -370,7 +375,7 @@ class _DateGroupHeader extends ConsumerWidget {
           const SizedBox(width: KuberSpacing.sm),
           Text(
             totalText,
-            style: GoogleFonts.inter(
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: totalColor,
@@ -388,11 +393,20 @@ class _DayCard extends StatelessWidget {
   final void Function(Transaction) onTap;
   final void Function(Transaction) onEdit;
 
+  final dynamic formatter;
+  final Map<int, Category> categoryMap;
+  final Map<int, Account> accountMap;
+  final List<Transaction> transactionList;
+
   const _DayCard({
     required this.transactions,
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
+    required this.formatter,
+    required this.categoryMap,
+    required this.accountMap,
+    required this.transactionList,
   });
 
   @override
@@ -406,6 +420,11 @@ class _DayCard extends StatelessWidget {
             onDelete: () => onDelete(transactions[i]),
             onTap: () => onTap(transactions[i]),
             onEdit: () => onEdit(transactions[i]),
+            formatter: formatter,
+            category: categoryMap[int.tryParse(transactions[i].categoryId)],
+            account: accountMap[int.tryParse(transactions[i].accountId)],
+            accountMap: accountMap,
+            transactionList: transactionList,
           ),
         ],
       ],
@@ -418,12 +437,22 @@ class _TransactionRow extends ConsumerWidget {
   final VoidCallback onDelete;
   final VoidCallback onTap;
   final VoidCallback onEdit;
+  final dynamic formatter;
+  final Category? category;
+  final Account? account;
+  final Map<int, Account> accountMap;
+  final List<Transaction> transactionList;
 
   const _TransactionRow({
     required this.transaction,
     required this.onDelete,
     required this.onTap,
     required this.onEdit,
+    required this.formatter,
+    this.category,
+    this.account,
+    required this.accountMap,
+    required this.transactionList,
   });
 
   @override
@@ -432,42 +461,19 @@ class _TransactionRow extends ConsumerWidget {
     final isTransfer = transaction.isTransfer;
     final isAdjustment = transaction.isBalanceAdjustment;
 
-    final category = ref.watch(categoryListProvider.select(
-      (async) => async.whenOrNull(
-        data: (cats) => cats
-            .where((c) => c.id.toString() == transaction.categoryId)
-            .firstOrNull,
-      ),
-    ));
-
-    final account = ref.watch(accountListProvider.select(
-      (async) => async.whenOrNull(
-        data: (accs) => accs
-            .where((a) => a.id.toString() == transaction.accountId)
-            .firstOrNull,
-      ),
-    ));
-
     // Transfer-specific: look up FROM and TO accounts
     String? fromName;
     String? toName;
     if (isTransfer) {
       // This is the expense (FROM) leg. Find the income (TO) leg by transferId.
-      final pairAccountId = ref.watch(transactionListProvider.select(
-        (async) => async.whenOrNull(
-          data: (txns) => txns
-              .firstWhereOrNull(
-                  (t) => t.transferId == transaction.transferId && t.id != transaction.id)
-              ?.accountId,
-        ),
-      ));
-      final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
-      fromName = accounts
-          .where((a) => a.id.toString() == transaction.accountId)
-          .firstOrNull
-          ?.name;
+      final pairAccountId = transactionList
+          .firstWhereOrNull(
+              (t) => t.transferId == transaction.transferId && t.id != transaction.id)
+          ?.accountId;
+
+      fromName = accountMap[int.tryParse(transaction.accountId)]?.name;
       toName = pairAccountId != null
-          ? accounts.where((a) => a.id.toString() == pairAccountId).firstOrNull?.name
+          ? accountMap[int.tryParse(pairAccountId)]?.name
           : null;
     }
 
@@ -497,10 +503,10 @@ class _TransactionRow extends ConsumerWidget {
       amountPrefix = '';
     } else {
       iconData = category != null
-          ? IconMapper.fromString(category.icon)
+          ? IconMapper.fromString(category!.icon)
           : Icons.category;
       iconColor =
-          category != null ? Color(category.colorValue) : cs.primary;
+          category != null ? Color(category!.colorValue) : cs.primary;
       displayName = transaction.name;
       subtitle =
           '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
@@ -540,7 +546,7 @@ class _TransactionRow extends ConsumerWidget {
                   children: [
                     Text(
                       displayName,
-                      style: GoogleFonts.inter(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
@@ -554,7 +560,7 @@ class _TransactionRow extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             subtitle,
-                            style: GoogleFonts.inter(
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
                               color: cs.onSurfaceVariant,
@@ -579,7 +585,7 @@ class _TransactionRow extends ConsumerWidget {
                             ),
                             child: Text(
                               'ADJUSTMENT',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurfaceVariant,
@@ -598,8 +604,8 @@ class _TransactionRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$amountPrefix${ref.watch(formatterProvider).formatCurrency(transaction.amount)}',
-                    style: GoogleFonts.inter(
+                    '$amountPrefix${formatter.formatCurrency(transaction.amount)}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: amountColor,
@@ -608,7 +614,7 @@ class _TransactionRow extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     DateFormatter.time(transaction.createdAt),
-                    style: GoogleFonts.inter(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontSize: 11,
                       fontWeight: FontWeight.w400,
                       color: cs.onSurfaceVariant,

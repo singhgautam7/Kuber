@@ -43,6 +43,12 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
   }
 }
 
+/// Provides a map of account id -> Account for quick lookup
+final accountMapProvider = FutureProvider<Map<int, Account>>((ref) async {
+  final accounts = await ref.watch(accountListProvider.future);
+  return {for (final a in accounts) a.id: a};
+});
+
 /// Computed balance for an account.
 /// Unified formula: initialBalance + income - expense.
 /// CC initial balance is stored as negative (debt), so negative balance = debt.

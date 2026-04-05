@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
 
@@ -86,7 +85,7 @@ class KuberNavRail extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
               child: Text(
                 'Kuber',
-                style: GoogleFonts.inter(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: cs.primary,
@@ -133,7 +132,7 @@ class KuberNavRail extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Add Transaction',
-                          style: GoogleFonts.inter(
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
@@ -184,7 +183,7 @@ class _RailItem extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 item.label,
-                style: GoogleFonts.inter(
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                   color: isActive

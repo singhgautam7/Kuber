@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -413,38 +412,40 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       alignment: Alignment.center,
                       children: [
                         // Amount — truly centered across full width
-                        TextField(
-                          controller: _amountController,
-                          keyboardType:
-                              const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d*\.?\d{0,2}'),
+                        RepaintBoundary(
+                          child: TextField(
+                            controller: _amountController,
+                            keyboardType:
+                                const TextInputType.numberWithOptions(
+                              decimal: true,
                             ),
-                          ],
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          style: GoogleFonts.inter(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: _typeColor,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: '0',
-                            hintStyle: GoogleFonts.inter(
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d*\.?\d{0,2}'),
+                              ),
+                            ],
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            style: textTheme.displayLarge?.copyWith(
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
-                              color: cs.onSurfaceVariant,
+                              color: _typeColor,
                             ),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            contentPadding: EdgeInsets.zero,
-                            isDense: true,
-                            isCollapsed: true,
+                            decoration: InputDecoration(
+                              hintText: '0',
+                              hintStyle: textTheme.displayLarge?.copyWith(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                              isCollapsed: true,
+                            ),
                           ),
                         ),
                         // currency symbol — pinned left
@@ -452,7 +453,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                           left: 0,
                           child: Text(
                             ref.watch(currencyProvider).symbol,
-                            style: GoogleFonts.inter(
+                            style: textTheme.titleLarge?.copyWith(
                               fontSize: 28,
                               fontWeight: FontWeight.w300,
                               color: cs.onSurfaceVariant,
@@ -732,7 +733,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   ),
                                   child: Text(
                                     '#${tag.name}',
-                                    style: GoogleFonts.inter(
+                                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: cs.primary,
@@ -1181,14 +1182,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ],
                 textAlign: TextAlign.center,
                 maxLines: 1,
-                style: GoogleFonts.inter(
+                style: textTheme.displayLarge?.copyWith(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
                   color: cs.onSurface,
                 ),
                 decoration: InputDecoration(
                   hintText: '0',
-                  hintStyle: GoogleFonts.inter(
+                  hintStyle: textTheme.displayLarge?.copyWith(
                     fontSize: 48,
                     fontWeight: FontWeight.bold,
                     color: cs.onSurfaceVariant,
@@ -1207,7 +1208,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 left: 0,
                 child: Text(
                   ref.watch(currencyProvider).symbol,
-                  style: GoogleFonts.inter(
+                  style: textTheme.titleLarge?.copyWith(
                     fontSize: 28,
                     fontWeight: FontWeight.w300,
                     color: cs.onSurfaceVariant,
@@ -1469,7 +1470,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         ),
                         child: Text(
                           '#${tag.name}',
-                          style: GoogleFonts.inter(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                             color: cs.primary,
@@ -1806,7 +1807,7 @@ class _BudgetProgressIndicator extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Budget',
-                  style: GoogleFonts.inter(
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: cs.primary,
@@ -1816,7 +1817,7 @@ class _BudgetProgressIndicator extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)} (${p.percentage.toStringAsFixed(0)}% used)',
-                    style: GoogleFonts.inter(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: p.percentage >= 100 ? cs.error : cs.onSurfaceVariant,

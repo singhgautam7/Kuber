@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'app_text_styles.dart';
 
 class KuberSpacing {
   static const xs = 4.0;
@@ -76,7 +76,7 @@ class KuberLightColors {
 
 class AppTheme {
   static ThemeData dark() {
-    final textTheme = GoogleFonts.interTextTheme(
+    final textTheme = AppTextStyles.getTextTheme(
       ThemeData.dark().textTheme,
     );
 
@@ -189,7 +189,7 @@ class AppTheme {
         selectedColor: KuberColors.primarySubtle,
         checkmarkColor: KuberColors.primary,
         showCheckmark: true,
-        labelStyle: GoogleFonts.inter(
+        labelStyle: AppTextStyles.inter.copyWith(
           fontSize: 13,
           color: KuberColors.textSecondary,
         ),
@@ -294,7 +294,7 @@ class AppTheme {
   }
 
   static ThemeData light() {
-    final textTheme = GoogleFonts.interTextTheme(
+    final textTheme = AppTextStyles.getTextTheme(
       ThemeData.light().textTheme,
     );
 
@@ -407,7 +407,7 @@ class AppTheme {
         selectedColor: KuberLightColors.primarySubtle,
         checkmarkColor: KuberLightColors.primary,
         showCheckmark: true,
-        labelStyle: GoogleFonts.inter(
+        labelStyle: AppTextStyles.inter.copyWith(
           fontSize: 13,
           color: KuberLightColors.textSecondary,
         ),

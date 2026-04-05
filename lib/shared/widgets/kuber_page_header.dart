@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class KuberPageHeader extends StatelessWidget {
   final String title;
@@ -33,7 +32,7 @@ class KuberPageHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
                     color: cs.onSurface,
@@ -44,7 +43,7 @@ class KuberPageHeader extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   description,
-                  style: GoogleFonts.inter(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontSize: 13,
                     color: cs.onSurfaceVariant,
                   ),
