@@ -3,9 +3,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 
-    <!-- Strip photo/video/audio permissions injected by dependencies (e.g. file_picker) -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
+    <!-- Image/video permissions for attachment picking -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <!-- Strip audio permission injected by dependencies -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove"/>
 
     <application

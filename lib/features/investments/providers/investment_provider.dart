@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/services/attachment_service.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/investment.dart';
@@ -95,12 +96,18 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
 
   Future<void> deleteInvestment(Investment investment) async {
     final isar = ref.read(isarProvider);
+    final attachments = ref.read(attachmentServiceProvider);
 
     final linkedTxns = await isar.transactions
         .filter()
         .linkedRuleIdEqualTo(investment.uid)
         .linkedRuleTypeEqualTo('investment')
         .findAll();
+
+    // Delete attachment files for linked transactions
+    for (final txn in linkedTxns) {
+      await attachments.deleteAllForTransaction(txn.id);
+    }
 
     await isar.writeTxn(() async {
       await isar.transactions.deleteAll(linkedTxns.map((t) => t.id).toList());

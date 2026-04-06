@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/brand_icon.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../core/utils/formatters.dart';
@@ -57,21 +58,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               const SizedBox(height: KuberSpacing.xxl),
 
               // App icon
-              Container(
-                width: 64,
-                height: 64,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.lg),
-                ),
-                child: Image.asset(
-                  'android/play_store_512.png',
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              const BrandIcon(size: 64),
               const SizedBox(height: KuberSpacing.xl),
 
               // Headline

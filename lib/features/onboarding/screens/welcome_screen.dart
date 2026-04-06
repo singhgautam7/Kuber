@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/brand_icon.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -233,24 +234,9 @@ class _AnimatedAppIconState extends State<AnimatedAppIcon>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return ScaleTransition(
       scale: _scale,
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-        ),
-        child: Image.asset(
-          'android/play_store_512.png',
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.cover,
-        ),
-      ),
+      child: BrandIcon(size: widget.size),
     );
   }
 }

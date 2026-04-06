@@ -8,8 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../main.dart';
 
-import '../../settings/providers/settings_provider.dart';
-import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/brand_icon.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -76,7 +75,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final currency = ref.watch(currencyProvider);
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -88,19 +86,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
-                  ),
-                  child: Icon(
-                    IconMapper.fromCurrencyCode(currency.code),
-                    color: cs.primary,
-                    size: 44,
-                  ),
-                ),
+                const BrandIcon(size: 88),
                 const SizedBox(height: KuberSpacing.lg),
                 Text(
                   'Kuber',

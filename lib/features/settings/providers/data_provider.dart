@@ -184,7 +184,7 @@ class DataController extends StateNotifier<DataState> {
 
   Future<void> importData() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['csv'],
         allowMultiple: false,

@@ -11,6 +11,7 @@ class PrefsKeys {
   static const migratedTxnLinkedRuleV1 = 'kuber_migrated_txn_linked_rule_v1';
   static const migratedSeedLedgerCategoryV1 = 'kuber_migrated_seed_ledger_category_v1';
   static const migratedSeedLoanInvestmentCategoryV1 = 'kuber_migrated_seed_loan_investment_category_v1';
+  static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
 
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';

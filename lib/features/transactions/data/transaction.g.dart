@@ -23,51 +23,56 @@ const TransactionSchema = CollectionSchema(
       type: IsarType.string,
     ),
     r'amount': PropertySchema(id: 1, name: r'amount', type: IsarType.double),
-    r'categoryId': PropertySchema(
+    r'attachmentPaths': PropertySchema(
       id: 2,
+      name: r'attachmentPaths',
+      type: IsarType.stringList,
+    ),
+    r'categoryId': PropertySchema(
+      id: 3,
       name: r'categoryId',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'isBalanceAdjustment': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'isBalanceAdjustment',
       type: IsarType.bool,
     ),
     r'isTransfer': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'isTransfer',
       type: IsarType.bool,
     ),
     r'linkedRuleId': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'linkedRuleId',
       type: IsarType.string,
     ),
     r'linkedRuleType': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'linkedRuleType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 8, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 9, name: r'name', type: IsarType.string),
     r'nameLower': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'nameLower',
       type: IsarType.string,
     ),
-    r'notes': PropertySchema(id: 10, name: r'notes', type: IsarType.string),
+    r'notes': PropertySchema(id: 11, name: r'notes', type: IsarType.string),
     r'transferId': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'transferId',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 12, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 13, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -171,6 +176,13 @@ int _transactionEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.accountId.length * 3;
+  bytesCount += 3 + object.attachmentPaths.length * 3;
+  {
+    for (var i = 0; i < object.attachmentPaths.length; i++) {
+      final value = object.attachmentPaths[i];
+      bytesCount += value.length * 3;
+    }
+  }
   bytesCount += 3 + object.categoryId.length * 3;
   {
     final value = object.linkedRuleId;
@@ -210,18 +222,19 @@ void _transactionSerialize(
 ) {
   writer.writeString(offsets[0], object.accountId);
   writer.writeDouble(offsets[1], object.amount);
-  writer.writeString(offsets[2], object.categoryId);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeBool(offsets[4], object.isBalanceAdjustment);
-  writer.writeBool(offsets[5], object.isTransfer);
-  writer.writeString(offsets[6], object.linkedRuleId);
-  writer.writeString(offsets[7], object.linkedRuleType);
-  writer.writeString(offsets[8], object.name);
-  writer.writeString(offsets[9], object.nameLower);
-  writer.writeString(offsets[10], object.notes);
-  writer.writeString(offsets[11], object.transferId);
-  writer.writeString(offsets[12], object.type);
-  writer.writeDateTime(offsets[13], object.updatedAt);
+  writer.writeStringList(offsets[2], object.attachmentPaths);
+  writer.writeString(offsets[3], object.categoryId);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeBool(offsets[5], object.isBalanceAdjustment);
+  writer.writeBool(offsets[6], object.isTransfer);
+  writer.writeString(offsets[7], object.linkedRuleId);
+  writer.writeString(offsets[8], object.linkedRuleType);
+  writer.writeString(offsets[9], object.name);
+  writer.writeString(offsets[10], object.nameLower);
+  writer.writeString(offsets[11], object.notes);
+  writer.writeString(offsets[12], object.transferId);
+  writer.writeString(offsets[13], object.type);
+  writer.writeDateTime(offsets[14], object.updatedAt);
 }
 
 Transaction _transactionDeserialize(
@@ -233,19 +246,20 @@ Transaction _transactionDeserialize(
   final object = Transaction();
   object.accountId = reader.readString(offsets[0]);
   object.amount = reader.readDouble(offsets[1]);
-  object.categoryId = reader.readString(offsets[2]);
-  object.createdAt = reader.readDateTime(offsets[3]);
+  object.attachmentPaths = reader.readStringList(offsets[2]) ?? [];
+  object.categoryId = reader.readString(offsets[3]);
+  object.createdAt = reader.readDateTime(offsets[4]);
   object.id = id;
-  object.isBalanceAdjustment = reader.readBool(offsets[4]);
-  object.isTransfer = reader.readBool(offsets[5]);
-  object.linkedRuleId = reader.readStringOrNull(offsets[6]);
-  object.linkedRuleType = reader.readStringOrNull(offsets[7]);
-  object.name = reader.readString(offsets[8]);
-  object.nameLower = reader.readString(offsets[9]);
-  object.notes = reader.readStringOrNull(offsets[10]);
-  object.transferId = reader.readStringOrNull(offsets[11]);
-  object.type = reader.readString(offsets[12]);
-  object.updatedAt = reader.readDateTime(offsets[13]);
+  object.isBalanceAdjustment = reader.readBool(offsets[5]);
+  object.isTransfer = reader.readBool(offsets[6]);
+  object.linkedRuleId = reader.readStringOrNull(offsets[7]);
+  object.linkedRuleType = reader.readStringOrNull(offsets[8]);
+  object.name = reader.readString(offsets[9]);
+  object.nameLower = reader.readString(offsets[10]);
+  object.notes = reader.readStringOrNull(offsets[11]);
+  object.transferId = reader.readStringOrNull(offsets[12]);
+  object.type = reader.readString(offsets[13]);
+  object.updatedAt = reader.readDateTime(offsets[14]);
   return object;
 }
 
@@ -261,28 +275,30 @@ P _transactionDeserializeProp<P>(
     case 1:
       return (reader.readDouble(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 9:
       return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 11:
       return (reader.readStringOrNull(offset)) as P;
     case 12:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 13:
+      return (reader.readString(offset)) as P;
+    case 14:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1178,6 +1194,206 @@ extension TransactionQueryFilter
 
           epsilon: epsilon,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'attachmentPaths',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'attachmentPaths',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'attachmentPaths',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'attachmentPaths',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'attachmentPaths',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'attachmentPaths',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'attachmentPaths',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'attachmentPaths',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'attachmentPaths', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'attachmentPaths', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'attachmentPaths', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'attachmentPaths', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'attachmentPaths', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'attachmentPaths', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'attachmentPaths',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  attachmentPathsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'attachmentPaths',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
       );
     });
   }
@@ -2972,6 +3188,13 @@ extension TransactionQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QDistinct>
+  distinctByAttachmentPaths() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'attachmentPaths');
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QDistinct> distinctByCategoryId({
     bool caseSensitive = true,
   }) {
@@ -3082,6 +3305,13 @@ extension TransactionQueryProperty
   QueryBuilder<Transaction, double, QQueryOperations> amountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'amount');
+    });
+  }
+
+  QueryBuilder<Transaction, List<String>, QQueryOperations>
+  attachmentPathsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'attachmentPaths');
     });
   }
 

@@ -9,6 +9,7 @@ import '../../categories/providers/category_provider.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../history/utils/history_utils.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../tags/providers/tag_providers.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/transaction_row.dart';
 
@@ -75,6 +76,19 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
             final accountMap = accountMapAsync.valueOrNull ?? {};
             final categoryMap = categoryMapAsync.valueOrNull ?? {};
             final allTransactions = allTransactionsAsync.valueOrNull ?? [];
+
+            // Build tag names map for indicator line
+            final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
+            final tagNameById = {for (final t in allTags) t.id: t.name};
+            final txnTagsMapData = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+            final tagNamesMap = <int, List<String>>{};
+            for (final entry in txnTagsMapData.entries) {
+              final names = entry.value
+                  .map((tagId) => tagNameById[tagId])
+                  .whereType<String>()
+                  .toList();
+              if (names.isNotEmpty) tagNamesMap[entry.key] = names;
+            }
             final groups = groupTransactionsByDate(transactions);
 
             return Column(
@@ -94,6 +108,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                       categoryMap: categoryMap,
                       accountMap: accountMap,
                       transactionList: allTransactions,
+                      tagNamesMap: tagNamesMap,
                     ),
                   ],
                 );

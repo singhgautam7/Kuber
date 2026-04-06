@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  file_selector_windows
   isar_community_flutter_libs
   local_auth_windows
   permission_handler_windows

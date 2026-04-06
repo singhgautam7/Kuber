@@ -14,6 +14,7 @@ class KuberRadius {
   static const sm = 4.0; // tags, badges
   static const md = 8.0; // cards, buttons, inputs, chips — universal
   static const lg = 12.0; // bottom sheets only
+  static const xl = 24.0; // brand icons, large cards
   static const full = 999.0;
 }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/models/export_data.dart';
@@ -524,7 +524,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     final mimeType = fileName.toLowerCase().endsWith('.csv')
         ? 'text/csv'
         : 'application/pdf';
-    final openResult = await OpenFile.open(result.tempFile.path, type: mimeType);
+    final openResult = await OpenFilex.open(result.tempFile.path, type: mimeType);
     if (openResult.type != ResultType.done && mounted) {
       showKuberSnackBar(context, 'No app found to open this file type.');
     }

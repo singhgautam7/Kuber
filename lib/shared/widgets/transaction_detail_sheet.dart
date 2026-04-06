@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/services/attachment_service.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../core/utils/icon_mapper.dart';
 import '../../features/accounts/providers/account_provider.dart';
@@ -238,6 +242,68 @@ class TransactionDetailSheet extends ConsumerWidget {
               label: 'NOTES',
               value: transaction.notes!,
               fullWidth: true,
+            ),
+          ],
+
+          // ── Attachments ────────────────────────────────────────────
+          if (transaction.attachmentPaths.isNotEmpty) ...[
+            const SizedBox(height: KuberSpacing.xl),
+            Text(
+              'ATTACHMENTS',
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 72,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: transaction.attachmentPaths.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(width: KuberSpacing.sm),
+                itemBuilder: (context, index) {
+                  final path = transaction.attachmentPaths[index];
+                  final isImage =
+                      AttachmentService.getFileType(path) == 'image';
+
+                  return GestureDetector(
+                    onTap: () => OpenFilex.open(path),
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerLow,
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: cs.outline),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: isImage
+                          ? Image.file(
+                              File(path),
+                              fit: BoxFit.cover,
+                              width: 72,
+                              height: 72,
+                              errorBuilder: (_, __, ___) => Icon(
+                                Icons.broken_image_outlined,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            )
+                          : Center(
+                              child: Icon(
+                                Icons.picture_as_pdf,
+                                color: cs.primary,
+                                size: 32,
+                              ),
+                            ),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
 

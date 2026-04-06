@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show DateUtils;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/services/attachment_service.dart';
 import '../data/transaction.dart';
 import '../data/transaction_repository.dart';
 import '../../budgets/services/budget_service.dart';
@@ -51,13 +52,18 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
   }
 
   Future<void> delete(int id) async {
-    final t = await ref.read(transactionRepositoryProvider).getById(id);
+    final repo = ref.read(transactionRepositoryProvider);
+    final attachments = ref.read(attachmentServiceProvider);
+    final t = await repo.getById(id);
     if (t != null && t.isTransfer && t.transferId != null) {
-      await ref
-          .read(transactionRepositoryProvider)
-          .deleteTransferPair(t.transferId!);
+      // Delete attachments for both legs of the transfer
+      await attachments.deleteAllForTransaction(t.id);
+      final pair = await repo.findTransferPair(t.transferId!, t.id);
+      if (pair != null) await attachments.deleteAllForTransaction(pair.id);
+      await repo.deleteTransferPair(t.transferId!);
     } else {
-      await ref.read(transactionRepositoryProvider).delete(id);
+      if (t != null) await attachments.deleteAllForTransaction(t.id);
+      await repo.delete(id);
     }
     ref.invalidateSelf();
     _invalidateDependencies();
