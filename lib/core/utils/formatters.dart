@@ -153,3 +153,32 @@ class CurrencyInputFormatter extends TextInputFormatter {
     );
   }
 }
+
+class TitleCaseInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    final String transformed = newValue.text.toTitleCase();
+
+    return newValue.copyWith(
+      text: transformed,
+      selection: newValue.selection,
+    );
+  }
+}
+
+extension StringExtensions on String {
+  String toTitleCase() {
+    if (isEmpty) return this;
+    return split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+}

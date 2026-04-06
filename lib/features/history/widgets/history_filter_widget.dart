@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../providers/history_filter_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -97,7 +96,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                 if (showFiltersLabel)
                   Text(
                     'FILTERS',
-                    style: GoogleFonts.inter(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.2,
@@ -183,6 +182,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   }
 
   Widget _buildSearchChip(String query, ColorScheme cs) {
+    final theme = Theme.of(context);
     return Tooltip(
       message: 'Search transactions',
       child: GestureDetector(
@@ -205,7 +205,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
               Flexible(
                 child: Text(
                   query,
-                  style: GoogleFonts.inter(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.primary,
@@ -243,6 +243,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   }
 
   Widget _buildSearchInput(ColorScheme cs) {
+    final theme = Theme.of(context);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
@@ -254,11 +255,11 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
         controller: _searchController,
         focusNode: _focusNode,
         textAlignVertical: TextAlignVertical.center,
-        style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+        style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurface),
         textInputAction: TextInputAction.done,
         decoration: InputDecoration(
           hintText: 'Search transactions...',
-          hintStyle: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurfaceVariant),
           prefixIcon: IconButton(
             icon: Icon(Icons.arrow_back_rounded, size: 20, color: cs.onSurfaceVariant),
             onPressed: _onSearchCancel,
@@ -324,7 +325,7 @@ class _QuickFilterButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: isSelected ? Colors.white : cs.onSurfaceVariant,

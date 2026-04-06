@@ -53,23 +53,19 @@ class HomeAccountsCard extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.sm),
             SizedBox(
-              height: 130,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
+              height: 110,
+              child: PageView.builder(
+                controller: PageController(viewportFraction: 0.45),
                 itemCount: accounts.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: KuberSpacing.md),
+                padEnds: false,
                 itemBuilder: (context, i) {
                   final account = accounts[i];
                   final balanceAsync =
                       ref.watch(accountBalanceProvider(account.id));
                   final acctColor = resolveAccountColor(account);
-                  final cardWidth = (MediaQuery.of(context).size.width -
-                          2 * KuberSpacing.lg -
-                          KuberSpacing.md) /
-                      2;
-                  return SizedBox(
-                    width: cardWidth,
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12),
                     child: InkWell(
                       onTap: () {
                         showModalBottomSheet(
@@ -83,7 +79,7 @@ class HomeAccountsCard extends ConsumerWidget {
                       },
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                       child: Container(
-                        padding: const EdgeInsets.all(KuberSpacing.lg),
+                        padding: const EdgeInsets.all(KuberSpacing.md),
                         decoration: BoxDecoration(
                           color: cs.surfaceContainer,
                           borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -94,6 +90,7 @@ class HomeAccountsCard extends ConsumerWidget {
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Row(
                               children: [
@@ -155,7 +152,6 @@ class HomeAccountsCard extends ConsumerWidget {
                                   color: cs.onSurfaceVariant,
                                 ),
                               ),
-                            const Spacer(),
                           ],
                         ),
                       ),
@@ -164,8 +160,8 @@ class HomeAccountsCard extends ConsumerWidget {
                 },
               ),
             ),
-          ],
-        );
+            ],
+          );
       },
     );
   }

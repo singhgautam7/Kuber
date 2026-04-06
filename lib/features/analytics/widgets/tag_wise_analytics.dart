@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../transactions/data/transaction.dart';
@@ -21,6 +20,7 @@ class TagWiseAnalytics extends ConsumerWidget {
     final tagsAsync = ref.watch(tagListProvider);
     final txTagsMapAsync = ref.watch(transactionTagsMapProvider);
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return tagsAsync.when(
       data: (allTags) {
@@ -28,13 +28,13 @@ class TagWiseAnalytics extends ConsumerWidget {
           data: (txTagsMap) {
             final tagStats = _calculateTagStats(allTags, txTagsMap);
             if (tagStats.isEmpty) {
-              return _buildEmptyState(cs);
+              return _buildEmptyState(cs, tt);
             }
 
             final totalExpense = tagStats.values.fold<double>(0, (sum, val) => sum + val);
             final sortedTags = tagStats.entries.toList()
               ..sort((a, b) => b.value.compareTo(a.value));
-            
+
             final top3 = sortedTags.take(3).toList();
 
             return Card(
@@ -52,8 +52,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                           children: [
                             Text(
                               'Tag-wise Analytics',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
+                              style: tt.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurface,
                               ),
@@ -61,8 +60,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               'Spending by Tag',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
+                              style: tt.bodySmall?.copyWith(
                                 color: cs.onSurfaceVariant,
                               ),
                             ),
@@ -76,12 +74,12 @@ class TagWiseAnalytics extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: KuberSpacing.xl),
-                    
+
                     // Spending by Tag List
                     ...sortedTags.map((entry) {
                       final tag = allTags.firstWhere((t) => t.id == entry.key);
                       final amount = entry.value;
-                      
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
                         child: Column(
@@ -96,8 +94,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                   ),
                                   child: Text(
                                     '#${tag.name}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
+                                    style: tt.labelMedium?.copyWith(
                                       fontWeight: FontWeight.w700,
                                       color: cs.onSurface,
                                     ),
@@ -106,8 +103,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 const SizedBox(width: KuberSpacing.sm),
                                 Text(
                                   ref.watch(formatterProvider).formatPercentage(amount / totalExpense * 100),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 12,
+                                  style: tt.labelMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: cs.primary,
                                   ),
@@ -115,8 +111,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 const Spacer(),
                                 Text(
                                   ref.watch(formatterProvider).formatCurrency(amount),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
+                                  style: tt.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: cs.onSurface,
                                   ),
@@ -153,30 +148,29 @@ class TagWiseAnalytics extends ConsumerWidget {
                         ),
                       );
                     }),
-                    
+
                     const SizedBox(height: KuberSpacing.md),
                     const Divider(),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     Text(
                       'TOP TAGS CONTRIBUTION',
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
+                      style: tt.labelSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    
+
                     // Top 3 Tags Contribution Grid
                     Row(
                       children: List.generate(3, (index) {
                         if (index >= top3.length) return const Expanded(child: SizedBox());
-                        
+
                         final entry = top3[index];
                         final tag = allTags.firstWhere((t) => t.id == entry.key);
-                        
+
 
                         return Expanded(
                           child: Container(
@@ -191,8 +185,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                               children: [
                                 Text(
                                   '#${tag.name}',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11,
+                                  style: tt.labelSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: cs.onSurfaceVariant,
                                   ),
@@ -200,8 +193,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 const SizedBox(height: 4),
                                 Text(
                                   ref.watch(formatterProvider).formatPercentage(entry.value / totalExpense * 100),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
+                                  style: tt.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: cs.onSurface,
                                   ),
@@ -242,7 +234,7 @@ class TagWiseAnalytics extends ConsumerWidget {
     return tagStats;
   }
 
-  Widget _buildEmptyState(ColorScheme cs) {
+  Widget _buildEmptyState(ColorScheme cs, TextTheme tt) {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -258,8 +250,7 @@ class TagWiseAnalytics extends ConsumerWidget {
             Text(
               'There are no tags related transaction in in your selected date range',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 14,
+              style: tt.bodyMedium?.copyWith(
                 color: cs.onSurfaceVariant,
                 height: 1.5,
               ),

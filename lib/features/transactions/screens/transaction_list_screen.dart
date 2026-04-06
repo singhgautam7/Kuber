@@ -1,20 +1,15 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/date_formatter.dart';
-import '../../../core/utils/icon_mapper.dart';
-import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show settingsProvider, formatterProvider, SwipeMode;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
@@ -23,6 +18,8 @@ import '../../history/providers/history_filter_provider.dart';
 import '../../history/models/history_filter.dart';
 import '../../history/utils/filter_utils.dart';
 import '../../history/widgets/history_filter_widget.dart';
+import '../../history/utils/history_utils.dart';
+import '../widgets/transaction_row.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -32,49 +29,31 @@ class HistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
-  // No local search state, moved to HistoryFilterProvider
+  static const _groupsPerPage = 10;
+  int _displayedGroupCount = _groupsPerPage;
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.extentAfter < 300) {
+      _loadMoreGroups();
+    }
+  }
+
+  void _loadMoreGroups() {
+    // The actual check against groups.length happens in build —
+    // here we just bump the count and let build() clamp it.
+    setState(() => _displayedGroupCount += _groupsPerPage);
+  }
 
   List<Transaction> _applyFilters(List<Transaction> transactions, HistoryFilter filter) {
     final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
     return applyHistoryFilters(transactions, filter, txnTagsMap: txnTagsMap);
-  }
-
-  List<_DateGroup> _groupByDate(List<Transaction> transactions) {
-    // Filter out income legs of transfers (show only expense/FROM leg)
-    final displayList = transactions.where((t) =>
-        !(t.isTransfer && t.type == 'income')).toList();
-
-    final groups = <String, List<Transaction>>{};
-    for (final t in displayList) {
-      final key =
-          DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day)
-              .toIso8601String();
-      groups.putIfAbsent(key, () => []).add(t);
-    }
-
-    final result = groups.entries.map((e) {
-      final date = DateTime.parse(e.key);
-      final txns = e.value
-        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-      double dayTotal = 0;
-      for (final t in txns) {
-        if (t.isTransfer || t.isBalanceAdjustment) continue;
-        dayTotal += t.type == 'income' ? t.amount : -t.amount;
-      }
-
-      final label = DateFormatter.groupHeader(date).toUpperCase();
-
-      return _DateGroup(
-        label: label,
-        date: date,
-        dayTotal: dayTotal,
-        transactions: txns,
-      );
-    }).toList()
-      ..sort((a, b) => b.date.compareTo(a.date));
-
-    return result;
   }
 
   void _showTransactionDetail(Transaction t) {
@@ -86,7 +65,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Reset pagination when filters change
+    ref.listen(historyFilterProvider, (_, __) {
+      _displayedGroupCount = _groupsPerPage;
+    });
+
     final cs = Theme.of(context).colorScheme;
     final transactionsAsync = ref.watch(transactionListProvider);
     final filter = ref.watch(historyFilterProvider);
@@ -102,6 +92,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         behavior: HitTestBehavior.opaque,
         child: Scaffold(
           body: CustomScrollView(
+            controller: _scrollController,
             slivers: [
               // App bar
               const SliverToBoxAdapter(
@@ -160,7 +151,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   }
                   final totalNet = totalInc - totalExp;
                   final fmt = ref.watch(formatterProvider);
-                  final groups = _groupByDate(filtered);
+                  final groups = groupTransactionsByDate(filtered);
 
                   return [
                     // EXP / INC / NET summary
@@ -173,7 +164,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           children: [
                             Text(
                               'EXP ',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -182,7 +173,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             ),
                             Text(
                               '-${fmt.formatCurrency(totalExp)}',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -192,7 +183,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             const SizedBox(width: KuberSpacing.lg),
                             Text(
                               'INC ',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -201,7 +192,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             ),
                             Text(
                               '+${fmt.formatCurrency(totalInc)}',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -211,7 +202,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             const SizedBox(width: KuberSpacing.lg),
                             Text(
                               'NET ',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -222,7 +213,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               totalNet == 0
                                   ? fmt.formatCurrency(0)
                                   : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
-                              style: GoogleFonts.inter(
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -247,7 +238,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         ),
                         child: RichText(
                           text: TextSpan(
-                            style: GoogleFonts.inter(
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontSize: 11,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 1.2,
@@ -284,36 +275,62 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               : null,
                         ),
                       )
-                    else
-                      SliverPadding(
-                        padding: EdgeInsets.only(
-                          bottom: navBarBottomPadding(context),
-                          left: KuberSpacing.lg,
-                          right: KuberSpacing.lg,
-                        ),
-                        sliver: SliverList.builder(
-                          itemCount: groups.length * 2,
-                          itemBuilder: (context, index) {
-                            final groupIndex = index ~/ 2;
-                            final group = groups[groupIndex];
+                    else ...[
+                      () {
+                        final displayedGroups = groups.take(_displayedGroupCount).toList();
+                        final hasMore = displayedGroups.length < groups.length;
 
-                            if (index.isEven) {
-                              return _DateGroupHeader(
-                                label: group.label,
-                                dayTotal: group.dayTotal,
-                              );
-                            } else {
-                              return _DayCard(
-                                transactions: group.transactions,
-                                onDelete: _deleteWithUndo,
-                                onTap: (t) => _showTransactionDetail(t),
-                                onEdit: (t) =>
-                                    context.push('/add-transaction', extra: t),
-                              );
-                            }
-                          },
+                        return SliverPadding(
+                          padding: EdgeInsets.only(
+                            bottom: hasMore ? 0 : navBarBottomPadding(context),
+                            left: KuberSpacing.lg,
+                            right: KuberSpacing.lg,
+                          ),
+                          sliver: SliverList.builder(
+                            itemCount: displayedGroups.length * 2,
+                            itemBuilder: (context, index) {
+                              final groupIndex = index ~/ 2;
+                              final group = displayedGroups[groupIndex];
+
+                              if (index.isEven) {
+                                return DateGroupHeader(
+                                  label: group.label,
+                                  dayTotal: group.dayTotal,
+                                );
+                              } else {
+                                return TransactionDayCard(
+                                  transactions: group.transactions,
+                                  onDelete: _deleteWithUndo,
+                                  onTap: (t) => _showTransactionDetail(t),
+                                  onEdit: (t) =>
+                                      context.push('/add-transaction', extra: t),
+                                  formatter: fmt,
+                                  categoryMap: ref.watch(categoryMapProvider).valueOrNull ?? {},
+                                  accountMap: ref.watch(accountMapProvider).valueOrNull ?? {},
+                                  transactionList: transactions, // For transfer lookup
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      }(),
+                      if (groups.length > _displayedGroupCount)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: KuberSpacing.lg,
+                              bottom: navBarBottomPadding(context),
+                            ),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                    ],
                   ];
                 },
               ),
@@ -323,355 +340,4 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ),
     );
   }
-}
-
-// --- Private widgets ---
-
-class _DateGroupHeader extends ConsumerWidget {
-  final String label;
-  final double dayTotal;
-
-  const _DateGroupHeader({required this.label, required this.dayTotal});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final formatter = ref.watch(formatterProvider);
-    final isPositive = dayTotal >= 0;
-    final totalText = isPositive
-        ? '+${formatter.formatCurrency(dayTotal)}'
-        : '−${formatter.formatCurrency(dayTotal.abs())}';
-    final totalColor =
-        isPositive ? cs.tertiary : cs.onSurfaceVariant;
-
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: KuberSpacing.lg,
-        bottom: KuberSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          Expanded(
-            child: Container(
-              height: 0.5,
-              color: cs.outline,
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          Text(
-            totalText,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: totalColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DayCard extends StatelessWidget {
-  final List<Transaction> transactions;
-  final void Function(Transaction) onDelete;
-  final void Function(Transaction) onTap;
-  final void Function(Transaction) onEdit;
-
-  const _DayCard({
-    required this.transactions,
-    required this.onDelete,
-    required this.onTap,
-    required this.onEdit,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (int i = 0; i < transactions.length; i++) ...[
-          if (i > 0) const SizedBox(height: 8),
-          _TransactionRow(
-            transaction: transactions[i],
-            onDelete: () => onDelete(transactions[i]),
-            onTap: () => onTap(transactions[i]),
-            onEdit: () => onEdit(transactions[i]),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _TransactionRow extends ConsumerWidget {
-  final Transaction transaction;
-  final VoidCallback onDelete;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-
-  const _TransactionRow({
-    required this.transaction,
-    required this.onDelete,
-    required this.onTap,
-    required this.onEdit,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final isTransfer = transaction.isTransfer;
-    final isAdjustment = transaction.isBalanceAdjustment;
-
-    final category = ref.watch(categoryListProvider.select(
-      (async) => async.whenOrNull(
-        data: (cats) => cats
-            .where((c) => c.id.toString() == transaction.categoryId)
-            .firstOrNull,
-      ),
-    ));
-
-    final account = ref.watch(accountListProvider.select(
-      (async) => async.whenOrNull(
-        data: (accs) => accs
-            .where((a) => a.id.toString() == transaction.accountId)
-            .firstOrNull,
-      ),
-    ));
-
-    // Transfer-specific: look up FROM and TO accounts
-    String? fromName;
-    String? toName;
-    if (isTransfer) {
-      // This is the expense (FROM) leg. Find the income (TO) leg by transferId.
-      final pairAccountId = ref.watch(transactionListProvider.select(
-        (async) => async.whenOrNull(
-          data: (txns) => txns
-              .firstWhereOrNull(
-                  (t) => t.transferId == transaction.transferId && t.id != transaction.id)
-              ?.accountId,
-        ),
-      ));
-      final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
-      fromName = accounts
-          .where((a) => a.id.toString() == transaction.accountId)
-          .firstOrNull
-          ?.name;
-      toName = pairAccountId != null
-          ? accounts.where((a) => a.id.toString() == pairAccountId).firstOrNull?.name
-          : null;
-    }
-
-    final isIncome = transaction.type == 'income';
-
-    // Adjustment-specific styling
-    final IconData iconData;
-    final Color iconColor;
-    final String displayName;
-    final String subtitle;
-    final Color amountColor;
-    final String amountPrefix;
-
-    if (isAdjustment) {
-      iconData = Icons.account_balance_rounded;
-      iconColor = cs.onSurfaceVariant;
-      displayName = transaction.name;
-      subtitle = 'Account correction · excluded from analytics';
-      amountColor = cs.onSurface;
-      amountPrefix = isIncome ? '+' : '-';
-    } else if (isTransfer) {
-      iconData = Icons.swap_horiz_rounded;
-      iconColor = const Color(0xFF78909C);
-      displayName = '${fromName ?? "Unknown"} → ${toName ?? "Unknown"}';
-      subtitle = 'Transfer · ${toName ?? "Unknown"}';
-      amountColor = cs.onSurface;
-      amountPrefix = '';
-    } else {
-      iconData = category != null
-          ? IconMapper.fromString(category.icon)
-          : Icons.category;
-      iconColor =
-          category != null ? Color(category.colorValue) : cs.primary;
-      displayName = transaction.name;
-      subtitle =
-          '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
-      amountColor = isIncome ? cs.tertiary : cs.onSurface;
-      amountPrefix = isIncome ? '+' : '-';
-    }
-
-    final swipeMode = ref.watch(settingsProvider.select(
-      (async) => async.valueOrNull?.swipeMode ?? SwipeMode.changeTabs,
-    ));
-
-    final content = Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg,
-            vertical: KuberSpacing.md,
-          ),
-          child: Row(
-            children: [
-              CategoryIcon.square(
-                icon: iconData,
-                rawColor: iconColor,
-                size: 42,
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            subtitle,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: cs.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (isAdjustment) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(KuberRadius.sm),
-                              border: Border.all(
-                                color: cs.outline.withValues(alpha: 0.5),
-                              ),
-                            ),
-                            child: Text(
-                              'ADJUSTMENT',
-                              style: GoogleFonts.inter(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: cs.onSurfaceVariant,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '$amountPrefix${ref.watch(formatterProvider).formatCurrency(transaction.amount)}',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: amountColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormatter.time(transaction.createdAt),
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w400,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (swipeMode == SwipeMode.performActions) {
-      return Dismissible(
-        key: ValueKey(transaction.id),
-        direction: DismissDirection.horizontal,
-        background: Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: KuberSpacing.xl),
-          decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-          child: Icon(Icons.edit_outlined, color: cs.primary),
-        ),
-        secondaryBackground: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: KuberSpacing.xl),
-          decoration: BoxDecoration(
-            color: cs.error.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-          child: Icon(Icons.delete_outline, color: cs.error),
-        ),
-        confirmDismiss: (direction) async {
-          if (direction == DismissDirection.endToStart) {
-            onDelete();
-            return true;
-          } else {
-            onEdit();
-            return false;
-          }
-        },
-        child: content,
-      );
-    }
-
-    return content;
-  }
-}
-
-
-class _DateGroup {
-  final String label;
-  final DateTime date;
-  final double dayTotal;
-  final List<Transaction> transactions;
-
-  _DateGroup({
-    required this.label,
-    required this.date,
-    required this.dayTotal,
-    required this.transactions,
-  });
 }

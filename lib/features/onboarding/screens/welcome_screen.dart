@@ -57,7 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
               // Subheadline
               Text(
-                'Your personal financial log — simple, private, and local-first.',
+                'Your personal financial log. Simple, Private, and Local-first.',
                 style: GoogleFonts.inter(
                   fontSize: 15,
                   color: cs.onSurfaceVariant,
@@ -239,16 +239,16 @@ class _AnimatedAppIconState extends State<AnimatedAppIcon>
       child: Container(
         width: widget.size,
         height: widget.size,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: cs.primary.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(KuberRadius.lg),
         ),
-        child: Center(
-          child: Image.asset(
-            'android/play_store_512.png',
-            width: widget.size,
-            height: widget.size,
-          ),
+        child: Image.asset(
+          'android/play_store_512.png',
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.cover,
         ),
       ),
     );

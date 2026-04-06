@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -102,10 +101,11 @@ class AppButton extends StatelessWidget {
         Flexible(
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.2,
+              color: foregroundColor,
             ),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,

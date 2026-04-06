@@ -186,7 +186,7 @@ class RecurringDetailSheet extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.xl * 1.5),
+          const SizedBox(height: KuberSpacing.lg),
 
           // ── Actions ──────────────────────────────────────────────────
           Row(
@@ -227,7 +227,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             fullWidth: true,
             onPressed: () => _confirmDelete(context, ref),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpacing.xs),
         ],
       ),
     );
@@ -295,8 +295,9 @@ class _DetailCell extends StatelessWidget {
         vertical: KuberSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

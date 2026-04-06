@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -9,11 +8,13 @@ import '../../settings/providers/settings_provider.dart';
 
 class AvgWeeklyHeatmap extends ConsumerStatefulWidget {
   final List<Transaction> transactions;
+  final Map<String, double>? precomputedDailyAverages;
   final bool isLoading;
 
   const AvgWeeklyHeatmap({
     super.key,
     required this.transactions,
+    this.precomputedDailyAverages,
     this.isLoading = false,
   });
 
@@ -31,9 +32,10 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
       return _buildSkeleton();
     }
 
-    final dailyAverages = _calculateDailyAverages();
+    final dailyAverages = widget.precomputedDailyAverages ?? _calculateDailyAverages();
     final maxAvg = dailyAverages.values.fold<double>(0, (max, val) => val > max ? val : max);
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
     return Card(
       margin: EdgeInsets.zero,
@@ -45,27 +47,32 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Avg Weekly Heatmap',
-                      style: GoogleFonts.inter(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Avg Weekly Heatmap',
+                        style: tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Based on your selected filter',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: cs.onSurfaceVariant,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Based on your selected filter',
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(width: KuberSpacing.md),
                 Icon(
                   Icons.grid_view_rounded,
                   color: cs.onSurfaceVariant.withValues(alpha: 0.5),
@@ -74,7 +81,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
               ],
             ),
             const SizedBox(height: KuberSpacing.xl),
-            
+
             // Heatmap Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,8 +112,8 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                             color: cs.primary.withValues(alpha: opacity),
                             borderRadius: BorderRadius.circular(KuberRadius.sm),
                             border: Border.all(
-                              color: _selectedDayIndex == index 
-                                ? cs.primary 
+                              color: _selectedDayIndex == index
+                                ? cs.primary
                                 : Colors.transparent,
                               width: 1.5,
                             ),
@@ -116,7 +123,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                       const SizedBox(height: KuberSpacing.sm),
                       Text(
                         _getDayShortName(index),
-                        style: GoogleFonts.inter(
+                        style: tt.labelSmall?.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurfaceVariant,
@@ -127,19 +134,18 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                 );
               }),
             ),
-            
+
             const SizedBox(height: KuberSpacing.lg),
             const Divider(),
             const SizedBox(height: KuberSpacing.md),
-            
+
             // Intensity Legend
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'INTENSITY',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
+                  style: tt.labelSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                     color: cs.onSurfaceVariant,
@@ -182,8 +188,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                     children: [
                       Text(
                         dayName.toUpperCase(),
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
+                        style: tt.labelMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: isSelected ? cs.primary : cs.onSurfaceVariant,
                         ),
@@ -202,8 +207,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                       const Spacer(),
                       Text(
                         ref.watch(formatterProvider).formatCurrency(avg),
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
+                        style: tt.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
                         ),

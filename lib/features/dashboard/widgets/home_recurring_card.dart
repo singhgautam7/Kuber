@@ -118,40 +118,14 @@ class HomeRecurringCard extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        rule.name,
-                                        style: textTheme.bodyMedium?.copyWith(
-                                          color: cs.onSurface,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    const SizedBox(width: KuberSpacing.sm),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 5,
-                                        vertical: 1,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withValues(alpha: 0.15),
-                                        borderRadius:
-                                            BorderRadius.circular(KuberRadius.sm),
-                                      ),
-                                      child: Text(
-                                        statusLabel,
-                                        style: GoogleFonts.inter(
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w700,
-                                          color: statusColor,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  rule.name,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: cs.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                                 Text(
                                   DateFormat('MMM d').format(rule.nextDueAt),
@@ -162,14 +136,44 @@ class HomeRecurringCard extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          Text(
-                            CurrencyFormatter.format(rule.amount),
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: rule.type == 'income'
-                                  ? cs.tertiary
-                                  : cs.onSurface,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          const SizedBox(width: KuberSpacing.md),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                CurrencyFormatter.format(rule.amount),
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: rule.type == 'income'
+                                      ? cs.tertiary
+                                      : cs.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.1),
+                                  borderRadius:
+                                      BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: statusColor.withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Text(
+                                  statusLabel,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w800,
+                                    color: statusColor,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

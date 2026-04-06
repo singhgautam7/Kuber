@@ -45,10 +45,15 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Spending Distribution',
-                  style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                Expanded(
+                  child: Text(
+                    'Spending Distribution',
+                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
+                const SizedBox(width: KuberSpacing.md),
                 AnalyticsCardSmallTabs(
                   labels: const ['Category', 'Group'],
                   selectedIndex: _isGroupView ? 1 : 0,

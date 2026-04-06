@@ -8,6 +8,8 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 
 import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
+import '../widgets/currency_selector_sheet.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/services/biometric_service.dart';
 
@@ -401,112 +403,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showCurrencyPicker(BuildContext context, String currentCode) {
-    final cs = Theme.of(context).colorScheme;
-
-    showModalBottomSheet(
+    showCurrencyPicker(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(28),
-        ),
-        side: BorderSide(color: cs.outline),
-      ),
-      builder: (ctx) {
-        final sheetCs = Theme.of(ctx).colorScheme;
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          maxChildSize: 0.9,
-          minChildSize: 0.4,
-          expand: false,
-          builder: (ctx, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: KuberSpacing.md),
-                Container(
-                  width: 32,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: sheetCs.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.lg),
-                Text(
-                  'Select Currency',
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: sheetCs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.lg),
-                Expanded(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    itemCount: kCurrencies.length,
-                    itemBuilder: (ctx, i) {
-                      final c = kCurrencies[i];
-                      final isSelected = c.code == currentCode;
-                      return ListTile(
-                        leading: Container(
-                          width: 40,
-                          height: 40,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? sheetCs.primaryContainer
-                                : sheetCs.surfaceContainerHigh,
-                            borderRadius:
-                                BorderRadius.circular(KuberRadius.md),
-                          ),
-                          child: Text(
-                            c.symbol,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: isSelected
-                                  ? sheetCs.primary
-                                  : sheetCs.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          c.name,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w400,
-                            color: sheetCs.onSurface,
-                          ),
-                        ),
-                        subtitle: Text(
-                          c.code,
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: sheetCs.onSurfaceVariant,
-                          ),
-                        ),
-                        trailing: isSelected
-                            ? Icon(Icons.check_rounded,
-                                color: sheetCs.primary, size: 20)
-                            : null,
-                        onTap: () {
-                          setState(() => _tempCurrencyCode = c.code);
-                          ref.read(settingsProvider.notifier).setCurrency(c.code);
-                          Navigator.pop(ctx);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      ref: ref,
+      currentCode: currentCode,
+      onSelected: (code) => setState(() => _tempCurrencyCode = code),
     );
   }
 
@@ -572,6 +473,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: controller,
                     autofocus: true,
                     maxLength: 15,
+                    textCapitalization: TextCapitalization.words,
+                    inputFormatters: [TitleCaseInputFormatter()],
                     onChanged: (_) => setSheetState(() {}),
                     style: GoogleFonts.inter(fontSize: 16, color: cs.onSurface),
                     validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter your name' : null,
@@ -609,7 +512,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: FilledButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
-                        final newName = controller.text.trim();
+                        final newName = controller.text.trim().toTitleCase();
                         setState(() {
                           _userNameController.text = newName;
                         });
