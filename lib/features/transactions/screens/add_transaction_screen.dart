@@ -236,6 +236,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   _TransactionTypeSelector(
                     selected: _type,
                     onSelected: _onTypeChanged,
+                    enabled: !_isEditing,
                   ),
                   const SizedBox(height: KuberSpacing.xl),
 
@@ -2107,10 +2108,12 @@ class _SelectorTile extends StatelessWidget {
 class _TransactionTypeSelector extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onSelected;
+  final bool enabled;
 
   const _TransactionTypeSelector({
     required this.selected,
     required this.onSelected,
+    this.enabled = true,
   });
 
   static const _types = ['expense', 'income', 'transfer'];
@@ -2135,12 +2138,14 @@ class _TransactionTypeSelector extends StatelessWidget {
           final isSelected = _types[i] == selected;
           return Expanded(
             child: GestureDetector(
-              onTap: () => onSelected(_types[i]),
+              onTap: enabled ? () => onSelected(_types[i]) : null,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
                 decoration: BoxDecoration(
-                  color: isSelected ? colorScheme.primary : Colors.transparent,
+                  color: isSelected 
+                      ? (enabled ? colorScheme.primary : cs.surfaceContainerHighest)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
                 alignment: Alignment.center,
@@ -2148,8 +2153,8 @@ class _TransactionTypeSelector extends StatelessWidget {
                   _labels[i],
                   style: textTheme.labelLarge?.copyWith(
                     color: isSelected
-                        ? colorScheme.onPrimary
-                        : cs.onSurfaceVariant,
+                        ? (enabled ? colorScheme.onPrimary : cs.onSurface)
+                        : cs.onSurfaceVariant.withValues(alpha: enabled ? 1.0 : 0.5),
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   ),
                 ),
