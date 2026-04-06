@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../transactions/data/transaction.dart';
+import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
 class MonthlySummary {
@@ -35,8 +36,7 @@ final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
   double expense = 0;
   final categorySpending = <String, double>{};
 
-  for (final t in transactions) {
-    if (t.isTransfer || t.isBalanceAdjustment) continue;
+  for (final t in transactions.validForCalculations) {
     
     // Monthly range check (consistent with History)
     if (t.createdAt.isBefore(start) || !t.createdAt.isBefore(end)) continue;
@@ -61,9 +61,7 @@ final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
 final recentTransactionsProvider =
     FutureProvider<List<Transaction>>((ref) async {
   final all = await ref.watch(transactionListProvider.future);
-  // Filter out income legs of transfers (show only expense/FROM leg)
-  final filtered =
-      all.where((t) => !(t.isTransfer && t.type == 'income')).toList();
+  final filtered = all.validForFeed.toList();
   return filtered.take(10).toList();
 });
 
@@ -94,8 +92,7 @@ final last7DaysSummaryProvider =
     dayMap[key] = DaySummary(date: day, income: 0, expense: 0);
   }
 
-  for (final t in all) {
-    if (t.isTransfer || t.isBalanceAdjustment) continue;
+  for (final t in all.validForCalculations) {
     final d = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day);
     if (d.isBefore(sevenDaysAgo) || d.isAfter(today)) continue;
     final key = '${d.year}-${d.month}-${d.day}';

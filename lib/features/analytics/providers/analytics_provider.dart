@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../transactions/data/transaction.dart';
+import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
 enum FilterType {
@@ -187,8 +188,7 @@ final analyticsTransactionsProvider = Provider<List<Transaction>>((ref) {
   final from = DateTime(filter.from.year, filter.from.month, filter.from.day);
   final to = DateTime(filter.to.year, filter.to.month, filter.to.day, 23, 59, 59);
 
-  return all.where((t) {
-    if (t.isTransfer || t.isBalanceAdjustment) return false;
+  return all.validForCalculations.where((t) {
     final date = t.createdAt;
     return !date.isBefore(from) && !date.isAfter(to);
   }).toList();
