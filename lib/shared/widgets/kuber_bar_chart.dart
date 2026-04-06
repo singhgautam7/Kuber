@@ -201,37 +201,41 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
               // Chart area with floating tooltip overlay
               SizedBox(
                 height: widget.height,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Chart fills the stack
-                    Positioned.fill(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          return _chartType == KuberChartType.bar
-                              ? _buildBarChart(constraints, cs)
-                              : _buildLineChart(cs);
-                        },
-                      ),
-                    ),
-                    // Tooltip overlay at top
-                    if (_touchedIndex >= 0 &&
-                        _touchedIndex < widget.buckets.length)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: SlideTransition(
-                          position: _detailSlide,
-                          child: FadeTransition(
-                            opacity: _detailFade,
-                            child: _DetailPanel(
-                              bucket: widget.buckets[_touchedIndex],
-                            ),
+                child: TapRegion(
+                  onTapOutside: (_) {
+                    if (_touchedIndex != -1) {
+                      setState(() => _touchedIndex = -1);
+                      _detailAnim.reverse();
+                    }
+                  },
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Chart fills the stack
+                          Positioned.fill(
+                            child: _chartType == KuberChartType.bar
+                                ? _buildBarChart(constraints, cs)
+                                : _buildLineChart(cs),
                           ),
-                        ),
-                      ),
-                  ],
+                          // Tooltip overlay
+                          if (_touchedIndex >= 0 &&
+                              _touchedIndex < widget.buckets.length)
+                            _TooltipOverlay(
+                              bucket: widget.buckets[_touchedIndex],
+                              touchedIndex: _touchedIndex,
+                              totalBuckets: widget.buckets.length,
+                              maxWidth: constraints.maxWidth,
+                              chartHeight: constraints.maxHeight,
+                              maxY: _maxY,
+                              slide: _detailSlide,
+                              fade: _detailFade,
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -381,7 +385,6 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
 
   List<BarChartGroupData> _buildBarGroups(
       double barWidth, double dataGap, ColorScheme cs) {
-    final dimOverlay = cs.surface.withValues(alpha: 0.5);
 
     return widget.buckets.asMap().entries.map((entry) {
       final i = entry.key;
@@ -395,7 +398,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       final Color topColor = expenseOnTop ? cs.error : cs.tertiary;
 
       Color applyDim(Color c) =>
-          isDimmed ? Color.alphaBlend(dimOverlay, c) : c;
+          isDimmed ? cs.surfaceContainerHighest.withValues(alpha: 0.8) : c;
 
       final bool hasBottom = bottomVal > 0;
       final bool hasTop = topVal > 0;
@@ -638,78 +641,188 @@ class _ChartTypeTab extends StatelessWidget {
   }
 }
 
-class _DetailPanel extends ConsumerWidget {
+class _TooltipOverlay extends ConsumerWidget {
   final KuberBarBucket bucket;
+  final int touchedIndex;
+  final int totalBuckets;
+  final double maxWidth;
+  final double chartHeight;
+  final double maxY;
+  final Animation<Offset> slide;
+  final Animation<double> fade;
 
-  const _DetailPanel({required this.bucket});
+  const _TooltipOverlay({
+    required this.bucket,
+    required this.touchedIndex,
+    required this.totalBuckets,
+    required this.maxWidth,
+    required this.chartHeight,
+    required this.maxY,
+    required this.slide,
+    required this.fade,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final net = bucket.income - bucket.expense;
+    final tt = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: KuberSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: cs.inverseSurface,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(
-          color: cs.outline.withValues(alpha: 0.3),
-          width: 1,
+    final double cardWidth = 160;
+    final double slotWidth = maxWidth / totalBuckets;
+    final double barCenter = (touchedIndex + 0.5) * slotWidth;
+
+    double leftPos = barCenter - (cardWidth / 2);
+    leftPos = leftPos.clamp(8.0, maxWidth - cardWidth - 8.0);
+
+    double pointerOffset = barCenter - leftPos - 6; // 6 is half of pointer width
+    pointerOffset = pointerOffset.clamp(8.0, cardWidth - 20.0);
+
+    // Calculate dynamic bottom position over the bar
+    final bool expenseOnTop = bucket.expense >= bucket.income;
+    final double bottomVal = expenseOnTop ? bucket.income : bucket.expense;
+    final double topVal = expenseOnTop ? bucket.expense : bucket.income;
+    final double barGap = (bottomVal > 0 && topVal > 0 && topVal > bottomVal) ? 2.0 : 0.0;
+    
+    double adjustedTopTo = topVal;
+    if (barGap > 0 && adjustedTopTo <= bottomVal + barGap) {
+      adjustedTopTo = bottomVal + barGap + 1.0; 
+    }
+    double barMaxY = adjustedTopTo;
+    if (barMaxY == 0 && bottomVal > 0) barMaxY = bottomVal;
+    if (barMaxY == 0) barMaxY = maxY * 0.05; // min height for empty days
+
+    final double barHeightRatio = (barMaxY / maxY).clamp(0.0, 1.0);
+    final double drawingAreaHeight = chartHeight - 42; // reservedSize = 42 for bottom axis titles
+    final double bottomPos = 42 + (barHeightRatio * drawingAreaHeight);
+
+    return Positioned(
+      left: leftPos,
+      bottom: bottomPos,
+      child: SlideTransition(
+        position: slide,
+        child: FadeTransition(
+          opacity: fade,
+          child: SizedBox(
+            width: cardWidth,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpacing.md,
+                    vertical: KuberSpacing.md,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(
+                      color: cs.outline.withValues(alpha: 0.1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: cs.shadow.withValues(alpha: 0.2),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        '${bucket.monthLabel} ${bucket.dayLabel}'.toUpperCase(),
+                        style: tt.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: KuberSpacing.sm),
+                      _TooltipRow(
+                        label: 'Income',
+                        amount: '+${formatter.formatCurrency(bucket.income)}',
+                        color: cs.tertiary,
+                        labelColor: cs.onSurfaceVariant,
+                      ),
+                      const SizedBox(height: 4),
+                      _TooltipRow(
+                        label: 'Expense',
+                        amount: '-${formatter.formatCurrency(bucket.expense)}',
+                        color: cs.error,
+                        labelColor: cs.onSurfaceVariant,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: cs.outline.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      _TooltipRow(
+                        label: 'Net',
+                        amount: formatter.formatCurrency(net),
+                        color: cs.onSurface,
+                        labelColor: cs.onSurface,
+                        isBold: true,
+                      ),
+                    ],
+                  ),
+                ),
+                // Pointer
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: pointerOffset),
+                    child: Transform.translate(
+                      offset: const Offset(0, -6),
+                      child: Transform.rotate(
+                        angle: 3.14159 / 4,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerHigh,
+                            border: Border(
+                              bottom: BorderSide(
+                                color: cs.outline.withValues(alpha: 0.1),
+                              ),
+                              right: BorderSide(
+                                color: cs.outline.withValues(alpha: 0.1),
+                              ),
+                            )
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: cs.shadow.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _DetailRow(
-            label: 'Expense',
-            amount: formatter.formatCurrency(bucket.expense),
-            color: cs.error,
-            labelColor: cs.onInverseSurface,
-          ),
-          const SizedBox(height: KuberSpacing.xs),
-          _DetailRow(
-            label: 'Income',
-            amount: formatter.formatCurrency(bucket.income),
-            color: cs.tertiary,
-            labelColor: cs.onInverseSurface,
-          ),
-          const SizedBox(height: KuberSpacing.xs),
-          _DetailRow(
-            label: 'Net',
-            amount:
-                '${net >= 0 ? '+' : ''}${formatter.formatCurrency(net.abs())}',
-            color: net >= 0 ? cs.tertiary : cs.error,
-            labelColor: cs.onInverseSurface,
-          ),
-        ],
       ),
     );
   }
 }
 
-class _DetailRow extends StatelessWidget {
+class _TooltipRow extends StatelessWidget {
   final String label;
   final String amount;
   final Color color;
   final Color labelColor;
+  final bool isBold;
 
-  const _DetailRow({
+  const _TooltipRow({
     required this.label,
     required this.amount,
     required this.color,
     required this.labelColor,
+    this.isBold = false,
   });
 
   @override
@@ -720,14 +833,15 @@ class _DetailRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: tt.labelSmall?.copyWith(
+          style: tt.labelMedium?.copyWith(
             color: labelColor,
+            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
         Text(
           amount,
           style: tt.labelMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
             color: color,
           ),
           maxLines: 1,
