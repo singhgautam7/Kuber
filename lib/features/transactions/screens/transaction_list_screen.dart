@@ -11,6 +11,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../data/transaction.dart';
+import '../helpers/transaction_filters.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../export/widgets/export_bottom_sheet.dart';
@@ -141,8 +142,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   // Compute EXP / INC / NET from filtered list
                   double totalExp = 0;
                   double totalInc = 0;
-                  for (final t in filtered) {
-                    if (t.isTransfer || t.isBalanceAdjustment) continue;
+                  for (final t in filtered.validForCalculations) {
                     if (t.type == 'income') {
                       totalInc += t.amount;
                     } else {

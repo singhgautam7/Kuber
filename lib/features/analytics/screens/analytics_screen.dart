@@ -14,6 +14,7 @@ import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
+import '../../transactions/helpers/transaction_filters.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../providers/analytics_provider.dart';
 import '../widgets/category_group_stats.dart';
@@ -54,7 +55,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   // ---- bucket helpers -----------------------------------------------------
 
   List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns, AnalyticsFilter filter) {
-    txns = txns.where((t) => !t.isTransfer && !t.isBalanceAdjustment && t.linkedRuleType == null).toList();
+    txns = txns.validForCalculations.toList();
     List<_MutableBucket> buckets = [];
 
     switch (filter.type) {

@@ -389,8 +389,9 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       final Color bottomColor = expenseOnTop ? cs.tertiary : cs.error;
       final Color topColor = expenseOnTop ? cs.error : cs.tertiary;
 
-      Color applyDim(Color c) =>
-          isDimmed ? cs.onSurface.withValues(alpha: 0.15) : c;
+      Color applyDim(Color c) => isDimmed
+          ? Color.lerp(cs.surfaceContainer, cs.onSurface, 0.15)!.withValues(alpha: 1.0)
+          : c;
 
       final bool hasBottom = bottomVal > 0;
       final bool hasTop = topVal > 0;
@@ -726,7 +727,7 @@ class _TooltipOverlay extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        '${bucket.monthLabel} ${bucket.dayLabel}'.toUpperCase(),
+                        '${bucket.dayLabel} ${bucket.monthLabel}'.toUpperCase(),
                         style: tt.labelSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,

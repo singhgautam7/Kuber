@@ -1,5 +1,6 @@
 import '../../../core/utils/date_formatter.dart';
 import '../../transactions/data/transaction.dart';
+import '../../transactions/helpers/transaction_filters.dart';
 
 class DateGroup {
   final String label;
@@ -17,9 +18,7 @@ class DateGroup {
 
 List<DateGroup> groupTransactionsByDate(List<Transaction> transactions) {
   // Filter out income legs of transfers (show only expense/FROM leg)
-  final displayList = transactions
-      .where((t) => !(t.isTransfer && t.type == 'income'))
-      .toList();
+  final displayList = transactions.validForFeed.toList();
 
   final groups = <String, List<Transaction>>{};
   for (final t in displayList) {
@@ -33,8 +32,7 @@ List<DateGroup> groupTransactionsByDate(List<Transaction> transactions) {
     final txns = e.value..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     double dayTotal = 0;
-    for (final t in txns) {
-      if (t.isTransfer || t.isBalanceAdjustment) continue;
+    for (final t in txns.validForCalculations) {
       dayTotal += t.type == 'income' ? t.amount : -t.amount;
     }
 
