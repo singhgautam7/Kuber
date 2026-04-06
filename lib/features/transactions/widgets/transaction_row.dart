@@ -170,6 +170,46 @@ class TransactionRow extends ConsumerWidget {
     return parts.join('  \u00B7  ');
   }
 
+  /// Builds a styled TextSpan with tags in accent color.
+  InlineSpan _buildIndicatorSpan(ColorScheme cs) {
+    final hasAttachments = transaction.attachmentPaths.isNotEmpty;
+    final hasTags = tagNames.isNotEmpty;
+    final baseStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w400,
+      color: cs.onSurfaceVariant,
+    );
+    final tagStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      color: cs.primary,
+    );
+
+    final spans = <InlineSpan>[];
+
+    if (hasAttachments) {
+      spans.add(TextSpan(
+        text: '\u{1F4CE} ${transaction.attachmentPaths.length}',
+        style: baseStyle,
+      ));
+    }
+
+    if (hasAttachments && hasTags) {
+      spans.add(TextSpan(text: '  \u00B7  ', style: baseStyle));
+    }
+
+    if (hasTags) {
+      final visible = tagNames.take(2).map((t) => '#$t').join(' ');
+      spans.add(TextSpan(text: visible, style: tagStyle));
+      final remaining = tagNames.length - 2;
+      if (remaining > 0) {
+        spans.add(TextSpan(text: ' +$remaining more', style: baseStyle));
+      }
+    }
+
+    return TextSpan(children: spans);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
@@ -315,16 +355,10 @@ class TransactionRow extends ConsumerWidget {
                         ],
                       ],
                     ),
-                    if (_buildIndicatorText() case final indicatorText?) ...[
+                    if (_buildIndicatorText() != null) ...[
                       const SizedBox(height: 2),
-                      Text(
-                        indicatorText,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w400,
-                                  color: cs.onSurfaceVariant,
-                                ),
+                      Text.rich(
+                        _buildIndicatorSpan(cs),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

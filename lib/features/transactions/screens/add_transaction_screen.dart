@@ -1,11 +1,17 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/attachment_service.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -26,6 +32,7 @@ import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
 import '../../budgets/providers/budget_provider.dart';
+import '../../settings/widgets/settings_widgets.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -58,6 +65,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   bool _suppressSuggestions = false;
   List<Tag> _selectedTags = [];
+
+  // Attachment state
+  List<String> _attachmentPaths = [];
+  final List<String> _pendingAttachments = [];
+  final Set<String> _removedAttachments = {};
+  bool _isPickingFile = false;
+
+  int get _totalAttachmentCount =>
+      _attachmentPaths.length +
+      _pendingAttachments.length -
+      _removedAttachments.length;
+
   bool get _isEditing => widget.transaction != null;
 
   @override
@@ -78,6 +97,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         // Find TO leg — will be resolved after provider loads
         _loadTransferPair(t);
       }
+      _attachmentPaths = List.from(t.attachmentPaths);
       _loadTags();
     } else {
       _type = widget.initialType ?? 'expense';
@@ -754,6 +774,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ),
                   ),
                   const SizedBox(height: KuberSpacing.md),
+
+                  // Attachments section
+                  _buildAttachmentsSection(cs, textTheme),
                   const SizedBox(height: KuberSpacing.xl),
                   ], // end else (non-transfer)
                 ],
@@ -991,12 +1014,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     t.createdAt = _selectedDate;
     t.updatedAt = DateTime.now();
 
+    // Set attachment paths for existing attachments (edit mode)
+    if (_isEditing) {
+      t.attachmentPaths = _attachmentPaths
+          .where((p) => !_removedAttachments.contains(p))
+          .toList();
+    }
+
     try {
       final int resultId;
       if (_isEditing) {
         resultId = await ref.read(transactionListProvider.notifier).updateTransaction(t);
       } else {
         resultId = await ref.read(transactionListProvider.notifier).add(t);
+      }
+
+      // Save attachments
+      if (_pendingAttachments.isNotEmpty || _removedAttachments.isNotEmpty) {
+        await _saveAttachments(resultId);
       }
 
       // Save tags
@@ -1493,9 +1528,360 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
           ),
         ),
+        const SizedBox(height: KuberSpacing.md),
+
+        // Attachments section
+        _buildAttachmentsSection(cs, textTheme),
         const SizedBox(height: KuberSpacing.xl),
       ],
     );
+  }
+
+  // ── Attachments ──────────────────────────────────────────────────────────
+
+  Widget _buildAttachmentsSection(ColorScheme cs, TextTheme textTheme) {
+    final allPaths = [
+      ..._attachmentPaths.where((p) => !_removedAttachments.contains(p)),
+      ..._pendingAttachments,
+    ];
+    final canAdd = _totalAttachmentCount < 5;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          onTap: canAdd && !_isPickingFile ? _showAttachmentPicker : null,
+          child: Container(
+            padding: const EdgeInsets.all(KuberSpacing.lg),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: cs.outline),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: _isPickingFile
+                      ? Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: cs.primary,
+                          ),
+                        )
+                      : Icon(
+                          Icons.attach_file_rounded,
+                          size: 18,
+                          color: cs.primary,
+                        ),
+                ),
+                const SizedBox(width: KuberSpacing.md),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ATTACHMENTS',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      allPaths.isEmpty
+                          ? 'Add image or PDF'
+                          : '${allPaths.length} file${allPaths.length == 1 ? '' : 's'} attached',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: allPaths.isEmpty
+                            ? cs.onSurfaceVariant
+                            : cs.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                if (canAdd && !_isPickingFile)
+                  Icon(Icons.add, color: cs.onSurfaceVariant),
+              ],
+            ),
+          ),
+        ),
+        if (allPaths.isNotEmpty) ...[
+          const SizedBox(height: KuberSpacing.sm),
+          SizedBox(
+            height: 80,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: allPaths.length,
+              separatorBuilder: (_, __) => const SizedBox(width: KuberSpacing.sm),
+              itemBuilder: (context, index) {
+                final path = allPaths[index];
+                final isImage = AttachmentService.getFileType(path) == 'image';
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    GestureDetector(
+                      onTap: () => OpenFilex.open(path),
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: isImage
+                            ? Image.file(
+                                File(path),
+                                fit: BoxFit.cover,
+                                width: 80,
+                                height: 80,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.broken_image_outlined,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              )
+                            : Center(
+                                child: Icon(
+                                  Icons.picture_as_pdf,
+                                  color: cs.primary,
+                                  size: 32,
+                                ),
+                              ),
+                      ),
+                    ),
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: GestureDetector(
+                        onTap: () => _removeAttachment(path),
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: cs.error,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showAttachmentPicker() {
+    FocusScope.of(context).unfocus();
+    final cs = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: EdgeInsets.fromLTRB(
+          KuberSpacing.xl,
+          KuberSpacing.lg,
+          KuberSpacing.xl,
+          MediaQuery.of(context).viewPadding.bottom + KuberSpacing.xxl,
+        ),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.xl),
+            Text(
+              'Add Attachment',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.xl),
+            SettingsCardSelector<String>(
+              options: const [
+                SelectorOption(
+                  value: 'camera',
+                  label: 'Camera',
+                  subtitle: 'TAKE PHOTO',
+                  icon: Icons.camera_alt_outlined,
+                ),
+                SelectorOption(
+                  value: 'gallery',
+                  label: 'Gallery',
+                  subtitle: 'CHOOSE IMAGE',
+                  icon: Icons.photo_library_outlined,
+                ),
+                SelectorOption(
+                  value: 'pdf',
+                  label: 'PDF',
+                  subtitle: 'DOCUMENT',
+                  icon: Icons.picture_as_pdf_outlined,
+                ),
+              ],
+              selectedValue: '', // no pre-selection
+              onSelected: (value) {
+                Navigator.pop(context);
+                switch (value) {
+                  case 'camera':
+                    _pickImage(ImageSource.camera);
+                    break;
+                  case 'gallery':
+                    _pickImage(ImageSource.gallery);
+                    break;
+                  case 'pdf':
+                    _pickPdf();
+                    break;
+                }
+              },
+            ),
+            const SizedBox(height: KuberSpacing.lg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    if (_totalAttachmentCount >= 5) {
+      showKuberSnackBar(context, 'Maximum 5 attachments allowed', isError: true);
+      return;
+    }
+    setState(() => _isPickingFile = true);
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1920,
+        maxHeight: 1920,
+      );
+      if (picked != null && mounted) {
+        final file = File(picked.path);
+        final size = await file.length();
+        if (size > 5 * 1024 * 1024) {
+          if (mounted) {
+            showKuberSnackBar(context, 'File exceeds 5MB limit', isError: true);
+          }
+          return;
+        }
+        setState(() => _pendingAttachments.add(picked.path));
+      }
+    } catch (e) {
+      if (mounted) {
+        showKuberSnackBar(context, 'Failed to pick image: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingFile = false);
+    }
+  }
+
+  Future<void> _pickPdf() async {
+    if (_totalAttachmentCount >= 5) {
+      showKuberSnackBar(context, 'Maximum 5 attachments allowed', isError: true);
+      return;
+    }
+    setState(() => _isPickingFile = true);
+    try {
+      final result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      if (result != null && result.files.isNotEmpty && mounted) {
+        final path = result.files.single.path;
+        if (path == null) return;
+        final file = File(path);
+        final size = await file.length();
+        if (size > 5 * 1024 * 1024) {
+          if (mounted) {
+            showKuberSnackBar(context, 'File exceeds 5MB limit', isError: true);
+          }
+          return;
+        }
+        setState(() => _pendingAttachments.add(path));
+      }
+    } catch (e) {
+      if (mounted) {
+        showKuberSnackBar(context, 'Failed to pick PDF: $e', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingFile = false);
+    }
+  }
+
+  void _removeAttachment(String path) {
+    setState(() {
+      if (_pendingAttachments.contains(path)) {
+        _pendingAttachments.remove(path);
+      } else {
+        _removedAttachments.add(path);
+      }
+    });
+  }
+
+  Future<void> _saveAttachments(int transactionId) async {
+    final attachmentService = ref.read(attachmentServiceProvider);
+
+    // Delete removed attachments
+    for (final path in _removedAttachments) {
+      await attachmentService.deleteAttachment(path);
+    }
+
+    // Copy pending attachments
+    final savedPaths = <String>[];
+    final existingCount = _attachmentPaths
+        .where((p) => !_removedAttachments.contains(p))
+        .length;
+    for (int i = 0; i < _pendingAttachments.length; i++) {
+      final saved = await attachmentService.saveAttachment(
+        transactionId,
+        _pendingAttachments[i],
+        existingCount + i,
+      );
+      savedPaths.add(saved);
+    }
+
+    // Build final attachment list
+    final finalPaths = [
+      ..._attachmentPaths.where((p) => !_removedAttachments.contains(p)),
+      ...savedPaths,
+    ];
+
+    // Update the transaction with attachment paths
+    final allTxns = await ref.read(transactionListProvider.future);
+    final txn = allTxns.firstWhereOrNull((t) => t.id == transactionId);
+    if (txn != null) {
+      txn.attachmentPaths = finalPaths;
+      await ref.read(transactionListProvider.notifier).updateTransaction(txn);
+    }
   }
 
   void _showTransferAccountPicker({
