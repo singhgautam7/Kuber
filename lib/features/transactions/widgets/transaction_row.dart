@@ -79,6 +79,7 @@ class TransactionDayCard extends StatelessWidget {
   final Map<int, Category> categoryMap;
   final Map<int, Account> accountMap;
   final List<Transaction> transactionList;
+  final Map<int, List<String>> tagNamesMap;
 
   const TransactionDayCard({
     super.key,
@@ -90,6 +91,7 @@ class TransactionDayCard extends StatelessWidget {
     required this.categoryMap,
     required this.accountMap,
     required this.transactionList,
+    this.tagNamesMap = const {},
   });
 
   @override
@@ -108,6 +110,7 @@ class TransactionDayCard extends StatelessWidget {
             account: accountMap[int.tryParse(transactions[i].accountId)],
             accountMap: accountMap,
             transactionList: transactionList,
+            tagNames: tagNamesMap[transactions[i].id] ?? const [],
           ),
         ],
       ],
@@ -125,6 +128,7 @@ class TransactionRow extends ConsumerWidget {
   final Account? account;
   final Map<int, Account> accountMap;
   final List<Transaction> transactionList;
+  final List<String> tagNames;
 
   const TransactionRow({
     super.key,
@@ -137,7 +141,34 @@ class TransactionRow extends ConsumerWidget {
     this.account,
     required this.accountMap,
     required this.transactionList,
+    this.tagNames = const [],
   });
+
+  /// Builds the secondary indicator text showing attachment count and/or tags.
+  /// Returns null when there's nothing to show.
+  String? _buildIndicatorText() {
+    final hasAttachments = transaction.attachmentPaths.isNotEmpty;
+    final hasTags = tagNames.isNotEmpty;
+    if (!hasAttachments && !hasTags) return null;
+
+    final parts = <String>[];
+
+    if (hasAttachments) {
+      parts.add('\u{1F4CE} ${transaction.attachmentPaths.length}');
+    }
+
+    if (hasTags) {
+      final visible = tagNames.take(2).map((t) => '#$t').join(' ');
+      final remaining = tagNames.length - 2;
+      if (remaining > 0) {
+        parts.add('$visible +$remaining more');
+      } else {
+        parts.add(visible);
+      }
+    }
+
+    return parts.join('  \u00B7  ');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -284,6 +315,20 @@ class TransactionRow extends ConsumerWidget {
                         ],
                       ],
                     ),
+                    if (_buildIndicatorText() case final indicatorText?) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        indicatorText,
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w400,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),

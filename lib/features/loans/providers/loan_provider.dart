@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/isar_service.dart';
+import '../../../core/services/attachment_service.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/loan.dart';
@@ -81,6 +82,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
 
   Future<void> deleteLoan(Loan loan) async {
     final isar = ref.read(isarProvider);
+    final attachments = ref.read(attachmentServiceProvider);
 
     // Delete all linked transactions
     final linkedTxns = await isar.transactions
@@ -88,6 +90,11 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
         .linkedRuleIdEqualTo(loan.uid)
         .linkedRuleTypeEqualTo('loan')
         .findAll();
+
+    // Delete attachment files for linked transactions
+    for (final txn in linkedTxns) {
+      await attachments.deleteAllForTransaction(txn.id);
+    }
 
     await isar.writeTxn(() async {
       await isar.transactions.deleteAll(linkedTxns.map((t) => t.id).toList());

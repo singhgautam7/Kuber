@@ -26,6 +26,11 @@ class MigrationService {
       await _seedLoanInvestmentCategories(isar);
       await prefs.setBool(PrefsKeys.migratedSeedLoanInvestmentCategoryV1, true);
     }
+
+    // Migration 4: Attachments field — Isar auto-initializes List<String> as empty
+    if (!(prefs.getBool(PrefsKeys.migratedAttachmentsV1) ?? false)) {
+      await prefs.setBool(PrefsKeys.migratedAttachmentsV1, true);
+    }
   }
 
   static Future<void> _migrateRecurringToLinked(Isar isar) async {

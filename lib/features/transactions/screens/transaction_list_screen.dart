@@ -153,6 +153,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   final fmt = ref.watch(formatterProvider);
                   final groups = groupTransactionsByDate(filtered);
 
+                  // Build tag names map for indicator line
+                  final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
+                  final tagNameById = {for (final t in allTags) t.id: t.name};
+                  final txnTagsMapData = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+                  final tagNamesMap = <int, List<String>>{};
+                  for (final entry in txnTagsMapData.entries) {
+                    final names = entry.value
+                        .map((tagId) => tagNameById[tagId])
+                        .whereType<String>()
+                        .toList();
+                    if (names.isNotEmpty) tagNamesMap[entry.key] = names;
+                  }
+
                   return [
                     // EXP / INC / NET summary
                     SliverToBoxAdapter(
@@ -308,6 +321,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   categoryMap: ref.watch(categoryMapProvider).valueOrNull ?? {},
                                   accountMap: ref.watch(accountMapProvider).valueOrNull ?? {},
                                   transactionList: transactions, // For transfer lookup
+                                  tagNamesMap: tagNamesMap,
                                 );
                               }
                             },
