@@ -49,7 +49,7 @@ class SpendingStatsCard extends ConsumerWidget {
                         Text('AVG DAILY', style: _captionStyle(context)),
                         const SizedBox(height: 4),
                         Text(
-                          ref.watch(formatterProvider).formatCurrency(stats.avgDaily),
+                          ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -67,7 +67,7 @@ class SpendingStatsCard extends ConsumerWidget {
                         Text('THIS MONTH', style: _captionStyle(context)),
                         const SizedBox(height: 4),
                         Text(
-                          ref.watch(formatterProvider).formatCurrency(stats.monthTotal),
+                          ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -85,7 +85,7 @@ class SpendingStatsCard extends ConsumerWidget {
                         Text('PROJECTED', style: _captionStyle(context)),
                         const SizedBox(height: 4),
                         Text(
-                          ref.watch(formatterProvider).formatCurrency(stats.projected),
+                          ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: Theme.of(context).colorScheme.onSurface,

@@ -173,7 +173,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     letterSpacing: 1.0,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: KuberSpacing.xs),
                 Row(
                   children: [
                     Expanded(
@@ -206,7 +206,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     )),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: KuberSpacing.lg),
                 Text(
                   'ACTIVE ALERTS',
                   style: GoogleFonts.inter(
@@ -216,7 +216,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     letterSpacing: 1.0,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: KuberSpacing.xs),
                 if (alerts.isEmpty)
                   Text('No alerts set',
                       style: GoogleFonts.inter(color: cs.onSurfaceVariant))
@@ -231,7 +231,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                             ))
                         .toList(),
                   ),
-                const SizedBox(height: 16),
+                const SizedBox(height: KuberSpacing.lg),
                 Text(
                   'ACTIONS',
                   style: GoogleFonts.inter(
@@ -241,7 +241,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     letterSpacing: 1.0,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: KuberSpacing.xs),
                 Row(
                   children: [
                     Expanded(
@@ -273,7 +273,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: KuberSpacing.xs),
                 AppButton(
                   label: 'Delete Budget',
                   icon: Icons.delete_outline_rounded,
@@ -282,7 +282,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   onPressed: () => _confirmDeleteBudget(
                       context, ref, budget.id),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: KuberSpacing.xs),
               ],
             ),
             loading: () => const LinearProgressIndicator(),
@@ -439,8 +439,9 @@ class _DetailCell extends StatelessWidget {
         vertical: KuberSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
