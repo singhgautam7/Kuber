@@ -687,7 +687,7 @@ class _TooltipOverlay extends ConsumerWidget {
 
     final double barHeightRatio = (barMaxY / maxY).clamp(0.0, 1.0);
     final double drawingAreaHeight = chartHeight - 42; // reservedSize = 42 for bottom axis titles
-    final double bottomPos = 42 + (barHeightRatio * drawingAreaHeight);
+    final double bottomPos = 42 + (barHeightRatio * drawingAreaHeight) + 8.0;
 
     return Positioned(
       left: leftPos,
