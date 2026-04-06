@@ -166,7 +166,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         Container(
           padding: const EdgeInsets.all(KuberSpacing.lg),
           decoration: BoxDecoration(
-            color: cs.surfaceContainer,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(KuberRadius.md),
             border: Border.all(
               color: cs.outline.withValues(alpha: 0.5),
@@ -302,24 +302,16 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                   Text(
                     b.dayLabel,
                     style: tt.labelSmall?.copyWith(
-                      fontWeight: b.isHighlighted
-                          ? FontWeight.w700
-                          : FontWeight.w400,
-                      color: b.isHighlighted
-                          ? cs.onSurface
-                          : cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w400,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   Text(
                     b.monthLabel,
                     style: tt.labelSmall?.copyWith(
                       fontSize: 10,
-                      fontWeight: b.isHighlighted
-                          ? FontWeight.w700
-                          : FontWeight.w400,
-                      color: b.isHighlighted
-                          ? cs.onSurface
-                          : cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w400,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -398,7 +390,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       final Color topColor = expenseOnTop ? cs.error : cs.tertiary;
 
       Color applyDim(Color c) =>
-          isDimmed ? cs.surfaceContainerHighest.withValues(alpha: 0.8) : c;
+          isDimmed ? cs.onSurface.withValues(alpha: 0.15) : c;
 
       final bool hasBottom = bottomVal > 0;
       final bool hasTop = topVal > 0;
@@ -771,34 +763,6 @@ class _TooltipOverlay extends ConsumerWidget {
                         isBold: true,
                       ),
                     ],
-                  ),
-                ),
-                // Pointer
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: pointerOffset),
-                    child: Transform.translate(
-                      offset: const Offset(0, -6),
-                      child: Transform.rotate(
-                        angle: 3.14159 / 4,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh,
-                            border: Border(
-                              bottom: BorderSide(
-                                color: cs.outline.withValues(alpha: 0.1),
-                              ),
-                              right: BorderSide(
-                                color: cs.outline.withValues(alpha: 0.1),
-                              ),
-                            )
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
                 ),
               ],
