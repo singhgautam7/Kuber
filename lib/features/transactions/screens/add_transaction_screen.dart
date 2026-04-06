@@ -32,7 +32,8 @@ import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
 import '../../budgets/providers/budget_provider.dart';
-import '../../settings/widgets/settings_widgets.dart';
+import '../../settings/widgets/settings_widgets.dart' show SquircleIcon;
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -1690,81 +1691,88 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   void _showAttachmentPicker() {
     FocusScope.of(context).unfocus();
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        padding: EdgeInsets.fromLTRB(
-          KuberSpacing.xl,
-          KuberSpacing.lg,
-          KuberSpacing.xl,
-          MediaQuery.of(context).viewPadding.bottom + KuberSpacing.xxl,
-        ),
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+      builder: (sheetContext) {
+        return KuberBottomSheet(
+          title: 'Add Attachments',
+          subtitle: 'Max 5MB per file',
+          child: Row(
+            children: [
+              _buildPickerCard(
+                context: sheetContext,
+                icon: Icons.camera_alt_outlined,
+                label: 'Camera',
+                onTap: () {
+                  Navigator.of(sheetContext, rootNavigator: true).pop();
+                  _pickImage(ImageSource.camera);
+                },
               ),
-            ),
-            const SizedBox(height: KuberSpacing.xl),
-            Text(
-              'Add Attachment',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
+              const SizedBox(width: KuberSpacing.sm),
+              _buildPickerCard(
+                context: sheetContext,
+                icon: Icons.photo_library_outlined,
+                label: 'Gallery',
+                onTap: () {
+                  Navigator.of(sheetContext, rootNavigator: true).pop();
+                  _pickImage(ImageSource.gallery);
+                },
               ),
+              const SizedBox(width: KuberSpacing.sm),
+              _buildPickerCard(
+                context: sheetContext,
+                icon: Icons.picture_as_pdf_outlined,
+                label: 'PDF',
+                onTap: () {
+                  Navigator.of(sheetContext, rootNavigator: true).pop();
+                  _pickPdf();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPickerCard({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: cs.outline.withValues(alpha: 0.3),
             ),
-            const SizedBox(height: KuberSpacing.xl),
-            SettingsCardSelector<String>(
-              options: const [
-                SelectorOption(
-                  value: 'camera',
-                  label: 'Camera',
-                  subtitle: 'TAKE PHOTO',
-                  icon: Icons.camera_alt_outlined,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SquircleIcon(icon: icon, size: 16, padding: 8),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
                 ),
-                SelectorOption(
-                  value: 'gallery',
-                  label: 'Gallery',
-                  subtitle: 'CHOOSE IMAGE',
-                  icon: Icons.photo_library_outlined,
-                ),
-                SelectorOption(
-                  value: 'pdf',
-                  label: 'PDF',
-                  subtitle: 'DOCUMENT',
-                  icon: Icons.picture_as_pdf_outlined,
-                ),
-              ],
-              selectedValue: '', // no pre-selection
-              onSelected: (value) {
-                Navigator.pop(context);
-                switch (value) {
-                  case 'camera':
-                    _pickImage(ImageSource.camera);
-                    break;
-                  case 'gallery':
-                    _pickImage(ImageSource.gallery);
-                    break;
-                  case 'pdf':
-                    _pickPdf();
-                    break;
-                }
-              },
-            ),
-            const SizedBox(height: KuberSpacing.lg),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

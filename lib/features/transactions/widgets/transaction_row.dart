@@ -154,7 +154,7 @@ class TransactionRow extends ConsumerWidget {
     final parts = <String>[];
 
     if (hasAttachments) {
-      parts.add('\u{1F4CE} ${transaction.attachmentPaths.length}');
+      parts.add('${transaction.attachmentPaths.length}');
     }
 
     if (hasTags) {
@@ -170,10 +170,11 @@ class TransactionRow extends ConsumerWidget {
     return parts.join('  \u00B7  ');
   }
 
-  /// Builds a styled TextSpan with tags in accent color.
+  /// Builds a styled TextSpan with tags in accent color and attachment chip in golden.
   InlineSpan _buildIndicatorSpan(ColorScheme cs) {
     final hasAttachments = transaction.attachmentPaths.isNotEmpty;
     final hasTags = tagNames.isNotEmpty;
+    const goldColor = Color(0xFFD4A017);
     final baseStyle = TextStyle(
       fontSize: 11,
       fontWeight: FontWeight.w400,
@@ -188,9 +189,31 @@ class TransactionRow extends ConsumerWidget {
     final spans = <InlineSpan>[];
 
     if (hasAttachments) {
-      spans.add(TextSpan(
-        text: '\u{1F4CE} ${transaction.attachmentPaths.length}',
-        style: baseStyle,
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          decoration: BoxDecoration(
+            color: goldColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: goldColor.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.attach_file_rounded, size: 11, color: goldColor),
+              const SizedBox(width: 2),
+              Text(
+                '${transaction.attachmentPaths.length}',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: goldColor,
+                ),
+              ),
+            ],
+          ),
+        ),
       ));
     }
 
