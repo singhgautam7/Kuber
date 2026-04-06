@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
@@ -204,8 +204,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
                   children: [
                     Text(
                       'Calculator',
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
@@ -266,8 +265,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
             duration: const Duration(milliseconds: 150),
             child: Text(
               _previewResult ?? '',
-              style: GoogleFonts.inter(
-                fontSize: 18,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: cs.onSurfaceVariant,
               ),
               maxLines: 1,
@@ -279,7 +277,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
           // Main expression line
           Text(
             _expression.isEmpty ? '0' : _expression,
-            style: GoogleFonts.inter(
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
               fontSize: 40,
               fontWeight: FontWeight.bold,
               color: cs.onSurface,
@@ -376,7 +374,7 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
             ? Icon(btn.icon, size: 20, color: fgColor)
             : Text(
                 btn.label,
-                style: GoogleFonts.inter(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                   color: fgColor,

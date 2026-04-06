@@ -23,6 +23,7 @@ import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
 import '../widgets/top_filter_row.dart';
 import '../../export/widgets/export_bottom_sheet.dart';
+import '../../../shared/widgets/transaction_detail_sheet.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -193,23 +194,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget build(BuildContext context) {
     final filter = ref.watch(analyticsFilterProvider);
     final periodTxns = ref.watch(analyticsTransactionsProvider);
+    final computed = ref.watch(analyticsComputedProvider);
 
     final cs = Theme.of(context).colorScheme;
     final colorScheme = cs;
     final textTheme = Theme.of(context).textTheme;
 
-    final isEmpty = periodTxns.isEmpty;
+    final isEmpty = computed == null;
 
-    // Totals — cached once per build
-    double totalIncome = 0, totalExpense = 0;
-    for (final t in periodTxns) {
-      if (t.type == 'income') {
-        totalIncome += t.amount;
-      } else {
-        totalExpense += t.amount;
-      }
-    }
-    final netAmount = totalIncome - totalExpense;
+    // Totals — from cached provider (single O(n) pass)
+    final totalIncome = computed?.totalIncome ?? 0.0;
+    final totalExpense = computed?.totalExpense ?? 0.0;
+    final netAmount = computed?.netAmount ?? 0.0;
 
     // Buckets — cached once per build
     final buckets = _buildPeriodBuckets(periodTxns, filter);
@@ -234,6 +230,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       child: Scaffold(
         body: CustomScrollView(
           slivers: [
+            // ── Header (always eager) ─────────────────────────────────
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               sliver: SliverList(
@@ -251,53 +248,83 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                   const TopFilterRow(),
                   const SizedBox(height: KuberSpacing.lg),
-
-                  if (isEmpty) ...[
-                    const SizedBox(height: KuberSpacing.xl),
-                    const KuberEmptyState(
-                      icon: Icons.bar_chart,
-                      title: 'No data',
-                      description: 'No transactions found for this period',
-                    ),
-                  ] else ...[
-                    _buildSummaryCard(ref, colorScheme, textTheme, totalIncome, totalExpense, netAmount),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    RepaintBoundary(
-                      child: KuberBarChart(
-                        title: 'Spending Trend',
-                        buckets: buckets,
-                        height: 200,
-                      ),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    RepaintBoundary(
-                      child: AvgWeeklyHeatmap(transactions: periodTxns),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    RepaintBoundary(
-                      child: TransactionSizeDistribution(transactions: periodTxns),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    const RepaintBoundary(
-                      child: CategoryGroupStatsWidget(),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    RepaintBoundary(
-                      child: TagWiseAnalytics(transactions: periodTxns),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    _buildBiggestTransactionsSection(colorScheme, textTheme, top5, isMoreTab: false, biggestType: biggestType, categoryMap: categoryMap),
-                    SizedBox(height: navBarBottomPadding(context)),
-                  ],
                 ]),
               ),
             ),
+
+            // ── Analytics widgets (lazy — only built when scrolled into view) ─
+            if (isEmpty)
+              const SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      SizedBox(height: KuberSpacing.xl),
+                      KuberEmptyState(
+                        icon: Icons.bar_chart,
+                        title: 'No data',
+                        description: 'No transactions found for this period',
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                sliver: SliverList.builder(
+                  itemCount: 8,
+                  itemBuilder: (context, index) => switch (index) {
+                    0 => Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: _buildSummaryCard(ref, colorScheme, textTheme, totalIncome, totalExpense, netAmount),
+                    ),
+                    1 => Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: RepaintBoundary(
+                        child: KuberBarChart(
+                          title: 'Spending Trend',
+                          buckets: buckets,
+                          height: 200,
+                        ),
+                      ),
+                    ),
+                    2 => Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: RepaintBoundary(
+                        child: AvgWeeklyHeatmap(
+                          transactions: periodTxns,
+                          precomputedDailyAverages: computed.dailyAverages,
+                        ),
+                      ),
+                    ),
+                    3 => Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: RepaintBoundary(
+                        child: TransactionSizeDistribution(
+                          transactions: periodTxns,
+                          precomputedDistribution: computed.sizeDistribution,
+                        ),
+                      ),
+                    ),
+                    4 => const Padding(
+                      padding: EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: RepaintBoundary(
+                        child: CategoryGroupStatsWidget(),
+                      ),
+                    ),
+                    5 => Padding(
+                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: RepaintBoundary(
+                        child: TagWiseAnalytics(transactions: periodTxns),
+                      ),
+                    ),
+                    6 => _buildBiggestTransactionsSection(colorScheme, textTheme, top5, isMoreTab: false, biggestType: biggestType, categoryMap: categoryMap),
+                    7 => SizedBox(height: navBarBottomPadding(context)),
+                    _ => const SizedBox.shrink(),
+                  },
+                ),
+              ),
           ],
         ),
       ),
@@ -338,61 +365,68 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 final isExpense = t.type == 'expense';
                 final rankColor = i == 0 ? cs.primary : cs.onSurfaceVariant;
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: KuberSpacing.md),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: rankColor.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '#${i + 1}',
-                          style: tt.labelSmall?.copyWith(
-                            color: rankColor,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: KuberSpacing.md),
-                      if (cat != null)
-                        CategoryIcon.square(
-                          icon: IconMapper.fromString(cat.icon),
-                          rawColor: harmonizeCategory(context, Color(cat.colorValue)),
-                          size: 36,
-                        ),
-                      const SizedBox(width: KuberSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              t.name,
-                              style: tt.bodyMedium,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                  padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                  child: InkWell(
+                    onTap: () => showTransactionDetailSheet(context, ref, t),
+                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xs),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: rankColor.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
                             ),
-                            if (cat != null)
-                              Text(
-                                cat.name,
-                                style: tt.bodySmall?.copyWith(
-                                  color: cs.onSurfaceVariant,
-                                ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '#${i + 1}',
+                              style: tt.labelSmall?.copyWith(
+                                color: rankColor,
+                                fontWeight: FontWeight.w700,
                               ),
-                          ],
-                        ),
+                            ),
+                          ),
+                          const SizedBox(width: KuberSpacing.md),
+                          if (cat != null)
+                            CategoryIcon.square(
+                              icon: IconMapper.fromString(cat.icon),
+                              rawColor: harmonizeCategory(context, Color(cat.colorValue)),
+                              size: 36,
+                            ),
+                          const SizedBox(width: KuberSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  t.name,
+                                  style: tt.bodyMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (cat != null)
+                                  Text(
+                                    cat.name,
+                                    style: tt.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
+                            style: tt.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isExpense ? cs.error : cs.tertiary,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
-                        style: tt.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: isExpense ? cs.error : cs.tertiary,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 );
               }),
@@ -499,20 +533,20 @@ class _AnalyticsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              if (trailing != null) ...[
-                const SizedBox(height: KuberSpacing.sm),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: trailing!,
+              Expanded(
+                child: Text(
+                  title,
+                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              // ignore: use_null_aware_elements
+              if (trailing != null) trailing!,
             ],
           ),
           const SizedBox(height: KuberSpacing.xl),

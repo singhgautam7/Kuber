@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/theme/app_theme.dart';
 
 import '../../transactions/data/transaction.dart';
@@ -8,11 +8,13 @@ import '../../settings/providers/settings_provider.dart';
 
 class TransactionSizeDistribution extends ConsumerWidget {
   final List<Transaction> transactions;
+  final Map<String, int>? precomputedDistribution;
   final bool isLoading;
 
   const TransactionSizeDistribution({
     super.key,
     required this.transactions,
+    this.precomputedDistribution,
     this.isLoading = false,
   });
 
@@ -22,9 +24,10 @@ class TransactionSizeDistribution extends ConsumerWidget {
       return _buildSkeleton();
     }
 
-    final distribution = _calculateDistribution();
+    final distribution = precomputedDistribution ?? _calculateDistribution();
     final total = distribution.values.fold<int>(0, (sum, val) => sum + val);
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final formatter = ref.watch(formatterProvider);
 
     return Card(
@@ -36,8 +39,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
           children: [
             Text(
               'Transaction Size Distribution',
-              style: GoogleFonts.inter(
-                fontSize: 18,
+              style: tt.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: cs.onSurface,
               ),
@@ -45,8 +47,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
             const SizedBox(height: 4),
             Text(
               'Frequency by ticket size',
-              style: GoogleFonts.inter(
-                fontSize: 13,
+              style: tt.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
               ),
             ),
@@ -66,11 +67,11 @@ class TransactionSizeDistribution extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.xl),
             
             // Legend
-            _buildLegendItem(cs.primary.withValues(alpha: 0.9), 'Small (<${formatter.formatCurrency(500)})', distribution['small'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.9), 'Small (<${formatter.formatCurrency(500)})', distribution['small'] ?? 0, total, cs, tt),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.5), 'Medium (${formatter.formatCurrency(500)} - ${formatter.formatCurrency(2000)})', distribution['medium'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.5), 'Medium (${formatter.formatCurrency(500)} - ${formatter.formatCurrency(2000)})', distribution['medium'] ?? 0, total, cs, tt),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.1), 'Large (>${formatter.formatCurrency(2000)})', distribution['large'] ?? 0, total, cs),
+            _buildLegendItem(cs.primary.withValues(alpha: 0.1), 'Large (>${formatter.formatCurrency(2000)})', distribution['large'] ?? 0, total, cs, tt),
           ],
         ),
       ),
@@ -91,7 +92,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
     );
   }
 
-  Widget _buildLegendItem(Color color, String label, int count, int total, ColorScheme cs) {
+  Widget _buildLegendItem(Color color, String label, int count, int total, ColorScheme cs, TextTheme tt) {
     final percentage = total > 0 ? (count / total * 100).round() : 0;
     return Row(
       children: [
@@ -106,8 +107,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
         const SizedBox(width: KuberSpacing.md),
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
+          style: tt.bodyMedium?.copyWith(
             fontWeight: FontWeight.w500,
             color: cs.onSurfaceVariant,
           ),
@@ -115,8 +115,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
         const Spacer(),
         Text(
           '$percentage%',
-          style: GoogleFonts.inter(
-            fontSize: 14,
+          style: tt.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
           ),

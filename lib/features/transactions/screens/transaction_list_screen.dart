@@ -29,7 +29,27 @@ class HistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
-  // No local search state, moved to HistoryFilterProvider
+  static const _groupsPerPage = 10;
+  int _displayedGroupCount = _groupsPerPage;
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.extentAfter < 300) {
+      _loadMoreGroups();
+    }
+  }
+
+  void _loadMoreGroups() {
+    // The actual check against groups.length happens in build —
+    // here we just bump the count and let build() clamp it.
+    setState(() => _displayedGroupCount += _groupsPerPage);
+  }
 
   List<Transaction> _applyFilters(List<Transaction> transactions, HistoryFilter filter) {
     final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
@@ -45,7 +65,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Reset pagination when filters change
+    ref.listen(historyFilterProvider, (_, __) {
+      _displayedGroupCount = _groupsPerPage;
+    });
+
     final cs = Theme.of(context).colorScheme;
     final transactionsAsync = ref.watch(transactionListProvider);
     final filter = ref.watch(historyFilterProvider);
@@ -61,6 +92,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         behavior: HitTestBehavior.opaque,
         child: Scaffold(
           body: CustomScrollView(
+            controller: _scrollController,
             slivers: [
               // App bar
               const SliverToBoxAdapter(
@@ -243,40 +275,62 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               : null,
                         ),
                       )
-                    else
-                      SliverPadding(
-                        padding: EdgeInsets.only(
-                          bottom: navBarBottomPadding(context),
-                          left: KuberSpacing.lg,
-                          right: KuberSpacing.lg,
-                        ),
-                        sliver: SliverList.builder(
-                          itemCount: groups.length * 2,
-                          itemBuilder: (context, index) {
-                            final groupIndex = index ~/ 2;
-                            final group = groups[groupIndex];
+                    else ...[
+                      () {
+                        final displayedGroups = groups.take(_displayedGroupCount).toList();
+                        final hasMore = displayedGroups.length < groups.length;
 
-                            if (index.isEven) {
-                              return DateGroupHeader(
-                                label: group.label,
-                                dayTotal: group.dayTotal,
-                              );
-                            } else {
-                              return TransactionDayCard(
-                                transactions: group.transactions,
-                                onDelete: _deleteWithUndo,
-                                onTap: (t) => _showTransactionDetail(t),
-                                onEdit: (t) =>
-                                    context.push('/add-transaction', extra: t),
-                                formatter: fmt,
-                                categoryMap: ref.watch(categoryMapProvider).valueOrNull ?? {},
-                                accountMap: ref.watch(accountMapProvider).valueOrNull ?? {},
-                                transactionList: transactions, // For transfer lookup
-                              );
-                            }
-                          },
+                        return SliverPadding(
+                          padding: EdgeInsets.only(
+                            bottom: hasMore ? 0 : navBarBottomPadding(context),
+                            left: KuberSpacing.lg,
+                            right: KuberSpacing.lg,
+                          ),
+                          sliver: SliverList.builder(
+                            itemCount: displayedGroups.length * 2,
+                            itemBuilder: (context, index) {
+                              final groupIndex = index ~/ 2;
+                              final group = displayedGroups[groupIndex];
+
+                              if (index.isEven) {
+                                return DateGroupHeader(
+                                  label: group.label,
+                                  dayTotal: group.dayTotal,
+                                );
+                              } else {
+                                return TransactionDayCard(
+                                  transactions: group.transactions,
+                                  onDelete: _deleteWithUndo,
+                                  onTap: (t) => _showTransactionDetail(t),
+                                  onEdit: (t) =>
+                                      context.push('/add-transaction', extra: t),
+                                  formatter: fmt,
+                                  categoryMap: ref.watch(categoryMapProvider).valueOrNull ?? {},
+                                  accountMap: ref.watch(accountMapProvider).valueOrNull ?? {},
+                                  transactionList: transactions, // For transfer lookup
+                                );
+                              }
+                            },
+                          ),
+                        );
+                      }(),
+                      if (groups.length > _displayedGroupCount)
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top: KuberSpacing.lg,
+                              bottom: navBarBottomPadding(context),
+                            ),
+                            child: const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                    ],
                   ];
                 },
               ),

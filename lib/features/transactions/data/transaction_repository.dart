@@ -48,6 +48,14 @@ class TransactionRepository extends BaseRepository<Transaction> {
 
 
 
+  Future<Transaction?> findTransferPair(String transferId, int excludeId) async {
+    final pair = await isar.transactions
+        .filter()
+        .transferIdEqualTo(transferId)
+        .findAll();
+    return pair.where((t) => t.id != excludeId).firstOrNull;
+  }
+
   Future<List<int>> saveTransfer({
     required String fromAccountId,
     required String toAccountId,

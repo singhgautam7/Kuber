@@ -118,9 +118,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add-transaction',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => AddTransactionScreen(
-          transaction: state.extra as Transaction?,
-          initialType: state.uri.queryParameters['type'],
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: AddTransactionScreen(
+            transaction: state.extra as Transaction?,
+            initialType: state.uri.queryParameters['type'],
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              )),
+              child: child,
+            );
+          },
         ),
       ),
       GoRoute(

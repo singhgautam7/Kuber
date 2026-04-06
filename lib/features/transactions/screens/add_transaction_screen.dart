@@ -58,8 +58,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   bool _suppressSuggestions = false;
   List<Tag> _selectedTags = [];
-  bool _shouldAutofocus = true;
-
   bool get _isEditing => widget.transaction != null;
 
   @override
@@ -133,9 +131,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _loadTransferPair(Transaction t) async {
     if (t.transferId == null) return;
-    final allTxns = await ref.read(transactionListProvider.future);
-    final pair = allTxns.firstWhereOrNull(
-        (tx) => tx.transferId == t.transferId && tx.id != t.id);
+    final pair = await ref.read(transactionRepositoryProvider).findTransferPair(t.transferId!, t.id);
     if (pair != null && mounted) {
       setState(() => _selectedToAccountId = int.tryParse(pair.accountId));
     }
@@ -183,13 +179,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     }
     );
-
-    // After the first build, we stop auto-focussing to prevent focus jumps on rebuilds
-    if (_shouldAutofocus) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _shouldAutofocus = false);
-      });
-    }
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -262,7 +251,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       return TextField(
                         controller: controller,
                         focusNode: focusNode,
-                        autofocus: !_isEditing && _shouldAutofocus,
+                        autofocus: !_isEditing,
                         textCapitalization: TextCapitalization.sentences,
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,

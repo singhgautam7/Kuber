@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart';
@@ -155,8 +155,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
           const SizedBox(height: 2),
           Text(
             widget.subtitle!,
-            style: GoogleFonts.inter(
-              fontSize: 12,
+            style: tt.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
             ),
           ),
@@ -180,11 +179,16 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(children: [
-                    _LegendDot(color: cs.tertiary, label: 'INC'),
-                    const SizedBox(width: KuberSpacing.md),
-                    _LegendDot(color: cs.error, label: 'EXP'),
-                  ]),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        _LegendDot(color: cs.tertiary, label: 'INC'),
+                        const SizedBox(width: KuberSpacing.md),
+                        _LegendDot(color: cs.error, label: 'EXP'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: KuberSpacing.md),
                   _ChartTypeTabs(
                     current: _chartType,
                     onChanged: _switchChartType,
@@ -241,7 +245,12 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   // Shared axis titles
   // ---------------------------------------------------------------------------
 
-  FlTitlesData _titlesData(ColorScheme cs) {
+  FlTitlesData _titlesData(ColorScheme cs, TextTheme tt) {
+    final axisStyle = tt.labelSmall?.copyWith(
+      fontSize: 10,
+      color: cs.onSurfaceVariant,
+    );
+
     return FlTitlesData(
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
@@ -255,18 +264,12 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
             if (value == meta.min) {
               return Text(
                 formatter.formatCurrency(0),
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  color: cs.onSurfaceVariant,
-                ),
+                style: axisStyle,
               );
             }
             return Text(
               formatter.formatCompactCurrency(value),
-              style: GoogleFonts.inter(
-                fontSize: 10,
-                color: cs.onSurfaceVariant,
-              ),
+              style: axisStyle,
             );
           },
         ),
@@ -294,8 +297,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                 children: [
                   Text(
                     b.dayLabel,
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
+                    style: tt.labelSmall?.copyWith(
                       fontWeight: b.isHighlighted
                           ? FontWeight.w700
                           : FontWeight.w400,
@@ -306,7 +308,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                   ),
                   Text(
                     b.monthLabel,
-                    style: GoogleFonts.inter(
+                    style: tt.labelSmall?.copyWith(
                       fontSize: 10,
                       fontWeight: b.isHighlighted
                           ? FontWeight.w700
@@ -370,7 +372,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         ),
         gridData: _gridData(cs),
         borderData: FlBorderData(show: false),
-        titlesData: _titlesData(cs),
+        titlesData: _titlesData(cs, Theme.of(context).textTheme),
         barGroups: _buildBarGroups(barWidth, dataGap, cs),
       ),
     ),
@@ -483,7 +485,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         ),
         gridData: _gridData(cs),
         borderData: FlBorderData(show: false),
-        titlesData: _titlesData(cs),
+        titlesData: _titlesData(cs, Theme.of(context).textTheme),
         lineBarsData: [
           _lineData(
             cs.tertiary,
@@ -557,7 +559,7 @@ class _LegendDot extends StatelessWidget {
         const SizedBox(width: 5),
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w600,
             color: color,
@@ -712,20 +714,19 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tt = Theme.of(context).textTheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
+          style: tt.labelSmall?.copyWith(
             color: labelColor,
           ),
         ),
         Text(
           amount,
-          style: GoogleFonts.inter(
-            fontSize: 12,
+          style: tt.labelMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: color,
           ),

@@ -116,6 +116,70 @@ class AnalyticsFilterNotifier extends StateNotifier<AnalyticsFilter> {
   }
 }
 
+/// Pre-computed analytics data — single O(n) pass over transactions.
+/// Cached by Riverpod, recomputed only when filter or transactions change.
+class AnalyticsComputed {
+  final double totalIncome;
+  final double totalExpense;
+  final double netAmount;
+  final Map<String, double> dailyAverages;
+  final Map<String, int> sizeDistribution;
+
+  const AnalyticsComputed({
+    required this.totalIncome,
+    required this.totalExpense,
+    required this.netAmount,
+    required this.dailyAverages,
+    required this.sizeDistribution,
+  });
+}
+
+final analyticsComputedProvider = Provider<AnalyticsComputed?>((ref) {
+  final txns = ref.watch(analyticsTransactionsProvider);
+  if (txns.isEmpty) return null;
+
+  double totalIncome = 0, totalExpense = 0;
+  int smallCount = 0, mediumCount = 0, largeCount = 0;
+  final Map<int, List<double>> dayAmounts = {
+    1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [],
+  };
+
+  for (final t in txns) {
+    if (t.type == 'income') {
+      totalIncome += t.amount;
+    } else {
+      totalExpense += t.amount;
+      // Size distribution (expense only)
+      if (t.amount < 500) {
+        smallCount++;
+      } else if (t.amount <= 2000) {
+        mediumCount++;
+      } else {
+        largeCount++;
+      }
+      // Daily averages by weekday (expense only)
+      dayAmounts[t.createdAt.toLocal().weekday]!.add(t.amount);
+    }
+  }
+
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  final dailyAverages = <String, double>{};
+  for (int i = 1; i <= 7; i++) {
+    final amounts = dayAmounts[i]!;
+    dailyAverages[dayNames[i - 1]] = amounts.isEmpty
+        ? 0.0
+        : amounts.reduce((a, b) => a + b) / amounts.length;
+  }
+
+  return AnalyticsComputed(
+    totalIncome: totalIncome,
+    totalExpense: totalExpense,
+    netAmount: totalIncome - totalExpense,
+    dailyAverages: dailyAverages,
+    sizeDistribution: {'small': smallCount, 'medium': mediumCount, 'large': largeCount},
+  );
+});
+
 final analyticsTransactionsProvider = Provider<List<Transaction>>((ref) {
   final filter = ref.watch(analyticsFilterProvider);
   final all = ref.watch(transactionListProvider).valueOrNull ?? [];

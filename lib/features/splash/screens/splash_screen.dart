@@ -93,7 +93,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   height: 88,
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(KuberRadius.lg),
                   ),
                   child: Icon(
                     IconMapper.fromCurrencyCode(currency.code),
