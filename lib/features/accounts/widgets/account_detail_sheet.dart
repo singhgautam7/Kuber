@@ -55,7 +55,7 @@ class AccountDetailSheet extends ConsumerWidget {
           ref.read(historyFilterProvider.notifier).setFilters(
                 accountIds: {account.id.toString()},
               );
-          context.push('/history');
+          context.go('/history');
         },
       ),
       child: Column(
