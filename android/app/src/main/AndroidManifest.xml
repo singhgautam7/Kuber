@@ -5,7 +5,7 @@
 
     <!-- Image/video permissions for attachment picking -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>
     <!-- Strip audio permission injected by dependencies -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove"/>
 
