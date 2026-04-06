@@ -726,7 +726,7 @@ class _TooltipOverlay extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        '${bucket.monthLabel} ${bucket.dayLabel}'.toUpperCase(),
+                        '${bucket.dayLabel} ${bucket.monthLabel}'.toUpperCase(),
                         style: tt.labelSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
