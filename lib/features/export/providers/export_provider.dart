@@ -403,7 +403,7 @@ Future<bool> saveToFolder({
   required ExportFormat format,
 }) async {
   final fileName = result.tempFile.path.split('/').last;
-  final savedPath = await FilePicker.platform.saveFile(
+  final savedPath = await FilePicker.saveFile(
     dialogTitle: 'Save a copy',
     fileName: fileName,
     bytes: result.bytes,

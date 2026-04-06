@@ -1,7 +1,13 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/services/attachment_service.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -36,7 +42,18 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
   DateTime _selectedDate = DateTime.now();
   bool _shouldAutofocus = true;
 
+  // Attachment state
+  List<String> _attachmentPaths = []; // existing saved paths (edit mode)
+  final List<String> _pendingAttachments = []; // newly picked, not yet copied
+  final Set<String> _removedAttachments = {}; // staged for deletion on save
+  bool _isPickingFile = false;
+
   bool get _isEditing => widget.transaction != null;
+
+  int get _totalAttachmentCount =>
+      _attachmentPaths.length +
+      _pendingAttachments.length -
+      _removedAttachments.length;
 
   @override
   void initState() {
@@ -50,6 +67,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       _selectedCategoryId = int.tryParse(t.categoryId);
       _selectedAccountId = int.tryParse(t.accountId);
       _selectedDate = t.createdAt;
+      _attachmentPaths = List.from(t.attachmentPaths);
     }
   }
 
@@ -262,6 +280,10 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: KuberSpacing.lg),
+
+            // 8. Attachments
+            _buildAttachmentsSection(colorScheme, textTheme),
             const SizedBox(height: KuberSpacing.xl),
 
             // Actions
@@ -300,6 +322,229 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     );
   }
 
+  Widget _buildAttachmentsSection(ColorScheme cs, TextTheme textTheme) {
+    // All visible attachments: existing (minus removed) + pending
+    final visible = <_AttachmentItem>[
+      for (final p in _attachmentPaths)
+        if (!_removedAttachments.contains(p))
+          _AttachmentItem(path: p, isPending: false),
+      for (final p in _pendingAttachments)
+        _AttachmentItem(path: p, isPending: true),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ATTACHMENTS',
+          style: textTheme.labelSmall?.copyWith(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+        if (_isPickingFile)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: KuberSpacing.md),
+            child: Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          )
+        else if (visible.isEmpty)
+          TextButton.icon(
+            onPressed: _pickAttachment,
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('ADD IMAGE OR PDF'),
+            style: TextButton.styleFrom(
+              foregroundColor: cs.primary,
+              padding: EdgeInsets.zero,
+              alignment: Alignment.centerLeft,
+            ),
+          )
+        else
+          SizedBox(
+            height: 72,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: visible.length + (visible.length < AttachmentService.maxAttachments ? 1 : 0),
+              separatorBuilder: (_, __) => const SizedBox(width: KuberSpacing.sm),
+              itemBuilder: (context, index) {
+                if (index == visible.length) {
+                  // Add button
+                  return GestureDetector(
+                    onTap: _pickAttachment,
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: cs.outline),
+                      ),
+                      child: Icon(Icons.add, color: cs.primary),
+                    ),
+                  );
+                }
+
+                final item = visible[index];
+                final isImage = AttachmentService.getFileType(item.path) == 'image';
+
+                return GestureDetector(
+                  onTap: () => OpenFilex.open(item.path),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: isImage
+                            ? Image.file(
+                                File(item.path),
+                                fit: BoxFit.cover,
+                                width: 72,
+                                height: 72,
+                              )
+                            : Center(
+                                child: Icon(
+                                  Icons.picture_as_pdf,
+                                  color: cs.primary,
+                                  size: 32,
+                                ),
+                              ),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: GestureDetector(
+                          onTap: () => _removeAttachment(item),
+                          child: Container(
+                            width: 18,
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 12,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _pickAttachment() async {
+    if (_totalAttachmentCount >= AttachmentService.maxAttachments) {
+      if (mounted) {
+        showKuberSnackBar(context, 'Maximum ${AttachmentService.maxAttachments} attachments allowed',
+            isError: true);
+      }
+      return;
+    }
+
+    setState(() => _isPickingFile = true);
+
+    try {
+      // Show picker choice
+      final choice = await showModalBottomSheet<String>(
+        context: context,
+        useRootNavigator: true,
+        builder: (ctx) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Pick Image'),
+                onTap: () => Navigator.pop(ctx, 'image'),
+              ),
+              ListTile(
+                leading: const Icon(Icons.picture_as_pdf),
+                title: const Text('Pick PDF'),
+                onTap: () => Navigator.pop(ctx, 'pdf'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      if (choice == null || !mounted) {
+        setState(() => _isPickingFile = false);
+        return;
+      }
+
+      String? pickedPath;
+
+      if (choice == 'image') {
+        final picker = ImagePicker();
+        final image = await picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 85,
+          maxWidth: 1920,
+          maxHeight: 1920,
+        );
+        pickedPath = image?.path;
+      } else {
+        final result = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf'],
+        );
+        pickedPath = result?.files.single.path;
+      }
+
+      if (pickedPath != null && mounted) {
+        // Check file size
+        final fileSize = await File(pickedPath).length();
+        if (fileSize > AttachmentService.maxFileSizeBytes) {
+          if (mounted) {
+            showKuberSnackBar(context, 'File size exceeds 5MB limit',
+                isError: true);
+          }
+        } else {
+          setState(() => _pendingAttachments.add(pickedPath!));
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        showKuberSnackBar(context, 'Failed to pick file', isError: true);
+      }
+    } finally {
+      if (mounted) setState(() => _isPickingFile = false);
+    }
+  }
+
+  void _removeAttachment(_AttachmentItem item) {
+    setState(() {
+      if (item.isPending) {
+        _pendingAttachments.remove(item.path);
+        // In add mode, delete the temp file immediately (image_picker temp)
+        // Don't delete — it's a temp file managed by the OS
+      } else {
+        _removedAttachments.add(item.path);
+      }
+    });
+  }
+
   void _applySuggestion(Transaction suggestion) {
     setState(() {
       _nameController.text = suggestion.name;
@@ -313,7 +558,7 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     ref.read(suggestionQueryProvider.notifier).state = '';
   }
 
-  void _save() {
+  Future<void> _save() async {
     final name = _nameController.text.trim();
     final amount = double.tryParse(_amountController.text.trim());
 
@@ -334,6 +579,9 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
       return;
     }
 
+    final attachmentService = ref.read(attachmentServiceProvider);
+    final notifier = ref.read(transactionListProvider.notifier);
+
     final t = _isEditing ? widget.transaction! : Transaction();
     t.name = name;
     t.amount = amount;
@@ -350,11 +598,44 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     t.updatedAt = DateTime.now();
 
     if (_isEditing) {
-      ref.read(transactionListProvider.notifier).updateTransaction(t);
+      // Delete removed attachments
+      for (final path in _removedAttachments) {
+        await attachmentService.deleteAttachment(path);
+      }
+      // Copy pending attachments
+      final kept = _attachmentPaths
+          .where((p) => !_removedAttachments.contains(p))
+          .toList();
+      for (final source in _pendingAttachments) {
+        final saved = await attachmentService.saveAttachment(
+            t.id, source, kept.length);
+        kept.add(saved);
+      }
+      t.attachmentPaths = kept;
+      await notifier.updateTransaction(t);
     } else {
-      ref.read(transactionListProvider.notifier).add(t);
+      // Save transaction first to get the ID
+      final id = await notifier.add(t);
+      // Copy pending attachments with the new ID
+      if (_pendingAttachments.isNotEmpty) {
+        final paths = <String>[];
+        for (final source in _pendingAttachments) {
+          final saved = await attachmentService.saveAttachment(
+              id, source, paths.length);
+          paths.add(saved);
+        }
+        t.id = id;
+        t.attachmentPaths = paths;
+        await notifier.updateTransaction(t);
+      }
     }
 
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
   }
+}
+
+class _AttachmentItem {
+  final String path;
+  final bool isPending;
+  const _AttachmentItem({required this.path, required this.isPending});
 }

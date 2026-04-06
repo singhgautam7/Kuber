@@ -7,6 +7,7 @@ import 'package:kuber/features/budgets/data/budget.dart';
 import 'package:kuber/features/budgets/data/budget_repository.dart';
 import 'package:kuber/features/categories/providers/category_provider.dart';
 import 'package:kuber/core/services/notification_service.dart';
+import 'package:kuber/core/services/attachment_service.dart';
 import 'package:kuber/core/utils/formatters.dart';
 import 'package:kuber/features/settings/providers/settings_provider.dart';
 import '../../helpers/mock_repositories.dart';
@@ -17,6 +18,7 @@ void main() {
   late MockBudgetRepository mockBudgetRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockNotificationService mockNotification;
+  late MockAttachmentService mockAttachments;
   late ProviderContainer container;
 
   setUpAll(() {
@@ -38,11 +40,14 @@ void main() {
     mockBudgetRepo = MockBudgetRepository();
     mockCategoryRepo = MockCategoryRepository();
     mockNotification = MockNotificationService();
+    mockAttachments = MockAttachmentService();
 
     when(() => mockRepo.getAll()).thenAnswer((_) async => []);
     when(() => mockBudgetRepo.watchBudgets())
         .thenAnswer((_) => Stream.value([]));
     when(() => mockCategoryRepo.getAll()).thenAnswer((_) async => []);
+    when(() => mockAttachments.deleteAllForTransaction(any()))
+        .thenAnswer((_) async {});
 
     container = ProviderContainer(
       overrides: [
@@ -51,6 +56,7 @@ void main() {
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         notificationServiceProvider.overrideWithValue(mockNotification),
         formatterProvider.overrideWithValue(AppFormatter()),
+        attachmentServiceProvider.overrideWithValue(mockAttachments),
       ],
     );
   });
@@ -93,6 +99,8 @@ void main() {
         transferId: 'tf123',
       );
       when(() => mockRepo.getById(5)).thenAnswer((_) async => transfer);
+      when(() => mockRepo.findTransferPair('tf123', 5))
+          .thenAnswer((_) async => null);
       when(() => mockRepo.deleteTransferPair('tf123'))
           .thenAnswer((_) async {});
 
