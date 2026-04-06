@@ -103,27 +103,6 @@ class RecurringDetailSheet extends ConsumerWidget {
         rawColor: iconColor,
         size: 48,
       ),
-      actions: AppButton(
-        label: 'View Transactions',
-        icon: Icons.history_rounded,
-        type: AppButtonType.primary,
-        fullWidth: true,
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            useRootNavigator: true,
-            backgroundColor: cs.surfaceContainer,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(KuberRadius.lg),
-              ),
-            ),
-            builder: (_) => RecurringHistorySheet(rule: rule),
-          );
-        },
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -220,12 +199,40 @@ class RecurringDetailSheet extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: KuberSpacing.md),
-          AppButton(
-            label: 'Delete',
-            icon: Icons.delete_outline_rounded,
-            type: AppButtonType.danger,
-            fullWidth: true,
-            onPressed: () => _confirmDelete(context, ref),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: 'History',
+                  icon: Icons.history_rounded,
+                  type: AppButtonType.primary,
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      useRootNavigator: true,
+                      backgroundColor: cs.surfaceContainer,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(KuberRadius.lg),
+                        ),
+                      ),
+                      builder: (_) => RecurringHistorySheet(rule: rule),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: AppButton(
+                  label: 'Delete',
+                  icon: Icons.delete_outline_rounded,
+                  type: AppButtonType.danger,
+                  onPressed: () => _confirmDelete(context, ref),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: KuberSpacing.xs),
         ],

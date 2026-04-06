@@ -13,6 +13,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
+import 'budget_history_sheet.dart';
 
 class BudgetDetailsSheet extends ConsumerWidget {
   final int budgetId;
@@ -43,19 +44,6 @@ class BudgetDetailsSheet extends ConsumerWidget {
             icon: IconMapper.fromString(category.icon),
             rawColor: Color(category.colorValue),
             size: 48,
-          ),
-          actions: AppButton(
-            label: 'View Transactions',
-            icon: Icons.history_rounded,
-            type: AppButtonType.primary,
-            fullWidth: true,
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.push('/history', extra: {
-                'categoryId': category.id.toString(),
-                'budgetId': budget.id.toString(),
-              });
-            },
           ),
           child: progressAsync.when(
             data: (p) => Column(
@@ -273,14 +261,42 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xs),
-                AppButton(
-                  label: 'Delete Budget',
-                  icon: Icons.delete_outline_rounded,
-                  type: AppButtonType.danger,
-                  fullWidth: true,
-                  onPressed: () => _confirmDeleteBudget(
-                      context, ref, budget.id),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        label: 'History',
+                        icon: Icons.history_rounded,
+                        type: AppButtonType.primary,
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            useRootNavigator: true,
+                            backgroundColor: cs.surfaceContainer,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(KuberRadius.lg),
+                              ),
+                            ),
+                            builder: (_) => BudgetHistorySheet(budget: budget, category: category),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppButton(
+                        label: 'Delete',
+                        icon: Icons.delete_outline_rounded,
+                        type: AppButtonType.danger,
+                        onPressed: () => _confirmDeleteBudget(
+                            context, ref, budget.id),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: KuberSpacing.xs),
               ],
