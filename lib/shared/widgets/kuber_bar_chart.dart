@@ -283,7 +283,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          reservedSize: 36,
+          reservedSize: 42,
           getTitlesWidget: (value, meta) {
             final i = value.toInt();
             if (i < 0 || i >= widget.buckets.length) {
