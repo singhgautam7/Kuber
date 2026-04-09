@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/settings/providers/settings_provider.dart';
+import '../../features/history/providers/selection_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
@@ -98,6 +99,9 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
     if (_showSpeedDial) _closeSpeedDial();
+    
+    ref.read(transactionSelectionProvider.notifier).clear();
+
     widget.navigationShell!.goBranch(
       index,
       initialLocation: index == widget.navigationShell!.currentIndex,
@@ -133,6 +137,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (_isAnimatingProgrammatically) return;
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
+    ref.read(transactionSelectionProvider.notifier).clear();
     widget.navigationShell!.goBranch(index);
   }
 
@@ -164,6 +169,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     }
     final currentIndex = widget.navigationShell!.currentIndex;
 
+    final isSelectionMode = ref.watch(isSelectionModeProvider);
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= KuberBreakpoints.smallTablet;
 
@@ -177,8 +183,9 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           )
         : widget.navigationShell!;
 
+    Widget content;
     if (isWide) {
-      return Scaffold(
+      content = Scaffold(
         backgroundColor: cs.surface,
         body: Row(
           children: [
@@ -191,11 +198,10 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           ],
         ),
       );
-    }
-
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: Stack(
+    } else {
+      content = Scaffold(
+        backgroundColor: cs.surface,
+        body: Stack(
         children: [
           animatedContent,
           if (_showSpeedDial) ...[
@@ -221,20 +227,25 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         ],
       ),
       floatingActionButton: currentIndex != 3
-          ? GestureDetector(
-              onLongPress: _openSpeedDial,
-              child: FloatingActionButton(
-                onPressed: _onAddTapped,
-                backgroundColor: cs.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                child: AnimatedRotation(
-                  turns: _showSpeedDial ? 0.125 : 0,
-                  duration: const Duration(milliseconds: 200),
-                  child: const Icon(Icons.add),
+          ? AnimatedScale(
+              scale: ref.watch(isSelectionModeProvider) ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              child: GestureDetector(
+                onLongPress: _openSpeedDial,
+                child: FloatingActionButton(
+                  onPressed: _onAddTapped,
+                  backgroundColor: cs.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                  ),
+                  child: AnimatedRotation(
+                    turns: _showSpeedDial ? 0.125 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(Icons.add),
+                  ),
                 ),
               ),
             )
@@ -250,6 +261,29 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           );
         }).toList(),
       ),
+    );
+    }
+
+    return BackButtonListener(
+      onBackButtonPressed: () async {
+        if (_showSpeedDial) {
+          _closeSpeedDial();
+          return true;
+        }
+        
+        if (isSelectionMode) {
+          ref.read(transactionSelectionProvider.notifier).clear();
+          return true;
+        }
+        
+        if (currentIndex != 0) {
+          _onTabTapped(0);
+          return true;
+        }
+        
+        return false;
+      },
+      child: content,
     );
   }
 }

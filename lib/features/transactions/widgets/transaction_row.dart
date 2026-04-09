@@ -8,6 +8,7 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../accounts/data/account.dart';
 import '../../categories/data/category.dart';
+import '../../history/providers/selection_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../data/transaction.dart';
 
@@ -236,6 +237,8 @@ class TransactionRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final isSelectionMode = ref.watch(isSelectionModeProvider);
+    final isSelected = ref.watch(transactionSelectionProvider).contains(transaction.id);
     final isTransfer = transaction.isTransfer;
     final isAdjustment = transaction.isBalanceAdjustment;
 
@@ -295,14 +298,27 @@ class TransactionRow extends ConsumerWidget {
       (async) => async.valueOrNull?.swipeMode ?? SwipeMode.changeTabs,
     ));
 
-    final content = Container(
+    final content = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+        color: isSelected ? cs.primary.withValues(alpha: 0.2) : cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        border: Border.all(
+          color: isSelected ? cs.primary.withValues(alpha: 0.4) : cs.outline,
+          width: isSelected ? 1.5 : 1,
+        ),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          if (isSelectionMode) {
+            ref.read(transactionSelectionProvider.notifier).toggle(transaction.id);
+          } else {
+            onTap();
+          }
+        },
+        onLongPress: () {
+          ref.read(transactionSelectionProvider.notifier).toggle(transaction.id);
+        },
         borderRadius: BorderRadius.circular(KuberRadius.md),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -311,10 +327,33 @@ class TransactionRow extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              CategoryIcon.square(
-                icon: iconData,
-                rawColor: iconColor,
-                size: 42,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: isSelectionMode
+                    ? Container(
+                        key: const ValueKey('checkbox'),
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? cs.primary.withValues(alpha: 0.15) 
+                              : cs.onSurfaceVariant.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                        ),
+                        child: isSelected 
+                            ? Icon(
+                                Icons.check_rounded,
+                                color: cs.primary,
+                                size: 24,
+                              )
+                            : null,
+                      )
+                    : CategoryIcon.square(
+                        key: const ValueKey('icon'),
+                        icon: iconData,
+                        rawColor: iconColor,
+                        size: 42,
+                      ),
               ),
               const SizedBox(width: KuberSpacing.md),
               Expanded(
