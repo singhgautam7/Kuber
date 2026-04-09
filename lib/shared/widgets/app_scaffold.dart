@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -264,24 +265,28 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     );
     }
 
-    return BackButtonListener(
-      onBackButtonPressed: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
         if (_showSpeedDial) {
           _closeSpeedDial();
-          return true;
+          return;
         }
-        
+
         if (isSelectionMode) {
           ref.read(transactionSelectionProvider.notifier).clear();
-          return true;
+          return;
         }
-        
+
         if (currentIndex != 0) {
           _onTabTapped(0);
-          return true;
+          return;
         }
-        
-        return false;
+
+        // Final fallback: Exit app
+        SystemNavigator.pop();
       },
       child: content,
     );
