@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
@@ -22,7 +23,25 @@ class KuberApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
-        return LockScreen(child: child!);
+        final brightness = Theme.of(context).brightness;
+        final isDark = brightness == Brightness.dark;
+        
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent, 
+            statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness: isDark ? Brightness.dark : Brightness.light, 
+          ),
+          child: ColoredBox(
+            color: Theme.of(context).colorScheme.surface,
+            child: SafeArea(
+              bottom: false,
+              left: false,
+              right: false,
+              child: LockScreen(child: child!),
+            ),
+          ),
+        );
       },
     );
   }

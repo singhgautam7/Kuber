@@ -8,6 +8,7 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../budgets/data/budget.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../budgets/widgets/budget_details_sheet.dart';
 
 class BudgetSnapshotCard extends ConsumerWidget {
   const BudgetSnapshotCard({super.key});
@@ -131,11 +132,24 @@ class _BudgetRow extends ConsumerWidget {
 
     final remaining = (progress.limit - progress.spent).clamp(0.0, double.infinity);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        children: [
-          Row(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: category == null ? null : () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => BudgetDetailsSheet(
+            budgetId: budget.id,
+            category: category,
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          children: [
+            Row(
             children: [
               // Category Icon
               Container(
@@ -242,6 +256,6 @@ class _BudgetRow extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

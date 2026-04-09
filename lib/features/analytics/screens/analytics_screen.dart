@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -222,13 +221,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ..sort((a, b) => b.amount.compareTo(a.amount));
     final top5 = biggest.take(5).toList();
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        context.go('/');
-      },
-      child: Scaffold(
+    return Scaffold(
         body: CustomScrollView(
           slivers: [
             // ── Header (always eager) ─────────────────────────────────
@@ -328,8 +321,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildBiggestTransactionsSection(

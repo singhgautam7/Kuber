@@ -7,6 +7,7 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
@@ -20,6 +21,7 @@ import '../../history/models/history_filter.dart';
 import '../../history/utils/filter_utils.dart';
 import '../../history/widgets/history_filter_widget.dart';
 import '../../history/utils/history_utils.dart';
+import '../../history/providers/selection_provider.dart';
 import '../widgets/transaction_row.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
@@ -82,18 +84,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final transactionsAsync = ref.watch(transactionListProvider);
     final filter = ref.watch(historyFilterProvider);
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        context.go('/');
-      },
-      child: GestureDetector(
+    return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: Scaffold(
-          body: CustomScrollView(
-            controller: _scrollController,
+          body: Stack(
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
             slivers: [
               // App bar
               const SliverToBoxAdapter(
@@ -350,7 +348,139 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
             ],
           ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: AnimatedSlide(
+              offset: ref.watch(isSelectionModeProvider) ? Offset.zero : const Offset(0, 1.2),
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              child: const _SelectionActionBar(),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+}
+
+class _SelectionActionBar extends ConsumerWidget {
+  const _SelectionActionBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final selectedIds = ref.watch(transactionSelectionProvider);
+    final allTransactions = ref.watch(transactionListProvider).valueOrNull ?? [];
+    
+    final selectedTransactions = allTransactions.where((t) => selectedIds.contains(t.id)).toList();
+    
+    double totalExp = 0;
+    double totalInc = 0;
+    for (final t in selectedTransactions) {
+      if (!t.isBalanceAdjustment && !t.isTransfer) {
+        if (t.type == 'income') {
+          totalInc += t.amount;
+        } else {
+          totalExp += t.amount;
+        }
+      }
+    }
+    final totalNet = totalInc - totalExp;
+    final fmt = ref.watch(formatterProvider);
+
+    return Material(
+      elevation: 8,
+      color: cs.surfaceContainerHigh,
+      child: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.sm, vertical: KuberSpacing.md),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: cs.outline)),
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () => ref.read(transactionSelectionProvider.notifier).clear(),
+                icon: Icon(Icons.close_rounded, color: cs.onSurface),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${selectedIds.length} selected',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Text('EXP -${fmt.formatCurrency(totalExp)}', style: TextStyle(fontSize: 10, color: cs.error, fontWeight: FontWeight.w600)),
+                        const SizedBox(width: KuberSpacing.md),
+                        Text('INC +${fmt.formatCurrency(totalInc)}', style: TextStyle(fontSize: 10, color: cs.tertiary, fontWeight: FontWeight.w600)),
+                        const SizedBox(width: KuberSpacing.md),
+                        Text('NET ${totalNet > 0 ? "+" : totalNet < 0 ? "-" : ""}${fmt.formatCurrency(totalNet.abs())}', 
+                          style: TextStyle(
+                            fontSize: 10, 
+                            color: totalNet > 0 ? cs.tertiary : totalNet < 0 ? cs.error : cs.onSurfaceVariant, 
+                            fontWeight: FontWeight.w600
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () => _confirmDelete(context, ref, selectedIds),
+                icon: Icon(Icons.delete_outline, color: cs.error),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, WidgetRef ref, Set<int> selectedIds) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Delete ${selectedIds.length} transactions?'),
+        content: const Text('This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final notifier = ref.read(transactionListProvider.notifier);
+              for (final id in selectedIds) {
+                await notifier.delete(id);
+              }
+              ref.read(transactionSelectionProvider.notifier).clear();
+              if (context.mounted) {
+                showKuberSnackBar(
+                  context,
+                  '${selectedIds.length} transactions deleted',
+                  isError: true,
+                );
+              }
+            },
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

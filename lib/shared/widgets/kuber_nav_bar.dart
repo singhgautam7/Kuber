@@ -26,13 +26,13 @@ const kuberNavItems = [
     label: 'Home',
   ),
   KuberNavItem(
-    icon: Icons.receipt_long_outlined,
-    activeIcon: Icons.receipt_long_rounded,
+    icon: Icons.receipt_outlined,
+    activeIcon: Icons.receipt_rounded,
     label: 'History',
   ),
   KuberNavItem(
-    icon: Icons.bar_chart_outlined,
-    activeIcon: Icons.bar_chart_rounded,
+    icon: Icons.insert_chart_outlined,
+    activeIcon: Icons.insert_chart_rounded,
     label: 'Analytics',
   ),
   KuberNavItem(
