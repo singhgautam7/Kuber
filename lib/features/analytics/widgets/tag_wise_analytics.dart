@@ -31,11 +31,14 @@ class TagWiseAnalytics extends ConsumerWidget {
               return _buildEmptyState(cs, tt);
             }
 
-            final totalExpense = tagStats.values.fold<double>(0, (sum, val) => sum + val);
+            final totalExpense = tagStats.values.fold<double>(0, (sum, val) => sum + val['amount']!);
             final sortedTags = tagStats.entries.toList()
-              ..sort((a, b) => b.value.compareTo(a.value));
+              ..sort((a, b) => b.value['amount']!.compareTo(a.value['amount']!));
 
-            final top3 = sortedTags.take(3).toList();
+            // Top 3 sorted by transaction count
+            final top3ByCount = tagStats.entries.toList()
+              ..sort((a, b) => b.value['count']!.toInt().compareTo(a.value['count']!.toInt()));
+            final top3 = top3ByCount.take(3).toList();
 
             return Card(
               margin: EdgeInsets.zero,
@@ -78,7 +81,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                     // Spending by Tag List
                     ...sortedTags.map((entry) {
                       final tag = allTags.firstWhere((t) => t.id == entry.key);
-                      final amount = entry.value;
+                      final amount = entry.value['amount']!;
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
@@ -163,14 +166,14 @@ class TagWiseAnalytics extends ConsumerWidget {
                     ),
                     const SizedBox(height: KuberSpacing.lg),
 
-                    // Top 3 Tags Contribution Grid
+                    // Top 3 Tags by Transaction Count
                     Row(
                       children: List.generate(3, (index) {
                         if (index >= top3.length) return const Expanded(child: SizedBox());
 
                         final entry = top3[index];
                         final tag = allTags.firstWhere((t) => t.id == entry.key);
-
+                        final count = entry.value['count']!.toInt();
 
                         return Expanded(
                           child: Container(
@@ -189,13 +192,21 @@ class TagWiseAnalytics extends ConsumerWidget {
                                     fontWeight: FontWeight.w600,
                                     color: cs.onSurfaceVariant,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  ref.watch(formatterProvider).formatPercentage(entry.value / totalExpense * 100),
+                                  '$count',
                                   style: tt.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: cs.onSurface,
+                                  ),
+                                ),
+                                Text(
+                                  count == 1 ? 'txn' : 'txns',
+                                  style: tt.labelSmall?.copyWith(
+                                    fontSize: 10,
+                                    color: cs.onSurfaceVariant,
                                   ),
                                 ),
                               ],
@@ -218,15 +229,20 @@ class TagWiseAnalytics extends ConsumerWidget {
     );
   }
 
-  Map<int, double> _calculateTagStats(List<Tag> allTags, Map<int, Set<int>> txTagsMap) {
+  /// Returns a map of tagId → {'amount': double, 'count': double}
+  Map<int, Map<String, double>> _calculateTagStats(List<Tag> allTags, Map<int, Set<int>> txTagsMap) {
     final expenses = transactions.where((t) => t.type == 'expense').toList();
-    final Map<int, double> tagStats = {};
+    final Map<int, Map<String, double>> tagStats = {};
 
     for (final tx in expenses) {
       final tagIds = txTagsMap[tx.id];
       if (tagIds != null) {
         for (final tagId in tagIds) {
-          tagStats[tagId] = (tagStats[tagId] ?? 0) + tx.amount;
+          final existing = tagStats[tagId] ?? {'amount': 0.0, 'count': 0.0};
+          tagStats[tagId] = {
+            'amount': existing['amount']! + tx.amount,
+            'count': existing['count']! + 1,
+          };
         }
       }
     }

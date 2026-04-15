@@ -251,16 +251,9 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
               ),
             )
           : null,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: _onTabTapped,
-        destinations: kuberNavItems.map((item) {
-          return NavigationDestination(
-            icon: Icon(item.icon),
-            selectedIcon: Icon(item.activeIcon),
-            label: item.label,
-          );
-        }).toList(),
+      bottomNavigationBar: _KuberAnimatedNavBar(
+        currentIndex: currentIndex,
+        onTap: _onTabTapped,
       ),
     );
     }
@@ -289,6 +282,178 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         SystemNavigator.pop();
       },
       child: content,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Animated Bottom Nav Bar
+// ---------------------------------------------------------------------------
+
+class _KuberAnimatedNavBar extends StatefulWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const _KuberAnimatedNavBar({
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  State<_KuberAnimatedNavBar> createState() => _KuberAnimatedNavBarState();
+}
+
+class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
+  static const _animDuration = Duration(milliseconds: 200);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        border: Border(top: BorderSide(color: cs.outline.withValues(alpha: 0.4))),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: List.generate(kuberNavItems.length, (i) {
+              final item = kuberNavItems[i];
+              final isSelected = i == widget.currentIndex;
+              return Expanded(
+                child: _NavBarItem(
+                  item: item,
+                  isSelected: isSelected,
+                  animDuration: _animDuration,
+                  onTap: () => widget.onTap(i),
+                  cs: cs,
+                  tt: tt,
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavBarItem extends StatefulWidget {
+  final KuberNavItem item;
+  final bool isSelected;
+  final Duration animDuration;
+  final VoidCallback onTap;
+  final ColorScheme cs;
+  final TextTheme tt;
+
+  const _NavBarItem({
+    required this.item,
+    required this.isSelected,
+    required this.animDuration,
+    required this.onTap,
+    required this.cs,
+    required this.tt,
+  });
+
+  @override
+  State<_NavBarItem> createState() => _NavBarItemState();
+}
+
+class _NavBarItemState extends State<_NavBarItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.animDuration,
+      value: widget.isSelected ? 1.0 : 0.0,
+    );
+    _scaleAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void didUpdateWidget(_NavBarItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isSelected != oldWidget.isSelected) {
+      if (widget.isSelected) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedColor = widget.cs.primary;
+    final unselectedColor = widget.cs.onSurfaceVariant;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: widget.onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              final t = _controller.value;
+              return ScaleTransition(
+                scale: _scaleAnim,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outline icon (unselected)
+                    Opacity(
+                      opacity: (1 - t).clamp(0.0, 1.0),
+                      child: Icon(
+                        widget.item.icon,
+                        size: 24,
+                        color: unselectedColor,
+                      ),
+                    ),
+                    // Filled icon (selected)
+                    Opacity(
+                      opacity: t.clamp(0.0, 1.0),
+                      child: Icon(
+                        widget.item.activeIcon,
+                        size: 24,
+                        color: selectedColor,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 4),
+          AnimatedDefaultTextStyle(
+            duration: widget.animDuration,
+            style: widget.tt.labelSmall!.copyWith(
+              fontSize: 11,
+              fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: widget.isSelected ? selectedColor : unselectedColor,
+            ),
+            child: Text(widget.item.label),
+          ),
+        ],
+      ),
     );
   }
 }
