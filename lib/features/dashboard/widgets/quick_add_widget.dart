@@ -277,7 +277,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                                 ),
                               )
                             : Icon(
-                                Icons.send_outlined,
+                                Icons.send_rounded,
                                 size: 22,
                                 color: isDisabled
                                     ? cs.onSurfaceVariant.withValues(alpha: 0.5)

@@ -7,11 +7,11 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, settingsProvider;
+import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
 // ─────────────────────────────── Model ──────────────────────────────────────
@@ -41,7 +41,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
   bool _isInitializing = true;
 
   static const _suggestions = [
-    'Spent this month',
+    'Spendings this month',
     'Top category',
     'Net worth',
     'Biggest expense',
@@ -62,8 +62,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     final settings = await ref.read(settingsProvider.future);
     final name = settings.userName.isNotEmpty ? settings.userName : null;
     final greeting = name != null
-        ? 'Hi $name! I\'m Kuber — your on-device finance assistant.\nAsk me anything about your spending, income, or balances.'
-        : 'Hi! I\'m Kuber — your on-device finance assistant.\nAsk me anything about your spending, income, or balances.';
+        ? 'Hi $name! I\'m Kuber, your on-device finance assistant.\nAsk me anything about your spending, income, or balances.'
+        : 'Hi! I\'m Kuber, your on-device finance assistant.\nAsk me anything about your spending, income, or balances.';
 
     setState(() {
       _messages.add(KuberChatMessage(
@@ -129,29 +129,24 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final monthStart = DateTime(now.year, now.month, 1);
+    final monthEnd = DateTime(now.month == 12 ? now.year + 1 : now.year, now.month == 12 ? 1 : now.month + 1, 1);
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
-    final lastMonthEnd = DateTime(now.year, now.month, 0);
+    final lastMonthEnd = DateTime(now.year, now.month, 1);
     final weekStart = today.subtract(Duration(days: today.weekday - 1));
 
-    // Helpers
-    double sumExpenses(DateTime from, DateTime to) => txns
+    // Helpers using the global validForCalculations rule
+    double sumExpenses(DateTime from, DateTime to) => txns.validForCalculations
         .where((t) =>
             t.type == 'expense' &&
-            !t.isTransfer &&
-            !t.isBalanceAdjustment &&
-            t.linkedRuleType == null &&
             !t.createdAt.isBefore(from) &&
-            t.createdAt.isBefore(to.add(const Duration(days: 1))))
+            t.createdAt.isBefore(to))
         .fold(0.0, (s, t) => s + t.amount);
 
-    double sumIncome(DateTime from, DateTime to) => txns
+    double sumIncome(DateTime from, DateTime to) => txns.validForCalculations
         .where((t) =>
             t.type == 'income' &&
-            !t.isTransfer &&
-            !t.isBalanceAdjustment &&
-            t.linkedRuleType == null &&
             !t.createdAt.isBefore(from) &&
-            t.createdAt.isBefore(to.add(const Duration(days: 1))))
+            t.createdAt.isBefore(to))
         .fold(0.0, (s, t) => s + t.amount);
 
     // ── Expenses today ──
@@ -159,7 +154,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
         (lower.contains('spent') ||
             lower.contains('spend') ||
             lower.contains('expense'))) {
-      final total = sumExpenses(today, today);
+      final total = sumExpenses(today, today.add(const Duration(days: 1)));
       return 'You\'ve spent ${formatter.formatCurrency(total)} today.';
     }
 
@@ -167,7 +162,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     if (lower.contains('week') &&
         !lower.contains('last') &&
         (lower.contains('spent') || lower.contains('spend'))) {
-      final total = sumExpenses(weekStart, today);
+      final total = sumExpenses(weekStart, today.add(const Duration(days: 1)));
       return 'You\'ve spent ${formatter.formatCurrency(total)} this week.';
     }
 
@@ -184,13 +179,12 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
         (lower.contains('spent') ||
             lower.contains('spend') ||
             lower.contains('expense'))) {
-      final total = sumExpenses(monthStart, today);
-      final count = txns
+      final total = sumExpenses(monthStart, monthEnd);
+      final count = txns.validForCalculations
           .where((t) =>
               t.type == 'expense' &&
-              !t.isTransfer &&
-              !t.isBalanceAdjustment &&
-              !t.createdAt.isBefore(monthStart))
+              !t.createdAt.isBefore(monthStart) &&
+              t.createdAt.isBefore(monthEnd))
           .length;
       return 'You\'ve spent ${formatter.formatCurrency(total)} this month across $count transactions.';
     }
@@ -201,11 +195,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
             lower.contains('category') ||
             lower.contains('categor'))) {
       final Map<String, double> byCat = {};
-      for (final t in txns) {
-        if (t.type != 'expense' ||
-            t.isTransfer ||
-            t.isBalanceAdjustment ||
-            t.createdAt.isBefore(monthStart)) {
+      for (final t in txns.validForCalculations) {
+        if (t.type != 'expense' || t.createdAt.isBefore(monthStart) || !t.createdAt.isBefore(monthEnd)) {
           continue;
         }
         byCat[t.categoryId] = (byCat[t.categoryId] ?? 0) + t.amount;
@@ -222,14 +213,14 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     if (lower.contains('income') &&
         (lower.contains('month') || lower.contains('this month')) &&
         !lower.contains('last')) {
-      final total = sumIncome(monthStart, today);
+      final total = sumIncome(monthStart, monthEnd);
       return 'Your income this month is ${formatter.formatCurrency(total)}.';
     }
 
     // ── Savings ──
     if (lower.contains('saving') || lower.contains('saved') || lower.contains('save')) {
-      final income = sumIncome(monthStart, today);
-      final expense = sumExpenses(monthStart, today);
+      final income = sumIncome(monthStart, monthEnd);
+      final expense = sumExpenses(monthStart, monthEnd);
       final savings = income - expense;
       return 'This month you earned ${formatter.formatCurrency(income)} and spent ${formatter.formatCurrency(expense)}.\nNet savings: ${formatter.formatCurrency(savings.abs())}${savings < 0 ? ' (deficit)' : ''}.';
     }
@@ -237,9 +228,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     // ── Biggest expense ──
     if ((lower.contains('biggest') || lower.contains('largest')) &&
         (lower.contains('expense') || lower.contains('transaction'))) {
-      final expenses = txns
-          .where((t) =>
-              t.type == 'expense' && !t.isTransfer && !t.isBalanceAdjustment)
+      final expenses = txns.validForCalculations
+          .where((t) => t.type == 'expense')
           .toList()
         ..sort((a, b) => b.amount.compareTo(a.amount));
       if (expenses.isEmpty) return 'No expenses found.';
@@ -286,8 +276,6 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final bottomPad = MediaQuery.of(context).viewInsets.bottom +
-        MediaQuery.of(context).padding.bottom;
     final showSuggestions =
         _messages.where((m) => m.isUser).isEmpty && !_isInitializing;
 
@@ -295,14 +283,15 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       resizeToAvoidBottomInset: true,
       body: Column(
         children: [
-          const KuberAppBar(showBack: true, title: 'Ask Kuber'),
-          // Sub-header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, 0),
-            child: Row(
-              children: [
-                Container(
+          // Unified Header
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  KuberSpacing.md, KuberSpacing.sm, KuberSpacing.lg, 0),
+              child: Row(
+                children: [
+                  Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: cs.primaryContainer,
@@ -333,6 +322,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                 ),
               ],
             ),
+          ),
           ),
           const SizedBox(height: KuberSpacing.sm),
           Divider(height: 1, color: cs.outline.withValues(alpha: 0.3)),
@@ -384,8 +374,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 14, vertical: 7),
                               decoration: BoxDecoration(
-                                color: cs.primaryContainer
-                                    .withValues(alpha: 0.5),
+                                color: Colors.transparent,
                                 borderRadius:
                                     BorderRadius.circular(KuberRadius.full),
                                 border: Border.all(
@@ -409,66 +398,72 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
           Container(
             color: cs.surface,
             padding: EdgeInsets.fromLTRB(KuberSpacing.lg, KuberSpacing.sm,
-                KuberSpacing.lg, math.max(KuberSpacing.md, bottomPad)),
+                KuberSpacing.lg, math.max(KuberSpacing.md, MediaQuery.of(context).padding.bottom)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainer,
-                      borderRadius:
-                          BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(
-                          color: cs.outline.withValues(alpha: 0.4)),
+                  child: TextField(
+                    controller: _controller,
+                    enabled: !_isProcessing,
+                    maxLines: 4,
+                    minLines: 1,
+                    style: GoogleFonts.inter(
+                        fontSize: 15, color: cs.onSurface),
+                    onTapOutside: (_) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Ask about your spending...',
+                      hintStyle: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: KuberSpacing.md, vertical: 10),
-                    child: TextField(
-                      controller: _controller,
-                      enabled: !_isProcessing,
-                      maxLines: 4,
-                      minLines: 1,
-                      style: GoogleFonts.inter(
-                          fontSize: 14, color: cs.onSurface),
-                      decoration: InputDecoration(
-                        hintText: 'Ask about your spending...',
-                        hintStyle: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: cs.onSurfaceVariant
-                                .withValues(alpha: 0.6)),
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(),
-                    ),
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) {
+                      if (_controller.text.trim().isNotEmpty) _send();
+                    },
                   ),
                 ),
                 const SizedBox(width: KuberSpacing.sm),
-                GestureDetector(
-                  onTap: _isProcessing ? null : _send,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: _isProcessing
-                          ? cs.surfaceContainerHigh
-                          : cs.primary,
-                      borderRadius:
-                          BorderRadius.circular(KuberRadius.md),
-                    ),
-                    child: Icon(
-                      _isProcessing
-                          ? Icons.hourglass_top_rounded
-                          : Icons.send_rounded,
-                      size: 20,
-                      color: _isProcessing
-                          ? cs.onSurfaceVariant
-                          : cs.onPrimary,
-                    ),
-                  ),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (context, value, child) {
+                    final isEmpty = value.text.trim().isEmpty;
+                    final isDisabled = _isProcessing || isEmpty;
+
+                    return GestureDetector(
+                      onTap: isDisabled ? null : () => _send(),
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: isDisabled
+                              ? cs.onSurfaceVariant.withValues(alpha: 0.2)
+                              : cs.primary,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                        ),
+                        child: Center(
+                          child: _isProcessing
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.send_rounded,
+                                  size: 22,
+                                  color: isDisabled
+                                      ? cs.onSurfaceVariant.withValues(alpha: 0.5)
+                                      : cs.onPrimary,
+                                ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
