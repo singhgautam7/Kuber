@@ -181,7 +181,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               'QUICK ADD',
@@ -192,6 +192,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                 letterSpacing: 1.2,
               ),
             ),
+            const SizedBox(width: KuberSpacing.sm),
             GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -217,7 +218,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
               },
               child: Icon(
                 Icons.help_outline_rounded,
-                size: 16,
+                size: 15,
                 color: cs.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
@@ -233,6 +234,9 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                   controller: _controller,
                   enabled: !_isLoading,
                   style: GoogleFonts.inter(fontSize: 15, color: cs.onSurface),
+                  onTapOutside: (_) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  },
                   decoration: InputDecoration(
                     hintText: 'e.g. 250 on groceries from HDFC',
                     hintStyle: GoogleFonts.inter(

@@ -185,6 +185,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         : widget.navigationShell!;
 
     Widget content;
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     if (isWide) {
       content = Scaffold(
         backgroundColor: cs.surface,
@@ -229,7 +231,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       ),
       floatingActionButton: currentIndex != 3
           ? AnimatedScale(
-              scale: ref.watch(isSelectionModeProvider) ? 0.0 : 1.0,
+              scale: (ref.watch(isSelectionModeProvider) || isKeyboardOpen) ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               child: GestureDetector(
