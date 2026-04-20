@@ -84,12 +84,12 @@ class MoreScreen extends StatelessWidget {
                       subtitle: 'Track portfolio value and growth',
                       onTap: () => context.push('/more/investments'),
                     ),
-                    _MenuItem(
-                      icon: Icons.bar_chart_rounded,
-                      label: 'Charts',
-                      subtitle: 'Visualise your spending patterns',
-                      onTap: () => context.push('/more/charts'),
-                    ),
+                    // _MenuItem(
+                    //   icon: Icons.bar_chart_rounded,
+                    //   label: 'Charts',
+                    //   subtitle: 'Visualise your spending patterns',
+                    //   onTap: () => context.push('/more/charts'),
+                    // ),
                     _MenuItem(
                       icon: Icons.auto_awesome_rounded,
                       label: 'Ask Kuber',

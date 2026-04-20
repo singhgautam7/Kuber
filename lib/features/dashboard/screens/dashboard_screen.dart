@@ -100,10 +100,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           const SizedBox(height: KuberSpacing.lg),
 
-          // Quick Add
-          const QuickAddWidget(),
-          const SizedBox(height: KuberSpacing.xl),
-
           // [A] Balance Hero Card
           RepaintBoundary(
             child: summaryAsync.when(
@@ -115,6 +111,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               data: (summary) => _BalanceHeroCard(summary: summary),
             ),
           ),
+          const SizedBox(height: KuberSpacing.xl),
+
+          // Quick Add
+          const QuickAddWidget(),
+          const SizedBox(height: KuberSpacing.md),
           const SizedBox(height: KuberSpacing.md),
 
           // [A.1] Spending Stats

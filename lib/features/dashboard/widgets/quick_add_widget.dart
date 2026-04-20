@@ -13,7 +13,9 @@ import '../../settings/providers/settings_provider.dart'
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../core/models/info_config.dart';
 import '../utils/quick_add_parser.dart';
 
 class QuickAddWidget extends ConsumerStatefulWidget {
@@ -175,80 +177,124 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.4)),
-      ),
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'QUICK ADD',
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.2,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'QUICK ADD',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                KuberInfoBottomSheet.show(
+                  context,
+                  const KuberInfoConfig(
+                    title: 'Quick Add',
+                    description: 'Quickly record an expense using natural language without jumping through forms. It intelligently extracts the amount, category, and account.',
+                    items: [
+                      KuberInfoItem(
+                        icon: Icons.flash_on_rounded,
+                        title: 'Basic Expense',
+                        description: 'Type "250 on food" to add an expense of 250 to Food.',
+                      ),
+                      KuberInfoItem(
+                        icon: Icons.account_balance_wallet_rounded,
+                        title: 'With Account',
+                        description: 'Type "150 for uber from hdfc" to charge 150 to the HDFC account.',
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: Icon(
+                Icons.help_outline_rounded,
+                size: 16,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: TextField(
                   controller: _controller,
                   enabled: !_isLoading,
-                  style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                  style: GoogleFonts.inter(fontSize: 15, color: cs.onSurface),
                   decoration: InputDecoration(
                     hintText: 'e.g. 250 on groceries from HDFC',
                     hintStyle: GoogleFonts.inter(
-                        fontSize: 14,
+                        fontSize: 15,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
                   ),
-                  textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _submit(),
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) {
+                    if (_controller.text.trim().isNotEmpty) _submit();
+                  },
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
-              GestureDetector(
-                onTap: _isLoading ? null : _submit,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _isLoading
-                        ? cs.onSurfaceVariant.withValues(alpha: 0.2)
-                        : cs.primary,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        )
-                      : Icon(Icons.send_rounded, size: 18, color: cs.onPrimary),
-                ),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _controller,
+                builder: (context, value, child) {
+                  final isEmpty = value.text.trim().isEmpty;
+                  final isDisabled = _isLoading || isEmpty;
+
+                  return GestureDetector(
+                    onTap: isDisabled ? null : _submit,
+                    child: Container(
+                      width: 52,
+                      decoration: BoxDecoration(
+                        color: isDisabled
+                            ? cs.onSurfaceVariant.withValues(alpha: 0.2)
+                            : cs.primary,
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                      ),
+                      child: Center(
+                        child: _isLoading
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              )
+                            : Icon(
+                                Icons.send_outlined,
+                                size: 22,
+                                color: isDisabled
+                                    ? cs.onSurfaceVariant.withValues(alpha: 0.5)
+                                    : cs.onPrimary,
+                              ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),
-          if (_error != null) ...[
-            const SizedBox(height: KuberSpacing.xs),
-            Text(
-              _error!,
-              style: GoogleFonts.inter(fontSize: 11, color: cs.error),
-            ),
-          ],
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: KuberSpacing.sm),
+          Text(
+            _error!,
+            style: GoogleFonts.inter(fontSize: 12, color: cs.error),
+          ),
         ],
-      ),
+      ],
     );
   }
 }
