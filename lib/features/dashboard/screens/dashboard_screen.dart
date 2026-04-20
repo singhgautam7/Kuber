@@ -199,7 +199,7 @@ class _BalanceHeroCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Total Balance (This Month)',
+            'This Month\'s Balance',
             style: textTheme.labelLarge?.copyWith(
               color: cs.onSurfaceVariant,
             ),
