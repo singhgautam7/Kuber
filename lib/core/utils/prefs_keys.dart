@@ -22,4 +22,7 @@ class PrefsKeys {
   static const seenInfoLedger = 'seen_info_ledger';
   static const seenInfoLoans = 'seen_info_loans';
   static const seenInfoInvestments = 'seen_info_investments';
+
+  // Quick Add
+  static const defaultAccountId = 'kuber_default_account_id';
 }

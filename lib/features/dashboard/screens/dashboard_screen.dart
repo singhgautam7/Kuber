@@ -17,6 +17,7 @@ import '../widgets/budget_snapshot_card.dart';
 import '../widgets/home_accounts_card.dart';
 import '../widgets/home_recurring_card.dart';
 import '../widgets/home_recent_transactions.dart';
+import '../widgets/quick_add_widget.dart';
 
 const _subtitles = [
   'Let\'s manage your money wisely',
@@ -97,6 +98,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ],
           ),
+          const SizedBox(height: KuberSpacing.lg),
+
+          // Quick Add
+          const QuickAddWidget(),
           const SizedBox(height: KuberSpacing.xl),
 
           // [A] Balance Hero Card

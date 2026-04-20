@@ -6,6 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
+import '../../accounts/data/account.dart';
+import '../../accounts/providers/account_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/currency_selector_sheet.dart';
@@ -59,6 +61,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider).valueOrNull;
+    final accounts = ref.watch(accountListProvider).valueOrNull ?? <Account>[];
+    final defaultAccId = settings?.defaultAccountId;
+    final defaultAccName = accounts
+            .where((a) => a.id.toString() == defaultAccId)
+            .firstOrNull
+            ?.name ??
+        'Not set';
 
     // Fallbacks if data isn't ready
     final currentTheme = _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
@@ -287,6 +296,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ],
                       ),
                     ),
+                    Divider(height: 1, color: cs.outline),
+                    // Default Account
+                    _SettingsTile(
+                      icon: Icons.account_balance_wallet_outlined,
+                      label: 'Default Account',
+                      subtitle: 'Used by Quick Add',
+                      onTap: () => _showDefaultAccountPicker(context, accounts, defaultAccId),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            defaultAccName,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: KuberSpacing.sm),
+                          Icon(Icons.chevron_right_rounded,
+                              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                              size: 20),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.xl),
@@ -398,6 +431,98 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showDefaultAccountPicker(
+      BuildContext context, List<Account> accounts, String? currentId) {
+    final cs = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: cs.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  KuberSpacing.xl, KuberSpacing.sm, KuberSpacing.xl, KuberSpacing.sm),
+              child: Text(
+                'Default Account',
+                style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface),
+              ),
+            ),
+            Divider(height: 1, color: cs.outline),
+            if (currentId != null)
+              ListTile(
+                leading: Icon(Icons.cancel_outlined, color: cs.error),
+                title: Text('Clear default',
+                    style: GoogleFonts.inter(color: cs.error)),
+                onTap: () {
+                  ref
+                      .read(settingsProvider.notifier)
+                      .setDefaultAccountId(null);
+                  Navigator.pop(context);
+                  showKuberSnackBar(context, 'Default account cleared');
+                },
+              ),
+            if (accounts.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(KuberSpacing.xl),
+                child: Text('No accounts found.',
+                    style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+              ),
+            ...accounts.map((a) => ListTile(
+                  leading: Icon(
+                    a.id.toString() == currentId
+                        ? Icons.check_circle_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: a.id.toString() == currentId
+                        ? cs.primary
+                        : cs.onSurfaceVariant,
+                  ),
+                  title: Text(a.name,
+                      style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600, color: cs.onSurface)),
+                  subtitle: Text(
+                      a.isCreditCard ? 'Credit Card' : 'Bank / Cash',
+                      style: GoogleFonts.inter(
+                          fontSize: 12, color: cs.onSurfaceVariant)),
+                  onTap: () {
+                    ref
+                        .read(settingsProvider.notifier)
+                        .setDefaultAccountId(a.id.toString());
+                    Navigator.pop(context);
+                    showKuberSnackBar(
+                        context, '${a.name} set as default');
+                  },
+                )),
+            const SizedBox(height: KuberSpacing.lg),
+          ],
+        ),
       ),
     );
   }

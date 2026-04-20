@@ -10,7 +10,7 @@ import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, settingsProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../widgets/account_detail_sheet.dart';
@@ -202,6 +202,10 @@ class _AccountCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final isDefault = ref.watch(
+          settingsProvider.select((s) => s.valueOrNull?.defaultAccountId),
+        ) ==
+        account.id.toString();
     final balanceLabel =
         account.isCreditCard ? 'Limit Spent' : 'Available Balance';
     final Color balanceColor;
@@ -259,6 +263,37 @@ class _AccountCard extends ConsumerWidget {
                           letterSpacing: 0.8,
                         ),
                       ),
+                      if (isDefault) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: cs.tertiary.withValues(alpha: 0.15),
+                            borderRadius:
+                                BorderRadius.circular(KuberRadius.sm),
+                            border: Border.all(
+                                color: cs.tertiary.withValues(alpha: 0.4)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_rounded,
+                                  size: 10, color: cs.tertiary),
+                              const SizedBox(width: 3),
+                              Text(
+                                'DEFAULT',
+                                style: GoogleFonts.inter(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.tertiary,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

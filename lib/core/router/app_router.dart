@@ -37,6 +37,8 @@ import '../../features/loans/screens/add_loan_screen.dart';
 import '../../features/investments/data/investment.dart';
 import '../../features/investments/screens/investments_screen.dart';
 import '../../features/investments/screens/add_investment_screen.dart';
+import '../../features/more/screens/charts_screen.dart';
+import '../../features/more/screens/ask_kuber_screen.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
 import '../../features/budgets/screens/add_edit_budget_screen.dart';
@@ -297,6 +299,16 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'investments',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const InvestmentsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'charts',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const ChartsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'ask-kuber',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const AskKuberScreen(),
                   ),
                 ],
               ),
