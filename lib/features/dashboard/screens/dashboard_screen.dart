@@ -94,24 +94,28 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                 builder: (_, __) {
                   final t = _shimmerAnim.value;
                   const gold = Color(0xFFFFB300);
-                  final highlightCenter = -0.4 + t * 1.8;
-                  final lo = (highlightCenter - 0.25).clamp(-1.0, 1.0);
-                  final hi = (highlightCenter + 0.25).clamp(-1.0, 1.0);
+                  // Gradient always spans full width; stops move the highlight band
+                  final bandStart = (t - 0.18).clamp(0.0, 1.0);
+                  final bandMid   = t.clamp(0.0, 1.0);
+                  final bandEnd   = (t + 0.18).clamp(0.0, 1.0);
                   return GestureDetector(
                     onTap: () => context.push('/more/ask-kuber'),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment(lo, 0),
-                          end: Alignment(hi, 0),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                           colors: [
                             gold.withValues(alpha: 0.08),
-                            gold.withValues(alpha: 0.28),
+                            gold.withValues(alpha: 0.08),
+                            gold.withValues(alpha: 0.30),
+                            gold.withValues(alpha: 0.08),
                             gold.withValues(alpha: 0.08),
                           ],
+                          stops: [0.0, bandStart, bandMid, bandEnd, 1.0],
                         ),
-                        borderRadius: BorderRadius.circular(KuberRadius.full),
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
                         border: Border.all(color: gold.withValues(alpha: 0.55), width: 1.2),
                       ),
                       child: Row(
