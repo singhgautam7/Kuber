@@ -8,7 +8,6 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../categories/providers/category_provider.dart';
@@ -229,7 +228,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  const KuberAppBar(title: 'Analytics'),
+                  const SizedBox(height: KuberSpacing.xl),
+                  // const KuberAppBar(title: 'Analytics'),
                   KuberPageHeader(
                     title: 'Spending\nAnalytics',
                     description: 'Visualize your spending patterns',
