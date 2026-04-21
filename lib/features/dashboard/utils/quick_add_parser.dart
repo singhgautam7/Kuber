@@ -16,6 +16,7 @@ QuickAddResult parseQuickAdd(String input) {
       .trim();
 
   cleaned = cleaned.replaceFirst(RegExp(r'^spent\s+', caseSensitive: false), '');
+  cleaned = cleaned.replaceFirst(RegExp(r'^(add|create|log|record)\s+', caseSensitive: false), '');
 
   // Extract first number
   final numMatch = RegExp(r'\d+(\.\d+)?').firstMatch(cleaned);
@@ -47,7 +48,12 @@ QuickAddResult parseQuickAdd(String input) {
     accountHint = afterNum.substring(fromIdx + 6).trim();
   }
 
-  if (category != null && category.isEmpty) category = null;
+  if (category != null) {
+    category = category
+        .replaceFirst(RegExp(r'^(on|in|for|a|an|the|at|to)\s+', caseSensitive: false), '')
+        .trim();
+    if (category.isEmpty) category = null;
+  }
   if (accountHint != null && accountHint.isEmpty) accountHint = null;
 
   return QuickAddResult(amount: amount, category: category, accountHint: accountHint);

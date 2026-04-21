@@ -245,6 +245,17 @@ class TransactionDetailSheet extends ConsumerWidget {
             ),
           ],
 
+          if (transaction.quickAddNote != null && transaction.quickAddNote!.isNotEmpty) ...[
+            const SizedBox(height: KuberSpacing.sm),
+            _DetailCell(
+              label: 'ADDED USING PROMPT',
+              value: transaction.quickAddNote!,
+              fullWidth: true,
+              icon: Icons.flash_on_rounded,
+              iconColor: cs.primary,
+            ),
+          ],
+
           // ── Attachments ────────────────────────────────────────────
           if (transaction.attachmentPaths.isNotEmpty) ...[
             const SizedBox(height: KuberSpacing.xl),

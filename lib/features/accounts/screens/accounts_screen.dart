@@ -223,7 +223,9 @@ class _AccountCard extends ConsumerWidget {
     return InkWell(
       onTap: () => _openAccountDetailSheet(context, account),
       borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
+      child: Stack(
+        children: [
+          Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -263,37 +265,6 @@ class _AccountCard extends ConsumerWidget {
                           letterSpacing: 0.8,
                         ),
                       ),
-                      if (isDefault) ...[
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: cs.tertiary.withValues(alpha: 0.15),
-                            borderRadius:
-                                BorderRadius.circular(KuberRadius.sm),
-                            border: Border.all(
-                                color: cs.tertiary.withValues(alpha: 0.4)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.check_rounded,
-                                  size: 10, color: cs.tertiary),
-                              const SizedBox(width: 3),
-                              Text(
-                                'DEFAULT',
-                                style: GoogleFonts.inter(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: cs.tertiary,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -337,6 +308,37 @@ class _AccountCard extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+          if (isDefault)
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: cs.tertiary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(KuberRadius.sm),
+                  border: Border.all(color: cs.tertiary.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_rounded, size: 10, color: cs.tertiary),
+                    const SizedBox(width: 3),
+                    Text(
+                      'DEFAULT',
+                      style: GoogleFonts.inter(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: cs.tertiary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -43,13 +45,27 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   late final String _subtitle;
+  late final AnimationController _shimmerCtrl;
+  late final Animation<double> _shimmerAnim;
 
   @override
   void initState() {
     super.initState();
     _subtitle = _subtitles[Random().nextInt(_subtitles.length)];
+    _shimmerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+    _shimmerAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_shimmerCtrl);
+  }
+
+  @override
+  void dispose() {
+    _shimmerCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -70,7 +86,55 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           bottom: navBarBottomPadding(context),
         ),
         children: [
-          const KuberAppBar(horizontalPadding: 0),
+          KuberAppBar(
+            horizontalPadding: 0,
+            actions: [
+              AnimatedBuilder(
+                animation: _shimmerAnim,
+                builder: (_, __) {
+                  final t = _shimmerAnim.value;
+                  const gold = Color(0xFFFFB300);
+                  final highlightCenter = -0.4 + t * 1.8;
+                  final lo = (highlightCenter - 0.25).clamp(-1.0, 1.0);
+                  final hi = (highlightCenter + 0.25).clamp(-1.0, 1.0);
+                  return GestureDetector(
+                    onTap: () => context.push('/more/ask-kuber'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment(lo, 0),
+                          end: Alignment(hi, 0),
+                          colors: [
+                            gold.withValues(alpha: 0.08),
+                            gold.withValues(alpha: 0.28),
+                            gold.withValues(alpha: 0.08),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(KuberRadius.full),
+                        border: Border.all(color: gold.withValues(alpha: 0.55), width: 1.2),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome_rounded, size: 13, color: gold),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Ask Kuber',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: gold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: KuberSpacing.lg),
 
           // Greeting

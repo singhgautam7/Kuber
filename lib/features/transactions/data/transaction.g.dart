@@ -65,14 +65,19 @@ const TransactionSchema = CollectionSchema(
       type: IsarType.string,
     ),
     r'notes': PropertySchema(id: 11, name: r'notes', type: IsarType.string),
-    r'transferId': PropertySchema(
+    r'quickAddNote': PropertySchema(
       id: 12,
+      name: r'quickAddNote',
+      type: IsarType.string,
+    ),
+    r'transferId': PropertySchema(
+      id: 13,
       name: r'transferId',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 13, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 14, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -205,6 +210,12 @@ int _transactionEstimateSize(
     }
   }
   {
+    final value = object.quickAddNote;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.transferId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -232,9 +243,10 @@ void _transactionSerialize(
   writer.writeString(offsets[9], object.name);
   writer.writeString(offsets[10], object.nameLower);
   writer.writeString(offsets[11], object.notes);
-  writer.writeString(offsets[12], object.transferId);
-  writer.writeString(offsets[13], object.type);
-  writer.writeDateTime(offsets[14], object.updatedAt);
+  writer.writeString(offsets[12], object.quickAddNote);
+  writer.writeString(offsets[13], object.transferId);
+  writer.writeString(offsets[14], object.type);
+  writer.writeDateTime(offsets[15], object.updatedAt);
 }
 
 Transaction _transactionDeserialize(
@@ -257,9 +269,10 @@ Transaction _transactionDeserialize(
   object.name = reader.readString(offsets[9]);
   object.nameLower = reader.readString(offsets[10]);
   object.notes = reader.readStringOrNull(offsets[11]);
-  object.transferId = reader.readStringOrNull(offsets[12]);
-  object.type = reader.readString(offsets[13]);
-  object.updatedAt = reader.readDateTime(offsets[14]);
+  object.quickAddNote = reader.readStringOrNull(offsets[12]);
+  object.transferId = reader.readStringOrNull(offsets[13]);
+  object.type = reader.readString(offsets[14]);
+  object.updatedAt = reader.readDateTime(offsets[15]);
   return object;
 }
 
@@ -297,8 +310,10 @@ P _transactionDeserializeProp<P>(
     case 12:
       return (reader.readStringOrNull(offset)) as P;
     case 13:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 14:
+      return (reader.readString(offset)) as P;
+    case 15:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2443,6 +2458,165 @@ extension TransactionQueryFilter
   }
 
   QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'quickAddNote'),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'quickAddNote'),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'quickAddNote',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'quickAddNote',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'quickAddNote',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'quickAddNote',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'quickAddNote',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'quickAddNote',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'quickAddNote',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'quickAddNote',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'quickAddNote', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  quickAddNoteIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'quickAddNote', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
   transferIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -2948,6 +3122,19 @@ extension TransactionQuerySortBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByQuickAddNote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'quickAddNote', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  sortByQuickAddNoteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'quickAddNote', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByTransferId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transferId', Sort.asc);
@@ -3135,6 +3322,19 @@ extension TransactionQuerySortThenBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByQuickAddNote() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'quickAddNote', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  thenByQuickAddNoteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'quickAddNote', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByTransferId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'transferId', Sort.asc);
@@ -3265,6 +3465,14 @@ extension TransactionQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QDistinct> distinctByQuickAddNote({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'quickAddNote', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QDistinct> distinctByTransferId({
     bool caseSensitive = true,
   }) {
@@ -3368,6 +3576,12 @@ extension TransactionQueryProperty
   QueryBuilder<Transaction, String?, QQueryOperations> notesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'notes');
+    });
+  }
+
+  QueryBuilder<Transaction, String?, QQueryOperations> quickAddNoteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'quickAddNote');
     });
   }
 

@@ -121,6 +121,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       ..type = 'expense'
       ..categoryId = resolvedCategory.id.toString()
       ..accountId = resolvedAccountId
+      ..quickAddNote = input
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now();
 
@@ -138,6 +139,43 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     );
     _controller.clear();
     setState(() => _isLoading = false);
+  }
+
+  void _showQuickAddInfo(BuildContext context) {
+    KuberInfoBottomSheet.show(
+      context,
+      const KuberInfoConfig(
+        title: 'Quick Add',
+        description: 'Record an expense instantly using natural language — no forms, no tapping. Just type what you spent and Kuber figures out the rest.',
+        items: [
+          KuberInfoItem(
+            icon: Icons.flash_on_rounded,
+            title: 'Basic Amount',
+            description: '"250" or "₹250" — adds ₹250 to the General category.',
+          ),
+          KuberInfoItem(
+            icon: Icons.category_outlined,
+            title: 'With Category',
+            description: '"250 on food", "150 in gaming", "300 for rent" — links to an existing category or creates one.',
+          ),
+          KuberInfoItem(
+            icon: Icons.account_balance_wallet_rounded,
+            title: 'With Account',
+            description: '"150 for uber from hdfc" — matches your HDFC account by name.',
+          ),
+          KuberInfoItem(
+            icon: Icons.auto_fix_high_rounded,
+            title: 'Action Words',
+            description: '"Add 200 on coffee", "Log 500 for groceries", "Create 1000 in savings" — leading action words are stripped automatically.',
+          ),
+          KuberInfoItem(
+            icon: Icons.star_outline_rounded,
+            title: 'Default Account',
+            description: 'Set a default account in Settings → Default Account so you never need to specify "from …" every time.',
+          ),
+        ],
+      ),
+    );
   }
 
   void _showNoAccountDialog(String? hint) {
@@ -180,49 +218,30 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'QUICK ADD',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.2,
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _showQuickAddInfo(context),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'QUICK ADD',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: 1.2,
+                ),
               ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                KuberInfoBottomSheet.show(
-                  context,
-                  const KuberInfoConfig(
-                    title: 'Quick Add',
-                    description: 'Quickly record an expense using natural language without jumping through forms. It intelligently extracts the amount, category, and account.',
-                    items: [
-                      KuberInfoItem(
-                        icon: Icons.flash_on_rounded,
-                        title: 'Basic Expense',
-                        description: 'Type "250 on food" to add an expense of 250 to Food.',
-                      ),
-                      KuberInfoItem(
-                        icon: Icons.account_balance_wallet_rounded,
-                        title: 'With Account',
-                        description: 'Type "150 for uber from hdfc" to charge 150 to the HDFC account.',
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: Icon(
+              const SizedBox(width: KuberSpacing.sm),
+              Icon(
                 Icons.help_outline_rounded,
                 size: 15,
                 color: cs.onSurfaceVariant.withValues(alpha: 0.7),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: KuberSpacing.sm),
         IntrinsicHeight(
@@ -254,35 +273,41 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                 valueListenable: _controller,
                 builder: (context, value, child) {
                   final isEmpty = value.text.trim().isEmpty;
-                  final isDisabled = _isLoading || isEmpty;
+                  final isActive = !isEmpty || _isLoading;
 
                   return GestureDetector(
-                    onTap: isDisabled ? null : _submit,
-                    child: Container(
+                    onTap: (_isLoading || isEmpty) ? null : _submit,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       width: 52,
                       decoration: BoxDecoration(
-                        color: isDisabled
-                            ? cs.onSurfaceVariant.withValues(alpha: 0.2)
-                            : cs.primary,
+                        color: isActive
+                            ? cs.primary
+                            : cs.onSurfaceVariant.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Center(
-                        child: _isLoading
-                            ? SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: cs.onSurfaceVariant,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: _isLoading
+                              ? SizedBox(
+                                  key: const ValueKey('spinner'),
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: cs.onPrimary,
+                                  ),
+                                )
+                              : Icon(
+                                  key: const ValueKey('icon'),
+                                  Icons.send_rounded,
+                                  size: 22,
+                                  color: isActive
+                                      ? cs.onPrimary
+                                      : cs.onSurfaceVariant.withValues(alpha: 0.5),
                                 ),
-                              )
-                            : Icon(
-                                Icons.send_rounded,
-                                size: 22,
-                                color: isDisabled
-                                    ? cs.onSurfaceVariant.withValues(alpha: 0.5)
-                                    : cs.onPrimary,
-                              ),
+                        ),
                       ),
                     ),
                   );

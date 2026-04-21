@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -5,10 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/models/info_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
+import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../investments/providers/investment_provider.dart';
+import '../../ledger/providers/ledger_provider.dart';
+import '../../loans/providers/loan_provider.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, settingsProvider;
 import '../../transactions/helpers/transaction_filters.dart';
@@ -39,6 +46,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
   final List<KuberChatMessage> _messages = [];
   bool _isProcessing = false;
   bool _isInitializing = true;
+  bool _isTyping = false;
+  Timer? _typingTimer;
 
   static const _suggestions = [
     'Spendings this month',
@@ -74,6 +83,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
 
   @override
   void dispose() {
+    _typingTimer?.cancel();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -91,9 +101,51 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     });
   }
 
+  void _showHelp(BuildContext context) {
+    KuberInfoBottomSheet.show(
+      context,
+      const KuberInfoConfig(
+        title: 'Ask Kuber',
+        description: 'Ask anything about your finances in plain English. Kuber runs entirely on-device — no internet, no data shared.',
+        items: [
+          KuberInfoItem(
+            icon: Icons.currency_rupee_rounded,
+            title: 'Spending',
+            description: '"How much have I spent today/this week/this month?" or "What did I spend last month?"',
+          ),
+          KuberInfoItem(
+            icon: Icons.account_balance_wallet_rounded,
+            title: 'Balances & Net Worth',
+            description: '"What\'s my net worth?", "What\'s my HDFC balance?", or "What\'s my total balance?"',
+          ),
+          KuberInfoItem(
+            icon: Icons.category_outlined,
+            title: 'Categories & Trends',
+            description: '"What\'s my top spending category?", "How many categories do I have?", "Average monthly expense?"',
+          ),
+          KuberInfoItem(
+            icon: Icons.account_balance_outlined,
+            title: 'Loans & Borrowing',
+            description: '"How much do I owe on loans?", "How much have I borrowed?", "How much have I lent?"',
+          ),
+          KuberInfoItem(
+            icon: Icons.show_chart,
+            title: 'Investments & Budgets',
+            description: '"What\'s my portfolio value?", "Show my budgets", "Am I overspending on any budget?"',
+          ),
+          KuberInfoItem(
+            icon: Icons.format_list_numbered_rounded,
+            title: 'Counts',
+            description: '"How many transactions today?", "How many accounts do I have?", "How many income transactions?"',
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _send([String? override]) async {
     final input = (override ?? _controller.text).trim();
-    if (input.isEmpty || _isProcessing) return;
+    if (input.isEmpty || _isProcessing || _isTyping) return;
 
     if (override == null) _controller.clear();
 
@@ -104,15 +156,39 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     });
     _scrollToBottom();
 
-    final response = await _processQuery(input);
+    final results = await Future.wait([
+      _processQuery(input),
+      Future.delayed(const Duration(milliseconds: 1000)),
+    ]);
+    final response = results[0] as String;
 
     if (!mounted) return;
+    final msgTime = DateTime.now();
     setState(() {
-      _messages.add(KuberChatMessage(
-          text: response, isUser: false, time: DateTime.now()));
+      _messages.add(KuberChatMessage(text: '', isUser: false, time: msgTime));
       _isProcessing = false;
+      _isTyping = true;
     });
     _scrollToBottom();
+    _startTyping(response, msgTime);
+  }
+
+  void _startTyping(String response, DateTime msgTime) {
+    int charIndex = 0;
+    _typingTimer?.cancel();
+    _typingTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
+      if (!mounted) { timer.cancel(); return; }
+      charIndex = math.min(charIndex + 4, response.length);
+      setState(() {
+        _messages[_messages.length - 1] =
+            KuberChatMessage(text: response.substring(0, charIndex), isUser: false, time: msgTime);
+      });
+      if (charIndex >= response.length) {
+        timer.cancel();
+        setState(() => _isTyping = false);
+      }
+      if (charIndex % 60 == 0) _scrollToBottom();
+    });
   }
 
   Future<String> _processQuery(String input) async {
@@ -237,10 +313,72 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       return 'Your biggest expense is "${top.name}" — ${formatter.formatCurrency(top.amount)} on ${_fmtDate(top.createdAt)}.';
     }
 
-    // ── Transaction count ──
+    // ── Transaction count — today ──
+    if (lower.contains('how many') && lower.contains('transaction') && lower.contains('today')) {
+      final count = txns.where((t) => !t.isBalanceAdjustment && !t.createdAt.isBefore(today) && t.createdAt.isBefore(today.add(const Duration(days: 1)))).length;
+      return 'You made $count transaction${count == 1 ? '' : 's'} today.';
+    }
+
+    // ── Transaction count — this week ──
+    if (lower.contains('how many') && lower.contains('transaction') && lower.contains('week')) {
+      final count = txns.where((t) => !t.isBalanceAdjustment && !t.createdAt.isBefore(weekStart) && t.createdAt.isBefore(today.add(const Duration(days: 1)))).length;
+      return 'You made $count transaction${count == 1 ? '' : 's'} this week.';
+    }
+
+    // ── Transaction count — this month ──
+    if (lower.contains('how many') && lower.contains('transaction') && lower.contains('month')) {
+      final count = txns.where((t) => !t.isBalanceAdjustment && !t.createdAt.isBefore(monthStart) && t.createdAt.isBefore(monthEnd)).length;
+      return 'You made $count transaction${count == 1 ? '' : 's'} this month.';
+    }
+
+    // ── Transaction count — total ──
     if (lower.contains('how many') && lower.contains('transaction')) {
       final count = txns.where((t) => !t.isBalanceAdjustment).length;
       return 'You have $count transactions in total.';
+    }
+
+    // ── Expense transaction count ──
+    if (lower.contains('how many') && (lower.contains('expense') || lower.contains('expenses'))) {
+      final count = txns.where((t) => t.type == 'expense' && !t.isBalanceAdjustment).length;
+      return 'You have $count expense transaction${count == 1 ? '' : 's'} in total.';
+    }
+
+    // ── Income transaction count ──
+    if (lower.contains('how many') && lower.contains('income')) {
+      final count = txns.where((t) => t.type == 'income' && !t.isBalanceAdjustment).length;
+      return 'You have $count income transaction${count == 1 ? '' : 's'} in total.';
+    }
+
+    // ── Account count ──
+    if (lower.contains('how many') && lower.contains('account')) {
+      return 'You have ${accounts.length} account${accounts.length == 1 ? '' : 's'}.';
+    }
+
+    // ── Category count ──
+    if (lower.contains('how many') && lower.contains('categor')) {
+      return 'You have ${categories.length} categor${categories.length == 1 ? 'y' : 'ies'} set up.';
+    }
+
+    // ── Average monthly expense ──
+    if ((lower.contains('average') || lower.contains('avg')) && (lower.contains('expense') || lower.contains('spend'))) {
+      final monthlyTotals = <String, double>{};
+      for (final t in txns.validForCalculations.where((t) => t.type == 'expense')) {
+        final key = '${t.createdAt.year}-${t.createdAt.month}';
+        monthlyTotals[key] = (monthlyTotals[key] ?? 0) + t.amount;
+      }
+      if (monthlyTotals.isEmpty) return 'No expense data yet.';
+      final avg = monthlyTotals.values.reduce((a, b) => a + b) / monthlyTotals.length;
+      return 'Your average monthly spending is ${formatter.formatCurrency(avg)} (across ${monthlyTotals.length} month${monthlyTotals.length == 1 ? '' : 's'}).';
+    }
+
+    // ── Recent transactions ──
+    if ((lower.contains('recent') || lower.contains('latest')) && lower.contains('transaction')) {
+      final valid = txns.where((t) => !t.isBalanceAdjustment && !t.isTransfer).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      final top = valid.take(3).toList();
+      if (top.isEmpty) return 'No transactions found.';
+      final lines = top.map((t) => '• ${t.name} — ${formatter.formatCurrency(t.amount)} on ${_fmtDate(t.createdAt)}').join('\n');
+      return 'Your 3 most recent transactions:\n$lines';
     }
 
     // ── Account-specific balance ──
@@ -264,8 +402,59 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       return 'Your total net worth across ${accounts.length} account${accounts.length == 1 ? '' : 's'} is ${formatter.formatCurrency(total)}.';
     }
 
+    // ── Loans ──
+    if (lower.contains('loan') || lower.contains('emi') ||
+        (lower.contains('debt') && !lower.contains('borrow')) ||
+        lower.contains('repay') || lower.contains('lender')) {
+      final summary = await ref.read(loanSummaryProvider.future);
+      if (summary.outstanding == 0 && summary.totalPaid == 0) {
+        return 'You have no active loans tracked.';
+      }
+      return 'Loan summary:\n• Outstanding: ${formatter.formatCurrency(summary.outstanding)}\n• Total paid so far: ${formatter.formatCurrency(summary.totalPaid)}';
+    }
+
+    // ── Lend / Borrow ──
+    if (lower.contains('borrow') || lower.contains('lent') ||
+        lower.contains('lend') || lower.contains('owe') ||
+        lower.contains('receivable') || lower.contains('payable')) {
+      final summary = await ref.read(ledgerSummaryProvider.future);
+      if (lower.contains('borrow') || lower.contains('owe')) {
+        return 'You currently owe ${formatter.formatCurrency(summary.owed)} in total (money you borrowed).';
+      }
+      if (lower.contains('lent') || lower.contains('lend') || lower.contains('receivable')) {
+        return 'People owe you ${formatter.formatCurrency(summary.toReceive)} in total (money you lent).';
+      }
+      return 'Lend/Borrow summary:\n• You are owed: ${formatter.formatCurrency(summary.toReceive)}\n• You owe: ${formatter.formatCurrency(summary.owed)}';
+    }
+
+    // ── Investments ──
+    if (lower.contains('invest') || lower.contains('portfolio') ||
+        lower.contains('stock') || lower.contains('mutual fund') ||
+        lower.contains('asset') || lower.contains('gain') || lower.contains('loss')) {
+      final summary = await ref.read(investmentSummaryProvider.future);
+      if (summary.assetCount == 0) return 'No investments tracked yet.';
+      final gainLabel = summary.gainLoss >= 0
+          ? '+${formatter.formatCurrency(summary.gainLoss)}'
+          : '−${formatter.formatCurrency(summary.gainLoss.abs())}';
+      return 'Investment portfolio (${summary.assetCount} asset${summary.assetCount == 1 ? '' : 's'}):\n• Invested: ${formatter.formatCurrency(summary.totalInvested)}\n• Current value: ${formatter.formatCurrency(summary.currentValue)}\n• Gain/Loss: $gainLabel';
+    }
+
+    // ── Budgets ──
+    if (lower.contains('budget') || lower.contains('spending limit') || lower.contains('overspend')) {
+      final budgets = await ref.read(budgetVsActualProvider.future);
+      if (budgets.isEmpty) return 'No active budgets set up.';
+      final catMap = await ref.read(categoryMapProvider.future);
+      final lines = budgets.take(5).map((b) {
+        final catName = catMap[int.tryParse(b.budget.categoryId)]?.name ?? 'Budget';
+        final pct = b.progress.percentage.toStringAsFixed(0);
+        final over = b.progress.percentage > 100;
+        return '• $catName: ${formatter.formatCurrency(b.progress.spent)} / ${formatter.formatCurrency(b.progress.limit)} ($pct%${over ? ' over!' : ''})';
+      }).join('\n');
+      return 'Your budgets this period:\n$lines';
+    }
+
     // ── Fallback ──
-    return 'I can answer questions about your spending, income, balances, and categories.\n\nTry:\n• "How much have I spent this month?"\n• "What\'s my net worth?"\n• "What\'s my top category?"\n• "What\'s my biggest expense?"';
+    return 'I can answer questions about your spending, income, balances, and categories.\n\nTry:\n• "How much have I spent this month?"\n• "What\'s my net worth?"\n• "What\'s my top category?"\n• "How much do I owe on loans?"\n• "What\'s my portfolio value?"';
   }
 
   String _fmtDate(DateTime d) {
@@ -319,6 +508,11 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                       ),
                     ],
                   ),
+                ),
+                GestureDetector(
+                  onTap: () => _showHelp(context),
+                  child: Icon(Icons.help_outline_rounded,
+                      size: 20, color: cs.onSurfaceVariant.withValues(alpha: 0.7)),
                 ),
               ],
             ),
@@ -632,6 +826,28 @@ class _UserBubble extends StatelessWidget {
   }
 }
 
+TextSpan _buildRichText(String text, TextStyle base, Color highlight) {
+  final pattern = RegExp(r'[₹$€£]?[\d,]+(?:\.\d+)?', caseSensitive: false);
+  final spans = <TextSpan>[];
+  int last = 0;
+  for (final m in pattern.allMatches(text)) {
+    final matched = m.group(0)!;
+    if (!RegExp(r'\d').hasMatch(matched)) continue;
+    if (m.start > last) {
+      spans.add(TextSpan(text: text.substring(last, m.start), style: base));
+    }
+    spans.add(TextSpan(
+      text: matched,
+      style: base.copyWith(fontWeight: FontWeight.w700, color: highlight),
+    ));
+    last = m.end;
+  }
+  if (last < text.length) {
+    spans.add(TextSpan(text: text.substring(last), style: base));
+  }
+  return TextSpan(children: spans);
+}
+
 class _KuberBubble extends StatelessWidget {
   final KuberChatMessage message;
   const _KuberBubble({required this.message});
@@ -677,10 +893,12 @@ class _KuberBubble extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      message.text,
-                      style: GoogleFonts.inter(
-                          fontSize: 14, color: cs.onSurface),
+                    RichText(
+                      text: _buildRichText(
+                        message.text,
+                        GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                        cs.primary,
+                      ),
                     ),
                     const SizedBox(height: 3),
                     Text(
