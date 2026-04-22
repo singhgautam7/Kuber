@@ -50,6 +50,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
   late final String _subtitle;
   late final AnimationController _shimmerCtrl;
   late final Animation<double> _shimmerAnim;
+  int _shimmerCount = 0;
+  static const _shimmerMaxRuns = 7;
 
   @override
   void initState() {
@@ -61,10 +63,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     );
     _shimmerCtrl.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        // Pause 900ms between sweeps so the gradient fully clears before restarting
-        Future.delayed(const Duration(milliseconds: 900), () {
-          if (mounted) _shimmerCtrl.forward(from: 0.0);
-        });
+        _shimmerCount++;
+        if (_shimmerCount < _shimmerMaxRuns && mounted) {
+          _shimmerCtrl.forward(from: 0.0);
+        }
       }
     });
     _shimmerCtrl.forward();
