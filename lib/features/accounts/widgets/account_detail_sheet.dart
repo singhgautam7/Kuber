@@ -6,7 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+    show formatterProvider, settingsProvider;
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/category_icon.dart';
@@ -35,6 +36,10 @@ class AccountDetailSheet extends ConsumerWidget {
     final balanceAsync = ref.watch(accountBalanceProvider(account.id));
     final latestTxnAsync =
         ref.watch(accountLatestTransactionProvider(account.id));
+    final defaultAccountId = ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.defaultAccountId),
+    );
+    final isDefault = defaultAccountId == account.id.toString();
 
     return KuberBottomSheet(
       title: account.name,
@@ -154,6 +159,26 @@ class AccountDetailSheet extends ConsumerWidget {
             type: AppButtonType.danger,
             fullWidth: true,
             onPressed: () => _confirmDelete(context, ref),
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: isDefault ? 'Remove Default' : 'Set as Default',
+            icon: isDefault
+                ? Icons.check_circle_rounded
+                : Icons.star_outline_rounded,
+            type: isDefault ? AppButtonType.outline : AppButtonType.normal,
+            fullWidth: true,
+            onPressed: () {
+              ref.read(settingsProvider.notifier).setDefaultAccountId(
+                    isDefault ? null : account.id.toString(),
+                  );
+              showKuberSnackBar(
+                context,
+                isDefault
+                    ? 'Default account cleared'
+                    : '${account.name} set as default',
+              );
+            },
           ),
       ],
     ),

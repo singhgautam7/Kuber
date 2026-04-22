@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/categories/data/category.dart';
 import '../../features/categories/data/category_group.dart';
+import '../../features/transactions/data/transaction.dart';
+import '../../features/transactions/services/suggestion_service.dart';
 import '../utils/prefs_keys.dart';
 
 class MigrationService {
@@ -30,6 +32,27 @@ class MigrationService {
     // Migration 4: Attachments field — Isar auto-initializes List<String> as empty
     if (!(prefs.getBool(PrefsKeys.migratedAttachmentsV1) ?? false)) {
       await prefs.setBool(PrefsKeys.migratedAttachmentsV1, true);
+    }
+
+    // Migration 5: Backfill TransactionSuggestion from existing transactions
+    if (!(prefs.getBool(PrefsKeys.migratedSuggestionBackfillV1) ?? false)) {
+      await _backfillSuggestions(isar);
+      await prefs.setBool(PrefsKeys.migratedSuggestionBackfillV1, true);
+    }
+  }
+
+  static Future<void> _backfillSuggestions(Isar isar) async {
+    final service = SuggestionService(isar);
+    final allTxns = await isar.transactions.where().findAll();
+    const batchSize = 50;
+
+    for (int i = 0; i < allTxns.length; i += batchSize) {
+      final batch = allTxns.skip(i).take(batchSize);
+      for (final txn in batch) {
+        await service.upsertSuggestion(txn);
+      }
+      // Yield between batches to avoid blocking the event loop
+      await Future.delayed(Duration.zero);
     }
   }
 

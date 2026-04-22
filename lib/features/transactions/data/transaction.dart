@@ -18,6 +18,8 @@ class Transaction {
 
   String? notes;
 
+  String? quickAddNote;
+
   String? linkedRuleId; // UUID string — works for all linked collections
 
   @Index()

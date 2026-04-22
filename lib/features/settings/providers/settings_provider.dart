@@ -55,6 +55,7 @@ class SettingsState {
   final SwipeMode swipeMode;
   final bool biometricsEnabled;
   final NumberSystem numberSystem;
+  final String? defaultAccountId;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -64,6 +65,7 @@ class SettingsState {
     this.swipeMode = SwipeMode.changeTabs,
     this.biometricsEnabled = false,
     this.numberSystem = NumberSystem.indian,
+    this.defaultAccountId,
   });
 
   SettingsState copyWith({
@@ -99,6 +101,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final swipeModeIndex = prefs.getInt(PrefsKeys.swipeMode) ?? 0;
     final biometricsEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
     final numberSystemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
+    final defaultAccountId = prefs.getString(PrefsKeys.defaultAccountId);
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -108,7 +111,28 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       swipeMode: SwipeMode.values[swipeModeIndex],
       biometricsEnabled: biometricsEnabled,
       numberSystem: NumberSystem.values[numberSystemIndex],
+      defaultAccountId: defaultAccountId,
     );
+  }
+
+  Future<void> setDefaultAccountId(String? id) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (id == null) {
+      await prefs.remove(PrefsKeys.defaultAccountId);
+    } else {
+      await prefs.setString(PrefsKeys.defaultAccountId, id);
+    }
+    final cur = state.requireValue;
+    state = AsyncData(SettingsState(
+      themeMode: cur.themeMode,
+      currency: cur.currency,
+      dateFormat: cur.dateFormat,
+      userName: cur.userName,
+      swipeMode: cur.swipeMode,
+      biometricsEnabled: cur.biometricsEnabled,
+      numberSystem: cur.numberSystem,
+      defaultAccountId: id,
+    ));
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

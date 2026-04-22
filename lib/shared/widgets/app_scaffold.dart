@@ -100,7 +100,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
     if (_showSpeedDial) _closeSpeedDial();
-    
+
     ref.read(transactionSelectionProvider.notifier).clear();
 
     widget.navigationShell!.goBranch(
@@ -185,6 +185,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         : widget.navigationShell!;
 
     Widget content;
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     if (isWide) {
       content = Scaffold(
         backgroundColor: cs.surface,
@@ -229,7 +231,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       ),
       floatingActionButton: currentIndex != 3
           ? AnimatedScale(
-              scale: ref.watch(isSelectionModeProvider) ? 0.0 : 1.0,
+              scale: (ref.watch(isSelectionModeProvider) || isKeyboardOpen) ? 0.0 : 1.0,
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               child: GestureDetector(
@@ -258,28 +260,31 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     );
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
+    return BackButtonListener(
+      onBackButtonPressed: () async {
+        // If a screen is pushed on top of the shell (e.g. /add-transaction),
+        // return false so the root navigator pops it instead of us handling it.
+        if (Navigator.of(context, rootNavigator: true).canPop()) {
+          return false;
+        }
 
         if (_showSpeedDial) {
           _closeSpeedDial();
-          return;
+          return true;
         }
 
         if (isSelectionMode) {
           ref.read(transactionSelectionProvider.notifier).clear();
-          return;
+          return true;
         }
 
         if (currentIndex != 0) {
           _onTabTapped(0);
-          return;
+          return true;
         }
 
-        // Final fallback: Exit app
         SystemNavigator.pop();
+        return true;
       },
       child: content,
     );
@@ -416,28 +421,37 @@ class _NavBarItemState extends State<_NavBarItem>
               final t = _controller.value;
               return ScaleTransition(
                 scale: _scaleAnim,
-                child: Stack(
+                child: Container(
+                  width: 56,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: widget.cs.primaryContainer.withValues(alpha: t * 0.1),
+                    borderRadius: BorderRadius.circular(KuberRadius.lg),
+                  ),
                   alignment: Alignment.center,
-                  children: [
-                    // Outline icon (unselected)
-                    Opacity(
-                      opacity: (1 - t).clamp(0.0, 1.0),
-                      child: Icon(
-                        widget.item.icon,
-                        size: 24,
-                        color: unselectedColor,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Outline icon (unselected)
+                      Opacity(
+                        opacity: (1 - t).clamp(0.0, 1.0),
+                        child: Icon(
+                          widget.item.icon,
+                          size: 24,
+                          color: unselectedColor,
+                        ),
                       ),
-                    ),
-                    // Filled icon (selected)
-                    Opacity(
-                      opacity: t.clamp(0.0, 1.0),
-                      child: Icon(
-                        widget.item.activeIcon,
-                        size: 24,
-                        color: selectedColor,
+                      // Filled icon (selected)
+                      Opacity(
+                        opacity: t.clamp(0.0, 1.0),
+                        child: Icon(
+                          widget.item.activeIcon,
+                          size: 24,
+                          color: selectedColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

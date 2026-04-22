@@ -138,6 +138,7 @@ class _BudgetRow extends ConsumerWidget {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
+          useRootNavigator: true,
           backgroundColor: Colors.transparent,
           builder: (context) => BudgetDetailsSheet(
             budgetId: budget.id,

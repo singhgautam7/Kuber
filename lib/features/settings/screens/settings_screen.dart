@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
+import '../../accounts/data/account.dart';
+import '../../accounts/providers/account_provider.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/currency_selector_sheet.dart';
@@ -59,6 +62,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider).valueOrNull;
+    final accounts = ref.watch(accountListProvider).valueOrNull ?? <Account>[];
+    final defaultAccId = settings?.defaultAccountId;
+    final defaultAccName = accounts
+            .where((a) => a.id.toString() == defaultAccId)
+            .firstOrNull
+            ?.name ??
+        'Not set';
 
     // Fallbacks if data isn't ready
     final currentTheme = _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
@@ -287,6 +297,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ],
                       ),
                     ),
+                    Divider(height: 1, color: cs.outline),
+                    // Default Account
+                    _SettingsTile(
+                      icon: Icons.account_balance_wallet_outlined,
+                      label: 'Default Account',
+                      subtitle: 'Used by Quick Add',
+                      onTap: () => _showDefaultAccountPicker(context, accounts, defaultAccId),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            defaultAccName,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(width: KuberSpacing.sm),
+                          Icon(Icons.chevron_right_rounded,
+                              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                              size: 20),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.xl),
@@ -399,6 +433,156 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showDefaultAccountPicker(
+      BuildContext context, List<Account> accounts, String? currentId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
+      ),
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          maxChildSize: 0.9,
+          minChildSize: 0.3,
+          expand: false,
+          builder: (ctx, scrollController) {
+            return Column(
+              children: [
+                const SizedBox(height: KuberSpacing.md),
+                Container(
+                  width: 32,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: KuberSpacing.lg),
+                Text(
+                  'Default Account',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: KuberSpacing.lg),
+                if (accounts.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(KuberSpacing.xl),
+                    child: Text(
+                      'No accounts found.',
+                      style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: accounts.length,
+                      itemBuilder: (ctx, i) {
+                        final a = accounts[i];
+                        final isSelected = a.id.toString() == currentId;
+                        final color = resolveAccountColor(a);
+                        return ListTile(
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(KuberRadius.md),
+                            ),
+                            child: Center(
+                              child: Container(
+                                width: 14,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            a.name,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                          subtitle: Text(
+                            a.isCreditCard ? 'Credit Card' : 'Bank / Cash',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? Icon(Icons.check_rounded, color: cs.primary, size: 20)
+                              : null,
+                          onTap: () {
+                            ref
+                                .read(settingsProvider.notifier)
+                                .setDefaultAccountId(a.id.toString());
+                            Navigator.pop(ctx);
+                            showKuberSnackBar(context, '${a.name} set as default');
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                if (currentId != null)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      KuberSpacing.lg,
+                      KuberSpacing.sm,
+                      KuberSpacing.lg,
+                      KuberSpacing.lg,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setDefaultAccountId(null);
+                          Navigator.pop(ctx);
+                          showKuberSnackBar(context, 'Default account cleared');
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: cs.error,
+                          side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Text(
+                          'Clear Default',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

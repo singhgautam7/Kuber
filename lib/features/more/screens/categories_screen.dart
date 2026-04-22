@@ -200,10 +200,12 @@ class CategoriesScreen extends ConsumerWidget {
       isScrollControlled: true,
       useSafeArea: true,
       useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
+      backgroundColor: cs.surfaceContainer,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      ),
+      builder: (context) => Padding(
+          padding: const EdgeInsets.fromLTRB(
             KuberSpacing.xl,
             0,
             KuberSpacing.xl,
@@ -288,7 +290,6 @@ class CategoriesScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 

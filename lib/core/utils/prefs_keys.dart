@@ -12,6 +12,7 @@ class PrefsKeys {
   static const migratedSeedLedgerCategoryV1 = 'kuber_migrated_seed_ledger_category_v1';
   static const migratedSeedLoanInvestmentCategoryV1 = 'kuber_migrated_seed_loan_investment_category_v1';
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
+  static const migratedSuggestionBackfillV1 = 'kuber_migrated_suggestion_backfill_v1';
 
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';
@@ -22,4 +23,7 @@ class PrefsKeys {
   static const seenInfoLedger = 'seen_info_ledger';
   static const seenInfoLoans = 'seen_info_loans';
   static const seenInfoInvestments = 'seen_info_investments';
+
+  // Quick Add
+  static const defaultAccountId = 'kuber_default_account_id';
 }

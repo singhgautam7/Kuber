@@ -56,7 +56,9 @@ class ActiveSelectionWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        Center(
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -66,19 +68,19 @@ class ActiveSelectionWidget extends StatelessWidget {
               Text(startYearStr, style: yearStyle),
               const SizedBox(width: 8),
               Text(startDateStr, style: headlineStyle),
-              
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Baseline(
-                  baseline: 18, // Adjust to center arrow roughly with text
+                  baseline: 18,
                   baselineType: TextBaseline.alphabetic,
-                  child: Icon(Icons.arrow_forward_rounded, 
-                    color: cs.primary.withValues(alpha: 0.5), 
+                  child: Icon(Icons.arrow_forward_rounded,
+                    color: cs.primary.withValues(alpha: 0.5),
                     size: 20
                   ),
                 ),
               ),
-              
+
               // [Date] [Year]
               Text(endDateStr, style: headlineStyle),
               const SizedBox(width: 8),

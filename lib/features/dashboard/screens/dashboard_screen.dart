@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -17,6 +19,7 @@ import '../widgets/budget_snapshot_card.dart';
 import '../widgets/home_accounts_card.dart';
 import '../widgets/home_recurring_card.dart';
 import '../widgets/home_recent_transactions.dart';
+import '../widgets/quick_add_widget.dart';
 
 const _subtitles = [
   'Let\'s manage your money wisely',
@@ -42,13 +45,40 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with SingleTickerProviderStateMixin {
   late final String _subtitle;
+  late final AnimationController _shimmerCtrl;
+  late final Animation<double> _shimmerAnim;
+  int _shimmerCount = 0;
+  static const _shimmerMaxRuns = 7;
 
   @override
   void initState() {
     super.initState();
     _subtitle = _subtitles[Random().nextInt(_subtitles.length)];
+    _shimmerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _shimmerCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _shimmerCount++;
+        if (_shimmerCount < _shimmerMaxRuns && mounted) {
+          _shimmerCtrl.forward(from: 0.0);
+        }
+      }
+    });
+    _shimmerCtrl.forward();
+    // Range [-0.18, 1.18] so the band enters from off-screen left and exits
+    // fully off-screen right before the animation completes — no stuck edge.
+    _shimmerAnim = Tween<double>(begin: -0.18, end: 1.18).animate(_shimmerCtrl);
+  }
+
+  @override
+  void dispose() {
+    _shimmerCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -69,7 +99,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           bottom: navBarBottomPadding(context),
         ),
         children: [
-          const KuberAppBar(horizontalPadding: 0),
+          KuberAppBar(
+            horizontalPadding: 0,
+            actions: [
+              AnimatedBuilder(
+                animation: _shimmerAnim,
+                builder: (_, __) {
+                  final t = _shimmerAnim.value;
+                  const gold = Color(0xFFFFB300);
+                  // Gradient always spans full width; stops move the highlight band
+                  final bandStart = (t - 0.18).clamp(0.0, 1.0);
+                  final bandMid   = t.clamp(0.0, 1.0);
+                  final bandEnd   = (t + 0.18).clamp(0.0, 1.0);
+                  return GestureDetector(
+                    onTap: () => context.push('/more/ask-kuber'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            gold.withValues(alpha: 0.08),
+                            gold.withValues(alpha: 0.08),
+                            gold.withValues(alpha: 0.30),
+                            gold.withValues(alpha: 0.08),
+                            gold.withValues(alpha: 0.08),
+                          ],
+                          stops: [0.0, bandStart, bandMid, bandEnd, 1.0],
+                        ),
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: gold.withValues(alpha: 0.55), width: 1.2),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome_rounded, size: 13, color: gold),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Ask Kuber',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: gold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: KuberSpacing.lg),
 
           // Greeting
@@ -97,7 +179,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpacing.lg),
 
           // [A] Balance Hero Card
           RepaintBoundary(
@@ -110,6 +192,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               data: (summary) => _BalanceHeroCard(summary: summary),
             ),
           ),
+          const SizedBox(height: KuberSpacing.xl),
+
+          // Quick Add
+          const QuickAddWidget(),
+          const SizedBox(height: KuberSpacing.md),
           const SizedBox(height: KuberSpacing.md),
 
           // [A.1] Spending Stats
@@ -131,8 +218,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   return const _SpendingAnalysisEmpty();
                 }
                 return KuberBarChart(
-                  title: 'SPENDING ANALYSIS',
-                  subtitle: 'Last 7 Days Activity',
+                  title: 'LAST 7 DAYS',
                   buckets: _buildLast7DaysBuckets(days),
                   height: 200,
                 );
@@ -193,7 +279,7 @@ class _BalanceHeroCard extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            'Total Balance (This Month)',
+            'This Month\'s Balance',
             style: textTheme.labelLarge?.copyWith(
               color: cs.onSurfaceVariant,
             ),
@@ -335,19 +421,19 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'SPENDING ANALYSIS',
+            'LAST 7 DAYS',
             style: textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            'Last 7 Days Activity',
-            style: textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
-          ),
+          // Text(
+          //   'Last 7 Days Activity',
+          //   style: textTheme.bodySmall?.copyWith(
+          //     color: cs.onSurfaceVariant,
+          //   ),
+          // ),
           const SizedBox(height: 24),
           Center(
             child: Padding(

@@ -7,10 +7,12 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/transactions/services/suggestion_service.dart';
 import '../../features/categories/data/category_group.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
+import 'json_backup_service.dart';
 import 'mock_data_service.dart';
 import '../database/seed_service.dart';
 import '../utils/color_palette.dart';
@@ -131,16 +133,40 @@ class DataService {
     return parsedRows;
   }
 
-  /// Imports data from a CSV file.
-  Future<ImportResult> importData(String csvContent) async {
+  /// Imports data from a CSV file. If [override] is true, clears all data first.
+  Future<ImportResult> importData(String csvContent, {bool override = false}) async {
     try {
-      final rows = parseCsv(csvContent); // Changed to use internal parseCsv
+      final rows = parseCsv(csvContent);
       if (rows.isEmpty) return ImportResult(successCount: 0, failureCount: 0, error: 'Empty file');
+
+      if (override) {
+        await isar.writeTxn(() => isar.clear());
+        await SeedService().seedInitialData(isar);
+      }
 
       return await _importTransactions(rows);
     } catch (e) {
       return ImportResult(successCount: 0, failureCount: 0, error: e.toString());
     }
+  }
+
+  /// Exports all data as a JSON backup string.
+  Future<String> exportJson() async {
+    return JsonBackupService().exportJson(isar);
+  }
+
+  /// Imports data from a JSON backup string (clears all existing data).
+  Future<ImportResult> importJson(String jsonContent) async {
+    final result = await JsonBackupService().importJson(isar, jsonContent);
+    // Rebuild suggestions from the restored transactions
+    final txns = await isar.transactions.where().findAll();
+    final suggestionService = SuggestionService(isar);
+    for (final tx in txns) {
+      if (!tx.isTransfer) {
+        suggestionService.upsertSuggestion(tx).ignore();
+      }
+    }
+    return result;
   }
 
 
@@ -364,12 +390,28 @@ class DataService {
       });
     }
 
+    // Upsert suggestions for all imported non-transfer transactions
+    final suggestionService = SuggestionService(isar);
+    for (final tx in toInsert) {
+      if (!tx.isTransfer) {
+        suggestionService.upsertSuggestion(tx).ignore();
+      }
+    }
+
     return ImportResult(successCount: success, failureCount: failure);
   }
 
   /// Generates mock data.
   Future<void> generateMockData() async {
     await MockDataService.generate(isar);
+    // Upsert suggestions for all generated transactions
+    final txns = await isar.transactions.where().findAll();
+    final suggestionService = SuggestionService(isar);
+    for (final tx in txns) {
+      if (!tx.isTransfer) {
+        await suggestionService.upsertSuggestion(tx);
+      }
+    }
   }
 
   /// Clears all data and re-seeds defaults.

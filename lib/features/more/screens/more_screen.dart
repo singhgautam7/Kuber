@@ -32,6 +32,22 @@ class MoreScreen extends StatelessWidget {
               delegate: SliverChildListDelegate([
                 const SizedBox(height: KuberSpacing.xl),
 
+                // Ask Kuber featured
+                _MenuSection(
+                  title: 'AI Assistant',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.auto_awesome_rounded,
+                      label: 'Ask Kuber (Beta)',
+                      subtitle: 'On-device spending insights',
+                      color: const Color(0xFFFFB300),
+                      onTap: () => context.push('/more/ask-kuber'),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
                 // Manage section
                 _MenuSection(
                   title: 'Manage',
@@ -190,12 +206,14 @@ class _MenuItem extends StatelessWidget {
   final String label;
   final String subtitle;
   final VoidCallback onTap;
+  final Color? color;
 
   const _MenuItem({
     required this.icon,
     required this.label,
     required this.subtitle,
     required this.onTap,
+    this.color,
   });
 
   @override
@@ -212,7 +230,7 @@ class _MenuItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SquircleIcon(icon: icon, color: cs.primary),
+            SquircleIcon(icon: icon, color: color ?? cs.primary),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Column(

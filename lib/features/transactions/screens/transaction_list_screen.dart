@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -94,8 +93,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 controller: _scrollController,
             slivers: [
               // App bar
+              // const SliverToBoxAdapter(
+              //   child: KuberAppBar(title: 'History'),
+              // ),
               const SliverToBoxAdapter(
-                child: KuberAppBar(title: 'History'),
+                child: SizedBox(height: KuberSpacing.xl),
               ),
 
               // Page header
@@ -374,9 +376,9 @@ class _SelectionActionBar extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final selectedIds = ref.watch(transactionSelectionProvider);
     final allTransactions = ref.watch(transactionListProvider).valueOrNull ?? [];
-    
+
     final selectedTransactions = allTransactions.where((t) => selectedIds.contains(t.id)).toList();
-    
+
     double totalExp = 0;
     double totalInc = 0;
     for (final t in selectedTransactions) {
@@ -427,10 +429,10 @@ class _SelectionActionBar extends ConsumerWidget {
                         const SizedBox(width: KuberSpacing.md),
                         Text('INC +${fmt.formatCurrency(totalInc)}', style: TextStyle(fontSize: 10, color: cs.tertiary, fontWeight: FontWeight.w600)),
                         const SizedBox(width: KuberSpacing.md),
-                        Text('NET ${totalNet > 0 ? "+" : totalNet < 0 ? "-" : ""}${fmt.formatCurrency(totalNet.abs())}', 
+                        Text('NET ${totalNet > 0 ? "+" : totalNet < 0 ? "-" : ""}${fmt.formatCurrency(totalNet.abs())}',
                           style: TextStyle(
-                            fontSize: 10, 
-                            color: totalNet > 0 ? cs.tertiary : totalNet < 0 ? cs.error : cs.onSurfaceVariant, 
+                            fontSize: 10,
+                            color: totalNet > 0 ? cs.tertiary : totalNet < 0 ? cs.error : cs.onSurfaceVariant,
                             fontWeight: FontWeight.w600
                           ),
                         ),
