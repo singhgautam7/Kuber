@@ -259,6 +259,14 @@ class MockDataService {
 
   static DateTime _randTime(DateTime base) {
     final rand = Random();
-    return DateTime(base.year, base.month, base.day, rand.nextInt(24), rand.nextInt(60));
+    final now = DateTime.now();
+    final isToday = base.year == now.year &&
+        base.month == now.month &&
+        base.day == now.day;
+    final maxHour = isToday ? now.hour : 23;
+    final hour = rand.nextInt(maxHour + 1);
+    final maxMinute = (isToday && hour == now.hour) ? now.minute : 59;
+    final minute = rand.nextInt(maxMinute + 1);
+    return DateTime(base.year, base.month, base.day, hour, minute);
   }
 }
