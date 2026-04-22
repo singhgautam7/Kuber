@@ -61,7 +61,15 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       final hint = parsed.accountHint!.toLowerCase();
       final match =
           accounts.where((a) => a.name.toLowerCase().contains(hint)).firstOrNull;
-      if (match != null) resolvedAccountId = match.id.toString();
+      if (match != null) {
+        resolvedAccountId = match.id.toString();
+      } else {
+        setState(() {
+          _error = 'No account named "${parsed.accountHint}" found';
+          _isLoading = false;
+        });
+        return;
+      }
     }
     resolvedAccountId ??= defaultId;
 

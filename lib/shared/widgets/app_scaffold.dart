@@ -260,28 +260,25 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     );
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-
+    return BackButtonListener(
+      onBackButtonPressed: () async {
         if (_showSpeedDial) {
           _closeSpeedDial();
-          return;
+          return true;
         }
 
         if (isSelectionMode) {
           ref.read(transactionSelectionProvider.notifier).clear();
-          return;
+          return true;
         }
 
         if (currentIndex != 0) {
           _onTabTapped(0);
-          return;
+          return true;
         }
 
-        // Final fallback: Exit app
         SystemNavigator.pop();
+        return true;
       },
       child: content,
     );
