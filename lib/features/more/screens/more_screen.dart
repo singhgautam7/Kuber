@@ -38,7 +38,7 @@ class MoreScreen extends StatelessWidget {
                   items: [
                     _MenuItem(
                       icon: Icons.auto_awesome_rounded,
-                      label: 'Ask Kuber',
+                      label: 'Ask Kuber (Beta)',
                       subtitle: 'On-device spending insights',
                       color: const Color(0xFFFFB300),
                       onTap: () => context.push('/more/ask-kuber'),

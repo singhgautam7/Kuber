@@ -226,7 +226,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'QUICK ADD',
+                'QUICK ADD (BETA)',
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
