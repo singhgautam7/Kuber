@@ -792,7 +792,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Ask Kuber',
+                          'Ask Kuber (Beta)',
                           style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,

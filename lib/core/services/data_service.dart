@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/transactions/services/suggestion_service.dart';
 import '../../features/categories/data/category_group.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
@@ -156,7 +157,16 @@ class DataService {
 
   /// Imports data from a JSON backup string (clears all existing data).
   Future<ImportResult> importJson(String jsonContent) async {
-    return JsonBackupService().importJson(isar, jsonContent);
+    final result = await JsonBackupService().importJson(isar, jsonContent);
+    // Rebuild suggestions from the restored transactions
+    final txns = await isar.transactions.where().findAll();
+    final suggestionService = SuggestionService(isar);
+    for (final tx in txns) {
+      if (!tx.isTransfer) {
+        suggestionService.upsertSuggestion(tx).ignore();
+      }
+    }
+    return result;
   }
 
 
@@ -380,12 +390,28 @@ class DataService {
       });
     }
 
+    // Upsert suggestions for all imported non-transfer transactions
+    final suggestionService = SuggestionService(isar);
+    for (final tx in toInsert) {
+      if (!tx.isTransfer) {
+        suggestionService.upsertSuggestion(tx).ignore();
+      }
+    }
+
     return ImportResult(successCount: success, failureCount: failure);
   }
 
   /// Generates mock data.
   Future<void> generateMockData() async {
     await MockDataService.generate(isar);
+    // Upsert suggestions for all generated transactions
+    final txns = await isar.transactions.where().findAll();
+    final suggestionService = SuggestionService(isar);
+    for (final tx in txns) {
+      if (!tx.isTransfer) {
+        await suggestionService.upsertSuggestion(tx);
+      }
+    }
   }
 
   /// Clears all data and re-seeds defaults.

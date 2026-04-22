@@ -16,19 +16,23 @@ import '../../categories/providers/category_provider.dart';
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
+import '../services/suggestion_service.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/account_picker_sheet.dart';
 import '../widgets/amount_input.dart';
 import '../widgets/attachments_section.dart';
+import '../widgets/budget_progress_indicator.dart';
 import '../widgets/category_picker_sheet.dart';
 import '../widgets/date_time_tile.dart';
 import '../widgets/notes_field.dart';
+import '../widgets/selector_tile.dart';
 import '../widgets/tags_tile.dart';
+import '../widgets/transaction_type_selector.dart';
+import '../widgets/transfer_account_tile.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
-import '../../budgets/providers/budget_provider.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -224,7 +228,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     const SizedBox(height: KuberSpacing.lg),
 
                     // Type segmented button
-                    _TransactionTypeSelector(
+                    TransactionTypeSelector(
                       selected: _type,
                       onSelected: _onTypeChanged,
                       enabled: !_isEditing,
@@ -249,7 +253,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       _buildCategoryAccountRow(cs, categoryMap, accounts),
                       if (_selectedCategoryId != null) ...[
                         const SizedBox(height: KuberSpacing.md),
-                        _BudgetProgressIndicator(categoryId: _selectedCategoryId!.toString()),
+                        BudgetProgressIndicator(categoryId: _selectedCategoryId!.toString()),
                       ],
                       const SizedBox(height: KuberSpacing.md),
 
@@ -380,7 +384,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         const SizedBox(height: KuberSpacing.lg),
 
         // FROM Account tile
-        _TransferAccountTile(
+        TransferAccountTile(
           label: 'FROM ACCOUNT',
           account: fromAccount,
           onTap: () => _showTransferAccountPicker(
@@ -418,7 +422,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         const SizedBox(height: KuberSpacing.sm),
 
         // TO Account tile
-        _TransferAccountTile(
+        TransferAccountTile(
           label: 'TO ACCOUNT',
           account: toAccount,
           onTap: () => _showTransferAccountPicker(
@@ -437,10 +441,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   // ── Autocomplete ─────────────────────────────────────────────────────────
 
   Widget _buildAutocompleteField(ColorScheme cs, TextTheme textTheme) {
-    return RawAutocomplete<Transaction>(
+    return RawAutocomplete<TransactionSuggestion>(
       textEditingController: _nameController,
       focusNode: _nameFocusNode,
-      displayStringForOption: (t) => t.name,
+      displayStringForOption: (s) => s.displayName,
       optionsBuilder: (textEditingValue) async {
         if (_suppressSuggestions) {
           _suppressSuggestions = false;
@@ -455,9 +459,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           return [];
         }
       },
-      onSelected: (transaction) {
+      onSelected: (suggestion) {
         _suppressSuggestions = true;
-        _applySuggestion(transaction);
+        _applySuggestion(suggestion);
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextField(
@@ -506,7 +510,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     itemCount: options.length,
                     itemBuilder: (context, index) {
                       final s = options.elementAt(index);
-                      final cat = catMap[int.tryParse(s.categoryId)];
+                      final cat = catMap[int.tryParse(s.categoryId ?? '')];
                       final catColor = cat != null
                           ? harmonizeCategory(
                               context, Color(cat.colorValue))
@@ -514,9 +518,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       final catIcon = cat != null
                           ? IconMapper.fromString(cat.icon)
                           : Icons.category;
-                      final amountColor = s.type == 'income'
-                          ? cs.tertiary
-                          : cs.error;
 
                       return InkWell(
                         onTap: () => onSelected(s),
@@ -545,7 +546,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      s.name,
+                                      s.displayName,
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
@@ -568,16 +569,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                                   ],
                                 ),
                               ),
-                              Text(
-                                ref.watch(formatterProvider).formatCurrency(s.amount),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: amountColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
+                              if (s.amount != null)
+                                Text(
+                                  ref.watch(formatterProvider).formatCurrency(s.amount!),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: cs.onSurfaceVariant,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
                             ],
                           ),
                         ),
@@ -610,7 +612,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               final cat = _selectedCategoryId != null
                   ? catMap[_selectedCategoryId]
                   : null;
-              return _SelectorTile(
+              return SelectorTile(
                 label: 'CATEGORY',
                 icon: cat != null
                     ? IconMapper.fromString(cat.icon)
@@ -633,7 +635,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               final acc = _selectedAccountId != null
                   ? accs.where((a) => a.id == _selectedAccountId).firstOrNull
                   : null;
-              return _SelectorTile(
+              return SelectorTile(
                 label: 'FROM ACCOUNT',
                 icon: acc != null
                     ? resolveAccountIcon(acc)
@@ -688,7 +690,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Widget _buildSelectorTilePlaceholder(String label) {
     final cs = Theme.of(context).colorScheme;
-    return _SelectorTile(
+    return SelectorTile(
       label: label,
       icon: Icons.hourglass_empty,
       value: '...',
@@ -844,14 +846,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   // ── Suggestions ──────────────────────────────────────────────────────────
 
-  void _applySuggestion(Transaction suggestion) {
+  void _applySuggestion(TransactionSuggestion suggestion) {
+    final accounts = ref.read(accountListProvider).valueOrNull ?? [];
+    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
+
+    final accountExists = suggestion.accountId != null &&
+        accounts.any((a) => a.id.toString() == suggestion.accountId);
+    final categoryExists = suggestion.categoryId != null &&
+        categories.any((c) => c.id.toString() == suggestion.categoryId);
+
     setState(() {
-      _nameController.text = suggestion.name;
-      _amountController.text = suggestion.amount.toString();
-      _type = suggestion.type;
-      _selectedCategoryId = int.tryParse(suggestion.categoryId);
-      _selectedAccountId = int.tryParse(suggestion.accountId);
-      _notesController.text = suggestion.notes ?? '';
+      _nameController.text = suggestion.displayName;
+      if (suggestion.amount != null) {
+        _amountController.text = suggestion.amount.toString();
+      }
+      if (categoryExists) {
+        _selectedCategoryId = int.tryParse(suggestion.categoryId!);
+      }
+      if (accountExists) {
+        _selectedAccountId = int.tryParse(suggestion.accountId!);
+      }
     });
     ref.read(suggestionQueryProvider.notifier).state = '';
     _nameFocusNode.requestFocus();
@@ -912,6 +926,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       } else {
         resultId = await ref.read(transactionListProvider.notifier).add(t);
       }
+      ref.read(suggestionServiceProvider).upsertSuggestion(t).ignore();
 
       // Save attachments
       if (_pendingAttachments.isNotEmpty || _removedAttachments.isNotEmpty) {
@@ -1045,275 +1060,3 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 }
 
-// ── Private Widgets ──────────────────────────────────────────────────────────
-
-class _TransferAccountTile extends StatelessWidget {
-  final String label;
-  final Account? account;
-  final VoidCallback onTap;
-
-  const _TransferAccountTile({
-    required this.label,
-    required this.account,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final color = account != null
-        ? resolveAccountColor(account!)
-        : cs.onSurfaceVariant;
-    final icon = account != null
-        ? resolveAccountIcon(account!)
-        : Icons.account_balance_wallet_outlined;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, size: 22, color: color),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    account?.name ?? 'Select Account',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: account != null
-                          ? cs.onSurface
-                          : cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: cs.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SelectorTile extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final String value;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  const _SelectorTile({
-    required this.label,
-    required this.icon,
-    required this.value,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: textTheme.labelSmall?.copyWith(
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-            Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 18, color: iconColor),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TransactionTypeSelector extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onSelected;
-  final bool enabled;
-
-  const _TransactionTypeSelector({
-    required this.selected,
-    required this.onSelected,
-    this.enabled = true,
-  });
-
-  static const _types = ['expense', 'income', 'transfer'];
-  static const _labels = ['Expense', 'Income', 'Transfer'];
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
-        children: List.generate(_types.length, (i) {
-          final isSelected = _types[i] == selected;
-          return Expanded(
-            child: GestureDetector(
-              onTap: enabled ? () => onSelected(_types[i]) : null,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (enabled ? cs.primary : cs.surfaceContainerHighest)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  _labels[i],
-                  style: textTheme.labelLarge?.copyWith(
-                    color: isSelected
-                        ? (enabled ? cs.onPrimary : cs.onSurface)
-                        : cs.onSurfaceVariant.withValues(alpha: enabled ? 1.0 : 0.5),
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _BudgetProgressIndicator extends ConsumerWidget {
-  final String categoryId;
-  const _BudgetProgressIndicator({required this.categoryId});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final budgetAsync = ref.watch(budgetByCategoryProvider(categoryId));
-    final cs = Theme.of(context).colorScheme;
-
-    return budgetAsync.when(
-      data: (budget) {
-        if (budget == null || !budget.isActive) return const SizedBox.shrink();
-
-        final progressAsync = ref.watch(budgetProgressProvider(budget));
-        return progressAsync.when(
-          data: (p) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.account_balance_wallet_outlined, size: 14, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Budget',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.primary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)} (${p.percentage.toStringAsFixed(0)}% used)',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: p.percentage >= 100 ? cs.error : cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                if (p.percentage >= 100)
-                  Icon(Icons.warning_amber_rounded, size: 14, color: cs.error),
-              ],
-            ),
-          ),
-          loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
-        );
-      },
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-}

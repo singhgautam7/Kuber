@@ -3,6 +3,7 @@ import 'package:isar_community/isar.dart';
 import '../../investments/data/investment.dart';
 import '../../loans/data/loan.dart';
 import '../../transactions/data/transaction.dart';
+import '../../transactions/services/suggestion_service.dart';
 import 'recurring_repository.dart';
 import 'recurring_rule.dart';
 
@@ -17,8 +18,10 @@ class RecurringProcessor {
     final now = DateTime.now();
     final repo = RecurringRepository(isar);
     final dueRules = await repo.getDue(now);
+    final suggestionService = SuggestionService(isar);
 
     int totalCreated = 0;
+    final createdRecurring = <Transaction>[];
 
     await isar.writeTxn(() async {
       for (final rule in dueRules) {
@@ -55,6 +58,7 @@ class RecurringProcessor {
             ..updatedAt = DateTime.now();
 
           await isar.transactions.put(t);
+          createdRecurring.add(t);
           totalCreated++;
 
           rule.executionCount++;
@@ -69,15 +73,19 @@ class RecurringProcessor {
       }
     });
 
+    for (final t in createdRecurring) {
+      suggestionService.upsertSuggestion(t).ignore();
+    }
+
     // Process loan auto-payments and investment SIP auto-debits
-    totalCreated += await _processLoanAutoPayments(now);
-    totalCreated += await _processInvestmentSipDebits(now);
+    totalCreated += await _processLoanAutoPayments(now, suggestionService);
+    totalCreated += await _processInvestmentSipDebits(now, suggestionService);
 
     return totalCreated;
   }
 
   /// Creates EMI transactions for loans with autoAddTransaction on their bill date.
-  Future<int> _processLoanAutoPayments(DateTime now) async {
+  Future<int> _processLoanAutoPayments(DateTime now, SuggestionService suggestionService) async {
     final today = now.day;
     final loans = await isar.loans
         .filter()
@@ -103,8 +111,9 @@ class RecurringProcessor {
       if (existing.isNotEmpty) continue;
 
       final txnName = 'EMI — ${loan.name}';
+      late Transaction t;
       await isar.writeTxn(() async {
-        final t = Transaction()
+        t = Transaction()
           ..name = txnName
           ..nameLower = txnName.toLowerCase()
           ..amount = loan.emiAmount
@@ -117,6 +126,7 @@ class RecurringProcessor {
           ..updatedAt = now;
         await isar.transactions.put(t);
       });
+      suggestionService.upsertSuggestion(t).ignore();
       created++;
     }
 
@@ -124,7 +134,7 @@ class RecurringProcessor {
   }
 
   /// Creates SIP contribution transactions for investments with autoDebit on their SIP date.
-  Future<int> _processInvestmentSipDebits(DateTime now) async {
+  Future<int> _processInvestmentSipDebits(DateTime now, SuggestionService suggestionService) async {
     final today = now.day;
     final investments = await isar.investments
         .filter()
@@ -151,8 +161,9 @@ class RecurringProcessor {
       if (existing.isNotEmpty) continue;
 
       final txnName = 'Contribution — ${inv.name}';
+      late Transaction t;
       await isar.writeTxn(() async {
-        final t = Transaction()
+        t = Transaction()
           ..name = txnName
           ..nameLower = txnName.toLowerCase()
           ..amount = inv.sipAmount!
@@ -165,6 +176,7 @@ class RecurringProcessor {
           ..updatedAt = now;
         await isar.transactions.put(t);
       });
+      suggestionService.upsertSuggestion(t).ignore();
       created++;
     }
 
