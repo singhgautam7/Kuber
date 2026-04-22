@@ -57,9 +57,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     _subtitle = _subtitles[Random().nextInt(_subtitles.length)];
     _shimmerCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat();
-    _shimmerAnim = Tween<double>(begin: 0.0, end: 1.0).animate(_shimmerCtrl);
+      duration: const Duration(milliseconds: 1800),
+    );
+    _shimmerCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        // Pause 900ms between sweeps so the gradient fully clears before restarting
+        Future.delayed(const Duration(milliseconds: 900), () {
+          if (mounted) _shimmerCtrl.forward(from: 0.0);
+        });
+      }
+    });
+    _shimmerCtrl.forward();
+    // Range [-0.18, 1.18] so the band enters from off-screen left and exits
+    // fully off-screen right before the animation completes — no stuck edge.
+    _shimmerAnim = Tween<double>(begin: -0.18, end: 1.18).animate(_shimmerCtrl);
   }
 
   @override

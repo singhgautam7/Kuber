@@ -262,6 +262,12 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
     return BackButtonListener(
       onBackButtonPressed: () async {
+        // If a screen is pushed on top of the shell (e.g. /add-transaction),
+        // return false so the root navigator pops it instead of us handling it.
+        if (Navigator.of(context, rootNavigator: true).canPop()) {
+          return false;
+        }
+
         if (_showSpeedDial) {
           _closeSpeedDial();
           return true;
