@@ -14,7 +14,6 @@ import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
 import 'json_backup_service.dart';
 import 'mock_data_service.dart';
-import '../database/seed_service.dart';
 import '../utils/color_palette.dart';
 
 
@@ -141,7 +140,6 @@ class DataService {
 
       if (override) {
         await isar.writeTxn(() => isar.clear());
-        await SeedService().seedInitialData(isar);
       }
 
       return await _importTransactions(rows);
@@ -163,7 +161,7 @@ class DataService {
     final suggestionService = SuggestionService(isar);
     for (final tx in txns) {
       if (!tx.isTransfer) {
-        suggestionService.upsertSuggestion(tx).ignore();
+        await suggestionService.upsertSuggestion(tx);
       }
     }
     return result;
@@ -394,7 +392,7 @@ class DataService {
     final suggestionService = SuggestionService(isar);
     for (final tx in toInsert) {
       if (!tx.isTransfer) {
-        suggestionService.upsertSuggestion(tx).ignore();
+        await suggestionService.upsertSuggestion(tx);
       }
     }
 
@@ -414,10 +412,9 @@ class DataService {
     }
   }
 
-  /// Clears all data and re-seeds defaults.
+  /// Clears all data.
   Future<void> clearAllData() async {
     await isar.writeTxn(() => isar.clear());
-    await SeedService().seedInitialData(isar);
   }
 
 

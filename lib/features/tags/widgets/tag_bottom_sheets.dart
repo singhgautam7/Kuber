@@ -335,9 +335,10 @@ class ViewTagBottomSheet extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(KuberRadius.sm),
               ),
             ),
-            onPressed: () {
-              ref.read(tagRepositoryProvider).deleteTag(tag.id);
-              Navigator.of(ctx).pop();
+            onPressed: () async {
+              await ref.read(tagRepositoryProvider).deleteTag(tag.id);
+              ref.invalidate(tagListProvider);
+              if (ctx.mounted) Navigator.of(ctx).pop();
             },
             child: const Text('Delete'),
           ),

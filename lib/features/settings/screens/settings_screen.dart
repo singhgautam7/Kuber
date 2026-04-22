@@ -390,6 +390,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               showKuberSnackBar(context, 'Biometric lock enabled');
                             }
                           } else {
+                            // Require authentication before disabling biometric lock
+                            final success = await _biometricService.authenticate();
+                            if (!context.mounted) return;
+                            if (!success) return;
+
                             setState(() => _tempBiometricsEnabled = false);
                             await ref.read(settingsProvider.notifier).setBiometricsEnabled(false);
                             if (!context.mounted) return;

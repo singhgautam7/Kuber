@@ -13,7 +13,6 @@ import '../../features/recurring/data/recurring_rule.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
 import '../../features/transactions/data/transaction.dart';
-import '../database/seed_service.dart';
 import 'data_service.dart';
 
 class JsonBackupService {
@@ -56,7 +55,6 @@ class JsonBackupService {
       final data = jsonDecode(jsonContent) as Map<String, dynamic>;
 
       await isar.writeTxn(() => isar.clear());
-      await SeedService().seedInitialData(isar);
 
       int count = 0;
 

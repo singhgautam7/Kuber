@@ -38,6 +38,10 @@ class SuggestionService {
         .limit(6)
         .findAll();
   }
+
+  Future<void> clearAll() async {
+    await isar.writeTxn(() => isar.transactionSuggestions.clear());
+  }
 }
 
 final suggestionServiceProvider = Provider<SuggestionService>((ref) {

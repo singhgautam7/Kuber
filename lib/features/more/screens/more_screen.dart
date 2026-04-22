@@ -121,6 +121,12 @@ class MoreScreen extends StatelessWidget {
                       subtitle: 'Export and clear your data',
                       onTap: () => context.push('/more/data'),
                     ),
+                    _MenuItem(
+                      icon: Icons.build_outlined,
+                      label: 'Troubleshoot',
+                      subtitle: 'Fix data and suggestion issues',
+                      onTap: () => context.push('/more/troubleshoot'),
+                    ),
                   ],
                 ),
 
