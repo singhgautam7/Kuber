@@ -87,7 +87,7 @@ class DataManagementScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: KuberSpacing.md),
                     _DataRow(
-                      icon: Icons.auto_awesome_rounded,
+                      icon: Icons.science_outlined,
                       title: 'Generate Mock Data',
                       description:
                           'Populate the app with realistic sample data for testing.',
@@ -116,51 +116,211 @@ class DataManagementScreen extends ConsumerWidget {
   }
 
   void _confirmClearData(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Clear All Data?'),
-        content: const Text(
-            'This will permanently delete all your transactions, accounts, categories, and recurring rules. This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref.read(dataControllerProvider.notifier).clearAllData();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: const Text('Clear All Data'),
-          ),
-        ],
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ConfirmActionSheet(
+        icon: Icons.delete_forever_rounded,
+        title: 'Clear All Data?',
+        description:
+            'This will permanently delete all your transactions, accounts, categories, and recurring rules. This action cannot be undone.',
+        confirmLabel: 'Clear All Data',
+        destructive: true,
+        onConfirm: () => ref.read(dataControllerProvider.notifier).clearAllData(),
       ),
     );
   }
 
   void _confirmMockData(BuildContext context, WidgetRef ref) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Generate Mock Data?'),
-        content: const Text(
-            'This will delete all existing data and replace it with sample data. Are you sure?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ConfirmActionSheet(
+        icon: Icons.science_outlined,
+        title: 'Generate Mock Data?',
+        description:
+            'All existing data will be permanently deleted and replaced with sample data.',
+        confirmLabel: 'Generate',
+        warnDescription: true,
+        onConfirm: () => ref.read(dataControllerProvider.notifier).generateMockData(),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Confirmation bottom sheet
+// ---------------------------------------------------------------------------
+
+class _ConfirmActionSheet extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final String confirmLabel;
+  final bool destructive;
+  final bool warnDescription;
+  final VoidCallback onConfirm;
+
+  const _ConfirmActionSheet({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.confirmLabel,
+    required this.onConfirm,
+    this.destructive = false,
+    this.warnDescription = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final viewPadding = MediaQuery.of(context).viewPadding.bottom;
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        KuberSpacing.xl,
+        KuberSpacing.lg,
+        KuberSpacing.xl,
+        viewPadding > 0 ? viewPadding + KuberSpacing.lg : KuberSpacing.xxl,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref.read(dataControllerProvider.notifier).generateMockData();
-            },
-            child: const Text('Generate'),
+          const SizedBox(height: KuberSpacing.xl),
+
+          // Icon
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: destructive
+                  ? cs.error.withValues(alpha: 0.1)
+                  : cs.primaryContainer.withValues(alpha: 0.4),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 28,
+              color: destructive ? cs.error : cs.primary,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.lg),
+
+          // Title
+          Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+              letterSpacing: -0.3,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+
+          // Description
+          if (warnDescription)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(KuberSpacing.lg),
+              decoration: BoxDecoration(
+                color: cs.error.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border: Border.all(color: cs.error.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
+                  const SizedBox(width: KuberSpacing.md),
+                  Expanded(
+                    child: Text(
+                      description,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: cs.error,
+                        height: 1.45,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Text(
+              description,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+                height: 1.45,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          const SizedBox(height: KuberSpacing.xl),
+
+          // Confirm button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onConfirm();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: destructive ? cs.error : cs.primary,
+                foregroundColor: destructive ? cs.onError : cs.onPrimary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                ),
+              ),
+              child: Text(
+                confirmLabel,
+                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.md),
+
+          // Cancel button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: cs.surfaceContainerHigh,
+                foregroundColor: cs.onSurface,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  side: BorderSide(color: cs.outline.withValues(alpha: 0.1)),
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
         ],
       ),

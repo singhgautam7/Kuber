@@ -100,7 +100,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
     if (_showSpeedDial) _closeSpeedDial();
-    
+
     ref.read(transactionSelectionProvider.notifier).clear();
 
     widget.navigationShell!.goBranch(
@@ -422,7 +422,7 @@ class _NavBarItemState extends State<_NavBarItem>
                   width: 56,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: widget.cs.primaryContainer.withValues(alpha: t * 0.5),
+                    color: widget.cs.primaryContainer.withValues(alpha: t * 0.1),
                     borderRadius: BorderRadius.circular(KuberRadius.lg),
                   ),
                   alignment: Alignment.center,

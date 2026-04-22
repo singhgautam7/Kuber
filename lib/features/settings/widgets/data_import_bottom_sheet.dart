@@ -50,6 +50,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
 
   String _errorMessage = '';
   int _importedCount = 0;
+  bool _isDownloadingTemplate = false;
 
   @override
   Widget build(BuildContext context) {
@@ -240,6 +241,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           const SizedBox(height: KuberSpacing.md),
           _buildInfoChip(cs, 'New records will be merged with your existing data.'),
         ],
+        const SizedBox(height: KuberSpacing.lg),
+        _buildTemplateCard(cs),
       ],
     );
   }
@@ -305,6 +308,115 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
         ],
       ),
     );
+  }
+
+  Widget _buildTemplateCard(ColorScheme cs) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header strip
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpacing.lg,
+              vertical: KuberSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: cs.secondaryContainer.withValues(alpha: 0.3),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.md)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.swap_horiz_rounded, size: 16, color: cs.secondary),
+                const SizedBox(width: KuberSpacing.sm),
+                Text(
+                  'MIGRATING FROM ANOTHER APP?',
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: cs.secondary,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(KuberSpacing.lg),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Download Template',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Get a CSV with the correct column headers to format your data.',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: cs.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: KuberSpacing.md),
+                _isDownloadingTemplate
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: cs.primary,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: _downloadTemplate,
+                        child: Container(
+                          padding: const EdgeInsets.all(KuberSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: cs.primaryContainer.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                            border: Border.all(
+                              color: cs.primary.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.download_rounded,
+                            size: 20,
+                            color: cs.primary,
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _downloadTemplate() async {
+    setState(() => _isDownloadingTemplate = true);
+    try {
+      await ref.read(dataControllerProvider.notifier).downloadTemplate();
+    } finally {
+      if (mounted) setState(() => _isDownloadingTemplate = false);
+    }
   }
 
   // ---- Progress --------------------------------------------------------------
