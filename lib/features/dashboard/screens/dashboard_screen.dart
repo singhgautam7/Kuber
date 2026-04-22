@@ -205,8 +205,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   return const _SpendingAnalysisEmpty();
                 }
                 return KuberBarChart(
-                  title: 'SPENDING ANALYSIS',
-                  subtitle: 'Last 7 Days Activity',
+                  title: 'LAST 7 DAYS',
                   buckets: _buildLast7DaysBuckets(days),
                   height: 200,
                 );
@@ -409,19 +408,19 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'SPENDING ANALYSIS',
+            'LAST 7 DAYS',
             style: textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            'Last 7 Days Activity',
-            style: textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
-          ),
+          // Text(
+          //   'Last 7 Days Activity',
+          //   style: textTheme.bodySmall?.copyWith(
+          //     color: cs.onSurfaceVariant,
+          //   ),
+          // ),
           const SizedBox(height: 24),
           Center(
             child: Padding(
