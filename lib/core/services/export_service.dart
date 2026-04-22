@@ -86,15 +86,11 @@ class ExportService {
   // ---------------------------------------------------------------------------
 
   static Future<Uint8List> exportTransactionsPdf(
-    TransactionExportData data, {
-    required Uint8List fontRegular,
-    required Uint8List fontBold,
-  }) async {
+    TransactionExportData data,
+  ) async {
     final doc = pw.Document();
-    final headerFont = pw.Font.ttf(fontBold.buffer
-        .asByteData(fontBold.offsetInBytes, fontBold.lengthInBytes));
-    final bodyFont = pw.Font.ttf(fontRegular.buffer
-        .asByteData(fontRegular.offsetInBytes, fontRegular.lengthInBytes));
+    final headerFont = pw.Font.helveticaBold();
+    final bodyFont = pw.Font.helvetica();
 
   doc.addPage(
     pw.MultiPage(
@@ -305,15 +301,11 @@ static String _s(String? text) {
   // ---------------------------------------------------------------------------
 
   static Future<Uint8List> exportAnalyticsPdf(
-    AnalyticsExportData data, {
-    required Uint8List fontRegular,
-    required Uint8List fontBold,
-  }) async {
+    AnalyticsExportData data,
+  ) async {
     final doc = pw.Document();
-    final headerFont = pw.Font.ttf(fontBold.buffer
-        .asByteData(fontBold.offsetInBytes, fontBold.lengthInBytes));
-    final bodyFont = pw.Font.ttf(fontRegular.buffer
-        .asByteData(fontRegular.offsetInBytes, fontRegular.lengthInBytes));
+    final headerFont = pw.Font.helveticaBold();
+    final bodyFont = pw.Font.helvetica();
 
   // Page 1 — Overview + bar chart
   doc.addPage(pw.Page(

@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/export_data.dart';
@@ -365,23 +364,15 @@ Future<ExportResult> performExport({
     const utf8Bom = [0xEF, 0xBB, 0xBF];
     bytes = Uint8List.fromList([...utf8Bom, ...utf8.encode(csvString)]);
   } else {
-    final fontRegularData = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
-    final fontRegular = fontRegularData.buffer.asUint8List(
-        fontRegularData.offsetInBytes, fontRegularData.lengthInBytes);
-
-    final fontBoldData = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
-    final fontBold = fontBoldData.buffer.asByteData().buffer.asUint8List(
-        fontBoldData.offsetInBytes, fontBoldData.lengthInBytes);
-
     if (type == ExportType.transactions) {
       bytes = await compute(
         _exportTransactionsPdfWrapper,
-        _PdfExportParams(data as TransactionExportData, fontRegular, fontBold),
+        data as TransactionExportData,
       );
     } else {
       bytes = await compute(
         _exportAnalyticsPdfWrapper,
-        _PdfExportParams(data as AnalyticsExportData, fontRegular, fontBold),
+        data as AnalyticsExportData,
       );
     }
   }
@@ -427,27 +418,12 @@ void deleteTempExportFile(ExportResult? result) {
 // Private helpers for compute
 // ---------------------------------------------------------------------------
 
-class _PdfExportParams {
-  final dynamic data;
-  final Uint8List fontRegular;
-  final Uint8List fontBold;
-  _PdfExportParams(this.data, this.fontRegular, this.fontBold);
+Future<Uint8List> _exportTransactionsPdfWrapper(TransactionExportData data) {
+  return ExportService.exportTransactionsPdf(data);
 }
 
-Future<Uint8List> _exportTransactionsPdfWrapper(_PdfExportParams params) {
-  return ExportService.exportTransactionsPdf(
-    params.data as TransactionExportData,
-    fontRegular: params.fontRegular,
-    fontBold: params.fontBold,
-  );
-}
-
-Future<Uint8List> _exportAnalyticsPdfWrapper(_PdfExportParams params) {
-  return ExportService.exportAnalyticsPdf(
-    params.data as AnalyticsExportData,
-    fontRegular: params.fontRegular,
-    fontBold: params.fontBold,
-  );
+Future<Uint8List> _exportAnalyticsPdfWrapper(AnalyticsExportData data) {
+  return ExportService.exportAnalyticsPdf(data);
 }
 
 // ---------------------------------------------------------------------------

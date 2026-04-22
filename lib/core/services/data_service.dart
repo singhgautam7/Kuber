@@ -11,6 +11,7 @@ import '../../features/categories/data/category_group.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
 import 'csv_service.dart';
+import 'json_backup_service.dart';
 import 'mock_data_service.dart';
 import '../database/seed_service.dart';
 import '../utils/color_palette.dart';
@@ -131,16 +132,31 @@ class DataService {
     return parsedRows;
   }
 
-  /// Imports data from a CSV file.
-  Future<ImportResult> importData(String csvContent) async {
+  /// Imports data from a CSV file. If [override] is true, clears all data first.
+  Future<ImportResult> importData(String csvContent, {bool override = false}) async {
     try {
-      final rows = parseCsv(csvContent); // Changed to use internal parseCsv
+      final rows = parseCsv(csvContent);
       if (rows.isEmpty) return ImportResult(successCount: 0, failureCount: 0, error: 'Empty file');
+
+      if (override) {
+        await isar.writeTxn(() => isar.clear());
+        await SeedService().seedInitialData(isar);
+      }
 
       return await _importTransactions(rows);
     } catch (e) {
       return ImportResult(successCount: 0, failureCount: 0, error: e.toString());
     }
+  }
+
+  /// Exports all data as a JSON backup string.
+  Future<String> exportJson() async {
+    return JsonBackupService().exportJson(isar);
+  }
+
+  /// Imports data from a JSON backup string (clears all existing data).
+  Future<ImportResult> importJson(String jsonContent) async {
+    return JsonBackupService().importJson(isar, jsonContent);
   }
 
 

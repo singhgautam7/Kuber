@@ -265,6 +265,10 @@ class DataController extends StateNotifier<DataState> {
     // These derived providers will automatically update because they watch transactionListProvider
   }
 
+  void refreshAfterImport() {
+    _refreshData();
+  }
+
   void reset() {
     state = DataState();
   }

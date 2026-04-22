@@ -21,7 +21,6 @@ import '../widgets/avg_weekly_heatmap.dart';
 import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
 import '../widgets/top_filter_row.dart';
-import '../../export/widgets/export_bottom_sheet.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 
 // ---------------------------------------------------------------------------
@@ -233,12 +232,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   KuberPageHeader(
                     title: 'Spending\nAnalytics',
                     description: 'Visualize your spending patterns',
-                    actionIcon: Icons.file_download_outlined,
-                    actionTooltip: 'Export',
-                    onAction: () => showExportBottomSheet(
-                      context: context,
-                      exportType: ExportType.transactions,
-                    ),
                   ),
                   const TopFilterRow(),
                   const SizedBox(height: KuberSpacing.lg),

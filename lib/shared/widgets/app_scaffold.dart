@@ -418,28 +418,37 @@ class _NavBarItemState extends State<_NavBarItem>
               final t = _controller.value;
               return ScaleTransition(
                 scale: _scaleAnim,
-                child: Stack(
+                child: Container(
+                  width: 56,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: widget.cs.primaryContainer.withValues(alpha: t * 0.5),
+                    borderRadius: BorderRadius.circular(KuberRadius.lg),
+                  ),
                   alignment: Alignment.center,
-                  children: [
-                    // Outline icon (unselected)
-                    Opacity(
-                      opacity: (1 - t).clamp(0.0, 1.0),
-                      child: Icon(
-                        widget.item.icon,
-                        size: 24,
-                        color: unselectedColor,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Outline icon (unselected)
+                      Opacity(
+                        opacity: (1 - t).clamp(0.0, 1.0),
+                        child: Icon(
+                          widget.item.icon,
+                          size: 24,
+                          color: unselectedColor,
+                        ),
                       ),
-                    ),
-                    // Filled icon (selected)
-                    Opacity(
-                      opacity: t.clamp(0.0, 1.0),
-                      child: Icon(
-                        widget.item.activeIcon,
-                        size: 24,
-                        color: selectedColor,
+                      // Filled icon (selected)
+                      Opacity(
+                        opacity: t.clamp(0.0, 1.0),
+                        child: Icon(
+                          widget.item.activeIcon,
+                          size: 24,
+                          color: selectedColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },
