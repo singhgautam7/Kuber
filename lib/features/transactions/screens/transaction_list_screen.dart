@@ -173,71 +173,76 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         padding: const EdgeInsets.symmetric(
                           horizontal: KuberSpacing.lg,
                         ),
-                        child: Row(
-                          children: [
-                            Text(
-                              'EXP ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: cs.onSurfaceVariant,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'EXP ',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '-${fmt.formatCurrency(totalExp)}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: cs.error,
+                              Text(
+                                '-${fmt.formatCurrency(totalExp.round())}',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: cs.error,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: KuberSpacing.lg),
-                            Text(
-                              'INC ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: cs.onSurfaceVariant,
+                              const SizedBox(width: KuberSpacing.lg),
+                              Text(
+                                'INC ',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '+${fmt.formatCurrency(totalInc)}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: cs.tertiary,
+                              Text(
+                                '+${fmt.formatCurrency(totalInc.round())}',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: cs.tertiary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: KuberSpacing.lg),
-                            Text(
-                              'NET ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: cs.onSurfaceVariant,
+                              const SizedBox(width: KuberSpacing.lg),
+                              Text(
+                                'NET ',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            Text(
-                              totalNet == 0
-                                  ? fmt.formatCurrency(0)
-                                  : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: totalNet > 0
-                                    ? cs.tertiary
-                                    : totalNet < 0
-                                        ? cs.error
-                                        : cs.onSurfaceVariant,
+                              Text(
+                                totalNet == 0
+                                    ? fmt.formatCurrency(0)
+                                    : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: totalNet > 0
+                                      ? cs.tertiary
+                                      : totalNet < 0
+                                          ? cs.error
+                                          : cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

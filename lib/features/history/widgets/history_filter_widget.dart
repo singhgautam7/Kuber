@@ -127,15 +127,15 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                           onTap: () => notifier.setType('income'),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                     ],
-  
+
                     // Search Area (Chip or Icon)
                     if (!_isSearching)
                       _buildSearchArea(hasSearchQuery, filter.searchQuery, cs),
-  
+
                     if (!_isSearching) ...[
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       // Filter Icon with Badge
                       Tooltip(
                         message: 'Advanced filters',
