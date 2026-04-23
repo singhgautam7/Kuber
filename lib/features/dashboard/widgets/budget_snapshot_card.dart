@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../budgets/data/budget.dart';
 import '../../budgets/providers/budget_provider.dart';
@@ -106,6 +107,7 @@ class _BudgetRow extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final budget = snapshot.budget;
     final progress = snapshot.progress;
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
     final category = categoryMap[int.tryParse(budget.categoryId)];
@@ -184,7 +186,7 @@ class _BudgetRow extends ConsumerWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: '${CurrencyFormatter.format(progress.spent)} ',
+                            text: '${maskAmount(CurrencyFormatter.format(progress.spent), isPrivate)} ',
                             style: textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: cs.onSurface,
@@ -192,7 +194,7 @@ class _BudgetRow extends ConsumerWidget {
                             ),
                           ),
                           TextSpan(
-                            text: '/ ${CurrencyFormatter.format(progress.limit)}',
+                            text: '/ ${maskAmount(CurrencyFormatter.format(progress.limit), isPrivate)}',
                             style: textTheme.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                               fontSize: 11,
@@ -202,7 +204,7 @@ class _BudgetRow extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${CurrencyFormatter.format(remaining)} remaining',
+                      '${maskAmount(CurrencyFormatter.format(remaining), isPrivate)} remaining',
                       style: textTheme.labelSmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         fontSize: 10,

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../transactions/data/transaction.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 
 class AvgWeeklyHeatmap extends ConsumerStatefulWidget {
@@ -73,11 +74,11 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                   ),
                 ),
                 const SizedBox(width: KuberSpacing.md),
-                Icon(
-                  Icons.grid_view_rounded,
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                  size: 20,
-                ),
+                // Icon(
+                //   Icons.grid_view_rounded,
+                //   color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                //   size: 20,
+                // ),
               ],
             ),
             const SizedBox(height: KuberSpacing.xl),
@@ -206,7 +207,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                       ],
                       const Spacer(),
                       Text(
-                        ref.watch(formatterProvider).formatCurrency(avg),
+                        maskAmount(ref.watch(formatterProvider).formatCurrency(avg), ref.watch(privacyModeProvider)),
                         style: tt.titleSmall?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,

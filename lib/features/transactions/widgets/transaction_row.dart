@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
@@ -26,10 +27,14 @@ class DateGroupHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final isPositive = dayTotal >= 0;
-    final totalText = isPositive
-        ? '+${formatter.formatCurrency(dayTotal)}'
-        : '−${formatter.formatCurrency(dayTotal.abs())}';
+    final totalText = maskAmount(
+      isPositive
+          ? '+${formatter.formatCurrency(dayTotal)}'
+          : '−${formatter.formatCurrency(dayTotal.abs())}',
+      isPrivate,
+    );
     final totalColor = isPositive ? cs.tertiary : cs.onSurfaceVariant;
 
     return Padding(
@@ -433,7 +438,7 @@ class TransactionRow extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '$amountPrefix${formatter.formatCurrency(transaction.amount)}',
+                    maskAmount('$amountPrefix${formatter.formatCurrency(transaction.amount)}', ref.watch(privacyModeProvider)),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,

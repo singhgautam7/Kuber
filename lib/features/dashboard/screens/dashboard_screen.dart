@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
@@ -145,6 +146,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              Consumer(
+                builder: (context, ref, _) {
+                  final isPrivate = ref.watch(privacyModeProvider);
+                  final cs = Theme.of(context).colorScheme;
+                  const blue = Color(0xFF3B82F6);
+                  return Tooltip(
+                    message: isPrivate ? 'Privacy mode: On' : 'Privacy mode: Off',
+                    triggerMode: TooltipTriggerMode.longPress,
+                    child: GestureDetector(
+                      onTap: () => ref.read(settingsProvider.notifier).togglePrivacyMode(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(
+                            color: isPrivate
+                                ? blue
+                                : cs.outline.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Icon(
+                          isPrivate ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                          size: 16,
+                          color: isPrivate ? blue : cs.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   );
@@ -288,8 +321,21 @@ class _BalanceHeroCard extends ConsumerWidget {
           Builder(
             builder: (context) {
               final formatter = ref.watch(formatterProvider);
+              final isPrivate = ref.watch(privacyModeProvider);
               final formattedRaw = formatter.formatCurrency(summary.net.abs(), symbol: '').trim();
               final prefix = summary.net < 0 ? '-' : '';
+
+              if (isPrivate) {
+                return Text(
+                  '****',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 36,
+                    letterSpacing: -0.05,
+                    color: cs.onSurface,
+                  ),
+                );
+              }
 
               return RichText(
                 text: TextSpan(
@@ -386,7 +432,7 @@ class _BalanceTile extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  ref.watch(formatterProvider).formatCurrency(amount),
+                  maskAmount(ref.watch(formatterProvider).formatCurrency(amount), ref.watch(privacyModeProvider)),
                   style: textTheme.bodyMedium?.copyWith(
                     color: cs.onSurface,
                     fontWeight: FontWeight.w600,

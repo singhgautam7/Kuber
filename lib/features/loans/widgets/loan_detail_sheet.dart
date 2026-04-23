@@ -8,7 +8,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider;
+import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/loan.dart';
@@ -34,6 +35,7 @@ class LoanDetailSheet extends ConsumerWidget {
     final progress = calc.computeProgress(loan, allTxns);
     final nextDue = calc.computeNextDueDate(loan);
     final isOverdue = nextDue != null && nextDue.isBefore(DateTime.now());
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final accountName = accounts
         .where((a) => a.id.toString() == loan.accountId)
@@ -177,22 +179,21 @@ class LoanDetailSheet extends ConsumerWidget {
               Expanded(
                 child: _StatColumn(
                   label: 'TOTAL',
-                  value: fmt.formatCurrency(loan.principalAmount),
+                  value: maskAmount(fmt.formatCurrency(loan.principalAmount), isPrivate),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
                   label: 'PAID',
-                  value: fmt.formatCurrency(totalPaid),
+                  value: maskAmount(fmt.formatCurrency(totalPaid), isPrivate),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
                   label: 'REMAINING',
-                  value: fmt.formatCurrency(
-                      remaining.clamp(0, double.infinity)),
+                  value: maskAmount(fmt.formatCurrency(remaining.clamp(0, double.infinity)), isPrivate),
                   color: remaining > 0 ? cs.error : cs.tertiary,
                 ),
               ),
@@ -217,7 +218,7 @@ class LoanDetailSheet extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  fmt.formatCurrency(loan.emiAmount),
+                  maskAmount(fmt.formatCurrency(loan.emiAmount), isPrivate),
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -494,6 +495,7 @@ class _PaymentRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final label = transaction.name.startsWith('EMI')
         ? 'EMI Paid'
@@ -530,7 +532,7 @@ class _PaymentRow extends ConsumerWidget {
             ),
           ),
           Text(
-            fmt.formatCurrency(transaction.amount),
+            maskAmount(fmt.formatCurrency(transaction.amount), isPrivate),
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,

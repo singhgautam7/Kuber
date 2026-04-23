@@ -9,3 +9,7 @@ class CurrencyFormatter {
     return '$symbol${formatter.format(amount.abs())}';
   }
 }
+
+String maskAmount(String formattedAmount, bool isPrivate) {
+  return isPrivate ? '****' : formattedAmount;
+}

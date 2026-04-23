@@ -106,4 +106,8 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   Future<void> clearAllData() async {}
   @override
   Future<void> setDefaultAccountId(String? id) async {}
+  @override
+  Future<void> togglePrivacyMode() async {}
+  @override
+  Future<void> setThresholds(double floor, double ceiling) async {}
 }

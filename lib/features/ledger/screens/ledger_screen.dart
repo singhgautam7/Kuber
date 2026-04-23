@@ -14,8 +14,9 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/info_provider.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+    show formatterProvider, privacyModeProvider;
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/ledger.dart';
 import '../providers/ledger_provider.dart';
@@ -173,6 +174,7 @@ class _SummaryRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final toReceive = calc.totalToReceive(ledgers, allTxns);
     final owed = calc.totalOwed(ledgers, allTxns);
 
@@ -183,7 +185,7 @@ class _SummaryRow extends ConsumerWidget {
           Expanded(
             child: _SummaryCard(
               label: 'YOU WILL RECEIVE',
-              amount: fmt.formatCurrency(toReceive),
+              amount: maskAmount(fmt.formatCurrency(toReceive), isPrivate),
               color: cs.tertiary,
             ),
           ),
@@ -191,7 +193,7 @@ class _SummaryRow extends ConsumerWidget {
           Expanded(
             child: _SummaryCard(
               label: 'YOU OWE',
-              amount: fmt.formatCurrency(owed),
+              amount: maskAmount(fmt.formatCurrency(owed), isPrivate),
               color: cs.error,
             ),
           ),
@@ -391,6 +393,7 @@ class _LedgerCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final paid = calc.computePaid(ledger.uid, allTxns);
     final remaining = calc.computeRemaining(ledger, allTxns);
@@ -479,7 +482,7 @@ class _LedgerCard extends ConsumerWidget {
                   ),
                   // Amount
                   Text(
-                    fmt.formatCurrency(ledger.originalAmount),
+                    maskAmount(fmt.formatCurrency(ledger.originalAmount), isPrivate),
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
@@ -511,7 +514,7 @@ class _LedgerCard extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    'Paid: ${fmt.formatCurrency(paid)}',
+                    'Paid: ${maskAmount(fmt.formatCurrency(paid), isPrivate)}',
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       color: cs.onSurfaceVariant,
@@ -540,7 +543,7 @@ class _LedgerCard extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'REMAINING: ${fmt.formatCurrency(remaining.clamp(0, double.infinity))}',
+                    'REMAINING: ${maskAmount(fmt.formatCurrency(remaining.clamp(0, double.infinity)), isPrivate)}',
                     style: GoogleFonts.inter(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,

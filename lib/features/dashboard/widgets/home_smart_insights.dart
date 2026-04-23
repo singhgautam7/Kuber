@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../insights/models/insight.dart';
 import '../../insights/providers/insight_provider.dart';
+import '../../settings/providers/settings_provider.dart';
 
 class HomeSmartInsights extends ConsumerStatefulWidget {
   const HomeSmartInsights({super.key});
@@ -31,6 +32,7 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
   @override
   Widget build(BuildContext context) {
     final insights = ref.watch(smartInsightsProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
@@ -80,6 +82,7 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
                       child: _InsightCard(
                         insight: insights[i],
                         isFirst: i == 0,
+                        isPrivate: isPrivate,
                       ),
                     ),
                   ),
@@ -93,8 +96,9 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
 class _InsightCard extends StatelessWidget {
   final KuberInsight insight;
   final bool isFirst;
+  final bool isPrivate;
 
-  const _InsightCard({required this.insight, required this.isFirst});
+  const _InsightCard({required this.insight, required this.isFirst, required this.isPrivate});
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +144,9 @@ class _InsightCard extends StatelessWidget {
           // Message
           if (isFirst)
             Text(
-              insight.message,
+              isPrivate
+                  ? insight.highlights.fold<String>(insight.message, (msg, h) => msg.replaceAll(h, '****'))
+                  : insight.message,
               style: tt.bodyMedium?.copyWith(
                 color: textColor,
                 fontWeight: FontWeight.w700,
@@ -151,8 +157,10 @@ class _InsightCard extends StatelessWidget {
             )
           else
             _HighlightedText(
-              message: insight.message,
-              highlights: insight.highlights,
+              message: isPrivate
+                  ? insight.highlights.fold<String>(insight.message, (msg, h) => msg.replaceAll(h, '****'))
+                  : insight.message,
+              highlights: isPrivate ? const [] : insight.highlights,
               highlightColor:
                   insight.highlightIsWarning ? cs.error : cs.primary,
               baseStyle: tt.bodyMedium?.copyWith(

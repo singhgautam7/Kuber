@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_detail_sheet.dart';
@@ -140,7 +141,7 @@ class HomeAccountsCard extends ConsumerWidget {
                                   balanceColor = balance < 0 ? cs.error : null;
                                 }
                                 return Text(
-                                  ref.watch(formatterProvider).formatCurrency(balance),
+                                  maskAmount(ref.watch(formatterProvider).formatCurrency(balance), ref.watch(privacyModeProvider)),
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: balanceColor,

@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 
 import '../../transactions/data/transaction.dart';
 import '../../settings/providers/settings_provider.dart';
+import 'threshold_settings_sheet.dart';
 
 class TransactionSizeDistribution extends ConsumerWidget {
   final List<Transaction> transactions;
@@ -24,7 +25,9 @@ class TransactionSizeDistribution extends ConsumerWidget {
       return _buildSkeleton();
     }
 
-    final distribution = precomputedDistribution ?? _calculateDistribution();
+    final floor = ref.watch(thresholdFloorProvider);
+    final ceiling = ref.watch(thresholdCeilingProvider);
+    final distribution = _calculateDistribution(floor, ceiling);
     final total = distribution.values.fold<int>(0, (sum, val) => sum + val);
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
@@ -37,22 +40,50 @@ class TransactionSizeDistribution extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Transaction Size Distribution',
-              style: tt.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Frequency by ticket size',
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Transaction Size Distribution',
+                        style: tt.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Frequency by ticket size',
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => _openThresholdSheet(context),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                      border: Border.all(
+                        color: cs.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(Icons.tune_rounded, size: 18, color: cs.onSurfaceVariant),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: KuberSpacing.xl),
-            
+
             // Segmented Bar
             Row(
               children: [
@@ -63,18 +94,50 @@ class TransactionSizeDistribution extends ConsumerWidget {
                 _buildBarSegment(cs.primary.withValues(alpha: 0.1), distribution['large'] ?? 0, total),
               ],
             ),
-            
+
             const SizedBox(height: KuberSpacing.xl),
-            
+
             // Legend
-            _buildLegendItem(cs.primary.withValues(alpha: 0.9), 'Small (<${formatter.formatCurrency(500)})', distribution['small'] ?? 0, total, cs, tt),
+            _buildLegendItem(
+              cs.primary.withValues(alpha: 0.9),
+              'Small (<${formatter.formatCurrency(floor)})',
+              distribution['small'] ?? 0,
+              total,
+              cs,
+              tt,
+            ),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.5), 'Medium (${formatter.formatCurrency(500)} - ${formatter.formatCurrency(2000)})', distribution['medium'] ?? 0, total, cs, tt),
+            _buildLegendItem(
+              cs.primary.withValues(alpha: 0.5),
+              'Medium (${formatter.formatCurrency(floor)} - ${formatter.formatCurrency(ceiling)})',
+              distribution['medium'] ?? 0,
+              total,
+              cs,
+              tt,
+            ),
             const SizedBox(height: KuberSpacing.md),
-            _buildLegendItem(cs.primary.withValues(alpha: 0.1), 'Large (>${formatter.formatCurrency(2000)})', distribution['large'] ?? 0, total, cs, tt),
+            _buildLegendItem(
+              cs.primary.withValues(alpha: 0.1),
+              'Large (>${formatter.formatCurrency(ceiling)})',
+              distribution['large'] ?? 0,
+              total,
+              cs,
+              tt,
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  void _openThresholdSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const ThresholdSettingsSheet(),
     );
   }
 
@@ -124,14 +187,14 @@ class TransactionSizeDistribution extends ConsumerWidget {
     );
   }
 
-  Map<String, int> _calculateDistribution() {
+  Map<String, int> _calculateDistribution(double floor, double ceiling) {
     final (s, m, l) = transactions.fold<(int, int, int)>(
       (0, 0, 0),
       (acc, tx) {
         if (tx.type != 'expense') return acc;
-        return tx.amount < 500
+        return tx.amount < floor
             ? (acc.$1 + 1, acc.$2, acc.$3)
-            : tx.amount <= 2000
+            : tx.amount <= ceiling
                 ? (acc.$1, acc.$2 + 1, acc.$3)
                 : (acc.$1, acc.$2, acc.$3 + 1);
       },

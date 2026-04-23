@@ -26,4 +26,11 @@ class PrefsKeys {
 
   // Quick Add
   static const defaultAccountId = 'kuber_default_account_id';
+
+  // Privacy
+  static const privacyMode = 'kuber_privacy_mode';
+
+  // Analytics thresholds
+  static const thresholdFloor = 'kuber_threshold_floor';
+  static const thresholdCeiling = 'kuber_threshold_ceiling';
 }

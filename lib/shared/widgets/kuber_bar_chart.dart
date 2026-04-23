@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/currency_formatter.dart';
 import '../../features/settings/providers/settings_provider.dart';
 
 // ---------------------------------------------------------------------------
@@ -265,14 +266,15 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
               return const SizedBox.shrink();
             }
             final formatter = ref.watch(formatterProvider);
+            final isPrivate = ref.watch(privacyModeProvider);
             if (value == meta.min) {
               return Text(
-                formatter.formatCurrency(0),
+                maskAmount(formatter.formatCurrency(0), isPrivate),
                 style: axisStyle,
               );
             }
             return Text(
-              formatter.formatCompactCurrency(value),
+              maskAmount(formatter.formatCompactCurrency(value), isPrivate),
               style: axisStyle,
             );
           },
@@ -659,6 +661,7 @@ class _TooltipOverlay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final net = bucket.income - bucket.expense;
     final tt = Theme.of(context).textTheme;
 
@@ -737,14 +740,14 @@ class _TooltipOverlay extends ConsumerWidget {
                       const SizedBox(height: KuberSpacing.sm),
                       _TooltipRow(
                         label: 'Income',
-                        amount: '+${formatter.formatCurrency(bucket.income)}',
+                        amount: maskAmount('+${formatter.formatCurrency(bucket.income)}', isPrivate),
                         color: cs.tertiary,
                         labelColor: cs.onSurfaceVariant,
                       ),
                       const SizedBox(height: 4),
                       _TooltipRow(
                         label: 'Expense',
-                        amount: '-${formatter.formatCurrency(bucket.expense)}',
+                        amount: maskAmount('-${formatter.formatCurrency(bucket.expense)}', isPrivate),
                         color: cs.error,
                         labelColor: cs.onSurfaceVariant,
                       ),
@@ -758,7 +761,7 @@ class _TooltipOverlay extends ConsumerWidget {
                       ),
                       _TooltipRow(
                         label: 'Net',
-                        amount: formatter.formatCurrency(net),
+                        amount: maskAmount(formatter.formatCurrency(net), isPrivate),
                         color: cs.onSurface,
                         labelColor: cs.onSurface,
                         isBold: true,

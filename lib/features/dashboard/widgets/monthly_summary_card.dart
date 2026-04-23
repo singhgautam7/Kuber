@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../providers/dashboard_provider.dart';
 
-class MonthlySummaryCard extends StatelessWidget {
+class MonthlySummaryCard extends ConsumerWidget {
   final MonthlySummary summary;
 
   const MonthlySummaryCard({super.key, required this.summary});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isPrivate = ref.watch(privacyModeProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
@@ -20,7 +23,7 @@ class MonthlySummaryCard extends StatelessWidget {
         children: [
           // Net total
           Text(
-            CurrencyFormatter.format(summary.net),
+            maskAmount(CurrencyFormatter.format(summary.net), isPrivate),
             style: textTheme.displaySmall?.copyWith(
               color: summary.net >= 0
                   ? colorScheme.tertiary
@@ -52,7 +55,7 @@ class MonthlySummaryCard extends StatelessWidget {
                       const SizedBox(height: KuberSpacing.xs),
                       Text('Income', style: textTheme.labelMedium),
                       Text(
-                        CurrencyFormatter.format(summary.totalIncome),
+                        maskAmount(CurrencyFormatter.format(summary.totalIncome), isPrivate),
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.tertiary,
                           fontWeight: FontWeight.w600,
@@ -77,7 +80,7 @@ class MonthlySummaryCard extends StatelessWidget {
                       const SizedBox(height: KuberSpacing.xs),
                       Text('Expenses', style: textTheme.labelMedium),
                       Text(
-                        CurrencyFormatter.format(summary.totalExpense),
+                        maskAmount(CurrencyFormatter.format(summary.totalExpense), isPrivate),
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.error,
                           fontWeight: FontWeight.w600,

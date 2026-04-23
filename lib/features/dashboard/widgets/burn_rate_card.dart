@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../../transactions/providers/stats_provider.dart';
 
 class BurnRateCard extends ConsumerWidget {
@@ -11,6 +12,7 @@ class BurnRateCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final burnRateAsync = ref.watch(burnRateProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -57,7 +59,7 @@ class BurnRateCard extends ConsumerWidget {
                           ),
                           const SizedBox(height: KuberSpacing.xs),
                           Text(
-                            '${CurrencyFormatter.format(data.avgDaily)}/day',
+                            '${maskAmount(CurrencyFormatter.format(data.avgDaily), isPrivate)}/day',
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: cs.onSurface,
@@ -95,7 +97,7 @@ class BurnRateCard extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          CurrencyFormatter.format(data.projected),
+                          maskAmount(CurrencyFormatter.format(data.projected), isPrivate),
                           style: textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: cs.onSurface,

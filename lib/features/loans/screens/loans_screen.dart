@@ -13,8 +13,9 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/info_provider.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+    show formatterProvider, privacyModeProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/loan.dart';
@@ -160,6 +161,7 @@ class _SummaryRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final outstanding = calc.totalOutstanding(loans, allTxns);
     final totalPaid = calc.totalPaidAllLoans(loans, allTxns);
 
@@ -170,7 +172,7 @@ class _SummaryRow extends ConsumerWidget {
           Expanded(
             child: _SummaryCard(
               label: 'TOTAL OUTSTANDING',
-              amount: fmt.formatCurrency(outstanding),
+              amount: maskAmount(fmt.formatCurrency(outstanding), isPrivate),
               color: cs.error,
             ),
           ),
@@ -178,7 +180,7 @@ class _SummaryRow extends ConsumerWidget {
           Expanded(
             child: _SummaryCard(
               label: 'TOTAL PAID',
-              amount: fmt.formatCurrency(totalPaid),
+              amount: maskAmount(fmt.formatCurrency(totalPaid), isPrivate),
               color: cs.tertiary,
             ),
           ),
@@ -330,6 +332,7 @@ class _LoanCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final totalPaid = calc.computeTotalPaid(loan.uid, allTxns);
     final remaining = calc.computeRemaining(loan, allTxns);
@@ -411,7 +414,7 @@ class _LoanCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      fmt.formatCurrency(loan.principalAmount),
+                      maskAmount(fmt.formatCurrency(loan.principalAmount), isPrivate),
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -437,7 +440,7 @@ class _LoanCard extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  '${fmt.formatCurrency(totalPaid)} / ${fmt.formatCurrency(loan.principalAmount)}',
+                  '${maskAmount(fmt.formatCurrency(totalPaid), isPrivate)} / ${maskAmount(fmt.formatCurrency(loan.principalAmount), isPrivate)}',
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     color: cs.onSurfaceVariant,
@@ -466,14 +469,13 @@ class _LoanCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     label: 'REMAINING',
-                    value: fmt.formatCurrency(
-                        remaining.clamp(0, double.infinity)),
+                    value: maskAmount(fmt.formatCurrency(remaining.clamp(0, double.infinity)), isPrivate),
                   ),
                 ),
                 Expanded(
                   child: _StatItem(
                     label: 'MONTHLY EMI',
-                    value: fmt.formatCurrency(loan.emiAmount),
+                    value: maskAmount(fmt.formatCurrency(loan.emiAmount), isPrivate),
                   ),
                 ),
                 if (loan.interestRate != null)

@@ -3,12 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../../shared/widgets/category_icon.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/currency_selector_sheet.dart';
@@ -360,6 +361,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 _SettingsCard(
                   children: [
                     _SettingsTile(
+                      icon: Icons.visibility_off_outlined,
+                      label: 'Privacy Mode',
+                      subtitle: 'Hide all balance and amount values',
+                      trailing: Switch(
+                        value: ref.watch(privacyModeProvider),
+                        onChanged: (_) => ref.read(settingsProvider.notifier).togglePrivacyMode(),
+                        activeTrackColor: cs.primary,
+                      ),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
                       icon: Icons.fingerprint_rounded,
                       label: 'Biometric Lock',
                       subtitle: 'FaceID or Fingerprint',
@@ -498,25 +510,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       itemBuilder: (ctx, i) {
                         final a = accounts[i];
                         final isSelected = a.id.toString() == currentId;
-                        final color = resolveAccountColor(a);
                         return ListTile(
-                          leading: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(KuberRadius.md),
-                            ),
-                            child: Center(
-                              child: Container(
-                                width: 14,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
+                          leading: CategoryIcon.square(
+                            icon: a.icon != null
+                                ? IconMapper.fromString(a.icon!)
+                                : Icons.account_balance,
+                            rawColor: a.colorValue != null
+                                ? Color(a.colorValue!)
+                                : cs.primary,
+                            size: 44,
                           ),
                           title: Text(
                             a.name,
