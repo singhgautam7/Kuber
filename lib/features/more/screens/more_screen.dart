@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -6,13 +7,15 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/widgets/settings_widgets.dart';
+import '../../dev/providers/dev_mode_provider.dart';
 
-class MoreScreen extends StatelessWidget {
+class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -148,6 +151,13 @@ class MoreScreen extends StatelessWidget {
                       subtitle: 'App limits and security',
                       onTap: () => context.pushNamed('permissions'),
                     ),
+                    if (isDevMode)
+                      _MenuItem(
+                        icon: Icons.bug_report_outlined,
+                        label: 'Dev Tools',
+                        subtitle: 'Developer-only tools',
+                        onTap: () => context.push('/more/dev-tools'),
+                      ),
                   ],
                 ),
               ]),

@@ -8,4 +8,9 @@ class CategoryGroup {
 
   @Index(unique: true)
   late String name;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+  };
 }

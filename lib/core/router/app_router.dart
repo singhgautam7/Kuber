@@ -41,6 +41,9 @@ import '../../features/more/screens/charts_screen.dart';
 import '../../features/more/screens/ask_kuber_screen.dart';
 import '../../features/more/screens/troubleshoot_screen.dart';
 import '../../features/budgets/data/budget.dart';
+import '../../features/dev/screens/dev_tools_screen.dart';
+import '../../features/dev/screens/db_explorer_screen.dart';
+import '../../features/dev/screens/db_collection_screen.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
 import '../../features/budgets/screens/add_edit_budget_screen.dart';
 import '../../core/utils/prefs_keys.dart';
@@ -315,6 +318,27 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'troubleshoot',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const TroubleshootScreen(),
+                  ),
+                  GoRoute(
+                    path: 'dev-tools',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const DevToolsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'db-explorer',
+                        parentNavigatorKey: _rootNavigatorKey,
+                        builder: (_, _) => const DbExplorerScreen(),
+                        routes: [
+                          GoRoute(
+                            path: ':collection',
+                            parentNavigatorKey: _rootNavigatorKey,
+                            builder: (_, state) => DbCollectionScreen(
+                              collectionName: state.pathParameters['collection']!,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),

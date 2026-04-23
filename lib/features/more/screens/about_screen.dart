@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../dev/widgets/version_tap_detector.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -126,75 +127,77 @@ class AboutScreen extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xxl),
 
                 // App Info Section
-                _AboutCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "App Version",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          Consumer(
-                            builder: (context, ref, _) {
-                              final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainerHigh,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: cs.outlineVariant),
-                                ),
-                                child: Text(
-                                  "v$version",
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: KuberSpacing.lg),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerLow.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(KuberRadius.sm),
-                          border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
-                        ),
-                        child: Row(
+                VersionTapDetector(
+                  child: _AboutCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.lock_outline_rounded,
-                                size: 14, color: cs.primary),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                "Privacy Note: Your data stays on your device",
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: cs.onSurfaceVariant,
-                                ),
+                            Text(
+                              "App Version",
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: cs.onSurface,
                               ),
+                            ),
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: cs.surfaceContainerHigh,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: cs.outlineVariant),
+                                  ),
+                                  child: Text(
+                                    "v$version",
+                                    style: GoogleFonts.jetBrainsMono(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onSurface,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: KuberSpacing.lg),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainerLow.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(KuberRadius.sm),
+                            border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.lock_outline_rounded,
+                                  size: 14, color: cs.primary),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "Privacy Note: Your data stays on your device",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: KuberSpacing.xxl),

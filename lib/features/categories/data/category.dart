@@ -14,6 +14,16 @@ class Category {
 
   @Index()
   int? groupId;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'icon': icon,
+    'colorValue': colorValue,
+    'isDefault': isDefault,
+    'type': type,
+    'groupId': groupId,
+  };
 }
 
 extension CategoryTypeExt on Category {

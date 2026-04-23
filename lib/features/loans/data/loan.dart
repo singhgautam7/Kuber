@@ -45,4 +45,28 @@ class Loan {
   late DateTime createdAt;
 
   late DateTime updatedAt;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'uid': uid,
+    'name': name,
+    'loanType': loanType,
+    'lenderName': lenderName,
+    'referenceNumber': referenceNumber,
+    'principalAmount': principalAmount,
+    'emiAmount': emiAmount,
+    'rateType': rateType,
+    'interestRate': interestRate,
+    'loanStartDate': loanStartDate?.toIso8601String(),
+    'billDate': billDate,
+    'startDate': startDate.toIso8601String(),
+    'endDate': endDate?.toIso8601String(),
+    'autoAddTransaction': autoAddTransaction,
+    'accountId': accountId,
+    'categoryId': categoryId,
+    'notes': notes,
+    'isCompleted': isCompleted,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }

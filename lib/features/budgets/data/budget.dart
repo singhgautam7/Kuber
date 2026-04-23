@@ -43,6 +43,23 @@ class Budget {
   Budget() {
     updatedAt = DateTime.now();
   }
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'categoryId': categoryId,
+    'amount': amount,
+    'periodType': periodType.name,
+    'startDate': startDate.toIso8601String(),
+    'endDate': endDate?.toIso8601String(),
+    'isRecurring': isRecurring,
+    'anchorDay': anchorDay,
+    'durationDays': durationDays,
+    'isActive': isActive,
+    'lastEvaluatedAt': lastEvaluatedAt?.toIso8601String(),
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'alerts': alerts.map((a) => a.toMap()).toList(),
+  };
 }
 
 enum BudgetAlertType {
@@ -64,4 +81,12 @@ class BudgetAlert {
   DateTime createdAt = DateTime.now();
   
   BudgetAlert();
+
+  Map<String, dynamic> toMap() => {
+    'type': type.name,
+    'value': value,
+    'isTriggered': isTriggered,
+    'enableNotification': enableNotification,
+    'createdAt': createdAt.toIso8601String(),
+  };
 }

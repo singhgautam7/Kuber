@@ -33,4 +33,25 @@ class RecurringRule {
 
   late DateTime createdAt;
   late DateTime updatedAt;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'amount': amount,
+    'type': type,
+    'categoryId': categoryId,
+    'accountId': accountId,
+    'notes': notes,
+    'frequency': frequency,
+    'customDays': customDays,
+    'startDate': startDate.toIso8601String(),
+    'nextDueAt': nextDueAt.toIso8601String(),
+    'executionCount': executionCount,
+    'endType': endType,
+    'endAfter': endAfter,
+    'endDate': endDate?.toIso8601String(),
+    'isPaused': isPaused,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }
