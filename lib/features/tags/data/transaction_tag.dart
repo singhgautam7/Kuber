@@ -11,4 +11,10 @@ class TransactionTag {
 
   @Index()
   late int tagId;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'transactionId': transactionId,
+    'tagId': tagId,
+  };
 }

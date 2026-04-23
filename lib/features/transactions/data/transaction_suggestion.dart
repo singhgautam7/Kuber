@@ -15,4 +15,15 @@ class TransactionSuggestion {
   double? amount;
   late DateTime createdAt;
   late DateTime updatedAt;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'nameLower': nameLower,
+    'displayName': displayName,
+    'categoryId': categoryId,
+    'accountId': accountId,
+    'amount': amount,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }

@@ -20,4 +20,11 @@ class Tag {
         .replaceAll(RegExp(r'\s+'), '-')
         .replaceAll(RegExp(r'[^a-z0-9-_]'), '');
   }
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'isEnabled': isEnabled,
+    'createdAt': createdAt.toIso8601String(),
+  };
 }

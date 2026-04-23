@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../dev/widgets/version_tap_detector.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -144,22 +145,24 @@ class AboutScreen extends ConsumerWidget {
                           Consumer(
                             builder: (context, ref, _) {
                               final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainerHigh,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(color: cs.outlineVariant),
-                                ),
-                                child: Text(
-                                  "v$version",
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface,
+                              return VersionTapDetector(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: cs.surfaceContainerHigh,
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: cs.outlineVariant),
+                                  ),
+                                  child: Text(
+                                    "v$version",
+                                    style: GoogleFonts.jetBrainsMono(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onSurface,
+                                    ),
                                   ),
                                 ),
                               );

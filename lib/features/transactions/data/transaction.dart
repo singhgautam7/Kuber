@@ -43,4 +43,24 @@ class Transaction {
 
   @ignore
   String? tempTags; // temporary storage for import
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'amount': amount,
+    'type': type,
+    'categoryId': categoryId,
+    'accountId': accountId,
+    'notes': notes,
+    'quickAddNote': quickAddNote,
+    'linkedRuleId': linkedRuleId,
+    'linkedRuleType': linkedRuleType,
+    'isBalanceAdjustment': isBalanceAdjustment,
+    'isTransfer': isTransfer,
+    'transferId': transferId,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'nameLower': nameLower,
+    'attachmentPaths': attachmentPaths,
+  };
 }

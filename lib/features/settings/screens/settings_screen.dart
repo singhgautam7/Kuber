@@ -11,6 +11,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
+import '../../dev/widgets/version_tap_detector.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../../../core/utils/formatters.dart';
@@ -432,11 +433,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       trailing: Consumer(
                         builder: (context, ref, _) {
                           final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
-                          return Text(
-                            'v$version',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: cs.onSurfaceVariant,
+                          return VersionTapDetector(
+                            child: Text(
+                              'v$version',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                color: cs.onSurfaceVariant,
+                              ),
                             ),
                           );
                         },

@@ -30,4 +30,20 @@ class Ledger {
   late DateTime createdAt;
 
   late DateTime updatedAt;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'uid': uid,
+    'personName': personName,
+    'personNameLower': personNameLower,
+    'type': type,
+    'originalAmount': originalAmount,
+    'accountId': accountId,
+    'categoryId': categoryId,
+    'notes': notes,
+    'expectedDate': expectedDate?.toIso8601String(),
+    'isSettled': isSettled,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }

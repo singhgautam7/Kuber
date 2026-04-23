@@ -29,4 +29,20 @@ class Investment {
   late DateTime createdAt;
 
   late DateTime updatedAt;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'uid': uid,
+    'name': name,
+    'investmentType': investmentType,
+    'currentValue': currentValue,
+    'autoDebit': autoDebit,
+    'sipAmount': sipAmount,
+    'sipDate': sipDate,
+    'accountId': accountId,
+    'categoryId': categoryId,
+    'notes': notes,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 }
