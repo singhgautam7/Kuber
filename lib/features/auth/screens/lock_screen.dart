@@ -15,29 +15,39 @@ class LockScreen extends ConsumerStatefulWidget {
 }
 
 class _LockScreenState extends ConsumerState<LockScreen> {
+  bool _hasAutoTriggered = false;
+
   @override
   void initState() {
     super.initState();
-    // Trigger auth on first load
+    // Cover the case where authProvider is already true on first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _triggerAuth();
-    });
-  }
-
-  Future<void> _triggerAuth() async {
-    // Only trigger if currently locked and biometrics is actually enabled
-    if (ref.read(authProvider)) {
-      // Add small delay for smoother transition
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (mounted && ref.read(authProvider)) {
-        ref.read(authProvider.notifier).authenticate();
+      if (ref.read(authProvider) && !_hasAutoTriggered) {
+        _hasAutoTriggered = true;
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted && ref.read(authProvider)) {
+            ref.read(authProvider.notifier).authenticate();
+          }
+        });
       }
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final isLocked = ref.watch(authProvider);
+
+    // Fires when _initialize() in AuthNotifier completes async and sets state = true
+    ref.listen<bool>(authProvider, (prev, next) {
+      if (prev == false && next == true && !_hasAutoTriggered) {
+        _hasAutoTriggered = true;
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted && ref.read(authProvider)) {
+            ref.read(authProvider.notifier).authenticate();
+          }
+        });
+      }
+    });
     final cs = Theme.of(context).colorScheme;
     final currency = ref.watch(currencyProvider);
 

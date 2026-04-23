@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
@@ -49,7 +50,7 @@ class SpendingStatsCard extends ConsumerWidget {
                         Text('AVG DAILY', style: _captionStyle(context)),
                         const SizedBox(height: 4),
                         Text(
-                          ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()),
+                          maskAmount(ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()), ref.watch(privacyModeProvider)),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -67,7 +68,7 @@ class SpendingStatsCard extends ConsumerWidget {
                         Text('THIS MONTH', style: _captionStyle(context)),
                         const SizedBox(height: 4),
                         Text(
-                          ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()),
+                          maskAmount(ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()), ref.watch(privacyModeProvider)),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
@@ -85,7 +86,7 @@ class SpendingStatsCard extends ConsumerWidget {
                         Text('PROJECTED', style: _captionStyle(context)),
                         const SizedBox(height: 4),
                         Text(
-                          ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()),
+                          maskAmount(ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()), ref.watch(privacyModeProvider)),
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: Theme.of(context).colorScheme.onSurface,

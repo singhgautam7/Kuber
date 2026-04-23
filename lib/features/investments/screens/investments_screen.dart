@@ -12,8 +12,9 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/info_provider.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+    show formatterProvider, privacyModeProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/investment.dart';
@@ -136,6 +137,7 @@ class _SummaryGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final totalInvested = calc.totalInvestedAll(investments, allTxns);
     final currentValue = calc.totalCurrentValueAll(investments);
@@ -155,7 +157,7 @@ class _SummaryGrid extends ConsumerWidget {
               Expanded(
                 child: _SummaryCard(
                   label: 'TOTAL INVESTED',
-                  amount: fmt.formatCurrency(totalInvested),
+                  amount: maskAmount(fmt.formatCurrency(totalInvested), isPrivate),
                   color: cs.onSurface,
                 ),
               ),
@@ -163,7 +165,7 @@ class _SummaryGrid extends ConsumerWidget {
               Expanded(
                 child: _SummaryCard(
                   label: 'CURRENT VALUE',
-                  amount: fmt.formatCurrency(currentValue),
+                  amount: maskAmount(fmt.formatCurrency(currentValue), isPrivate),
                   color: isGain ? cs.tertiary : cs.error,
                 ),
               ),
@@ -174,7 +176,7 @@ class _SummaryGrid extends ConsumerWidget {
             children: [
               Expanded(
                 child: _GainLossCard(
-                  amount: fmt.formatCurrency(gainLoss.abs()),
+                  amount: maskAmount(fmt.formatCurrency(gainLoss.abs()), isPrivate),
                   isGain: isGain,
                   percent: gainLossPercent,
                 ),
@@ -333,6 +335,7 @@ class _InvestmentCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
 
     final totalInvested =
         calc.computeTotalInvested(investment.uid, allTxns);
@@ -414,7 +417,7 @@ class _InvestmentCard extends ConsumerWidget {
                   children: [
                     Text(
                       hasCurrentValue
-                          ? fmt.formatCurrency(investment.currentValue!)
+                          ? maskAmount(fmt.formatCurrency(investment.currentValue!), isPrivate)
                           : '—',
                       style: GoogleFonts.inter(
                         fontSize: 16,
@@ -458,7 +461,7 @@ class _InvestmentCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        fmt.formatCurrency(totalInvested),
+                        maskAmount(fmt.formatCurrency(totalInvested), isPrivate),
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,

@@ -9,7 +9,8 @@ import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider;
+import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../data/transaction.dart';
 import '../helpers/transaction_filters.dart';
 import '../providers/transaction_provider.dart';
@@ -151,6 +152,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   }
                   final totalNet = totalInc - totalExp;
                   final fmt = ref.watch(formatterProvider);
+                  final isPrivate = ref.watch(privacyModeProvider);
                   final groups = groupTransactionsByDate(filtered);
 
                   // Build tag names map for indicator line
@@ -173,71 +175,76 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         padding: const EdgeInsets.symmetric(
                           horizontal: KuberSpacing.lg,
                         ),
-                        child: Row(
-                          children: [
-                            Text(
-                              'EXP ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: cs.onSurfaceVariant,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'EXP ',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '-${fmt.formatCurrency(totalExp)}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: cs.error,
+                              Text(
+                                maskAmount('-${fmt.formatCurrency(totalExp.round())}', isPrivate),
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: cs.error,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: KuberSpacing.lg),
-                            Text(
-                              'INC ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: cs.onSurfaceVariant,
+                              const SizedBox(width: KuberSpacing.lg),
+                              Text(
+                                'INC ',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '+${fmt.formatCurrency(totalInc)}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: cs.tertiary,
+                              Text(
+                                maskAmount('+${fmt.formatCurrency(totalInc.round())}', isPrivate),
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: cs.tertiary,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: KuberSpacing.lg),
-                            Text(
-                              'NET ',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.8,
-                                color: cs.onSurfaceVariant,
+                              const SizedBox(width: KuberSpacing.lg),
+                              Text(
+                                'NET ',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            Text(
-                              totalNet == 0
-                                  ? fmt.formatCurrency(0)
-                                  : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs())}',
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.8,
-                                color: totalNet > 0
-                                    ? cs.tertiary
-                                    : totalNet < 0
-                                        ? cs.error
-                                        : cs.onSurfaceVariant,
+                              Text(
+                                maskAmount(totalNet == 0
+                                    ? fmt.formatCurrency(0)
+                                    : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}', isPrivate),
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: totalNet > 0
+                                      ? cs.tertiary
+                                      : totalNet < 0
+                                          ? cs.error
+                                          : cs.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -392,6 +399,7 @@ class _SelectionActionBar extends ConsumerWidget {
     }
     final totalNet = totalInc - totalExp;
     final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
 
     return Material(
       elevation: 8,
@@ -425,11 +433,11 @@ class _SelectionActionBar extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Text('EXP -${fmt.formatCurrency(totalExp)}', style: TextStyle(fontSize: 10, color: cs.error, fontWeight: FontWeight.w600)),
+                        Text('EXP ${maskAmount('-${fmt.formatCurrency(totalExp)}', isPrivate)}', style: TextStyle(fontSize: 10, color: cs.error, fontWeight: FontWeight.w600)),
                         const SizedBox(width: KuberSpacing.md),
-                        Text('INC +${fmt.formatCurrency(totalInc)}', style: TextStyle(fontSize: 10, color: cs.tertiary, fontWeight: FontWeight.w600)),
+                        Text('INC ${maskAmount('+${fmt.formatCurrency(totalInc)}', isPrivate)}', style: TextStyle(fontSize: 10, color: cs.tertiary, fontWeight: FontWeight.w600)),
                         const SizedBox(width: KuberSpacing.md),
-                        Text('NET ${totalNet > 0 ? "+" : totalNet < 0 ? "-" : ""}${fmt.formatCurrency(totalNet.abs())}',
+                        Text('NET ${maskAmount('${totalNet > 0 ? "+" : totalNet < 0 ? "-" : ""}${fmt.formatCurrency(totalNet.abs())}', isPrivate)}',
                           style: TextStyle(
                             fontSize: 10,
                             color: totalNet > 0 ? cs.tertiary : totalNet < 0 ? cs.error : cs.onSurfaceVariant,

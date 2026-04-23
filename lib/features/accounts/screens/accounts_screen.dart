@@ -10,7 +10,8 @@ import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, settingsProvider;
+import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, privacyModeProvider, settingsProvider;
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../widgets/account_detail_sheet.dart';
@@ -288,7 +289,7 @@ class _AccountCard extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${balance < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(balance.abs())}',
+                  maskAmount('${balance < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(balance.abs())}', ref.watch(privacyModeProvider)),
                   style: GoogleFonts.inter(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
@@ -298,7 +299,7 @@ class _AccountCard extends ConsumerWidget {
                 ),
                 if (account.isCreditCard && account.creditLimit != null)
                   Text(
-                    'Limit  ${ref.watch(formatterProvider).formatCurrency(account.creditLimit!)}',
+                    'Limit  ${maskAmount(ref.watch(formatterProvider).formatCurrency(account.creditLimit!), ref.watch(privacyModeProvider))}',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: cs.onSurfaceVariant,
@@ -382,7 +383,7 @@ class _NetWorthCard extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '${netWorth < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(netWorth.abs())}',
+            maskAmount('${netWorth < 0 ? '−' : ''}${ref.watch(formatterProvider).formatCurrency(netWorth.abs())}', ref.watch(privacyModeProvider)),
             style: GoogleFonts.inter(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -441,7 +442,7 @@ class _NetWorthLegend extends StatelessWidget {
         const SizedBox(width: 6),
         Consumer(builder: (context, ref, _) {
           return Text(
-            '$label: ${ref.watch(formatterProvider).formatCurrency(amount)}',
+            '$label: ${maskAmount(ref.watch(formatterProvider).formatCurrency(amount), ref.watch(privacyModeProvider))}',
             style: GoogleFonts.inter(
               fontSize: 12,
               color: cs.onSurfaceVariant,

@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../recurring/providers/recurring_provider.dart';
 import '../../recurring/widgets/recurring_detail_sheet.dart';
@@ -141,7 +142,7 @@ class HomeRecurringCard extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                CurrencyFormatter.format(rule.amount),
+                                maskAmount(CurrencyFormatter.format(rule.amount), ref.watch(privacyModeProvider)),
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: rule.type == 'income'
                                       ? cs.tertiary

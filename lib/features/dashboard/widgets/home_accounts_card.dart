@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_detail_sheet.dart';
@@ -54,17 +55,20 @@ class HomeAccountsCard extends ConsumerWidget {
             const SizedBox(height: KuberSpacing.sm),
             SizedBox(
               height: 110,
-              child: PageView.builder(
-                controller: PageController(viewportFraction: 0.45),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
+                padding: EdgeInsets.zero,
                 itemCount: accounts.length,
-                padEnds: false,
                 itemBuilder: (context, i) {
                   final account = accounts[i];
                   final balanceAsync =
                       ref.watch(accountBalanceProvider(account.id));
                   final acctColor = resolveAccountColor(account);
 
-                  return Padding(
+                  return SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: InkWell(
                       onTap: () {
@@ -137,7 +141,7 @@ class HomeAccountsCard extends ConsumerWidget {
                                   balanceColor = balance < 0 ? cs.error : null;
                                 }
                                 return Text(
-                                  ref.watch(formatterProvider).formatCurrency(balance),
+                                  maskAmount(ref.watch(formatterProvider).formatCurrency(balance), ref.watch(privacyModeProvider)),
                                   style: textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: balanceColor,
@@ -156,6 +160,7 @@ class HomeAccountsCard extends ConsumerWidget {
                         ),
                       ),
                     ),
+                  ),
                   );
                 },
               ),

@@ -662,7 +662,7 @@ class CategoriesScreen extends ConsumerWidget {
     if (hasTxns) {
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogCtx) => AlertDialog(
           backgroundColor: cs.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -684,7 +684,7 @@ class CategoriesScreen extends ConsumerWidget {
             AppButton(
               label: 'OK',
               type: AppButtonType.primary,
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.of(dialogCtx).pop(),
             ),
           ],
         ),
@@ -692,7 +692,7 @@ class CategoriesScreen extends ConsumerWidget {
     } else {
       showDialog(
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (dialogCtx) => AlertDialog(
           backgroundColor: cs.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
@@ -711,7 +711,7 @@ class CategoriesScreen extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.of(dialogCtx).pop(),
               child: Text(
                 'Cancel',
                 style: GoogleFonts.inter(color: cs.onSurfaceVariant),
@@ -719,11 +719,11 @@ class CategoriesScreen extends ConsumerWidget {
             ),
             AppButton(
               label: 'Delete',
-              type: AppButtonType.primary,
-              onPressed: () {
-                ref.read(categoryRepositoryProvider).delete(cat.id);
+              type: AppButtonType.danger,
+              onPressed: () async {
+                await ref.read(categoryRepositoryProvider).delete(cat.id);
                 ref.invalidate(categoryListProvider);
-                Navigator.pop(context);
+                if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
               },
             ),
           ],

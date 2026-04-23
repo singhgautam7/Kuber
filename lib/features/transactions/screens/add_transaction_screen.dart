@@ -9,7 +9,8 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/transfer_helpers.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider;
+import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -571,7 +572,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                               ),
                               if (s.amount != null)
                                 Text(
-                                  ref.watch(formatterProvider).formatCurrency(s.amount!),
+                                  maskAmount(ref.watch(formatterProvider).formatCurrency(s.amount!), ref.watch(privacyModeProvider)),
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall

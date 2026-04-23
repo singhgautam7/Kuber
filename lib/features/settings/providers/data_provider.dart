@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_community/isar.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/services/data_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../features/transactions/services/suggestion_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
+import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -254,6 +257,43 @@ class DataController extends StateNotifier<DataState> {
       state = state.copyWith(status: DataOpStatus.success, message: 'All data cleared successfully');
     } catch (e) {
       state = state.copyWith(status: DataOpStatus.error, message: 'Clear failed: $e');
+    }
+  }
+
+  Future<void> runImport(String content, {required bool isJson, bool override = false}) async {
+    state = state.copyWith(status: DataOpStatus.loading, loadingMessage: 'Importing data…');
+    try {
+      ImportResult result;
+      if (isJson) {
+        result = await _service.importJson(content);
+      } else {
+        result = await _service.importData(content, override: override);
+      }
+      if (result.error != null) throw Exception(result.error);
+      _refreshData();
+      final msg = result.failureCount > 0
+          ? 'Imported ${result.successCount} records, ${result.failureCount} failed'
+          : 'Imported ${result.successCount} records successfully';
+      state = state.copyWith(status: DataOpStatus.success, message: msg);
+    } catch (e) {
+      state = state.copyWith(status: DataOpStatus.error, message: 'Import failed: $e');
+    }
+  }
+
+  Future<void> rebuildSuggestions() async {
+    state = state.copyWith(status: DataOpStatus.loading, loadingMessage: 'Rebuilding suggestions…');
+    try {
+      final suggestionService = SuggestionService(_service.isar);
+      await suggestionService.clearAll();
+      final txns = await _service.isar.transactions.where().findAll();
+      for (final tx in txns) {
+        if (!tx.isTransfer) {
+          await suggestionService.upsertSuggestion(tx);
+        }
+      }
+      state = state.copyWith(status: DataOpStatus.success, message: 'Suggestions rebuilt successfully');
+    } catch (e) {
+      state = state.copyWith(status: DataOpStatus.error, message: 'Rebuild failed: $e');
     }
   }
 

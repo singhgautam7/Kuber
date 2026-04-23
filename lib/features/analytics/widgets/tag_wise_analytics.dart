@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../transactions/data/transaction.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/data/tag.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 
 class TagWiseAnalytics extends ConsumerWidget {
@@ -113,7 +114,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                                 ),
                                 const Spacer(),
                                 Text(
-                                  ref.watch(formatterProvider).formatCurrency(amount),
+                                  maskAmount(ref.watch(formatterProvider).formatCurrency(amount), ref.watch(privacyModeProvider)),
                                   style: tt.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: cs.onSurface,

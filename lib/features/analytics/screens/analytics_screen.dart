@@ -13,7 +13,8 @@ import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/helpers/transaction_filters.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider;
+import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../providers/analytics_provider.dart';
 import '../widgets/category_group_stats.dart';
 import '../widgets/analytics_toggle.dart';
@@ -404,7 +405,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                           ),
                           Text(
-                            '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
+                            maskAmount('${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}', ref.watch(privacyModeProvider)),
                             style: tt.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: isExpense ? cs.error : cs.tertiary,
@@ -443,7 +444,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Income',
-                  amount: ref.watch(formatterProvider).formatCurrency(income),
+                  amount: maskAmount(ref.watch(formatterProvider).formatCurrency(income), ref.watch(privacyModeProvider)),
                   color: cs.tertiary,
                   icon: Icons.arrow_downward,
                 ),
@@ -452,7 +453,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Expense',
-                  amount: ref.watch(formatterProvider).formatCurrency(expense),
+                  amount: maskAmount(ref.watch(formatterProvider).formatCurrency(expense), ref.watch(privacyModeProvider)),
                   color: cs.error,
                   icon: Icons.arrow_upward,
                 ),
@@ -478,7 +479,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   ),
                 ),
                 Text(
-                  '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}',
+                  maskAmount('${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}', ref.watch(privacyModeProvider)),
                   style: tt.titleMedium?.copyWith(
                     color: net >= 0 ? cs.tertiary : cs.error,
                     fontWeight: FontWeight.w700,

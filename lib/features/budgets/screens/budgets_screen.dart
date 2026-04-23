@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
@@ -196,7 +197,7 @@ class BudgetCard extends ConsumerWidget {
                             : isDisabled
                               ? 'BUDGET IS CURRENTLY PAUSED'
                               : p.percentage >= 100
-                                ? 'EXCEEDED BY ${ref.watch(formatterProvider).formatCurrency(p.spent - p.limit)}'
+                                ? 'EXCEEDED BY ${maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent - p.limit), ref.watch(privacyModeProvider))}'
                                 : '${budget.isRecurring ? 'RESETS' : 'EXPIRES'} IN ${p.daysRemaining} ${p.daysRemaining == 1 ? 'DAY' : 'DAYS'}',
                           style: GoogleFonts.inter(
                             fontSize: 11,
@@ -234,7 +235,7 @@ class BudgetCard extends ConsumerWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '${ref.watch(formatterProvider).formatCurrency(p.spent)} ',
+                              text: '${maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent), ref.watch(privacyModeProvider))} ',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -242,7 +243,7 @@ class BudgetCard extends ConsumerWidget {
                               ),
                             ),
                             TextSpan(
-                              text: '/ ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
+                              text: '/ ${maskAmount(ref.watch(formatterProvider).formatCurrency(p.limit), ref.watch(privacyModeProvider))}',
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 color: cs.onSurfaceVariant,
@@ -326,7 +327,7 @@ class _AlertChips extends ConsumerWidget {
         
         final label = a.type == BudgetAlertType.percentage
             ? ref.watch(formatterProvider).formatPercentage(a.value)
-            : ref.watch(formatterProvider).formatCurrency(a.value);
+            : maskAmount(ref.watch(formatterProvider).formatCurrency(a.value), ref.watch(privacyModeProvider));
         
         Color badgeColor;
         if (percentage >= 66) {

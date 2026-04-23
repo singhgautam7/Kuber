@@ -7,7 +7,8 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../transactions/providers/stats_provider.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider;
+import '../../../core/utils/currency_formatter.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import 'analytics_toggle.dart';
 
 class CategoryGroupStatsWidget extends ConsumerStatefulWidget {
@@ -244,7 +245,7 @@ class _StatRow extends ConsumerWidget {
                   children: [
                     Text(label, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                     Text(
-                      ref.watch(formatterProvider).formatCurrency(amount),
+                      maskAmount(ref.watch(formatterProvider).formatCurrency(amount), ref.watch(privacyModeProvider)),
                       style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ],

@@ -36,6 +36,18 @@ final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return settings?.themeMode ?? ThemeMode.system;
 });
 
+final privacyModeProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.privacyMode ?? false;
+});
+
+final thresholdFloorProvider = Provider<double>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.thresholdFloor ?? 500;
+});
+
+final thresholdCeilingProvider = Provider<double>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.thresholdCeiling ?? 2000;
+});
+
 enum NumberSystem {
   indian,
   international,
@@ -56,6 +68,9 @@ class SettingsState {
   final bool biometricsEnabled;
   final NumberSystem numberSystem;
   final String? defaultAccountId;
+  final bool privacyMode;
+  final double thresholdFloor;
+  final double thresholdCeiling;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -66,6 +81,9 @@ class SettingsState {
     this.biometricsEnabled = false,
     this.numberSystem = NumberSystem.indian,
     this.defaultAccountId,
+    this.privacyMode = false,
+    this.thresholdFloor = 500,
+    this.thresholdCeiling = 2000,
   });
 
   SettingsState copyWith({
@@ -76,6 +94,9 @@ class SettingsState {
     SwipeMode? swipeMode,
     bool? biometricsEnabled,
     NumberSystem? numberSystem,
+    bool? privacyMode,
+    double? thresholdFloor,
+    double? thresholdCeiling,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -85,6 +106,10 @@ class SettingsState {
       swipeMode: swipeMode ?? this.swipeMode,
       biometricsEnabled: biometricsEnabled ?? this.biometricsEnabled,
       numberSystem: numberSystem ?? this.numberSystem,
+      defaultAccountId: this.defaultAccountId, // ignore: unnecessary_this
+      privacyMode: privacyMode ?? this.privacyMode,
+      thresholdFloor: thresholdFloor ?? this.thresholdFloor,
+      thresholdCeiling: thresholdCeiling ?? this.thresholdCeiling,
     );
   }
 }
@@ -102,6 +127,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final biometricsEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
     final numberSystemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
     final defaultAccountId = prefs.getString(PrefsKeys.defaultAccountId);
+    final privacyMode = prefs.getBool(PrefsKeys.privacyMode) ?? false;
+    final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
+    final thresholdCeiling = prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -112,6 +140,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       biometricsEnabled: biometricsEnabled,
       numberSystem: NumberSystem.values[numberSystemIndex],
       defaultAccountId: defaultAccountId,
+      privacyMode: privacyMode,
+      thresholdFloor: thresholdFloor,
+      thresholdCeiling: thresholdCeiling,
     );
   }
 
@@ -132,6 +163,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       biometricsEnabled: cur.biometricsEnabled,
       numberSystem: cur.numberSystem,
       defaultAccountId: id,
+      privacyMode: cur.privacyMode,
     ));
   }
 
@@ -169,6 +201,23 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PrefsKeys.biometricsEnabled, enabled);
     state = AsyncData(state.requireValue.copyWith(biometricsEnabled: enabled));
+  }
+
+  Future<void> setThresholds(double floor, double ceiling) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(PrefsKeys.thresholdFloor, floor);
+    await prefs.setDouble(PrefsKeys.thresholdCeiling, ceiling);
+    state = AsyncData(state.requireValue.copyWith(
+      thresholdFloor: floor,
+      thresholdCeiling: ceiling,
+    ));
+  }
+
+  Future<void> togglePrivacyMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final next = !state.requireValue.privacyMode;
+    await prefs.setBool(PrefsKeys.privacyMode, next);
+    state = AsyncData(state.requireValue.copyWith(privacyMode: next));
   }
 
   Future<void> setNumberSystem(NumberSystem system) async {

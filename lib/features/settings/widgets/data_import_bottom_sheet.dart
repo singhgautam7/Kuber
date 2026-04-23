@@ -30,8 +30,6 @@ void showDataImportBottomSheet(BuildContext context) {
 
 enum _ImportFmt { csv, json }
 
-enum _Stage { options, progress, complete, error }
-
 // ---------------------------------------------------------------------------
 // Widget
 // ---------------------------------------------------------------------------
@@ -44,12 +42,8 @@ class DataImportBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
-  _Stage _stage = _Stage.options;
   _ImportFmt _format = _ImportFmt.csv;
   bool _override = false;
-
-  String _errorMessage = '';
-  int _importedCount = 0;
   bool _isDownloadingTemplate = false;
 
   @override
@@ -102,12 +96,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           ),
           const SizedBox(height: KuberSpacing.sm),
 
-          switch (_stage) {
-            _Stage.options => _buildOptions(cs),
-            _Stage.progress => _buildProgress(cs),
-            _Stage.complete => _buildComplete(cs),
-            _Stage.error => _buildError(cs),
-          },
+          _buildOptions(cs),
         ],
       ),
     );
@@ -419,115 +408,6 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
     }
   }
 
-  // ---- Progress --------------------------------------------------------------
-
-  Widget _buildProgress(ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xxl),
-      child: Column(
-        children: [
-          CircularProgressIndicator(color: cs.primary),
-          const SizedBox(height: KuberSpacing.xl),
-          Text(
-            'Importing your data…',
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ---- Complete --------------------------------------------------------------
-
-  Widget _buildComplete(ColorScheme cs) {
-    return Column(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.check_circle_rounded, size: 32, color: cs.primary),
-        ),
-        const SizedBox(height: KuberSpacing.lg),
-        Text(
-          'Import Successful',
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '$_importedCount records imported.',
-          style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: KuberSpacing.xl),
-        AppButton(
-          label: 'Done',
-          type: AppButtonType.primary,
-          fullWidth: true,
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
-  }
-
-  // ---- Error -----------------------------------------------------------------
-
-  Widget _buildError(ColorScheme cs) {
-    return Column(
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: cs.error.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.error_outline_rounded, size: 36, color: cs.error),
-        ),
-        const SizedBox(height: KuberSpacing.lg),
-        Text(
-          'Import Failed',
-          style: GoogleFonts.inter(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.sm),
-        Text(
-          _errorMessage,
-          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: KuberSpacing.xl),
-        AppButton(
-          label: 'Try Again',
-          type: AppButtonType.primary,
-          fullWidth: true,
-          onPressed: () => setState(() => _stage = _Stage.options),
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        AppButton(
-          label: 'Cancel',
-          type: AppButtonType.normal,
-          fullWidth: true,
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
-  }
-
   // ---- Logic -----------------------------------------------------------------
 
   Future<void> _startImport() async {
@@ -540,39 +420,19 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
 
     if (result == null || result.files.isEmpty) return;
 
-    setState(() => _stage = _Stage.progress);
+    final filePath = result.files.first.path;
+    if (filePath == null) return;
 
-    try {
-      final filePath = result.files.first.path;
-      if (filePath == null) throw Exception('Could not read file path.');
+    final content = await File(filePath).readAsString();
 
-      final content = await File(filePath).readAsString();
-      final service = ref.read(dataServiceProvider);
+    if (!mounted) return;
+    // Close the sheet and let DataManagementScreen show the full-screen loader
+    Navigator.of(context).pop();
 
-      int count = 0;
-      if (_format == _ImportFmt.csv) {
-        final importResult = await service.importData(content, override: _override);
-        if (importResult.error != null) throw Exception(importResult.error);
-        count = importResult.successCount;
-      } else {
-        final importResult = await service.importJson(content);
-        if (importResult.error != null) throw Exception(importResult.error);
-        count = importResult.successCount;
-      }
-
-      ref.read(dataControllerProvider.notifier).refreshAfterImport();
-
-      if (!mounted) return;
-      setState(() {
-        _importedCount = count;
-        _stage = _Stage.complete;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        _stage = _Stage.error;
-      });
-    }
+    ref.read(dataControllerProvider.notifier).runImport(
+      content,
+      isJson: _format == _ImportFmt.json,
+      override: _override,
+    );
   }
 }
