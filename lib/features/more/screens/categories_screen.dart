@@ -719,7 +719,7 @@ class CategoriesScreen extends ConsumerWidget {
             ),
             AppButton(
               label: 'Delete',
-              type: AppButtonType.primary,
+              type: AppButtonType.danger,
               onPressed: () async {
                 await ref.read(categoryRepositoryProvider).delete(cat.id);
                 ref.invalidate(categoryListProvider);

@@ -292,10 +292,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
             icon: Icons.delete_outline_rounded,
             type: AppButtonType.danger,
             fullWidth: true,
-            onPressed: () {
-              Navigator.of(context).pop();
-              _confirmDelete(context, ref);
-            },
+            onPressed: () => _confirmDelete(context, ref),
           ),
         ],
       ),
@@ -339,6 +336,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
               await ref.read(tagRepositoryProvider).deleteTag(tag.id);
               ref.invalidate(tagListProvider);
               if (ctx.mounted) Navigator.of(ctx).pop();
+              if (context.mounted) Navigator.of(context).pop();
             },
             child: const Text('Delete'),
           ),
