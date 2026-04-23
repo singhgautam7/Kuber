@@ -11,7 +11,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
-import '../../dev/widgets/version_tap_detector.dart';
+
 import '../widgets/settings_widgets.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../../../core/utils/formatters.dart';
@@ -422,32 +422,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // ABOUT
-                _SectionLabel(label: 'ABOUT'),
-                const SizedBox(height: KuberSpacing.sm),
-                _SettingsCard(
-                  children: [
-                    _SettingsTile(
-                      icon: Icons.info_outline_rounded,
-                      label: 'App Version',
-                      trailing: Consumer(
-                        builder: (context, ref, _) {
-                          final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
-                          return VersionTapDetector(
-                            child: Text(
-                              'v$version',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.xxl),
+
               ]),
             ),
           ),

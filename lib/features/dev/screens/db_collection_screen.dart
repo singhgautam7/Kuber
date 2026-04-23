@@ -37,6 +37,8 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
   bool _isLoading = true;
   int _currentPage = 1;
   int _pageSize = 50;
+  int? _sortColumnIndex;
+  bool _sortAscending = true;
 
   @override
   void initState() {
@@ -124,6 +126,64 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
     return _allRecords.sublist(start, end);
   }
 
+  Future<void> _setPage(int newPage) async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 100)); // Artificial delay for smooth loader
+    if (mounted) {
+      setState(() {
+        _currentPage = newPage;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _setPageSize(int newSize) async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 100)); // Artificial delay for smooth loader
+    if (mounted) {
+      setState(() {
+        _pageSize = newSize;
+        _currentPage = 1;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onSort(int columnIndex, bool ascending) async {
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 100)); // Delay for smooth UI response during sorting
+
+    if (!mounted) return;
+
+    final keys = _allRecords.first.keys.toList();
+    final sortKey = keys[columnIndex];
+
+    _allRecords.sort((a, b) {
+      final aVal = a[sortKey];
+      final bVal = b[sortKey];
+
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return ascending ? -1 : 1;
+      if (bVal == null) return ascending ? 1 : -1;
+
+      int result;
+      if (aVal is num && bVal is num) {
+        result = aVal.compareTo(bVal);
+      } else if (aVal is bool && bVal is bool) {
+        result = aVal == bVal ? 0 : (aVal ? 1 : -1);
+      } else {
+        result = aVal.toString().compareTo(bVal.toString());
+      }
+      return ascending ? result : -result;
+    });
+
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+      _isLoading = false;
+    });
+  }
+
   void _showRecordDetails(Map<String, dynamic> record) {
     showModalBottomSheet(
       context: context,
@@ -197,11 +257,8 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                     DropdownMenuItem(value: 500, child: Text('500 per page')),
                   ],
                   onChanged: (val) {
-                    if (val != null && mounted) {
-                      setState(() {
-                        _pageSize = val;
-                        _currentPage = 1; // Reset to page 1
-                      });
+                    if (val != null) {
+                      _setPageSize(val);
                     }
                   },
                 ),
@@ -243,6 +300,8 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                               headingRowColor: WidgetStateProperty.all(cs.surfaceContainerHigh),
                               showCheckboxColumn: false,
                               columnSpacing: 24,
+                              sortColumnIndex: _sortColumnIndex,
+                              sortAscending: _sortAscending,
                               columns: _buildColumns(cs),
                               rows: _buildRows(cs),
                             ),
@@ -268,7 +327,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
               children: [
                 TextButton.icon(
                   onPressed: _currentPage > 1
-                      ? () => setState(() => _currentPage--)
+                      ? () => _setPage(_currentPage - 1)
                       : null,
                   icon: const Icon(Icons.chevron_left_rounded),
                   label: const Text('Prev'),
@@ -287,7 +346,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                 ),
                 TextButton.icon(
                   onPressed: _currentPage < _totalPages
-                      ? () => setState(() => _currentPage++)
+                      ? () => _setPage(_currentPage + 1)
                       : null,
                   icon: const Icon(Icons.chevron_right_rounded),
                   label: const Text('Next'),
@@ -312,12 +371,17 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
 
     return keys.map((key) {
       return DataColumn(
-        label: Text(
-          key,
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: cs.onSurfaceVariant,
+        onSort: (columnIndex, ascending) => _onSort(columnIndex, ascending),
+        label: Expanded(
+          child: Text(
+            key,
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: cs.onSurfaceVariant,
+            ),
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       );

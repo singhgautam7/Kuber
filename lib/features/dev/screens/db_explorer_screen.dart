@@ -59,6 +59,8 @@ class DbExplorerScreen extends ConsumerWidget {
             CollectionMeta('TransactionSuggestion', (i) => i.collection<TransactionSuggestion>().count()),
           ];
 
+          collections.sort((a, b) => a.name.compareTo(b.name));
+
           return ListView.separated(
             padding: const EdgeInsets.all(KuberSpacing.lg),
             itemCount: collections.length,

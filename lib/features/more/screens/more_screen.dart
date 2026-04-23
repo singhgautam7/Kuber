@@ -156,7 +156,6 @@ class MoreScreen extends ConsumerWidget {
                         icon: Icons.bug_report_outlined,
                         label: 'Dev Tools',
                         subtitle: 'Developer-only tools',
-                        color: cs.onSurfaceVariant,
                         onTap: () => context.push('/more/dev-tools'),
                       ),
                   ],
