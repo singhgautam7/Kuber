@@ -52,15 +52,9 @@ class MoreScreen extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // Manage section
-                _MenuSection(
+                 _MenuSection(
                   title: 'Manage',
                   items: [
-                    _MenuItem(
-                      icon: Icons.construction_outlined,
-                      label: 'Tools',
-                      subtitle: 'Calculators and utilities',
-                      onTap: () => context.push('/more/tools'),
-                    ),
                     _MenuItem(
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Accounts',
@@ -108,6 +102,12 @@ class MoreScreen extends ConsumerWidget {
                       label: 'Investments',
                       subtitle: 'Track portfolio value and growth',
                       onTap: () => context.push('/more/investments'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.construction_outlined,
+                      label: 'Tools (Beta)',
+                      subtitle: 'Calculators and utilities',
+                      onTap: () => context.push('/more/tools'),
                     ),
                   ],
                 ),
