@@ -20,6 +20,8 @@ import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
 import '../../investments/data/investment.dart';
 import '../../transactions/data/transaction_suggestion.dart';
+import '../../tools/bill_splitter/data/person.dart';
+import '../../tools/bill_splitter/data/bill.dart';
 
 class CollectionMeta {
   final String name;
@@ -57,6 +59,8 @@ class DbExplorerScreen extends ConsumerWidget {
             CollectionMeta('Loan', (i) => i.collection<Loan>().count()),
             CollectionMeta('Investment', (i) => i.collection<Investment>().count()),
             CollectionMeta('TransactionSuggestion', (i) => i.collection<TransactionSuggestion>().count()),
+            CollectionMeta('Person', (i) => i.collection<Person>().count()),
+            CollectionMeta('Bill', (i) => i.collection<Bill>().count()),
           ];
 
           collections.sort((a, b) => a.name.compareTo(b.name));
