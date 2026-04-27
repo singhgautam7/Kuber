@@ -14,6 +14,8 @@ import '../../features/ledger/data/ledger.dart';
 import '../../features/loans/data/loan.dart';
 import '../../features/investments/data/investment.dart';
 import '../../features/transactions/data/transaction_suggestion.dart';
+import '../../features/tools/bill_splitter/data/person.dart';
+import '../../features/tools/bill_splitter/data/bill.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -36,6 +38,8 @@ class IsarService {
         LoanSchema,
         InvestmentSchema,
         TransactionSuggestionSchema,
+        PersonSchema,
+        BillSchema,
       ],
       directory: dir.path,
     );

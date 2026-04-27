@@ -20,6 +20,8 @@ import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
 import '../../investments/data/investment.dart';
 import '../../transactions/data/transaction_suggestion.dart';
+import '../../tools/bill_splitter/data/person.dart';
+import '../../tools/bill_splitter/data/bill.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -98,6 +100,14 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           break;
         case 'TransactionSuggestion':
           final list = await isar.collection<TransactionSuggestion>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'Person':
+          final list = await isar.collection<Person>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'Bill':
+          final list = await isar.collection<Bill>().where().findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }

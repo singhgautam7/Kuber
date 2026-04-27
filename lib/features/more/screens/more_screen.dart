@@ -56,6 +56,12 @@ class MoreScreen extends ConsumerWidget {
                   title: 'Manage',
                   items: [
                     _MenuItem(
+                      icon: Icons.construction_outlined,
+                      label: 'Tools',
+                      subtitle: 'Calculators and utilities',
+                      onTap: () => context.push('/more/tools'),
+                    ),
+                    _MenuItem(
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Accounts',
                       subtitle: 'Your wallets and bank accounts',

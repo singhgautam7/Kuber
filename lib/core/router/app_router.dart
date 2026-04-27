@@ -53,6 +53,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
 import '../../features/splash/screens/splash_screen.dart';
+import '../../features/tools/tools_hub_screen.dart';
+import '../../features/tools/bill_splitter/bill_splitter_screen.dart';
+import '../../features/tools/bill_splitter/add_edit_bill_screen.dart';
+import '../../features/tools/bill_splitter/data/bill.dart';
+import '../../features/tools/currency_converter/currency_converter_screen.dart';
+import '../../features/tools/emi_calculator/emi_calculator_screen.dart';
+import '../../features/tools/sip_calculator/sip_calculator_screen.dart';
+import '../../features/tools/sip_amount_finder/sip_amount_finder_screen.dart';
+import '../../features/tools/tip_calculator/tip_calculator_screen.dart';
+import '../../features/tools/discount_calculator/discount_calculator_screen.dart';
+import '../../features/tools/gst_calculator/gst_calculator_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
@@ -320,6 +331,52 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (_, _) => const TroubleshootScreen(),
                   ),
                   GoRoute(
+                    path: 'tools',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const ToolsHubScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/bill-splitter',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const BillSplitterScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/currency-converter',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const CurrencyConverterScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/emi-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const EmiCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/sip-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) =>
+                        const InvestmentReturnsCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/sip-amount-finder',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const SipAmountFinderScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/tip-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const TipCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/discount-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const DiscountCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/gst-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const GstCalculatorScreen(),
+                  ),
+                  GoRoute(
                     path: 'dev-tools',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const DevToolsScreen(),
@@ -357,6 +414,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, state) =>
             AddEditBudgetScreen(existingBudget: state.extra as Budget?),
+      ),
+      GoRoute(
+        path: '/more/tools/bill-splitter/add',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const AddEditBillScreen(),
+      ),
+      GoRoute(
+        path: '/more/tools/bill-splitter/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, state) =>
+            AddEditBillScreen(existingBill: state.extra as Bill?),
       ),
       GoRoute(
         path: '/ledger/add',

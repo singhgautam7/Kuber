@@ -186,6 +186,172 @@ class InfoConstants {
     ],
   );
 
+  static const billSplitter = KuberInfoConfig(
+    title: 'About Bill Splitter',
+    description: 'Split expenses fairly among friends and groups.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.receipt_long_rounded,
+        title: 'Multiple Split Modes',
+        description: 'Split equally, by amount, percentage, or custom fractions.',
+      ),
+      KuberInfoItem(
+        icon: Icons.group_outlined,
+        title: 'People List',
+        description: 'Save people you split with for quick reuse.',
+      ),
+      KuberInfoItem(
+        icon: Icons.handshake_outlined,
+        title: 'Lend / Borrow',
+        description: 'Add splits directly to your Lend/Borrow tracker (coming soon).',
+      ),
+    ],
+  );
+
+  static const currencyConverter = KuberInfoConfig(
+    title: 'Currency Converter',
+    description: 'Convert between currencies using live exchange rates.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.currency_exchange_rounded,
+        title: 'Live Rates',
+        description: 'Rates fetched from frankfurter.app.',
+      ),
+      KuberInfoItem(
+        icon: Icons.offline_bolt_outlined,
+        title: 'Offline Support',
+        description: 'Cached rates used when offline (up to 24 hours old).',
+      ),
+      KuberInfoItem(
+        icon: Icons.swap_horiz_rounded,
+        title: 'Quick Swap',
+        description: 'Swap FROM and TO currencies instantly.',
+      ),
+    ],
+  );
+
+  static const emiCalculator = KuberInfoConfig(
+    title: 'EMI Calculator',
+    description: 'Calculate monthly loan repayments and total interest.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.account_balance_outlined,
+        title: 'EMI Formula',
+        description: 'Uses standard reducing-balance EMI calculation.',
+      ),
+      KuberInfoItem(
+        icon: Icons.percent_rounded,
+        title: 'Annual Rate',
+        description: 'Enter yearly interest rate — monthly rate is calculated automatically.',
+      ),
+      KuberInfoItem(
+        icon: Icons.calendar_month_outlined,
+        title: 'Flexible Tenure',
+        description: 'Enter tenure in years or months.',
+      ),
+    ],
+  );
+
+  static const investmentReturnsCalculator = KuberInfoConfig(
+    title: 'Investment Returns',
+    description: 'Estimate SIP and lump-sum investment growth.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.trending_up_rounded,
+        title: 'SIP (Monthly)',
+        description: 'Systematic Investment Plan — invest a fixed amount each month.',
+      ),
+      KuberInfoItem(
+        icon: Icons.payments_outlined,
+        title: 'One Time',
+        description: 'Lump-sum investment growth using monthly compounding.',
+      ),
+      KuberInfoItem(
+        icon: Icons.show_chart,
+        title: 'Estimated Returns',
+        description: 'Results are projections based on constant return rate.',
+      ),
+    ],
+  );
+
+  static const sipAmountFinder = KuberInfoConfig(
+    title: 'SIP Amount Finder',
+    description: 'Find how much to invest monthly to reach your goal.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.flag_outlined,
+        title: 'Goal-Based Planning',
+        description: 'Enter your target amount, return rate, and time horizon.',
+      ),
+      KuberInfoItem(
+        icon: Icons.calculate_rounded,
+        title: 'Reverse SIP',
+        description: 'Calculates the required monthly SIP to reach your goal.',
+      ),
+    ],
+  );
+
+  static const tipCalculator = KuberInfoConfig(
+    title: 'Tip Calculator',
+    description: 'Quickly calculate how much to tip.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.percent_rounded,
+        title: 'Slider + Input',
+        description: 'Adjust tip percentage with a slider or type it directly.',
+      ),
+      KuberInfoItem(
+        icon: Icons.receipt_outlined,
+        title: 'Total',
+        description: 'Shows tip amount and final bill total.',
+      ),
+    ],
+  );
+
+  static const discountCalculator = KuberInfoConfig(
+    title: 'Discount Calculator',
+    description: 'Find out how much you save with a discount.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.local_offer_rounded,
+        title: 'Discount Amount',
+        description: 'See exactly how much you save.',
+      ),
+      KuberInfoItem(
+        icon: Icons.price_check_rounded,
+        title: 'Final Price',
+        description: 'Shows the price after discount is applied.',
+      ),
+      KuberInfoItem(
+        icon: Icons.tune_rounded,
+        title: 'Slider Control',
+        description: 'Adjust discount % with a slider or type it directly.',
+      ),
+    ],
+  );
+
+  static const gstCalculator = KuberInfoConfig(
+    title: 'GST Calculator',
+    description: 'Add or remove GST from any amount.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.add_circle_outline,
+        title: 'Add GST',
+        description: 'Calculate total amount with GST on top of base price.',
+      ),
+      KuberInfoItem(
+        icon: Icons.remove_circle_outline,
+        title: 'Remove GST',
+        description: 'Extract base price from a GST-inclusive amount.',
+      ),
+      KuberInfoItem(
+        icon: Icons.account_balance_outlined,
+        title: 'CGST + SGST',
+        description: 'GST is split equally into CGST and SGST components.',
+      ),
+    ],
+  );
+
   static const recurring = KuberInfoConfig(
     title: 'How Recurring Works',
     description: 'Automate your regular income and expenses.',
