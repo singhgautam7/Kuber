@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart';
 import '../../core/utils/icon_mapper.dart';
@@ -17,10 +18,12 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.title,
     this.actions,
     this.showBack = false,
+    this.showHome = false,
     this.horizontalPadding,
     this.infoConfig,
   });
 
+  final bool showHome;
   final KuberInfoConfig? infoConfig;
 
   @override
@@ -44,6 +47,14 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Icon(Icons.arrow_back_rounded,
+                      color: cs.onSurface, size: 22),
+                ),
+                const SizedBox(width: 12),
+              ],
+              if (showHome) ...[
+                GestureDetector(
+                  onTap: () => context.go('/'),
+                  child: Icon(Icons.home_outlined,
                       color: cs.onSurface, size: 22),
                 ),
                 const SizedBox(width: 12),
