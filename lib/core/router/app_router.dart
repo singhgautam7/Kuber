@@ -15,6 +15,7 @@ import '../../features/accounts/data/account.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
 import '../../features/accounts/screens/add_edit_account_screen.dart';
 import '../../features/more/screens/more_screen.dart';
+import '../../features/more/screens/more_search_screen.dart';
 import '../../features/more/screens/about_screen.dart';
 import '../../features/more/screens/permissions_screen.dart';
 import '../../features/more/screens/categories_screen.dart';
@@ -375,6 +376,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'tools/gst-calculator',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const GstCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'search',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const MoreSearchScreen(),
                   ),
                   GoRoute(
                     path: 'dev-tools',

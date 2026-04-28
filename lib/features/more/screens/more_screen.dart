@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import '../../dev/providers/dev_mode_provider.dart';
 
@@ -21,8 +21,15 @@ class MoreScreen extends ConsumerWidget {
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(title: 'More'),
+          const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.xl)),
+          SliverToBoxAdapter(
+            child: KuberPageHeader(
+              title: 'More',
+              description: 'Manage your settings, tools and data',
+              actionIcon: Icons.search_rounded,
+              actionTooltip: 'Search',
+              onAction: () => context.push('/more/search'),
+            ),
           ),
           SliverPadding(
             padding: EdgeInsets.only(
@@ -33,8 +40,6 @@ class MoreScreen extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                const SizedBox(height: KuberSpacing.xl),
-
                 // Ask Kuber featured
                 _MenuSection(
                   title: 'AI Assistant',
@@ -52,7 +57,7 @@ class MoreScreen extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // Manage section
-                 _MenuSection(
+                _MenuSection(
                   title: 'Manage',
                   items: [
                     _MenuItem(
@@ -103,11 +108,62 @@ class MoreScreen extends ConsumerWidget {
                       subtitle: 'Track portfolio value and growth',
                       onTap: () => context.push('/more/investments'),
                     ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // Tools section
+                _MenuSection(
+                  title: 'Tools (Beta)',
+                  items: [
                     _MenuItem(
-                      icon: Icons.construction_outlined,
-                      label: 'Tools (Beta)',
-                      subtitle: 'Calculators and utilities',
-                      onTap: () => context.push('/more/tools'),
+                      icon: Icons.receipt_long_rounded,
+                      label: 'Bill Splitter',
+                      subtitle: 'Split bills with friends',
+                      onTap: () => context.push('/more/tools/bill-splitter'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.currency_exchange_rounded,
+                      label: 'Currency Converter',
+                      subtitle: 'Convert between currencies live',
+                      onTap: () => context.push('/more/tools/currency-converter'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.account_balance_rounded,
+                      label: 'EMI Calculator',
+                      subtitle: 'Estimate loan EMIs',
+                      onTap: () => context.push('/more/tools/emi-calculator'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.trending_up_rounded,
+                      label: 'Investment Returns',
+                      subtitle: 'Estimate SIP & lump-sum growth',
+                      onTap: () => context.push('/more/tools/sip-calculator'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.savings_rounded,
+                      label: 'SIP Amount Finder',
+                      subtitle: 'Find required monthly investment',
+                      onTap: () => context.push('/more/tools/sip-amount-finder'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.percent_rounded,
+                      label: 'Tip Calculator',
+                      subtitle: 'Calculate tips quickly',
+                      onTap: () => context.push('/more/tools/tip-calculator'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.local_offer_rounded,
+                      label: 'Discount Calculator',
+                      subtitle: 'Find the best deal',
+                      onTap: () => context.push('/more/tools/discount-calculator'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.calculate_rounded,
+                      label: 'GST Calculator',
+                      subtitle: 'Add or remove GST instantly',
+                      onTap: () => context.push('/more/tools/gst-calculator'),
                     ),
                   ],
                 ),
