@@ -41,7 +41,7 @@ final privacyModeProvider = Provider<bool>((ref) {
 });
 
 final navBarStyleProvider = Provider<NavBarStyle>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.navBarStyle ?? NavBarStyle.classic;
+  return ref.watch(settingsProvider).valueOrNull?.navBarStyle ?? NavBarStyle.modern;
 });
 
 final thresholdFloorProvider = Provider<double>((ref) {
@@ -143,7 +143,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final privacyMode = prefs.getBool(PrefsKeys.privacyMode) ?? false;
     final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
     final thresholdCeiling = prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
-    final navBarStyleIndex = prefs.getInt(PrefsKeys.navBarStyle) ?? 0;
+    final navBarStyleIndex = prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],

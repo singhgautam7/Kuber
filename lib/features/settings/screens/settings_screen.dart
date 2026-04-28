@@ -79,7 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currencyCode = _tempCurrencyCode ?? settings?.currency ?? 'INR';
     final currentSwipeMode = _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
     final currentNumberSystem = _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
-    final currentNavBarStyle = _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.classic;
+    final currentNavBarStyle = _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
     final currentBiometricsEnabled = _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
     final currency = currencyFromCode(currencyCode);
 

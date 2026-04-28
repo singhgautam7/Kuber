@@ -177,7 +177,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     final isWide = width >= KuberBreakpoints.smallTablet;
 
     final swipeMode = settings?.swipeMode ?? SwipeMode.changeTabs;
-    final navBarStyle = settings?.navBarStyle ?? NavBarStyle.classic;
+    final navBarStyle = settings?.navBarStyle ?? NavBarStyle.modern;
 
     final animatedContent = swipeMode == SwipeMode.changeTabs
         ? PageView(
@@ -236,7 +236,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           onAddLongPress: _openSpeedDial,
           isSelectionMode: isSelectionMode,
           isKeyboardOpen: isKeyboardOpen,
-          showAdd: currentIndex != 3,
           isSpeedDialOpen: _showSpeedDial,
         ),
       );
@@ -333,7 +332,6 @@ class _ModernNavBar extends StatefulWidget {
   final VoidCallback onAddLongPress;
   final bool isSelectionMode;
   final bool isKeyboardOpen;
-  final bool showAdd;
   final bool isSpeedDialOpen;
 
   const _ModernNavBar({
@@ -343,7 +341,6 @@ class _ModernNavBar extends StatefulWidget {
     required this.onAddLongPress,
     required this.isSelectionMode,
     required this.isKeyboardOpen,
-    required this.showAdd,
     required this.isSpeedDialOpen,
   });
 
@@ -364,52 +361,82 @@ class _ModernNavBarState extends State<_ModernNavBar> {
       offset: hide ? const Offset(0, 1.5) : Offset.zero,
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOutCubic,
-      child: Container(
-        color: Colors.transparent,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.sm),
-            child: Row(
-              children: [
-                // Pill
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(KuberRadius.xl),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                      child: Container(
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainer.withValues(alpha: 0.92),
-                          borderRadius: BorderRadius.circular(KuberRadius.xl),
-                          border: Border.all(
-                            color: cs.outline.withValues(alpha: 0.18),
-                          ),
+      child: Stack(
+        children: [
+          // Gradient scrim — fades content into background below the pill
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      cs.surface.withValues(alpha: 0),
+                      cs.surface.withValues(alpha: 0.85),
+                      cs.surface,
+                    ],
+                    stops: const [0.0, 0.45, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Pill + add button
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.sm),
+              child: Row(
+                children: [
+                  // Pill — border is OUTSIDE ClipRRect so it's never clipped
+                  Expanded(
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(KuberRadius.xl),
+                        border: Border.all(
+                          color: cs.outlineVariant,
+                          width: 1,
                         ),
-                        child: Row(
-                          children: List.generate(kuberNavItems.length, (i) {
-                            final item = kuberNavItems[i];
-                            final isSelected = i == widget.currentIndex;
-                            return Expanded(
-                              child: _NavBarItem(
-                                item: item,
-                                isSelected: isSelected,
-                                animDuration: _animDuration,
-                                onTap: () => widget.onTap(i),
-                                cs: cs,
-                                tt: tt,
-                              ),
-                            );
-                          }),
+                        boxShadow: [
+                          BoxShadow(
+                            color: cs.shadow.withValues(alpha: 0.18),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(KuberRadius.xl - 1),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                          child: Container(
+                            color: cs.surfaceContainerHighest,
+                            child: Row(
+                              children: List.generate(kuberNavItems.length, (i) {
+                                final item = kuberNavItems[i];
+                                final isSelected = i == widget.currentIndex;
+                                return Expanded(
+                                  child: _NavBarItem(
+                                    item: item,
+                                    isSelected: isSelected,
+                                    animDuration: _animDuration,
+                                    onTap: () => widget.onTap(i),
+                                    cs: cs,
+                                    tt: tt,
+                                    fullTint: true,
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                // Add button
-                if (widget.showAdd) ...[
+                  // Add button — always visible in Modern mode
                   const SizedBox(width: KuberSpacing.sm),
                   GestureDetector(
                     onTap: widget.onAddTapped,
@@ -430,10 +457,10 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                     ),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -498,6 +525,7 @@ class _NavBarItem extends StatefulWidget {
   final VoidCallback onTap;
   final ColorScheme cs;
   final TextTheme tt;
+  final bool fullTint;
 
   const _NavBarItem({
     required this.item,
@@ -506,6 +534,7 @@ class _NavBarItem extends StatefulWidget {
     required this.onTap,
     required this.cs,
     required this.tt,
+    this.fullTint = false,
   });
 
   @override
@@ -556,14 +585,67 @@ class _NavBarItemState extends State<_NavBarItem>
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              final t = _controller.value;
-              return ScaleTransition(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final t = _controller.value;
+
+          // Build inside builder so Opacity values re-read on every animation tick
+          final iconContent = Stack(
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: (1 - t).clamp(0.0, 1.0),
+                child: Icon(widget.item.icon, size: 22, color: unselectedColor),
+              ),
+              Opacity(
+                opacity: t.clamp(0.0, 1.0),
+                child: Icon(widget.item.activeIcon, size: 22, color: selectedColor),
+              ),
+            ],
+          );
+
+          if (widget.fullTint) {
+            // Modern: wrap icon + label in a single tinted capsule, centered
+            // so it never touches the pill border on either edge.
+            // KuberRadius.full makes it a stadium shape — visually consistent
+            // with the overall pill regardless of the tint's aspect ratio.
+            return Center(
+              child: ScaleTransition(
+                scale: _scaleAnim,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: widget.cs.primary.withValues(alpha: t * 0.15),
+                    borderRadius: BorderRadius.circular(KuberRadius.full),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(height: 20, width: 20, child: iconContent),
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: widget.tt.labelSmall!.copyWith(
+                          fontSize: 10,
+                          fontWeight: t > 0.5 ? FontWeight.w700 : FontWeight.w500,
+                          color: t > 0.5 ? selectedColor : unselectedColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          // Classic: icon-only tint, label sits outside below
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ScaleTransition(
                 scale: _scaleAnim,
                 child: Container(
                   width: 56,
@@ -573,44 +655,22 @@ class _NavBarItemState extends State<_NavBarItem>
                     borderRadius: BorderRadius.circular(KuberRadius.lg),
                   ),
                   alignment: Alignment.center,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Outline icon (unselected)
-                      Opacity(
-                        opacity: (1 - t).clamp(0.0, 1.0),
-                        child: Icon(
-                          widget.item.icon,
-                          size: 24,
-                          color: unselectedColor,
-                        ),
-                      ),
-                      // Filled icon (selected)
-                      Opacity(
-                        opacity: t.clamp(0.0, 1.0),
-                        child: Icon(
-                          widget.item.activeIcon,
-                          size: 24,
-                          color: selectedColor,
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: iconContent,
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 4),
-          AnimatedDefaultTextStyle(
-            duration: widget.animDuration,
-            style: widget.tt.labelSmall!.copyWith(
-              fontSize: 11,
-              fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: widget.isSelected ? selectedColor : unselectedColor,
-            ),
-            child: Text(widget.item.label),
-          ),
-        ],
+              ),
+              const SizedBox(height: 4),
+              AnimatedDefaultTextStyle(
+                duration: widget.animDuration,
+                style: widget.tt.labelSmall!.copyWith(
+                  fontSize: 11,
+                  fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: widget.isSelected ? selectedColor : unselectedColor,
+                ),
+                child: Text(widget.item.label),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
