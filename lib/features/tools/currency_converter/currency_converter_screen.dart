@@ -91,8 +91,9 @@ class _CurrencyConverterScreenState
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'Currency Converter',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.currencyConverter,
             ),
           ),

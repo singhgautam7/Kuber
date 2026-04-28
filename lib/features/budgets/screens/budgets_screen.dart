@@ -45,8 +45,9 @@ class BudgetsScreen extends ConsumerWidget {
           // App bar
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              showBack: true, 
-              title: 'Budgets',
+              showBack: true,
+              showHome: true,
+              title: '',
               infoConfig: InfoConstants.budgets,
             ),
           ),

@@ -61,8 +61,9 @@ class _SipAmountFinderScreenState
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'SIP Amount Finder',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.sipAmountFinder,
             ),
           ),

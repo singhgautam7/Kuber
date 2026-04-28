@@ -35,7 +35,7 @@ class DataManagementScreen extends ConsumerWidget {
           CustomScrollView(
             slivers: [
               const SliverToBoxAdapter(
-                child: KuberAppBar(showBack: true, title: 'Data'),
+                child: KuberAppBar(showBack: true, showHome: true, title: ''),
               ),
               SliverToBoxAdapter(
                 child: Padding(

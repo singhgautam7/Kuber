@@ -286,7 +286,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     final txns = ref.read(transactionListProvider).valueOrNull ?? [];
     final accounts = ref.read(accountListProvider).valueOrNull ?? [];
     final settings = await ref.read(settingsProvider.future);
-    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
+    final categories = ref.read(categoryListProvider).valueOrNull ??
+        await ref.read(categoryListProvider.future) ?? [];
     final formatter = ref.read(formatterProvider);
     final currency = currencyFromCode(settings.currency);
     currency.symbol;
@@ -298,6 +299,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     final lastMonthStart = DateTime(now.year, now.month - 1, 1);
     final lastMonthEnd = DateTime(now.year, now.month, 1);
     final weekStart = today.subtract(Duration(days: today.weekday - 1));
+    final yearStart = DateTime(now.year, 1, 1);
+    final yearEnd = DateTime(now.year + 1, 1, 1);
 
     double sumExpenses(DateTime from, DateTime to) => txns.validForCalculations
         .where((t) =>
@@ -312,6 +315,97 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
             !t.createdAt.isBefore(from) &&
             t.createdAt.isBefore(to))
         .fold(0.0, (s, t) => s + t.amount);
+
+    // ── Category-specific spending ──
+    if ((lower.contains('spent') ||
+            lower.contains('spend') ||
+            lower.contains('expense')) &&
+        !(lower.contains('top') || lower.contains('most'))) {
+      final matchedCat = categories
+          .where((c) =>
+              c.name.trim().isNotEmpty &&
+              lower.contains(c.name.toLowerCase()))
+          .firstOrNull;
+
+      if (matchedCat != null) {
+        final catCustomRange = _parseCustomDateRange(lower);
+        final DateTime from;
+        final DateTime to;
+        final String dateLabel;
+        final String thinkingDate;
+
+        if (catCustomRange != null) {
+          from = catCustomRange.from;
+          to = catCustomRange.to;
+          dateLabel = 'in the past ${catCustomRange.label}';
+          thinkingDate =
+              '${_fmtDate(catCustomRange.from)} – ${_fmtDate(catCustomRange.to.subtract(const Duration(days: 1)))}';
+        } else if (lower.contains('this year')) {
+          from = yearStart;
+          to = yearEnd;
+          dateLabel = 'this year';
+          thinkingDate = '${_fmtDate(yearStart)} – ${_fmtDate(today)}';
+        } else if (lower.contains('last month')) {
+          from = lastMonthStart;
+          to = lastMonthEnd;
+          dateLabel = 'last month';
+          thinkingDate =
+              '${_fmtDate(lastMonthStart)} – ${_fmtDate(lastMonthEnd.subtract(const Duration(days: 1)))}';
+        } else if (lower.contains('last week')) {
+          final lastWeekStart = weekStart.subtract(const Duration(days: 7));
+          from = lastWeekStart;
+          to = weekStart;
+          dateLabel = 'last week';
+          thinkingDate =
+              '${_fmtDate(lastWeekStart)} – ${_fmtDate(weekStart.subtract(const Duration(days: 1)))}';
+        } else if (lower.contains('today')) {
+          from = today;
+          to = today.add(const Duration(days: 1));
+          dateLabel = 'today';
+          thinkingDate = _fmtDate(today);
+        } else if (lower.contains('week')) {
+          from = weekStart;
+          to = today.add(const Duration(days: 1));
+          dateLabel = 'this week';
+          thinkingDate = '${_fmtDate(weekStart)} – ${_fmtDate(today)}';
+        } else if (lower.contains('month')) {
+          from = monthStart;
+          to = monthEnd;
+          dateLabel = 'this month';
+          thinkingDate = '${_fmtDate(monthStart)} – ${_fmtDate(today)}';
+        } else {
+          from = DateTime(2000);
+          to = today.add(const Duration(days: 1));
+          dateLabel = 'overall';
+          thinkingDate = 'All time';
+        }
+
+        final total = txns.validForCalculations
+            .where((t) =>
+                t.type == 'expense' &&
+                t.categoryId == matchedCat.id.toString() &&
+                !t.createdAt.isBefore(from) &&
+                t.createdAt.isBefore(to))
+            .fold(0.0, (sum, t) => sum + t.amount);
+
+        final verb = (dateLabel == 'today' ||
+                dateLabel == 'this week' ||
+                dateLabel == 'this month' ||
+                dateLabel == 'this year')
+            ? "You've spent"
+            : 'You spent';
+        final suffix =
+            dateLabel == 'overall' ? 'in total' : dateLabel;
+
+        return _QueryResult(
+          '$verb ${formatter.formatCurrency(total)} on ${matchedCat.name} $suffix.',
+          KuberThinkingInfo(
+            dateFilter: thinkingDate,
+            scanned: ['Transactions', 'Categories (${matchedCat.name})'],
+          ),
+        );
+      }
+    }
 
     // ── Custom date range ("past two weeks", "last 3 months") ──
     final customRange = _parseCustomDateRange(lower);
@@ -393,6 +487,27 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       );
     }
 
+    // ── Expenses this year ──
+    if (lower.contains('this year') &&
+        (lower.contains('spent') ||
+            lower.contains('spend') ||
+            lower.contains('expense'))) {
+      final total = sumExpenses(yearStart, yearEnd);
+      final count = txns.validForCalculations
+          .where((t) =>
+              t.type == 'expense' &&
+              !t.createdAt.isBefore(yearStart) &&
+              t.createdAt.isBefore(yearEnd))
+          .length;
+      return _QueryResult(
+        'You\'ve spent ${formatter.formatCurrency(total)} this year across $count transactions.',
+        KuberThinkingInfo(
+          dateFilter: '${_fmtDate(yearStart)} – ${_fmtDate(today)}',
+          scanned: ['Transactions'],
+        ),
+      );
+    }
+
     // ── Top category ──
     if ((lower.contains('most') || lower.contains('top')) &&
         (lower.contains('spent') ||
@@ -462,6 +577,18 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
         'Your income this month is ${formatter.formatCurrency(total)}.',
         KuberThinkingInfo(
           dateFilter: '${_fmtDate(monthStart)} – ${_fmtDate(today)}',
+          scanned: ['Transactions'],
+        ),
+      );
+    }
+
+    // ── Income this year ──
+    if (lower.contains('income') && lower.contains('this year')) {
+      final total = sumIncome(yearStart, yearEnd);
+      return _QueryResult(
+        'Your income this year is ${formatter.formatCurrency(total)}.',
+        KuberThinkingInfo(
+          dateFilter: '${_fmtDate(yearStart)} – ${_fmtDate(today)}',
           scanned: ['Transactions'],
         ),
       );

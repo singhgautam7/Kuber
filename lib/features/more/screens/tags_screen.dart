@@ -75,8 +75,9 @@ class _TagsBody extends StatelessWidget {
       slivers: [
         const SliverToBoxAdapter(
           child: KuberAppBar(
-            showBack: true, 
-            title: 'Tags',
+            showBack: true,
+            showHome: true,
+            title: '',
             infoConfig: InfoConstants.tags,
           ),
         ),

@@ -32,6 +32,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _tempCurrencyCode;
   SwipeMode? _tempSwipeMode;
   NumberSystem? _tempNumberSystem;
+  NavBarStyle? _tempNavBarStyle;
   bool? _tempBiometricsEnabled;
 
   @override
@@ -43,6 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _tempCurrencyCode = settings?.currency;
     _tempSwipeMode = settings?.swipeMode;
     _tempNumberSystem = settings?.numberSystem;
+    _tempNavBarStyle = settings?.navBarStyle;
     _tempBiometricsEnabled = settings?.biometricsEnabled;
   }
 
@@ -77,6 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currencyCode = _tempCurrencyCode ?? settings?.currency ?? 'INR';
     final currentSwipeMode = _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
     final currentNumberSystem = _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
+    final currentNavBarStyle = _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
     final currentBiometricsEnabled = _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
     final currency = currencyFromCode(currencyCode);
 
@@ -85,7 +88,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         body: CustomScrollView(
           slivers: [
             const SliverToBoxAdapter(
-              child: KuberAppBar(showBack: true, title: 'Settings'),
+              child: KuberAppBar(showBack: true, showHome: true, title: ''),
             ),
             // Page header
             SliverToBoxAdapter(
@@ -171,6 +174,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               onSelected: (val) {
                                 setState(() => _tempThemeMode = val);
                                 ref.read(settingsProvider.notifier).setThemeMode(val);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1, color: cs.outline),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
+                          vertical: KuberSpacing.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const SquircleIcon(icon: Icons.crop_free_rounded, size: 18, padding: 8),
+                                const SizedBox(width: KuberSpacing.md),
+                                Text(
+                                  'Bottom Navigation UI',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: KuberSpacing.md),
+                            SettingsCardSelector<NavBarStyle>(
+                              options: const [
+                                SelectorOption(
+                                  value: NavBarStyle.classic,
+                                  label: 'Classic',
+                                  subtitle: 'Standard bar',
+                                  icon: Icons.view_quilt_rounded,
+                                ),
+                                SelectorOption(
+                                  value: NavBarStyle.modern,
+                                  label: 'Modern',
+                                  subtitle: 'Floating pill',
+                                  icon: Icons.crop_free_rounded,
+                                ),
+                              ],
+                              selectedValue: currentNavBarStyle,
+                              onSelected: (val) {
+                                setState(() => _tempNavBarStyle = val);
+                                ref.read(settingsProvider.notifier).setNavBarStyle(val);
                               },
                             ),
                           ],

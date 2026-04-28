@@ -90,7 +90,7 @@ class _ToolsHubScreenState extends State<ToolsHubScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(title: 'Tools', showBack: true),
+      appBar: KuberAppBar(title: '', showBack: true, showHome: true),
       body: Column(
         children: [
           const KuberPageHeader(

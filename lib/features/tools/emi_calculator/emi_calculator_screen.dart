@@ -60,8 +60,9 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'EMI Calculator',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.emiCalculator,
             ),
           ),

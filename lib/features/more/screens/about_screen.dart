@@ -23,7 +23,7 @@ class AboutScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, title: 'About'),
+            child: KuberAppBar(showBack: true, showHome: true, title: ''),
           ),
           // Header section
           SliverToBoxAdapter(

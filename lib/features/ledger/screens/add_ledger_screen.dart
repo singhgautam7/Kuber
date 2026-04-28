@@ -14,6 +14,8 @@ import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart'
     show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
+import '../../tools/bill_splitter/providers/people_provider.dart';
+import '../../tools/bill_splitter/widgets/bs_avatar.dart';
 import '../data/ledger.dart';
 import '../providers/ledger_provider.dart';
 
@@ -73,7 +75,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
-    final personNames = ref.watch(ledgerPersonNamesProvider).valueOrNull ?? [];
+    final people = ref.watch(peopleListProvider).valueOrNull ?? [];
     final selectedAccount = accounts
         .where((a) => a.id.toString() == _selectedAccountId)
         .firstOrNull;
@@ -179,10 +181,14 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     textEditingController: _nameController,
                     focusNode: _nameFocusNode,
                     optionsBuilder: (textEditingValue) {
-                      if (textEditingValue.text.isEmpty) return [];
-                      final query = textEditingValue.text.toLowerCase();
-                      return personNames
-                          .where((n) => n.toLowerCase().contains(query))
+                      final query = textEditingValue.text.trim().toLowerCase();
+                      if (query.isEmpty) {
+                        // Show all people when field is focused and empty
+                        return people.map((p) => p.name).toList();
+                      }
+                      return people
+                          .where((p) => p.name.toLowerCase().contains(query))
+                          .map((p) => p.name)
                           .toList();
                     },
                     fieldViewBuilder:
@@ -211,21 +217,44 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                       return Align(
                         alignment: Alignment.topLeft,
                         child: Material(
-                          elevation: 4,
+                          elevation: 8,
                           borderRadius: BorderRadius.circular(KuberRadius.md),
                           color: cs.surfaceContainer,
                           child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 200),
-                            child: ListView.builder(
+                            constraints: const BoxConstraints(maxHeight: 240),
+                            child: ListView.separated(
                               shrinkWrap: true,
+                              padding: const EdgeInsets.symmetric(vertical: 6),
                               itemCount: options.length,
+                              separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                indent: 56,
+                                color: cs.outline,
+                              ),
                               itemBuilder: (ctx, i) {
                                 final name = options.elementAt(i);
-                                return ListTile(
-                                  title: Text(name,
-                                      style: GoogleFonts.inter(
-                                          color: cs.onSurface)),
+                                return InkWell(
                                   onTap: () => onSelected(name),
+                                  borderRadius:
+                                      BorderRadius.circular(KuberRadius.md),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 10),
+                                    child: Row(
+                                      children: [
+                                        BsAvatar(name: name, size: 32),
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          name,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: cs.onSurface,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 );
                               },
                             ),
@@ -514,6 +543,16 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
 
   Future<void> _save() async {
     final personName = _toTitleCase(_nameController.text);
+
+    // Auto-add to the shared Person model if the name is new.
+    final existingPeople =
+        ref.read(peopleListProvider).valueOrNull ?? [];
+    final alreadyExists = existingPeople.any(
+      (p) => p.name.toLowerCase() == personName.toLowerCase(),
+    );
+    if (!alreadyExists) {
+      await ref.read(peopleListProvider.notifier).add(personName);
+    }
 
     // Find the "Lent / Borrow" system category
     final categories =

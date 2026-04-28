@@ -63,8 +63,9 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'Tip Calculator',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.tipCalculator,
             ),
           ),

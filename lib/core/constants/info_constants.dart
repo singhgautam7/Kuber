@@ -201,9 +201,9 @@ class InfoConstants {
         description: 'Save people you split with for quick reuse.',
       ),
       KuberInfoItem(
-        icon: Icons.handshake_outlined,
-        title: 'Lend / Borrow',
-        description: 'Add splits directly to your Lend/Borrow tracker (coming soon).',
+        icon: Icons.info_outline_rounded,
+        title: 'Tracking Only',
+        description: 'Bill Splitter is for reference only. Splits are not added to your transactions or Lend/Borrow tracker automatically.',
       ),
     ],
   );

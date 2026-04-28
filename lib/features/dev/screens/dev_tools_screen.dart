@@ -23,7 +23,7 @@ class DevToolsScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, title: 'Dev Tools'),
+            child: KuberAppBar(showBack: true, showHome: true, title: ''),
           ),
           SliverToBoxAdapter(
             child: Padding(

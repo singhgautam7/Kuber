@@ -69,7 +69,8 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
               const SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  title: 'Loans',
+                  showHome: true,
+                  title: '',
                   infoConfig: InfoConstants.loans,
                 ),
               ),

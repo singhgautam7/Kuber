@@ -36,7 +36,7 @@ class HowToUseScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'How to Use'),
+      appBar: KuberAppBar(showBack: true, showHome: true, title: ''),
       body: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: KuberSpacing.lg,

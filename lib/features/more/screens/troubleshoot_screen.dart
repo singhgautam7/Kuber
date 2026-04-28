@@ -33,7 +33,7 @@ class TroubleshootScreen extends ConsumerWidget {
           CustomScrollView(
             slivers: [
               const SliverToBoxAdapter(
-                child: KuberAppBar(showBack: true, title: 'Troubleshoot'),
+                child: KuberAppBar(showBack: true, showHome: true, title: ''),
               ),
               SliverToBoxAdapter(
                 child: Padding(

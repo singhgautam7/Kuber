@@ -68,8 +68,9 @@ class _InvestmentReturnsCalculatorScreenState
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'Investment Returns',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.investmentReturnsCalculator,
             ),
           ),

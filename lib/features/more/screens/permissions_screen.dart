@@ -17,7 +17,7 @@ class PermissionsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'Permissions'),
+      appBar: KuberAppBar(showBack: true, showHome: true, title: ''),
       body: CustomScrollView(
         slivers: [
           // Page header

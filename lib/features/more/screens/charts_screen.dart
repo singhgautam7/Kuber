@@ -21,7 +21,7 @@ class ChartsScreen extends ConsumerWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const KuberAppBar(showBack: true, title: 'Charts'),
+          KuberAppBar(showBack: true, showHome: true, title: ''),
           Expanded(
             child: _ChartsBody(),
           ),

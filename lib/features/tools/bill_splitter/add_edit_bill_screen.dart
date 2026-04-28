@@ -1,3 +1,4 @@
+import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,18 +6,31 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/person_avatar.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart';
 import 'data/bill.dart';
 import 'people_picker_sheet.dart';
 import 'providers/bills_provider.dart';
+import 'providers/bill_net_provider.dart';
+import 'widgets/bs_avatar.dart';
+
+const _splitTabs = [
+  _SplitTab('equal', 'Equal', Icons.drag_handle_rounded),
+  _SplitTab('unequal', 'Custom', Icons.edit_rounded),
+  _SplitTab('percentage', '%', Icons.percent_rounded),
+  _SplitTab('fraction', 'Frac', Icons.call_split_rounded),
+];
+
+class _SplitTab {
+  final String value;
+  final String label;
+  final IconData icon;
+  const _SplitTab(this.value, this.label, this.icon);
+}
 
 class AddEditBillScreen extends ConsumerStatefulWidget {
   final Bill? existingBill;
-
   const AddEditBillScreen({super.key, this.existingBill});
-
   @override
   ConsumerState<AddEditBillScreen> createState() => _AddEditBillScreenState();
 }
@@ -24,17 +38,15 @@ class AddEditBillScreen extends ConsumerStatefulWidget {
 class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
   final _nameCtrl = TextEditingController();
   final _amountCtrl = TextEditingController();
-  List<String> _selectedPeople = [];
+  final _amountFocus = FocusNode();
+  List<String> _participants = ['You'];
   String? _paidBy;
   String _splitType = 'equal';
   bool _isSaving = false;
 
-  // Per-person input controllers for unequal/percentage modes
   final Map<String, TextEditingController> _unequalCtrls = {};
-  final Map<String, TextEditingController> _percentageCtrls = {};
-  final Map<String, TextEditingController> _fractionCtrls = {};
-
-  static const _splitTypes = ['equal', 'unequal', 'percentage', 'fraction'];
+  final Map<String, TextEditingController> _pctCtrls = {};
+  final Map<String, TextEditingController> _fracCtrls = {};
 
   @override
   void initState() {
@@ -42,8 +54,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
     final b = widget.existingBill;
     if (b != null) {
       _nameCtrl.text = b.name;
-      _amountCtrl.text = b.totalAmount.toStringAsFixed(2);
-      _selectedPeople = b.participants.map((p) => p.personName).toList();
+      _amountCtrl.text = b.totalAmount.toString();
+      _participants = b.participants.map((p) => p.personName).toList();
       _paidBy = b.paidByPersonName;
       _splitType = b.splitType;
     }
@@ -53,141 +65,94 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _amountCtrl.dispose();
-    for (final c in _unequalCtrls.values) { c.dispose(); }
-    for (final c in _percentageCtrls.values) { c.dispose(); }
-    for (final c in _fractionCtrls.values) { c.dispose(); }
+    _amountFocus.dispose();
+    for (final c in [..._unequalCtrls.values, ..._pctCtrls.values, ..._fracCtrls.values]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
-  TextEditingController _unequalCtrl(String name) =>
-      _unequalCtrls.putIfAbsent(name, () => TextEditingController());
+  void _unfocus() {
+    FocusScope.of(context).unfocus();
+  }
 
-  TextEditingController _percentageCtrl(String name) =>
-      _percentageCtrls.putIfAbsent(name, () => TextEditingController());
+  TextEditingController _ctrl(Map<String, TextEditingController> map, String name) =>
+      map.putIfAbsent(name, TextEditingController.new);
 
-  TextEditingController _fractionCtrl(String name) =>
-      _fractionCtrls.putIfAbsent(name, () => TextEditingController());
+  double? get _total => double.tryParse(_amountCtrl.text);
 
-  // Returns null if invalid
   Map<String, double>? _resolveShares() {
-    final total = double.tryParse(_amountCtrl.text);
-    if (total == null || total <= 0) return null;
-    if (_selectedPeople.isEmpty) return null;
-
+    final total = _total;
+    if (total == null || total <= 0 || _participants.isEmpty) return null;
     switch (_splitType) {
       case 'equal':
-        final share = total / _selectedPeople.length;
-        return {for (final p in _selectedPeople) p: share};
-
+        final each = total / _participants.length;
+        return {for (final p in _participants) p: each};
       case 'unequal':
         final shares = <String, double>{};
         double sum = 0;
-        for (final p in _selectedPeople) {
-          final v = double.tryParse(_unequalCtrl(p).text);
+        for (final p in _participants) {
+          final v = double.tryParse(_ctrl(_unequalCtrls, p).text);
           if (v == null) return null;
           shares[p] = v;
           sum += v;
         }
-        if ((sum - total).abs() > 0.01) return null;
-        return shares;
-
+        return (sum - total).abs() <= 0.01 ? shares : null;
       case 'percentage':
         final shares = <String, double>{};
-        double sumPct = 0;
-        for (final p in _selectedPeople) {
-          final v = double.tryParse(_percentageCtrl(p).text);
+        double sum = 0;
+        for (final p in _participants) {
+          final v = double.tryParse(_ctrl(_pctCtrls, p).text);
           if (v == null) return null;
           shares[p] = total * v / 100;
-          sumPct += v;
+          sum += v;
         }
-        if ((sumPct - 100).abs() > 0.01) return null;
-        return shares;
-
+        return (sum - 100).abs() <= 0.01 ? shares : null;
       case 'fraction':
         final fracs = <String, double>{};
-        double sumFrac = 0;
-        for (final p in _selectedPeople) {
-          final text = _fractionCtrl(p).text.trim();
-          final frac = _parseFraction(text);
-          if (frac == null) return null;
-          fracs[p] = frac;
-          sumFrac += frac;
+        double sum = 0;
+        for (final p in _participants) {
+          final v = double.tryParse(_ctrl(_fracCtrls, p).text);
+          if (v == null || v <= 0) return null;
+          fracs[p] = v;
+          sum += v;
         }
-        if (sumFrac <= 0) return null;
-        return {
-          for (final entry in fracs.entries)
-            entry.key: total * entry.value / sumFrac
-        };
-
+        if (sum <= 0) return null;
+        return {for (final e in fracs.entries) e.key: total * e.value / sum};
       default:
         return null;
     }
   }
 
-  double? _parseFraction(String text) {
-    if (text.isEmpty) return null;
-    if (text.contains('/')) {
-      final parts = text.split('/');
-      if (parts.length != 2) return null;
-      final num = double.tryParse(parts[0].trim());
-      final den = double.tryParse(parts[1].trim());
-      if (num == null || den == null || den == 0) return null;
-      return num / den;
-    }
-    return double.tryParse(text);
-  }
-
-  String? _validationError() {
-    final total = double.tryParse(_amountCtrl.text);
+  String? get _validationError {
+    final total = _total;
     if (_nameCtrl.text.trim().isEmpty) return 'Bill name is required';
-    if (total == null || total <= 0) return 'Enter a valid total amount';
-    if (_selectedPeople.length < 2) return 'Select at least 2 people';
+    if (total == null || total <= 0) return 'Enter a valid amount';
+    if (_participants.length < 2) return 'Select at least 2 people';
     if (_paidBy == null) return 'Select who paid';
-
-    switch (_splitType) {
-      case 'unequal':
-        double sum = 0;
-        for (final p in _selectedPeople) {
-          final v = double.tryParse(_unequalCtrl(p).text);
-          if (v == null) return 'Enter amounts for all people';
-          sum += v;
-        }
-        if ((sum - total).abs() > 0.01) {
-          return 'Amounts must add up to ${total.toStringAsFixed(2)}';
-        }
-      case 'percentage':
-        double sum = 0;
-        for (final p in _selectedPeople) {
-          final v = double.tryParse(_percentageCtrl(p).text);
-          if (v == null) return 'Enter percentages for all people';
-          sum += v;
-        }
-        if ((sum - 100).abs() > 0.01) return 'Percentages must add up to 100%';
-      case 'fraction':
-        for (final p in _selectedPeople) {
-          if (_parseFraction(_fractionCtrl(p).text.trim()) == null) {
-            return 'Enter valid fractions (e.g. 1/3)';
-          }
-        }
+    if (_resolveShares() == null) {
+      return switch (_splitType) {
+        'unequal' => 'Amounts must add up to total',
+        'percentage' => 'Percentages must add up to 100%',
+        'fraction' => 'Enter valid parts for all people',
+        _ => null,
+      };
     }
     return null;
   }
 
   Future<void> _save() async {
-    final error = _validationError();
-    if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    final err = _validationError;
+    if (err != null) {
+      showKuberSnackBar(context, err, isError: true);
       return;
     }
-
-    final shares = _resolveShares();
-    if (shares == null) return;
-
+    final shares = _resolveShares()!;
     setState(() => _isSaving = true);
     final bill = widget.existingBill ?? Bill();
     bill
       ..name = _nameCtrl.text.trim()
-      ..totalAmount = double.parse(_amountCtrl.text)
+      ..totalAmount = _total!
       ..paidByPersonName = _paidBy!
       ..splitType = _splitType
       ..participants = shares.entries
@@ -196,441 +161,560 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
             ..share = e.value)
           .toList()
       ..createdAt = widget.existingBill?.createdAt ?? DateTime.now();
-
     await ref.read(billsListProvider.notifier).save(bill);
     if (mounted) context.pop();
+  }
+
+  // ── balance indicator ──────────────────────────────────────────────────
+  ({String label, bool balanced}) _balanceState(Map<String, double>? shares) {
+    final total = _total;
+    if (total == null || shares == null) {
+      return (label: '', balanced: false);
+    }
+    switch (_splitType) {
+      case 'equal':
+        return (label: '✓ BALANCED', balanced: true);
+      case 'unequal':
+        final sum = shares.values.fold(0.0, (a, b) => a + b);
+        final diff = total - sum;
+        if (diff.abs() <= 0.01) return (label: '✓ BALANCED', balanced: true);
+        return (label: '${diff > 0 ? '+' : ''}${diff.toStringAsFixed(0)} LEFT', balanced: false);
+      case 'percentage':
+        final sum = _participants.fold(0.0, (a, p) {
+          return a + (double.tryParse(_ctrl(_pctCtrls, p).text) ?? 0);
+        });
+        if ((sum - 100).abs() <= 0.01) return (label: '✓ BALANCED', balanced: true);
+        final diff = 100 - sum;
+        return (label: '${diff > 0 ? '+' : ''}${diff.toStringAsFixed(0)}% LEFT', balanced: false);
+      case 'fraction':
+        final sum = _participants.fold(0.0, (a, p) {
+          return a + (double.tryParse(_ctrl(_fracCtrls, p).text) ?? 0);
+        });
+        return sum > 0
+            ? (label: '✓ BALANCED', balanced: true)
+            : (label: 'ENTER PARTS', balanced: false);
+      default:
+        return (label: '', balanced: true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final currency = ref.watch(currencyProvider);
-    final formatter = ref.watch(formatterProvider);
-    final total = double.tryParse(_amountCtrl.text);
     final shares = _resolveShares();
-    final error = _validationError();
+    final balance = _balanceState(shares);
+    final total = _total ?? 0;
+    final isEdit = widget.existingBill != null;
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        title: widget.existingBill == null ? 'Add Bill' : 'Edit Bill',
-        showBack: true,
+      // ── Top bar ──────────────────────────────────────────────────────
+      appBar: AppBar(
+        backgroundColor: cs.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: GestureDetector(
+          onTap: () => context.pop(),
+          child: Icon(Icons.close_rounded, color: cs.onSurface),
+        ),
+        title: Text(
+          isEdit ? 'Edit Bill' : 'New Bill',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface,
+          ),
+        ),
+        centerTitle: true,
       ),
+
+      // ── Sticky save footer ────────────────────────────────────────────
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          border: Border(top: BorderSide(color: cs.outline)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: AppButton(
+            label: isEdit ? 'Update Bill' : 'Save Bill',
+            type: AppButtonType.primary,
+            fullWidth: true,
+            icon: Icons.check_rounded,
+            isLoading: _isSaving,
+            onPressed: _isSaving ? null : _save,
+          ),
+        ),
+      ),
+
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Section 1: Bill Info ─────────────────────────────────────
-            _SectionCard(
-              title: 'BILL INFO',
-              children: [
-                _FormField(
-                  label: 'BILL NAME',
-                  child: TextField(
-                    controller: _nameCtrl,
-                    textCapitalization: TextCapitalization.words,
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface),
-                    onChanged: (_) => setState(() {}),
-                    decoration: _inputDecoration(cs, 'e.g. Dinner at Olive Garden'),
-                  ),
+            // ── BILL NAME ─────────────────────────────────────────────
+            _FieldLabel('BILL NAME'),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _nameCtrl,
+              textCapitalization: TextCapitalization.words,
+              onChanged: (_) => setState(() {}),
+              style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface),
+              decoration: InputDecoration(
+                hintText: 'e.g. Goa Airbnb',
+                prefixIcon: Icon(Icons.receipt_long_rounded, size: 18, color: cs.onSurfaceVariant),
+                filled: true,
+                fillColor: cs.surfaceContainer,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderSide: BorderSide(color: cs.outline),
                 ),
-                const SizedBox(height: KuberSpacing.md),
-                _FormField(
-                  label: 'TOTAL AMOUNT',
-                  child: TextField(
-                    controller: _amountCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface),
-                    onChanged: (_) => setState(() {}),
-                    decoration: _inputDecoration(cs, '0.00', prefix: '${currency.symbol} '),
-                  ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderSide: BorderSide(color: cs.outline),
                 ),
-              ],
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderSide: BorderSide(color: cs.primary, width: 2),
+                ),
+              ),
             ),
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: 14),
 
-            // ── Section 2: Participants ──────────────────────────────────
-            _SectionCard(
-              title: 'PARTICIPANTS',
-              children: [
-                if (_selectedPeople.isEmpty)
-                  Text(
-                    'No people selected yet',
-                    style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
-                  )
-                else
-                  Wrap(
-                    spacing: KuberSpacing.sm,
-                    runSpacing: KuberSpacing.sm,
-                    children: _selectedPeople.map((name) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.sm,
-                          vertical: KuberSpacing.xs,
-                        ),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(KuberRadius.full),
-                          border: Border.all(color: cs.outline),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            PersonAvatar(name: name, size: PersonAvatarSize.small),
-                            const SizedBox(width: KuberSpacing.xs),
-                            Text(
-                              name,
-                              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface),
-                            ),
-                            const SizedBox(width: KuberSpacing.xs),
-                            GestureDetector(
-                              onTap: () => setState(() {
-                                _selectedPeople.remove(name);
-                                if (_paidBy == name) _paidBy = null;
-                              }),
-                              child: Icon(Icons.close_rounded, size: 14, color: cs.onSurfaceVariant),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                const SizedBox(height: KuberSpacing.md),
-                TextButton.icon(
-                  onPressed: () async {
-                    final result = await showPeoplePickerSheet(context, _selectedPeople);
-                    if (result != null) {
-                      setState(() {
-                        _selectedPeople = result;
-                        if (_paidBy != null && !_selectedPeople.contains(_paidBy)) {
-                          _paidBy = null;
-                        }
-                      });
-                    }
-                  },
-                  icon: Icon(Icons.group_add_rounded, size: 18, color: cs.primary),
-                  label: Text(
-                    '+ Add People',
-                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: cs.primary),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: KuberSpacing.md),
-
-            // ── Section 3: Paid By ───────────────────────────────────────
-            if (_selectedPeople.isNotEmpty) ...[
-              _SectionCard(
-                title: 'PAID BY',
+            // ── TOTAL AMOUNT ──────────────────────────────────────────
+            _FieldLabel('TOTAL AMOUNT'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border: Border.all(color: cs.outline),
+              ),
+              child: Row(
                 children: [
-                  Wrap(
-                    spacing: KuberSpacing.sm,
-                    runSpacing: KuberSpacing.sm,
-                    children: _selectedPeople.map((name) {
-                      final isSelected = _paidBy == name;
-                      return GestureDetector(
-                        onTap: () => setState(() => _paidBy = name),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 150),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: KuberSpacing.md,
-                            vertical: KuberSpacing.sm,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected ? cs.primary.withValues(alpha: 0.12) : cs.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(KuberRadius.full),
-                            border: Border.all(
-                              color: isSelected ? cs.primary : cs.outline,
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PersonAvatar(name: name, size: PersonAvatarSize.small),
-                              const SizedBox(width: KuberSpacing.xs),
-                              Text(
-                                name,
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: isSelected ? cs.primary : cs.onSurface,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                  Text(
+                    currency.symbol,
+                    style: GoogleFonts.inter(fontSize: 26, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _amountCtrl,
+                      focusNode: _amountFocus,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (_) => setState(() {}),
+                      style: GoogleFonts.inter(
+                        fontSize: 36, fontWeight: FontWeight.w800,
+                        color: cs.onSurface, letterSpacing: -1.2,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '0',
+                        hintStyle: GoogleFonts.inter(fontSize: 36, fontWeight: FontWeight.w800, color: cs.onSurfaceVariant.withValues(alpha: 0.4)),
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 36, height: 36,
+                    decoration: ShapeDecoration(
+                      color: cs.surfaceContainerHigh,
+                      shape: bsSquircle(10, side: BorderSide(color: cs.outline),
+                      ),
+                    ),
+                    child: Icon(Icons.calculate_rounded, size: 16, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
-              const SizedBox(height: KuberSpacing.md),
+            ),
+            const SizedBox(height: 14),
 
-              // ── Section 4: Split Type ──────────────────────────────────
-              _SectionCard(
-                title: 'SPLIT TYPE',
-                children: [
-                  Row(
-                    children: _splitTypes.map((type) {
-                      final selected = _splitType == type;
-                      final label = type[0].toUpperCase() + type.substring(1);
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _splitType = type),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            margin: const EdgeInsets.only(right: 4),
-                            padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
-                            decoration: BoxDecoration(
-                              color: selected ? cs.primary : cs.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(
-                                color: selected ? cs.primary : cs.outline,
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              label,
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: selected ? Colors.white : cs.onSurface,
-                              ),
-                            ),
+            // ── PARTICIPANTS ──────────────────────────────────────────
+            Row(
+              children: [
+                _FieldLabel('PARTICIPANTS · ${_participants.length}'),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () async {
+                    _unfocus();
+                    final result = await showPeoplePickerSheet(context, _participants);
+                    _unfocus();
+                    if (result != null) {
+                      setState(() {
+                        _participants = result.contains('You') ? result : ['You', ...result];
+                        if (_paidBy != null && !_participants.contains(_paidBy)) _paidBy = null;
+                      });
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_rounded, size: 12, color: cs.primary),
+                      const SizedBox(width: 4),
+                      Text('ADD / EDIT', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.4, color: cs.primary)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Avatar strip
+            if (_participants.isNotEmpty)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _participants.map((name) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Column(
+                      children: [
+                        BsAvatar(name: name, size: 36),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          width: 44,
+                          child: Text(
+                            name == kYouName ? 'You' : name.split(' ').first,
+                            style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ],
+                    ),
+                  )).toList(),
+                ),
+              ),
+            const SizedBox(height: 14),
 
-                  // Dynamic inputs based on split type
-                  if (_splitType != 'equal' && _selectedPeople.isNotEmpty) ...[
-                    const SizedBox(height: KuberSpacing.lg),
-                    ..._selectedPeople.map((name) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+            // ── PAID BY ───────────────────────────────────────────────
+            _FieldLabel('PAID BY'),
+            const SizedBox(height: 8),
+            Opacity(
+              opacity: _participants.length < 2 ? 0.45 : 1.0,
+              child: GestureDetector(
+                onTap: _participants.length < 2
+                    ? null
+                    : () {
+                        _unfocus();
+                        _showPaidByPicker(context, cs);
+                      },
+                child: Container(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainer,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(color: cs.outline),
+                  ),
+                  child: Row(
+                    children: [
+                      if (_paidBy != null) ...[
+                        BsAvatar(name: _paidBy!, size: 28),
+                        const SizedBox(width: 10),
+                      ] else
+                        Icon(
+                          _participants.length < 2 ? Icons.lock_outline_rounded : Icons.person_outline_rounded,
+                          size: 18,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _participants.length < 2
+                              ? 'Add participants first'
+                              : (_paidBy ?? 'Select person'),
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: _paidBy != null ? FontWeight.w600 : FontWeight.w500,
+                            color: _paidBy != null ? cs.onSurface : cs.onSurfaceVariant,
+                            letterSpacing: -0.1,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: cs.onSurfaceVariant),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // ── SPLIT TYPE ────────────────────────────────────────────
+            _FieldLabel('SPLIT TYPE'),
+            const SizedBox(height: 8),
+            Container(
+              height: 38,
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border: Border.all(color: cs.outline),
+              ),
+              child: Row(
+                children: _splitTabs.map((tab) {
+                  final sel = _splitType == tab.value;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _splitType = tab.value),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        margin: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: sel ? cs.primary.withValues(alpha: 0.14) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(6),
+                          border: sel ? Border.all(color: cs.primary.withValues(alpha: 0.35)) : null,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          tab.label,
+                          style: GoogleFonts.inter(
+                            fontSize: 12, fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
+                            color: sel ? cs.primary : cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // ── DYNAMIC BREAKDOWN CARD ────────────────────────────────
+            if (_participants.isNotEmpty && total > 0) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainer,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: cs.outline),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    // Header strip
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        border: Border(bottom: BorderSide(color: cs.outline)),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _breakdownHeader(total),
+                              style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.8, color: cs.onSurfaceVariant),
+                            ),
+                          ),
+                          Text(
+                            balance.label,
+                            style: GoogleFonts.inter(
+                              fontSize: 11, fontWeight: FontWeight.w700,
+                              color: balance.balanced ? KuberColors.income : const Color(0xFFF59E0B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Per-person rows
+                    ..._participants.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final name = entry.value;
+                      final isLast = i == _participants.length - 1;
+                      final computed = shares?[name] ?? (total / _participants.length);
+
+                      return Container(
+                        decoration: BoxDecoration(
+                          border: isLast ? null : Border(bottom: BorderSide(color: cs.outline)),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         child: Row(
                           children: [
-                            PersonAvatar(name: name, size: PersonAvatarSize.small),
-                            const SizedBox(width: KuberSpacing.sm),
+                            BsAvatar(name: name, size: 36),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                name,
-                                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(name, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: cs.onSurface, letterSpacing: -0.1)),
+                                  if (_splitType != 'equal')
+                                    Text('≈ ${computed.toStringAsFixed(0)}', style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant, fontFeatures: const [FontFeature.tabularFigures()])),
+                                ],
                               ),
                             ),
-                            SizedBox(
-                              width: 120,
-                              child: TextField(
-                                controller: _splitType == 'unequal'
-                                    ? _unequalCtrl(name)
-                                    : _splitType == 'percentage'
-                                        ? _percentageCtrl(name)
-                                        : _fractionCtrl(name),
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                onChanged: (_) => setState(() {}),
-                                style: GoogleFonts.inter(fontSize: 13, color: cs.onSurface),
-                                decoration: InputDecoration(
-                                  hintText: _splitType == 'unequal'
-                                      ? '0.00'
-                                      : _splitType == 'percentage'
-                                          ? '0'
-                                          : '1/3',
-                                  hintStyle: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
-                                  suffixText: _splitType == 'percentage' ? '%' : null,
-                                  suffixStyle: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
-                                  filled: true,
-                                  fillColor: cs.surfaceContainerHigh,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: KuberSpacing.md,
-                                    vertical: KuberSpacing.sm,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                                    borderSide: BorderSide(color: cs.outline),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                                    borderSide: BorderSide(color: cs.outline),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                                    borderSide: BorderSide(color: cs.primary),
-                                  ),
-                                ),
+
+                            // Dynamic input based on split type
+                            if (_splitType == 'equal')
+                              Text(
+                                computed.toStringAsFixed(0),
+                                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: cs.onSurface, fontFeatures: const [FontFeature.tabularFigures()]),
                               ),
-                            ),
+
+                            if (_splitType == 'unequal')
+                              _SplitInput(controller: _ctrl(_unequalCtrls, name), suffix: '₹', width: 104, onChanged: () => setState(() {})),
+
+                            if (_splitType == 'percentage')
+                              _SplitInput(controller: _ctrl(_pctCtrls, name), suffix: '%', width: 86, onChanged: () => setState(() {})),
+
+                            if (_splitType == 'fraction')
+                              _SplitInput(
+                                controller: _ctrl(_fracCtrls, name),
+                                suffix: '/ ${_participants.fold(0.0, (sum, p) => sum + (double.tryParse(_ctrl(_fracCtrls, p).text) ?? 0)).toStringAsFixed(0)}',
+                                width: 86,
+                                onChanged: () => setState(() {}),
+                              ),
                           ],
                         ),
                       );
                     }),
                   ],
-                ],
+                ),
               ),
-              const SizedBox(height: KuberSpacing.md),
 
-              // ── Section 5: Result Preview ──────────────────────────────
-              _SectionCard(
-                title: 'PREVIEW',
-                children: shares != null
-                    ? _selectedPeople.map((name) {
-                        final amount = shares[name] ?? 0;
-                        final isPayer = name == _paidBy;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                          child: Row(
-                            children: [
-                              PersonAvatar(name: name, size: PersonAvatarSize.small),
-                              const SizedBox(width: KuberSpacing.md),
-                              Expanded(
-                                child: Text(
-                                  name,
-                                  style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface),
-                                ),
-                              ),
-                              if (isPayer)
-                                Text(
-                                  'Paid ✓',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.tertiary,
-                                  ),
-                                )
-                              else
-                                Text(
-                                  formatter.formatCurrency(amount, symbol: currency.symbol),
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurface,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        );
-                      }).toList()
-                    : [
-                        if (error != null && _selectedPeople.isNotEmpty && total != null)
-                          Text(
-                            error,
-                            style: GoogleFonts.inter(fontSize: 13, color: cs.error),
-                          )
-                        else
-                          Text(
-                            'Fill in the form to see the preview',
-                            style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
-                          ),
-                      ],
-              ),
+              // Info card for non-equal modes
+              if (_splitType != 'equal') ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: cs.primary.withValues(alpha: 0.25)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 14, color: cs.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _splitType == 'unequal'
+                              ? 'Enter exact amounts. Sum must match the total.'
+                              : _splitType == 'percentage'
+                                  ? 'Percentages must add up to 100%. Computed amounts update live.'
+                                  : 'Each person gets a share proportional to their parts.',
+                          style: GoogleFonts.inter(fontSize: 11.5, color: cs.onSurface, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
 
-            const SizedBox(height: KuberSpacing.xl),
-            AppButton(
-              label: widget.existingBill == null ? 'Save Bill' : 'Update Bill',
-              type: AppButtonType.primary,
-              fullWidth: true,
-              isLoading: _isSaving,
-              onPressed: error == null ? _save : null,
-            ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration(ColorScheme cs, String hint, {String? prefix}) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: GoogleFonts.inter(fontSize: 15, color: cs.onSurfaceVariant),
-      prefixText: prefix,
-      prefixStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w500, color: cs.onSurfaceVariant),
-      filled: true,
-      fillColor: cs.surfaceContainerHigh,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: KuberSpacing.md,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        borderSide: BorderSide(color: cs.outline),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        borderSide: BorderSide(color: cs.outline),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        borderSide: BorderSide(color: cs.primary),
-      ),
-    );
+  String _breakdownHeader(double total) {
+    return switch (_splitType) {
+      'equal' => 'SPLIT EQUALLY · ${(total / _participants.length).toStringAsFixed(0)} EACH',
+      'unequal' => 'ENTER EXACT AMOUNTS',
+      'percentage' => 'ENTER % SHARES',
+      'fraction' => 'ENTER PARTS',
+      _ => '',
+    };
   }
-}
 
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  const _SectionCard({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.md),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _FormField extends StatelessWidget {
-  final String label;
-  final Widget child;
-
-  const _FormField({required this.label, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.2,
+  void _showPaidByPicker(BuildContext context, ColorScheme cs) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 36, height: 4, decoration: BoxDecoration(color: cs.outline, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text('Who Paid?', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800, color: cs.onSurface)),
+              ),
+              const SizedBox(height: 12),
+              ..._participants.map((name) => ListTile(
+                leading: BsAvatar(name: name, size: 36),
+                title: Text(name, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                trailing: _paidBy == name ? Icon(Icons.check_rounded, color: cs.primary) : null,
+                onTap: () {
+                  setState(() => _paidBy = name);
+                  Navigator.pop(context);
+                },
+              )),
+              const SizedBox(height: 16),
+            ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
-        child,
-      ],
+      ),
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String text;
+  const _FieldLabel(this.text);
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 11, fontWeight: FontWeight.w800,
+        letterSpacing: 1.1, color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+class _SplitInput extends StatelessWidget {
+  final TextEditingController controller;
+  final String suffix;
+  final double width;
+  final VoidCallback onChanged;
+
+  const _SplitInput({required this.controller, required this.suffix, required this.width, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: width,
+      height: 38,
+      child: TextField(
+        controller: controller,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        onChanged: (_) => onChanged(),
+        textAlign: TextAlign.right,
+        style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: cs.onSurface, fontFeatures: const [FontFeature.tabularFigures()]),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: cs.surfaceContainerHigh,
+          suffixText: suffix,
+          suffixStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: cs.outline)),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: cs.outline)),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: cs.primary)),
+        ),
+      ),
     );
   }
 }
