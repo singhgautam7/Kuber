@@ -64,7 +64,8 @@ class _InvestmentsScreenState extends ConsumerState<InvestmentsScreen> {
               const SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  title: 'Investments',
+                  showHome: true,
+                  title: '',
                   infoConfig: InfoConstants.investments,
                 ),
               ),

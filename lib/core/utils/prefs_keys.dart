@@ -33,4 +33,5 @@ class PrefsKeys {
   // Analytics thresholds
   static const thresholdFloor = 'kuber_threshold_floor';
   static const thresholdCeiling = 'kuber_threshold_ceiling';
+  static const navBarStyle = 'nav_bar_style';
 }

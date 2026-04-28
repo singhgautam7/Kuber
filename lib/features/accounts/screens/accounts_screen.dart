@@ -133,8 +133,9 @@ class _AccountsBody extends ConsumerWidget {
         // App bar
         const SliverToBoxAdapter(
           child: KuberAppBar(
-            showBack: true, 
-            title: 'Accounts',
+            showBack: true,
+            showHome: true,
+            title: '',
             infoConfig: InfoConstants.accounts,
           ),
         ),

@@ -76,7 +76,8 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
               const SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  title: 'Lent / Borrow',
+                  showHome: true,
+                  title: '',
                   infoConfig: InfoConstants.ledger,
                 ),
               ),

@@ -286,7 +286,8 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
     final txns = ref.read(transactionListProvider).valueOrNull ?? [];
     final accounts = ref.read(accountListProvider).valueOrNull ?? [];
     final settings = await ref.read(settingsProvider.future);
-    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
+    final categories = ref.read(categoryListProvider).valueOrNull ??
+        await ref.read(categoryListProvider.future) ?? [];
     final formatter = ref.read(formatterProvider);
     final currency = currencyFromCode(settings.currency);
     currency.symbol;

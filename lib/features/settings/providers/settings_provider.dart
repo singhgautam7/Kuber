@@ -40,6 +40,10 @@ final privacyModeProvider = Provider<bool>((ref) {
   return ref.watch(settingsProvider).valueOrNull?.privacyMode ?? false;
 });
 
+final navBarStyleProvider = Provider<NavBarStyle>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.navBarStyle ?? NavBarStyle.classic;
+});
+
 final thresholdFloorProvider = Provider<double>((ref) {
   return ref.watch(settingsProvider).valueOrNull?.thresholdFloor ?? 500;
 });
@@ -59,6 +63,11 @@ enum SwipeMode {
   performActions,
 }
 
+enum NavBarStyle {
+  classic,
+  modern,
+}
+
 class SettingsState {
   final ThemeMode themeMode;
   final String currency;
@@ -71,6 +80,7 @@ class SettingsState {
   final bool privacyMode;
   final double thresholdFloor;
   final double thresholdCeiling;
+  final NavBarStyle navBarStyle;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -84,6 +94,7 @@ class SettingsState {
     this.privacyMode = false,
     this.thresholdFloor = 500,
     this.thresholdCeiling = 2000,
+    this.navBarStyle = NavBarStyle.classic,
   });
 
   SettingsState copyWith({
@@ -97,6 +108,7 @@ class SettingsState {
     bool? privacyMode,
     double? thresholdFloor,
     double? thresholdCeiling,
+    NavBarStyle? navBarStyle,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -110,6 +122,7 @@ class SettingsState {
       privacyMode: privacyMode ?? this.privacyMode,
       thresholdFloor: thresholdFloor ?? this.thresholdFloor,
       thresholdCeiling: thresholdCeiling ?? this.thresholdCeiling,
+      navBarStyle: navBarStyle ?? this.navBarStyle,
     );
   }
 }
@@ -130,6 +143,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final privacyMode = prefs.getBool(PrefsKeys.privacyMode) ?? false;
     final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
     final thresholdCeiling = prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
+    final navBarStyleIndex = prefs.getInt(PrefsKeys.navBarStyle) ?? 0;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -143,6 +157,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       privacyMode: privacyMode,
       thresholdFloor: thresholdFloor,
       thresholdCeiling: thresholdCeiling,
+      navBarStyle: NavBarStyle.values[navBarStyleIndex],
     );
   }
 
@@ -164,7 +179,14 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       numberSystem: cur.numberSystem,
       defaultAccountId: id,
       privacyMode: cur.privacyMode,
+      navBarStyle: cur.navBarStyle,
     ));
+  }
+
+  Future<void> setNavBarStyle(NavBarStyle style) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.navBarStyle, style.index);
+    state = AsyncData(state.requireValue.copyWith(navBarStyle: style));
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
-import '../../features/settings/providers/settings_provider.dart';
+import '../../features/settings/providers/settings_provider.dart' show settingsProvider, SwipeMode, NavBarStyle;
 import '../../features/history/providers/selection_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
@@ -175,6 +177,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     final isWide = width >= KuberBreakpoints.smallTablet;
 
     final swipeMode = settings?.swipeMode ?? SwipeMode.changeTabs;
+    final navBarStyle = settings?.navBarStyle ?? NavBarStyle.classic;
 
     final animatedContent = swipeMode == SwipeMode.changeTabs
         ? PageView(
@@ -201,90 +204,118 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           ],
         ),
       );
+    } else if (navBarStyle == NavBarStyle.modern) {
+      content = Scaffold(
+        backgroundColor: cs.surface,
+        extendBody: true,
+        body: Stack(
+          children: [
+            animatedContent,
+            if (_showSpeedDial) ...[
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: _closeSpeedDial,
+                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
+                ),
+              ),
+              Positioned(
+                right: KuberSpacing.lg,
+                bottom: 100,
+                child: _SpeedDialMenu(
+                  animation: _dialAnimation,
+                  onClose: _closeSpeedDial,
+                ),
+              ),
+            ],
+          ],
+        ),
+        bottomNavigationBar: _ModernNavBar(
+          currentIndex: currentIndex,
+          onTap: _onTabTapped,
+          onAddTapped: _onAddTapped,
+          onAddLongPress: _openSpeedDial,
+          isSelectionMode: isSelectionMode,
+          isKeyboardOpen: isKeyboardOpen,
+          showAdd: currentIndex != 3,
+          isSpeedDialOpen: _showSpeedDial,
+        ),
+      );
     } else {
       content = Scaffold(
         backgroundColor: cs.surface,
         body: Stack(
-        children: [
-          animatedContent,
-          if (_showSpeedDial) ...[
-            // Full-screen barrier
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: _closeSpeedDial,
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.5),
+          children: [
+            animatedContent,
+            if (_showSpeedDial) ...[
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: _closeSpeedDial,
+                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
                 ),
               ),
-            ),
-            // Speed dial options
-            Positioned(
-              right: KuberSpacing.lg,
-              bottom: 100,
-              child: _SpeedDialMenu(
-                animation: _dialAnimation,
-                onClose: _closeSpeedDial,
+              Positioned(
+                right: KuberSpacing.lg,
+                bottom: 100,
+                child: _SpeedDialMenu(
+                  animation: _dialAnimation,
+                  onClose: _closeSpeedDial,
+                ),
               ),
-            ),
+            ],
           ],
-        ],
-      ),
-      floatingActionButton: currentIndex != 3
-          ? AnimatedScale(
-              scale: (ref.watch(isSelectionModeProvider) || isKeyboardOpen) ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              child: GestureDetector(
-                onLongPress: _openSpeedDial,
-                child: FloatingActionButton(
-                  onPressed: _onAddTapped,
-                  backgroundColor: cs.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  child: AnimatedRotation(
-                    turns: _showSpeedDial ? 0.125 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: const Icon(Icons.add),
+        ),
+        floatingActionButton: currentIndex != 3
+            ? AnimatedScale(
+                scale: (isSelectionMode || isKeyboardOpen) ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                child: GestureDetector(
+                  onLongPress: _openSpeedDial,
+                  child: FloatingActionButton(
+                    onPressed: _onAddTapped,
+                    backgroundColor: cs.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                    ),
+                    child: AnimatedRotation(
+                      turns: _showSpeedDial ? 0.125 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: const Icon(Icons.add),
+                    ),
                   ),
                 ),
-              ),
-            )
-          : null,
-      bottomNavigationBar: _KuberAnimatedNavBar(
-        currentIndex: currentIndex,
-        onTap: _onTabTapped,
-      ),
-    );
+              )
+            : null,
+        bottomNavigationBar: _KuberAnimatedNavBar(
+          currentIndex: currentIndex,
+          onTap: _onTabTapped,
+        ),
+      );
     }
 
-    return BackButtonListener(
-      onBackButtonPressed: () async {
-        // If GoRouter has a route to pop (e.g. /add-transaction pushed on root),
-        // return false so GoRouter's dispatcher handles the pop.
-        if (GoRouter.of(context).canPop()) {
-          return false;
-        }
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (didPop) return;
 
         if (_showSpeedDial) {
           _closeSpeedDial();
-          return true;
+          return;
         }
 
         if (isSelectionMode) {
           ref.read(transactionSelectionProvider.notifier).clear();
-          return true;
+          return;
         }
 
         if (currentIndex != 0) {
           _onTabTapped(0);
-          return true;
+          return;
         }
 
         SystemNavigator.pop();
-        return true;
       },
       child: content,
     );
@@ -292,8 +323,121 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 }
 
 // ---------------------------------------------------------------------------
-// Animated Bottom Nav Bar
+// Modern Floating Nav Bar
 // ---------------------------------------------------------------------------
+
+class _ModernNavBar extends StatefulWidget {
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+  final VoidCallback onAddTapped;
+  final VoidCallback onAddLongPress;
+  final bool isSelectionMode;
+  final bool isKeyboardOpen;
+  final bool showAdd;
+  final bool isSpeedDialOpen;
+
+  const _ModernNavBar({
+    required this.currentIndex,
+    required this.onTap,
+    required this.onAddTapped,
+    required this.onAddLongPress,
+    required this.isSelectionMode,
+    required this.isKeyboardOpen,
+    required this.showAdd,
+    required this.isSpeedDialOpen,
+  });
+
+  @override
+  State<_ModernNavBar> createState() => _ModernNavBarState();
+}
+
+class _ModernNavBarState extends State<_ModernNavBar> {
+  static const _animDuration = Duration(milliseconds: 200);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final hide = widget.isSelectionMode || widget.isKeyboardOpen;
+
+    return AnimatedSlide(
+      offset: hide ? const Offset(0, 1.5) : Offset.zero,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOutCubic,
+      child: Container(
+        color: Colors.transparent,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+                KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.sm),
+            child: Row(
+              children: [
+                // Pill
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(KuberRadius.xl),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                      child: Container(
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainer.withValues(alpha: 0.92),
+                          borderRadius: BorderRadius.circular(KuberRadius.xl),
+                          border: Border.all(
+                            color: cs.outline.withValues(alpha: 0.18),
+                          ),
+                        ),
+                        child: Row(
+                          children: List.generate(kuberNavItems.length, (i) {
+                            final item = kuberNavItems[i];
+                            final isSelected = i == widget.currentIndex;
+                            return Expanded(
+                              child: _NavBarItem(
+                                item: item,
+                                isSelected: isSelected,
+                                animDuration: _animDuration,
+                                onTap: () => widget.onTap(i),
+                                cs: cs,
+                                tt: tt,
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Add button
+                if (widget.showAdd) ...[
+                  const SizedBox(width: KuberSpacing.sm),
+                  GestureDetector(
+                    onTap: widget.onAddTapped,
+                    onLongPress: widget.onAddLongPress,
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(KuberRadius.xl),
+                      ),
+                      alignment: Alignment.center,
+                      child: AnimatedRotation(
+                        turns: widget.isSpeedDialOpen ? 0.125 : 0,
+                        duration: _animDuration,
+                        child: Icon(Icons.add, color: cs.onPrimary, size: 26),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _KuberAnimatedNavBar extends StatefulWidget {
   final int currentIndex;

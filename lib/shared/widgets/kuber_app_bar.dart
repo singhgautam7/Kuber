@@ -44,20 +44,22 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               if (showBack) ...[
-                GestureDetector(
+                _AppBarButton(
+                  icon: Icons.arrow_back_rounded,
+                  tooltip: 'Back',
                   onTap: () => Navigator.pop(context),
-                  child: Icon(Icons.arrow_back_rounded,
-                      color: cs.onSurface, size: 22),
+                  cs: cs,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: KuberSpacing.sm),
               ],
               if (showHome) ...[
-                GestureDetector(
+                _AppBarButton(
+                  icon: Icons.home_outlined,
+                  tooltip: 'Home',
                   onTap: () => context.go('/'),
-                  child: Icon(Icons.home_outlined,
-                      color: cs.onSurface, size: 22),
+                  cs: cs,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: KuberSpacing.sm),
               ],
               if (title == null) ...[
                 Container(
@@ -65,7 +67,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   height: 32,
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                   ),
                   child: Center(
                     child: Icon(
@@ -97,18 +99,51 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
               const Spacer(),
               if (infoConfig != null) ...[
-                IconButton(
-                  onPressed: () => KuberInfoBottomSheet.show(context, infoConfig!),
-                  icon: const Icon(Icons.help_outline),
-                  color: cs.onSurfaceVariant,
-                  iconSize: 22,
-                  visualDensity: VisualDensity.compact,
+                _AppBarButton(
+                  icon: Icons.help_outline_rounded,
+                  tooltip: 'Help',
+                  onTap: () => KuberInfoBottomSheet.show(context, infoConfig!),
+                  cs: cs,
                 ),
                 const SizedBox(width: 4),
               ],
               if (actions != null) ...actions!,
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AppBarButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final ColorScheme cs;
+
+  const _AppBarButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    required this.cs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      triggerMode: TooltipTriggerMode.longPress,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
+          ),
+          child: Icon(icon, color: cs.onSurfaceVariant, size: 18),
         ),
       ),
     );

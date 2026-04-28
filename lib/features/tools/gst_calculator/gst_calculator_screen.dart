@@ -76,8 +76,9 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'GST Calculator',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.gstCalculator,
             ),
           ),

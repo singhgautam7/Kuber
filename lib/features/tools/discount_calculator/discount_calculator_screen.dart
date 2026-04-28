@@ -64,8 +64,9 @@ class _DiscountCalculatorScreenState
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'Discount Calculator',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.discountCalculator,
             ),
           ),

@@ -57,8 +57,9 @@ class RecurringScreen extends ConsumerWidget {
               // App bar
               const SliverToBoxAdapter(
                 child: KuberAppBar(
-                  showBack: true, 
-                  title: 'Recurring',
+                  showBack: true,
+                  showHome: true,
+                  title: '',
                   infoConfig: InfoConstants.recurring,
                 ),
               ),

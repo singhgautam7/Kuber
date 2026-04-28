@@ -110,4 +110,6 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   Future<void> togglePrivacyMode() async {}
   @override
   Future<void> setThresholds(double floor, double ceiling) async {}
+  @override
+  Future<void> setNavBarStyle(NavBarStyle style) async {}
 }

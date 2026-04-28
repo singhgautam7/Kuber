@@ -34,8 +34,9 @@ class BillSplitterScreen extends ConsumerWidget {
           // ── App Bar ────────────────────────────────────────────────────
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: 'Bill Splitter',
+              title: '',
               showBack: true,
+              showHome: true,
               infoConfig: InfoConstants.billSplitter,
             ),
           ),
