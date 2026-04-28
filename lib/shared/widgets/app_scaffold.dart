@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -363,20 +361,22 @@ class _ModernNavBarState extends State<_ModernNavBar> {
       curve: Curves.easeInOutCubic,
       child: Stack(
         children: [
-          // Gradient scrim — fades content into background below the pill
+          // Static scrim — covers the system nav bar inset so the Android
+          // gesture line / 3-button nav never clashes with scrolled content.
+          // Pure gradient paint — no GPU blur pass.
           Positioned.fill(
             child: IgnorePointer(
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       cs.surface.withValues(alpha: 0),
-                      cs.surface.withValues(alpha: 0.85),
+                      cs.surface.withValues(alpha: 0.72),
                       cs.surface,
                     ],
-                    stops: const [0.0, 0.45, 1.0],
+                    stops: const [0.0, 0.35, 1.0],
                   ),
                 ),
               ),
@@ -386,53 +386,37 @@ class _ModernNavBarState extends State<_ModernNavBar> {
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.sm),
+              padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
               child: Row(
                 children: [
-                  // Pill — border is OUTSIDE ClipRRect so it's never clipped
+                  // Pill — solid background, border only (no blur / shadow)
                   Expanded(
                     child: Container(
-                      height: 60,
+                      height: 64,
                       decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(KuberRadius.xl),
                         border: Border.all(
                           color: cs.outlineVariant,
                           width: 1,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.shadow.withValues(alpha: 0.18),
-                            blurRadius: 12,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(KuberRadius.xl - 1),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                          child: Container(
-                            color: cs.surfaceContainerHighest,
-                            child: Row(
-                              children: List.generate(kuberNavItems.length, (i) {
-                                final item = kuberNavItems[i];
-                                final isSelected = i == widget.currentIndex;
-                                return Expanded(
-                                  child: _NavBarItem(
-                                    item: item,
-                                    isSelected: isSelected,
-                                    animDuration: _animDuration,
-                                    onTap: () => widget.onTap(i),
-                                    cs: cs,
-                                    tt: tt,
-                                    fullTint: true,
-                                  ),
-                                );
-                              }),
+                      child: Row(
+                        children: List.generate(kuberNavItems.length, (i) {
+                          final item = kuberNavItems[i];
+                          final isSelected = i == widget.currentIndex;
+                          return Expanded(
+                            child: _NavBarItem(
+                              item: item,
+                              isSelected: isSelected,
+                              animDuration: _animDuration,
+                              onTap: () => widget.onTap(i),
+                              cs: cs,
+                              tt: tt,
+                              fullTint: true,
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -442,8 +426,8 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                     onTap: widget.onAddTapped,
                     onLongPress: widget.onAddLongPress,
                     child: Container(
-                      width: 60,
-                      height: 60,
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
                         color: cs.primary,
                         borderRadius: BorderRadius.circular(KuberRadius.xl),
@@ -590,53 +574,30 @@ class _NavBarItemState extends State<_NavBarItem>
         builder: (context, _) {
           final t = _controller.value;
 
-          // Build inside builder so Opacity values re-read on every animation tick
-          final iconContent = Stack(
-            alignment: Alignment.center,
-            children: [
-              Opacity(
-                opacity: (1 - t).clamp(0.0, 1.0),
-                child: Icon(widget.item.icon, size: 22, color: unselectedColor),
-              ),
-              Opacity(
-                opacity: t.clamp(0.0, 1.0),
-                child: Icon(widget.item.activeIcon, size: 22, color: selectedColor),
-              ),
-            ],
-          );
+          // Single icon with interpolated color — no Opacity/compositing overhead
+          final iconColor = Color.lerp(unselectedColor, selectedColor, t)!;
+          final iconData = t > 0.5 ? widget.item.activeIcon : widget.item.icon;
+          final iconContent = Icon(iconData, size: 22, color: iconColor);
 
           if (widget.fullTint) {
-            // Modern: wrap icon + label in a single tinted capsule, centered
-            // so it never touches the pill border on either edge.
-            // KuberRadius.full makes it a stadium shape — visually consistent
-            // with the overall pill regardless of the tint's aspect ratio.
+            // Modern: no background tint — active state shown via icon/text color only
             return Center(
-              child: ScaleTransition(
-                scale: _scaleAnim,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: widget.cs.primary.withValues(alpha: t * 0.15),
-                    borderRadius: BorderRadius.circular(KuberRadius.full),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(iconData, size: 24, color: iconColor),
+                  const SizedBox(height: 3),
+                  Text(
+                    widget.item.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: widget.tt.labelSmall!.copyWith(
+                      fontSize: 11,
+                      fontWeight: t > 0.5 ? FontWeight.w700 : FontWeight.w500,
+                      color: t > 0.5 ? selectedColor : unselectedColor,
+                    ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: 20, width: 20, child: iconContent),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.item.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: widget.tt.labelSmall!.copyWith(
-                          fontSize: 10,
-                          fontWeight: t > 0.5 ? FontWeight.w700 : FontWeight.w500,
-                          color: t > 0.5 ? selectedColor : unselectedColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
               ),
             );
           }

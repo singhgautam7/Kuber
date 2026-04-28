@@ -179,6 +179,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ],
                         ),
                       ),
+                      Divider(height: 1, color: cs.outline),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
+                          vertical: KuberSpacing.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const SquircleIcon(icon: Icons.crop_free_rounded, size: 18, padding: 8),
+                                const SizedBox(width: KuberSpacing.md),
+                                Text(
+                                  'Bottom Navigation UI',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: KuberSpacing.md),
+                            SettingsCardSelector<NavBarStyle>(
+                              options: const [
+                                SelectorOption(
+                                  value: NavBarStyle.classic,
+                                  label: 'Classic',
+                                  subtitle: 'Standard bar',
+                                  icon: Icons.view_quilt_rounded,
+                                ),
+                                SelectorOption(
+                                  value: NavBarStyle.modern,
+                                  label: 'Modern',
+                                  subtitle: 'Floating pill',
+                                  icon: Icons.crop_free_rounded,
+                                ),
+                              ],
+                              selectedValue: currentNavBarStyle,
+                              onSelected: (val) {
+                                setState(() => _tempNavBarStyle = val);
+                                ref.read(settingsProvider.notifier).setNavBarStyle(val);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
 
@@ -355,33 +403,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       },
                     ),
                   ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // BOTTOM NAVIGATION UI
-                _SectionLabel(label: 'BOTTOM NAVIGATION UI'),
-                const SizedBox(height: KuberSpacing.sm),
-                SettingsCardSelector<NavBarStyle>(
-                  options: const [
-                    SelectorOption(
-                      value: NavBarStyle.classic,
-                      label: 'Classic',
-                      subtitle: 'Standard bar',
-                      icon: Icons.view_quilt_rounded,
-                    ),
-                    SelectorOption(
-                      value: NavBarStyle.modern,
-                      label: 'Modern',
-                      subtitle: 'Floating pill',
-                      icon: Icons.crop_free_rounded,
-                    ),
-                  ],
-                  selectedValue: currentNavBarStyle,
-                  onSelected: (val) {
-                    setState(() => _tempNavBarStyle = val);
-                    ref.read(settingsProvider.notifier).setNavBarStyle(val);
-                  },
                 ),
 
                 const SizedBox(height: KuberSpacing.xl),
