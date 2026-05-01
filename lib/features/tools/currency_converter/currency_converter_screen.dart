@@ -104,6 +104,7 @@ class _CurrencyConverterScreenState
               actionIcon: Icons.refresh_rounded,
               onAction: _refresh,
               actionTooltip: 'Refresh rates',
+              isLoading: ratesAsync.isLoading || ratesAsync.isRefreshing,
             ),
           ),
           SliverPadding(
@@ -118,15 +119,23 @@ class _CurrencyConverterScreenState
                 // Last updated label
                 Padding(
                   padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                  child: Text(
-                    isStale
-                        ? 'CACHED · $lastUpdatedLabel'
-                        : 'LAST UPDATED: $lastUpdatedLabel',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: isStale ? cs.error : cs.primary,
-                      letterSpacing: 1.0,
+                  child: RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.0,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: isStale ? 'CACHED · ' : 'LAST UPDATED: ',
+                          style: TextStyle(color: cs.onSurfaceVariant),
+                        ),
+                        TextSpan(
+                          text: lastUpdatedLabel,
+                          style: TextStyle(color: isStale ? cs.error : cs.primary),
+                        ),
+                      ],
                     ),
                   ),
                 ),

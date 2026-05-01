@@ -6,6 +6,7 @@ class KuberPageHeader extends StatelessWidget {
   final IconData actionIcon;
   final VoidCallback? onAction;
   final String? actionTooltip;
+  final bool isLoading;
 
   const KuberPageHeader({
     super.key,
@@ -14,6 +15,7 @@ class KuberPageHeader extends StatelessWidget {
     this.actionIcon = Icons.add_rounded,
     this.onAction,
     this.actionTooltip,
+    this.isLoading = false,
   });
 
   @override
@@ -59,7 +61,7 @@ class KuberPageHeader extends StatelessWidget {
               child: Tooltip(
                 message: actionTooltip ?? '',
                 child: GestureDetector(
-                  onTap: onAction,
+                  onTap: isLoading ? null : onAction,
                   child: Container(
                     width: 48,
                     height: 48,
@@ -74,11 +76,19 @@ class KuberPageHeader extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Icon(
-                      actionIcon,
-                      color: Colors.white,
-                      size: 26,
-                    ),
+                    child: isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.all(14.0),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                        : Icon(
+                            actionIcon,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                   ),
                 ),
               ),
