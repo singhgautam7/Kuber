@@ -4,12 +4,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../features/history/providers/history_filter_provider.dart';
 import '../../features/settings/providers/settings_provider.dart';
-import 'kuber_home_widget_title.dart';
+import 'package:go_router/go_router.dart';
 
 // ---------------------------------------------------------------------------
 // Data model
@@ -21,8 +20,8 @@ class KuberBarBucket {
   final double income;
   final double expense;
   final bool isHighlighted; // true for today / last item in period
-  final DateTime? date;     // Start date for filtering; enables "View Transactions"
-  final DateTime? endDate;  // Optional end date for filtering range
+  final DateTime? date;
+  final DateTime? endDate;
 
   const KuberBarBucket({
     required this.dayLabel,
@@ -152,16 +151,19 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title + subtitle ABOVE the card
-        KuberHomeWidgetTitle(title: widget.title),
+        Text(
+          widget.title,
+          style: tt.labelSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.2,
+          ),
+        ),
         if (widget.subtitle != null) ...[
           const SizedBox(height: 2),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              widget.subtitle!,
-              style: tt.bodySmall?.copyWith(
-                color: cs.onSurfaceVariant,
-              ),
+          Text(
+            widget.subtitle!,
+            style: tt.bodySmall?.copyWith(
+              color: cs.onSurfaceVariant,
             ),
           ),
         ],
@@ -695,14 +697,7 @@ class _TooltipOverlay extends ConsumerWidget {
 
     final double barHeightRatio = (barMaxY / maxY).clamp(0.0, 1.0);
     final double drawingAreaHeight = chartHeight - 42; // reservedSize = 42 for bottom axis titles
-    double bottomPos = 42 + (barHeightRatio * drawingAreaHeight) + 8.0;
-    
-    // Clamp bottomPos so it stays within the Stack bounds (otherwise hit testing fails)
-    final double approxTooltipHeight = 160;
-    if (bottomPos + approxTooltipHeight > chartHeight) {
-      bottomPos = chartHeight - approxTooltipHeight;
-      if (bottomPos < 42) bottomPos = 42; // Minimum padding from bottom axis
-    }
+    final double bottomPos = 42 + (barHeightRatio * drawingAreaHeight) + 8.0;
 
     return Positioned(
       left: leftPos,
@@ -711,10 +706,7 @@ class _TooltipOverlay extends ConsumerWidget {
         position: slide,
         child: FadeTransition(
           opacity: fade,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {},
-            child: SizedBox(
+          child: SizedBox(
             width: cardWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -781,15 +773,22 @@ class _TooltipOverlay extends ConsumerWidget {
                         isBold: true,
                       ),
                       if (bucket.date != null) ...[
-                        const SizedBox(height: 4),
+                        const SizedBox(height: KuberSpacing.sm),
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: cs.outline.withValues(alpha: 0.2),
+                        ),
+                        const SizedBox(height: KuberSpacing.sm),
                         GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onTap: () {
                             final d = bucket.date!;
                             final e = bucket.endDate ?? d;
+                            ref.read(historyFilterProvider.notifier).clearAll();
                             ref.read(historyFilterProvider.notifier).setFilters(
                               from: DateTime(d.year, d.month, d.day),
                               to: DateTime(e.year, e.month, e.day, 23, 59, 59),
-                              clearTypes: true,
                             );
                             context.go('/history');
                           },
@@ -814,7 +813,6 @@ class _TooltipOverlay extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
           ),
         ),
       ),
@@ -843,29 +841,21 @@ class _TooltipRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: tt.labelSmall?.copyWith(
-                color: labelColor,
-                fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ],
+        Text(
+          label,
+          style: tt.labelMedium?.copyWith(
+            color: labelColor,
+            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+          ),
         ),
         Text(
           amount,
-          style: tt.labelSmall?.copyWith(
-            color: labelColor,
-            fontWeight: FontWeight.w700,
+          style: tt.labelMedium?.copyWith(
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            color: color,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

@@ -198,6 +198,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         expense: b.expense,
         isHighlighted: i == buckets.length - 1,
         date: b.date,
+        endDate: b.endDate,
       );
     });
   }

@@ -88,6 +88,14 @@ class PermissionsScreen extends ConsumerWidget {
                         : AppPermissionStatus.notRequired,
                     statusTextOverride: !state.isBiometricAvailable ? 'NOT AVAILABLE' : null,
                   ),
+                  const SizedBox(height: KuberSpacing.lg),
+                  _PermissionCard(
+                    icon: Icons.wifi_rounded,
+                    title: 'Internet Access',
+                    description: 'Required to fetch live exchange rates for the currency converter.',
+                    status: AppPermissionStatus.granted,
+                    statusTextOverride: 'ALWAYS GRANTED',
+                  ),
                   const SizedBox(height: KuberSpacing.xxl),
                   SizedBox(
                     width: double.infinity,

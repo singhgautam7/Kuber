@@ -222,6 +222,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                 icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant, size: 18),
                 onPressed: () {
                   _searchController.clear();
+                  ref.read(historyFilterProvider.notifier).setSearchQuery(null);
+                  _onSearchCancel();
                 },
               ),
             ),
