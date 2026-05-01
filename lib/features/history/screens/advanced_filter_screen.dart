@@ -3,12 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../providers/history_filter_provider.dart';
 import '../models/history_filter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../core/utils/icon_mapper.dart';
 
 class AdvancedFilterScreen extends ConsumerStatefulWidget {
   const AdvancedFilterScreen({super.key});
@@ -201,11 +206,10 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 title: 'ACCOUNTS',
                 child: accountsAsync.when(
                   data: (accounts) => Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: accounts.map((a) => _AccountCard(
-                      name: a.name,
-                      type: a.isCreditCard ? 'CREDIT' : (a.type.toUpperCase()),
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: accounts.map((a) => _AccountPill(
+                      account: a,
                       isSelected: _localFilter.accountIds.contains(a.id.toString()),
                       onTap: () => _toggleAccount(a.id.toString()),
                     )).toList(),
@@ -218,27 +222,16 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               _Section(
                 title: 'CATEGORIES',
                 child: categoriesAsync.when(
-                  data: (categories) => GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1,
-                    ),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final c = categories[index];
-                      return _CategoryCard(
-                        name: c.name,
-                        icon: c.icon,
-                        isSelected: _localFilter.categoryIds.contains(c.id.toString()),
-                        onTap: () => _toggleCategory(c.id.toString()),
-                      );
-                    },
+                  data: (categories) => Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: categories.map((c) => _CategoryPill(
+                      category: c,
+                      isSelected: _localFilter.categoryIds.contains(c.id.toString()),
+                      onTap: () => _toggleCategory(c.id.toString()),
+                    )).toList(),
                   ),
-                  loading: () => _SkeletonGrid(itemCount: 6, isSquare: true),
+                  loading: () => _SkeletonGrid(itemCount: 6),
                   error: (_, __) => const Text('Error loading categories'),
                 ),
               ),
@@ -426,15 +419,13 @@ class _TypePill extends StatelessWidget {
   }
 }
 
-class _AccountCard extends StatelessWidget {
-  final String name;
-  final String type;
+class _AccountPill extends StatelessWidget {
+  final Account account;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _AccountCard({
-    required this.name,
-    required this.type,
+  const _AccountPill({
+    required this.account,
     required this.isSelected,
     required this.onTap,
   });
@@ -442,42 +433,58 @@ class _AccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final iconData = resolveAccountIcon(account);
+    final iconColor = resolveAccountColor(account);
+    final typeLabel = account.isCreditCard ? 'CREDIT' : account.type.toUpperCase();
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: (MediaQuery.of(context).size.width - 52) / 2,
-        padding: const EdgeInsets.all(16),
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: cs.surfaceContainer,
+          color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(
             color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              name,
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(KuberRadius.sm),
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              child: Icon(iconData, size: 20, color: iconColor),
             ),
-            const SizedBox(height: 4),
-            Text(
-              type,
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                color: cs.primary,
-                letterSpacing: 0.5,
-              ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  account.name,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? cs.primary : cs.onSurface,
+                  ),
+                ),
+                Text(
+                  typeLabel,
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected ? cs.primary : cs.onSurfaceVariant.withValues(alpha: 0.6),
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -486,15 +493,13 @@ class _AccountCard extends StatelessWidget {
   }
 }
 
-class _CategoryCard extends StatelessWidget {
-  final String name;
-  final String icon;
+class _CategoryPill extends StatelessWidget {
+  final Category category;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _CategoryCard({
-    required this.name,
-    required this.icon,
+  const _CategoryPill({
+    required this.category,
     required this.isSelected,
     required this.onTap,
   });
@@ -502,64 +507,55 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final iconData = IconMapper.fromString(category.icon);
+    final iconColor = harmonizeCategory(context, Color(category.colorValue));
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        constraints: const BoxConstraints(minHeight: 44),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? cs.primaryContainer.withValues(alpha: 0.3) : cs.surfaceContainer,
+          color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(
             color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              _getIconData(icon),
-              color: isSelected ? cs.primary : cs.onSurfaceVariant,
-              size: 24,
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(KuberRadius.sm),
+              ),
+              child: Icon(iconData, size: 20, color: iconColor),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(width: 10),
             Text(
-              name,
+              category.name,
               style: GoogleFonts.inter(
                 fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: isSelected ? cs.primary : cs.onSurface,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
       ),
     );
-  }
-
-  IconData _getIconData(String name) {
-    switch (name) {
-      case 'restaurant': return Icons.restaurant_rounded;
-      case 'shopping_cart': return Icons.shopping_cart_rounded;
-      case 'directions_bus': return Icons.directions_bus_rounded;
-      case 'home': return Icons.home_rounded;
-      case 'movie': return Icons.movie_rounded;
-      case 'medical_services': return Icons.medical_services_rounded;
-      case 'payments': return Icons.payments_rounded;
-      case 'work': return Icons.work_rounded;
-      default: return Icons.category_rounded;
-    }
   }
 }
 
 class _SkeletonGrid extends StatelessWidget {
   final int itemCount;
-  final bool isSquare;
   final double height;
 
-  const _SkeletonGrid({required this.itemCount, this.isSquare = false, this.height = 64});
+  const _SkeletonGrid({required this.itemCount, this.height = 44});
 
   @override
   Widget build(BuildContext context) {
@@ -568,11 +564,11 @@ class _SkeletonGrid extends StatelessWidget {
       baseColor: cs.surfaceContainerHigh,
       highlightColor: cs.surfaceContainerHighest,
       child: Wrap(
-        spacing: 12,
-        runSpacing: 12,
+        spacing: 8,
+        runSpacing: 8,
         children: List.generate(itemCount, (index) => Container(
-          width: isSquare ? (MediaQuery.of(context).size.width - 64) / 3 : (MediaQuery.of(context).size.width - 52) / 2,
-          height: isSquare ? (MediaQuery.of(context).size.width - 64) / 3 : height,
+          width: (MediaQuery.of(context).size.width - 48) / 2,
+          height: height,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(KuberRadius.md),

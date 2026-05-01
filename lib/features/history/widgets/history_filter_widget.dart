@@ -111,7 +111,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                     if (!_isSearching) ...[
                       // Quick Filters: Exp / Inc
                       Tooltip(
-                        message: 'Expense',
+                        message: 'Filter expenses',
+                        triggerMode: TooltipTriggerMode.longPress,
                         child: _QuickFilterButton(
                           label: 'Exp',
                           isSelected: filter.types.contains('expense'),
@@ -120,7 +121,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                       ),
                       const SizedBox(width: 8),
                       Tooltip(
-                        message: 'Income',
+                        message: 'Filter income',
+                        triggerMode: TooltipTriggerMode.longPress,
                         child: _QuickFilterButton(
                           label: 'Inc',
                           isSelected: filter.types.contains('income'),
@@ -139,6 +141,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                       // Filter Icon with Badge
                       Tooltip(
                         message: 'Advanced filters',
+                        triggerMode: TooltipTriggerMode.longPress,
                         child: _FilterIconButton(
                           count: filter.activeFiltersCount,
                           isActive: filter.isAdvanced,
@@ -148,7 +151,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
                       const SizedBox(width: 8),
                       // Clear Button
                       Tooltip(
-                        message: 'Clear all filters',
+                        message: 'Clear filters',
+                        triggerMode: TooltipTriggerMode.longPress,
                         child: _ClearButton(
                           isEnabled: !filter.isEmpty,
                           onTap: () {
@@ -185,6 +189,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
     final theme = Theme.of(context);
     return Tooltip(
       message: 'Search transactions',
+      triggerMode: TooltipTriggerMode.longPress,
       child: GestureDetector(
         key: const ValueKey('search_chip'),
         onTap: _onSearchToggle,
@@ -224,6 +229,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   Widget _buildSearchIcon(ColorScheme cs) {
     return Tooltip(
       message: 'Search transactions',
+      triggerMode: TooltipTriggerMode.longPress,
       child: GestureDetector(
         key: const ValueKey('search_icon'),
         onTap: _onSearchToggle,

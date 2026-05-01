@@ -10,7 +10,7 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider, navBarStyleProvider, NavBarStyle;
 import '../data/transaction.dart';
 import '../helpers/transaction_filters.dart';
 import '../providers/transaction_provider.dart';
@@ -401,11 +401,19 @@ class _SelectionActionBar extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
 
+    final isModern = ref.watch(navBarStyleProvider) == NavBarStyle.modern;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    // On modern nav bar, add generous bottom clearance so curved-screen edges
+    // don't clip the action buttons (the floating nav bar normally fills this space).
+    final bottomPad = isModern
+        ? bottomInset + KuberSpacing.xl
+        : bottomInset;
+
     return Material(
       elevation: 8,
       color: cs.surfaceContainerHigh,
-      child: SafeArea(
-        top: false,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomPad),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.sm, vertical: KuberSpacing.md),
           decoration: BoxDecoration(
@@ -413,9 +421,17 @@ class _SelectionActionBar extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              IconButton(
-                onPressed: () => ref.read(transactionSelectionProvider.notifier).clear(),
-                icon: Icon(Icons.close_rounded, color: cs.onSurface),
+              GestureDetector(
+                onTap: () => ref.read(transactionSelectionProvider.notifier).clear(),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+                  ),
+                  child: Icon(Icons.close_rounded, size: 16, color: cs.onSurface),
+                ),
               ),
               const SizedBox(width: KuberSpacing.sm),
               Expanded(
@@ -449,9 +465,17 @@ class _SelectionActionBar extends ConsumerWidget {
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () => _confirmDelete(context, ref, selectedIds),
-                icon: Icon(Icons.delete_outline, color: cs.error),
+              GestureDetector(
+                onTap: () => _confirmDelete(context, ref, selectedIds),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(color: cs.error.withValues(alpha: 0.5)),
+                  ),
+                  child: Icon(Icons.delete_outline, size: 16, color: cs.error),
+                ),
               ),
             ],
           ),
