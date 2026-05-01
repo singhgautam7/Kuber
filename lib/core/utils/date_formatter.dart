@@ -8,6 +8,7 @@ class DateFormatter {
 
     if (dateOnly == today) return 'Today';
     if (dateOnly == today.subtract(const Duration(days: 1))) return 'Yesterday';
+    if (date.year != now.year) return DateFormat('d MMM yyyy').format(date);
     return DateFormat('EEE, d MMM').format(date);
   }
 

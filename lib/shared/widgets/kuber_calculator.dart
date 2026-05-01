@@ -101,6 +101,33 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
     });
   }
 
+  void _onPercent() {
+    HapticFeedback.selectionClick();
+    final expr = _rawExpression;
+    if (expr.isEmpty) return;
+    setState(() {
+      int lastOpIdx = -1;
+      for (final op in _operators) {
+        final idx = expr.lastIndexOf(op);
+        if (idx > lastOpIdx) lastOpIdx = idx;
+      }
+      if (lastOpIdx == -1) {
+        final v = double.tryParse(expr) ?? 0;
+        final result = v / 100;
+        _expression = _formatNumber(result);
+        _rawExpression = result.toString();
+      } else {
+        final left = double.tryParse(expr.substring(0, lastOpIdx).trim()) ?? 0;
+        final right = double.tryParse(expr.substring(lastOpIdx + 1).trim()) ?? 0;
+        final pct = left * right / 100;
+        final prefix = expr.substring(0, lastOpIdx + 1);
+        _rawExpression = '$prefix$pct';
+        _expression = '$prefix${_formatNumber(pct)}';
+      }
+      _updatePreview();
+    });
+  }
+
   void _onConfirm() {
     HapticFeedback.mediumImpact();
     final result =
@@ -295,9 +322,10 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   Widget _buildButtonGrid() {
     final cs = Theme.of(context).colorScheme;
     final rows = [
-      // Row 1: C (flex 2, red), ⌫ (red), ÷ (blue)
+      // Row 1: C (red), % (blue), ⌫ (red), ÷ (blue)
       [
-        _CalcBtn('C', _onClear, color: cs.error, flex: 2),
+        _CalcBtn('C', _onClear, color: cs.error),
+        _CalcBtn('%', _onPercent, color: cs.primary),
         _CalcBtn('⌫', _onBackspace,
             color: cs.error, icon: Icons.backspace_outlined),
         _CalcBtn('÷', () => _onOperator('÷'), color: cs.primary),
@@ -323,13 +351,14 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
         _CalcBtn('3', () => _onDigit('3')),
         _CalcBtn('+', () => _onOperator('+'), color: cs.primary),
       ],
-      // Row 5: 0, ., = (blue), ✓ (blue filled)
+      // Row 5: ., 0, = (blue), ✓ (blue filled)
       [
-        _CalcBtn('0', () => _onDigit('0')),
         _CalcBtn('.', () => _onDigit('.')),
+        _CalcBtn('0', () => _onDigit('0')),
         _CalcBtn('=', _onEquals, color: cs.primary),
         _CalcBtn('✓', _onConfirm,
-            color: cs.onPrimary, backgroundColor: cs.primary),
+            color: cs.onPrimary, backgroundColor: cs.primary,
+            icon: Icons.check_rounded),
       ],
     ];
 
@@ -340,7 +369,6 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
                 child: Row(
                   children: row
                       .map((btn) => Expanded(
-                            flex: btn.flex,
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: KuberSpacing.xs),
@@ -390,9 +418,8 @@ class _CalcBtn {
   final VoidCallback onTap;
   final Color? color;
   final Color? backgroundColor;
-  final int flex;
   final IconData? icon;
 
   _CalcBtn(this.label, this.onTap,
-      {this.color, this.backgroundColor, this.flex = 1, this.icon});
+      {this.color, this.backgroundColor, this.icon});
 }

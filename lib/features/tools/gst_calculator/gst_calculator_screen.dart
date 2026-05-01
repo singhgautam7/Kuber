@@ -39,7 +39,7 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
   }
 
   ({double gstAmount, double baseAmount, double cgst, double sgst})? _compute() {
-    final amount = double.tryParse(_amountCtrl.text);
+    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', ''));
     final rate = _rate;
     if (amount == null || rate == null) return null;
     if (amount <= 0 || rate <= 0) return null;
@@ -104,6 +104,7 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
                       controller: _amountCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
+                      formatAsAmount: true,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
                     const ToolInputLabel('GST RATE'),

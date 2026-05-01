@@ -39,13 +39,13 @@ class _DiscountCalculatorScreenState
 
   void _onTextChanged(String v) {
     final parsed = double.tryParse(v);
-    if (parsed != null && parsed >= 0 && parsed <= 90) {
+    if (parsed != null && parsed >= 0 && parsed <= 100) {
       setState(() => _discountPercent = parsed);
     }
   }
 
   ({double discountAmount, double finalPrice})? _compute() {
-    final price = double.tryParse(_priceCtrl.text);
+    final price = double.tryParse(_priceCtrl.text.replaceAll(',', ''));
     if (price == null || price <= 0) return null;
     final discountAmount = price * _discountPercent / 100;
     return (discountAmount: discountAmount, finalPrice: price - discountAmount);
@@ -92,6 +92,7 @@ class _DiscountCalculatorScreenState
                       controller: _priceCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
+                      formatAsAmount: true,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
                     const ToolInputLabel('DISCOUNT PERCENTAGE'),
@@ -102,10 +103,10 @@ class _DiscountCalculatorScreenState
                       onChanged: _onTextChanged,
                     ),
                     Slider(
-                      value: _discountPercent.clamp(0, 90),
+                      value: _discountPercent.clamp(0, 100),
                       min: 0,
-                      max: 90,
-                      divisions: 90,
+                      max: 100,
+                      divisions: 100,
                       activeColor: cs.primary,
                       inactiveColor: cs.outline,
                       label: '${_discountPercent.toStringAsFixed(0)}%',
@@ -117,7 +118,7 @@ class _DiscountCalculatorScreenState
                         Text('0%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
-                        Text('90%',
+                        Text('100%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
                       ],

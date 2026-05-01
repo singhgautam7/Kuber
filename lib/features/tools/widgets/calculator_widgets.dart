@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, NumberSystem;
 
 class ToolInputCard extends StatelessWidget {
   final List<Widget> children;
@@ -68,12 +71,13 @@ class ToolInputLabel extends StatelessWidget {
   }
 }
 
-class ToolTextField extends StatelessWidget {
+class ToolTextField extends ConsumerWidget {
   final TextEditingController controller;
   final String? label;
   final String? prefix;
   final String? suffix;
   final ValueChanged<String>? onChanged;
+  final bool formatAsAmount;
 
   const ToolTextField({
     super.key,
@@ -82,11 +86,13 @@ class ToolTextField extends StatelessWidget {
     this.prefix,
     this.suffix,
     this.onChanged,
+    this.formatAsAmount = false,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final isIndian = formatAsAmount ? ref.watch(formatterProvider).system == NumberSystem.indian : false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,6 +103,9 @@ class ToolTextField extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: formatAsAmount
+              ? [CurrencyInputFormatter(isIndian: isIndian)]
+              : null,
           onChanged: onChanged,
           style: GoogleFonts.inter(
             fontSize: 15,

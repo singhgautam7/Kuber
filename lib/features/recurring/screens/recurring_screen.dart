@@ -13,7 +13,8 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
+import '../../../core/utils/currency_formatter.dart' show maskAmount;
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
@@ -222,7 +223,7 @@ class RecurringScreen extends ConsumerWidget {
                                             ),
                                           ),
                                           Text(
-                                            '${t.type == 'expense' ? '-' : ''}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
+                                            maskAmount('${t.type == 'expense' ? '-' : ''}${ref.watch(formatterProvider).formatCurrency(t.amount)}', ref.watch(privacyModeProvider)),
                                             style: textTheme.bodyMedium?.copyWith(
                                               color: cs.onSurfaceVariant,
                                               fontWeight: FontWeight.w600,
@@ -280,7 +281,7 @@ class _RecurringKpisGrid extends ConsumerWidget {
               _buildKpiCard(
                 context,
                 title: 'ACTIVE AUTO INC.',
-                value: '+${ref.watch(formatterProvider).formatCurrency(activeAutoIncome)}',
+                value: maskAmount('+${ref.watch(formatterProvider).formatCurrency(activeAutoIncome)}', ref.watch(privacyModeProvider)),
                 valueColor: Theme.of(context).colorScheme.tertiary,
               ),
               const SizedBox(height: 12),
@@ -299,7 +300,7 @@ class _RecurringKpisGrid extends ConsumerWidget {
               _buildKpiCard(
                 context,
                 title: 'ACTIVE AUTO EXP.',
-                value: '-${ref.watch(formatterProvider).formatCurrency(activeAutoExpense)}',
+                value: maskAmount('-${ref.watch(formatterProvider).formatCurrency(activeAutoExpense)}', ref.watch(privacyModeProvider)),
                 valueColor: Theme.of(context).colorScheme.error,
               ),
               const SizedBox(height: 12),
@@ -462,7 +463,7 @@ class _RuleCard extends StatelessWidget {
               children: [
                 Consumer(builder: (context, ref, _) {
                   return Text(
-                    '$amountSign${ref.watch(formatterProvider).formatCurrency(rule.amount)}',
+                    maskAmount('$amountSign${ref.watch(formatterProvider).formatCurrency(rule.amount)}', ref.watch(privacyModeProvider)),
                     style: GoogleFonts.inter(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,

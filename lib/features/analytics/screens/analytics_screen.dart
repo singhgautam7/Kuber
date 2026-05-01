@@ -31,9 +31,11 @@ import '../../../shared/widgets/transaction_detail_sheet.dart';
 class _MutableBucket {
   final String day;
   final String month;
+  final DateTime? date;
+  final DateTime? endDate;
   double income = 0;
   double expense = 0;
-  _MutableBucket(this.day, this.month);
+  _MutableBucket(this.day, this.month, {this.date, this.endDate});
 }
 
 // ---------------------------------------------------------------------------
@@ -88,7 +90,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         final daysCount = filter.to.difference(filter.from).inDays + 1;
         buckets = List.generate(daysCount, (i) {
           final d = filter.from.add(Duration(days: i));
-          return _MutableBucket(DateFormat('d').format(d), DateFormat('MMM').format(d).toUpperCase());
+          return _MutableBucket(DateFormat('d').format(d), DateFormat('MMM').format(d).toUpperCase(), date: d);
         });
         for (final t in txns) {
           final diff = t.createdAt.difference(filter.from).inDays;
@@ -106,7 +108,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         // Divide into 4 or 5 weeks
         final daysInMonth = filter.to.difference(filter.from).inDays + 1;
         final weekCount = (daysInMonth / 7).ceil();
-        buckets = List.generate(weekCount, (i) => _MutableBucket('Week', '${i + 1}'));
+        buckets = List.generate(weekCount, (i) {
+          final startDay = filter.from.add(Duration(days: i * 7));
+          final endDay = i == weekCount - 1 ? filter.to : startDay.add(const Duration(days: 6));
+          return _MutableBucket('Week', '${i + 1}', date: startDay, endDate: endDay);
+        });
         for (final t in txns) {
           final dayDiff = t.createdAt.difference(filter.from).inDays;
           final week = (dayDiff / 7).floor();
@@ -131,7 +137,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                final quarters = (monthsDiff / 3).ceil().clamp(1, 12);
                buckets = List.generate(quarters, (i) {
                   final m = DateTime(filter.from.year, filter.from.month + i * 3, 1);
-                  return _MutableBucket('Q${((m.month - 1) / 3).floor() + 1}', DateFormat('yy').format(m));
+                  final endM = DateTime(m.year, m.month + 3, 0); // Last day of quarter
+                  return _MutableBucket('Q${((m.month - 1) / 3).floor() + 1}', DateFormat('yy').format(m), date: m, endDate: endM.isAfter(filter.to) ? filter.to : endM);
                });
                for (final t in txns) {
                  final mDiff = (t.createdAt.year - filter.from.year) * 12 + t.createdAt.month - filter.from.month;
@@ -147,7 +154,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                final count = monthsDiff + 1;
                buckets = List.generate(count, (i) {
                  final m = DateTime(filter.from.year, filter.from.month + i, 1);
-                 return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m));
+                 final endM = DateTime(m.year, m.month + 1, 0);
+                 return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m), date: m, endDate: endM.isAfter(filter.to) ? filter.to : endM);
                });
                for (final t in txns) {
                  final idx = (t.createdAt.year - filter.from.year) * 12 + t.createdAt.month - filter.from.month;
@@ -164,7 +172,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           // Show weeks
           final days = filter.to.difference(filter.from).inDays + 1;
           final weeks = (days / 7).ceil();
-          buckets = List.generate(weeks, (i) => _MutableBucket('Week', '${i + 1}'));
+          buckets = List.generate(weeks, (i) {
+            final startDay = filter.from.add(Duration(days: i * 7));
+            final endDay = i == weeks - 1 ? filter.to : startDay.add(const Duration(days: 6));
+            return _MutableBucket('Week', '${i + 1}', date: startDay, endDate: endDay);
+          });
           for (final t in txns) {
             final idx = (t.createdAt.difference(filter.from).inDays / 7).floor().clamp(0, weeks - 1);
             if (t.type == 'income') {
@@ -185,6 +197,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         income: b.income,
         expense: b.expense,
         isHighlighted: i == buckets.length - 1,
+        date: b.date,
       );
     });
   }

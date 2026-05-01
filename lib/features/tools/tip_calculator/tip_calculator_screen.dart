@@ -38,13 +38,13 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
 
   void _onTextChanged(String v) {
     final parsed = double.tryParse(v);
-    if (parsed != null && parsed >= 0 && parsed <= 30) {
+    if (parsed != null && parsed >= 0 && parsed <= 100) {
       setState(() => _tipPercent = parsed);
     }
   }
 
   ({double tip, double total})? _compute() {
-    final bill = double.tryParse(_billCtrl.text);
+    final bill = double.tryParse(_billCtrl.text.replaceAll(',', ''));
     if (bill == null || bill <= 0) return null;
     final tip = bill * _tipPercent / 100;
     return (tip: tip, total: bill + tip);
@@ -91,6 +91,7 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                       controller: _billCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
+                      formatAsAmount: true,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
                     const ToolInputLabel('TIP PERCENTAGE'),
@@ -101,10 +102,10 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                       onChanged: _onTextChanged,
                     ),
                     Slider(
-                      value: _tipPercent.clamp(0, 30),
+                      value: _tipPercent.clamp(0, 100),
                       min: 0,
-                      max: 30,
-                      divisions: 30,
+                      max: 100,
+                      divisions: 100,
                       activeColor: cs.primary,
                       inactiveColor: cs.outline,
                       label: '${_tipPercent.toStringAsFixed(0)}%',
@@ -116,7 +117,7 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                         Text('0%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
-                        Text('30%',
+                        Text('100%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
                       ],

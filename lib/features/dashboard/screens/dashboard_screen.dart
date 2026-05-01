@@ -286,6 +286,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         income: d.income,
         expense: d.expense,
         isHighlighted: i == days.length - 1,
+        date: d.date,
       );
     });
   }

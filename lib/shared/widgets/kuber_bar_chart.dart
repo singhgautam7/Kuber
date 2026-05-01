@@ -4,8 +4,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/currency_formatter.dart';
+import '../../features/history/providers/history_filter_provider.dart';
 import '../../features/settings/providers/settings_provider.dart';
 import 'kuber_home_widget_title.dart';
 
@@ -19,6 +21,8 @@ class KuberBarBucket {
   final double income;
   final double expense;
   final bool isHighlighted; // true for today / last item in period
+  final DateTime? date;     // Start date for filtering; enables "View Transactions"
+  final DateTime? endDate;  // Optional end date for filtering range
 
   const KuberBarBucket({
     required this.dayLabel,
@@ -26,6 +30,8 @@ class KuberBarBucket {
     required this.income,
     required this.expense,
     this.isHighlighted = false,
+    this.date,
+    this.endDate,
   });
 }
 
@@ -689,7 +695,14 @@ class _TooltipOverlay extends ConsumerWidget {
 
     final double barHeightRatio = (barMaxY / maxY).clamp(0.0, 1.0);
     final double drawingAreaHeight = chartHeight - 42; // reservedSize = 42 for bottom axis titles
-    final double bottomPos = 42 + (barHeightRatio * drawingAreaHeight) + 8.0;
+    double bottomPos = 42 + (barHeightRatio * drawingAreaHeight) + 8.0;
+    
+    // Clamp bottomPos so it stays within the Stack bounds (otherwise hit testing fails)
+    final double approxTooltipHeight = 160;
+    if (bottomPos + approxTooltipHeight > chartHeight) {
+      bottomPos = chartHeight - approxTooltipHeight;
+      if (bottomPos < 42) bottomPos = 42; // Minimum padding from bottom axis
+    }
 
     return Positioned(
       left: leftPos,
@@ -698,7 +711,10 @@ class _TooltipOverlay extends ConsumerWidget {
         position: slide,
         child: FadeTransition(
           opacity: fade,
-          child: SizedBox(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {},
+            child: SizedBox(
             width: cardWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -764,11 +780,41 @@ class _TooltipOverlay extends ConsumerWidget {
                         labelColor: cs.onSurface,
                         isBold: true,
                       ),
+                      if (bucket.date != null) ...[
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () {
+                            final d = bucket.date!;
+                            final e = bucket.endDate ?? d;
+                            ref.read(historyFilterProvider.notifier).setFilters(
+                              from: DateTime(d.year, d.month, d.day),
+                              to: DateTime(e.year, e.month, e.day, 23, 59, 59),
+                              clearTypes: true,
+                            );
+                            context.go('/history');
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'View Transactions',
+                                style: tt.labelSmall?.copyWith(
+                                  color: cs.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.arrow_outward_rounded, size: 12, color: cs.primary),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

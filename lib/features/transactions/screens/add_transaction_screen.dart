@@ -690,11 +690,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _pickDate() async {
     FocusScope.of(context).unfocus();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final initialDateOnly = DateTime(
+      _selectedDate.year, _selectedDate.month, _selectedDate.day);
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: initialDateOnly.isAfter(today) ? today : initialDateOnly,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: today,
     );
     if (picked != null && mounted) {
       final time = await showTimePicker(
