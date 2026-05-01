@@ -13,10 +13,10 @@ import '../../settings/providers/settings_provider.dart'
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../../shared/widgets/app_button.dart';
-import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/models/info_config.dart';
 import '../utils/quick_add_parser.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class QuickAddWidget extends ConsumerStatefulWidget {
   const QuickAddWidget({super.key});
@@ -149,43 +149,6 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     setState(() => _isLoading = false);
   }
 
-  void _showQuickAddInfo(BuildContext context) {
-    KuberInfoBottomSheet.show(
-      context,
-      const KuberInfoConfig(
-        title: 'Quick Add',
-        description: 'Record an expense instantly using natural language — no forms, no tapping. Just type what you spent and Kuber figures out the rest.',
-        items: [
-          KuberInfoItem(
-            icon: Icons.flash_on_rounded,
-            title: 'Basic Amount',
-            description: '"250" or "₹250" — adds ₹250 to the General category.',
-          ),
-          KuberInfoItem(
-            icon: Icons.category_outlined,
-            title: 'With Category',
-            description: '"250 on food", "150 in gaming", "300 for rent" — links to an existing category or creates one.',
-          ),
-          KuberInfoItem(
-            icon: Icons.account_balance_wallet_rounded,
-            title: 'With Account',
-            description: '"150 for uber from hdfc" — matches your HDFC account by name.',
-          ),
-          KuberInfoItem(
-            icon: Icons.auto_fix_high_rounded,
-            title: 'Action Words',
-            description: '"Add 200 on coffee", "Log 500 for groceries", "Create 1000 in savings" — leading action words are stripped automatically.',
-          ),
-          KuberInfoItem(
-            icon: Icons.star_outline_rounded,
-            title: 'Default Account',
-            description: 'Set a default account in Settings → Default Account so you never need to specify "from …" every time.',
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showNoAccountDialog(String? hint) {
     final cs = Theme.of(context).colorScheme;
     showDialog(
@@ -226,27 +189,36 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => _showQuickAddInfo(context),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'QUICK ADD (BETA)',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1.2,
-                ),
+        KuberHomeWidgetTitle(
+          title: 'QUICK ADD (BETA)',
+          infoConfig: const KuberInfoConfig(
+            title: 'Quick Add',
+            description: 'Record an expense instantly using natural language — no forms, no tapping. Just type what you spent and Kuber figures out the rest.',
+            items: [
+              KuberInfoItem(
+                icon: Icons.flash_on_rounded,
+                title: 'Basic Amount',
+                description: '"250" or "₹250" — adds ₹250 to the General category.',
               ),
-              const SizedBox(width: KuberSpacing.sm),
-              Icon(
-                Icons.help_outline_rounded,
-                size: 15,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+              KuberInfoItem(
+                icon: Icons.category_outlined,
+                title: 'With Category',
+                description: '"250 on food", "150 in gaming", "300 for rent" — links to an existing category or creates one.',
+              ),
+              KuberInfoItem(
+                icon: Icons.account_balance_wallet_rounded,
+                title: 'With Account',
+                description: '"150 for uber from hdfc" — matches your HDFC account by name.',
+              ),
+              KuberInfoItem(
+                icon: Icons.auto_fix_high_rounded,
+                title: 'Action Words',
+                description: '"Add 200 on coffee", "Log 500 for groceries", "Create 1000 in savings" — leading action words are stripped automatically.',
+              ),
+              KuberInfoItem(
+                icon: Icons.star_outline_rounded,
+                title: 'Default Account',
+                description: 'Set a default account in Settings → Default Account so you never need to specify "from …" every time.',
               ),
             ],
           ),

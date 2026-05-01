@@ -21,6 +21,7 @@ import '../widgets/home_accounts_card.dart';
 import '../widgets/home_recurring_card.dart';
 import '../widgets/home_recent_transactions.dart';
 import '../widgets/quick_add_widget.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 const _subtitles = [
   'Let\'s manage your money wisely',
@@ -466,20 +467,7 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'LAST 7 DAYS',
-            style: textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
-          ),
-          const SizedBox(height: 2),
-          // Text(
-          //   'Last 7 Days Activity',
-          //   style: textTheme.bodySmall?.copyWith(
-          //     color: cs.onSurfaceVariant,
-          //   ),
-          // ),
+          const KuberHomeWidgetTitle(title: 'LAST 7 DAYS'),
           const SizedBox(height: 24),
           Center(
             child: Padding(

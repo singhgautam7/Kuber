@@ -12,6 +12,7 @@ import '../../settings/providers/settings_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/transaction_row.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class HomeRecentTransactionsCard extends ConsumerWidget {
   const HomeRecentTransactionsCard({super.key});
@@ -28,29 +29,20 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('RECENT TRANSACTIONS',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  )),
-              GestureDetector(
-                onTap: () => context.go('/history'),
-                child: Text('VIEW ALL',
-                    style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.0,
-                      color: cs.primary,
-                    )),
+        KuberHomeWidgetTitle(
+          title: 'RECENT TRANSACTIONS',
+          trailing: GestureDetector(
+            onTap: () => context.go('/history'),
+            child: Text(
+              'VIEW ALL',
+              style: textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.0,
+                color: cs.primary,
               ),
-            ],
+            ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
         recentAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Error: $e')),

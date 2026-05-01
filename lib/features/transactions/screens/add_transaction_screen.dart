@@ -9,8 +9,6 @@ import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/transfer_helpers.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -29,6 +27,7 @@ import '../widgets/date_time_tile.dart';
 import '../widgets/notes_field.dart';
 import '../widgets/selector_tile.dart';
 import '../widgets/tags_tile.dart';
+import '../widgets/transaction_suggestion_overlay.dart';
 import '../widgets/transaction_type_selector.dart';
 import '../widgets/transfer_account_tile.dart';
 import '../../tags/data/tag.dart';
@@ -452,7 +451,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           return [];
         }
         final query = textEditingValue.text.trim();
-        if (query.isEmpty || _isEditing) return [];
+        if (query.isEmpty) return [];
         ref.read(suggestionQueryProvider.notifier).state = query;
         try {
           return await ref.read(suggestionProvider.future);
@@ -485,114 +484,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           ),
         );
       },
-      optionsViewBuilder: (context, onSelected, options) {
-        final catMap = ref.read(categoryMapProvider).valueOrNull ?? {};
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(top: KuberSpacing.xs),
-            child: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(8),
-              color: cs.surfaceContainerHigh,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: 200,
-                  maxWidth: MediaQuery.of(context).size.width -
-                      2 * KuberSpacing.lg,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: KuberSpacing.xs,
-                    ),
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (context, index) {
-                      final s = options.elementAt(index);
-                      final cat = catMap[int.tryParse(s.categoryId ?? '')];
-                      final catColor = cat != null
-                          ? harmonizeCategory(
-                              context, Color(cat.colorValue))
-                          : cs.onSurfaceVariant;
-                      final catIcon = cat != null
-                          ? IconMapper.fromString(cat.icon)
-                          : Icons.category;
-
-                      return InkWell(
-                        onTap: () => onSelected(s),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: KuberSpacing.md,
-                            vertical: KuberSpacing.md,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: catColor.withValues(alpha: 0.15),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(catIcon,
-                                    size: 18, color: catColor),
-                              ),
-                              const SizedBox(width: KuberSpacing.sm),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      s.displayName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.copyWith(
-                                            color: cs.onSurface,
-                                          ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    if (cat?.name != null)
-                                      Text(
-                                        cat!.name,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall
-                                            ?.copyWith(
-                                              color: cs.onSurfaceVariant,
-                                            ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              if (s.amount != null)
-                                Text(
-                                  maskAmount(ref.watch(formatterProvider).formatCurrency(s.amount!), ref.watch(privacyModeProvider)),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: cs.onSurfaceVariant,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
+      optionsViewBuilder: (context, onSelected, options) =>
+          TransactionSuggestionOverlay(
+            options: options,
+            onSelected: onSelected,
           ),
-        );
-      },
     );
   }
 

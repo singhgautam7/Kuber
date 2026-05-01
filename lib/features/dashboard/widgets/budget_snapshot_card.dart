@@ -10,6 +10,7 @@ import '../../budgets/data/budget.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../budgets/widgets/budget_details_sheet.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class BudgetSnapshotCard extends ConsumerWidget {
   const BudgetSnapshotCard({super.key});
@@ -18,7 +19,6 @@ class BudgetSnapshotCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final snapshotAsync = ref.watch(budgetSnapshotProvider);
     final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     return snapshotAsync.when(
       loading: () => _buildLoading(context),
@@ -31,16 +31,7 @@ class BudgetSnapshotCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'BUDGET SNAPSHOT',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ),
+              const KuberHomeWidgetTitle(title: 'BUDGET SNAPSHOT'),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(KuberSpacing.md),
@@ -62,23 +53,12 @@ class BudgetSnapshotCard extends ConsumerWidget {
 
   Widget _buildLoading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              'BUDGET SNAPSHOT',
-              style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
-                color: cs.onSurface.withValues(alpha: 0.1),
-              ),
-            ),
-          ),
+          const KuberHomeWidgetTitle(title: 'BUDGET SNAPSHOT'),
           Shimmer.fromColors(
             baseColor: cs.surfaceContainerHigh,
             highlightColor: cs.surfaceContainerLowest,

@@ -39,7 +39,7 @@ class DateGroupHeader extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.only(
-        top: KuberSpacing.lg,
+        top: KuberSpacing.sm,
         bottom: KuberSpacing.sm,
       ),
       child: Row(

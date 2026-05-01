@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../features/settings/providers/settings_provider.dart';
+import 'kuber_home_widget_title.dart';
 
 // ---------------------------------------------------------------------------
 // Data model
@@ -145,19 +146,16 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title + subtitle ABOVE the card
-        Text(
-          widget.title,
-          style: tt.labelSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
-        ),
+        KuberHomeWidgetTitle(title: widget.title),
         if (widget.subtitle != null) ...[
           const SizedBox(height: 2),
-          Text(
-            widget.subtitle!,
-            style: tt.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text(
+              widget.subtitle!,
+              style: tt.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
         ],
@@ -799,21 +797,29 @@ class _TooltipRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: tt.labelMedium?.copyWith(
-            color: labelColor,
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
-          ),
+        Row(
+          children: [
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: tt.labelSmall?.copyWith(
+                color: labelColor,
+                fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
         ),
         Text(
           amount,
-          style: tt.labelMedium?.copyWith(
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-            color: color,
+          style: tt.labelSmall?.copyWith(
+            color: labelColor,
+            fontWeight: FontWeight.w700,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );

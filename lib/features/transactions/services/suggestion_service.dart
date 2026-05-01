@@ -35,7 +35,7 @@ class SuggestionService {
         .filter()
         .nameLowerContains(query.toLowerCase().trim())
         .sortByUpdatedAtDesc()
-        .limit(6)
+        .limit(12)
         .findAll();
   }
 
