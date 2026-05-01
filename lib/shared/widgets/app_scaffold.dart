@@ -27,7 +27,7 @@ class AppScaffold extends ConsumerStatefulWidget {
 }
 
 class _AppScaffoldState extends ConsumerState<AppScaffold>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   bool _showSpeedDial = false;
   bool _isAnimatingProgrammatically = false;
   late final PageController _pageController;
@@ -37,6 +37,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageController =
         PageController(initialPage: widget.navigationShell?.currentIndex ?? 0);
     _dialController = AnimationController(
@@ -56,9 +57,47 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     _dialController.dispose();
     super.dispose();
+  }
+
+  /// Fallback back-button handler.
+  ///
+  /// GoRouter's [RootBackButtonDispatcher] is registered as a
+  /// [WidgetsBindingObserver] before this widget. When the system back
+  /// button is pressed, GoRouter tries to pop the current branch navigator.
+  /// If the branch has no sub-routes (the common case for shell tabs),
+  /// GoRouter's `popRoute()` returns `false`, and
+  /// [WidgetsBinding.handlePopRoute] continues to the next observer — us.
+  @override
+  Future<bool> didPopRoute() async {
+    if (!mounted) return false;
+    return _handleBackButton();
+  }
+
+  /// Shared back-button logic used by both [PopScope] and [didPopRoute].
+  bool _handleBackButton() {
+    if (_showSpeedDial) {
+      _closeSpeedDial();
+      return true;
+    }
+
+    final isSelectionMode = ref.read(isSelectionModeProvider);
+    if (isSelectionMode) {
+      ref.read(transactionSelectionProvider.notifier).clear();
+      return true;
+    }
+
+    final currentIndex = widget.navigationShell?.currentIndex ?? 0;
+    if (currentIndex != 0) {
+      _onTabTapped(0);
+      return true;
+    }
+
+    SystemNavigator.pop();
+    return true;
   }
 
   @override
@@ -296,23 +335,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) {
         if (didPop) return;
-
-        if (_showSpeedDial) {
-          _closeSpeedDial();
-          return;
-        }
-
-        if (isSelectionMode) {
-          ref.read(transactionSelectionProvider.notifier).clear();
-          return;
-        }
-
-        if (currentIndex != 0) {
-          _onTabTapped(0);
-          return;
-        }
-
-        SystemNavigator.pop();
+        _handleBackButton();
       },
       child: content,
     );

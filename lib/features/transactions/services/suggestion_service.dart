@@ -30,13 +30,28 @@ class SuggestionService {
   }
 
   Future<List<TransactionSuggestion>> search(String query) async {
-    if (query.trim().isEmpty) return [];
-    return isar.transactionSuggestions
+    final q = query.toLowerCase().trim();
+    if (q.isEmpty) return [];
+
+    // Fetch all substring matches — index can't help with contains, so the
+    // scan cost is the same regardless of how many rows come back.
+    final results = await isar.transactionSuggestions
         .filter()
-        .nameLowerContains(query.toLowerCase().trim())
+        .nameLowerContains(q)
         .sortByUpdatedAtDesc()
-        .limit(12)
         .findAll();
+
+    // 3-tier relevance: exact (0) > prefix (1) > contains (2).
+    // Within each tier keep recency order from the Isar sort above.
+    int score(String name) {
+      if (name == q) return 0;
+      if (name.startsWith(q)) return 1;
+      return 2;
+    }
+
+    results.sort((a, b) => score(a.nameLower).compareTo(score(b.nameLower)));
+
+    return results.take(15).toList();
   }
 
   Future<void> clearAll() async {
