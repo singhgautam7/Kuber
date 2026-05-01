@@ -35,7 +35,7 @@ class _InvestmentReturnsCalculatorScreenState
   }
 
   ({double fv, double invested, double returns})? _compute() {
-    final p = double.tryParse(_amountCtrl.text);
+    final p = double.tryParse(_amountCtrl.text.replaceAll(',', ''));
     final annualRate = double.tryParse(_rateCtrl.text);
     final period = double.tryParse(_periodCtrl.text);
     if (p == null || annualRate == null || period == null) return null;
@@ -49,7 +49,9 @@ class _InvestmentReturnsCalculatorScreenState
       final invested = p * n;
       return (fv: fv, invested: invested, returns: fv - invested);
     } else {
-      final fv = p * pow(1 + r, n);
+      final annualR = annualRate / 100;
+      final years = _periodIndex == 0 ? period : period / 12.0;
+      final fv = p * pow(1 + annualR, years);
       return (fv: fv, invested: p, returns: fv - p);
     }
   }
@@ -106,6 +108,7 @@ class _InvestmentReturnsCalculatorScreenState
                       controller: _amountCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
+                      formatAsAmount: true,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
                     ToolTextField(

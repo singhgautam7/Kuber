@@ -64,16 +64,22 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   @override
   void didUpdateWidget(AppScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigationShell == null || oldWidget.navigationShell == null) return;
-    if (widget.navigationShell!.currentIndex != oldWidget.navigationShell!.currentIndex) {
+    if (widget.navigationShell == null || oldWidget.navigationShell == null) {
+      return;
+    }
+    if (widget.navigationShell!.currentIndex !=
+        oldWidget.navigationShell!.currentIndex) {
       if (_pageController.hasClients &&
-          _pageController.page?.round() != widget.navigationShell!.currentIndex) {
+          _pageController.page?.round() !=
+              widget.navigationShell!.currentIndex) {
         final currentPage = _pageController.page?.round() ?? 0;
         final targetIndex = widget.navigationShell!.currentIndex;
         final distance = (targetIndex - currentPage).abs();
         if (distance > 1) {
           _isAnimatingProgrammatically = true;
-          final jumpTo = targetIndex > currentPage ? targetIndex - 1 : targetIndex + 1;
+          final jumpTo = targetIndex > currentPage
+              ? targetIndex - 1
+              : targetIndex + 1;
           _pageController.jumpToPage(jumpTo);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
@@ -296,6 +302,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) {
         if (didPop) return;
+        final currentIndex = widget.navigationShell?.currentIndex ?? 0;
+        final isSelectionMode = ref.read(isSelectionModeProvider);
 
         if (_showSpeedDial) {
           _closeSpeedDial();

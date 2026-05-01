@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class SpendingStatsCard extends ConsumerWidget {
   const SpendingStatsCard({super.key});
@@ -16,91 +17,81 @@ class SpendingStatsCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final textTheme = Theme.of(context).textTheme;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
-              child: Text(
-                    'SPENDING PATTERN',
-                    style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const KuberHomeWidgetTitle(title: 'SPENDING PATTERN'),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+              width: 1,
             ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-                  width: 1,
+          ),
+          child: Row(
+            children: [
+              // Avg daily
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('AVG DAILY', style: _captionStyle(context)),
+                    const SizedBox(height: 4),
+                    Text(
+                      maskAmount(ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()), ref.watch(privacyModeProvider)),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    Text('last 90 days', style: _captionStyle(context)),
+                  ],
                 ),
               ),
-              child: Row(
-                children: [
-                  // Avg daily
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('AVG DAILY', style: _captionStyle(context)),
-                        const SizedBox(height: 4),
-                        Text(
-                          maskAmount(ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()), ref.watch(privacyModeProvider)),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        Text('last 90 days', style: _captionStyle(context)),
-                      ],
+              const _VerticalDivider(),
+              // This month
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('THIS MONTH', style: _captionStyle(context)),
+                    const SizedBox(height: 4),
+                    Text(
+                      maskAmount(ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()), ref.watch(privacyModeProvider)),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
-                  ),
-                  const _VerticalDivider(),
-                  // This month
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('THIS MONTH', style: _captionStyle(context)),
-                        const SizedBox(height: 4),
-                        Text(
-                          maskAmount(ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()), ref.watch(privacyModeProvider)),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                        Text('${stats.daysElapsed} days', style: _captionStyle(context)),
-                      ],
-                    ),
-                  ),
-                  const _VerticalDivider(),
-                  // Projected
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('PROJECTED', style: _captionStyle(context)),
-                        const SizedBox(height: 4),
-                        Text(
-                          maskAmount(ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()), ref.watch(privacyModeProvider)),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                        ),
-                        Text('end of month', style: _captionStyle(context)),
-                      ],
-                    ),
-                  ),
-                ],
+                    Text('${stats.daysElapsed} days', style: _captionStyle(context)),
+                  ],
+                ),
               ),
-            ),
-          ],
-        );
+              const _VerticalDivider(),
+              // Projected
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('PROJECTED', style: _captionStyle(context)),
+                    const SizedBox(height: 4),
+                    Text(
+                      maskAmount(ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()), ref.watch(privacyModeProvider)),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                    Text('end of month', style: _captionStyle(context)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   TextStyle? _captionStyle(BuildContext context) =>

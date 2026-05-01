@@ -17,9 +17,6 @@ class TransactionRepository extends BaseRepository<Transaction> {
   Future<int> save(Transaction t) async {
     t.nameLower = t.name.toLowerCase();
     t.updatedAt = DateTime.now();
-    if (t.id == Isar.autoIncrement) {
-      t.createdAt = DateTime.now();
-    }
     return isar.writeTxn(() => isar.transactions.put(t));
   }
 

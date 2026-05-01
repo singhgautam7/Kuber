@@ -85,137 +85,77 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
           vertical: 4,
         ),
         height: 56,
-        child: Stack(
-          alignment: Alignment.center,
+        child: Row(
           children: [
-            // Row for all elements except active search input
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // FILTERS Label
-                if (showFiltersLabel)
-                  Text(
-                    'FILTERS',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.2,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
+            // Left side elements: FILTERS label OR Back button + Search Input
+            if (_isSearching || hasSearchQuery)
+              Expanded(child: _buildSearchInput(cs))
+            else ...[
+              // FILTERS Label
+              if (showFiltersLabel)
+                Text(
+                  'FILTERS',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
-  
-                // Buttons Row
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!_isSearching) ...[
-                      // Quick Filters: Exp / Inc
-                      Tooltip(
-                        message: 'Expense',
-                        child: _QuickFilterButton(
-                          label: 'Exp',
-                          isSelected: filter.types.contains('expense'),
-                          onTap: () => notifier.setType('expense'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Tooltip(
-                        message: 'Income',
-                        child: _QuickFilterButton(
-                          label: 'Inc',
-                          isSelected: filter.types.contains('income'),
-                          onTap: () => notifier.setType('income'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-
-                    // Search Area (Chip or Icon)
-                    if (!_isSearching)
-                      _buildSearchArea(hasSearchQuery, filter.searchQuery, cs),
-
-                    if (!_isSearching) ...[
-                      const SizedBox(width: 8),
-                      // Filter Icon with Badge
-                      Tooltip(
-                        message: 'Advanced filters',
-                        child: _FilterIconButton(
-                          count: filter.activeFiltersCount,
-                          isActive: filter.isAdvanced,
-                          onTap: widget.onAdvancedTap,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Clear Button
-                      Tooltip(
-                        message: 'Clear all filters',
-                        child: _ClearButton(
-                          isEnabled: !filter.isEmpty,
-                          onTap: () {
-                            notifier.clearAll();
-                            _searchController.clear();
-                          },
-                        ),
-                      ),
-                    ],
-                  ],
                 ),
-              ],
-            ),
-  
-            // Animated Search Input (Full Width Overlay)
-            if (_isSearching)
-              Positioned.fill(
-                child: _buildSearchInput(cs),
+              const Spacer(),
+              // Quick Filters: Exp / Inc
+              Tooltip(
+                message: 'Filter expenses',
+                triggerMode: TooltipTriggerMode.longPress,
+                child: _QuickFilterButton(
+                  label: 'Exp',
+                  isSelected: filter.types.contains('expense'),
+                  onTap: () => notifier.setType('expense'),
+                ),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchArea(bool hasQuery, String? query, ColorScheme cs) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: hasQuery ? _buildSearchChip(query!, cs) : _buildSearchIcon(cs),
-    );
-  }
-
-  Widget _buildSearchChip(String query, ColorScheme cs) {
-    final theme = Theme.of(context);
-    return Tooltip(
-      message: 'Search transactions',
-      child: GestureDetector(
-        key: const ValueKey('search_chip'),
-        onTap: _onSearchToggle,
-        child: Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.5)),
-          ),
-          constraints: const BoxConstraints(maxWidth: 150),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.search_rounded, size: 16, color: cs.primary),
               const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  query,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: cs.primary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Tooltip(
+                message: 'Filter income',
+                triggerMode: TooltipTriggerMode.longPress,
+                child: _QuickFilterButton(
+                  label: 'Inc',
+                  isSelected: filter.types.contains('income'),
+                  onTap: () => notifier.setType('income'),
                 ),
               ),
+              const SizedBox(width: 8),
+              // Search Icon (to expand)
+              _buildSearchIcon(cs),
             ],
-          ),
+
+            // Right side elements: Advanced Filter and Clear buttons
+            // They should always be visible (unless we want to hide them when searching, but user explicitly asked:
+            // "The clear all filters and advance filters option should still be visible.")
+            const SizedBox(width: 8),
+            // Filter Icon with Badge
+            Tooltip(
+              message: 'Advanced filters',
+              triggerMode: TooltipTriggerMode.longPress,
+              child: _FilterIconButton(
+                count: filter.activeFiltersCount,
+                isActive: filter.isAdvanced,
+                onTap: widget.onAdvancedTap,
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Clear Button
+            Tooltip(
+              message: 'Clear filters',
+              triggerMode: TooltipTriggerMode.longPress,
+              child: _ClearButton(
+                isEnabled: !filter.isEmpty,
+                onTap: () {
+                  notifier.clearAll();
+                  _searchController.clear();
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -224,6 +164,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   Widget _buildSearchIcon(ColorScheme cs) {
     return Tooltip(
       message: 'Search transactions',
+      triggerMode: TooltipTriggerMode.longPress,
       child: GestureDetector(
         key: const ValueKey('search_icon'),
         onTap: _onSearchToggle,
@@ -244,54 +185,59 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
 
   Widget _buildSearchInput(ColorScheme cs) {
     final theme = Theme.of(context);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary, width: 2),
-      ),
-      child: TextField(
-        controller: _searchController,
-        focusNode: _focusNode,
-        textAlignVertical: TextAlignVertical.center,
-        style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurface),
-        textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-          hintText: 'Search transactions...',
-          hintStyle: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurfaceVariant),
-          prefixIcon: IconButton(
-            icon: Icon(Icons.arrow_back_rounded, size: 20, color: cs.onSurfaceVariant),
-            onPressed: _onSearchCancel,
-          ),
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 0),
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Tooltip(
-                message: 'Clear search',
-                child: IconButton(
-                  icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant),
-                  onPressed: () {
-                    _searchController.clear();
-                  },
-                ),
-              ),
-              Tooltip(
-                message: 'Apply search',
-                child: IconButton(
-                  icon: Icon(Icons.check_rounded, color: cs.primary),
-                  onPressed: () => _onSearchSubmit(_searchController.text),
-                ),
-              ),
-            ],
-          ),
+    return TextField(
+      controller: _searchController,
+      focusNode: _focusNode,
+      textAlignVertical: TextAlignVertical.center,
+      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurface),
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: 'Search transactions...',
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurfaceVariant),
+        prefixIcon: IconButton(
+          icon: Icon(Icons.arrow_back_rounded, size: 20, color: cs.onSurfaceVariant),
+          onPressed: _onSearchCancel,
         ),
-        onSubmitted: _onSearchSubmit,
+        filled: true,
+        fillColor: cs.surfaceContainer,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderSide: BorderSide(color: cs.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderSide: BorderSide(color: cs.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderSide: BorderSide(color: cs.outline),
+        ),
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Tooltip(
+              message: 'Clear search',
+              child: IconButton(
+                icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant, size: 18),
+                onPressed: () {
+                  _searchController.clear();
+                  ref.read(historyFilterProvider.notifier).setSearchQuery(null);
+                  _onSearchCancel();
+                },
+              ),
+            ),
+            Tooltip(
+              message: 'Apply search',
+              child: IconButton(
+                icon: Icon(Icons.check_rounded, color: cs.primary, size: 20),
+                onPressed: () => _onSearchSubmit(_searchController.text),
+              ),
+            ),
+          ],
+        ),
       ),
+      onSubmitted: _onSearchSubmit,
     );
   }
 }

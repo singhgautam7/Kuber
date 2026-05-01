@@ -29,7 +29,7 @@ String _accountTypeLabel(Account account) {
   } else {
     switch (account.type.toLowerCase()) {
       case 'bank':
-        label = 'BANK/CASH';
+        label = 'BANK';
       case 'card':
         label = 'CREDIT CARD';
       default:

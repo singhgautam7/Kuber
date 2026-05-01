@@ -34,7 +34,7 @@ class _SipAmountFinderScreenState
   }
 
   ({double sip, double totalInvested, double returns})? _compute() {
-    final goal = double.tryParse(_goalCtrl.text);
+    final goal = double.tryParse(_goalCtrl.text.replaceAll(',', ''));
     final annualRate = double.tryParse(_rateCtrl.text);
     final period = double.tryParse(_periodCtrl.text);
     if (goal == null || annualRate == null || period == null) return null;
@@ -89,6 +89,7 @@ class _SipAmountFinderScreenState
                       controller: _goalCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
+                      formatAsAmount: true,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
                     ToolTextField(
@@ -135,7 +136,7 @@ class _SipAmountFinderScreenState
                           ToolStatRow(
                             label: 'Goal Amount',
                             value: formatter.formatCurrency(
-                                double.tryParse(_goalCtrl.text) ?? 0,
+                                double.tryParse(_goalCtrl.text.replaceAll(',', '')) ?? 0,
                                 symbol: currency.symbol),
                           ),
                           const SizedBox(height: KuberSpacing.sm),

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="add_transaction"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_add_short"
+        android:shortcutLongLabel="@string/shortcut_add_long"
+        android:icon="@drawable/ic_shortcut_add">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/add-transaction" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="view_transactions"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_history_short"
+        android:shortcutLongLabel="@string/shortcut_history_long"
+        android:icon="@drawable/ic_shortcut_history">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/history" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="ask_kuber"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_ask_short"
+        android:shortcutLongLabel="@string/shortcut_ask_long"
+        android:icon="@drawable/ic_shortcut_ask">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/ask-kuber" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+</shortcuts>

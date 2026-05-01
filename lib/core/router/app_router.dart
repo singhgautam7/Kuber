@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
@@ -54,6 +55,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
 import '../../features/splash/screens/splash_screen.dart';
+import '../../features/history/providers/selection_provider.dart';
 import '../../features/tools/tools_hub_screen.dart';
 import '../../features/tools/bill_splitter/bill_splitter_screen.dart';
 import '../../features/tools/bill_splitter/add_edit_bill_screen.dart';
@@ -100,6 +102,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
       final onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
+
+      // Normalize deep link paths from app shortcuts (kuber://app/<path>)
+      // GoRouter sees the path portion; remap any shortcut aliases here.
+      if (state.matchedLocation == '/ask-kuber') return '/more/ask-kuber';
 
       // Allow splash screen to show
       if (state.matchedLocation == '/splash') return null;
@@ -232,7 +238,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const DashboardScreen(),
+                builder: (context, state) => const _RootTabBackScope(
+                  tabIndex: 0,
+                  child: DashboardScreen(),
+                ),
               ),
             ],
           ),
@@ -241,7 +250,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/history',
-                builder: (context, state) => const HistoryScreen(),
+                builder: (context, state) => const _RootTabBackScope(
+                  tabIndex: 1,
+                  child: HistoryScreen(),
+                ),
               ),
             ],
           ),
@@ -250,7 +262,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/analytics',
-                builder: (context, state) => const AnalyticsScreen(),
+                builder: (context, state) => const _RootTabBackScope(
+                  tabIndex: 2,
+                  child: AnalyticsScreen(),
+                ),
               ),
             ],
           ),
@@ -259,7 +274,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/more',
-                builder: (context, state) => const MoreScreen(),
+                builder: (context, state) => const _RootTabBackScope(
+                  tabIndex: 3,
+                  child: MoreScreen(),
+                ),
                 routes: [
                   GoRoute(
                     path: 'accounts',
@@ -468,3 +486,35 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class _RootTabBackScope extends ConsumerWidget {
+  final int tabIndex;
+  final Widget child;
+
+  const _RootTabBackScope({required this.tabIndex, required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isSelectionMode = ref.watch(isSelectionModeProvider);
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        if (tabIndex == 1 && isSelectionMode) {
+          ref.read(transactionSelectionProvider.notifier).clear();
+          return;
+        }
+
+        if (tabIndex == 0) {
+          SystemNavigator.pop();
+          return;
+        }
+
+        context.go('/');
+      },
+      child: child,
+    );
+  }
+}

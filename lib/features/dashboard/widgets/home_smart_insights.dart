@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../insights/models/insight.dart';
 import '../../insights/providers/insight_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class HomeSmartInsights extends ConsumerStatefulWidget {
   const HomeSmartInsights({super.key});
@@ -41,29 +42,17 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'SMART INSIGHTS',
-                  style: tt.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                if (insights.isNotEmpty)
-                  Text(
+          KuberHomeWidgetTitle(
+            title: 'SMART INSIGHTS',
+            trailing: insights.isNotEmpty
+                ? Text(
                     '${_currentIndex + 1}/${insights.length}',
                     style: tt.labelSmall?.copyWith(
                       color: cs.onSurfaceVariant,
                       letterSpacing: 0.5,
                     ),
-                  ),
-              ],
-            ),
+                  )
+                : null,
           ),
 
           SizedBox(

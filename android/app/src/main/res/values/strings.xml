@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_add_short">Add</string>
+    <string name="shortcut_add_long">Add Transaction</string>
+    <string name="shortcut_history_short">Transactions</string>
+    <string name="shortcut_history_long">View Transactions</string>
+    <string name="shortcut_ask_short">Ask Kuber</string>
+    <string name="shortcut_ask_long">Ask Kuber</string>
+</resources>

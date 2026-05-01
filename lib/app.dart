@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/settings/providers/settings_provider.dart';
 import 'features/auth/screens/lock_screen.dart';
+import 'features/settings/providers/settings_provider.dart';
 
 class KuberApp extends ConsumerWidget {
   const KuberApp({super.key});
@@ -25,12 +25,14 @@ class KuberApp extends ConsumerWidget {
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
         final isDark = brightness == Brightness.dark;
-        
+
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent, 
-            statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness: isDark ? Brightness.dark : Brightness.light, 
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness:
+                isDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness:
+                isDark ? Brightness.dark : Brightness.light,
           ),
           child: ColoredBox(
             color: Theme.of(context).colorScheme.surface,

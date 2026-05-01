@@ -12,6 +12,7 @@ import '../../settings/providers/settings_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../recurring/providers/recurring_provider.dart';
 import '../../recurring/widgets/recurring_detail_sheet.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class HomeRecurringCard extends ConsumerWidget {
   const HomeRecurringCard({super.key});
@@ -22,7 +23,6 @@ class HomeRecurringCard extends ConsumerWidget {
     final categoryMapAsync = ref.watch(categoryMapProvider);
     final textTheme = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final colorScheme = cs;
 
     return upcomingAsync.when(
       loading: () => const SizedBox.shrink(),
@@ -35,153 +35,144 @@ class HomeRecurringCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('RECURRING',
-                        style: textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        )),
-                    GestureDetector(
-                      onTap: () => GoRouter.of(context).push('/more/recurring'),
-                      child: Text('VIEW ALL',
-                          style: textTheme.labelSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.0,
-                            color: colorScheme.primary,
-                          )),
+              KuberHomeWidgetTitle(
+                title: 'RECURRING',
+                trailing: GestureDetector(
+                  onTap: () => context.push('/more/recurring'),
+                  child: Text(
+                    'VIEW ALL',
+                    style: textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.0,
+                      color: cs.primary,
                     ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.sm),
               categoryMapAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (catMap) => Column(
-                children: rules.map((rule) {
-                  final catId = int.tryParse(rule.categoryId);
-                  final cat = catId != null ? catMap[catId] : null;
-                  final now = DateTime.now();
-                  final today = DateTime(now.year, now.month, now.day);
-                  final dueDay = DateTime(
-                      rule.nextDueAt.year, rule.nextDueAt.month, rule.nextDueAt.day);
+                loading: () => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (catMap) => Column(
+                  children: rules.map((rule) {
+                    final catId = int.tryParse(rule.categoryId);
+                    final cat = catId != null ? catMap[catId] : null;
+                    final now = DateTime.now();
+                    final today = DateTime(now.year, now.month, now.day);
+                    final dueDay = DateTime(
+                        rule.nextDueAt.year, rule.nextDueAt.month, rule.nextDueAt.day);
 
-                  String statusLabel;
-                  Color statusColor;
-                  if (dueDay.isBefore(today)) {
-                    statusLabel = 'PROCESSED';
-                    statusColor = cs.tertiary;
-                  } else if (dueDay.isAtSameMomentAs(today)) {
-                    statusLabel = 'PENDING';
-                    statusColor = cs.primary;
-                  } else {
-                    statusLabel = 'SCHEDULED';
-                    statusColor = cs.onSurfaceVariant;
-                  }
+                    String statusLabel;
+                    Color statusColor;
+                    if (dueDay.isBefore(today)) {
+                      statusLabel = 'PROCESSED';
+                      statusColor = cs.tertiary;
+                    } else if (dueDay.isAtSameMomentAs(today)) {
+                      statusLabel = 'PENDING';
+                      statusColor = cs.primary;
+                    } else {
+                      statusLabel = 'SCHEDULED';
+                      statusColor = cs.onSurfaceVariant;
+                    }
 
-                  final catColor = cat != null
-                      ? harmonizeCategory(context, Color(cat.colorValue))
-                      : cs.onSurfaceVariant;
+                    final catColor = cat != null
+                        ? harmonizeCategory(context, Color(cat.colorValue))
+                        : cs.onSurfaceVariant;
 
-                  return GestureDetector(
-                    onTap: () => showRecurringDetailSheet(context, ref, rule),
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                      padding: const EdgeInsets.all(KuberSpacing.md),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: catColor.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
+                    return GestureDetector(
+                      onTap: () => showRecurringDetailSheet(context, ref, rule),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                        padding: const EdgeInsets.all(KuberSpacing.md),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainer,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: catColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                cat != null
+                                    ? IconMapper.fromString(cat.icon)
+                                    : Icons.category_outlined,
+                                color: catColor,
+                                size: 20,
+                              ),
                             ),
-                            child: Icon(
-                              cat != null
-                                  ? IconMapper.fromString(cat.icon)
-                                  : Icons.category_outlined,
-                              color: catColor,
-                              size: 20,
+                            const SizedBox(width: KuberSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    rule.name,
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurface,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                  Text(
+                                    DateFormat('MMM d').format(rule.nextDueAt),
+                                    style: textTheme.labelSmall?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: KuberSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            const SizedBox(width: KuberSpacing.md),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  rule.name,
+                                  maskAmount(CurrencyFormatter.format(rule.amount), ref.watch(privacyModeProvider)),
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurface,
-                                    fontWeight: FontWeight.w500,
+                                    color: rule.type == 'income'
+                                        ? cs.tertiary
+                                        : cs.onSurface,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
                                 ),
-                                Text(
-                                  DateFormat('MMM d').format(rule.nextDueAt),
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: cs.onSurfaceVariant,
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.1),
+                                    borderRadius:
+                                        BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: statusColor.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    statusLabel,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w800,
+                                      color: statusColor,
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: KuberSpacing.md),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                maskAmount(CurrencyFormatter.format(rule.amount), ref.watch(privacyModeProvider)),
-                                style: textTheme.bodyMedium?.copyWith(
-                                  color: rule.type == 'income'
-                                      ? cs.tertiary
-                                      : cs.onSurface,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: statusColor.withValues(alpha: 0.1),
-                                  borderRadius:
-                                      BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: statusColor.withValues(alpha: 0.2),
-                                  ),
-                                ),
-                                child: Text(
-                                  statusLabel,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w800,
-                                    color: statusColor,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-              ),
+                    );
+                  }).toList(),
+                ),
               ),
             ],
           ),

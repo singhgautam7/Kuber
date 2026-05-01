@@ -85,6 +85,17 @@ class TransactionDetailSheet extends ConsumerWidget {
     required this.onDelete,
   });
 
+  String _formatDetailDatetime(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final d = DateTime(dt.year, dt.month, dt.day);
+    final timeStr = DateFormatter.time(dt);
+    if (d == today) return 'Today • $timeStr';
+    if (d == today.subtract(const Duration(days: 1))) return 'Yesterday • $timeStr';
+    if (dt.year != now.year) return '${DateFormat('d MMM yyyy').format(dt)} • $timeStr';
+    return '${DateFormat('EEE, d MMM').format(dt)} • $timeStr';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
@@ -159,8 +170,7 @@ class TransactionDetailSheet extends ConsumerWidget {
       accountDisplay += ' •••• ${account.last4Digits}';
     }
 
-    final dateLabel =
-        '${DateFormatter.groupHeader(transaction.createdAt)}, ${DateFormat('d MMM').format(transaction.createdAt)} • ${DateFormatter.time(transaction.createdAt)}';
+    final dateLabel = _formatDetailDatetime(transaction.createdAt);
 
     return KuberBottomSheet(
       title: displayName,

@@ -8,6 +8,7 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_detail_sheet.dart';
+import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class HomeAccountsCard extends ConsumerWidget {
   const HomeAccountsCard({super.key});
@@ -26,33 +27,20 @@ class HomeAccountsCard extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'ACCOUNTS',
-                    style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
-                    ),
+            KuberHomeWidgetTitle(
+              title: 'ACCOUNTS',
+              trailing: GestureDetector(
+                onTap: () => context.push('/more/accounts'),
+                child: Text(
+                  'VIEW ALL',
+                  style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: cs.primary,
                   ),
-                  GestureDetector(
-                    onTap: () => context.push('/more/accounts'),
-                    child: Text(
-                      'VIEW ALL',
-                      style: textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.0,
-                        color: cs.primary,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            const SizedBox(height: KuberSpacing.sm),
             SizedBox(
               height: 110,
               child: ListView.builder(

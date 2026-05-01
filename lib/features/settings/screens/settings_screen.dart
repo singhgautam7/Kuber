@@ -190,7 +190,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           children: [
                             Row(
                               children: [
-                                const SquircleIcon(icon: Icons.crop_free_rounded, size: 18, padding: 8),
+                                const SquircleIcon(icon: Icons.space_dashboard_rounded, size: 18, padding: 8),
                                 const SizedBox(width: KuberSpacing.md),
                                 Text(
                                   'Bottom Navigation UI',
@@ -209,13 +209,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   value: NavBarStyle.classic,
                                   label: 'Classic',
                                   subtitle: 'Standard bar',
-                                  icon: Icons.view_quilt_rounded,
+                                  icon: Icons.view_headline_rounded,
                                 ),
                                 SelectorOption(
                                   value: NavBarStyle.modern,
                                   label: 'Modern',
                                   subtitle: 'Floating pill',
-                                  icon: Icons.crop_free_rounded,
+                                  icon: Icons.lens_rounded,
                                 ),
                               ],
                               selectedValue: currentNavBarStyle,
@@ -931,3 +931,4 @@ class _SelectableCard extends StatelessWidget {
     );
   }
 }
+

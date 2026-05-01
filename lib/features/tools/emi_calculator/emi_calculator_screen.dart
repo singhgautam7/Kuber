@@ -33,7 +33,7 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
   }
 
   ({double emi, double totalPayable, double totalInterest})? _compute() {
-    final p = double.tryParse(_principalCtrl.text);
+    final p = double.tryParse(_principalCtrl.text.replaceAll(',', ''));
     final annualRate = double.tryParse(_rateCtrl.text);
     final tenure = double.tryParse(_tenureCtrl.text);
     if (p == null || annualRate == null || tenure == null) return null;
@@ -88,6 +88,7 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
                       controller: _principalCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
+                      formatAsAmount: true,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
                     ToolTextField(
