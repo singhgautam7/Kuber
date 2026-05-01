@@ -60,8 +60,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
     switch (filter.type) {
       case FilterType.today:
-        final labels = ['Dawn', 'Morning', 'Noon', 'Evening', 'Night'];
-        buckets = labels.map((l) => _MutableBucket(l, '')).toList();
+        buckets = [
+          _MutableBucket('Dawn', '', date: filter.from, endDate: filter.from.add(const Duration(hours: 5, minutes: 59))),
+          _MutableBucket('Morning', '', date: filter.from.add(const Duration(hours: 6)), endDate: filter.from.add(const Duration(hours: 10, minutes: 59))),
+          _MutableBucket('Noon', '', date: filter.from.add(const Duration(hours: 11)), endDate: filter.from.add(const Duration(hours: 13, minutes: 59))),
+          _MutableBucket('Evening', '', date: filter.from.add(const Duration(hours: 14)), endDate: filter.from.add(const Duration(hours: 18, minutes: 59))),
+          _MutableBucket('Night', '', date: filter.from.add(const Duration(hours: 19)), endDate: filter.to),
+        ];
         for (final t in txns) {
           final h = t.createdAt.hour;
           int idx;

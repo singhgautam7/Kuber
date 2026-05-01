@@ -70,6 +70,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   late final AnimationController _detailAnim;
   late final Animation<double> _detailFade;
   late final Animation<Offset> _detailSlide;
+  BoxConstraints? _latestConstraints;
 
   // Visual gap between stacked bar segments (data-space units)
   static const double _segmentGap = 2.0;
@@ -170,81 +171,88 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         const SizedBox(height: KuberSpacing.sm),
 
         // Card container
-        Container(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(
-              color: cs.outline.withValues(alpha: 0.5),
-              width: 1,
-            ),
-          ),
-          child: Column(
+        TapRegion(
+          onTapOutside: (_) {
+            if (_touchedIndex != -1) {
+              setState(() => _touchedIndex = -1);
+              _detailAnim.reverse();
+            }
+          },
+          child: Stack(
+            clipBehavior: Clip.none,
             children: [
-              // Legend (left) + chart type tabs (right)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        _LegendDot(color: cs.tertiary, label: 'INC'),
-                        const SizedBox(width: KuberSpacing.md),
-                        _LegendDot(color: cs.error, label: 'EXP'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: KuberSpacing.md),
-                  _ChartTypeTabs(
-                    current: _chartType,
-                    onChanged: _switchChartType,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: KuberSpacing.lg),
-
-              // Chart area with floating tooltip overlay
-              SizedBox(
-                height: widget.height,
-                child: TapRegion(
-                  onTapOutside: (_) {
-                    if (_touchedIndex != -1) {
-                      setState(() => _touchedIndex = -1);
-                      _detailAnim.reverse();
-                    }
-                  },
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          // Chart fills the stack
-                          Positioned.fill(
-                            child: _chartType == KuberChartType.bar
-                                ? _buildBarChart(constraints, cs)
-                                : _buildLineChart(cs),
-                          ),
-                          // Tooltip overlay
-                          if (_touchedIndex >= 0 &&
-                              _touchedIndex < widget.buckets.length)
-                            _TooltipOverlay(
-                              bucket: widget.buckets[_touchedIndex],
-                              touchedIndex: _touchedIndex,
-                              totalBuckets: widget.buckets.length,
-                              maxWidth: constraints.maxWidth,
-                              chartHeight: constraints.maxHeight,
-                              maxY: _maxY,
-                              slide: _detailSlide,
-                              fade: _detailFade,
-                            ),
-                        ],
-                      );
-                    },
+              Container(
+                padding: const EdgeInsets.all(KuberSpacing.lg),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(
+                    color: cs.outline.withValues(alpha: 0.5),
+                    width: 1,
                   ),
                 ),
+                child: Column(
+                  children: [
+                    // Legend (left) + chart type tabs (right)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              _LegendDot(color: cs.tertiary, label: 'INC'),
+                              const SizedBox(width: KuberSpacing.md),
+                              _LegendDot(color: cs.error, label: 'EXP'),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        _ChartTypeTabs(
+                          current: _chartType,
+                          onChanged: _switchChartType,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: KuberSpacing.lg),
+
+                    // Chart area
+                    SizedBox(
+                      height: widget.height,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted && _latestConstraints != constraints) {
+                              setState(() {
+                                _latestConstraints = constraints;
+                              });
+                            }
+                          });
+                          return _chartType == KuberChartType.bar
+                              ? _buildBarChart(constraints, cs)
+                              : _buildLineChart(cs);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              // Tooltip overlay
+              if (_touchedIndex >= 0 &&
+                  _touchedIndex < widget.buckets.length &&
+                  _latestConstraints != null)
+                _TooltipOverlay(
+                  bucket: widget.buckets[_touchedIndex],
+                  touchedIndex: _touchedIndex,
+                  totalBuckets: widget.buckets.length,
+                  maxWidth: _latestConstraints!.maxWidth,
+                  chartHeight: _latestConstraints!.maxHeight,
+                  maxY: _maxY,
+                  slide: _detailSlide,
+                  fade: _detailFade,
+                  bottomOffset: KuberSpacing.lg,
+                  leftOffset: KuberSpacing.lg,
+                ),
             ],
           ),
         ),
@@ -651,6 +659,8 @@ class _TooltipOverlay extends ConsumerWidget {
   final double maxY;
   final Animation<Offset> slide;
   final Animation<double> fade;
+  final double leftOffset;
+  final double bottomOffset;
 
   const _TooltipOverlay({
     required this.bucket,
@@ -661,6 +671,8 @@ class _TooltipOverlay extends ConsumerWidget {
     required this.maxY,
     required this.slide,
     required this.fade,
+    this.leftOffset = 0,
+    this.bottomOffset = 0,
   });
 
   @override
@@ -700,14 +712,17 @@ class _TooltipOverlay extends ConsumerWidget {
     final double bottomPos = 42 + (barHeightRatio * drawingAreaHeight) + 8.0;
 
     return Positioned(
-      left: leftPos,
-      bottom: bottomPos,
+      left: leftPos + leftOffset,
+      bottom: bottomPos + bottomOffset,
       child: SlideTransition(
         position: slide,
         child: FadeTransition(
           opacity: fade,
-          child: SizedBox(
-            width: cardWidth,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {},
+            child: SizedBox(
+              width: cardWidth,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -816,6 +831,7 @@ class _TooltipOverlay extends ConsumerWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
