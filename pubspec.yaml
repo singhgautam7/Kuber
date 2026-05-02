@@ -1,7 +1,7 @@
 name: kuber
 description: "Kuber — local-first expense manager"
 publish_to: 'none'
-version: 2.2.5+23
+version: 2.2.6+24
 
 environment:
   sdk: ^3.11.1
