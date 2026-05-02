@@ -127,14 +127,16 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.bar_chart_outlined,
         title: 'Separate from Analytics',
-        description: 'Lent and borrowed amounts are excluded from spending analytics.',
+        description:
+            'Lent and borrowed amounts are excluded from spending analytics.',
       ),
     ],
   );
 
   static const loans = KuberInfoConfig(
     title: 'About Loans',
-    description: 'Track your EMIs, outstanding balances and repayment progress.',
+    description:
+        'Track your EMIs, outstanding balances and repayment progress.',
     items: [
       KuberInfoItem(
         icon: Icons.account_balance_outlined,
@@ -181,7 +183,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.bar_chart_outlined,
         title: 'Separate from Analytics',
-        description: 'Investment contributions are excluded from spending analytics.',
+        description:
+            'Investment contributions are excluded from spending analytics.',
       ),
     ],
   );
@@ -193,7 +196,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.receipt_long_rounded,
         title: 'Multiple Split Modes',
-        description: 'Split equally, by amount, percentage, or custom fractions.',
+        description:
+            'Split equally, by amount, percentage, or custom fractions.',
       ),
       KuberInfoItem(
         icon: Icons.group_outlined,
@@ -203,7 +207,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.info_outline_rounded,
         title: 'Tracking Only',
-        description: 'Bill Splitter is for reference only. Splits are not added to your transactions or Lend/Borrow tracker automatically.',
+        description:
+            'Bill Splitter is for reference only. Splits are not added to your transactions or Lend/Borrow tracker automatically.',
       ),
     ],
   );
@@ -242,7 +247,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.percent_rounded,
         title: 'Annual Rate',
-        description: 'Enter yearly interest rate — monthly rate is calculated automatically.',
+        description:
+            'Enter yearly interest rate — monthly rate is calculated automatically.',
       ),
       KuberInfoItem(
         icon: Icons.calendar_month_outlined,
@@ -259,7 +265,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.trending_up_rounded,
         title: 'SIP (Monthly)',
-        description: 'Systematic Investment Plan — invest a fixed amount each month.',
+        description:
+            'Systematic Investment Plan — invest a fixed amount each month.',
       ),
       KuberInfoItem(
         icon: Icons.payments_outlined,
@@ -364,7 +371,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.repeat_rounded,
         title: 'Recurring Deposit (RD)',
-        description: 'Monthly installments that each compound for remaining duration.',
+        description:
+            'Monthly installments that each compound for remaining duration.',
       ),
     ],
   );
@@ -376,12 +384,14 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.savings_outlined,
         title: '15-Year Lock-in',
-        description: 'PPF has a 15-year maturity with optional 5-year extensions.',
+        description:
+            'PPF has a 15-year maturity with optional 5-year extensions.',
       ),
       KuberInfoItem(
         icon: Icons.shield_outlined,
         title: 'Tax-Free Returns',
-        description: 'PPF interest and maturity are fully exempt from income tax.',
+        description:
+            'PPF interest and maturity are fully exempt from income tax.',
       ),
     ],
   );
@@ -393,12 +403,14 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.work_outline,
         title: 'New vs Old Regime',
-        description: 'New regime has lower slabs with fewer deductions; old regime allows 80C, HRA etc.',
+        description:
+            'New regime has lower slabs with fewer deductions; old regime allows 80C, HRA etc.',
       ),
       KuberInfoItem(
         icon: Icons.savings_outlined,
         title: 'PF Contribution',
-        description: 'Employee & employer each contribute 12% of basic (capped at ₹15,000/month).',
+        description:
+            'Employee & employer each contribute 12% of basic (capped at ₹15,000/month).',
       ),
     ],
   );
@@ -427,12 +439,14 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.timeline_rounded,
         title: 'Break-even Point',
-        description: 'The month when cumulative savings equal the purchase cost.',
+        description:
+            'The month when cumulative savings equal the purchase cost.',
       ),
       KuberInfoItem(
         icon: Icons.swap_horiz_rounded,
         title: 'Alternative Cost',
-        description: 'Add what you were paying before this purchase to increase effective savings.',
+        description:
+            'Add what you were paying before this purchase to increase effective savings.',
       ),
     ],
   );
@@ -444,7 +458,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.home_work_outlined,
         title: 'Three Rules',
-        description: 'Exemption is the minimum of: HRA received, Rent − 10% Basic, 50%/40% of Basic.',
+        description:
+            'Exemption is the minimum of: HRA received, Rent − 10% Basic, 50%/40% of Basic.',
       ),
       KuberInfoItem(
         icon: Icons.location_city_outlined,
@@ -456,17 +471,25 @@ class InfoConstants {
 
   static const splitCalculator = KuberInfoConfig(
     title: 'Split Calculator',
-    description: 'Split any amount between multiple people.',
+    description: 'Calculate and save simple bill splits for reference.',
     items: [
       KuberInfoItem(
         icon: Icons.people_outline,
-        title: 'Split Modes',
-        description: 'Equal, unequal amounts, percentage, or fractional splits.',
+        title: 'Calculator First',
+        description:
+            'Use it to work out who owes whom. It is not a full group settlement app.',
       ),
       KuberInfoItem(
         icon: Icons.send_rounded,
-        title: 'Add to Lent/Borrow',
-        description: 'Send anyone\'s share directly to the Lent/Borrow tracker.',
+        title: 'Use with Lend/Borrow',
+        description:
+            'When you are part of the split, send the amount you owe or should receive to Lend/Borrow with details in notes.',
+      ),
+      KuberInfoItem(
+        icon: Icons.apps_rounded,
+        title: 'For Full Splitting',
+        description:
+            'For complete Splitwise-style groups, settlements, reminders, and balances, use a dedicated splitter app.',
       ),
     ],
   );

@@ -84,7 +84,7 @@ class _CurrencyConverterScreenState
 
     ref.listen(exchangeRatesProvider(_fromCurrency), (previous, next) {
       if (!_refreshRequested) return;
-      if (next.isLoading) return;
+      if (next.isLoading || next.isRefreshing) return;
       setState(() => _refreshRequested = false);
       next.when(
         loading: () {},

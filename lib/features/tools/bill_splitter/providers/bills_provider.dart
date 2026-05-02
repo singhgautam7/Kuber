@@ -6,8 +6,7 @@ import 'package:isar_community/isar.dart';
 import '../../../../core/database/isar_service.dart';
 import '../data/bill.dart';
 
-final billsListProvider =
-    AsyncNotifierProvider<BillsListNotifier, List<Bill>>(
+final billsListProvider = AsyncNotifierProvider<BillsListNotifier, List<Bill>>(
   BillsListNotifier.new,
 );
 
@@ -27,6 +26,16 @@ class BillsListNotifier extends AsyncNotifier<List<Bill>> {
 
   Future<void> delete(int id) async {
     await _isar.writeTxn(() => _isar.bills.delete(id));
+    ref.invalidateSelf();
+  }
+
+  Future<void> setArchived(int id, bool archived) async {
+    final bill = await _isar.bills.get(id);
+    if (bill == null) return;
+    bill
+      ..isArchived = archived
+      ..archivedAt = archived ? DateTime.now() : null;
+    await _isar.writeTxn(() => _isar.bills.put(bill));
     ref.invalidateSelf();
   }
 }

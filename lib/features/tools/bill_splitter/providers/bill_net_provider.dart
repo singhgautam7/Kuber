@@ -42,7 +42,10 @@ const kYouName = 'You';
 /// Negative amount → you owe that person.
 final personNetListProvider = Provider<AsyncValue<List<PersonNet>>>((ref) {
   final billsAsync = ref.watch(billsListProvider);
-  return billsAsync.whenData((bills) => _computePersonNets(bills));
+  return billsAsync.whenData(
+    (bills) =>
+        _computePersonNets(bills.where((bill) => !bill.isArchived).toList()),
+  );
 });
 
 List<PersonNet> _computePersonNets(List<Bill> bills) {
@@ -79,14 +82,17 @@ List<PersonNet> _computePersonNets(List<Bill> bills) {
   }
 
   // Sort by absolute amount descending
-  final result = nets.entries
-      .map((e) => PersonNet(
-            name: e.key,
-            amount: e.value,
-            bills: billCounts[e.key] ?? 0,
-          ))
-      .toList()
-    ..sort((a, b) => b.amount.abs().compareTo(a.amount.abs()));
+  final result =
+      nets.entries
+          .map(
+            (e) => PersonNet(
+              name: e.key,
+              amount: e.value,
+              bills: billCounts[e.key] ?? 0,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => b.amount.abs().compareTo(a.amount.abs()));
 
   return result;
 }
@@ -150,4 +156,78 @@ double yourShareInBill(Bill bill) {
     return othersTotal;
   }
   return yourParticipant.share;
+}
+
+class SplitDebt {
+  final String personName;
+  final String type; // 'lent' | 'borrowed'
+  final double amount;
+
+  const SplitDebt({
+    required this.personName,
+    required this.type,
+    required this.amount,
+  });
+
+  bool get isLent => type == 'lent';
+}
+
+List<SplitDebt> debtsForYou(Bill bill) {
+  final shares = {
+    for (final participant in bill.participants)
+      participant.personName: participant.share,
+  };
+
+  if (bill.paidByPersonName == kYouName) {
+    return bill.participants
+        .where(
+          (participant) =>
+              participant.personName != kYouName && participant.share > 0.01,
+        )
+        .map(
+          (participant) => SplitDebt(
+            personName: participant.personName,
+            type: 'lent',
+            amount: participant.share,
+          ),
+        )
+        .toList();
+  }
+
+  final yourShare = shares[kYouName];
+  if (yourShare == null || yourShare <= 0.01) return const [];
+
+  return [
+    SplitDebt(
+      personName: bill.paidByPersonName,
+      type: 'borrowed',
+      amount: yourShare,
+    ),
+  ];
+}
+
+String splitLedgerNote({
+  required Bill bill,
+  required SplitDebt debt,
+  required String Function(double amount) formatAmount,
+}) {
+  final buffer = StringBuffer()
+    ..writeln('Added from Split Calculator.')
+    ..writeln(
+      debt.isLent
+          ? '${debt.personName} owes You ${formatAmount(debt.amount)}.'
+          : 'You owe ${debt.personName} ${formatAmount(debt.amount)}.',
+    )
+    ..writeln('Bill: ${bill.name}')
+    ..writeln('Total: ${formatAmount(bill.totalAmount)}')
+    ..writeln('Paid by: ${bill.paidByPersonName}')
+    ..writeln('Split details:');
+
+  for (final participant in bill.participants) {
+    buffer.writeln(
+      '- ${participant.personName}: ${formatAmount(participant.share)}',
+    );
+  }
+
+  return buffer.toString().trim();
 }
