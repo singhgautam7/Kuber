@@ -67,6 +67,13 @@ import '../../features/tools/sip_amount_finder/sip_amount_finder_screen.dart';
 import '../../features/tools/tip_calculator/tip_calculator_screen.dart';
 import '../../features/tools/discount_calculator/discount_calculator_screen.dart';
 import '../../features/tools/gst_calculator/gst_calculator_screen.dart';
+import '../../features/tools/fd_rd_calculator/fd_rd_calculator_screen.dart';
+import '../../features/tools/ppf_calculator/ppf_calculator_screen.dart';
+import '../../features/tools/salary_calculator/salary_calculator_screen.dart';
+import '../../features/tools/inflation_calculator/inflation_calculator_screen.dart';
+import '../../features/tools/breakeven_calculator/breakeven_calculator_screen.dart';
+import '../../features/tools/hra_calculator/hra_calculator_screen.dart';
+import '../../features/tools/split_calculator/split_calculator_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
@@ -394,6 +401,41 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'tools/gst-calculator',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const GstCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/fd-rd-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const FdRdCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/ppf-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const PpfCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/salary-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const SalaryCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/inflation-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const InflationCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/breakeven-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const BreakevenCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/hra-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const HraCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/split-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const SplitCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'search',

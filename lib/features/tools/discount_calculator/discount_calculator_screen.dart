@@ -39,7 +39,7 @@ class _DiscountCalculatorScreenState
 
   void _onTextChanged(String v) {
     final parsed = double.tryParse(v);
-    if (parsed != null && parsed >= 0 && parsed <= 100) {
+    if (parsed != null && parsed >= 0 && parsed <= 90) {
       setState(() => _discountPercent = parsed);
     }
   }
@@ -103,10 +103,10 @@ class _DiscountCalculatorScreenState
                       onChanged: _onTextChanged,
                     ),
                     Slider(
-                      value: _discountPercent.clamp(0, 100),
+                      value: _discountPercent.clamp(0, 90),
                       min: 0,
-                      max: 100,
-                      divisions: 100,
+                      max: 90,
+                      divisions: 90,
                       activeColor: cs.primary,
                       inactiveColor: cs.outline,
                       label: '${_discountPercent.toStringAsFixed(0)}%',
@@ -118,7 +118,7 @@ class _DiscountCalculatorScreenState
                         Text('0%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
-                        Text('100%',
+                        Text('90%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
                       ],
@@ -142,6 +142,12 @@ class _DiscountCalculatorScreenState
                             value:
                                 '-${formatter.formatCurrency(result.discountAmount, symbol: currency.symbol)}',
                             valueColor: cs.error,
+                          ),
+                          const SizedBox(height: KuberSpacing.sm),
+                          ToolStatRow(
+                            label: 'You Save',
+                            value: '${_discountPercent.toStringAsFixed(1)}%',
+                            valueColor: cs.tertiary,
                           ),
                         ],
                 ),

@@ -352,6 +352,125 @@ class InfoConstants {
     ],
   );
 
+  static const fdRdCalculator = KuberInfoConfig(
+    title: 'FD / RD Calculator',
+    description: 'Calculate fixed and recurring deposit returns.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.account_balance_wallet_outlined,
+        title: 'Fixed Deposit (FD)',
+        description: 'Lump-sum deposit that compounds at a fixed rate.',
+      ),
+      KuberInfoItem(
+        icon: Icons.repeat_rounded,
+        title: 'Recurring Deposit (RD)',
+        description: 'Monthly installments that each compound for remaining duration.',
+      ),
+    ],
+  );
+
+  static const ppfCalculator = KuberInfoConfig(
+    title: 'PPF Calculator',
+    description: 'Estimate Public Provident Fund maturity amount.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.savings_outlined,
+        title: '15-Year Lock-in',
+        description: 'PPF has a 15-year maturity with optional 5-year extensions.',
+      ),
+      KuberInfoItem(
+        icon: Icons.shield_outlined,
+        title: 'Tax-Free Returns',
+        description: 'PPF interest and maturity are fully exempt from income tax.',
+      ),
+    ],
+  );
+
+  static const salaryCalculator = KuberInfoConfig(
+    title: 'Salary Breakdown',
+    description: 'Understand your CTC vs in-hand salary.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.work_outline,
+        title: 'New vs Old Regime',
+        description: 'New regime has lower slabs with fewer deductions; old regime allows 80C, HRA etc.',
+      ),
+      KuberInfoItem(
+        icon: Icons.savings_outlined,
+        title: 'PF Contribution',
+        description: 'Employee & employer each contribute 12% of basic (capped at ₹15,000/month).',
+      ),
+    ],
+  );
+
+  static const inflationCalculator = KuberInfoConfig(
+    title: 'Inflation Calculator',
+    description: 'See the future value of money after inflation.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.trending_down_rounded,
+        title: 'Purchasing Power',
+        description: 'Inflation reduces what your money can buy over time.',
+      ),
+      KuberInfoItem(
+        icon: Icons.percent_rounded,
+        title: 'India Average',
+        description: 'India\'s average inflation rate is around 5–7% per year.',
+      ),
+    ],
+  );
+
+  static const breakevenCalculator = KuberInfoConfig(
+    title: 'Break-even Calculator',
+    description: 'Find how long to recover a purchase cost.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.timeline_rounded,
+        title: 'Break-even Point',
+        description: 'The month when cumulative savings equal the purchase cost.',
+      ),
+      KuberInfoItem(
+        icon: Icons.swap_horiz_rounded,
+        title: 'Alternative Cost',
+        description: 'Add what you were paying before this purchase to increase effective savings.',
+      ),
+    ],
+  );
+
+  static const hraCalculator = KuberInfoConfig(
+    title: 'HRA Exemption',
+    description: 'Calculate HRA tax exemption for old tax regime.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.home_work_outlined,
+        title: 'Three Rules',
+        description: 'Exemption is the minimum of: HRA received, Rent − 10% Basic, 50%/40% of Basic.',
+      ),
+      KuberInfoItem(
+        icon: Icons.location_city_outlined,
+        title: 'Metro vs Non-Metro',
+        description: 'Metro cities get 50% of basic; non-metro cities get 40%.',
+      ),
+    ],
+  );
+
+  static const splitCalculator = KuberInfoConfig(
+    title: 'Split Calculator',
+    description: 'Split any amount between multiple people.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.people_outline,
+        title: 'Split Modes',
+        description: 'Equal, unequal amounts, percentage, or fractional splits.',
+      ),
+      KuberInfoItem(
+        icon: Icons.send_rounded,
+        title: 'Add to Lent/Borrow',
+        description: 'Send anyone\'s share directly to the Lent/Borrow tracker.',
+      ),
+    ],
+  );
+
   static const recurring = KuberInfoConfig(
     title: 'How Recurring Works',
     description: 'Automate your regular income and expenses.',

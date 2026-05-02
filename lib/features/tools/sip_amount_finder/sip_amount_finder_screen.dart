@@ -42,7 +42,7 @@ class _SipAmountFinderScreenState
 
     final n = _periodIndex == 0 ? period * 12 : period;
     final r = annualRate / 12 / 100;
-    final sip = goal * r / ((pow(1 + r, n) - 1) * (1 + r));
+    final sip = goal * r / (pow(1 + r, n) - 1);
     final totalInvested = sip * n;
     final returns = goal - totalInvested;
     return (sip: sip, totalInvested: totalInvested, returns: returns);
@@ -134,13 +134,6 @@ class _SipAmountFinderScreenState
                           ),
                           const SizedBox(height: KuberSpacing.lg),
                           ToolStatRow(
-                            label: 'Goal Amount',
-                            value: formatter.formatCurrency(
-                                double.tryParse(_goalCtrl.text.replaceAll(',', '')) ?? 0,
-                                symbol: currency.symbol),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
                             label: 'Total Invested',
                             value: formatter.formatCurrency(
                                 result.totalInvested,
@@ -152,6 +145,17 @@ class _SipAmountFinderScreenState
                             value: formatter.formatCurrency(result.returns,
                                 symbol: currency.symbol),
                             valueColor: cs.tertiary,
+                          ),
+                          const SizedBox(height: KuberSpacing.sm),
+                          ToolStatRow(
+                            label: 'Time Period',
+                            value: () {
+                              final period = double.tryParse(_periodCtrl.text);
+                              if (period == null) return '-';
+                              return _periodIndex == 0
+                                  ? '${period.toInt()} Years'
+                                  : '${period.toInt()} Months';
+                            }(),
                           ),
                         ],
                 ),

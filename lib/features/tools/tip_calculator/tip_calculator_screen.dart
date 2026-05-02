@@ -21,6 +21,7 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
   final _billCtrl = TextEditingController();
   final _tipPctCtrl = TextEditingController(text: '10');
   double _tipPercent = 10;
+  int _splitCount = 1;
 
   @override
   void dispose() {
@@ -38,16 +39,17 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
 
   void _onTextChanged(String v) {
     final parsed = double.tryParse(v);
-    if (parsed != null && parsed >= 0 && parsed <= 100) {
+    if (parsed != null && parsed >= 0 && parsed <= 30) {
       setState(() => _tipPercent = parsed);
     }
   }
 
-  ({double tip, double total})? _compute() {
+  ({double tip, double total, double perPerson})? _compute() {
     final bill = double.tryParse(_billCtrl.text.replaceAll(',', ''));
     if (bill == null || bill <= 0) return null;
     final tip = bill * _tipPercent / 100;
-    return (tip: tip, total: bill + tip);
+    final total = bill + tip;
+    return (tip: tip, total: total, perPerson: total / _splitCount);
   }
 
   @override
@@ -102,10 +104,10 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                       onChanged: _onTextChanged,
                     ),
                     Slider(
-                      value: _tipPercent.clamp(0, 100),
+                      value: _tipPercent.clamp(0, 30),
                       min: 0,
-                      max: 100,
-                      divisions: 100,
+                      max: 30,
+                      divisions: 30,
                       activeColor: cs.primary,
                       inactiveColor: cs.outline,
                       label: '${_tipPercent.toStringAsFixed(0)}%',
@@ -117,9 +119,38 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                         Text('0%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
-                        Text('100%',
+                        Text('30%',
                             style: GoogleFonts.inter(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
+                      ],
+                    ),
+                    const SizedBox(height: KuberSpacing.lg),
+                    const ToolInputLabel('SPLIT BETWEEN'),
+                    const SizedBox(height: KuberSpacing.sm),
+                    Row(
+                      children: [
+                        _StepperButton(
+                          icon: Icons.remove,
+                          onTap: _splitCount > 1
+                              ? () => setState(() => _splitCount--)
+                              : null,
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        Text(
+                          '$_splitCount ${_splitCount == 1 ? 'person' : 'people'}',
+                          style: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        _StepperButton(
+                          icon: Icons.add,
+                          onTap: _splitCount < 20
+                              ? () => setState(() => _splitCount++)
+                              : null,
+                        ),
                       ],
                     ),
                   ],
@@ -130,24 +161,62 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                       ? [const ToolEmptyResult()]
                       : [
                           ToolHeroResult(
-                            label: 'Total Amount',
-                            value: formatter.formatCurrency(result.total,
+                            label: 'Tip Amount',
+                            value: formatter.formatCurrency(result.tip,
                                 symbol: currency.symbol),
                             color: cs.primary,
                           ),
                           const SizedBox(height: KuberSpacing.lg),
                           ToolStatRow(
-                            label: 'Tip Amount',
-                            value: formatter.formatCurrency(result.tip,
+                            label: 'Total Bill',
+                            value: formatter.formatCurrency(result.total,
                                 symbol: currency.symbol),
-                            valueColor: cs.tertiary,
                           ),
+                          if (_splitCount > 1) ...[
+                            const SizedBox(height: KuberSpacing.sm),
+                            ToolStatRow(
+                              label: 'Per Person',
+                              value: formatter.formatCurrency(result.perPerson,
+                                  symbol: currency.symbol),
+                              valueColor: cs.tertiary,
+                            ),
+                          ],
                         ],
                 ),
               ]),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StepperButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  const _StepperButton({required this.icon, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          icon,
+          size: 18,
+          color: onTap != null ? cs.onSurface : cs.onSurfaceVariant,
+        ),
       ),
     );
   }
