@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -149,27 +147,27 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
                                 symbol: currency.symbol),
                           ),
                           const SizedBox(height: KuberSpacing.lg),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton(
-                              onPressed: () => context.push('/recurring/add'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: cs.primary,
-                                side: BorderSide(color: cs.primary),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                                ),
-                                padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-                              ),
-                              child: Text(
-                                'Add as Recurring Transaction',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
+                          // SizedBox(
+                          //   width: double.infinity,
+                          //   child: OutlinedButton(
+                          //     onPressed: () => context.push('/recurring/add'),
+                          //     style: OutlinedButton.styleFrom(
+                          //       foregroundColor: cs.primary,
+                          //       side: BorderSide(color: cs.primary),
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(KuberRadius.md),
+                          //       ),
+                          //       padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
+                          //     ),
+                          //     child: Text(
+                          //       'Add as Recurring Transaction',
+                          //       style: GoogleFonts.inter(
+                          //         fontSize: 14,
+                          //         fontWeight: FontWeight.w600,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                 ),
               ]),

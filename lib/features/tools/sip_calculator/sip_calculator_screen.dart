@@ -49,7 +49,9 @@ class _InvestmentReturnsCalculatorScreenState
       final invested = p * n;
       return (fv: fv, invested: invested, returns: fv - invested);
     } else {
-      final fv = p * pow(1 + r, n);
+      final annualR = annualRate / 100;
+      final years = _periodIndex == 0 ? period : period / 12.0;
+      final fv = p * pow(1 + annualR, years);
       return (fv: fv, invested: p, returns: fv - p);
     }
   }
@@ -142,35 +144,49 @@ class _InvestmentReturnsCalculatorScreenState
                 ToolResultCard(
                   children: result == null
                       ? [const ToolEmptyResult()]
-                      : [
-                        ToolHeroResult(
-                          label: 'Expected Final Amount',
-                          value: formatter.formatCurrency(result.fv,
-                              symbol: currency.symbol),
-                          color: cs.primary,
-                        ),
-                        const SizedBox(height: KuberSpacing.lg),
-                        ToolStatRow(
-                          label: 'Total Invested',
-                          value: formatter.formatCurrency(result.invested,
-                              symbol: currency.symbol),
-                        ),
-                        const SizedBox(height: KuberSpacing.sm),
-                        ToolStatRow(
-                          label: 'Total Returns',
-                          value: formatter.formatCurrency(result.returns,
-                              symbol: currency.symbol),
-                          valueColor: cs.tertiary,
-                        ),
-                        const SizedBox(height: KuberSpacing.sm),
-                        ToolStatRow(
-                          label: 'Return %',
-                          value: result.invested > 0
-                              ? '${(result.returns / result.invested * 100).toStringAsFixed(1)}%'
-                              : '-',
-                          valueColor: cs.tertiary,
-                        ),
-                      ],
+                      : isMonthly
+                          ? [
+                              ToolHeroResult(
+                                label: 'Estimated Returns',
+                                value: formatter.formatCurrency(result.returns,
+                                    symbol: currency.symbol),
+                                color: cs.tertiary,
+                              ),
+                              const SizedBox(height: KuberSpacing.lg),
+                              ToolStatRow(
+                                label: 'Total Invested',
+                                value: formatter.formatCurrency(result.invested,
+                                    symbol: currency.symbol),
+                              ),
+                              const SizedBox(height: KuberSpacing.sm),
+                              ToolStatRow(
+                                label: 'Total Value',
+                                value: formatter.formatCurrency(result.fv,
+                                    symbol: currency.symbol),
+                                valueColor: cs.tertiary,
+                              ),
+                            ]
+                          : [
+                              ToolHeroResult(
+                                label: 'Total Value',
+                                value: formatter.formatCurrency(result.fv,
+                                    symbol: currency.symbol),
+                                color: cs.primary,
+                              ),
+                              const SizedBox(height: KuberSpacing.lg),
+                              ToolStatRow(
+                                label: 'Estimated Returns',
+                                value: formatter.formatCurrency(result.returns,
+                                    symbol: currency.symbol),
+                                valueColor: cs.tertiary,
+                              ),
+                              const SizedBox(height: KuberSpacing.sm),
+                              ToolStatRow(
+                                label: 'Principal',
+                                value: formatter.formatCurrency(result.invested,
+                                    symbol: currency.symbol),
+                              ),
+                            ],
                 ),
               ]),
             ),

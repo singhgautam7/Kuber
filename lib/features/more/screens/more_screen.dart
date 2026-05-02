@@ -115,55 +115,13 @@ class MoreScreen extends ConsumerWidget {
 
                 // Tools section
                 _MenuSection(
-                  title: 'Tools (Beta)',
+                  title: 'Tools',
                   items: [
                     _MenuItem(
-                      icon: Icons.receipt_long_rounded,
-                      label: 'Bill Splitter',
-                      subtitle: 'Split bills with friends',
-                      onTap: () => context.push('/more/tools/bill-splitter'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.currency_exchange_rounded,
-                      label: 'Currency Converter',
-                      subtitle: 'Convert between currencies live',
-                      onTap: () => context.push('/more/tools/currency-converter'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.account_balance_rounded,
-                      label: 'EMI Calculator',
-                      subtitle: 'Estimate loan EMIs',
-                      onTap: () => context.push('/more/tools/emi-calculator'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.trending_up_rounded,
-                      label: 'Investment Returns',
-                      subtitle: 'Estimate SIP & lump-sum growth',
-                      onTap: () => context.push('/more/tools/sip-calculator'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.savings_rounded,
-                      label: 'SIP Amount Finder',
-                      subtitle: 'Find required monthly investment',
-                      onTap: () => context.push('/more/tools/sip-amount-finder'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.percent_rounded,
-                      label: 'Tip Calculator',
-                      subtitle: 'Calculate tips quickly',
-                      onTap: () => context.push('/more/tools/tip-calculator'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.local_offer_rounded,
-                      label: 'Discount Calculator',
-                      subtitle: 'Find the best deal',
-                      onTap: () => context.push('/more/tools/discount-calculator'),
-                    ),
-                    _MenuItem(
                       icon: Icons.calculate_rounded,
-                      label: 'GST Calculator',
-                      subtitle: 'Add or remove GST instantly',
-                      onTap: () => context.push('/more/tools/gst-calculator'),
+                      label: 'Calculators & Tools',
+                      subtitle: 'EMI, SIP, salary, GST, split & more',
+                      onTap: () => context.push('/more/tools'),
                     ),
                   ],
                 ),

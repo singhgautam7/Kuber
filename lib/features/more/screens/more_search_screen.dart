@@ -60,15 +60,23 @@ List<_SearchableItem> _buildItems(bool isDevMode) => [
       _SearchableItem(label: 'Lend / Borrow', subtitle: 'Track money you lent or borrowed', icon: Icons.handshake_outlined, section: 'Manage', route: '/more/ledger'),
       _SearchableItem(label: 'Loans', subtitle: 'Track EMIs and repayment progress', icon: Icons.account_balance_outlined, section: 'Manage', route: '/more/loans'),
       _SearchableItem(label: 'Investments', subtitle: 'Track portfolio value and growth', icon: Icons.show_chart, section: 'Manage', route: '/more/investments'),
-      // Tools
-      _SearchableItem(label: 'Bill Splitter', subtitle: 'Split bills with friends', icon: Icons.receipt_long_rounded, section: 'Tools', route: '/more/tools/bill-splitter'),
-      _SearchableItem(label: 'Currency Converter', subtitle: 'Convert between currencies live', icon: Icons.currency_exchange_rounded, section: 'Tools', route: '/more/tools/currency-converter'),
-      _SearchableItem(label: 'EMI Calculator', subtitle: 'Estimate loan EMIs', icon: Icons.account_balance_rounded, section: 'Tools', route: '/more/tools/emi-calculator'),
+      // Tools — Finance Calculators
+      _SearchableItem(label: 'EMI Calculator', subtitle: 'Plan your loan repayments', icon: Icons.account_balance_rounded, section: 'Tools', route: '/more/tools/emi-calculator'),
       _SearchableItem(label: 'Investment Returns', subtitle: 'Estimate SIP & lump-sum growth', icon: Icons.trending_up_rounded, section: 'Tools', route: '/more/tools/sip-calculator'),
       _SearchableItem(label: 'SIP Amount Finder', subtitle: 'Find required monthly investment', icon: Icons.savings_rounded, section: 'Tools', route: '/more/tools/sip-amount-finder'),
-      _SearchableItem(label: 'Tip Calculator', subtitle: 'Calculate tips quickly', icon: Icons.percent_rounded, section: 'Tools', route: '/more/tools/tip-calculator'),
+      _SearchableItem(label: 'FD / RD Calculator', subtitle: 'Fixed & recurring deposits', icon: Icons.account_balance_wallet_rounded, section: 'Tools', route: '/more/tools/fd-rd-calculator'),
+      _SearchableItem(label: 'PPF Calculator', subtitle: '15-year provident fund', icon: Icons.shield_rounded, section: 'Tools', route: '/more/tools/ppf-calculator'),
+      _SearchableItem(label: 'Inflation Calculator', subtitle: 'Future purchasing power', icon: Icons.trending_down_rounded, section: 'Tools', route: '/more/tools/inflation-calculator'),
+      // Tools — Tax & Salary
+      _SearchableItem(label: 'Salary Breakdown', subtitle: 'CTC to in-hand calculation', icon: Icons.work_rounded, section: 'Tools', route: '/more/tools/salary-calculator'),
+      _SearchableItem(label: 'GST Calculator', subtitle: 'Add or remove GST instantly', icon: Icons.percent_rounded, section: 'Tools', route: '/more/tools/gst-calculator'),
+      _SearchableItem(label: 'HRA Exemption', subtitle: 'Old regime tax exemption', icon: Icons.home_work_rounded, section: 'Tools', route: '/more/tools/hra-calculator'),
+      // Tools — Quick Calculators
+      _SearchableItem(label: 'Tip Calculator', subtitle: 'Calculate tips quickly', icon: Icons.receipt_long_rounded, section: 'Tools', route: '/more/tools/tip-calculator'),
       _SearchableItem(label: 'Discount Calculator', subtitle: 'Find the best deal', icon: Icons.local_offer_rounded, section: 'Tools', route: '/more/tools/discount-calculator'),
-      _SearchableItem(label: 'GST Calculator', subtitle: 'Add or remove GST instantly', icon: Icons.calculate_rounded, section: 'Tools', route: '/more/tools/gst-calculator'),
+      _SearchableItem(label: 'Break-even Calculator', subtitle: 'Months to recover a purchase', icon: Icons.timeline_rounded, section: 'Tools', route: '/more/tools/breakeven-calculator'),
+      _SearchableItem(label: 'Split Calculator', subtitle: 'Split expenses between people', icon: Icons.people_rounded, section: 'Tools', route: '/more/tools/split-calculator'),
+      _SearchableItem(label: 'Currency Converter', subtitle: 'Convert between currencies live', icon: Icons.currency_exchange_rounded, section: 'Tools', route: '/more/tools/currency-converter'),
       // App
       _SearchableItem(label: 'Settings', subtitle: 'Theme, currency, and profile', icon: Icons.settings_outlined, section: 'App', route: '/more/settings'),
       _SearchableItem(label: 'Data', subtitle: 'Export and clear your data', icon: Icons.storage_rounded, section: 'App', route: '/more/data'),

@@ -8,11 +8,13 @@ class ExchangeRatesResult {
   final Map<String, double> rates;
   final String lastUpdated;
   final bool isStale;
+  final bool isFetchedFromNetwork;
 
   const ExchangeRatesResult({
     required this.rates,
     required this.lastUpdated,
     required this.isStale,
+    this.isFetchedFromNetwork = false,
   });
 }
 
@@ -52,6 +54,7 @@ final exchangeRatesProvider =
         rates: rawRates,
         lastUpdated: fetchTime,
         isStale: false,
+        isFetchedFromNetwork: true,
       );
     }
   } catch (_) {

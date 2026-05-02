@@ -134,6 +134,13 @@ const _kGroups = [
       route: 'split-calculator',
       accentColor: _kBlue,
     ),
+    _ToolEntry(
+      name: 'Currency Converter',
+      description: 'Convert between currencies',
+      icon: Icons.currency_exchange_rounded,
+      route: 'currency-converter',
+      accentColor: _kEmerald,
+    ),
   ]),
 ];
 

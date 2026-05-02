@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../widgets/calculator_widgets.dart';
 import 'providers/exchange_rates_provider.dart';
 
@@ -24,6 +25,7 @@ class _CurrencyConverterScreenState
   final _amountCtrl = TextEditingController(text: '1');
   String _fromCurrency = 'USD';
   String _toCurrency = 'INR';
+  bool _refreshRequested = false;
 
   @override
   void dispose() {
@@ -40,6 +42,7 @@ class _CurrencyConverterScreenState
   }
 
   void _refresh() {
+    setState(() => _refreshRequested = true);
     ref.invalidate(exchangeRatesProvider(_fromCurrency));
   }
 
@@ -78,6 +81,27 @@ class _CurrencyConverterScreenState
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final ratesAsync = ref.watch(exchangeRatesProvider(_fromCurrency));
+
+    ref.listen(exchangeRatesProvider(_fromCurrency), (previous, next) {
+      if (!_refreshRequested) return;
+      if (next.isLoading) return;
+      setState(() => _refreshRequested = false);
+      next.when(
+        loading: () {},
+        error: (_, __) => showKuberSnackBar(
+          context,
+          'No network. Please check your internet connection',
+          isError: true,
+        ),
+        data: (result) => result.isFetchedFromNetwork
+            ? showKuberSnackBar(context, 'Exchange rates refreshed')
+            : showKuberSnackBar(
+                context,
+                'No network. Please check your internet connection',
+                isError: true,
+              ),
+      );
+    });
 
     final isStale = ratesAsync.valueOrNull?.isStale ?? false;
     final rawLastUpdated = ratesAsync.valueOrNull?.lastUpdated;
