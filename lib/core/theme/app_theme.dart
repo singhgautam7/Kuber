@@ -42,6 +42,8 @@ class KuberColors {
   static const incomeSubtle = Color(0x1A22C55E);
   static const expense = Color(0xFFEF4444);
   static const expenseSubtle = Color(0x1AEF4444);
+  static const warning = Color(0xFFF59E0B);
+  static const warningSubtle = Color(0x1AF59E0B);
 
   // Utility
   static const white = Color(0xFFFFFFFF);
@@ -70,6 +72,8 @@ class KuberLightColors {
   static const incomeSubtle = Color(0x1A16A34A);
   static const expense = Color(0xFFDC2626);
   static const expenseSubtle = Color(0x1ADC2626);
+  static const warning = Color(0xFFD97706);
+  static const warningSubtle = Color(0x1AD97706);
 
   // Utility
   static const white = Color(0xFFFFFFFF);
@@ -77,9 +81,7 @@ class KuberLightColors {
 
 class AppTheme {
   static ThemeData dark() {
-    final textTheme = AppTextStyles.getTextTheme(
-      ThemeData.dark().textTheme,
-    );
+    final textTheme = AppTextStyles.getTextTheme(ThemeData.dark().textTheme);
 
     final colorScheme = ColorScheme.dark(
       surface: KuberColors.background,
@@ -295,9 +297,7 @@ class AppTheme {
   }
 
   static ThemeData light() {
-    final textTheme = AppTextStyles.getTextTheme(
-      ThemeData.light().textTheme,
-    );
+    final textTheme = AppTextStyles.getTextTheme(ThemeData.light().textTheme);
 
     final colorScheme = ColorScheme.light(
       surface: KuberLightColors.background,
@@ -374,7 +374,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: KuberLightColors.primary, width: 2),
+          borderSide: const BorderSide(
+            color: KuberLightColors.primary,
+            width: 2,
+          ),
         ),
         labelStyle: const TextStyle(color: KuberLightColors.textSecondary),
       ),

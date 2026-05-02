@@ -300,149 +300,147 @@ class _BalanceHeroCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final formatter = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
     final symbol = ref.watch(currencyProvider).symbol;
+    final isPositive = summary.net >= 0;
+    final netColor = isPositive ? cs.tertiary : cs.error;
+    final prefix = isPositive ? '+' : '-';
+    final formattedNet = formatter.formatCurrency(summary.net.abs(), symbol: symbol).trim();
+    final formattedIncome = maskAmount(
+        formatter.formatCurrency(summary.totalIncome, symbol: symbol), isPrivate);
+    final formattedExpense = maskAmount(
+        formatter.formatCurrency(summary.totalExpense, symbol: symbol), isPrivate);
+
+    final total = summary.totalIncome + summary.totalExpense;
+    final incPct = total > 0 ? summary.totalIncome / total : 0.5;
+
+    final monthLabel = DateFormat('MMMM').format(DateTime.now()).toUpperCase();
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.xl),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.lg,
+        vertical: KuberSpacing.md + 2,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(KuberRadius.md),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'This Month\'s Balance',
-            style: textTheme.labelLarge?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Builder(
-            builder: (context) {
-              final formatter = ref.watch(formatterProvider);
-              final isPrivate = ref.watch(privacyModeProvider);
-              final formattedRaw = formatter.formatCurrency(summary.net.abs(), symbol: '').trim();
-              final prefix = summary.net < 0 ? '-' : '';
-
-              if (isPrivate) {
-                return Text(
-                  '****',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 36,
-                    letterSpacing: -0.05,
-                    color: cs.onSurface,
-                  ),
-                );
-              }
-
-              return RichText(
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 36,
-                    letterSpacing: -0.05,
-                    color: cs.onSurface,
-                  ) ?? const TextStyle(),
-                  children: [
-                    TextSpan(text: prefix),
-                    TextSpan(
-                      text: symbol,
-                      style: TextStyle(color: cs.primary),
-                    ),
-                    TextSpan(text: formattedRaw),
-                  ],
+          // Header row: month label + net amount
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '$monthLabel · NET',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: 0.8,
                 ),
-              );
-            },
+              ),
+              const Spacer(),
+              isPrivate
+                  ? Text(
+                      '****',
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: cs.onSurface,
+                        letterSpacing: -0.6,
+                      ),
+                    )
+                  : Text(
+                      '$prefix$formattedNet',
+                      style: GoogleFonts.inter(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: netColor,
+                        letterSpacing: -0.6,
+                      ),
+                    ),
+            ],
           ),
-          const SizedBox(height: KuberSpacing.xl),
+
+          const SizedBox(height: KuberSpacing.md),
+
+          // Proportional income/expense ratio bar
           Row(
             children: [
               Expanded(
-                child: _BalanceTile(
-                  label: 'Income',
-                  amount: summary.totalIncome,
-                  icon: Icons.arrow_downward_rounded,
-                  iconColor: cs.tertiary,
+                flex: (incPct * 1000).round(),
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: cs.tertiary,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
                 ),
               ),
-              const SizedBox(width: KuberSpacing.lg),
+              const SizedBox(width: 3),
               Expanded(
-                child: _BalanceTile(
-                  label: 'Expense',
-                  amount: summary.totalExpense,
-                  icon: Icons.arrow_upward_rounded,
-                  iconColor: cs.error,
+                flex: ((1 - incPct) * 1000).round().clamp(1, 1000),
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: cs.error,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
 
-class _BalanceTile extends ConsumerWidget {
-  final String label;
-  final double amount;
-  final IconData icon;
-  final Color iconColor;
+          const SizedBox(height: KuberSpacing.sm + 2),
 
-  const _BalanceTile({
-    required this.label,
-    required this.amount,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-               color: cs.outline.withValues(alpha: 0.3),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: iconColor, size: 18),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+          // Income / Expense legend
+          Row(
+            children: [
+              // Income: dot + amount
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: cs.tertiary,
+                  shape: BoxShape.circle,
                 ),
-                Text(
-                  maskAmount(ref.watch(formatterProvider).formatCurrency(amount), ref.watch(privacyModeProvider)),
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Text(
+                formattedIncome,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
-              ],
-            ),
+              ),
+              const Spacer(),
+              // Expense: amount + dot
+              Text(
+                formattedExpense,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurface,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: cs.error,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ),
         ],
       ),

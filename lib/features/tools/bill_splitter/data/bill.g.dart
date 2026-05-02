@@ -17,31 +17,41 @@ const BillSchema = CollectionSchema(
   name: r'Bill',
   id: 7031121081258233164,
   properties: {
-    r'createdAt': PropertySchema(
+    r'archivedAt': PropertySchema(
       id: 0,
+      name: r'archivedAt',
+      type: IsarType.dateTime,
+    ),
+    r'createdAt': PropertySchema(
+      id: 1,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'name': PropertySchema(id: 1, name: r'name', type: IsarType.string),
-    r'paidByPersonName': PropertySchema(
+    r'isArchived': PropertySchema(
       id: 2,
+      name: r'isArchived',
+      type: IsarType.bool,
+    ),
+    r'name': PropertySchema(id: 3, name: r'name', type: IsarType.string),
+    r'paidByPersonName': PropertySchema(
+      id: 4,
       name: r'paidByPersonName',
       type: IsarType.string,
     ),
     r'participants': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'participants',
       type: IsarType.objectList,
 
       target: r'BillParticipant',
     ),
     r'splitType': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'splitType',
       type: IsarType.string,
     ),
     r'totalAmount': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'totalAmount',
       type: IsarType.double,
     ),
@@ -92,17 +102,19 @@ void _billSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.createdAt);
-  writer.writeString(offsets[1], object.name);
-  writer.writeString(offsets[2], object.paidByPersonName);
+  writer.writeDateTime(offsets[0], object.archivedAt);
+  writer.writeDateTime(offsets[1], object.createdAt);
+  writer.writeBool(offsets[2], object.isArchived);
+  writer.writeString(offsets[3], object.name);
+  writer.writeString(offsets[4], object.paidByPersonName);
   writer.writeObjectList<BillParticipant>(
-    offsets[3],
+    offsets[5],
     allOffsets,
     BillParticipantSchema.serialize,
     object.participants,
   );
-  writer.writeString(offsets[4], object.splitType);
-  writer.writeDouble(offsets[5], object.totalAmount);
+  writer.writeString(offsets[6], object.splitType);
+  writer.writeDouble(offsets[7], object.totalAmount);
 }
 
 Bill _billDeserialize(
@@ -112,20 +124,22 @@ Bill _billDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Bill();
-  object.createdAt = reader.readDateTime(offsets[0]);
+  object.archivedAt = reader.readDateTimeOrNull(offsets[0]);
+  object.createdAt = reader.readDateTime(offsets[1]);
   object.id = id;
-  object.name = reader.readString(offsets[1]);
-  object.paidByPersonName = reader.readString(offsets[2]);
+  object.isArchived = reader.readBool(offsets[2]);
+  object.name = reader.readString(offsets[3]);
+  object.paidByPersonName = reader.readString(offsets[4]);
   object.participants =
       reader.readObjectList<BillParticipant>(
-        offsets[3],
+        offsets[5],
         BillParticipantSchema.deserialize,
         allOffsets,
         BillParticipant(),
       ) ??
       [];
-  object.splitType = reader.readString(offsets[4]);
-  object.totalAmount = reader.readDouble(offsets[5]);
+  object.splitType = reader.readString(offsets[6]);
+  object.totalAmount = reader.readDouble(offsets[7]);
   return object;
 }
 
@@ -137,12 +151,16 @@ P _billDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readObjectList<BillParticipant>(
                 offset,
                 BillParticipantSchema.deserialize,
@@ -151,9 +169,9 @@ P _billDeserializeProp<P>(
               ) ??
               [])
           as P;
-    case 4:
+    case 6:
       return (reader.readString(offset)) as P;
-    case 5:
+    case 7:
       return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -251,6 +269,81 @@ extension BillQueryWhere on QueryBuilder<Bill, Bill, QWhereClause> {
 }
 
 extension BillQueryFilter on QueryBuilder<Bill, Bill, QFilterCondition> {
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> archivedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'archivedAt'),
+      );
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> archivedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'archivedAt'),
+      );
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> archivedAtEqualTo(
+    DateTime? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'archivedAt', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> archivedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'archivedAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> archivedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'archivedAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> archivedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'archivedAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<Bill, Bill, QAfterFilterCondition> createdAtEqualTo(
     DateTime value,
   ) {
@@ -363,6 +456,16 @@ extension BillQueryFilter on QueryBuilder<Bill, Bill, QFilterCondition> {
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterFilterCondition> isArchivedEqualTo(
+    bool value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isArchived', value: value),
       );
     });
   }
@@ -948,6 +1051,18 @@ extension BillQueryObject on QueryBuilder<Bill, Bill, QFilterCondition> {
 extension BillQueryLinks on QueryBuilder<Bill, Bill, QFilterCondition> {}
 
 extension BillQuerySortBy on QueryBuilder<Bill, Bill, QSortBy> {
+  QueryBuilder<Bill, Bill, QAfterSortBy> sortByArchivedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'archivedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterSortBy> sortByArchivedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'archivedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<Bill, Bill, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -957,6 +1072,18 @@ extension BillQuerySortBy on QueryBuilder<Bill, Bill, QSortBy> {
   QueryBuilder<Bill, Bill, QAfterSortBy> sortByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterSortBy> sortByIsArchived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterSortBy> sortByIsArchivedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.desc);
     });
   }
 
@@ -1010,6 +1137,18 @@ extension BillQuerySortBy on QueryBuilder<Bill, Bill, QSortBy> {
 }
 
 extension BillQuerySortThenBy on QueryBuilder<Bill, Bill, QSortThenBy> {
+  QueryBuilder<Bill, Bill, QAfterSortBy> thenByArchivedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'archivedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterSortBy> thenByArchivedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'archivedAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<Bill, Bill, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1031,6 +1170,18 @@ extension BillQuerySortThenBy on QueryBuilder<Bill, Bill, QSortThenBy> {
   QueryBuilder<Bill, Bill, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterSortBy> thenByIsArchived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QAfterSortBy> thenByIsArchivedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.desc);
     });
   }
 
@@ -1084,9 +1235,21 @@ extension BillQuerySortThenBy on QueryBuilder<Bill, Bill, QSortThenBy> {
 }
 
 extension BillQueryWhereDistinct on QueryBuilder<Bill, Bill, QDistinct> {
+  QueryBuilder<Bill, Bill, QDistinct> distinctByArchivedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'archivedAt');
+    });
+  }
+
   QueryBuilder<Bill, Bill, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<Bill, Bill, QDistinct> distinctByIsArchived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isArchived');
     });
   }
 
@@ -1131,9 +1294,21 @@ extension BillQueryProperty on QueryBuilder<Bill, Bill, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Bill, DateTime?, QQueryOperations> archivedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'archivedAt');
+    });
+  }
+
   QueryBuilder<Bill, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<Bill, bool, QQueryOperations> isArchivedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isArchived');
     });
   }
 

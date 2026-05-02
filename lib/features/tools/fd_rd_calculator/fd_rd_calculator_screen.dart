@@ -10,41 +10,61 @@ import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../widgets/calculator_widgets.dart';
 
-class EmiCalculatorScreen extends ConsumerStatefulWidget {
-  const EmiCalculatorScreen({super.key});
+class FdRdCalculatorScreen extends ConsumerStatefulWidget {
+  const FdRdCalculatorScreen({super.key});
 
   @override
-  ConsumerState<EmiCalculatorScreen> createState() =>
-      _EmiCalculatorScreenState();
+  ConsumerState<FdRdCalculatorScreen> createState() =>
+      _FdRdCalculatorScreenState();
 }
 
-class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
+class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen> {
   final _principalCtrl = TextEditingController();
   final _rateCtrl = TextEditingController();
-  final _tenureCtrl = TextEditingController();
-  int _tenureIndex = 0; // 0 = Years, 1 = Months
+  final _durationCtrl = TextEditingController();
+  int _typeIndex = 0; // 0 = FD, 1 = RD
+  int _durationUnitIndex = 0; // 0 = Years, 1 = Months
+  int _compoundingIndex = 0; // 0 = Monthly, 1 = Quarterly, 2 = Yearly
 
   @override
   void dispose() {
     _principalCtrl.dispose();
     _rateCtrl.dispose();
-    _tenureCtrl.dispose();
+    _durationCtrl.dispose();
     super.dispose();
   }
 
-  ({double emi, double totalPayable, double totalInterest})? _compute() {
+  ({double maturity, double principal, double interest})? _compute() {
     final p = double.tryParse(_principalCtrl.text.replaceAll(',', ''));
-    final annualRate = double.tryParse(_rateCtrl.text);
-    final tenure = double.tryParse(_tenureCtrl.text);
-    if (p == null || annualRate == null || tenure == null) return null;
-    if (p <= 0 || annualRate <= 0 || tenure <= 0) return null;
+    final rate = double.tryParse(_rateCtrl.text);
+    final duration = double.tryParse(_durationCtrl.text);
+    if (p == null || rate == null || duration == null) return null;
+    if (p <= 0 || rate <= 0 || duration <= 0) return null;
 
-    final n = _tenureIndex == 0 ? tenure * 12 : tenure;
-    final r = annualRate / 12 / 100;
-    final emi = p * r * pow(1 + r, n) / (pow(1 + r, n) - 1);
-    final totalPayable = emi * n;
-    final totalInterest = totalPayable - p;
-    return (emi: emi, totalPayable: totalPayable, totalInterest: totalInterest);
+    final months = _durationUnitIndex == 0 ? duration * 12 : duration;
+    final years = months / 12;
+    final r = rate / 100;
+
+    if (_typeIndex == 0) {
+      // FD: A = P * (1 + r/n)^(n*t)
+      final n = [12, 4, 1][_compoundingIndex].toDouble();
+      final maturity = p * pow(1 + r / n, n * years);
+      return (maturity: maturity, principal: p, interest: maturity - p);
+    } else {
+      // RD: each monthly installment compounds for its remaining period
+      double maturity = 0;
+      final n = 12.0; // monthly compounding for RD
+      for (int i = 1; i <= months.toInt(); i++) {
+        final t = (months - i + 1) / 12;
+        maturity += p * pow(1 + r / n, n * t);
+      }
+      final totalPrincipal = p * months.toInt();
+      return (
+        maturity: maturity,
+        principal: totalPrincipal,
+        interest: maturity - totalPrincipal,
+      );
+    }
   }
 
   @override
@@ -53,6 +73,7 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
     final result = _compute();
+    final isFd = _typeIndex == 0;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -63,13 +84,13 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
               title: '',
               showBack: true,
               showHome: true,
-              infoConfig: InfoConstants.emiCalculator,
+              infoConfig: InfoConstants.fdRdCalculator,
             ),
           ),
           const SliverToBoxAdapter(
             child: KuberPageHeader(
-              title: 'EMI Calculator',
-              description: 'Plan your loan repayments',
+              title: 'FD / RD Calculator',
+              description: 'Fixed & recurring deposit returns',
             ),
           ),
           SliverPadding(
@@ -83,8 +104,16 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
               delegate: SliverChildListDelegate([
                 ToolInputCard(
                   children: [
+                    const ToolInputLabel('DEPOSIT TYPE'),
+                    const SizedBox(height: KuberSpacing.sm),
+                    ToolSegmentedControl(
+                      labels: const ['FD', 'RD'],
+                      selectedIndex: _typeIndex,
+                      onChanged: (i) => setState(() => _typeIndex = i),
+                    ),
+                    const SizedBox(height: KuberSpacing.lg),
                     ToolTextField(
-                      label: 'LOAN AMOUNT',
+                      label: isFd ? 'PRINCIPAL AMOUNT' : 'MONTHLY INSTALLMENT',
                       controller: _principalCtrl,
                       prefix: currency.symbol,
                       onChanged: (_) => setState(() {}),
@@ -98,13 +127,13 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
                       onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('TENURE'),
+                    const ToolInputLabel('DURATION'),
                     const SizedBox(height: KuberSpacing.sm),
                     Row(
                       children: [
                         Expanded(
                           child: ToolTextField(
-                            controller: _tenureCtrl,
+                            controller: _durationCtrl,
                             onChanged: (_) => setState(() {}),
                           ),
                         ),
@@ -112,12 +141,24 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
                         Expanded(
                           child: ToolSegmentedControl(
                             labels: const ['Years', 'Months'],
-                            selectedIndex: _tenureIndex,
-                            onChanged: (i) => setState(() => _tenureIndex = i),
+                            selectedIndex: _durationUnitIndex,
+                            onChanged: (i) =>
+                                setState(() => _durationUnitIndex = i),
                           ),
                         ),
                       ],
                     ),
+                    if (isFd) ...[
+                      const SizedBox(height: KuberSpacing.lg),
+                      const ToolInputLabel('COMPOUNDING'),
+                      const SizedBox(height: KuberSpacing.sm),
+                      ToolSegmentedControl(
+                        labels: const ['Monthly', 'Quarterly', 'Yearly'],
+                        selectedIndex: _compoundingIndex,
+                        onChanged: (i) =>
+                            setState(() => _compoundingIndex = i),
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.lg),
@@ -126,48 +167,24 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
                       ? [const ToolEmptyResult()]
                       : [
                           ToolHeroResult(
-                            label: 'Monthly EMI',
-                            value: formatter.formatCurrency(result.emi,
+                            label: 'Maturity Amount',
+                            value: formatter.formatCurrency(result.maturity,
                                 symbol: currency.symbol),
                             color: cs.primary,
                           ),
                           const SizedBox(height: KuberSpacing.lg),
                           ToolStatRow(
-                            label: 'Total Interest',
-                            value: formatter.formatCurrency(
-                                result.totalInterest,
+                            label: 'Principal',
+                            value: formatter.formatCurrency(result.principal,
                                 symbol: currency.symbol),
-                            valueColor: cs.error,
                           ),
                           const SizedBox(height: KuberSpacing.sm),
                           ToolStatRow(
-                            label: 'Total Payable',
-                            value: formatter.formatCurrency(
-                                result.totalPayable,
+                            label: 'Interest Earned',
+                            value: formatter.formatCurrency(result.interest,
                                 symbol: currency.symbol),
+                            valueColor: cs.tertiary,
                           ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          // SizedBox(
-                          //   width: double.infinity,
-                          //   child: OutlinedButton(
-                          //     onPressed: () => context.push('/recurring/add'),
-                          //     style: OutlinedButton.styleFrom(
-                          //       foregroundColor: cs.primary,
-                          //       side: BorderSide(color: cs.primary),
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(KuberRadius.md),
-                          //       ),
-                          //       padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-                          //     ),
-                          //     child: Text(
-                          //       'Add as Recurring Transaction',
-                          //       style: GoogleFonts.inter(
-                          //         fontSize: 14,
-                          //         fontWeight: FontWeight.w600,
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
                         ],
                 ),
               ]),

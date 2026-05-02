@@ -127,14 +127,16 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.bar_chart_outlined,
         title: 'Separate from Analytics',
-        description: 'Lent and borrowed amounts are excluded from spending analytics.',
+        description:
+            'Lent and borrowed amounts are excluded from spending analytics.',
       ),
     ],
   );
 
   static const loans = KuberInfoConfig(
     title: 'About Loans',
-    description: 'Track your EMIs, outstanding balances and repayment progress.',
+    description:
+        'Track your EMIs, outstanding balances and repayment progress.',
     items: [
       KuberInfoItem(
         icon: Icons.account_balance_outlined,
@@ -181,7 +183,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.bar_chart_outlined,
         title: 'Separate from Analytics',
-        description: 'Investment contributions are excluded from spending analytics.',
+        description:
+            'Investment contributions are excluded from spending analytics.',
       ),
     ],
   );
@@ -193,7 +196,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.receipt_long_rounded,
         title: 'Multiple Split Modes',
-        description: 'Split equally, by amount, percentage, or custom fractions.',
+        description:
+            'Split equally, by amount, percentage, or custom fractions.',
       ),
       KuberInfoItem(
         icon: Icons.group_outlined,
@@ -203,7 +207,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.info_outline_rounded,
         title: 'Tracking Only',
-        description: 'Bill Splitter is for reference only. Splits are not added to your transactions or Lend/Borrow tracker automatically.',
+        description:
+            'Bill Splitter is for reference only. Splits are not added to your transactions or Lend/Borrow tracker automatically.',
       ),
     ],
   );
@@ -242,7 +247,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.percent_rounded,
         title: 'Annual Rate',
-        description: 'Enter yearly interest rate — monthly rate is calculated automatically.',
+        description:
+            'Enter yearly interest rate — monthly rate is calculated automatically.',
       ),
       KuberInfoItem(
         icon: Icons.calendar_month_outlined,
@@ -259,7 +265,8 @@ class InfoConstants {
       KuberInfoItem(
         icon: Icons.trending_up_rounded,
         title: 'SIP (Monthly)',
-        description: 'Systematic Investment Plan — invest a fixed amount each month.',
+        description:
+            'Systematic Investment Plan — invest a fixed amount each month.',
       ),
       KuberInfoItem(
         icon: Icons.payments_outlined,
@@ -348,6 +355,141 @@ class InfoConstants {
         icon: Icons.account_balance_outlined,
         title: 'CGST + SGST',
         description: 'GST is split equally into CGST and SGST components.',
+      ),
+    ],
+  );
+
+  static const fdRdCalculator = KuberInfoConfig(
+    title: 'FD / RD Calculator',
+    description: 'Calculate fixed and recurring deposit returns.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.account_balance_wallet_outlined,
+        title: 'Fixed Deposit (FD)',
+        description: 'Lump-sum deposit that compounds at a fixed rate.',
+      ),
+      KuberInfoItem(
+        icon: Icons.repeat_rounded,
+        title: 'Recurring Deposit (RD)',
+        description:
+            'Monthly installments that each compound for remaining duration.',
+      ),
+    ],
+  );
+
+  static const ppfCalculator = KuberInfoConfig(
+    title: 'PPF Calculator',
+    description: 'Estimate Public Provident Fund maturity amount.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.savings_outlined,
+        title: '15-Year Lock-in',
+        description:
+            'PPF has a 15-year maturity with optional 5-year extensions.',
+      ),
+      KuberInfoItem(
+        icon: Icons.shield_outlined,
+        title: 'Tax-Free Returns',
+        description:
+            'PPF interest and maturity are fully exempt from income tax.',
+      ),
+    ],
+  );
+
+  static const salaryCalculator = KuberInfoConfig(
+    title: 'Salary Breakdown',
+    description: 'Understand your CTC vs in-hand salary.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.work_outline,
+        title: 'New vs Old Regime',
+        description:
+            'New regime has lower slabs with fewer deductions; old regime allows 80C, HRA etc.',
+      ),
+      KuberInfoItem(
+        icon: Icons.savings_outlined,
+        title: 'PF Contribution',
+        description:
+            'Employee & employer each contribute 12% of basic (capped at ₹15,000/month).',
+      ),
+    ],
+  );
+
+  static const inflationCalculator = KuberInfoConfig(
+    title: 'Inflation Calculator',
+    description: 'See the future value of money after inflation.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.trending_down_rounded,
+        title: 'Purchasing Power',
+        description: 'Inflation reduces what your money can buy over time.',
+      ),
+      KuberInfoItem(
+        icon: Icons.percent_rounded,
+        title: 'India Average',
+        description: 'India\'s average inflation rate is around 5–7% per year.',
+      ),
+    ],
+  );
+
+  static const breakevenCalculator = KuberInfoConfig(
+    title: 'Break-even Calculator',
+    description: 'Find how long to recover a purchase cost.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.timeline_rounded,
+        title: 'Break-even Point',
+        description:
+            'The month when cumulative savings equal the purchase cost.',
+      ),
+      KuberInfoItem(
+        icon: Icons.swap_horiz_rounded,
+        title: 'Alternative Cost',
+        description:
+            'Add what you were paying before this purchase to increase effective savings.',
+      ),
+    ],
+  );
+
+  static const hraCalculator = KuberInfoConfig(
+    title: 'HRA Exemption',
+    description: 'Calculate HRA tax exemption for old tax regime.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.home_work_outlined,
+        title: 'Three Rules',
+        description:
+            'Exemption is the minimum of: HRA received, Rent − 10% Basic, 50%/40% of Basic.',
+      ),
+      KuberInfoItem(
+        icon: Icons.location_city_outlined,
+        title: 'Metro vs Non-Metro',
+        description: 'Metro cities get 50% of basic; non-metro cities get 40%.',
+      ),
+    ],
+  );
+
+  static const splitCalculator = KuberInfoConfig(
+    title: 'Split Calculator',
+    description: 'Calculate and save simple bill splits for reference.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.people_outline,
+        title: 'Calculator First',
+        description:
+            'Use it to work out who owes whom. It is not a full group settlement app.',
+      ),
+      KuberInfoItem(
+        icon: Icons.send_rounded,
+        title: 'Use with Lend/Borrow',
+        description:
+            'When you are part of the split, send the amount you owe or should receive to Lend/Borrow with details in notes.',
+      ),
+      KuberInfoItem(
+        icon: Icons.apps_rounded,
+        title: 'For Full Splitting',
+        description:
+            'For complete Splitwise-style groups, settlements, reminders, and balances, use a dedicated splitter app.',
       ),
     ],
   );

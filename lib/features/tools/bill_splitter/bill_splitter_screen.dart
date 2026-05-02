@@ -24,8 +24,6 @@ class BillSplitterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final billsAsync = ref.watch(billsListProvider);
-    final netSummaryAsync = ref.watch(netSummaryProvider);
-    final personNetAsync = ref.watch(personNetListProvider);
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -37,63 +35,72 @@ class BillSplitterScreen extends ConsumerWidget {
               title: '',
               showBack: true,
               showHome: true,
-              infoConfig: InfoConstants.billSplitter,
+              infoConfig: InfoConstants.splitCalculator,
             ),
           ),
 
           // ── Page Header with action button ─────────────────────────────
           SliverToBoxAdapter(
             child: KuberPageHeader(
-              title: 'Split &\nSettle Up',
-              description: 'Track who owes whom across your shared bills.',
-              onAction: () => context.push('/more/tools/bill-splitter/add'),
-              actionTooltip: 'New Bill',
+              title: 'Split\nCalculator',
+              description: 'Save simple splits and send dues to Lend/Borrow.',
+              onAction: () => context.push('/more/tools/split-calculator/add'),
+              actionTooltip: 'New Split',
             ),
           ),
 
-          // ── NET BALANCE card ───────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: netSummaryAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-              data: (summary) => _NetBalanceCard(summary: summary),
-            ),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-          // ── BY PERSON section ──────────────────────────────────────────
-          SliverToBoxAdapter(
-            child: personNetAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-              data: (netList) => netList.isEmpty
-                  ? const SizedBox.shrink()
-                  : _ByPersonSection(netList: netList),
-            ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-          // ── RECENT BILLS section ───────────────────────────────────────
+          // ── SAVED SPLITS section ───────────────────────────────────────
           SliverToBoxAdapter(
             child: billsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Error: $e')),
-              data: (bills) => bills.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: KuberSpacing.xxl),
-                      child: KuberEmptyState(
-                        icon: Icons.receipt_long_outlined,
-                        title: 'No bills yet',
-                        description: 'Tap + to split your first bill',
-                        actionLabel: 'Add Bill',
-                        onAction: () =>
-                            context.push('/more/tools/bill-splitter/add'),
+              data: (bills) {
+                final activeBills = bills
+                    .where((bill) => !bill.isArchived)
+                    .toList();
+                final archivedBills = bills
+                    .where((bill) => bill.isArchived)
+                    .toList();
+
+                if (activeBills.isEmpty && archivedBills.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: KuberSpacing.xxl,
+                    ),
+                    child: KuberEmptyState(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'No splits yet',
+                      description: 'Tap + to calculate your first split',
+                      actionLabel: 'New Split',
+                      onAction: () =>
+                          context.push('/more/tools/split-calculator/add'),
+                    ),
+                  );
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (activeBills.isNotEmpty)
+                      _RecentBillsSection(
+                        bills: activeBills,
+                        title: 'RECENT SPLITS',
+                        countLabel: '${activeBills.length} ACTIVE',
                       ),
-                    )
-                  : _RecentBillsSection(bills: bills),
+                    if (archivedBills.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      _RecentBillsSection(
+                        bills: archivedBills,
+                        title: 'ARCHIVED SPLITS',
+                        countLabel: '${archivedBills.length} ARCHIVED',
+                        isArchived: true,
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
           ),
 
@@ -104,328 +111,20 @@ class BillSplitterScreen extends ConsumerWidget {
   }
 }
 
-// ── NET BALANCE CARD ─────────────────────────────────────────────────────────
-
-class _NetBalanceCard extends StatelessWidget {
-  final NetSummary summary;
-
-  const _NetBalanceCard({required this.summary});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final isPositive = summary.net >= 0;
-    final netColor = isPositive ? KuberColors.income : KuberColors.expense;
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: '₹',
-      decimalDigits: 0,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: ShapeDecoration(
-          color: cs.surfaceContainer,
-          shape: bsSquircle(16, side: BorderSide(color: cs.outline),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // NET BALANCE label
-            Text(
-              'NET BALANCE',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.3,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 4),
-
-            // Big number
-            Text(
-              '${isPositive ? '+' : ''}${formatter.format(summary.net)}',
-              style: GoogleFonts.inter(
-                fontSize: 36,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -1.4,
-                color: netColor,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-            const SizedBox(height: 4),
-
-            // Sub-line
-            Text(
-              'across ${summary.activePeople} ${summary.activePeople == 1 ? 'person' : 'people'}',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // Two side-by-side mini cards
-            Row(
-              children: [
-                Expanded(
-                  child: _NetMiniCard(
-                    label: "YOU'LL RECEIVE",
-                    amount: summary.youReceive,
-                    color: KuberColors.income,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _NetMiniCard(
-                    label: 'YOU OWE',
-                    amount: summary.youOwe,
-                    color: KuberColors.expense,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _NetMiniCard extends StatelessWidget {
-  final String label;
-  final double amount;
-  final Color color;
-
-  const _NetMiniCard({
-    required this.label,
-    required this.amount,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: '₹',
-      decimalDigits: 0,
-    );
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: ShapeDecoration(
-        color: cs.surfaceContainerHigh,
-        shape: bsSquircle(14, side: BorderSide(color: cs.outline),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            formatter.format(amount),
-            style: GoogleFonts.inter(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.7,
-              color: color,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── BY PERSON SECTION ─────────────────────────────────────────────────────────
-
-class _ByPersonSection extends StatelessWidget {
-  final List<PersonNet> netList;
-
-  const _ByPersonSection({required this.netList});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Section header
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'BY PERSON',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                'VIEW ALL',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.6,
-                  color: cs.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Card with rows
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-          child: Container(
-            decoration: ShapeDecoration(
-              color: cs.surfaceContainer,
-              shape: bsSquircle(14, side: BorderSide(color: cs.outline),
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: netList
-                  .asMap()
-                  .entries
-                  .map((entry) => _PersonRow(
-                        person: entry.value,
-                        isLast: entry.key == netList.length - 1,
-                      ))
-                  .toList(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _PersonRow extends StatelessWidget {
-  final PersonNet person;
-  final bool isLast;
-
-  const _PersonRow({required this.person, required this.isLast});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final owesYou = person.amount > 0.01;
-    final settled = person.isSettled;
-    final color = settled
-        ? cs.onSurfaceVariant
-        : (owesYou ? KuberColors.income : KuberColors.expense);
-    final verb = settled
-        ? 'all settled up'
-        : (owesYou ? 'owes you' : 'you owe');
-    final formatter = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: '₹',
-      decimalDigits: 0,
-    );
-
-    return Container(
-      decoration: BoxDecoration(
-        border: isLast
-            ? null
-            : Border(bottom: BorderSide(color: cs.outline, width: 1)),
-      ),
-      padding: const EdgeInsets.symmetric(
-        vertical: 12,
-        horizontal: KuberSpacing.lg,
-      ),
-      child: Row(
-        children: [
-          BsAvatar(name: person.name, size: 40),
-          const SizedBox(width: 12),
-
-          // Name + sub-line
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  person.name,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.1,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '$verb · ${person.bills} bill${person.bills == 1 ? '' : 's'}',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Amount + label
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                settled ? '—' : formatter.format(person.amount.abs()),
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.3,
-                  color: color,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-              if (!settled) ...[
-                const SizedBox(height: 1),
-                Text(
-                  owesYou ? 'TO YOU' : 'TO PAY',
-                  style: GoogleFonts.inter(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                    color: color,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── RECENT BILLS SECTION ──────────────────────────────────────────────────────
+// ── RECENT SPLITS SECTION ─────────────────────────────────────────────────────
 
 class _RecentBillsSection extends ConsumerWidget {
   final List<Bill> bills;
+  final String title;
+  final String countLabel;
+  final bool isArchived;
 
-  const _RecentBillsSection({required this.bills});
+  const _RecentBillsSection({
+    required this.bills,
+    required this.title,
+    required this.countLabel,
+    this.isArchived = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -444,7 +143,7 @@ class _RecentBillsSection extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'RECENT BILLS',
+                title,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -453,7 +152,7 @@ class _RecentBillsSection extends ConsumerWidget {
                 ),
               ),
               Text(
-                '${bills.length} TOTAL',
+                countLabel,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -472,17 +171,20 @@ class _RecentBillsSection extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: bills
-                .map((bill) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _BillRow(
-                        bill: bill,
-                        formattedAmount: formatter.formatCurrency(
-                          bill.totalAmount,
-                          symbol: currency.symbol,
-                        ),
-                        onTap: () => _showViewSheet(context, bill),
+                .map(
+                  (bill) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _BillRow(
+                      bill: bill,
+                      isArchived: isArchived,
+                      formattedAmount: formatter.formatCurrency(
+                        bill.totalAmount,
+                        symbol: currency.symbol,
                       ),
-                    ))
+                      onTap: () => _showViewSheet(context, bill),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -506,11 +208,13 @@ class _BillRow extends StatelessWidget {
   final Bill bill;
   final String formattedAmount;
   final VoidCallback onTap;
+  final bool isArchived;
 
   const _BillRow({
     required this.bill,
     required this.formattedAmount,
     required this.onTap,
+    this.isArchived = false,
   });
 
   @override
@@ -524,10 +228,10 @@ class _BillRow extends StatelessWidget {
     final String statusLabel;
     switch (status) {
       case BillStatus.youLent:
-        statusColor = KuberColors.income;
-        statusLabel = 'YOU LENT';
+        statusColor = isArchived ? cs.onSurfaceVariant : KuberColors.income;
+        statusLabel = 'OWES YOU';
       case BillStatus.youOwe:
-        statusColor = KuberColors.expense;
+        statusColor = isArchived ? cs.onSurfaceVariant : KuberColors.expense;
         statusLabel = 'YOU OWE';
       case BillStatus.settled:
         statusColor = cs.onSurfaceVariant;
@@ -548,8 +252,7 @@ class _BillRow extends StatelessWidget {
       child: Container(
         decoration: ShapeDecoration(
           color: cs.surfaceContainer,
-          shape: bsSquircle(14, side: BorderSide(color: cs.outline),
-          ),
+          shape: bsSquircle(14, side: BorderSide(color: cs.outline)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -566,11 +269,17 @@ class _BillRow extends StatelessWidget {
                     height: 42,
                     decoration: ShapeDecoration(
                       color: cs.surfaceContainerHigh,
-                      shape: bsSquircle(12, side: BorderSide(color: cs.outline)),
+                      shape: bsSquircle(
+                        12,
+                        side: BorderSide(color: cs.outline),
+                      ),
                     ),
                     alignment: Alignment.center,
-                    child:
-                        Icon(Icons.receipt_long_rounded, color: cs.primary, size: 18),
+                    child: Icon(
+                      Icons.receipt_long_rounded,
+                      color: isArchived ? cs.onSurfaceVariant : cs.primary,
+                      size: 18,
+                    ),
                   ),
                   const SizedBox(width: 12),
 
@@ -623,21 +332,27 @@ class _BillRow extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
-                    border: Border(top: BorderSide(color: cs.outline, width: 1)),
+                    border: Border(
+                      top: BorderSide(color: cs.outline, width: 1),
+                    ),
                   ),
                   child: Row(
                     children: [
                       // Avatar stack
                       _AvatarStack(
-                          names: bill.participants
-                              .map((p) => p.personName)
-                              .toList()),
+                        names: bill.participants
+                            .map((p) => p.personName)
+                            .toList(),
+                        isMuted: isArchived,
+                      ),
                       const SizedBox(width: 4),
 
                       // Split type badge
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 3),
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
                           color: cs.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(6),
@@ -683,16 +398,14 @@ class _BillRow extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              status == BillStatus.settled
-                                  ? '—'
-                                  : formatter.format(yourShare),
+                              _signedShare(status, formatter, yourShare),
                               style: GoogleFonts.inter(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.2,
                                 color: statusColor,
                                 fontFeatures: const [
-                                  FontFeature.tabularFigures()
+                                  FontFeature.tabularFigures(),
                                 ],
                               ),
                             ),
@@ -729,12 +442,26 @@ class _BillRow extends StatelessWidget {
       _ => splitType.toUpperCase(),
     };
   }
+
+  String _signedShare(
+    BillStatus status,
+    NumberFormat formatter,
+    double amount,
+  ) {
+    return switch (status) {
+      BillStatus.youLent => '+${formatter.format(amount)}',
+      BillStatus.youOwe => '-${formatter.format(amount)}',
+      BillStatus.settled => '—',
+      BillStatus.notInvolved => '',
+    };
+  }
 }
 
 class _AvatarStack extends StatelessWidget {
   final List<String> names;
+  final bool isMuted;
 
-  const _AvatarStack({required this.names});
+  const _AvatarStack({required this.names, this.isMuted = false});
 
   @override
   Widget build(BuildContext context) {
@@ -754,7 +481,7 @@ class _AvatarStack extends StatelessWidget {
           ...shown.asMap().entries.map((entry) {
             return Positioned(
               left: entry.key * 16.0,
-              child: BsAvatar(name: entry.value, size: 24),
+              child: _mutedAvatar(BsAvatar(name: entry.value, size: 24)),
             );
           }),
           if (overflow > 0)
@@ -780,6 +507,36 @@ class _AvatarStack extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _mutedAvatar(Widget child) {
+    if (!isMuted) return child;
+
+    return ColorFiltered(
+      colorFilter: const ColorFilter.matrix([
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ]),
+      child: Opacity(opacity: 0.45, child: child),
     );
   }
 }

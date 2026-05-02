@@ -11,18 +11,19 @@ import 'package:flutter/services.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../tools/bill_splitter/providers/people_provider.dart';
 import '../../tools/bill_splitter/widgets/bs_avatar.dart';
 import '../data/ledger.dart';
+import '../data/ledger_prefill.dart';
 import '../providers/ledger_provider.dart';
 
 class AddLedgerScreen extends ConsumerStatefulWidget {
   final Ledger? existing;
+  final LedgerPrefill? prefill;
 
-  const AddLedgerScreen({super.key, this.existing});
+  const AddLedgerScreen({super.key, this.existing, this.prefill});
 
   @override
   ConsumerState<AddLedgerScreen> createState() => _AddLedgerScreenState();
@@ -46,7 +47,8 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     if (e != null) {
       _isEditing = true;
       _type = e.type;
-      _amountController.text = e.originalAmount == e.originalAmount.truncateToDouble()
+      _amountController.text =
+          e.originalAmount == e.originalAmount.truncateToDouble()
           ? e.originalAmount.toInt().toString()
           : e.originalAmount.toStringAsFixed(2);
       _nameController.text = e.personName;
@@ -55,7 +57,17 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       _expectedDate = e.expectedDate;
       _notesController.text = e.notes ?? '';
     } else {
-      _type = 'lent';
+      final prefill = widget.prefill;
+      _type = prefill?.type ?? 'lent';
+      if (prefill != null) {
+        _amountController.text =
+            prefill.amount == prefill.amount.truncateToDouble()
+            ? prefill.amount.toInt().toString()
+            : prefill.amount.toStringAsFixed(2);
+        _nameController.text = prefill.personName;
+        _notesController.text = prefill.notes ?? '';
+        _entryDate = prefill.entryDate ?? DateTime.now();
+      }
     }
   }
 
@@ -123,11 +135,13 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _amountController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d{0,2}')),
+                        RegExp(r'^\d*\.?\d{0,2}'),
+                      ),
                     ],
                     style: GoogleFonts.inter(
                       fontSize: 24,
@@ -155,19 +169,19 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                           height: 44,
                           margin: const EdgeInsets.only(right: 4),
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(KuberRadius.md),
+                            borderRadius: BorderRadius.circular(KuberRadius.md),
                             border: Border.all(color: cs.outline),
                           ),
-                          child: Icon(Icons.calculate_outlined,
-                              color: cs.onSurfaceVariant),
+                          child: Icon(
+                            Icons.calculate_outlined,
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
                       ),
                       filled: true,
                       fillColor: cs.surfaceContainerHighest,
                       border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -193,26 +207,30 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     },
                     fieldViewBuilder:
                         (context, controller, focusNode, onFieldSubmitted) {
-                      return TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        style: GoogleFonts.inter(color: cs.onSurface),
-                        decoration: InputDecoration(
-                          hintText: 'Who are you dealing with?',
-                          hintStyle:
-                              GoogleFonts.inter(color: cs.onSurfaceVariant),
-                          prefixIcon: Icon(Icons.person_outline,
-                              color: cs.onSurfaceVariant),
-                          filled: true,
-                          fillColor: cs.surfaceContainerHighest,
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(KuberRadius.md),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      );
-                    },
+                          return TextField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            style: GoogleFonts.inter(color: cs.onSurface),
+                            decoration: InputDecoration(
+                              hintText: 'Who are you dealing with?',
+                              hintStyle: GoogleFonts.inter(
+                                color: cs.onSurfaceVariant,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.person_outline,
+                                color: cs.onSurfaceVariant,
+                              ),
+                              filled: true,
+                              fillColor: cs.surfaceContainerHighest,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  KuberRadius.md,
+                                ),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                          );
+                        },
                     optionsViewBuilder: (context, onSelected, options) {
                       return Align(
                         alignment: Alignment.topLeft,
@@ -235,11 +253,14 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                                 final name = options.elementAt(i);
                                 return InkWell(
                                   onTap: () => onSelected(name),
-                                  borderRadius:
-                                      BorderRadius.circular(KuberRadius.md),
+                                  borderRadius: BorderRadius.circular(
+                                    KuberRadius.md,
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 10),
+                                      horizontal: 12,
+                                      vertical: 10,
+                                    ),
                                     child: Row(
                                       children: [
                                         BsAvatar(name: name, size: 32),
@@ -280,15 +301,20 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     onTap: () => _pickAccount(context),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.account_balance_outlined,
-                              size: 20, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.account_balance_outlined,
+                            size: 20,
+                            color: cs.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -302,8 +328,11 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                               ),
                             ),
                           ),
-                          Icon(Icons.chevron_right,
-                              color: cs.onSurfaceVariant, size: 20),
+                          Icon(
+                            Icons.chevron_right,
+                            color: cs.onSurfaceVariant,
+                            size: 20,
+                          ),
                         ],
                       ),
                     ),
@@ -317,19 +346,25 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     onTap: () => _pickEntryDate(context),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.schedule,
-                              size: 18, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.schedule,
+                            size: 18,
+                            color: cs.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 12),
                           Text(
-                            DateFormat('MMM d, yyyy  h:mm a')
-                                .format(_entryDate),
+                            DateFormat(
+                              'MMM d, yyyy  h:mm a',
+                            ).format(_entryDate),
                             style: GoogleFonts.inter(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -337,8 +372,11 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                             ),
                           ),
                           const Spacer(),
-                          Icon(Icons.calendar_today,
-                              size: 16, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: cs.onSurfaceVariant,
+                          ),
                         ],
                       ),
                     ),
@@ -352,21 +390,27 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     onTap: () => _pickExpectedDate(context),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_today,
-                              size: 18, color: cs.onSurfaceVariant),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 18,
+                            color: cs.onSurfaceVariant,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               _expectedDate != null
-                                  ? DateFormat('MMM d, yyyy')
-                                      .format(_expectedDate!)
+                                  ? DateFormat(
+                                      'MMM d, yyyy',
+                                    ).format(_expectedDate!)
                                   : 'No due date set',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
@@ -379,10 +423,12 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                           ),
                           if (_expectedDate != null)
                             GestureDetector(
-                              onTap: () =>
-                                  setState(() => _expectedDate = null),
-                              child: Icon(Icons.close,
-                                  size: 18, color: cs.onSurfaceVariant),
+                              onTap: () => setState(() => _expectedDate = null),
+                              child: Icon(
+                                Icons.close,
+                                size: 18,
+                                color: cs.onSurfaceVariant,
+                              ),
                             ),
                         ],
                       ),
@@ -454,8 +500,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => KuberCalculator(
         initialValue: _amount,
@@ -482,8 +529,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
@@ -535,18 +583,21 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   }
 
   String _toTitleCase(String input) {
-    return input.trim().split(RegExp(r'\s+')).map((word) {
-      if (word.isEmpty) return word;
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    return input
+        .trim()
+        .split(RegExp(r'\s+'))
+        .map((word) {
+          if (word.isEmpty) return word;
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 
   Future<void> _save() async {
     final personName = _toTitleCase(_nameController.text);
 
     // Auto-add to the shared Person model if the name is new.
-    final existingPeople =
-        ref.read(peopleListProvider).valueOrNull ?? [];
+    final existingPeople = ref.read(peopleListProvider).valueOrNull ?? [];
     final alreadyExists = existingPeople.any(
       (p) => p.name.toLowerCase() == personName.toLowerCase(),
     );
@@ -563,7 +614,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     final categoryId = ledgerCategory?.id.toString() ?? '';
 
     if (_isEditing) {
-      await ref.read(ledgerListProvider.notifier).updateLedger(
+      await ref
+          .read(ledgerListProvider.notifier)
+          .updateLedger(
             ledger: widget.existing!,
             personName: personName,
             amount: _amount,
@@ -575,7 +628,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
             expectedDate: _expectedDate,
           );
     } else {
-      await ref.read(ledgerListProvider.notifier).addLedger(
+      await ref
+          .read(ledgerListProvider.notifier)
+          .addLedger(
             personName: personName,
             type: _type,
             amount: _amount,
@@ -675,28 +730,44 @@ class _DuplicateWarning extends ConsumerWidget {
 
     final ledgers = ref.watch(ledgerListProvider).valueOrNull ?? [];
     final query = personName.trim().toLowerCase();
-    final hasDuplicate = ledgers.any((l) =>
-        l.personNameLower == query && l.type == type && !l.isSettled);
+    final hasDuplicate = ledgers.any(
+      (l) => l.personNameLower == query && l.type == type && !l.isSettled,
+    );
 
     if (!hasDuplicate) return const SizedBox.shrink();
 
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline_rounded, size: 14, color: cs.onSurfaceVariant),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              'Note: an active ${type == 'lent' ? 'lent' : 'borrow'} entry for ${personName.trim()} already exists — a new one will be created.',
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: cs.onSurfaceVariant,
+      padding: const EdgeInsets.only(top: KuberSpacing.sm),
+      child: Container(
+        padding: const EdgeInsets.all(KuberSpacing.md),
+        decoration: BoxDecoration(
+          color: KuberColors.warningSubtle,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: KuberColors.warning.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              size: 17,
+              color: KuberColors.warning,
+            ),
+            const SizedBox(width: KuberSpacing.sm),
+            Expanded(
+              child: Text(
+                'Note: an active ${type == 'lent' ? 'lent' : 'borrow'} entry for ${personName.trim()} already exists. Are you sure you want to create a new entry?',
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

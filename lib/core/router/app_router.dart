@@ -31,6 +31,7 @@ import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
 import '../../features/ledger/data/ledger.dart';
+import '../../features/ledger/data/ledger_prefill.dart';
 import '../../features/ledger/screens/ledger_screen.dart';
 import '../../features/ledger/screens/add_ledger_screen.dart';
 import '../../features/loans/data/loan.dart';
@@ -57,9 +58,6 @@ import 'dart:async';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/history/providers/selection_provider.dart';
 import '../../features/tools/tools_hub_screen.dart';
-import '../../features/tools/bill_splitter/bill_splitter_screen.dart';
-import '../../features/tools/bill_splitter/add_edit_bill_screen.dart';
-import '../../features/tools/bill_splitter/data/bill.dart';
 import '../../features/tools/currency_converter/currency_converter_screen.dart';
 import '../../features/tools/emi_calculator/emi_calculator_screen.dart';
 import '../../features/tools/sip_calculator/sip_calculator_screen.dart';
@@ -67,6 +65,14 @@ import '../../features/tools/sip_amount_finder/sip_amount_finder_screen.dart';
 import '../../features/tools/tip_calculator/tip_calculator_screen.dart';
 import '../../features/tools/discount_calculator/discount_calculator_screen.dart';
 import '../../features/tools/gst_calculator/gst_calculator_screen.dart';
+import '../../features/tools/fd_rd_calculator/fd_rd_calculator_screen.dart';
+import '../../features/tools/ppf_calculator/ppf_calculator_screen.dart';
+import '../../features/tools/salary_calculator/salary_calculator_screen.dart';
+import '../../features/tools/inflation_calculator/inflation_calculator_screen.dart';
+import '../../features/tools/breakeven_calculator/breakeven_calculator_screen.dart';
+import '../../features/tools/hra_calculator/hra_calculator_screen.dart';
+import '../../features/tools/bill_splitter/add_edit_bill_screen.dart';
+import '../../features/tools/bill_splitter/bill_splitter_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
@@ -79,8 +85,8 @@ class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyListeners();
     _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) => notifyListeners(),
-        );
+      (dynamic _) => notifyListeners(),
+    );
   }
 
   late final StreamSubscription<dynamic> _subscription;
@@ -150,13 +156,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              )),
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ),
               child: child,
             );
           },
@@ -274,10 +283,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/more',
-                builder: (context, state) => const _RootTabBackScope(
-                  tabIndex: 3,
-                  child: MoreScreen(),
-                ),
+                builder: (context, state) =>
+                    const _RootTabBackScope(tabIndex: 3, child: MoreScreen()),
                 routes: [
                   GoRoute(
                     path: 'accounts',
@@ -354,11 +361,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const ToolsHubScreen(),
                   ),
-                  GoRoute(
-                    path: 'tools/bill-splitter',
-                    parentNavigatorKey: _rootNavigatorKey,
-                    builder: (_, _) => const BillSplitterScreen(),
-                  ),
+
                   GoRoute(
                     path: 'tools/currency-converter',
                     parentNavigatorKey: _rootNavigatorKey,
@@ -396,6 +399,41 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (_, _) => const GstCalculatorScreen(),
                   ),
                   GoRoute(
+                    path: 'tools/fd-rd-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const FdRdCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/ppf-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const PpfCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/salary-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const SalaryCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/inflation-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const InflationCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/breakeven-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const BreakevenCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/hra-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const HraCalculatorScreen(),
+                  ),
+                  GoRoute(
+                    path: 'tools/split-calculator',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (_, _) => const BillSplitterScreen(),
+                  ),
+                  GoRoute(
                     path: 'search',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (_, _) => const MoreSearchScreen(),
@@ -414,7 +452,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                             path: ':collection',
                             parentNavigatorKey: _rootNavigatorKey,
                             builder: (_, state) => DbCollectionScreen(
-                              collectionName: state.pathParameters['collection']!,
+                              collectionName:
+                                  state.pathParameters['collection']!,
                             ),
                           ),
                         ],
@@ -440,20 +479,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             AddEditBudgetScreen(existingBudget: state.extra as Budget?),
       ),
       GoRoute(
-        path: '/more/tools/bill-splitter/add',
+        path: '/more/tools/split-calculator/add',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const AddEditBillScreen(),
       ),
-      GoRoute(
-        path: '/more/tools/bill-splitter/edit',
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) =>
-            AddEditBillScreen(existingBill: state.extra as Bill?),
-      ),
+
       GoRoute(
         path: '/ledger/add',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, _) => const AddLedgerScreen(),
+        builder: (_, state) {
+          final extra = state.extra;
+          return AddLedgerScreen(
+            prefill: extra is LedgerPrefill ? extra : null,
+          );
+        },
       ),
       GoRoute(
         path: '/ledger/edit',
@@ -469,8 +508,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loans/edit',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) =>
-            AddLoanScreen(existing: state.extra as Loan?),
+        builder: (_, state) => AddLoanScreen(existing: state.extra as Loan?),
       ),
       GoRoute(
         path: '/investments/add',

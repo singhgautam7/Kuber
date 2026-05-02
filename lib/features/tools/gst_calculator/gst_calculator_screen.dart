@@ -203,7 +203,7 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
                     const ToolInputLabel('MODE'),
                     const SizedBox(height: KuberSpacing.sm),
                     ToolSegmentedControl(
-                      labels: const ['ADD GST', 'REMOVE GST'],
+                      labels: const ['EXCL. GST', 'INCL. GST'],
                       selectedIndex: _modeIndex,
                       onChanged: (i) => setState(() => _modeIndex = i),
                     ),
@@ -215,18 +215,20 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
                       ? [const ToolEmptyResult()]
                       : [
                           ToolHeroResult(
-                            label: _modeIndex == 0
-                                ? 'Total (with GST)'
-                                : 'Original Amount',
+                            label: 'Final Amount',
                             value: formatter.formatCurrency(
-                              _modeIndex == 0
-                                  ? result.baseAmount + result.gstAmount
-                                  : result.baseAmount,
+                              result.baseAmount + result.gstAmount,
                               symbol: currency.symbol,
                             ),
                             color: cs.primary,
                           ),
                           const SizedBox(height: KuberSpacing.lg),
+                          ToolStatRow(
+                            label: 'Base Amount',
+                            value: formatter.formatCurrency(result.baseAmount,
+                                symbol: currency.symbol),
+                          ),
+                          const SizedBox(height: KuberSpacing.sm),
                           ToolStatRow(
                             label: 'GST Amount',
                             value: formatter.formatCurrency(result.gstAmount,
