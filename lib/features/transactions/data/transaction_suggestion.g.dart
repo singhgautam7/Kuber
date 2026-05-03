@@ -44,8 +44,9 @@ const TransactionSuggestionSchema = CollectionSchema(
       name: r'nameLower',
       type: IsarType.string,
     ),
+    r'type': PropertySchema(id: 6, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -100,6 +101,12 @@ int _transactionSuggestionEstimateSize(
   }
   bytesCount += 3 + object.displayName.length * 3;
   bytesCount += 3 + object.nameLower.length * 3;
+  {
+    final value = object.type;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -115,7 +122,8 @@ void _transactionSuggestionSerialize(
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeString(offsets[4], object.displayName);
   writer.writeString(offsets[5], object.nameLower);
-  writer.writeDateTime(offsets[6], object.updatedAt);
+  writer.writeString(offsets[6], object.type);
+  writer.writeDateTime(offsets[7], object.updatedAt);
 }
 
 TransactionSuggestion _transactionSuggestionDeserialize(
@@ -132,7 +140,8 @@ TransactionSuggestion _transactionSuggestionDeserialize(
   object.displayName = reader.readString(offsets[4]);
   object.id = id;
   object.nameLower = reader.readString(offsets[5]);
-  object.updatedAt = reader.readDateTime(offsets[6]);
+  object.type = reader.readStringOrNull(offsets[6]);
+  object.updatedAt = reader.readDateTime(offsets[7]);
   return object;
 }
 
@@ -156,6 +165,8 @@ P _transactionSuggestionDeserializeProp<P>(
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1426,6 +1437,213 @@ extension TransactionSuggestionQueryFilter
     TransactionSuggestion,
     QAfterFilterCondition
   >
+  typeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'type'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'type'),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'type',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'type',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'type', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
+  typeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'type', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<
+    TransactionSuggestion,
+    TransactionSuggestion,
+    QAfterFilterCondition
+  >
   updatedAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1596,6 +1814,20 @@ extension TransactionSuggestionQuerySortBy
   }
 
   QueryBuilder<TransactionSuggestion, TransactionSuggestion, QAfterSortBy>
+  sortByType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionSuggestion, TransactionSuggestion, QAfterSortBy>
+  sortByTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionSuggestion, TransactionSuggestion, QAfterSortBy>
   sortByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'updatedAt', Sort.asc);
@@ -1711,6 +1943,20 @@ extension TransactionSuggestionQuerySortThenBy
   }
 
   QueryBuilder<TransactionSuggestion, TransactionSuggestion, QAfterSortBy>
+  thenByType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TransactionSuggestion, TransactionSuggestion, QAfterSortBy>
+  thenByTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TransactionSuggestion, TransactionSuggestion, QAfterSortBy>
   thenByUpdatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'updatedAt', Sort.asc);
@@ -1766,6 +2012,13 @@ extension TransactionSuggestionQueryWhereDistinct
   distinctByNameLower({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nameLower', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<TransactionSuggestion, TransactionSuggestion, QDistinct>
+  distinctByType({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'type', caseSensitive: caseSensitive);
     });
   }
 
@@ -1829,6 +2082,13 @@ extension TransactionSuggestionQueryProperty
   nameLowerProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nameLower');
+    });
+  }
+
+  QueryBuilder<TransactionSuggestion, String?, QQueryOperations>
+  typeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'type');
     });
   }
 

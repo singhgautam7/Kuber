@@ -106,7 +106,7 @@ class _CurrencyConverterScreenState
     final isStale = ratesAsync.valueOrNull?.isStale ?? false;
     final rawLastUpdated = ratesAsync.valueOrNull?.lastUpdated;
     final lastUpdatedLabel = rawLastUpdated != null
-        ? _formatLastUpdated(rawLastUpdated, isStale)
+        ? _formatLastUpdated(rawLastUpdated, isStale).toUpperCase()
         : '—';
 
     return Scaffold(
@@ -124,7 +124,7 @@ class _CurrencyConverterScreenState
           SliverToBoxAdapter(
             child: KuberPageHeader(
               title: 'Currency Converter',
-              description: 'Convert between currencies live',
+              description: 'Convert currencies using live exchange rates',
               actionIcon: Icons.refresh_rounded,
               onAction: _refresh,
               actionTooltip: 'Refresh rates',

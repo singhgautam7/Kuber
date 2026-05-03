@@ -39,10 +39,10 @@ class _InflationCalculatorScreenState
     if (amount == null || rate == null || years == null) return null;
     if (amount <= 0 || rate <= 0 || years <= 0) return null;
 
-    final futureValue = amount * pow(1 + rate / 100, years);
-    final valueLost = futureValue - amount;
-    // Purchasing power: what future amount is worth in today's terms
-    final purchasingPower = amount / pow(1 + rate / 100, years);
+    final futureValue = amount / pow(1 + rate / 100, years);
+    final valueLost = amount - futureValue;
+    // Future equivalent: how much you'd need in future to maintain today's purchasing power
+    final purchasingPower = amount * pow(1 + rate / 100, years);
     return (
       futureValue: futureValue,
       valueLost: valueLost,
@@ -131,7 +131,7 @@ class _InflationCalculatorScreenState
                           ),
                           const SizedBox(height: KuberSpacing.sm),
                           ToolStatRow(
-                            label: 'Effective Purchasing Power',
+                            label: 'Future Equivalent Needed',
                             value: formatter.formatCurrency(
                                 result.purchasingPower,
                                 symbol: currency.symbol),

@@ -142,6 +142,7 @@ class JsonBackupService {
         'createdAt': t.createdAt.toIso8601String(),
         'updatedAt': t.updatedAt.toIso8601String(),
         'nameLower': t.nameLower,
+        'attachmentPaths': t.attachmentPaths,
       };
 
   Map<String, dynamic> _catToMap(Category c) => {
@@ -306,7 +307,8 @@ class JsonBackupService {
     ..transferId = m['transferId'] as String?
     ..createdAt = DateTime.parse(m['createdAt'] as String)
     ..updatedAt = DateTime.parse(m['updatedAt'] as String)
-    ..nameLower = m['nameLower'] as String;
+    ..nameLower = m['nameLower'] as String
+    ..attachmentPaths = (m['attachmentPaths'] as List?)?.cast<String>() ?? [];
 
   Category _mapToCat(Map<String, dynamic> m) => Category()
     ..id = m['id'] as int

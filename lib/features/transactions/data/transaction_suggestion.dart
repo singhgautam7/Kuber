@@ -13,6 +13,7 @@ class TransactionSuggestion {
   String? categoryId;
   String? accountId;
   double? amount;
+  String? type;
   late DateTime createdAt;
   late DateTime updatedAt;
 
@@ -23,6 +24,7 @@ class TransactionSuggestion {
     'categoryId': categoryId,
     'accountId': accountId,
     'amount': amount,
+    'type': type,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };

@@ -35,27 +35,10 @@ class MoreScreen extends ConsumerWidget {
             padding: EdgeInsets.only(
               left: KuberSpacing.lg,
               right: KuberSpacing.lg,
-              top: KuberSpacing.sm,
               bottom: navBarBottomPadding(context),
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Ask Kuber featured
-                _MenuSection(
-                  title: 'AI Assistant',
-                  items: [
-                    _MenuItem(
-                      icon: Icons.auto_awesome_rounded,
-                      label: 'Ask Kuber (Beta)',
-                      subtitle: 'On-device spending insights',
-                      color: const Color(0xFFFFB300),
-                      onTap: () => context.push('/more/ask-kuber'),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
                 // Manage section
                 _MenuSection(
                   title: 'Manage',
@@ -117,6 +100,13 @@ class MoreScreen extends ConsumerWidget {
                 _MenuSection(
                   title: 'Tools',
                   items: [
+                    _MenuItem(
+                      icon: Icons.auto_awesome_rounded,
+                      label: 'Ask Kuber (Beta)',
+                      subtitle: 'On-device smart assistant',
+                      color: const Color(0xFFFFB300),
+                      onTap: () => context.push('/more/ask-kuber'),
+                    ),
                     _MenuItem(
                       icon: Icons.calculate_rounded,
                       label: 'Calculators & Tools',
