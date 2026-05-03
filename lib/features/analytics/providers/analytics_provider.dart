@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/utils/prefs_keys.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -46,22 +48,49 @@ final analyticsFilterProvider = StateNotifierProvider<AnalyticsFilterNotifier, A
 class AnalyticsFilterNotifier extends StateNotifier<AnalyticsFilter> {
   final Ref ref;
 
-  AnalyticsFilterNotifier(this.ref) : super(_initialFilter());
+  AnalyticsFilterNotifier(this.ref) : super(_initialFilter()) {
+    _loadSavedFilter();
+  }
 
   static AnalyticsFilter _initialFilter() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    return AnalyticsFilter(
-      type: FilterType.today,
-      from: today,
-      to: today,
-    );
+    return AnalyticsFilter(type: FilterType.today, from: today, to: today);
+  }
+
+  Future<void> _loadSavedFilter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final typeIndex = prefs.getInt(PrefsKeys.analyticsFilterType);
+    if (typeIndex == null || typeIndex >= FilterType.values.length) return;
+    final savedType = FilterType.values[typeIndex];
+    if (savedType == FilterType.custom) {
+      final fromMs = prefs.getInt(PrefsKeys.analyticsFilterFrom);
+      final toMs = prefs.getInt(PrefsKeys.analyticsFilterTo);
+      if (fromMs != null && toMs != null) {
+        state = AnalyticsFilter(
+          type: FilterType.custom,
+          from: DateTime.fromMillisecondsSinceEpoch(fromMs),
+          to: DateTime.fromMillisecondsSinceEpoch(toMs),
+        );
+      }
+    } else {
+      setFilter(savedType);
+    }
+  }
+
+  Future<void> _persist(FilterType type, DateTime from, DateTime to) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.analyticsFilterType, type.index);
+    if (type == FilterType.custom) {
+      await prefs.setInt(PrefsKeys.analyticsFilterFrom, from.millisecondsSinceEpoch);
+      await prefs.setInt(PrefsKeys.analyticsFilterTo, to.millisecondsSinceEpoch);
+    }
   }
 
   void setFilter(FilterType type, {DateTime? from, DateTime? to}) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     DateTime newFrom = from ?? state.from;
     DateTime newTo = to ?? state.to;
 
@@ -110,6 +139,7 @@ class AnalyticsFilterNotifier extends StateNotifier<AnalyticsFilter> {
     }
 
     state = AnalyticsFilter(type: type, from: newFrom, to: newTo);
+    _persist(type, newFrom, newTo).ignore();
   }
 
   void reset() {

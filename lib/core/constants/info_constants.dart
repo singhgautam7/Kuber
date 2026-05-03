@@ -215,7 +215,7 @@ class InfoConstants {
 
   static const currencyConverter = KuberInfoConfig(
     title: 'Currency Converter',
-    description: 'Convert between currencies using live exchange rates.',
+    description: 'Convert currencies using live exchange rates.',
     items: [
       KuberInfoItem(
         icon: Icons.currency_exchange_rounded,

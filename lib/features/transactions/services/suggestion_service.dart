@@ -24,6 +24,7 @@ class SuggestionService {
         ..categoryId = txn.categoryId.isEmpty ? null : txn.categoryId
         ..accountId = txn.accountId.isEmpty ? null : txn.accountId
         ..amount = txn.amount
+        ..type = txn.type
         ..createdAt = existing?.createdAt ?? DateTime.now()
         ..updatedAt = DateTime.now());
     });

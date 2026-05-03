@@ -62,19 +62,25 @@ class KuberPageHeader extends StatelessWidget {
                 message: actionTooltip ?? '',
                 child: GestureDetector(
                   onTap: isLoading ? null : onAction,
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: cs.primary,
+                      color: isLoading
+                          ? cs.onSurface.withValues(alpha: 0.38)
+                          : cs.primary,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      boxShadow: isLoading
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: cs.primary.withValues(alpha: 0.2),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                     ),
                     child: isLoading
                         ? const Padding(

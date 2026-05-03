@@ -241,17 +241,13 @@ class _SalaryCalculatorScreenState
                       onChanged: (i) => setState(() => _cityIndex = i),
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const ToolInputLabel('PROFESSIONAL TAX'),
-                        Switch(
-                          value: _profTaxEnabled,
-                          activeThumbColor: cs.primary,
-                          onChanged: (v) =>
-                              setState(() => _profTaxEnabled = v),
-                        ),
-                      ],
+                    const ToolInputLabel('PROFESSIONAL TAX'),
+                    const SizedBox(height: KuberSpacing.sm),
+                    ToolSegmentedControl(
+                      labels: const ['OFF', 'ON'],
+                      selectedIndex: _profTaxEnabled ? 1 : 0,
+                      onChanged: (i) =>
+                          setState(() => _profTaxEnabled = i == 1),
                     ),
                     if (_profTaxEnabled) ...[
                       const SizedBox(height: KuberSpacing.sm),

@@ -767,6 +767,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       if (accountExists) {
         _selectedAccountId = int.tryParse(suggestion.accountId!);
       }
+      if (suggestion.type != null && _type != 'transfer') {
+        _type = suggestion.type!;
+      }
     });
     ref.read(suggestionQueryProvider.notifier).state = '';
     _nameFocusNode.requestFocus();

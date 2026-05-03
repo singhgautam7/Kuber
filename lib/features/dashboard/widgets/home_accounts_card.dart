@@ -4,11 +4,22 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../accounts/data/account.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_detail_sheet.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
+
+String _accountTypeLabel(Account a) {
+  if (a.isCreditCard) return 'Credit Card';
+  return switch (a.type.toLowerCase()) {
+    'bank' => 'Bank',
+    'wallet' => 'Wallet',
+    'cash' => 'Cash',
+    _ => a.type,
+  };
+}
 
 class HomeAccountsCard extends ConsumerWidget {
   const HomeAccountsCard({super.key});
@@ -42,7 +53,7 @@ class HomeAccountsCard extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 110,
+              height: 130,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const ClampingScrollPhysics(),
@@ -101,12 +112,25 @@ class HomeAccountsCard extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: KuberSpacing.sm),
                                 Expanded(
-                                  child: Text(
-                                    account.name,
-                                    style: textTheme.labelMedium?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        account.name,
+                                        style: textTheme.labelMedium?.copyWith(
+                                          color: cs.onSurface,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        _accountTypeLabel(account),
+                                        style: textTheme.labelSmall?.copyWith(
+                                          color: cs.onSurfaceVariant,
+                                          fontSize: 10,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
