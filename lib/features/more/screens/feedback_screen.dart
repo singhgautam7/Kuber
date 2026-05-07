@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart';
 
 const _feedbackTypes = ['Bug', 'New Feature Request', 'General Feedback'];
@@ -35,9 +36,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   Future<void> _submit() async {
     final feedbackText = _feedbackCtrl.text.trim();
     if (feedbackText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your feedback before submitting.')),
-      );
+      showKuberSnackBar(context, 'Please enter your feedback before submitting.', isError: true);
       return;
     }
 
@@ -94,9 +93,7 @@ Currency    : ${currency.name} (${currency.code})
 
       if (!await launchUrl(uri)) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open mail app. Please try again.')),
-          );
+          showKuberSnackBar(context, 'Could not open mail app. Please try again.', isError: true);
         }
       }
     } finally {
