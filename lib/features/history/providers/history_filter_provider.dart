@@ -41,10 +41,14 @@ class HistoryFilterNotifier extends StateNotifier<HistoryFilter> {
     Set<String>? accountIds,
     Set<String>? categoryIds,
     Set<int>? tagIds,
+    double? minAmount,
+    double? maxAmount,
     bool clearTypes = false,
     bool clearRecurring = false,
     bool clearFrom = false,
     bool clearTo = false,
+    bool clearMinAmount = false,
+    bool clearMaxAmount = false,
   }) {
     state = state.copyWith(
       types: types,
@@ -54,10 +58,14 @@ class HistoryFilterNotifier extends StateNotifier<HistoryFilter> {
       accountIds: accountIds,
       categoryIds: categoryIds,
       tagIds: tagIds,
+      minAmount: minAmount,
+      maxAmount: maxAmount,
       clearTypes: clearTypes,
       clearRecurring: clearRecurring,
       clearFrom: clearFrom,
       clearTo: clearTo,
+      clearMinAmount: clearMinAmount,
+      clearMaxAmount: clearMaxAmount,
     );
   }
 

@@ -193,32 +193,32 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
           title: 'QUICK ADD (BETA)',
           infoConfig: const KuberInfoConfig(
             title: 'Quick Add',
-            description: 'Record an expense instantly using natural language — no forms, no tapping. Just type what you spent and Kuber figures out the rest.',
+            description: 'Record an expense instantly using natural language. No forms, no tapping. Just type what you spent and Kuber figures out the rest.',
             items: [
               KuberInfoItem(
                 icon: Icons.flash_on_rounded,
                 title: 'Basic Amount',
-                description: '"250" or "₹250" — adds ₹250 to the General category.',
+                description: '"250" or "₹250" adds ₹250 to the General category.',
               ),
               KuberInfoItem(
                 icon: Icons.category_outlined,
                 title: 'With Category',
-                description: '"250 on food", "150 in gaming", "300 for rent" — links to an existing category or creates one.',
+                description: '"250 on food", "150 in gaming", "300 for rent" links to an existing category or creates one.',
               ),
               KuberInfoItem(
                 icon: Icons.account_balance_wallet_rounded,
                 title: 'With Account',
-                description: '"150 for uber from hdfc" — matches your HDFC account by name.',
+                description: '"150 for uber from hdfc" matches your HDFC account by name.',
               ),
               KuberInfoItem(
                 icon: Icons.auto_fix_high_rounded,
                 title: 'Action Words',
-                description: '"Add 200 on coffee", "Log 500 for groceries", "Create 1000 in savings" — leading action words are stripped automatically.',
+                description: '"Add 200 on coffee", "Log 500 for groceries", "Create 1000 in savings" - leading action words are stripped automatically.',
               ),
               KuberInfoItem(
                 icon: Icons.star_outline_rounded,
                 title: 'Default Account',
-                description: 'Set a default account in Settings → Default Account so you never need to specify "from …" every time.',
+                description: 'Set a default account in Settings to skip typing "from ..." every time.',
               ),
             ],
           ),

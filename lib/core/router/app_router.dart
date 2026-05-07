@@ -18,6 +18,7 @@ import '../../features/accounts/screens/add_edit_account_screen.dart';
 import '../../features/more/screens/more_screen.dart';
 import '../../features/more/screens/more_search_screen.dart';
 import '../../features/more/screens/about_screen.dart';
+import '../../features/more/screens/feedback_screen.dart';
 import '../../features/more/screens/permissions_screen.dart';
 import '../../features/more/screens/categories_screen.dart';
 import '../../features/more/screens/tags_screen.dart';
@@ -235,6 +236,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/more/about',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, _) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: '/more/feedback',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, _) => const FeedbackScreen(),
       ),
       StatefulShellRoute(
         builder: (context, state, navigationShell) =>

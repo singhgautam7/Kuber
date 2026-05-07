@@ -36,45 +36,43 @@ class DbExplorerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final isar = ref.read(isarProvider);
+
+    final collections = [
+      CollectionMeta('Transaction', (i) => i.collection<Transaction>().count()),
+      CollectionMeta('Account', (i) => i.collection<Account>().count()),
+      CollectionMeta('Category', (i) => i.collection<Category>().count()),
+      CollectionMeta('CategoryGroup', (i) => i.collection<CategoryGroup>().count()),
+      CollectionMeta('RecurringRule', (i) => i.collection<RecurringRule>().count()),
+      CollectionMeta('Tag', (i) => i.collection<Tag>().count()),
+      CollectionMeta('TransactionTag', (i) => i.collection<TransactionTag>().count()),
+      CollectionMeta('Budget', (i) => i.collection<Budget>().count()),
+      CollectionMeta('Ledger', (i) => i.collection<Ledger>().count()),
+      CollectionMeta('Loan', (i) => i.collection<Loan>().count()),
+      CollectionMeta('Investment', (i) => i.collection<Investment>().count()),
+      CollectionMeta('TransactionSuggestion', (i) => i.collection<TransactionSuggestion>().count()),
+      CollectionMeta('Person', (i) => i.collection<Person>().count()),
+      CollectionMeta('Bill', (i) => i.collection<Bill>().count()),
+    ]..sort((a, b) => a.name.compareTo(b.name));
+
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: const KuberAppBar(showBack: true, title: 'DB Explorer'),
-      body: Consumer(
-        builder: (context, ref, _) {
-          // If isarProvider is just a Provider<Isar>, we can read it directly.
-          // Let's assume it's synchronous since we throw UnimplementedError in IsarService if not overridden
-          // And main.dart usually overrides it with the opened instance.
-          final isar = ref.read(isarProvider);
-          
-          final collections = [
-            CollectionMeta('Transaction', (i) => i.collection<Transaction>().count()),
-            CollectionMeta('Account', (i) => i.collection<Account>().count()),
-            CollectionMeta('Category', (i) => i.collection<Category>().count()),
-            CollectionMeta('CategoryGroup', (i) => i.collection<CategoryGroup>().count()),
-            CollectionMeta('RecurringRule', (i) => i.collection<RecurringRule>().count()),
-            CollectionMeta('Tag', (i) => i.collection<Tag>().count()),
-            CollectionMeta('TransactionTag', (i) => i.collection<TransactionTag>().count()),
-            CollectionMeta('Budget', (i) => i.collection<Budget>().count()),
-            CollectionMeta('Ledger', (i) => i.collection<Ledger>().count()),
-            CollectionMeta('Loan', (i) => i.collection<Loan>().count()),
-            CollectionMeta('Investment', (i) => i.collection<Investment>().count()),
-            CollectionMeta('TransactionSuggestion', (i) => i.collection<TransactionSuggestion>().count()),
-            CollectionMeta('Person', (i) => i.collection<Person>().count()),
-            CollectionMeta('Bill', (i) => i.collection<Bill>().count()),
-          ];
-
-          collections.sort((a, b) => a.name.compareTo(b.name));
-
-          return ListView.separated(
+      body: CustomScrollView(
+        slivers: [
+          const SliverToBoxAdapter(
+            child: KuberAppBar(showBack: true, title: 'DB Explorer'),
+          ),
+          SliverPadding(
             padding: const EdgeInsets.all(KuberSpacing.lg),
-            itemCount: collections.length,
-            separatorBuilder: (context, index) => const SizedBox(height: KuberSpacing.sm),
-            itemBuilder: (context, index) {
-              final meta = collections[index];
-              return _CollectionCard(meta: meta, isar: isar);
-            },
-          );
-        },
+            sliver: SliverList.separated(
+              itemCount: collections.length,
+              separatorBuilder: (context, index) => const SizedBox(height: KuberSpacing.sm),
+              itemBuilder: (context, index) {
+                return _CollectionCard(meta: collections[index], isar: isar);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

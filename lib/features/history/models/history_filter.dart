@@ -8,6 +8,8 @@ class HistoryFilter {
   final Set<String> accountIds;
   final Set<String> categoryIds;
   final Set<int> tagIds;
+  final double? minAmount;
+  final double? maxAmount;
 
   const HistoryFilter({
     this.types = const {},
@@ -18,6 +20,8 @@ class HistoryFilter {
     this.accountIds = const {},
     this.categoryIds = const {},
     this.tagIds = const {},
+    this.minAmount,
+    this.maxAmount,
   });
 
   bool get isEmpty =>
@@ -28,7 +32,9 @@ class HistoryFilter {
       to == null &&
       accountIds.isEmpty &&
       categoryIds.isEmpty &&
-      tagIds.isEmpty;
+      tagIds.isEmpty &&
+      minAmount == null &&
+      maxAmount == null;
 
   bool get isAdvanced =>
       from != null ||
@@ -36,6 +42,8 @@ class HistoryFilter {
       accountIds.isNotEmpty ||
       categoryIds.isNotEmpty ||
       tagIds.isNotEmpty ||
+      minAmount != null ||
+      maxAmount != null ||
       types.length > 1;
 
   int get activeFiltersCount {
@@ -47,6 +55,7 @@ class HistoryFilter {
     if (tagIds.isNotEmpty) count += tagIds.length;
     if (isRecurring != null) count++;
     if (searchQuery != null && searchQuery!.isNotEmpty) count++;
+    if (minAmount != null || maxAmount != null) count++;
     return count;
   }
 
@@ -59,11 +68,15 @@ class HistoryFilter {
     Set<String>? accountIds,
     Set<String>? categoryIds,
     Set<int>? tagIds,
+    double? minAmount,
+    double? maxAmount,
     bool clearTypes = false,
     bool clearRecurring = false,
     bool clearSearchQuery = false,
     bool clearFrom = false,
     bool clearTo = false,
+    bool clearMinAmount = false,
+    bool clearMaxAmount = false,
   }) {
     return HistoryFilter(
       types: clearTypes ? const {} : (types ?? this.types),
@@ -74,6 +87,8 @@ class HistoryFilter {
       accountIds: accountIds ?? this.accountIds,
       categoryIds: categoryIds ?? this.categoryIds,
       tagIds: tagIds ?? this.tagIds,
+      minAmount: clearMinAmount ? null : (minAmount ?? this.minAmount),
+      maxAmount: clearMaxAmount ? null : (maxAmount ?? this.maxAmount),
     );
   }
 
@@ -89,7 +104,9 @@ class HistoryFilter {
           to == other.to &&
           accountIds == other.accountIds &&
           categoryIds == other.categoryIds &&
-          tagIds == other.tagIds;
+          tagIds == other.tagIds &&
+          minAmount == other.minAmount &&
+          maxAmount == other.maxAmount;
 
   @override
   int get hashCode =>
@@ -100,5 +117,7 @@ class HistoryFilter {
       to.hashCode ^
       accountIds.hashCode ^
       categoryIds.hashCode ^
-      tagIds.hashCode;
+      tagIds.hashCode ^
+      minAmount.hashCode ^
+      maxAmount.hashCode;
 }

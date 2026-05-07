@@ -55,5 +55,13 @@ List<Transaction> applyHistoryFilters(
     }).toList();
   }
 
+  // Amount range
+  if (filter.minAmount != null) {
+    filtered = filtered.where((t) => t.amount >= filter.minAmount!).toList();
+  }
+  if (filter.maxAmount != null) {
+    filtered = filtered.where((t) => t.amount <= filter.maxAmount!).toList();
+  }
+
   return filtered;
 }

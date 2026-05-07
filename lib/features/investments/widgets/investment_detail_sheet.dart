@@ -7,9 +7,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider, privacyModeProvider;
+    show currencyProvider, formatterProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/investment.dart';
@@ -52,7 +51,6 @@ class _InvestmentDetailSheetState
         calc.computeGainLossPercent(investment, allTxns);
     final isGain = gainLoss >= 0;
     final hasCurrentValue = investment.currentValue != null;
-    final isPrivate = ref.watch(privacyModeProvider);
 
     return KuberBottomSheet(
       title: investment.name,
@@ -134,7 +132,7 @@ class _InvestmentDetailSheetState
               Expanded(
                 child: _StatColumn(
                   label: 'INVESTED',
-                  value: maskAmount(fmt.formatCurrency(totalInvested), isPrivate),
+                  value: fmt.formatCurrency(totalInvested),
                   color: cs.onSurface,
                 ),
               ),
@@ -142,7 +140,7 @@ class _InvestmentDetailSheetState
                 child: _StatColumn(
                   label: 'CURRENT',
                   value: hasCurrentValue
-                      ? maskAmount(fmt.formatCurrency(investment.currentValue!), isPrivate)
+                      ? fmt.formatCurrency(investment.currentValue!)
                       : '—',
                   color: cs.onSurface,
                 ),
@@ -162,7 +160,7 @@ class _InvestmentDetailSheetState
                     const SizedBox(height: 4),
                     Text(
                       hasCurrentValue
-                          ? maskAmount('${isGain ? '+' : ''}${fmt.formatCurrency(gainLoss)}', isPrivate)
+                          ? '${isGain ? '+' : ''}${fmt.formatCurrency(gainLoss)}'
                           : '—',
                       style: GoogleFonts.inter(
                         fontSize: 16,
@@ -204,9 +202,7 @@ class _InvestmentDetailSheetState
               _InfoRow(
                 icon: Icons.savings_outlined,
                 label: 'Monthly SIP',
-                value: isPrivate
-                    ? '****'
-                    : '${fmt.formatCurrency(investment.sipAmount!)} on ${investment.sipDate}th',
+                value: '${fmt.formatCurrency(investment.sipAmount!)} on ${investment.sipDate}th',
               ),
             if (investment.accountId != null) ...[
               const SizedBox(height: 8),
@@ -538,7 +534,6 @@ class _ContributionRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
-    final isPrivate = ref.watch(privacyModeProvider);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -569,7 +564,7 @@ class _ContributionRow extends ConsumerWidget {
             ),
           ),
           Text(
-            maskAmount(fmt.formatCurrency(transaction.amount), isPrivate),
+            fmt.formatCurrency(transaction.amount),
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,
