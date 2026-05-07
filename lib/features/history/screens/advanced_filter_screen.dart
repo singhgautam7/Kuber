@@ -24,20 +24,42 @@ class AdvancedFilterScreen extends ConsumerStatefulWidget {
 
 class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
   late HistoryFilter _localFilter;
+  late TextEditingController _minAmountCtrl;
+  late TextEditingController _maxAmountCtrl;
 
   @override
   void initState() {
     super.initState();
     _localFilter = ref.read(historyFilterProvider);
+    _minAmountCtrl = TextEditingController(
+      text: _localFilter.minAmount != null ? _localFilter.minAmount!.toStringAsFixed(0) : '',
+    );
+    _maxAmountCtrl = TextEditingController(
+      text: _localFilter.maxAmount != null ? _localFilter.maxAmount!.toStringAsFixed(0) : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _minAmountCtrl.dispose();
+    _maxAmountCtrl.dispose();
+    super.dispose();
   }
 
   void _reset() {
+    _minAmountCtrl.clear();
+    _maxAmountCtrl.clear();
     setState(() {
       _localFilter = const HistoryFilter();
     });
   }
 
   void _apply() {
+    final minText = _minAmountCtrl.text.trim();
+    final maxText = _maxAmountCtrl.text.trim();
+    final minAmount = minText.isNotEmpty ? double.tryParse(minText) : null;
+    final maxAmount = maxText.isNotEmpty ? double.tryParse(maxText) : null;
+
     ref.read(historyFilterProvider.notifier).setFilters(
       types: _localFilter.types,
       isRecurring: _localFilter.isRecurring,
@@ -46,10 +68,14 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
       accountIds: _localFilter.accountIds,
       categoryIds: _localFilter.categoryIds,
       tagIds: _localFilter.tagIds,
+      minAmount: minAmount,
+      maxAmount: maxAmount,
       clearTypes: _localFilter.types.isEmpty,
       clearRecurring: _localFilter.isRecurring == null,
       clearFrom: _localFilter.from == null,
       clearTo: _localFilter.to == null,
+      clearMinAmount: minAmount == null,
+      clearMaxAmount: maxAmount == null,
     );
     Navigator.pop(context);
   }
@@ -205,15 +231,27 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               _Section(
                 title: 'ACCOUNTS',
                 child: accountsAsync.when(
-                  data: (accounts) => Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: accounts.map((a) => _AccountPill(
-                      account: a,
-                      isSelected: _localFilter.accountIds.contains(a.id.toString()),
-                      onTap: () => _toggleAccount(a.id.toString()),
-                    )).toList(),
-                  ),
+                  data: (accounts) {
+                    final sorted = [...accounts]..sort((a, b) {
+                      int typePriority(account) {
+                        if (account.isCreditCard) return 2;
+                        if (account.type == 'cash') return 0;
+                        return 1;
+                      }
+                      final tp = typePriority(a).compareTo(typePriority(b));
+                      if (tp != 0) return tp;
+                      return a.name.compareTo(b.name);
+                    });
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: sorted.map((a) => _AccountPill(
+                        account: a,
+                        isSelected: _localFilter.accountIds.contains(a.id.toString()),
+                        onTap: () => _toggleAccount(a.id.toString()),
+                      )).toList(),
+                    );
+                  },
                   loading: () => _SkeletonGrid(itemCount: 3),
                   error: (_, __) => const Text('Error loading accounts'),
                 ),
@@ -222,15 +260,18 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               _Section(
                 title: 'CATEGORIES',
                 child: categoriesAsync.when(
-                  data: (categories) => Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: categories.map((c) => _CategoryPill(
-                      category: c,
-                      isSelected: _localFilter.categoryIds.contains(c.id.toString()),
-                      onTap: () => _toggleCategory(c.id.toString()),
-                    )).toList(),
-                  ),
+                  data: (categories) {
+                    final sorted = [...categories]..sort((a, b) => a.name.compareTo(b.name));
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: sorted.map((c) => _CategoryPill(
+                        category: c,
+                        isSelected: _localFilter.categoryIds.contains(c.id.toString()),
+                        onTap: () => _toggleCategory(c.id.toString()),
+                      )).toList(),
+                    );
+                  },
                   loading: () => _SkeletonGrid(itemCount: 6),
                   error: (_, __) => const Text('Error loading categories'),
                 ),
@@ -239,37 +280,79 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               _Section(
                 title: 'TAGS',
                 child: tagsAsync.when(
-                  data: (tags) => Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: tags.map((t) {
-                      final isSelected = _localFilter.tagIds.contains(t.id);
-                      return GestureDetector(
-                        onTap: () => _toggleTag(t.id),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
-                            border: Border.all(
-                              color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
+                  data: (tags) {
+                    final sorted = [...tags]..sort((a, b) => a.name.compareTo(b.name));
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: sorted.map((t) {
+                        final isSelected = _localFilter.tagIds.contains(t.id);
+                        return GestureDetector(
+                          onTap: () => _toggleTag(t.id),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? cs.primary : cs.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(KuberRadius.md),
+                              border: Border.all(
+                                color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              '#${t.name.toUpperCase()}',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                              ),
                             ),
                           ),
-                          child: Text(
-                            '#${t.name.toUpperCase()}',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                        );
+                      }).toList(),
+                    );
+                  },
                   loading: () => _SkeletonGrid(itemCount: 5, height: 32),
                   error: (_, __) => const Text('Error loading tags'),
+                ),
+              ),
+              const SizedBox(height: 32),
+              _Section(
+                title: 'AMOUNT RANGE',
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _minAmountCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: cs.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'min',
+                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: _maxAmountCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: cs.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'max',
+                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 120),

@@ -370,31 +370,40 @@ class _BalanceHeroCard extends ConsumerWidget {
           const SizedBox(height: KuberSpacing.md),
 
           // Proportional income/expense ratio bar
-          Row(
-            children: [
-              Expanded(
-                flex: (incPct * 1000).round(),
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: cs.tertiary,
-                    borderRadius: BorderRadius.circular(3),
+          if (total == 0)
+            Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: cs.outlineVariant,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  flex: (incPct * 1000).round(),
+                  child: Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: cs.tertiary,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 3),
-              Expanded(
-                flex: ((1 - incPct) * 1000).round().clamp(1, 1000),
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: cs.error,
-                    borderRadius: BorderRadius.circular(3),
+                const SizedBox(width: 3),
+                Expanded(
+                  flex: ((1 - incPct) * 1000).round().clamp(1, 1000),
+                  child: Container(
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: cs.error,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
           const SizedBox(height: KuberSpacing.sm + 2),
 

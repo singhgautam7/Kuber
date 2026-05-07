@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
@@ -168,6 +170,44 @@ class MoreScreen extends ConsumerWidget {
                         subtitle: 'Developer-only tools',
                         onTap: () => context.push('/more/dev-tools'),
                       ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // Contact Us section
+                _MenuSection(
+                  title: 'Contact Us',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.star_rate_rounded,
+                      label: 'Rate Us on Play Store',
+                      subtitle: 'Enjoying Kuber? Leave a review',
+                      onTap: () {
+                        launchUrl(
+                          Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
+                          mode: LaunchMode.externalApplication,
+                        );
+                      },
+                    ),
+                    _MenuItem(
+                      icon: Icons.share_rounded,
+                      label: 'Share This App',
+                      subtitle: 'Recommend Kuber to friends and family',
+                      onTap: () {
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text: 'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
+                          ),
+                        );
+                      },
+                    ),
+                    _MenuItem(
+                      icon: Icons.feedback_outlined,
+                      label: 'Submit a Feedback',
+                      subtitle: 'Report a bug or suggest a feature',
+                      onTap: () => context.push('/more/feedback'),
+                    ),
                   ],
                 ),
               ]),

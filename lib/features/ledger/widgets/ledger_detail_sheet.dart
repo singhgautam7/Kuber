@@ -6,8 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/ledger.dart';
@@ -31,7 +30,6 @@ class LedgerDetailSheet extends ConsumerWidget {
     final remaining = calc.computeRemaining(ledger, allTxns);
     final progress = calc.computeProgress(ledger, allTxns);
     final isLent = ledger.type == 'lent';
-    final isPrivate = ref.watch(privacyModeProvider);
     final progressColor = isLent ? cs.tertiary : cs.error;
 
     final initials = _getInitials(ledger.personName);
@@ -122,21 +120,21 @@ class LedgerDetailSheet extends ConsumerWidget {
               Expanded(
                 child: _StatColumn(
                   label: 'TOTAL',
-                  value: maskAmount(fmt.formatCurrency(ledger.originalAmount), isPrivate),
+                  value: fmt.formatCurrency(ledger.originalAmount),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
                   label: 'PAID',
-                  value: maskAmount(fmt.formatCurrency(paid), isPrivate),
+                  value: fmt.formatCurrency(paid),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
                   label: 'REMAINING',
-                  value: maskAmount(fmt.formatCurrency(remaining.clamp(0, double.infinity)), isPrivate),
+                  value: fmt.formatCurrency(remaining.clamp(0, double.infinity)),
                   color: remaining > 0 ? cs.error : cs.tertiary,
                 ),
               ),
@@ -435,7 +433,6 @@ class _PaymentRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
-    final isPrivate = ref.watch(privacyModeProvider);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -466,7 +463,7 @@ class _PaymentRow extends ConsumerWidget {
             ),
           ),
           Text(
-            maskAmount(fmt.formatCurrency(transaction.amount), isPrivate),
+            fmt.formatCurrency(transaction.amount),
             style: GoogleFonts.inter(
               fontSize: 14,
               fontWeight: FontWeight.w700,

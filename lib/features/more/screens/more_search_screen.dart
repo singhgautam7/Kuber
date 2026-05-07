@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../dev/providers/dev_mode_provider.dart';
@@ -15,6 +17,7 @@ class _SearchableItem {
   final String? route;
   final String? namedRoute;
   final Color? color;
+  final VoidCallback? onAction;
 
   const _SearchableItem({
     required this.label,
@@ -24,6 +27,7 @@ class _SearchableItem {
     this.route,
     this.namedRoute,
     this.color,
+    this.onAction,
   });
 
   bool matches(String q) {
@@ -33,7 +37,9 @@ class _SearchableItem {
   }
 
   void navigate(BuildContext context) {
-    if (namedRoute != null) {
+    if (onAction != null) {
+      onAction!();
+    } else if (namedRoute != null) {
       context.pushNamed(namedRoute!);
     } else {
       context.push(route!);
@@ -84,6 +90,29 @@ List<_SearchableItem> _buildItems(bool isDevMode) => [
       // About
       _SearchableItem(label: 'About Kuber', subtitle: 'Vision, origin, and developer', icon: Icons.info_outline_rounded, section: 'About', namedRoute: 'about'),
       _SearchableItem(label: 'Permissions', subtitle: 'App limits and security', icon: Icons.security_outlined, section: 'About', namedRoute: 'permissions'),
+      // Contact Us
+      _SearchableItem(
+        label: 'Rate Us on Play Store',
+        subtitle: 'Enjoying Kuber? Leave a review',
+        icon: Icons.star_rate_rounded,
+        section: 'Contact Us',
+        onAction: () => launchUrl(
+          Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
+          mode: LaunchMode.externalApplication,
+        ),
+      ),
+      _SearchableItem(
+        label: 'Share This App',
+        subtitle: 'Recommend Kuber to friends and family',
+        icon: Icons.share_rounded,
+        section: 'Contact Us',
+        onAction: () => SharePlus.instance.share(
+          ShareParams(
+            text: 'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
+          ),
+        ),
+      ),
+      _SearchableItem(label: 'Submit a Feedback', subtitle: 'Report a bug or suggest a feature', icon: Icons.feedback_outlined, section: 'Contact Us', route: '/more/feedback'),
       // Dev Tools (conditional)
       if (isDevMode)
         _SearchableItem(label: 'Dev Tools', subtitle: 'Developer-only tools', icon: Icons.bug_report_outlined, section: 'Dev', route: '/more/dev-tools'),
