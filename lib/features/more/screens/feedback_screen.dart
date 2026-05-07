@@ -84,13 +84,12 @@ User Name   : ${settings?.userName.isNotEmpty == true ? settings!.userName : 'No
 Currency    : ${currency.name} (${currency.code})
 ''';
 
-      final uri = Uri(
-        scheme: 'mailto',
-        path: 'singhgautam.dev@gmail.com',
-        queryParameters: {
-          'subject': subject,
-          'body': body,
-        },
+      // Build mailto URI manually — Uri(queryParameters:) encodes spaces as +
+      // which mail clients render literally. Uri.encodeComponent uses %20 instead.
+      final uri = Uri.parse(
+        'mailto:singhgautam.dev@gmail.com'
+        '?subject=${Uri.encodeComponent(subject)}'
+        '&body=${Uri.encodeComponent(body)}',
       );
 
       if (!await launchUrl(uri)) {
@@ -115,7 +114,7 @@ Currency    : ${currency.name} (${currency.code})
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, showHome: true),
+            child: KuberAppBar(showBack: true, showHome: true, title: ''),
           ),
           const SliverToBoxAdapter(
             child: KuberPageHeader(
