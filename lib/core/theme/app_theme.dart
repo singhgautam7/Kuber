@@ -80,8 +80,24 @@ class KuberLightColors {
 }
 
 class AppTheme {
-  static ThemeData dark() {
+  static ThemeData dark({Color? seedColor}) {
     final textTheme = AppTextStyles.getTextTheme(ThemeData.dark().textTheme);
+
+    if (seedColor != null) {
+      final base = ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.dark,
+      );
+      final adjusted = base.copyWith(
+        tertiary: KuberColors.income,
+        onTertiary: Colors.white,
+        error: KuberColors.expense,
+        onError: Colors.white,
+        errorContainer: KuberColors.expenseSubtle,
+        onErrorContainer: KuberColors.expense,
+      );
+      return _buildFromScheme(adjusted, textTheme);
+    }
 
     final colorScheme = ColorScheme.dark(
       surface: KuberColors.background,
@@ -296,8 +312,24 @@ class AppTheme {
     );
   }
 
-  static ThemeData light() {
+  static ThemeData light({Color? seedColor}) {
     final textTheme = AppTextStyles.getTextTheme(ThemeData.light().textTheme);
+
+    if (seedColor != null) {
+      final base = ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.light,
+      );
+      final adjusted = base.copyWith(
+        tertiary: KuberLightColors.income,
+        onTertiary: Colors.white,
+        error: KuberLightColors.expense,
+        onError: Colors.white,
+        errorContainer: KuberLightColors.expenseSubtle,
+        onErrorContainer: KuberLightColors.expense,
+      );
+      return _buildFromScheme(adjusted, textTheme);
+    }
 
     final colorScheme = ColorScheme.light(
       surface: KuberLightColors.background,
@@ -510,6 +542,182 @@ class AppTheme {
       ),
       popupMenuTheme: PopupMenuThemeData(
         color: KuberLightColors.surfaceMuted,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+      ),
+    );
+  }
+
+  static ThemeData _buildFromScheme(ColorScheme cs, TextTheme textTheme) {
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: cs,
+      textTheme: textTheme,
+      splashFactory: NoSplash.splashFactory,
+      scaffoldBackgroundColor: cs.surface,
+      cardTheme: CardThemeData(
+        color: cs.surfaceContainer,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          side: BorderSide(color: cs.outline),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: cs.surfaceContainer,
+        indicatorColor: cs.primaryContainer,
+        surfaceTintColor: Colors.transparent,
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: cs.primary);
+          }
+          return IconThemeData(color: cs.onSurfaceVariant);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return textTheme.labelSmall?.copyWith(
+              color: cs.primary,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant);
+        }),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: cs.surfaceContainer,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderSide: BorderSide(color: cs.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderSide: BorderSide(color: cs.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderSide: BorderSide(color: cs.primary, width: 2),
+        ),
+        labelStyle: TextStyle(color: cs.onSurfaceVariant),
+      ),
+      dividerTheme: DividerThemeData(color: cs.outline, thickness: 0.5),
+      appBarTheme: AppBarTheme(
+        backgroundColor: cs.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        titleTextStyle: textTheme.titleLarge?.copyWith(color: cs.onSurface),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: cs.surfaceContainer,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          side: BorderSide(color: cs.outline),
+        ),
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: cs.surfaceContainerHigh,
+        side: BorderSide(color: cs.outline),
+        selectedColor: cs.primaryContainer,
+        checkmarkColor: cs.primary,
+        showCheckmark: true,
+        labelStyle: AppTextStyles.inter.copyWith(
+          fontSize: 13,
+          color: cs.onSurfaceVariant,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(KuberRadius.lg),
+          ),
+          side: BorderSide(color: cs.outline),
+        ),
+      ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          side: BorderSide(color: cs.outline),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: cs.onSurface,
+          side: BorderSide(color: cs.outline),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: cs.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+          ),
+        ),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return cs.primaryContainer;
+            return cs.surfaceContainer;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return cs.primary;
+            return cs.onSurfaceVariant;
+          }),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+            ),
+          ),
+          side: WidgetStatePropertyAll(BorderSide(color: cs.outline)),
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return Colors.white;
+          return cs.onSurfaceVariant;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return cs.primary;
+          return cs.surfaceContainerHigh;
+        }),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: cs.primary,
+        linearTrackColor: cs.surfaceContainerHigh,
+      ),
+      listTileTheme: ListTileThemeData(
+        tileColor: cs.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+        ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: cs.surfaceContainerHigh,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),

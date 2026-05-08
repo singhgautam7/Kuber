@@ -34,6 +34,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   NumberSystem? _tempNumberSystem;
   NavBarStyle? _tempNavBarStyle;
   bool? _tempBiometricsEnabled;
+  bool? _tempMaterialYou;
+  MaterialYouSeed? _tempMaterialYouSeed;
 
   @override
   void initState() {
@@ -46,6 +48,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _tempNumberSystem = settings?.numberSystem;
     _tempNavBarStyle = settings?.navBarStyle;
     _tempBiometricsEnabled = settings?.biometricsEnabled;
+    _tempMaterialYou = settings?.materialYou;
+    _tempMaterialYouSeed = settings?.materialYouSeed;
   }
 
   @override
@@ -81,6 +85,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentNumberSystem = _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
     final currentNavBarStyle = _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
     final currentBiometricsEnabled = _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
+    final currentMaterialYou = _tempMaterialYou ?? settings?.materialYou ?? false;
+    final currentMaterialYouSeed =
+        _tempMaterialYouSeed ?? settings?.materialYouSeed ?? MaterialYouSeed.blue;
     final currency = currencyFromCode(currencyCode);
 
     return Scaffold(
@@ -176,6 +183,89 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ref.read(settingsProvider.notifier).setThemeMode(val);
                               },
                             ),
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1, color: cs.outline),
+                      // Material You toggle + color picker
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: KuberSpacing.lg,
+                          vertical: KuberSpacing.md,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const SquircleIcon(icon: Icons.colorize_outlined, size: 18, padding: 8),
+                                const SizedBox(width: KuberSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Material You (Beta)',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: cs.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Pick an accent color for the app theme',
+                                        style: GoogleFonts.inter(
+                                          fontSize: 12,
+                                          color: cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: currentMaterialYou,
+                                  onChanged: (val) {
+                                    setState(() => _tempMaterialYou = val);
+                                    ref.read(settingsProvider.notifier).setMaterialYou(val);
+                                  },
+                                ),
+                              ],
+                            ),
+                            if (currentMaterialYou) ...[
+                              const SizedBox(height: KuberSpacing.md),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: MaterialYouSeed.values.map((seed) {
+                                  final isSelected = seed == currentMaterialYouSeed;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() => _tempMaterialYouSeed = seed);
+                                      ref.read(settingsProvider.notifier).setMaterialYouSeed(seed);
+                                    },
+                                    child: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: seed.color,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isSelected ? cs.onSurface : Colors.transparent,
+                                          width: 2.5,
+                                        ),
+                                      ),
+                                      child: isSelected
+                                          ? const Icon(
+                                              Icons.check_rounded,
+                                              color: Colors.white,
+                                              size: 20,
+                                            )
+                                          : null,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
                           ],
                         ),
                       ),

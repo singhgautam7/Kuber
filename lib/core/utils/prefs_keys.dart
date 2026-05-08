@@ -35,6 +35,10 @@ class PrefsKeys {
   static const thresholdCeiling = 'kuber_threshold_ceiling';
   static const navBarStyle = 'nav_bar_style';
 
+  // Material You
+  static const materialYou = 'kuber_material_you';
+  static const materialYouSeed = 'kuber_material_you_seed';
+
   // Tools hub
   static const toolsViewMode = 'kuber_tools_view_mode';
 

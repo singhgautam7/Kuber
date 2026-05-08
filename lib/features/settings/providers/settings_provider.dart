@@ -52,6 +52,14 @@ final thresholdCeilingProvider = Provider<double>((ref) {
   return ref.watch(settingsProvider).valueOrNull?.thresholdCeiling ?? 2000;
 });
 
+final materialYouProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.materialYou ?? false;
+});
+
+final materialYouSeedProvider = Provider<MaterialYouSeed>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.materialYouSeed ?? MaterialYouSeed.blue;
+});
+
 enum NumberSystem {
   indian,
   international,
@@ -68,6 +76,18 @@ enum NavBarStyle {
   modern,
 }
 
+enum MaterialYouSeed {
+  blue(Color(0xFF2563EB), 'Blue'),
+  purple(Color(0xFF7C3AED), 'Purple'),
+  teal(Color(0xFF0D9488), 'Teal'),
+  amber(Color(0xFFD97706), 'Amber'),
+  pink(Color(0xFFDB2777), 'Pink');
+
+  final Color color;
+  final String label;
+  const MaterialYouSeed(this.color, this.label);
+}
+
 class SettingsState {
   final ThemeMode themeMode;
   final String currency;
@@ -81,6 +101,8 @@ class SettingsState {
   final double thresholdFloor;
   final double thresholdCeiling;
   final NavBarStyle navBarStyle;
+  final bool materialYou;
+  final MaterialYouSeed materialYouSeed;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -95,6 +117,8 @@ class SettingsState {
     this.thresholdFloor = 500,
     this.thresholdCeiling = 2000,
     this.navBarStyle = NavBarStyle.classic,
+    this.materialYou = false,
+    this.materialYouSeed = MaterialYouSeed.blue,
   });
 
   SettingsState copyWith({
@@ -109,6 +133,8 @@ class SettingsState {
     double? thresholdFloor,
     double? thresholdCeiling,
     NavBarStyle? navBarStyle,
+    bool? materialYou,
+    MaterialYouSeed? materialYouSeed,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -123,6 +149,8 @@ class SettingsState {
       thresholdFloor: thresholdFloor ?? this.thresholdFloor,
       thresholdCeiling: thresholdCeiling ?? this.thresholdCeiling,
       navBarStyle: navBarStyle ?? this.navBarStyle,
+      materialYou: materialYou ?? this.materialYou,
+      materialYouSeed: materialYouSeed ?? this.materialYouSeed,
     );
   }
 }
@@ -144,6 +172,12 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
     final thresholdCeiling = prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
     final navBarStyleIndex = prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
+    final materialYou = prefs.getBool(PrefsKeys.materialYou) ?? false;
+    final materialYouSeedIndex = prefs.getInt(PrefsKeys.materialYouSeed) ?? 0;
+    final materialYouSeed = materialYouSeedIndex >= 0 &&
+            materialYouSeedIndex < MaterialYouSeed.values.length
+        ? MaterialYouSeed.values[materialYouSeedIndex]
+        : MaterialYouSeed.blue;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -158,6 +192,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       thresholdFloor: thresholdFloor,
       thresholdCeiling: thresholdCeiling,
       navBarStyle: NavBarStyle.values[navBarStyleIndex],
+      materialYou: materialYou,
+      materialYouSeed: materialYouSeed,
     );
   }
 
@@ -246,6 +282,18 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefsKeys.numberSystem, system.index);
     state = AsyncData(state.requireValue.copyWith(numberSystem: system));
+  }
+
+  Future<void> setMaterialYou(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(PrefsKeys.materialYou, enabled);
+    state = AsyncData(state.requireValue.copyWith(materialYou: enabled));
+  }
+
+  Future<void> setMaterialYouSeed(MaterialYouSeed seed) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.materialYouSeed, seed.index);
+    state = AsyncData(state.requireValue.copyWith(materialYouSeed: seed));
   }
 
   Future<void> clearAllData() async {

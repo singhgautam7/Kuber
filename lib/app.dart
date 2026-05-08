@@ -13,13 +13,17 @@ class KuberApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final materialYou = ref.watch(materialYouProvider);
+    final seed = ref.watch(materialYouSeedProvider);
     final router = ref.watch(routerProvider);
+
+    final seedColor = materialYou ? seed.color : null;
 
     return MaterialApp.router(
       title: 'Kuber',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light(seedColor: seedColor),
+      darkTheme: AppTheme.dark(seedColor: seedColor),
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
