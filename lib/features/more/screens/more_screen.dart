@@ -46,25 +46,25 @@ class MoreScreen extends ConsumerWidget {
                   title: 'Manage',
                   items: [
                     _MenuItem(
-                      icon: Icons.account_balance_wallet_outlined,
+                      icon: Icons.account_balance_wallet,
                       label: 'Accounts',
                       subtitle: 'Your wallets and bank accounts',
                       onTap: () => context.push('/more/accounts'),
                     ),
                     _MenuItem(
-                      icon: Icons.category_outlined,
+                      icon: Icons.category,
                       label: 'Categories',
                       subtitle: 'Organize your transactions',
                       onTap: () => context.push('/more/categories'),
                     ),
                     _MenuItem(
-                      icon: Icons.label_outlined,
+                      icon: Icons.label_rounded,
                       label: 'Tags',
                       subtitle: 'Organize the labels for your transactions',
                       onTap: () => context.push('/more/tags'),
                     ),
                     _MenuItem(
-                      icon: Icons.account_balance_rounded,
+                      icon: Icons.pie_chart_rounded,
                       label: 'Budgets',
                       subtitle: 'Track and control your monthly spending',
                       onTap: () => context.push('/more/budgets'),
@@ -76,7 +76,7 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () => context.push('/more/recurring'),
                     ),
                     _MenuItem(
-                      icon: Icons.handshake_outlined,
+                      icon: Icons.handshake,
                       label: 'Lend / Borrow',
                       subtitle: 'Track money you lent or borrowed',
                       onTap: () => context.push('/more/ledger'),
@@ -125,7 +125,7 @@ class MoreScreen extends ConsumerWidget {
                   title: 'App',
                   items: [
                     _MenuItem(
-                      icon: Icons.settings_outlined,
+                      icon: Icons.settings,
                       label: 'Settings',
                       subtitle: 'Theme, currency, and profile',
                       onTap: () => context.push('/more/settings'),
@@ -137,7 +137,7 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () => context.push('/more/data'),
                     ),
                     _MenuItem(
-                      icon: Icons.build_outlined,
+                      icon: Icons.build,
                       label: 'Troubleshoot',
                       subtitle: 'Fix data and suggestion issues',
                       onTap: () => context.push('/more/troubleshoot'),
@@ -165,7 +165,7 @@ class MoreScreen extends ConsumerWidget {
                     ),
                     if (isDevMode)
                       _MenuItem(
-                        icon: Icons.bug_report_outlined,
+                        icon: Icons.bug_report,
                         label: 'Dev Tools',
                         subtitle: 'Developer-only tools',
                         onTap: () => context.push('/more/dev-tools'),
@@ -177,7 +177,7 @@ class MoreScreen extends ConsumerWidget {
 
                 // Contact Us section
                 _MenuSection(
-                  title: 'Contact Us',
+                  title: 'Help Us',
                   items: [
                     _MenuItem(
                       icon: Icons.star_rate_rounded,
@@ -203,7 +203,7 @@ class MoreScreen extends ConsumerWidget {
                       },
                     ),
                     _MenuItem(
-                      icon: Icons.feedback_outlined,
+                      icon: Icons.feedback,
                       label: 'Submit a Feedback',
                       subtitle: 'Report a bug or suggest a feature',
                       onTap: () => context.push('/more/feedback'),

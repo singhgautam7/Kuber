@@ -24,6 +24,7 @@ class AdvancedFilterScreen extends ConsumerStatefulWidget {
 
 class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
   late HistoryFilter _localFilter;
+  late TextEditingController _searchCtrl;
   late TextEditingController _minAmountCtrl;
   late TextEditingController _maxAmountCtrl;
 
@@ -31,6 +32,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
   void initState() {
     super.initState();
     _localFilter = ref.read(historyFilterProvider);
+    _searchCtrl = TextEditingController(text: _localFilter.searchQuery ?? '');
     _minAmountCtrl = TextEditingController(
       text: _localFilter.minAmount != null ? _localFilter.minAmount!.toStringAsFixed(0) : '',
     );
@@ -41,12 +43,14 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
 
   @override
   void dispose() {
+    _searchCtrl.dispose();
     _minAmountCtrl.dispose();
     _maxAmountCtrl.dispose();
     super.dispose();
   }
 
   void _reset() {
+    _searchCtrl.clear();
     _minAmountCtrl.clear();
     _maxAmountCtrl.clear();
     setState(() {
@@ -55,12 +59,14 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
   }
 
   void _apply() {
+    final searchQuery = _searchCtrl.text.trim();
     final minText = _minAmountCtrl.text.trim();
     final maxText = _maxAmountCtrl.text.trim();
     final minAmount = minText.isNotEmpty ? double.tryParse(minText) : null;
     final maxAmount = maxText.isNotEmpty ? double.tryParse(maxText) : null;
 
-    ref.read(historyFilterProvider.notifier).setFilters(
+    final notifier = ref.read(historyFilterProvider.notifier);
+    notifier.setFilters(
       types: _localFilter.types,
       isRecurring: _localFilter.isRecurring,
       from: _localFilter.from,
@@ -77,6 +83,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
       clearMinAmount: minAmount == null,
       clearMaxAmount: maxAmount == null,
     );
+    notifier.setSearchQuery(searchQuery.isEmpty ? null : searchQuery);
     Navigator.pop(context);
   }
 
@@ -157,6 +164,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
           ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             children: [
+              // 1. DATE RANGE
               _Section(
                 title: 'DATE RANGE',
                 child: InkWell(
@@ -193,6 +201,24 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              // 2. TRANSACTION NAME
+              _Section(
+                title: 'TRANSACTION NAME',
+                child: TextField(
+                  controller: _searchCtrl,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: cs.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Search via name.',
+                    hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              // 3. TYPE
               _Section(
                 title: 'TYPE',
                 child: Wrap(
@@ -228,6 +254,47 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              // 4. AMOUNT RANGE
+              _Section(
+                title: 'AMOUNT RANGE',
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _minAmountCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: cs.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'min',
+                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: _maxAmountCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: cs.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'max',
+                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              // 5. ACCOUNTS
               _Section(
                 title: 'ACCOUNTS',
                 child: accountsAsync.when(
@@ -257,6 +324,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              // 6. CATEGORIES
               _Section(
                 title: 'CATEGORIES',
                 child: categoriesAsync.when(
@@ -277,6 +345,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              // 7. TAGS
               _Section(
                 title: 'TAGS',
                 child: tagsAsync.when(
@@ -314,45 +383,6 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                   },
                   loading: () => _SkeletonGrid(itemCount: 5, height: 32),
                   error: (_, __) => const Text('Error loading tags'),
-                ),
-              ),
-              const SizedBox(height: 32),
-              _Section(
-                title: 'AMOUNT RANGE',
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _minAmountCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: cs.onSurface,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'min',
-                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: TextField(
-                        controller: _maxAmountCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: cs.onSurface,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'max',
-                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 120),

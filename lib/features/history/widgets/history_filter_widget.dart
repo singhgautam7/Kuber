@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/history_filter.dart';
 import '../providers/history_filter_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 
@@ -49,6 +50,8 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   }
 
   void _onSearchCancel() {
+    _searchController.clear();
+    ref.read(historyFilterProvider.notifier).setSearchQuery(null);
     setState(() {
       _isSearching = false;
       _focusNode.unfocus();
@@ -66,6 +69,13 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
     final notifier = ref.read(historyFilterProvider.notifier);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+
+    // Keep controller in sync when query changes externally (e.g. advanced filter apply / clear all)
+    ref.listen<HistoryFilter>(historyFilterProvider, (prev, next) {
+      if (prev?.searchQuery != next.searchQuery && !_focusNode.hasFocus) {
+        _searchController.text = next.searchQuery ?? '';
+      }
+    });
 
     final hasSearchQuery =
         filter.searchQuery != null && filter.searchQuery!.isNotEmpty;
@@ -213,28 +223,12 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
           borderRadius: BorderRadius.circular(KuberRadius.md),
           borderSide: BorderSide(color: cs.outline),
         ),
-        suffixIcon: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Tooltip(
-              message: 'Clear search',
-              child: IconButton(
-                icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant, size: 18),
-                onPressed: () {
-                  _searchController.clear();
-                  ref.read(historyFilterProvider.notifier).setSearchQuery(null);
-                  _onSearchCancel();
-                },
-              ),
-            ),
-            Tooltip(
-              message: 'Apply search',
-              child: IconButton(
-                icon: Icon(Icons.check_rounded, color: cs.primary, size: 20),
-                onPressed: () => _onSearchSubmit(_searchController.text),
-              ),
-            ),
-          ],
+        suffixIcon: Tooltip(
+          message: 'Apply search',
+          child: IconButton(
+            icon: Icon(Icons.check_rounded, color: cs.primary, size: 20),
+            onPressed: () => _onSearchSubmit(_searchController.text),
+          ),
         ),
       ),
       onSubmitted: _onSearchSubmit,
