@@ -4,10 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../providers/settings_provider.dart';
 
-/// Shows a bottom sheet to select a currency.
-/// Used in both Settings and Onboarding for consistency.
 void showCurrencyPicker({
   required BuildContext context,
   required WidgetRef ref,
@@ -21,104 +20,161 @@ void showCurrencyPicker({
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: cs.surfaceContainer,
-    shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(28),
-      ),
-      side: BorderSide(color: cs.outline),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
     ),
-    builder: (ctx) {
-      final sheetCs = Theme.of(ctx).colorScheme;
-      return DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.4,
-        expand: false,
-        builder: (ctx, scrollController) {
-          return Column(
-            children: [
-              const SizedBox(height: KuberSpacing.md),
-              Container(
-                width: 32,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: sheetCs.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.lg),
-              Text(
-                'Select Currency',
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: sheetCs.onSurface,
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.lg),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: kCurrencies.length,
-                  itemBuilder: (ctx, i) {
-                    final c = kCurrencies[i];
-                    final isSelected = c.code == currentCode;
-                    return ListTile(
-                      leading: Container(
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? sheetCs.primaryContainer
-                              : sheetCs.surfaceContainerHigh,
-                          borderRadius:
-                              BorderRadius.circular(KuberRadius.md),
-                        ),
-                        child: Text(
-                          c.symbol,
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected
-                                ? sheetCs.primary
-                                : sheetCs.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                      title: Text(
-                        c.name,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
-                          color: sheetCs.onSurface,
-                        ),
-                      ),
-                      subtitle: Text(
-                        c.code,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: sheetCs.onSurfaceVariant,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(Icons.check_rounded,
-                              color: sheetCs.primary, size: 20)
-                          : null,
-                      onTap: () {
-                        onSelected(c.code);
-                        ref.read(settingsProvider.notifier).setCurrency(c.code);
-                        Navigator.pop(ctx);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    },
+    builder: (_) => _CurrencyPickerSheet(
+      ref: ref,
+      currentCode: currentCode,
+      onSelected: onSelected,
+    ),
   );
+}
+
+class _CurrencyPickerSheet extends StatefulWidget {
+  final WidgetRef ref;
+  final String currentCode;
+  final Function(String) onSelected;
+
+  const _CurrencyPickerSheet({
+    required this.ref,
+    required this.currentCode,
+    required this.onSelected,
+  });
+
+  @override
+  State<_CurrencyPickerSheet> createState() => _CurrencyPickerSheetState();
+}
+
+class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  List<KuberCurrency> _filtered = kCurrencies;
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onSearch(String query) {
+    final q = query.trim().toLowerCase();
+    setState(() {
+      _filtered = q.isEmpty
+          ? kCurrencies
+          : kCurrencies.where((c) {
+              return c.code.toLowerCase().contains(q) ||
+                  c.name.toLowerCase().contains(q) ||
+                  c.symbol.toLowerCase().contains(q);
+            }).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return KuberBottomSheet(
+      title: 'Select Currency',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: _searchCtrl,
+            onChanged: _onSearch,
+            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+            decoration: InputDecoration(
+              hintText: 'Search by name, code or symbol…',
+              hintStyle: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+              prefixIcon: Icon(Icons.search_rounded, size: 20, color: cs.onSurfaceVariant),
+              suffixIcon: _searchCtrl.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.close_rounded, size: 18, color: cs.onSurfaceVariant),
+                      onPressed: () {
+                        _searchCtrl.clear();
+                        _onSearch('');
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: cs.surfaceContainerHigh,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderSide: BorderSide(color: cs.outline),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderSide: BorderSide(color: cs.outline),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderSide: BorderSide(color: cs.outline),
+              ),
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          if (_filtered.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+              child: Center(
+                child: Text(
+                  'No currencies found',
+                  style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+                ),
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _filtered.length,
+              itemBuilder: (ctx, i) {
+                final c = _filtered[i];
+                final isSelected = c.code == widget.currentCode;
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isSelected ? cs.primaryContainer : cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                    ),
+                    child: Text(
+                      c.symbol,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? cs.primary : cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    c.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  subtitle: Text(
+                    c.code,
+                    style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+                  ),
+                  trailing: isSelected
+                      ? Icon(Icons.check_rounded, color: cs.primary, size: 20)
+                      : null,
+                  onTap: () {
+                    widget.onSelected(c.code);
+                    widget.ref.read(settingsProvider.notifier).setCurrency(c.code);
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
 }
