@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../tutorial/models/tutorial_step_keys.dart';
 import '../providers/analytics_provider.dart';
 
 class TopFilterRow extends ConsumerWidget {
@@ -29,6 +30,7 @@ class TopFilterRow extends ConsumerWidget {
           GestureDetector(
             onTap: () => _goToFilterScreen(context),
             child: Container(
+              key: TutorialStepKeys.analyticsFilterPill,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: cs.primary.withValues(alpha: 0.1),

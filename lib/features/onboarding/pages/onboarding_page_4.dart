@@ -37,6 +37,9 @@ class OnboardingPageFour extends ConsumerWidget {
 
     return Column(
       children: [
+        // Ghost header — same height as OnboardingSkipButton on pages 1–3
+        // so "Make it yours." doesn't glue to the status bar.
+        const SizedBox(height: 48),
         Expanded(
           child: OnboardingFit(
             child: Form(

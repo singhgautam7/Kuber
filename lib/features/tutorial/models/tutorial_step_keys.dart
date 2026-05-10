@@ -19,6 +19,7 @@ class TutorialStepKeys {
   static final historyFilterIcon = GlobalKey();
   static final historyFirstItem = GlobalKey();
 
+  static final analyticsFilterPill = GlobalKey();
   static final analyticsPage = GlobalKey();
   static final spendingTrendsChart = GlobalKey();
   static final categoryBreakdownChart = GlobalKey();

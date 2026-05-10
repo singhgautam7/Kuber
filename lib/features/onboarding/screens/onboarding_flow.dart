@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/router/app_router.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../widgets/onboarding_tutorial_nudge.dart';
 import '../pages/onboarding_page_1.dart';
 import '../pages/onboarding_page_2.dart';
 import '../pages/onboarding_page_3.dart';
@@ -88,12 +90,18 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final prefs = await SharedPreferences.getInstance();
     final wasOnboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
     await prefs.setBool(PrefsKeys.onboarded, true);
-    if (!wasOnboarded && !widget.isReplay) {
-      await prefs.setBool(PrefsKeys.onboardingTutorialNudgePending, true);
-    }
+    final showNudge = !wasOnboarded && !widget.isReplay;
 
     if (!mounted) return;
     context.go('/');
+    if (showNudge) {
+      Future.delayed(const Duration(milliseconds: 400), () {
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null && ctx.mounted) {
+          showTutorialNudgeSheet(ctx);
+        }
+      });
+    }
   }
 
   @override
@@ -107,6 +115,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
     return Scaffold(
       backgroundColor: cs.surface,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: false,
         child: Column(

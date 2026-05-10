@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/brand_icon.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../models/tutorial_chapter.dart';
 import '../providers/tutorial_provider.dart';
 import '../providers/tutorial_sandbox_provider.dart';
@@ -21,10 +22,16 @@ class TutorialChapterScreen extends ConsumerWidget {
       backgroundColor: cs.surface,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(KuberSpacing.xl),
+          padding: const EdgeInsets.fromLTRB(
+            KuberSpacing.xl,
+            KuberSpacing.xl,
+            KuberSpacing.xl,
+            0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Top bar — always visible
               Row(
                 children: [
                   const BrandIcon(size: 36),
@@ -45,65 +52,65 @@ class TutorialChapterScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: KuberSpacing.xxl),
-              Text(
-                'Pick a chapter.',
-                style: GoogleFonts.inter(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                  letterSpacing: -0.8,
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.sm),
-              Text(
-                'Five quick chapters, about 2 minutes each. Jump in anywhere.',
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
               const SizedBox(height: KuberSpacing.xl),
+
+              // Scrollable list with heading as first item
               Expanded(
                 child: ListView.separated(
-                  itemCount: tutorialChapters.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: KuberSpacing.md),
+                  itemCount: tutorialChapters.length + 1,
+                  separatorBuilder: (_, index) => index == 0
+                      ? const SizedBox(height: KuberSpacing.xl)
+                      : const SizedBox(height: KuberSpacing.md),
                   itemBuilder: (context, index) {
-                    final chapter = tutorialChapters[index];
+                    if (index == 0) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pick a chapter.',
+                            style: GoogleFonts.inter(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              color: cs.onSurface,
+                              letterSpacing: -0.8,
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpacing.sm),
+                          Text(
+                            'Five quick chapters, about 2 minutes each. Jump in anywhere.',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    final chapter = tutorialChapters[index - 1];
+                    final chapterIndex = index - 1;
                     return _ChapterCard(
                       chapter: chapter,
-                      selected: state.isActive && state.chapterIndex == index,
-                      completed: state.completedChapters.contains(index),
-                      onTap: () => _startChapter(context, ref, index),
+                      selected:
+                          state.isActive && state.chapterIndex == chapterIndex,
+                      completed:
+                          state.completedChapters.contains(chapterIndex),
+                      onTap: () => _startChapter(context, ref, chapterIndex),
                     );
                   },
                 ),
               ),
-              const SizedBox(height: KuberSpacing.lg),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: OutlinedButton(
-                        onPressed: () => _confirmSkip(context, ref),
-                        child: const Text('Maybe later'),
-                      ),
-                    ),
+
+              // Bottom CTA — full-width single button
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: KuberSpacing.lg),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: () => _startChapter(context, ref, 0),
+                    child: const Text('Start from beginning →'),
                   ),
-                  const SizedBox(width: KuberSpacing.md),
-                  Expanded(
-                    flex: 2,
-                    child: SizedBox(
-                      height: 48,
-                      child: FilledButton(
-                        onPressed: () => _startChapter(context, ref, 0),
-                        child: const Text('Start from beginning →'),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -118,23 +125,55 @@ class TutorialChapterScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmSkip(BuildContext context, WidgetRef ref) async {
-    final skip = await showDialog<bool>(
+    final skip = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Skip tutorial?'),
-        content: const Text('You can always replay it from More → Tutorial.'),
-        actions: [
-          OutlinedButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep going'),
+      isScrollControlled: true,
+      useRootNavigator: true,
+      builder: (sheetCtx) {
+        final cs = Theme.of(sheetCtx).colorScheme;
+        return KuberBottomSheet(
+          title: 'Skip tutorial?',
+          actions: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(
+                      sheetCtx,
+                      rootNavigator: true,
+                    ).pop(false),
+                    child: const Text('Keep going'),
+                  ),
+                ),
+              ),
+              SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(
+                      sheetCtx,
+                      rootNavigator: true,
+                    ).pop(true),
+                    child: const Text('Skip'),
+                  ),
+                ),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Skip'),
+          child: Text(
+            'You can always replay it from More → Tutorial.',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              height: 1.5,
+              color: cs.onSurfaceVariant,
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
+
     if (skip == true && context.mounted) {
       final sandbox = ref.read(tutorialSandboxIsarProvider);
       if (sandbox != null) {

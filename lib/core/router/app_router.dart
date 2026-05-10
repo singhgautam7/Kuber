@@ -75,7 +75,7 @@ import '../../features/tools/hra_calculator/hra_calculator_screen.dart';
 import '../../features/tools/bill_splitter/add_edit_bill_screen.dart';
 import '../../features/tools/bill_splitter/bill_splitter_screen.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
 final _shellHistoryKey = GlobalKey<NavigatorState>(debugLabel: 'history');
 final _shellAnalyticsKey = GlobalKey<NavigatorState>(debugLabel: 'analytics');
@@ -101,7 +101,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: GoRouterRefreshStream(
       ref.watch(recurringProcessResultProvider.notifier).stream,
@@ -133,24 +133,24 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/splash',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: '/onboarding',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => OnboardingFlow(
           isReplay: state.uri.queryParameters['replay'] == 'true',
         ),
       ),
       GoRoute(
         path: '/tutorial',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const TutorialChapterScreen(),
       ),
       GoRoute(
         path: '/add-transaction',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: AddTransactionScreen(
@@ -176,18 +176,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/analytics/filter',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AnalyticsFilterScreen(),
       ),
       GoRoute(
         path: '/history/filter',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AdvancedFilterScreen(),
       ),
 
       GoRoute(
         path: '/category/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) {
           final args = state.extra as CategoryRouteArgs?;
           return AddEditCategoryScreen(
@@ -200,48 +200,48 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       GoRoute(
         path: '/accounts/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AddEditAccountScreen(),
       ),
       GoRoute(
         path: '/accounts/edit',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) =>
             AddEditAccountScreen(account: state.extra as Account?),
       ),
 
       GoRoute(
         path: '/recurring/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const AddRecurringScreen(),
       ),
       GoRoute(
         path: '/recurring/edit',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddRecurringScreen(existingRule: state.extra as RecurringRule?),
       ),
 
       GoRoute(
         path: '/recurring-loader',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const RecurringLoaderScreen(),
       ),
       GoRoute(
         name: 'permissions',
         path: '/security',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const PermissionsScreen(),
       ),
       GoRoute(
         name: 'about',
         path: '/more/about',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const AboutScreen(),
       ),
       GoRoute(
         path: '/more/feedback',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const FeedbackScreen(),
       ),
       StatefulShellRoute(
@@ -296,169 +296,169 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'accounts',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const AccountsScreen(),
                   ),
                   GoRoute(
                     path: 'categories',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const CategoriesScreen(),
                   ),
                   GoRoute(
                     path: 'tags',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const TagsScreen(),
                   ),
                   GoRoute(
                     path: 'settings',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const SettingsScreen(),
                   ),
                   GoRoute(
                     path: 'how-to-use',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const HowToUseScreen(),
                   ),
                   GoRoute(
                     path: 'data',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const DataManagementScreen(),
                   ),
                   GoRoute(
                     path: 'recurring',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const RecurringScreen(),
                   ),
                   GoRoute(
                     path: 'budgets',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const BudgetsScreen(),
                   ),
                   GoRoute(
                     path: 'ledger',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const LedgerScreen(),
                   ),
                   GoRoute(
                     path: 'loans',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const LoansScreen(),
                   ),
                   GoRoute(
                     path: 'investments',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const InvestmentsScreen(),
                   ),
                   GoRoute(
                     path: 'charts',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const ChartsScreen(),
                   ),
                   GoRoute(
                     path: 'ask-kuber',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const AskKuberScreen(),
                   ),
                   GoRoute(
                     path: 'troubleshoot',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const TroubleshootScreen(),
                   ),
                   GoRoute(
                     path: 'tools',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const ToolsHubScreen(),
                   ),
 
                   GoRoute(
                     path: 'tools/currency-converter',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const CurrencyConverterScreen(),
                   ),
                   GoRoute(
                     path: 'tools/emi-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const EmiCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/sip-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) =>
                         const InvestmentReturnsCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/sip-amount-finder',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const SipAmountFinderScreen(),
                   ),
                   GoRoute(
                     path: 'tools/tip-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const TipCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/discount-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const DiscountCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/gst-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const GstCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/fd-rd-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const FdRdCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/ppf-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const PpfCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/salary-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const SalaryCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/inflation-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const InflationCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/breakeven-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const BreakevenCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/hra-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const HraCalculatorScreen(),
                   ),
                   GoRoute(
                     path: 'tools/split-calculator',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const BillSplitterScreen(),
                   ),
                   GoRoute(
                     path: 'search',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const MoreSearchScreen(),
                   ),
                   GoRoute(
                     path: 'dev-tools',
-                    parentNavigatorKey: _rootNavigatorKey,
+                    parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const DevToolsScreen(),
                     routes: [
                       GoRoute(
                         path: 'db-explorer',
-                        parentNavigatorKey: _rootNavigatorKey,
+                        parentNavigatorKey: rootNavigatorKey,
                         builder: (_, _) => const DbExplorerScreen(),
                         routes: [
                           GoRoute(
                             path: ':collection',
-                            parentNavigatorKey: _rootNavigatorKey,
+                            parentNavigatorKey: rootNavigatorKey,
                             builder: (_, state) => DbCollectionScreen(
                               collectionName:
                                   state.pathParameters['collection']!,
@@ -476,25 +476,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/budgets/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddEditBudgetScreen(preselectedCategory: state.extra as Category?),
       ),
       GoRoute(
         path: '/budgets/edit',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddEditBudgetScreen(existingBudget: state.extra as Budget?),
       ),
       GoRoute(
         path: '/more/tools/split-calculator/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const AddEditBillScreen(),
       ),
 
       GoRoute(
         path: '/ledger/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) {
           final extra = state.extra;
           return AddLedgerScreen(
@@ -504,28 +504,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/ledger/edit',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddLedgerScreen(existing: state.extra as Ledger?),
       ),
       GoRoute(
         path: '/loans/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const AddLoanScreen(),
       ),
       GoRoute(
         path: '/loans/edit',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => AddLoanScreen(existing: state.extra as Loan?),
       ),
       GoRoute(
         path: '/investments/add',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const AddInvestmentScreen(),
       ),
       GoRoute(
         path: '/investments/edit',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddInvestmentScreen(existing: state.extra as Investment?),
       ),

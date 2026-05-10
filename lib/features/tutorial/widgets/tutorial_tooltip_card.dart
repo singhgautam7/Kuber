@@ -166,6 +166,7 @@ class _TooltipContent extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: colorScheme.primary,
+                decoration: TextDecoration.none,
               ),
             ),
           ),
@@ -176,6 +177,7 @@ class _TooltipContent extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: colorScheme.onSurface,
+              decoration: TextDecoration.none,
             ),
           ),
           const SizedBox(height: KuberSpacing.sm),
@@ -187,6 +189,7 @@ class _TooltipContent extends StatelessWidget {
               fontSize: 13,
               height: 1.5,
               color: colorScheme.onSurfaceVariant,
+              decoration: TextDecoration.none,
             ),
           ),
           const SizedBox(height: KuberSpacing.lg),
@@ -221,11 +224,12 @@ class _TooltipContent extends StatelessWidget {
                   style: GoogleFonts.inter(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w700,
+                    decoration: TextDecoration.none,
                   ),
                 ),
               ),
               const Spacer(),
-              if (!state.isFirstStep) ...[
+              if (state.stepIndex > 0) ...[
                 OutlinedButton(onPressed: onPrev, child: const Text('‹ Prev')),
                 const SizedBox(width: KuberSpacing.sm),
               ],

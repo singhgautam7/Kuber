@@ -1,82 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../more/screens/more_screen.dart';
 import '../../settings/widgets/settings_widgets.dart';
 
-class OnboardingTutorialNudge extends StatefulWidget {
-  final Widget child;
-
-  const OnboardingTutorialNudge({super.key, required this.child});
-
-  @override
-  State<OnboardingTutorialNudge> createState() =>
-      _OnboardingTutorialNudgeState();
+/// Opens the post-onboarding "Just so you know" bottom sheet. Called directly
+/// after the user taps "Start my journey" so the sheet appears on top of the
+/// home screen without relying on a global widget listener.
+void showTutorialNudgeSheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useRootNavigator: true,
+    builder: (_) => const _TutorialNudgeSheet(),
+  );
 }
 
-class _OnboardingTutorialNudgeState extends State<OnboardingTutorialNudge> {
-  bool _checking = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showIfPending());
-  }
-
-  @override
-  void didUpdateWidget(covariant OnboardingTutorialNudge oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showIfPending());
-  }
-
-  Future<void> _showIfPending() async {
-    if (!mounted || _checking) return;
-    _checking = true;
-    final prefs = await SharedPreferences.getInstance();
-    final pending =
-        prefs.getBool(PrefsKeys.onboardingTutorialNudgePending) ?? false;
-    if (!pending || !mounted) {
-      _checking = false;
-      return;
-    }
-    await prefs.setBool(PrefsKeys.onboardingTutorialNudgePending, false);
-    _checking = false;
-    if (!mounted) return;
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      builder: (_) => const _TutorialNudgeSheet(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
-class _TutorialNudgeSheet extends StatelessWidget {
+class _TutorialNudgeSheet extends ConsumerWidget {
   const _TutorialNudgeSheet();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
 
     return KuberBottomSheet(
       title: 'Just so you know',
       leadingIcon: SquircleIcon(icon: Icons.school_rounded, color: cs.primary),
-      actions: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: FilledButton(
-          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
-          child: Text(
-            'Got it',
-            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w800),
+      actions: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () async {
+                Navigator.of(context, rootNavigator: true).pop();
+                if (context.mounted) {
+                  await launchTutorialFromMore(context, ref);
+                }
+              },
+              child: const Text('Go to tutorials'),
+            ),
           ),
-        ),
+          const SizedBox(height: KuberSpacing.sm),
+          SizedBox(
+            height: 48,
+            child: FilledButton(
+              onPressed: () =>
+                  Navigator.of(context, rootNavigator: true).pop(),
+              child: Text(
+                'Got it',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       child: Column(
         children: const [

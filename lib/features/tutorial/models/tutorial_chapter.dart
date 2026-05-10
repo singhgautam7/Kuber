@@ -166,6 +166,12 @@ final tutorialChapters = <TutorialChapter>[
     route: '/analytics',
     steps: [
       TutorialStep(
+        key: TutorialStepKeys.analyticsFilterPill,
+        title: 'Set the date range first',
+        description:
+            'By default only today\'s data is shown. Tap this pill and pick "All time" so the charts below have something to graph.',
+      ),
+      TutorialStep(
         key: TutorialStepKeys.analyticsPage,
         title: 'Your financial snapshot',
         description: 'Visual breakdowns of where your money goes each month.',

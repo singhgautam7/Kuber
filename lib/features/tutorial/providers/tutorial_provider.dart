@@ -83,18 +83,9 @@ class TutorialNotifier extends StateNotifier<TutorialState> {
   }
 
   void prevStep() {
-    if (state.isFirstStep) return;
-
-    if (state.stepIndex > 0) {
-      state = state.copyWith(stepIndex: state.stepIndex - 1);
-      return;
-    }
-
-    final previousChapterIndex = state.chapterIndex - 1;
-    state = state.copyWith(
-      chapterIndex: previousChapterIndex,
-      stepIndex: tutorialChapters[previousChapterIndex].steps.length - 1,
-    );
+    // Prev is scoped to the current chapter. Step 0 is the floor.
+    if (state.stepIndex == 0) return;
+    state = state.copyWith(stepIndex: state.stepIndex - 1);
   }
 
   void completeTutorial() {
