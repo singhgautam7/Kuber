@@ -3,7 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 
 /// Shared amount input widget used by both normal and transfer forms.
@@ -25,6 +26,7 @@ class AmountInput extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
 
     return Column(
       children: [
@@ -45,9 +47,7 @@ class AmountInput extends ConsumerWidget {
                     decimal: true,
                   ),
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,2}'),
-                    ),
+                    CurrencyInputFormatter(isIndian: isIndian),
                   ],
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -89,7 +89,7 @@ class AmountInput extends ConsumerWidget {
               Positioned(
                 right: 0,
                 child: GestureDetector(
-                  onTap: () => _openCalculator(context),
+                  onTap: () => _openCalculator(context, ref),
                   child: Container(
                     width: 44,
                     height: 44,
@@ -123,12 +123,19 @@ class AmountInput extends ConsumerWidget {
               child: GestureDetector(
                 onTap: () {
                   final current =
-                      double.tryParse(controller.text.trim()) ?? 0;
+                      double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0;
                   final newAmount = current + amount;
-                  controller.text =
-                      newAmount.truncateToDouble() == newAmount
-                          ? newAmount.toInt().toString()
-                          : newAmount.toStringAsFixed(2);
+                  final unformattedText = newAmount.truncateToDouble() == newAmount
+                      ? newAmount.toInt().toString()
+                      : newAmount.toStringAsFixed(2);
+                  
+                  controller.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
+                    TextEditingValue.empty,
+                    TextEditingValue(
+                      text: unformattedText,
+                      selection: TextSelection.collapsed(offset: unformattedText.length),
+                    ),
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -155,9 +162,10 @@ class AmountInput extends ConsumerWidget {
     );
   }
 
-  void _openCalculator(BuildContext context) {
+  void _openCalculator(BuildContext context, WidgetRef ref) {
     FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
+    final isIndian = ref.read(formatterProvider).system == NumberSystem.indian;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -169,11 +177,18 @@ class AmountInput extends ConsumerWidget {
             BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => KuberCalculator(
-        initialValue: double.tryParse(controller.text.trim()) ?? 0,
+        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
-          controller.text = result == result.truncateToDouble()
+          final unformattedText = result == result.truncateToDouble()
               ? result.toInt().toString()
               : result.toStringAsFixed(2);
+          controller.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
+            TextEditingValue.empty,
+            TextEditingValue(
+              text: unformattedText,
+              selection: TextSelection.collapsed(offset: unformattedText.length),
+            ),
+          );
         },
       ),
     ).then((_) {

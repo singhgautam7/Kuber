@@ -6,6 +6,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
 import 'features/settings/providers/settings_provider.dart';
+import 'features/tutorial/widgets/tutorial_overlay.dart';
 
 class KuberApp extends ConsumerWidget {
   const KuberApp({super.key});
@@ -26,21 +27,28 @@ class KuberApp extends ConsumerWidget {
         final brightness = Theme.of(context).brightness;
         final isDark = brightness == Brightness.dark;
 
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness:
-                isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness:
-                isDark ? Brightness.dark : Brightness.light,
-          ),
-          child: ColoredBox(
-            color: Theme.of(context).colorScheme.surface,
-            child: SafeArea(
-              bottom: false,
-              left: false,
-              right: false,
-              child: LockScreen(child: child!),
+        return Navigator(
+          onGenerateRoute: (settings) => PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness:
+                    isDark ? Brightness.light : Brightness.dark,
+                statusBarBrightness:
+                    isDark ? Brightness.dark : Brightness.light,
+              ),
+              child: ColoredBox(
+                color: Theme.of(context).colorScheme.surface,
+                child: TutorialOverlay(
+                  child: SafeArea(
+                    bottom: false,
+                    left: false,
+                    right: false,
+                    child: LockScreen(child: child!),
+                  ),
+                ),
+              ),
             ),
           ),
         );

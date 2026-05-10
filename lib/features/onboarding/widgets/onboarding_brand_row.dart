@@ -1,0 +1,53 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/brand_icon.dart';
+
+class OnboardingBrandRow extends StatelessWidget {
+  final VoidCallback? onSkip;
+
+  const OnboardingBrandRow({super.key, this.onSkip});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpacing.xl,
+        KuberSpacing.lg,
+        KuberSpacing.xl,
+        KuberSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          const BrandIcon(size: 40),
+          const SizedBox(width: KuberSpacing.md),
+          Text(
+            'Kuber',
+            style: GoogleFonts.inter(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const Spacer(),
+          if (onSkip != null)
+            TextButton(
+              onPressed: onSkip,
+              child: Text(
+                'Skip',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

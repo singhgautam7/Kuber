@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/ledger.dart';
@@ -12,13 +12,13 @@ import '../data/ledger_repository.dart';
 import '../utils/ledger_calculations.dart' as calc;
 
 final ledgerRepositoryProvider = Provider<LedgerRepository>((ref) {
-  return LedgerRepository(ref.watch(isarProvider));
+  return LedgerRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final ledgerListProvider =
     AsyncNotifierProvider<LedgerListNotifier, List<Ledger>>(
-  LedgerListNotifier.new,
-);
+      LedgerListNotifier.new,
+    );
 
 class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
   @override
@@ -120,12 +120,14 @@ class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
       ..categoryId = categoryId
       ..updatedAt = DateTime.now();
 
-    await ref.read(transactionListProvider.notifier).updateTransaction(initialTxn);
+    await ref
+        .read(transactionListProvider.notifier)
+        .updateTransaction(initialTxn);
     ref.invalidateSelf();
   }
 
   Future<void> deleteLedger(Ledger ledger) async {
-    final isar = ref.read(isarProvider);
+    final isar = ref.read(tutorialAwareIsarProvider);
 
     // Delete all linked transactions
     final linkedTxns = await isar.transactions
@@ -134,8 +136,7 @@ class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
         .findAll();
 
     await isar.writeTxn(() async {
-      await isar.transactions
-          .deleteAll(linkedTxns.map((t) => t.id).toList());
+      await isar.transactions.deleteAll(linkedTxns.map((t) => t.id).toList());
       await isar.ledgers.delete(ledger.id);
     });
 
@@ -177,11 +178,7 @@ class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
     final remaining = calc.computeRemaining(ledger, allTxns);
 
     if (remaining > 0) {
-      await addPayment(
-        ledger: ledger,
-        amount: remaining,
-        accountId: accountId,
-      );
+      await addPayment(ledger: ledger, amount: remaining, accountId: accountId);
     }
 
     ledger
@@ -195,24 +192,22 @@ class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
 /// All transactions linked to a specific ledger, sorted newest-first.
 final ledgerTransactionsProvider =
     FutureProvider.family<List<Transaction>, String>((ref, ledgerUid) async {
-  final all = await ref.watch(transactionListProvider.future);
-  return all
-      .where((t) => t.linkedRuleId == ledgerUid)
-      .toList()
-    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-});
+      final all = await ref.watch(transactionListProvider.future);
+      return all.where((t) => t.linkedRuleId == ledgerUid).toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
 
 /// Payment transactions only (excluding initial) for a ledger.
-final ledgerPaymentsProvider =
-    FutureProvider.family<List<Transaction>, String>((ref, ledgerUid) async {
-  final all = await ref.watch(transactionListProvider.future);
-  return all.where((t) {
-    if (t.linkedRuleId != ledgerUid) return false;
-    final lower = t.name.toLowerCase();
-    return !lower.startsWith('lent to') && !lower.startsWith('borrowed from');
-  }).toList()
-    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-});
+final ledgerPaymentsProvider = FutureProvider.family<List<Transaction>, String>(
+  (ref, ledgerUid) async {
+    final all = await ref.watch(transactionListProvider.future);
+    return all.where((t) {
+      if (t.linkedRuleId != ledgerUid) return false;
+      final lower = t.name.toLowerCase();
+      return !lower.startsWith('lent to') && !lower.startsWith('borrowed from');
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  },
+);
 
 /// Distinct person names for autocomplete.
 final ledgerPersonNamesProvider = FutureProvider<List<String>>((ref) async {
@@ -221,11 +216,13 @@ final ledgerPersonNamesProvider = FutureProvider<List<String>>((ref) async {
 });
 
 /// Summary: total to receive and total owed.
-final ledgerSummaryProvider = FutureProvider<({double toReceive, double owed})>((ref) async {
-  final ledgers = await ref.watch(ledgerListProvider.future);
-  final txns = await ref.watch(transactionListProvider.future);
-  return (
-    toReceive: calc.totalToReceive(ledgers, txns),
-    owed: calc.totalOwed(ledgers, txns),
-  );
-});
+final ledgerSummaryProvider = FutureProvider<({double toReceive, double owed})>(
+  (ref) async {
+    final ledgers = await ref.watch(ledgerListProvider.future);
+    final txns = await ref.watch(transactionListProvider.future);
+    return (
+      toReceive: calc.totalToReceive(ledgers, txns),
+      owed: calc.totalOwed(ledgers, txns),
+    );
+  },
+);

@@ -152,35 +152,20 @@ class TransactionRow extends ConsumerWidget {
 
   /// Builds the secondary indicator text showing attachment count and/or tags.
   /// Returns null when there's nothing to show.
-  String? _buildIndicatorText() {
+  bool _hasIndicator() {
     final hasAttachments = transaction.attachmentPaths.isNotEmpty;
+    final hasNotes = transaction.notes?.isNotEmpty == true;
     final hasTags = tagNames.isNotEmpty;
-    if (!hasAttachments && !hasTags) return null;
-
-    final parts = <String>[];
-
-    if (hasAttachments) {
-      parts.add('${transaction.attachmentPaths.length}');
-    }
-
-    if (hasTags) {
-      final visible = tagNames.take(2).map((t) => '#$t').join(' ');
-      final remaining = tagNames.length - 2;
-      if (remaining > 0) {
-        parts.add('$visible +$remaining more');
-      } else {
-        parts.add(visible);
-      }
-    }
-
-    return parts.join('  \u00B7  ');
+    return hasAttachments || hasNotes || hasTags;
   }
 
-  /// Builds a styled TextSpan with tags in accent color and attachment chip in golden.
+  /// Builds a styled TextSpan with tags in accent color and attachment/notes chips.
   InlineSpan _buildIndicatorSpan(ColorScheme cs) {
     final hasAttachments = transaction.attachmentPaths.isNotEmpty;
+    final hasNotes = transaction.notes?.isNotEmpty == true;
     final hasTags = tagNames.isNotEmpty;
     const goldColor = Color(0xFFD4A017);
+    final blueColor = cs.primary;
     final baseStyle = TextStyle(
       fontSize: 11,
       fontWeight: FontWeight.w400,
@@ -198,7 +183,8 @@ class TransactionRow extends ConsumerWidget {
       spans.add(WidgetSpan(
         alignment: PlaceholderAlignment.middle,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+          height: 16,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             color: goldColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(4),
@@ -206,6 +192,7 @@ class TransactionRow extends ConsumerWidget {
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.attach_file_rounded, size: 11, color: goldColor),
               const SizedBox(width: 2),
@@ -213,6 +200,7 @@ class TransactionRow extends ConsumerWidget {
                 '${transaction.attachmentPaths.length}',
                 style: const TextStyle(
                   fontSize: 10,
+                  height: 1.0,
                   fontWeight: FontWeight.w600,
                   color: goldColor,
                 ),
@@ -223,7 +211,33 @@ class TransactionRow extends ConsumerWidget {
       ));
     }
 
-    if (hasAttachments && hasTags) {
+    if (hasAttachments && hasNotes) {
+      spans.add(const WidgetSpan(child: SizedBox(width: 4)));
+    }
+
+    if (hasNotes) {
+      spans.add(WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: Container(
+          height: 16,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            color: blueColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: blueColor.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.notes_rounded, size: 11, color: blueColor),
+            ],
+          ),
+        ),
+      ));
+    }
+
+    if ((hasAttachments || hasNotes) && hasTags) {
       spans.add(TextSpan(text: '  \u00B7  ', style: baseStyle));
     }
 
@@ -422,7 +436,7 @@ class TransactionRow extends ConsumerWidget {
                         ],
                       ],
                     ),
-                    if (_buildIndicatorText() != null) ...[
+                    if (_hasIndicator()) ...[
                       const SizedBox(height: 2),
                       Text.rich(
                         _buildIndicatorSpan(cs),

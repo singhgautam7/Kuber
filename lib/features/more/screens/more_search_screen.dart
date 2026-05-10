@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../dev/providers/dev_mode_provider.dart';
 import '../../settings/widgets/settings_widgets.dart';
+import 'more_screen.dart';
 
 class _SearchableItem {
   final String label;
@@ -18,6 +19,7 @@ class _SearchableItem {
   final String? namedRoute;
   final Color? color;
   final VoidCallback? onAction;
+  final Future<void> Function(BuildContext, WidgetRef)? onRefAction;
 
   const _SearchableItem({
     required this.label,
@@ -28,6 +30,7 @@ class _SearchableItem {
     this.namedRoute,
     this.color,
     this.onAction,
+    this.onRefAction,
   });
 
   bool matches(String q) {
@@ -36,8 +39,10 @@ class _SearchableItem {
         subtitle.toLowerCase().contains(lower);
   }
 
-  void navigate(BuildContext context) {
-    if (onAction != null) {
+  void navigate(BuildContext context, WidgetRef ref) {
+    if (onRefAction != null) {
+      onRefAction!(context, ref);
+    } else if (onAction != null) {
       onAction!();
     } else if (namedRoute != null) {
       context.pushNamed(namedRoute!);
@@ -48,75 +53,270 @@ class _SearchableItem {
 }
 
 List<_SearchableItem> _buildItems(bool isDevMode) => [
-      // AI Assistant
-      _SearchableItem(
-        label: 'Ask Kuber',
-        subtitle: 'On-device spending insights',
-        icon: Icons.auto_awesome_rounded,
-        section: 'AI',
-        route: '/more/ask-kuber',
-        color: const Color(0xFFFFB300),
+  // AI Assistant
+  _SearchableItem(
+    label: 'Ask Kuber',
+    subtitle: 'On-device spending insights',
+    icon: Icons.auto_awesome_rounded,
+    section: 'AI',
+    route: '/more/ask-kuber',
+    color: const Color(0xFFFFB300),
+  ),
+  // Manage
+  _SearchableItem(
+    label: 'Accounts',
+    subtitle: 'Your wallets and bank accounts',
+    icon: Icons.account_balance_wallet_outlined,
+    section: 'Manage',
+    route: '/more/accounts',
+  ),
+  _SearchableItem(
+    label: 'Categories',
+    subtitle: 'Organize your transactions',
+    icon: Icons.category_outlined,
+    section: 'Manage',
+    route: '/more/categories',
+  ),
+  _SearchableItem(
+    label: 'Tags',
+    subtitle: 'Organize the labels for your transactions',
+    icon: Icons.label_outlined,
+    section: 'Manage',
+    route: '/more/tags',
+  ),
+  _SearchableItem(
+    label: 'Budgets',
+    subtitle: 'Track and control your monthly spending',
+    icon: Icons.account_balance_rounded,
+    section: 'Manage',
+    route: '/more/budgets',
+  ),
+  _SearchableItem(
+    label: 'Recurring Transactions',
+    subtitle: 'Automated scheduled transactions',
+    icon: Icons.sync_rounded,
+    section: 'Manage',
+    route: '/more/recurring',
+  ),
+  _SearchableItem(
+    label: 'Lend / Borrow',
+    subtitle: 'Track money you lent or borrowed',
+    icon: Icons.handshake_outlined,
+    section: 'Manage',
+    route: '/more/ledger',
+  ),
+  _SearchableItem(
+    label: 'Loans',
+    subtitle: 'Track EMIs and repayment progress',
+    icon: Icons.account_balance_outlined,
+    section: 'Manage',
+    route: '/more/loans',
+  ),
+  _SearchableItem(
+    label: 'Investments',
+    subtitle: 'Track portfolio value and growth',
+    icon: Icons.show_chart,
+    section: 'Manage',
+    route: '/more/investments',
+  ),
+  // Tools hub
+  _SearchableItem(
+    label: 'Calculators & Tools',
+    subtitle: 'EMI, SIP, salary, GST, split & more',
+    icon: Icons.calculate_outlined,
+    section: 'Tools',
+    route: '/more/tools',
+  ),
+  _SearchableItem(
+    label: 'App Tutorial',
+    subtitle: 'Replay the feature walkthrough',
+    icon: Icons.school_rounded,
+    section: 'Tutorial',
+    onRefAction: launchTutorialFromMore,
+  ),
+  _SearchableItem(
+    label: 'Welcome Tour',
+    subtitle: 'Replay the onboarding screens',
+    icon: Icons.auto_stories_rounded,
+    section: 'Tutorial',
+    route: '/onboarding?replay=true',
+  ),
+  // Individual tools
+  _SearchableItem(
+    label: 'EMI Calculator',
+    subtitle: 'Loan repayments',
+    icon: Icons.account_balance_rounded,
+    section: 'Tools',
+    route: '/more/tools/emi-calculator',
+  ),
+  _SearchableItem(
+    label: 'Investment Returns',
+    subtitle: 'SIP & lump-sum growth',
+    icon: Icons.trending_up_rounded,
+    section: 'Tools',
+    route: '/more/tools/sip-calculator',
+  ),
+  _SearchableItem(
+    label: 'SIP Amount',
+    subtitle: 'Find monthly investment',
+    icon: Icons.savings_rounded,
+    section: 'Tools',
+    route: '/more/tools/sip-amount-finder',
+  ),
+  _SearchableItem(
+    label: 'FD / RD',
+    subtitle: 'Fixed & recurring deposits',
+    icon: Icons.account_balance_wallet_rounded,
+    section: 'Tools',
+    route: '/more/tools/fd-rd-calculator',
+  ),
+  _SearchableItem(
+    label: 'PPF Calculator',
+    subtitle: '15-year provident fund',
+    icon: Icons.shield_rounded,
+    section: 'Tools',
+    route: '/more/tools/ppf-calculator',
+  ),
+  _SearchableItem(
+    label: 'Inflation',
+    subtitle: 'Future purchasing power',
+    icon: Icons.trending_down_rounded,
+    section: 'Tools',
+    route: '/more/tools/inflation-calculator',
+  ),
+  _SearchableItem(
+    label: 'Salary Breakdown',
+    subtitle: 'CTC → in-hand',
+    icon: Icons.work_rounded,
+    section: 'Tools',
+    route: '/more/tools/salary-calculator',
+  ),
+  _SearchableItem(
+    label: 'GST Calculator',
+    subtitle: 'Add or remove GST',
+    icon: Icons.percent_rounded,
+    section: 'Tools',
+    route: '/more/tools/gst-calculator',
+  ),
+  _SearchableItem(
+    label: 'HRA Exemption',
+    subtitle: 'Old regime tax',
+    icon: Icons.home_work_rounded,
+    section: 'Tools',
+    route: '/more/tools/hra-calculator',
+  ),
+  _SearchableItem(
+    label: 'Tip Calculator',
+    subtitle: 'Bills & gratuity',
+    icon: Icons.receipt_long_rounded,
+    section: 'Tools',
+    route: '/more/tools/tip-calculator',
+  ),
+  _SearchableItem(
+    label: 'Discount Calculator',
+    subtitle: 'Find the best deal',
+    icon: Icons.local_offer_rounded,
+    section: 'Tools',
+    route: '/more/tools/discount-calculator',
+  ),
+  _SearchableItem(
+    label: 'Break-even',
+    subtitle: 'Months to recover',
+    icon: Icons.timeline_rounded,
+    section: 'Tools',
+    route: '/more/tools/breakeven-calculator',
+  ),
+  _SearchableItem(
+    label: 'Split Calculator',
+    subtitle: 'Split expenses between people',
+    icon: Icons.people_rounded,
+    section: 'Tools',
+    route: '/more/tools/split-calculator',
+  ),
+  _SearchableItem(
+    label: 'Currency Converter',
+    subtitle: 'Convert currencies',
+    icon: Icons.currency_exchange_rounded,
+    section: 'Tools',
+    route: '/more/tools/currency-converter',
+  ),
+  // App
+  _SearchableItem(
+    label: 'Settings',
+    subtitle: 'Theme, currency, and profile',
+    icon: Icons.settings_outlined,
+    section: 'App',
+    route: '/more/settings',
+  ),
+  _SearchableItem(
+    label: 'Data',
+    subtitle: 'Export and clear your data',
+    icon: Icons.storage_rounded,
+    section: 'App',
+    route: '/more/data',
+  ),
+  _SearchableItem(
+    label: 'Troubleshoot',
+    subtitle: 'Fix data and suggestion issues',
+    icon: Icons.build_outlined,
+    section: 'App',
+    route: '/more/troubleshoot',
+  ),
+  // About
+  _SearchableItem(
+    label: 'About Kuber',
+    subtitle: 'Vision, origin, and developer',
+    icon: Icons.info_outline_rounded,
+    section: 'About',
+    namedRoute: 'about',
+  ),
+  _SearchableItem(
+    label: 'Permissions',
+    subtitle: 'App limits and security',
+    icon: Icons.security_outlined,
+    section: 'About',
+    namedRoute: 'permissions',
+  ),
+  // Contact Us
+  _SearchableItem(
+    label: 'Rate Us on Play Store',
+    subtitle: 'Enjoying Kuber? Leave a review',
+    icon: Icons.star_rate_rounded,
+    section: 'Contact Us',
+    onAction: () => launchUrl(
+      Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
+      mode: LaunchMode.externalApplication,
+    ),
+  ),
+  _SearchableItem(
+    label: 'Share This App',
+    subtitle: 'Recommend Kuber to friends and family',
+    icon: Icons.share_rounded,
+    section: 'Contact Us',
+    onAction: () => SharePlus.instance.share(
+      ShareParams(
+        text:
+            'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
       ),
-      // Manage
-      _SearchableItem(label: 'Accounts', subtitle: 'Your wallets and bank accounts', icon: Icons.account_balance_wallet_outlined, section: 'Manage', route: '/more/accounts'),
-      _SearchableItem(label: 'Categories', subtitle: 'Organize your transactions', icon: Icons.category_outlined, section: 'Manage', route: '/more/categories'),
-      _SearchableItem(label: 'Tags', subtitle: 'Organize the labels for your transactions', icon: Icons.label_outlined, section: 'Manage', route: '/more/tags'),
-      _SearchableItem(label: 'Budgets', subtitle: 'Track and control your monthly spending', icon: Icons.account_balance_rounded, section: 'Manage', route: '/more/budgets'),
-      _SearchableItem(label: 'Recurring Transactions', subtitle: 'Automated scheduled transactions', icon: Icons.sync_rounded, section: 'Manage', route: '/more/recurring'),
-      _SearchableItem(label: 'Lend / Borrow', subtitle: 'Track money you lent or borrowed', icon: Icons.handshake_outlined, section: 'Manage', route: '/more/ledger'),
-      _SearchableItem(label: 'Loans', subtitle: 'Track EMIs and repayment progress', icon: Icons.account_balance_outlined, section: 'Manage', route: '/more/loans'),
-      _SearchableItem(label: 'Investments', subtitle: 'Track portfolio value and growth', icon: Icons.show_chart, section: 'Manage', route: '/more/investments'),
-      // Tools hub
-      _SearchableItem(label: 'Calculators & Tools', subtitle: 'EMI, SIP, salary, GST, split & more', icon: Icons.calculate_outlined, section: 'Tools', route: '/more/tools'),
-      // Individual tools
-      _SearchableItem(label: 'EMI Calculator', subtitle: 'Loan repayments', icon: Icons.account_balance_rounded, section: 'Tools', route: '/more/tools/emi-calculator'),
-      _SearchableItem(label: 'Investment Returns', subtitle: 'SIP & lump-sum growth', icon: Icons.trending_up_rounded, section: 'Tools', route: '/more/tools/sip-calculator'),
-      _SearchableItem(label: 'SIP Amount', subtitle: 'Find monthly investment', icon: Icons.savings_rounded, section: 'Tools', route: '/more/tools/sip-amount-finder'),
-      _SearchableItem(label: 'FD / RD', subtitle: 'Fixed & recurring deposits', icon: Icons.account_balance_wallet_rounded, section: 'Tools', route: '/more/tools/fd-rd-calculator'),
-      _SearchableItem(label: 'PPF Calculator', subtitle: '15-year provident fund', icon: Icons.shield_rounded, section: 'Tools', route: '/more/tools/ppf-calculator'),
-      _SearchableItem(label: 'Inflation', subtitle: 'Future purchasing power', icon: Icons.trending_down_rounded, section: 'Tools', route: '/more/tools/inflation-calculator'),
-      _SearchableItem(label: 'Salary Breakdown', subtitle: 'CTC → in-hand', icon: Icons.work_rounded, section: 'Tools', route: '/more/tools/salary-calculator'),
-      _SearchableItem(label: 'GST Calculator', subtitle: 'Add or remove GST', icon: Icons.percent_rounded, section: 'Tools', route: '/more/tools/gst-calculator'),
-      _SearchableItem(label: 'HRA Exemption', subtitle: 'Old regime tax', icon: Icons.home_work_rounded, section: 'Tools', route: '/more/tools/hra-calculator'),
-      _SearchableItem(label: 'Tip Calculator', subtitle: 'Bills & gratuity', icon: Icons.receipt_long_rounded, section: 'Tools', route: '/more/tools/tip-calculator'),
-      _SearchableItem(label: 'Discount Calculator', subtitle: 'Find the best deal', icon: Icons.local_offer_rounded, section: 'Tools', route: '/more/tools/discount-calculator'),
-      _SearchableItem(label: 'Break-even', subtitle: 'Months to recover', icon: Icons.timeline_rounded, section: 'Tools', route: '/more/tools/breakeven-calculator'),
-      _SearchableItem(label: 'Split Calculator', subtitle: 'Split expenses between people', icon: Icons.people_rounded, section: 'Tools', route: '/more/tools/split-calculator'),
-      _SearchableItem(label: 'Currency Converter', subtitle: 'Convert currencies', icon: Icons.currency_exchange_rounded, section: 'Tools', route: '/more/tools/currency-converter'),
-      // App
-      _SearchableItem(label: 'Settings', subtitle: 'Theme, currency, and profile', icon: Icons.settings_outlined, section: 'App', route: '/more/settings'),
-      _SearchableItem(label: 'Data', subtitle: 'Export and clear your data', icon: Icons.storage_rounded, section: 'App', route: '/more/data'),
-      _SearchableItem(label: 'Troubleshoot', subtitle: 'Fix data and suggestion issues', icon: Icons.build_outlined, section: 'App', route: '/more/troubleshoot'),
-      // About
-      _SearchableItem(label: 'About Kuber', subtitle: 'Vision, origin, and developer', icon: Icons.info_outline_rounded, section: 'About', namedRoute: 'about'),
-      _SearchableItem(label: 'Permissions', subtitle: 'App limits and security', icon: Icons.security_outlined, section: 'About', namedRoute: 'permissions'),
-      // Contact Us
-      _SearchableItem(
-        label: 'Rate Us on Play Store',
-        subtitle: 'Enjoying Kuber? Leave a review',
-        icon: Icons.star_rate_rounded,
-        section: 'Contact Us',
-        onAction: () => launchUrl(
-          Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
-          mode: LaunchMode.externalApplication,
-        ),
-      ),
-      _SearchableItem(
-        label: 'Share This App',
-        subtitle: 'Recommend Kuber to friends and family',
-        icon: Icons.share_rounded,
-        section: 'Contact Us',
-        onAction: () => SharePlus.instance.share(
-          ShareParams(
-            text: 'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
-          ),
-        ),
-      ),
-      _SearchableItem(label: 'Submit a Feedback', subtitle: 'Report a bug or suggest a feature', icon: Icons.feedback_outlined, section: 'Contact Us', route: '/more/feedback'),
-      // Dev Tools (conditional)
-      if (isDevMode)
-        _SearchableItem(label: 'Dev Tools', subtitle: 'Developer-only tools', icon: Icons.bug_report_outlined, section: 'Dev', route: '/more/dev-tools'),
-    ];
+    ),
+  ),
+  _SearchableItem(
+    label: 'Submit a Feedback',
+    subtitle: 'Report a bug or suggest a feature',
+    icon: Icons.feedback_outlined,
+    section: 'Contact Us',
+    route: '/more/feedback',
+  ),
+  // Dev Tools (conditional)
+  if (isDevMode)
+    _SearchableItem(
+      label: 'Dev Tools',
+      subtitle: 'Developer-only tools',
+      icon: Icons.bug_report_outlined,
+      section: 'Dev',
+      route: '/more/dev-tools',
+    ),
+];
 
 class MoreSearchScreen extends ConsumerStatefulWidget {
   const MoreSearchScreen({super.key});
@@ -254,11 +454,8 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                     )
                   : ListView.separated(
                       itemCount: filtered.length,
-                      separatorBuilder: (_, __) => Divider(
-                        height: 1,
-                        color: cs.outline,
-                        indent: 52,
-                      ),
+                      separatorBuilder: (_, __) =>
+                          Divider(height: 1, color: cs.outline, indent: 52),
                       itemBuilder: (context, index) =>
                           _SearchResultItem(item: filtered[index]),
                     ),
@@ -270,18 +467,18 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
   }
 }
 
-class _SearchResultItem extends StatelessWidget {
+class _SearchResultItem extends ConsumerWidget {
   final _SearchableItem item;
 
   const _SearchResultItem({required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => item.navigate(context),
+      onTap: () => item.navigate(context, ref),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: KuberSpacing.lg,
@@ -308,7 +505,9 @@ class _SearchResultItem extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: cs.primaryContainer,
                           borderRadius: BorderRadius.circular(KuberRadius.sm),
@@ -338,8 +537,11 @@ class _SearchResultItem extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 20,
+            ),
           ],
         ),
       ),

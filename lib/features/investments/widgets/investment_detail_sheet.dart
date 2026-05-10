@@ -363,7 +363,7 @@ class _InvestmentDetailSheetState
             label: 'Update',
             type: AppButtonType.primary,
             onPressed: () {
-              final value = double.tryParse(controller.text.trim());
+              final value = double.tryParse(controller.text.trim().replaceAll(',', ''));
               ref
                   .read(investmentListProvider.notifier)
                   .updateCurrentValue(widget.investment, value);

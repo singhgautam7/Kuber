@@ -12,6 +12,8 @@ import '../../../core/utils/transfer_helpers.dart';
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart' show formatterProvider, NumberSystem;
+import '../../../core/utils/formatters.dart';
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
 import '../providers/transaction_provider.dart';
@@ -33,16 +35,13 @@ import '../widgets/transfer_account_tile.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
   final String? initialType;
 
-  const AddTransactionScreen({
-    super.key,
-    this.transaction,
-    this.initialType,
-  });
+  const AddTransactionScreen({super.key, this.transaction, this.initialType});
 
   @override
   ConsumerState<AddTransactionScreen> createState() =>
@@ -77,9 +76,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _removedAttachments.length;
 
   List<String> get _displayPaths => [
-        ..._attachmentPaths.where((p) => !_removedAttachments.contains(p)),
-        ..._pendingAttachments,
-      ];
+    ..._attachmentPaths.where((p) => !_removedAttachments.contains(p)),
+    ..._pendingAttachments,
+  ];
 
   bool get _isEditing => widget.transaction != null;
 
@@ -110,14 +109,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     setState(() {
       _type = newType;
       if (_selectedCategoryId != null) {
-        final categories =
-            ref.read(categoryListProvider).valueOrNull ?? [];
+        final categories = ref.read(categoryListProvider).valueOrNull ?? [];
         final selectedCat = categories
             .where((c) => c.id == _selectedCategoryId)
             .firstOrNull;
         if (selectedCat != null) {
           final catType = selectedCat.type;
-          final isStillValid = catType == 'both' ||
+          final isStillValid =
+              catType == 'both' ||
               (newType == 'expense' && catType == 'expense') ||
               (newType == 'income' && catType == 'income');
           if (!isStillValid) {
@@ -141,7 +140,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _loadTags() async {
     if (widget.transaction == null) return;
-    final tags = await ref.read(tagRepositoryProvider).getTagsForTransaction(widget.transaction!.id);
+    final tags = await ref
+        .read(tagRepositoryProvider)
+        .getTagsForTransaction(widget.transaction!.id);
     if (mounted) {
       setState(() => _selectedTags = tags);
     }
@@ -149,7 +150,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _loadTransferPair(Transaction t) async {
     if (t.transferId == null) return;
-    final pair = await ref.read(transactionRepositoryProvider).findTransferPair(t.transferId!, t.id);
+    final pair = await ref
+        .read(transactionRepositoryProvider)
+        .findTransferPair(t.transferId!, t.id);
     if (pair != null && mounted) {
       setState(() => _selectedToAccountId = int.tryParse(pair.accountId));
     }
@@ -207,9 +210,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           _isEditing
               ? (_type == 'transfer' ? 'Edit Transfer' : 'Edit Transaction')
               : 'Add Transaction',
-          style: textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
@@ -220,8 +221,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.lg,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -229,6 +233,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                     // Type segmented button
                     TransactionTypeSelector(
+                      key: TutorialStepKeys.transactionTypeToggle,
                       selected: _type,
                       onSelected: _onTypeChanged,
                       enabled: !_isEditing,
@@ -244,6 +249,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                       // Amount input
                       AmountInput(
+                        key: TutorialStepKeys.amountField,
                         controller: _amountController,
                         amountColor: _typeColor,
                       ),
@@ -253,7 +259,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       _buildCategoryAccountRow(cs, categoryMap, accounts),
                       if (_selectedCategoryId != null) ...[
                         const SizedBox(height: KuberSpacing.md),
-                        BudgetProgressIndicator(categoryId: _selectedCategoryId!.toString()),
+                        BudgetProgressIndicator(
+                          categoryId: _selectedCategoryId!.toString(),
+                        ),
                       ],
                       const SizedBox(height: KuberSpacing.md),
 
@@ -277,19 +285,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   /// Used by both normal and transfer forms.
   List<Widget> _buildSharedFormFields({required bool showNotesPrefixIcon}) {
     return [
-      DateTimeTile(
-        selectedDate: _selectedDate,
-        onTap: _pickDate,
-      ),
+      DateTimeTile(selectedDate: _selectedDate, onTap: _pickDate),
       const SizedBox(height: KuberSpacing.md),
 
       TagsTile(
+        key: TutorialStepKeys.tagsPicker,
         selectedTags: _selectedTags,
         onTap: _showTagSelector,
       ),
       const SizedBox(height: KuberSpacing.md),
 
       NotesField(
+        key: TutorialStepKeys.notesField,
         controller: _notesController,
         focusNode: showNotesPrefixIcon ? null : _notesFocusNode,
         showPrefixIcon: showNotesPrefixIcon,
@@ -377,6 +384,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
         // Amount input (shared widget)
         AmountInput(
+          key: TutorialStepKeys.amountField,
           controller: _amountController,
           focusNode: _amountFocusNode,
           amountColor: cs.onSurface,
@@ -465,27 +473,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return TextField(
+          key: TutorialStepKeys.descriptionField,
           controller: controller,
           focusNode: focusNode,
           autofocus: !_isEditing,
           textCapitalization: TextCapitalization.sentences,
-          style: textTheme.bodyLarge?.copyWith(
-            color: cs.onSurface,
-          ),
+          style: textTheme.bodyLarge?.copyWith(color: cs.onSurface),
           decoration: InputDecoration(
             hintText: 'Transaction name',
             hintStyle: textTheme.bodyLarge?.copyWith(
               color: cs.onSurfaceVariant,
             ),
-            prefixIcon: Icon(
-              Icons.edit_outlined,
-              color: cs.onSurfaceVariant,
-            ),
+            prefixIcon: Icon(Icons.edit_outlined, color: cs.onSurfaceVariant),
           ),
         );
       },
       optionsViewBuilder: (context, onSelected, options) =>
           TransactionSuggestionOverlay(
+            key: TutorialStepKeys.suggestionList,
             options: options,
             onSelected: onSelected,
           ),
@@ -510,6 +515,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? catMap[_selectedCategoryId]
                   : null;
               return SelectorTile(
+                key: TutorialStepKeys.categoryPicker,
                 label: 'CATEGORY',
                 icon: cat != null
                     ? IconMapper.fromString(cat.icon)
@@ -533,6 +539,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? accs.where((a) => a.id == _selectedAccountId).firstOrNull
                   : null;
               return SelectorTile(
+                key: TutorialStepKeys.accountPicker,
                 label: 'FROM ACCOUNT',
                 icon: acc != null
                     ? resolveAccountIcon(acc)
@@ -562,22 +569,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       ),
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(
-          top: BorderSide(color: cs.outline),
-        ),
+        border: Border(top: BorderSide(color: cs.outline)),
       ),
       child: AppButton(
         label: _isEditing
             ? (_type == 'expense'
-                ? 'Update Expense'
-                : _type == 'income'
-                    ? 'Update Income'
-                    : 'Update Transfer')
+                  ? 'Update Expense'
+                  : _type == 'income'
+                  ? 'Update Income'
+                  : 'Update Transfer')
             : (_type == 'expense'
-                ? 'Save Expense'
-                : _type == 'income'
-                    ? 'Save Income'
-                    : 'Save Transfer'),
+                  ? 'Save Expense'
+                  : _type == 'income'
+                  ? 'Save Income'
+                  : 'Save Transfer'),
         type: AppButtonType.primary,
         fullWidth: true,
         onPressed: _save,
@@ -608,7 +613,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: _selectedCategoryId,
@@ -635,7 +642,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: _selectedAccountId,
@@ -651,10 +660,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     });
   }
 
-  void _showTransferAccountPicker({
-    required bool isFrom,
-    int? excludeId,
-  }) {
+  void _showTransferAccountPicker({required bool isFrom, int? excludeId}) {
     FocusScope.of(context).unfocus();
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
@@ -664,11 +670,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => AccountPickerSheet(
-        selectedAccountId:
-            isFrom ? _selectedFromAccountId : _selectedToAccountId,
+        selectedAccountId: isFrom
+            ? _selectedFromAccountId
+            : _selectedToAccountId,
         excludeAccountId: excludeId,
         onSelected: (id) {
           setState(() {
@@ -693,7 +702,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final initialDateOnly = DateTime(
-      _selectedDate.year, _selectedDate.month, _selectedDate.day);
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    );
     final picked = await showDatePicker(
       context: context,
       initialDate: initialDateOnly.isAfter(today) ? today : initialDateOnly,
@@ -730,7 +742,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => TagSelectorBottomSheet(
         initialSelectedTags: _selectedTags,
@@ -751,15 +765,28 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final accounts = ref.read(accountListProvider).valueOrNull ?? [];
     final categories = ref.read(categoryListProvider).valueOrNull ?? [];
 
-    final accountExists = suggestion.accountId != null &&
+    final accountExists =
+        suggestion.accountId != null &&
         accounts.any((a) => a.id.toString() == suggestion.accountId);
-    final categoryExists = suggestion.categoryId != null &&
+    final categoryExists =
+        suggestion.categoryId != null &&
         categories.any((c) => c.id.toString() == suggestion.categoryId);
 
     setState(() {
       _nameController.text = suggestion.displayName;
       if (suggestion.amount != null) {
-        _amountController.text = suggestion.amount.toString();
+        final isIndian = ref.read(formatterProvider).system == NumberSystem.indian;
+        final unformattedText = suggestion.amount == suggestion.amount!.truncateToDouble()
+            ? suggestion.amount!.toInt().toString()
+            : suggestion.amount!.toStringAsFixed(2);
+            
+        _amountController.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
+          TextEditingValue.empty,
+          TextEditingValue(
+            text: unformattedText,
+            selection: TextSelection.collapsed(offset: unformattedText.length),
+          ),
+        );
       }
       if (categoryExists) {
         _selectedCategoryId = int.tryParse(suggestion.categoryId!);
@@ -784,10 +811,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     final name = _nameController.text.trim();
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = double.tryParse(_amountController.text.trim().replaceAll(',', ''));
 
     if (name.isEmpty) {
-      showKuberSnackBar(context, 'Please enter a transaction name', isError: true);
+      showKuberSnackBar(
+        context,
+        'Please enter a transaction name',
+        isError: true,
+      );
       return;
     }
     if (amount == null || amount <= 0) {
@@ -826,7 +857,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     try {
       final int resultId;
       if (_isEditing) {
-        resultId = await ref.read(transactionListProvider.notifier).updateTransaction(t);
+        resultId = await ref
+            .read(transactionListProvider.notifier)
+            .updateTransaction(t);
       } else {
         resultId = await ref.read(transactionListProvider.notifier).add(t);
       }
@@ -838,10 +871,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
 
       // Save tags
-      await ref.read(tagRepositoryProvider).updateTransactionTags(
-        resultId,
-        _selectedTags.map((tag) => tag.id).toList(),
-      );
+      await ref
+          .read(tagRepositoryProvider)
+          .updateTransactionTags(
+            resultId,
+            _selectedTags.map((tag) => tag.id).toList(),
+          );
     } catch (e) {
       if (mounted) {
         showKuberSnackBar(context, 'Failed to save: $e', isError: true);
@@ -858,21 +893,33 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _saveTransfer() async {
-    final amount = double.tryParse(_amountController.text.trim());
+    final amount = double.tryParse(_amountController.text.trim().replaceAll(',', ''));
     if (amount == null || amount <= 0) {
       showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
       return;
     }
     if (_selectedFromAccountId == null) {
-      showKuberSnackBar(context, 'Please select a source account', isError: true);
+      showKuberSnackBar(
+        context,
+        'Please select a source account',
+        isError: true,
+      );
       return;
     }
     if (_selectedToAccountId == null) {
-      showKuberSnackBar(context, 'Please select a destination account', isError: true);
+      showKuberSnackBar(
+        context,
+        'Please select a destination account',
+        isError: true,
+      );
       return;
     }
     if (_selectedFromAccountId == _selectedToAccountId) {
-      showKuberSnackBar(context, 'Source and destination accounts must be different', isError: true);
+      showKuberSnackBar(
+        context,
+        'Source and destination accounts must be different',
+        isError: true,
+      );
       return;
     }
 
@@ -882,22 +929,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     try {
       if (_isEditing) {
-        await ref.read(transactionListProvider.notifier).updateTransfer(
-          id: widget.transaction!.id,
-          fromAccountId: _selectedFromAccountId.toString(),
-          toAccountId: _selectedToAccountId.toString(),
-          amount: amount,
-          createdAt: _selectedDate,
-          notes: notes,
-        );
+        await ref
+            .read(transactionListProvider.notifier)
+            .updateTransfer(
+              id: widget.transaction!.id,
+              fromAccountId: _selectedFromAccountId.toString(),
+              toAccountId: _selectedToAccountId.toString(),
+              amount: amount,
+              createdAt: _selectedDate,
+              notes: notes,
+            );
       } else {
-        await ref.read(transactionListProvider.notifier).saveTransfer(
-          fromAccountId: _selectedFromAccountId.toString(),
-          toAccountId: _selectedToAccountId.toString(),
-          amount: amount,
-          createdAt: _selectedDate,
-          notes: notes,
-        );
+        await ref
+            .read(transactionListProvider.notifier)
+            .saveTransfer(
+              fromAccountId: _selectedFromAccountId.toString(),
+              toAccountId: _selectedToAccountId.toString(),
+              amount: amount,
+              createdAt: _selectedDate,
+              notes: notes,
+            );
       }
     } catch (e) {
       if (mounted) {
@@ -963,4 +1014,3 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
   }
 }
-

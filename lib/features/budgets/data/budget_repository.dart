@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import 'budget.dart';
 
 final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   return BudgetRepository(isar);
 });
 
@@ -20,7 +20,11 @@ class BudgetRepository {
   }
 
   Future<Budget?> getByCategory(String categoryId) async {
-    return isar.budgets.filter().categoryIdEqualTo(categoryId).isActiveEqualTo(true).findFirst();
+    return isar.budgets
+        .filter()
+        .categoryIdEqualTo(categoryId)
+        .isActiveEqualTo(true)
+        .findFirst();
   }
 
   Stream<List<Budget>> watchBudgets() {
@@ -29,13 +33,17 @@ class BudgetRepository {
 
   Future<Id> saveBudget(Budget budget, List<BudgetAlert> alerts) async {
     return isar.writeTxn(() async {
-      debugPrint('BUDGET_REPO: Writing budget ${budget.id} with ${alerts.length} alerts');
+      debugPrint(
+        'BUDGET_REPO: Writing budget ${budget.id} with ${alerts.length} alerts',
+      );
       budget.alerts = alerts;
       final id = await isar.budgets.put(budget);
-      
+
       final saved = await isar.budgets.get(id);
-      debugPrint('BUDGET_REPO: Successfully saved budget. ID: $id. Alerts in DB: ${saved?.alerts.length}');
-      
+      debugPrint(
+        'BUDGET_REPO: Successfully saved budget. ID: $id. Alerts in DB: ${saved?.alerts.length}',
+      );
+
       return id;
     });
   }
@@ -62,14 +70,18 @@ class BudgetRepository {
     return budget?.alerts ?? [];
   }
 
-  Future<double> calculateUsage(String categoryId, DateTime start, DateTime end) async {
+  Future<double> calculateUsage(
+    String categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
     final txns = await isar.transactions
         .filter()
         .categoryIdEqualTo(categoryId)
         .typeEqualTo('expense')
         .createdAtBetween(start, end)
         .findAll();
-    
+
     double total = 0.0;
     for (final tx in txns) {
       total += tx.amount;
@@ -109,10 +121,11 @@ class BudgetRepository {
         }
 
         // Non-recurring expiry check
-        if (!budget.isRecurring && budget.startDate.isBefore(currentMonthStart)) {
+        if (!budget.isRecurring &&
+            budget.startDate.isBefore(currentMonthStart)) {
           budget.isActive = false;
         }
-        
+
         await isar.budgets.put(budget);
       }
     });

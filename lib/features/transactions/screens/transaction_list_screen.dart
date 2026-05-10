@@ -10,7 +10,12 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider, navBarStyleProvider, NavBarStyle;
+import '../../settings/providers/settings_provider.dart'
+    show
+        formatterProvider,
+        privacyModeProvider,
+        navBarStyleProvider,
+        NavBarStyle;
 import '../data/transaction.dart';
 import '../helpers/transaction_filters.dart';
 import '../providers/transaction_provider.dart';
@@ -22,6 +27,7 @@ import '../../history/utils/filter_utils.dart';
 import '../../history/widgets/history_filter_widget.dart';
 import '../../history/utils/history_utils.dart';
 import '../../history/providers/selection_provider.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 import '../widgets/transaction_row.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
@@ -54,7 +60,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     setState(() => _displayedGroupCount += _groupsPerPage);
   }
 
-  List<Transaction> _applyFilters(List<Transaction> transactions, HistoryFilter filter) {
+  List<Transaction> _applyFilters(
+    List<Transaction> transactions,
+    HistoryFilter filter,
+  ) {
     final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
     return applyHistoryFilters(transactions, filter, txnTagsMap: txnTagsMap);
   }
@@ -85,294 +94,338 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final filter = ref.watch(historyFilterProvider);
 
     return GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        behavior: HitTestBehavior.opaque,
-        child: Scaffold(
-          body: Stack(
-            children: [
-              CustomScrollView(
-                controller: _scrollController,
-            slivers: [
-              // App bar
-              // const SliverToBoxAdapter(
-              //   child: KuberAppBar(title: 'History'),
-              // ),
-              const SliverToBoxAdapter(
-                child: SizedBox(height: KuberSpacing.xl),
-              ),
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: Scaffold(
+        body: Stack(
+          children: [
+            CustomScrollView(
+              key: TutorialStepKeys.historyList,
+              controller: _scrollController,
+              slivers: [
+                // App bar
+                // const SliverToBoxAdapter(
+                //   child: KuberAppBar(title: 'History'),
+                // ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: KuberSpacing.xl),
+                ),
 
-              // Page header
-              SliverToBoxAdapter(
-                child: KuberPageHeader(
-                  title: 'Transaction\nHistory',
-                  description: 'Your past expenses, incomes and transfers',
-                  actionIcon: Icons.file_download_outlined,
-                  actionTooltip: 'Export',
-                  onAction: () => showExportBottomSheet(
-                    context: context,
-                    exportType: ExportType.transactions,
+                // Page header
+                SliverToBoxAdapter(
+                  child: KuberPageHeader(
+                    title: 'Transaction\nHistory',
+                    description: 'Your past expenses, incomes and transfers',
+                    actionIcon: Icons.file_download_outlined,
+                    actionTooltip: 'Export',
+                    onAction: () => showExportBottomSheet(
+                      context: context,
+                      exportType: ExportType.transactions,
+                    ),
                   ),
                 ),
-              ),
 
-              SliverToBoxAdapter(
-                child: HistoryFilterWidget(
-                  onAdvancedTap: () => context.push('/history/filter'),
+                SliverToBoxAdapter(
+                  child: HistoryFilterWidget(
+                    key: TutorialStepKeys.historyQuickFilters,
+                    onAdvancedTap: () => context.push('/history/filter'),
+                  ),
                 ),
-              ),
 
-              const SliverToBoxAdapter(
-                child: SizedBox(height: KuberSpacing.sm),
-              ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: KuberSpacing.sm),
+                ),
 
-              // Transaction list
-              ...transactionsAsync.when(
-                loading: () => [
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                ],
-                error: (e, _) => [
-                  SliverFillRemaining(
-                    child: Center(child: Text('Error: $e')),
-                  ),
-                ],
-                data: (transactions) {
-                  final filtered = _applyFilters(transactions, filter);
+                // Transaction list
+                ...transactionsAsync.when(
+                  loading: () => [
+                    const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  ],
+                  error: (e, _) => [
+                    SliverFillRemaining(
+                      child: Center(child: Text('Error: $e')),
+                    ),
+                  ],
+                  data: (transactions) {
+                    final filtered = _applyFilters(transactions, filter);
 
-                  // Compute EXP / INC / NET from filtered list
-                  double totalExp = 0;
-                  double totalInc = 0;
-                  for (final t in filtered.validForCalculations) {
-                    if (t.type == 'income') {
-                      totalInc += t.amount;
-                    } else {
-                      totalExp += t.amount;
+                    // Compute EXP / INC / NET from filtered list
+                    double totalExp = 0;
+                    double totalInc = 0;
+                    for (final t in filtered.validForCalculations) {
+                      if (t.type == 'income') {
+                        totalInc += t.amount;
+                      } else {
+                        totalExp += t.amount;
+                      }
                     }
-                  }
-                  final totalNet = totalInc - totalExp;
-                  final fmt = ref.watch(formatterProvider);
-                  final isPrivate = ref.watch(privacyModeProvider);
-                  final groups = groupTransactionsByDate(filtered);
+                    final totalNet = totalInc - totalExp;
+                    final fmt = ref.watch(formatterProvider);
+                    final isPrivate = ref.watch(privacyModeProvider);
+                    final groups = groupTransactionsByDate(filtered);
 
-                  // Build tag names map for indicator line
-                  final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
-                  final tagNameById = {for (final t in allTags) t.id: t.name};
-                  final txnTagsMapData = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
-                  final tagNamesMap = <int, List<String>>{};
-                  for (final entry in txnTagsMapData.entries) {
-                    final names = entry.value
-                        .map((tagId) => tagNameById[tagId])
-                        .whereType<String>()
-                        .toList();
-                    if (names.isNotEmpty) tagNamesMap[entry.key] = names;
-                  }
+                    // Build tag names map for indicator line
+                    final allTags =
+                        ref.watch(tagListProvider).valueOrNull ?? [];
+                    final tagNameById = {for (final t in allTags) t.id: t.name};
+                    final txnTagsMapData =
+                        ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+                    final tagNamesMap = <int, List<String>>{};
+                    for (final entry in txnTagsMapData.entries) {
+                      final names = entry.value
+                          .map((tagId) => tagNameById[tagId])
+                          .whereType<String>()
+                          .toList();
+                      if (names.isNotEmpty) tagNamesMap[entry.key] = names;
+                    }
 
-                  return [
-                    // EXP / INC / NET summary
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.lg,
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'EXP ',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                maskAmount('-${fmt.formatCurrency(totalExp.round())}', isPrivate),
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
-                                  color: cs.error,
-                                ),
-                              ),
-                              const SizedBox(width: KuberSpacing.lg),
-                              Text(
-                                'INC ',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                maskAmount('+${fmt.formatCurrency(totalInc.round())}', isPrivate),
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
-                                  color: cs.tertiary,
-                                ),
-                              ),
-                              const SizedBox(width: KuberSpacing.lg),
-                              Text(
-                                'NET ',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                maskAmount(totalNet == 0
-                                    ? fmt.formatCurrency(0)
-                                    : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}', isPrivate),
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.8,
-                                  color: totalNet > 0
-                                      ? cs.tertiary
-                                      : totalNet < 0
-                                          ? cs.error
-                                          : cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
+                    return [
+                      // EXP / INC / NET summary
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: KuberSpacing.lg,
                           ),
-                        ),
-                      ),
-                    ),
-
-                    // SHOWING N TRANSACTIONS row
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.lg,
-                          vertical: KuberSpacing.sm,
-                        ),
-                        child: RichText(
-                          text: TextSpan(
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2,
-                              color: cs.onSurfaceVariant,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'EXP ',
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.8,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                ),
+                                Text(
+                                  maskAmount(
+                                    '-${fmt.formatCurrency(totalExp.round())}',
+                                    isPrivate,
+                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.8,
+                                        color: cs.error,
+                                      ),
+                                ),
+                                const SizedBox(width: KuberSpacing.lg),
+                                Text(
+                                  'INC ',
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.8,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                ),
+                                Text(
+                                  maskAmount(
+                                    '+${fmt.formatCurrency(totalInc.round())}',
+                                    isPrivate,
+                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.8,
+                                        color: cs.tertiary,
+                                      ),
+                                ),
+                                const SizedBox(width: KuberSpacing.lg),
+                                Text(
+                                  'NET ',
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.8,
+                                        color: cs.onSurfaceVariant,
+                                      ),
+                                ),
+                                Text(
+                                  maskAmount(
+                                    totalNet == 0
+                                        ? fmt.formatCurrency(0)
+                                        : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}',
+                                    isPrivate,
+                                  ),
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.8,
+                                        color: totalNet > 0
+                                            ? cs.tertiary
+                                            : totalNet < 0
+                                            ? cs.error
+                                            : cs.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
                             ),
-                            children: [
-                              const TextSpan(text: 'SHOWING '),
-                              TextSpan(
-                                text: '${filtered.length} ',
-                                style: TextStyle(color: cs.primary),
-                              ),
-                              const TextSpan(text: 'TRANSACTIONS'),
-                            ],
                           ),
                         ),
                       ),
-                    ),
 
-                    if (filtered.isEmpty)
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        child: KuberEmptyState(
-                          icon: Icons.receipt_long_outlined,
-                          title: transactions.isEmpty
-                              ? 'No transactions yet'
-                              : 'No transactions found',
-                          description: transactions.isEmpty
-                              ? 'Start tracking your expenses'
-                              : 'Try adjusting your search or filters',
-                          actionLabel:
-                              transactions.isEmpty ? 'Add Transaction' : null,
-                          onAction: transactions.isEmpty
-                              ? () => context.push('/add-transaction')
-                              : null,
+                      // SHOWING N TRANSACTIONS row
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: KuberSpacing.lg,
+                            vertical: KuberSpacing.sm,
+                          ),
+                          child: RichText(
+                            text: TextSpan(
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.2,
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                              children: [
+                                const TextSpan(text: 'SHOWING '),
+                                TextSpan(
+                                  text: '${filtered.length} ',
+                                  style: TextStyle(color: cs.primary),
+                                ),
+                                const TextSpan(text: 'TRANSACTIONS'),
+                              ],
+                            ),
+                          ),
                         ),
-                      )
-                    else ...[
-                      () {
-                        final displayedGroups = groups.take(_displayedGroupCount).toList();
-                        final hasMore = displayedGroups.length < groups.length;
+                      ),
 
-                        return SliverPadding(
-                          padding: EdgeInsets.only(
-                            bottom: hasMore ? 0 : navBarBottomPadding(context),
-                            left: KuberSpacing.lg,
-                            right: KuberSpacing.lg,
+                      if (filtered.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: KuberEmptyState(
+                            icon: Icons.receipt_long_outlined,
+                            title: transactions.isEmpty
+                                ? 'No transactions yet'
+                                : 'No transactions found',
+                            description: transactions.isEmpty
+                                ? 'Start tracking your expenses'
+                                : 'Try adjusting your search or filters',
+                            actionLabel: transactions.isEmpty
+                                ? 'Add Transaction'
+                                : null,
+                            onAction: transactions.isEmpty
+                                ? () => context.push('/add-transaction')
+                                : null,
                           ),
-                          sliver: SliverList.builder(
-                            itemCount: displayedGroups.length * 2,
-                            itemBuilder: (context, index) {
-                              final groupIndex = index ~/ 2;
-                              final group = displayedGroups[groupIndex];
+                        )
+                      else ...[
+                        () {
+                          final displayedGroups = groups
+                              .take(_displayedGroupCount)
+                              .toList();
+                          final hasMore =
+                              displayedGroups.length < groups.length;
 
-                              if (index.isEven) {
-                                return DateGroupHeader(
-                                  label: group.label,
-                                  dayTotal: group.dayTotal,
-                                );
-                              } else {
-                                return TransactionDayCard(
-                                  transactions: group.transactions,
-                                  onDelete: _deleteWithUndo,
-                                  onTap: (t) => _showTransactionDetail(t),
-                                  onEdit: (t) =>
-                                      context.push('/add-transaction', extra: t),
-                                  formatter: fmt,
-                                  categoryMap: ref.watch(categoryMapProvider).valueOrNull ?? {},
-                                  accountMap: ref.watch(accountMapProvider).valueOrNull ?? {},
-                                  transactionList: transactions, // For transfer lookup
-                                  tagNamesMap: tagNamesMap,
-                                );
-                              }
-                            },
-                          ),
-                        );
-                      }(),
-                      if (groups.length > _displayedGroupCount)
-                        SliverToBoxAdapter(
-                          child: Padding(
+                          return SliverPadding(
                             padding: EdgeInsets.only(
-                              top: KuberSpacing.lg,
-                              bottom: navBarBottomPadding(context),
+                              bottom: hasMore
+                                  ? 0
+                                  : navBarBottomPadding(context),
+                              left: KuberSpacing.lg,
+                              right: KuberSpacing.lg,
                             ),
-                            child: const Center(
-                              child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                            sliver: SliverList.builder(
+                              itemCount: displayedGroups.length * 2,
+                              itemBuilder: (context, index) {
+                                final groupIndex = index ~/ 2;
+                                final group = displayedGroups[groupIndex];
+
+                                if (index.isEven) {
+                                  return DateGroupHeader(
+                                    label: group.label,
+                                    dayTotal: group.dayTotal,
+                                  );
+                                } else {
+                                  return TransactionDayCard(
+                                    key: groupIndex == 0
+                                        ? TutorialStepKeys.historyFirstItem
+                                        : null,
+                                    transactions: group.transactions,
+                                    onDelete: _deleteWithUndo,
+                                    onTap: (t) => _showTransactionDetail(t),
+                                    onEdit: (t) => context.push(
+                                      '/add-transaction',
+                                      extra: t,
+                                    ),
+                                    formatter: fmt,
+                                    categoryMap:
+                                        ref
+                                            .watch(categoryMapProvider)
+                                            .valueOrNull ??
+                                        {},
+                                    accountMap:
+                                        ref
+                                            .watch(accountMapProvider)
+                                            .valueOrNull ??
+                                        {},
+                                    transactionList:
+                                        transactions, // For transfer lookup
+                                    tagNamesMap: tagNamesMap,
+                                  );
+                                }
+                              },
+                            ),
+                          );
+                        }(),
+                        if (groups.length > _displayedGroupCount)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: KuberSpacing.lg,
+                                bottom: navBarBottomPadding(context),
+                              ),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  ];
-                },
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: AnimatedSlide(
-              offset: ref.watch(isSelectionModeProvider) ? Offset.zero : const Offset(0, 1.2),
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              child: const _SelectionActionBar(),
+                      ],
+                    ];
+                  },
+                ),
+              ],
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedSlide(
+                offset: ref.watch(isSelectionModeProvider)
+                    ? Offset.zero
+                    : const Offset(0, 1.2),
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutCubic,
+                child: const _SelectionActionBar(),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class _SelectionActionBar extends ConsumerWidget {
@@ -382,9 +435,12 @@ class _SelectionActionBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final selectedIds = ref.watch(transactionSelectionProvider);
-    final allTransactions = ref.watch(transactionListProvider).valueOrNull ?? [];
+    final allTransactions =
+        ref.watch(transactionListProvider).valueOrNull ?? [];
 
-    final selectedTransactions = allTransactions.where((t) => selectedIds.contains(t.id)).toList();
+    final selectedTransactions = allTransactions
+        .where((t) => selectedIds.contains(t.id))
+        .toList();
 
     double totalExp = 0;
     double totalInc = 0;
@@ -405,9 +461,7 @@ class _SelectionActionBar extends ConsumerWidget {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     // On modern nav bar, add generous bottom clearance so curved-screen edges
     // don't clip the action buttons (the floating nav bar normally fills this space).
-    final bottomPad = isModern
-        ? bottomInset + KuberSpacing.xl
-        : bottomInset;
+    final bottomPad = isModern ? bottomInset + KuberSpacing.xl : bottomInset;
 
     return Material(
       elevation: 8,
@@ -415,22 +469,35 @@ class _SelectionActionBar extends ConsumerWidget {
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPad),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.sm, vertical: KuberSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.sm,
+            vertical: KuberSpacing.md,
+          ),
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: cs.outline)),
           ),
           child: Row(
             children: [
               GestureDetector(
-                onTap: () => ref.read(transactionSelectionProvider.notifier).clear(),
+                onTap: () =>
+                    ref.read(transactionSelectionProvider.notifier).clear(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: cs.outline.withValues(alpha: 0.3),
+                    ),
                   ),
-                  child: Icon(Icons.close_rounded, size: 16, color: cs.onSurface),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 16,
+                    color: cs.onSurface,
+                  ),
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
@@ -449,15 +516,38 @@ class _SelectionActionBar extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Text('EXP ${maskAmount('-${fmt.formatCurrency(totalExp)}', isPrivate)}', style: TextStyle(fontSize: 10, color: cs.error, fontWeight: FontWeight.w600)),
-                        const SizedBox(width: KuberSpacing.md),
-                        Text('INC ${maskAmount('+${fmt.formatCurrency(totalInc)}', isPrivate)}', style: TextStyle(fontSize: 10, color: cs.tertiary, fontWeight: FontWeight.w600)),
-                        const SizedBox(width: KuberSpacing.md),
-                        Text('NET ${maskAmount('${totalNet > 0 ? "+" : totalNet < 0 ? "-" : ""}${fmt.formatCurrency(totalNet.abs())}', isPrivate)}',
+                        Text(
+                          'EXP ${maskAmount('-${fmt.formatCurrency(totalExp)}', isPrivate)}',
                           style: TextStyle(
                             fontSize: 10,
-                            color: totalNet > 0 ? cs.tertiary : totalNet < 0 ? cs.error : cs.onSurfaceVariant,
-                            fontWeight: FontWeight.w600
+                            color: cs.error,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        Text(
+                          'INC ${maskAmount('+${fmt.formatCurrency(totalInc)}', isPrivate)}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: cs.tertiary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: KuberSpacing.md),
+                        Text(
+                          'NET ${maskAmount('${totalNet > 0
+                              ? "+"
+                              : totalNet < 0
+                              ? "-"
+                              : ""}${fmt.formatCurrency(totalNet.abs())}', isPrivate)}',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: totalNet > 0
+                                ? cs.tertiary
+                                : totalNet < 0
+                                ? cs.error
+                                : cs.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -468,7 +558,10 @@ class _SelectionActionBar extends ConsumerWidget {
               GestureDetector(
                 onTap: () => _confirmDelete(context, ref, selectedIds),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -484,7 +577,11 @@ class _SelectionActionBar extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, Set<int> selectedIds) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Set<int> selectedIds,
+  ) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -496,7 +593,9 @@ class _SelectionActionBar extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
             onPressed: () async {
               Navigator.pop(dialogContext);
               final notifier = ref.read(transactionListProvider.notifier);

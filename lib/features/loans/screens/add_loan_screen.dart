@@ -6,12 +6,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../../core/utils/formatters.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/loan.dart';
 import '../providers/loan_provider.dart';
@@ -70,7 +71,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   }
 
   double get _principalAmount =>
-      double.tryParse(_principalController.text.trim()) ?? 0;
+      double.tryParse(_principalController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void dispose() {
@@ -129,8 +130,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}')),
+                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                     ],
                     suffixIcon: GestureDetector(
                       onTap: () => _openCalculator(context),
@@ -211,8 +211,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}')),
+                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                     ],
                     suffixIcon: GestureDetector(
                       onTap: () => _openCalculatorFor(_emiController),
@@ -244,8 +243,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                           hint: 'e.g. 8.45',
                           keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'^\d+\.?\d{0,2}')),
+                            CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                           ],
                         ),
                       ),
@@ -603,7 +601,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     return _principalAmount > 0 &&
         _nameController.text.trim().isNotEmpty &&
         _emiController.text.trim().isNotEmpty &&
-        (double.tryParse(_emiController.text.trim()) ?? 0) > 0 &&
+        (double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0) > 0 &&
         _selectedAccountId != null;
   }
 
@@ -624,7 +622,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => KuberCalculator(
-        initialValue: double.tryParse(controller.text.trim()) ?? 0,
+        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
           setState(() {
             controller.text = result == result.truncateToDouble()
@@ -694,8 +692,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       orElse: () => categories.first,
     );
 
-    final emi = double.tryParse(_emiController.text.trim()) ?? 0;
-    final interest = double.tryParse(_interestController.text.trim());
+    final emi = double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0;
+    final interest = double.tryParse(_interestController.text.trim().replaceAll(',', ''));
 
     if (_isEditing) {
       final loan = widget.existing!
