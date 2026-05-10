@@ -7,7 +7,7 @@ import '../../features/analytics/screens/analytics_filter_screen.dart';
 import '../../features/history/screens/advanced_filter_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/onboarding/screens/welcome_screen.dart';
-import '../../features/onboarding/screens/setup_screen.dart';
+import '../../features/tutorial/screens/tutorial_chapter_screen.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
@@ -139,12 +139,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const WelcomeScreen(),
+        builder: (context, state) => OnboardingFlow(
+          isReplay: state.uri.queryParameters['replay'] == 'true',
+        ),
       ),
       GoRoute(
-        path: '/onboarding/setup',
+        path: '/tutorial',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SetupScreen(),
+        builder: (context, state) => const TutorialChapterScreen(),
       ),
       GoRoute(
         path: '/add-transaction',

@@ -14,7 +14,8 @@ import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/helpers/transaction_filters.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
+import '../../settings/providers/settings_provider.dart'
+    show formatterProvider, privacyModeProvider;
 import '../providers/analytics_provider.dart';
 import '../widgets/category_group_stats.dart';
 import '../widgets/analytics_toggle.dart';
@@ -23,6 +24,7 @@ import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
 import '../widgets/top_filter_row.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -54,18 +56,46 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   // ---- bucket helpers -----------------------------------------------------
 
-  List<KuberBarBucket> _buildPeriodBuckets(List<Transaction> txns, AnalyticsFilter filter) {
+  List<KuberBarBucket> _buildPeriodBuckets(
+    List<Transaction> txns,
+    AnalyticsFilter filter,
+  ) {
     txns = txns.validForCalculations.toList();
     List<_MutableBucket> buckets = [];
 
     switch (filter.type) {
       case FilterType.today:
         buckets = [
-          _MutableBucket('Dawn', '', date: filter.from, endDate: filter.from.add(const Duration(hours: 5, minutes: 59))),
-          _MutableBucket('Morning', '', date: filter.from.add(const Duration(hours: 6)), endDate: filter.from.add(const Duration(hours: 10, minutes: 59))),
-          _MutableBucket('Noon', '', date: filter.from.add(const Duration(hours: 11)), endDate: filter.from.add(const Duration(hours: 13, minutes: 59))),
-          _MutableBucket('Evening', '', date: filter.from.add(const Duration(hours: 14)), endDate: filter.from.add(const Duration(hours: 18, minutes: 59))),
-          _MutableBucket('Night', '', date: filter.from.add(const Duration(hours: 19)), endDate: filter.to),
+          _MutableBucket(
+            'Dawn',
+            '',
+            date: filter.from,
+            endDate: filter.from.add(const Duration(hours: 5, minutes: 59)),
+          ),
+          _MutableBucket(
+            'Morning',
+            '',
+            date: filter.from.add(const Duration(hours: 6)),
+            endDate: filter.from.add(const Duration(hours: 10, minutes: 59)),
+          ),
+          _MutableBucket(
+            'Noon',
+            '',
+            date: filter.from.add(const Duration(hours: 11)),
+            endDate: filter.from.add(const Duration(hours: 13, minutes: 59)),
+          ),
+          _MutableBucket(
+            'Evening',
+            '',
+            date: filter.from.add(const Duration(hours: 14)),
+            endDate: filter.from.add(const Duration(hours: 18, minutes: 59)),
+          ),
+          _MutableBucket(
+            'Night',
+            '',
+            date: filter.from.add(const Duration(hours: 19)),
+            endDate: filter.to,
+          ),
         ];
         for (final t in txns) {
           final h = t.createdAt.hour;
@@ -95,7 +125,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         final daysCount = filter.to.difference(filter.from).inDays + 1;
         buckets = List.generate(daysCount, (i) {
           final d = filter.from.add(Duration(days: i));
-          return _MutableBucket(DateFormat('d').format(d), DateFormat('MMM').format(d).toUpperCase(), date: d);
+          return _MutableBucket(
+            DateFormat('d').format(d),
+            DateFormat('MMM').format(d).toUpperCase(),
+            date: d,
+          );
         });
         for (final t in txns) {
           final diff = t.createdAt.difference(filter.from).inDays;
@@ -115,8 +149,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         final weekCount = (daysInMonth / 7).ceil();
         buckets = List.generate(weekCount, (i) {
           final startDay = filter.from.add(Duration(days: i * 7));
-          final endDay = i == weekCount - 1 ? filter.to : startDay.add(const Duration(days: 6));
-          return _MutableBucket('Week', '${i + 1}', date: startDay, endDate: endDay);
+          final endDay = i == weekCount - 1
+              ? filter.to
+              : startDay.add(const Duration(days: 6));
+          return _MutableBucket(
+            'Week',
+            '${i + 1}',
+            date: startDay,
+            endDate: endDay,
+          );
         });
         for (final t in txns) {
           final dayDiff = t.createdAt.difference(filter.from).inDays;
@@ -134,56 +175,94 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       case FilterType.all:
       case FilterType.custom:
         // If > 6 months, show months. Otherwise show weeks.
-        final monthsDiff = (filter.to.year - filter.from.year) * 12 + filter.to.month - filter.from.month;
-        if (monthsDiff >= 6 || filter.type == FilterType.all || filter.type == FilterType.thisYear) {
-             // Quarterly or monthly depending on range
-             if (monthsDiff > 12) {
-               // Show Quarters
-               final quarters = (monthsDiff / 3).ceil().clamp(1, 12);
-               buckets = List.generate(quarters, (i) {
-                  final m = DateTime(filter.from.year, filter.from.month + i * 3, 1);
-                  final endM = DateTime(m.year, m.month + 3, 0); // Last day of quarter
-                  return _MutableBucket('Q${((m.month - 1) / 3).floor() + 1}', DateFormat('yy').format(m), date: m, endDate: endM.isAfter(filter.to) ? filter.to : endM);
-               });
-               for (final t in txns) {
-                 final mDiff = (t.createdAt.year - filter.from.year) * 12 + t.createdAt.month - filter.from.month;
-                 final idx = (mDiff / 3).floor().clamp(0, quarters - 1);
-                 if (t.type == 'income') {
-                   buckets[idx].income += t.amount;
-                 } else {
-                   buckets[idx].expense += t.amount;
-                 }
-               }
-             } else {
-               // Show Months
-               final count = monthsDiff + 1;
-               buckets = List.generate(count, (i) {
-                 final m = DateTime(filter.from.year, filter.from.month + i, 1);
-                 final endM = DateTime(m.year, m.month + 1, 0);
-                 return _MutableBucket(DateFormat('MMM').format(m), DateFormat('yy').format(m), date: m, endDate: endM.isAfter(filter.to) ? filter.to : endM);
-               });
-               for (final t in txns) {
-                 final idx = (t.createdAt.year - filter.from.year) * 12 + t.createdAt.month - filter.from.month;
-                 if (idx >= 0 && idx < count) {
-                   if (t.type == 'income') {
-                     buckets[idx].income += t.amount;
-                   } else {
-                     buckets[idx].expense += t.amount;
-                   }
-                 }
-               }
-             }
+        final monthsDiff =
+            (filter.to.year - filter.from.year) * 12 +
+            filter.to.month -
+            filter.from.month;
+        if (monthsDiff >= 6 ||
+            filter.type == FilterType.all ||
+            filter.type == FilterType.thisYear) {
+          // Quarterly or monthly depending on range
+          if (monthsDiff > 12) {
+            // Show Quarters
+            final quarters = (monthsDiff / 3).ceil().clamp(1, 12);
+            buckets = List.generate(quarters, (i) {
+              final m = DateTime(
+                filter.from.year,
+                filter.from.month + i * 3,
+                1,
+              );
+              final endM = DateTime(
+                m.year,
+                m.month + 3,
+                0,
+              ); // Last day of quarter
+              return _MutableBucket(
+                'Q${((m.month - 1) / 3).floor() + 1}',
+                DateFormat('yy').format(m),
+                date: m,
+                endDate: endM.isAfter(filter.to) ? filter.to : endM,
+              );
+            });
+            for (final t in txns) {
+              final mDiff =
+                  (t.createdAt.year - filter.from.year) * 12 +
+                  t.createdAt.month -
+                  filter.from.month;
+              final idx = (mDiff / 3).floor().clamp(0, quarters - 1);
+              if (t.type == 'income') {
+                buckets[idx].income += t.amount;
+              } else {
+                buckets[idx].expense += t.amount;
+              }
+            }
+          } else {
+            // Show Months
+            final count = monthsDiff + 1;
+            buckets = List.generate(count, (i) {
+              final m = DateTime(filter.from.year, filter.from.month + i, 1);
+              final endM = DateTime(m.year, m.month + 1, 0);
+              return _MutableBucket(
+                DateFormat('MMM').format(m),
+                DateFormat('yy').format(m),
+                date: m,
+                endDate: endM.isAfter(filter.to) ? filter.to : endM,
+              );
+            });
+            for (final t in txns) {
+              final idx =
+                  (t.createdAt.year - filter.from.year) * 12 +
+                  t.createdAt.month -
+                  filter.from.month;
+              if (idx >= 0 && idx < count) {
+                if (t.type == 'income') {
+                  buckets[idx].income += t.amount;
+                } else {
+                  buckets[idx].expense += t.amount;
+                }
+              }
+            }
+          }
         } else {
           // Show weeks
           final days = filter.to.difference(filter.from).inDays + 1;
           final weeks = (days / 7).ceil();
           buckets = List.generate(weeks, (i) {
             final startDay = filter.from.add(Duration(days: i * 7));
-            final endDay = i == weeks - 1 ? filter.to : startDay.add(const Duration(days: 6));
-            return _MutableBucket('Week', '${i + 1}', date: startDay, endDate: endDay);
+            final endDay = i == weeks - 1
+                ? filter.to
+                : startDay.add(const Duration(days: 6));
+            return _MutableBucket(
+              'Week',
+              '${i + 1}',
+              date: startDay,
+              endDate: endDay,
+            );
           });
           for (final t in txns) {
-            final idx = (t.createdAt.difference(filter.from).inDays / 7).floor().clamp(0, weeks - 1);
+            final idx = (t.createdAt.difference(filter.from).inDays / 7)
+                .floor()
+                .clamp(0, weeks - 1);
             if (t.type == 'income') {
               buckets[idx].income += t.amount;
             } else {
@@ -233,108 +312,124 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
     // Top 5 biggest transactions (filtered by tab)
     final biggestType = _biggestTab == 0 ? 'expense' : 'income';
-    final biggest = periodTxns
-        .where((t) => t.type == biggestType)
-        .toList()
+    final biggest = periodTxns.where((t) => t.type == biggestType).toList()
       ..sort((a, b) => b.amount.compareTo(a.amount));
     final top5 = biggest.take(5).toList();
 
     return Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            // ── Header (always eager) ─────────────────────────────────
+      body: CustomScrollView(
+        key: TutorialStepKeys.analyticsPage,
+        slivers: [
+          // ── Header (always eager) ─────────────────────────────────
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const SizedBox(height: KuberSpacing.xl),
+                // const KuberAppBar(title: 'Analytics'),
+                KuberPageHeader(
+                  title: 'Spending\nAnalytics',
+                  description: 'Visualize your spending patterns',
+                ),
+                const TopFilterRow(),
+                const SizedBox(height: KuberSpacing.lg),
+              ]),
+            ),
+          ),
+
+          // ── Analytics widgets (lazy — only built when scrolled into view) ─
+          if (isEmpty)
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    SizedBox(height: KuberSpacing.xl),
+                    KuberEmptyState(
+                      icon: Icons.bar_chart,
+                      title: 'No data',
+                      description: 'No transactions found for this period',
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  const SizedBox(height: KuberSpacing.xl),
-                  // const KuberAppBar(title: 'Analytics'),
-                  KuberPageHeader(
-                    title: 'Spending\nAnalytics',
-                    description: 'Visualize your spending patterns',
+              sliver: SliverList.builder(
+                itemCount: 8,
+                itemBuilder: (context, index) => switch (index) {
+                  0 => Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                    child: _buildSummaryCard(
+                      ref,
+                      colorScheme,
+                      textTheme,
+                      totalIncome,
+                      totalExpense,
+                      netAmount,
+                    ),
                   ),
-                  const TopFilterRow(),
-                  const SizedBox(height: KuberSpacing.lg),
-                ]),
+                  1 => Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                    child: RepaintBoundary(
+                      child: KuberBarChart(
+                        key: TutorialStepKeys.spendingTrendsChart,
+                        title: 'Spending Trend',
+                        buckets: buckets,
+                        height: 200,
+                      ),
+                    ),
+                  ),
+                  2 => Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                    child: RepaintBoundary(
+                      child: AvgWeeklyHeatmap(
+                        transactions: periodTxns,
+                        precomputedDailyAverages: computed.dailyAverages,
+                      ),
+                    ),
+                  ),
+                  3 => Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                    child: RepaintBoundary(
+                      child: TransactionSizeDistribution(
+                        transactions: periodTxns,
+                        precomputedDistribution: computed.sizeDistribution,
+                      ),
+                    ),
+                  ),
+                  4 => Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                    child: RepaintBoundary(
+                      child: CategoryGroupStatsWidget(
+                        key: TutorialStepKeys.categoryBreakdownChart,
+                      ),
+                    ),
+                  ),
+                  5 => Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                    child: RepaintBoundary(
+                      child: TagWiseAnalytics(transactions: periodTxns),
+                    ),
+                  ),
+                  6 => _buildBiggestTransactionsSection(
+                    colorScheme,
+                    textTheme,
+                    top5,
+                    isMoreTab: false,
+                    biggestType: biggestType,
+                    categoryMap: categoryMap,
+                  ),
+                  7 => SizedBox(height: navBarBottomPadding(context)),
+                  _ => const SizedBox.shrink(),
+                },
               ),
             ),
-
-            // ── Analytics widgets (lazy — only built when scrolled into view) ─
-            if (isEmpty)
-              const SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    children: [
-                      SizedBox(height: KuberSpacing.xl),
-                      KuberEmptyState(
-                        icon: Icons.bar_chart,
-                        title: 'No data',
-                        description: 'No transactions found for this period',
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-                sliver: SliverList.builder(
-                  itemCount: 8,
-                  itemBuilder: (context, index) => switch (index) {
-                    0 => Padding(
-                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: _buildSummaryCard(ref, colorScheme, textTheme, totalIncome, totalExpense, netAmount),
-                    ),
-                    1 => Padding(
-                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: RepaintBoundary(
-                        child: KuberBarChart(
-                          title: 'Spending Trend',
-                          buckets: buckets,
-                          height: 200,
-                        ),
-                      ),
-                    ),
-                    2 => Padding(
-                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: RepaintBoundary(
-                        child: AvgWeeklyHeatmap(
-                          transactions: periodTxns,
-                          precomputedDailyAverages: computed.dailyAverages,
-                        ),
-                      ),
-                    ),
-                    3 => Padding(
-                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: RepaintBoundary(
-                        child: TransactionSizeDistribution(
-                          transactions: periodTxns,
-                          precomputedDistribution: computed.sizeDistribution,
-                        ),
-                      ),
-                    ),
-                    4 => const Padding(
-                      padding: EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: RepaintBoundary(
-                        child: CategoryGroupStatsWidget(),
-                      ),
-                    ),
-                    5 => Padding(
-                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: RepaintBoundary(
-                        child: TagWiseAnalytics(transactions: periodTxns),
-                      ),
-                    ),
-                    6 => _buildBiggestTransactionsSection(colorScheme, textTheme, top5, isMoreTab: false, biggestType: biggestType, categoryMap: categoryMap),
-                    7 => SizedBox(height: navBarBottomPadding(context)),
-                    _ => const SizedBox.shrink(),
-                  },
-                ),
-              ),
-          ],
-        ),
-      );
+        ],
+      ),
+    );
   }
 
   Widget _buildBiggestTransactionsSection(
@@ -358,9 +453,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               child: Center(
                 child: Text(
                   'No $biggestType transactions',
-                  style: tt.bodySmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             )
@@ -376,7 +469,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     onTap: () => showTransactionDetailSheet(context, ref, t),
                     borderRadius: BorderRadius.circular(KuberRadius.sm),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xs),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: KuberSpacing.xs,
+                      ),
                       child: Row(
                         children: [
                           Container(
@@ -399,7 +494,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           if (cat != null)
                             CategoryIcon.square(
                               icon: IconMapper.fromString(cat.icon),
-                              rawColor: harmonizeCategory(context, Color(cat.colorValue)),
+                              rawColor: harmonizeCategory(
+                                context,
+                                Color(cat.colorValue),
+                              ),
                               size: 36,
                             ),
                           const SizedBox(width: KuberSpacing.md),
@@ -424,7 +522,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                             ),
                           ),
                           Text(
-                            maskAmount('${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}', ref.watch(privacyModeProvider)),
+                            maskAmount(
+                              '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
+                              ref.watch(privacyModeProvider),
+                            ),
                             style: tt.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: isExpense ? cs.error : cs.tertiary,
@@ -447,8 +548,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
   // ---- summary card -------------------------------------------------------
 
-  Widget _buildSummaryCard(WidgetRef ref, ColorScheme cs, TextTheme tt,
-      double income, double expense, double net) {
+  Widget _buildSummaryCard(
+    WidgetRef ref,
+    ColorScheme cs,
+    TextTheme tt,
+    double income,
+    double expense,
+    double net,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -463,7 +570,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Income',
-                  amount: maskAmount(ref.watch(formatterProvider).formatCurrency(income), ref.watch(privacyModeProvider)),
+                  amount: maskAmount(
+                    ref.watch(formatterProvider).formatCurrency(income),
+                    ref.watch(privacyModeProvider),
+                  ),
                   color: cs.tertiary,
                   icon: Icons.arrow_downward,
                 ),
@@ -472,7 +582,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               Expanded(
                 child: _SummaryTile(
                   label: 'Expense',
-                  amount: maskAmount(ref.watch(formatterProvider).formatCurrency(expense), ref.watch(privacyModeProvider)),
+                  amount: maskAmount(
+                    ref.watch(formatterProvider).formatCurrency(expense),
+                    ref.watch(privacyModeProvider),
+                  ),
                   color: cs.error,
                   icon: Icons.arrow_upward,
                 ),
@@ -483,7 +596,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
-                vertical: KuberSpacing.sm, horizontal: KuberSpacing.md),
+              vertical: KuberSpacing.sm,
+              horizontal: KuberSpacing.md,
+            ),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(8),
@@ -493,12 +608,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               children: [
                 Text(
                   'Net: ',
-                  style: tt.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
                 Text(
-                  maskAmount('${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}', ref.watch(privacyModeProvider)),
+                  maskAmount(
+                    '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}',
+                    ref.watch(privacyModeProvider),
+                  ),
                   style: tt.titleMedium?.copyWith(
                     color: net >= 0 ? cs.tertiary : cs.error,
                     fontWeight: FontWeight.w700,
@@ -594,9 +710,9 @@ class _SummaryTile extends StatelessWidget {
               const SizedBox(width: KuberSpacing.xs),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
@@ -613,6 +729,3 @@ class _SummaryTile extends StatelessWidget {
     );
   }
 }
-
-
-

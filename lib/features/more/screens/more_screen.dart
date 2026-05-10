@@ -7,9 +7,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../shared/widgets/kuber_loader.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import '../../dev/providers/dev_mode_provider.dart';
+import '../../tutorial/providers/tutorial_provider.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
+import '../../tutorial/services/tutorial_mock_data_service.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -64,6 +69,7 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () => context.push('/more/tags'),
                     ),
                     _MenuItem(
+                      key: TutorialStepKeys.moreBudgetsItem,
                       icon: Icons.pie_chart_rounded,
                       label: 'Budgets',
                       subtitle: 'Track and control your monthly spending',
@@ -103,6 +109,7 @@ class MoreScreen extends ConsumerWidget {
                   title: 'Tools',
                   items: [
                     _MenuItem(
+                      key: TutorialStepKeys.moreAskKuberItem,
                       icon: Icons.auto_awesome_rounded,
                       label: 'Ask Kuber (Beta)',
                       subtitle: 'On-device smart assistant',
@@ -131,6 +138,7 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () => context.push('/more/settings'),
                     ),
                     _MenuItem(
+                      key: TutorialStepKeys.moreDataItem,
                       icon: Icons.storage_rounded,
                       label: 'Data',
                       subtitle: 'Export and clear your data',
@@ -175,6 +183,26 @@ class MoreScreen extends ConsumerWidget {
 
                 const SizedBox(height: KuberSpacing.xl),
 
+                _MenuSection(
+                  title: 'Tutorial',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.school_rounded,
+                      label: 'App Tutorial (Beta)',
+                      subtitle: 'Replay the feature walkthrough',
+                      onTap: () => launchTutorialFromMore(context, ref),
+                    ),
+                    _MenuItem(
+                      icon: Icons.auto_stories_rounded,
+                      label: 'Welcome Tour',
+                      subtitle: 'Replay the welcome and setup screens',
+                      onTap: () => context.push('/onboarding?replay=true'),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
                 // Contact Us section
                 _MenuSection(
                   title: 'Help Us',
@@ -185,7 +213,9 @@ class MoreScreen extends ConsumerWidget {
                       subtitle: 'Enjoying Kuber? Leave a review',
                       onTap: () {
                         launchUrl(
-                          Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
+                          Uri.parse(
+                            'https://play.google.com/store/apps/details?id=com.grs.kuber',
+                          ),
                           mode: LaunchMode.externalApplication,
                         );
                       },
@@ -197,7 +227,8 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () {
                         SharePlus.instance.share(
                           ShareParams(
-                            text: 'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
+                            text:
+                                'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
                           ),
                         );
                       },
@@ -217,6 +248,32 @@ class MoreScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> launchTutorialFromMore(BuildContext context, WidgetRef ref) async {
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const KuberLoader(label: 'Preparing tutorial...'),
+  );
+
+  try {
+    final currentSandbox = ref.read(tutorialSandboxIsarProvider);
+    if (currentSandbox != null) {
+      await closeSandboxIsar(currentSandbox);
+      ref.read(tutorialSandboxIsarProvider.notifier).state = null;
+    }
+    final sandbox = await openSandboxIsar();
+    ref.read(tutorialSandboxIsarProvider.notifier).state = sandbox;
+    await TutorialMockDataService().generateMockData(sandbox);
+    ref.read(tutorialNotifierProvider.notifier).setSandboxMode(true);
+  } finally {
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
+  if (context.mounted) context.push('/tutorial');
 }
 
 class _MenuSection extends StatelessWidget {
@@ -253,11 +310,7 @@ class _MenuSection extends StatelessWidget {
               for (int i = 0; i < items.length; i++) ...[
                 items[i],
                 if (i < items.length - 1)
-                  Divider(
-                    height: 1,
-                    color: cs.outline,
-                    indent: 52,
-                  ),
+                  Divider(height: 1, color: cs.outline, indent: 52),
               ],
             ],
           ),
@@ -275,6 +328,7 @@ class _MenuItem extends StatelessWidget {
   final Color? color;
 
   const _MenuItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.subtitle,
@@ -321,8 +375,11 @@ class _MenuItem extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 20,
+            ),
           ],
         ),
       ),

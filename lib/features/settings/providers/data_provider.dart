@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/data_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../features/transactions/services/suggestion_service.dart';
@@ -57,7 +57,7 @@ class DataState {
 }
 
 final dataServiceProvider = Provider<DataService>((ref) {
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   return DataService(isar);
 });
 
@@ -65,11 +65,13 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
 });
 
-final dataControllerProvider = StateNotifierProvider<DataController, DataState>((ref) {
-  final service = ref.watch(dataServiceProvider);
-  final notificationService = ref.watch(notificationServiceProvider);
-  return DataController(service, notificationService, ref);
-});
+final dataControllerProvider = StateNotifierProvider<DataController, DataState>(
+  (ref) {
+    final service = ref.watch(dataServiceProvider);
+    final notificationService = ref.watch(notificationServiceProvider);
+    return DataController(service, notificationService, ref);
+  },
+);
 
 class DataController extends StateNotifier<DataState> {
   final DataService _service;
@@ -77,15 +79,16 @@ class DataController extends StateNotifier<DataState> {
   final Ref _ref;
 
   static const notificationId = 1001;
-  DataController(this._service, this._notificationService, this._ref) : super(DataState());
+  DataController(this._service, this._notificationService, this._ref)
+    : super(DataState());
 
   Future<void> exportData() async {
     state = state.copyWith(status: DataOpStatus.loading, filePath: null);
-    
+
     try {
       await _notificationService.init();
       await _notificationService.requestPermission();
-      
+
       // Non-awaited to avoid blocking the main flow
       _notificationService.showExportNotification(
         id: notificationId,
@@ -98,9 +101,9 @@ class DataController extends StateNotifier<DataState> {
       final entry = exports.entries.first;
       final timestamp = DateFormat('yyyy_MM_dd_HHmm').format(DateTime.now());
       final fileName = 'kuber_backup_$timestamp.csv';
-      
+
       final path = await _saveFile(entry.value, fileName);
-      
+
       if (path != null) {
         state = state.copyWith(
           status: DataOpStatus.success,
@@ -118,8 +121,11 @@ class DataController extends StateNotifier<DataState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Export failed: $e');
-      
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Export failed: $e',
+      );
+
       _notificationService.showExportNotification(
         id: notificationId,
         title: 'Export Failed',
@@ -140,10 +146,10 @@ class DataController extends StateNotifier<DataState> {
     } else {
       directory = await getDownloadsDirectory();
     }
-    
+
     directory ??= await getExternalStorageDirectory();
     directory ??= await getApplicationDocumentsDirectory();
-    
+
     final file = File('${directory.path}/$fileName');
     await file.writeAsString(content);
     return file.path;
@@ -151,10 +157,10 @@ class DataController extends StateNotifier<DataState> {
 
   Future<void> downloadTemplate() async {
     state = state.copyWith(status: DataOpStatus.loading, filePath: null);
-    
+
     await _notificationService.init();
     await _notificationService.requestPermission();
-    
+
     const notificationId = 1002;
     await _notificationService.showExportNotification(
       id: notificationId,
@@ -165,8 +171,12 @@ class DataController extends StateNotifier<DataState> {
 
     try {
       final path = await _service.downloadTemplate();
-      state = state.copyWith(status: DataOpStatus.success, message: 'Template downloaded successfully', filePath: path);
-      
+      state = state.copyWith(
+        status: DataOpStatus.success,
+        message: 'Template downloaded successfully',
+        filePath: path,
+      );
+
       final fileName = path?.split('/').last ?? 'template.csv';
       await _notificationService.showExportNotification(
         id: notificationId,
@@ -176,7 +186,10 @@ class DataController extends StateNotifier<DataState> {
         payload: path,
       );
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Download failed: $e');
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Download failed: $e',
+      );
       await _notificationService.showExportNotification(
         id: notificationId,
         title: 'Download Failed',
@@ -207,9 +220,9 @@ class DataController extends StateNotifier<DataState> {
         final file = File(fileData.path!);
         final csvContent = await file.readAsString();
         final importResult = await _service.importData(csvContent);
-        
+
         if (importResult.error != null) {
-           // Skip or handle individual file error
+          // Skip or handle individual file error
         } else {
           totalSuccess += importResult.successCount;
           totalFailure += importResult.failureCount;
@@ -217,10 +230,10 @@ class DataController extends StateNotifier<DataState> {
       }
 
       _refreshData();
-      final msg = totalFailure > 0 
-        ? 'Imported $totalSuccess records, $totalFailure failed'
-        : 'Imported $totalSuccess records successfully';
-        
+      final msg = totalFailure > 0
+          ? 'Imported $totalSuccess records, $totalFailure failed'
+          : 'Imported $totalSuccess records successfully';
+
       state = state.copyWith(
         status: DataOpStatus.success,
         message: msg,
@@ -228,7 +241,10 @@ class DataController extends StateNotifier<DataState> {
         failureCount: totalFailure,
       );
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Import failed: $e');
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Import failed: $e',
+      );
     }
   }
 
@@ -240,9 +256,15 @@ class DataController extends StateNotifier<DataState> {
     try {
       await _service.generateMockData();
       _refreshData();
-      state = state.copyWith(status: DataOpStatus.success, message: 'Mock data generated successfully');
+      state = state.copyWith(
+        status: DataOpStatus.success,
+        message: 'Mock data generated successfully',
+      );
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Generation failed: $e');
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Generation failed: $e',
+      );
     }
   }
 
@@ -254,14 +276,27 @@ class DataController extends StateNotifier<DataState> {
     try {
       await _service.clearAllData();
       _refreshData();
-      state = state.copyWith(status: DataOpStatus.success, message: 'All data cleared successfully');
+      state = state.copyWith(
+        status: DataOpStatus.success,
+        message: 'All data cleared successfully',
+      );
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Clear failed: $e');
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Clear failed: $e',
+      );
     }
   }
 
-  Future<void> runImport(String content, {required bool isJson, bool override = false}) async {
-    state = state.copyWith(status: DataOpStatus.loading, loadingMessage: 'Importing data…');
+  Future<void> runImport(
+    String content, {
+    required bool isJson,
+    bool override = false,
+  }) async {
+    state = state.copyWith(
+      status: DataOpStatus.loading,
+      loadingMessage: 'Importing data…',
+    );
     try {
       ImportResult result;
       if (isJson) {
@@ -276,12 +311,18 @@ class DataController extends StateNotifier<DataState> {
           : 'Imported ${result.successCount} records successfully';
       state = state.copyWith(status: DataOpStatus.success, message: msg);
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Import failed: $e');
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Import failed: $e',
+      );
     }
   }
 
   Future<void> rebuildSuggestions() async {
-    state = state.copyWith(status: DataOpStatus.loading, loadingMessage: 'Rebuilding suggestions…');
+    state = state.copyWith(
+      status: DataOpStatus.loading,
+      loadingMessage: 'Rebuilding suggestions…',
+    );
     try {
       final suggestionService = SuggestionService(_service.isar);
       await suggestionService.clearAll();
@@ -291,9 +332,15 @@ class DataController extends StateNotifier<DataState> {
           await suggestionService.upsertSuggestion(tx);
         }
       }
-      state = state.copyWith(status: DataOpStatus.success, message: 'Suggestions rebuilt successfully');
+      state = state.copyWith(
+        status: DataOpStatus.success,
+        message: 'Suggestions rebuilt successfully',
+      );
     } catch (e) {
-      state = state.copyWith(status: DataOpStatus.error, message: 'Rebuild failed: $e');
+      state = state.copyWith(
+        status: DataOpStatus.error,
+        message: 'Rebuild failed: $e',
+      );
     }
   }
 

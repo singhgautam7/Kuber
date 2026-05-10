@@ -3,17 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/history_filter.dart';
 import '../providers/history_filter_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 class HistoryFilterWidget extends ConsumerStatefulWidget {
   final VoidCallback onAdvancedTap;
 
-  const HistoryFilterWidget({
-    super.key,
-    required this.onAdvancedTap,
-  });
+  const HistoryFilterWidget({super.key, required this.onAdvancedTap});
 
   @override
-  ConsumerState<HistoryFilterWidget> createState() => _HistoryFilterWidgetState();
+  ConsumerState<HistoryFilterWidget> createState() =>
+      _HistoryFilterWidgetState();
 }
 
 class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
@@ -32,6 +31,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
       setState(() => _isSearching = false);
     }
   }
+
   @override
   void dispose() {
     _focusNode.removeListener(_onFocusChange);
@@ -59,7 +59,9 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
   }
 
   void _onSearchSubmit(String query) {
-    ref.read(historyFilterProvider.notifier).setSearchQuery(query.isEmpty ? null : query);
+    ref
+        .read(historyFilterProvider.notifier)
+        .setSearchQuery(query.isEmpty ? null : query);
     setState(() => _isSearching = false);
   }
 
@@ -147,6 +149,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
               message: 'Advanced filters',
               triggerMode: TooltipTriggerMode.longPress,
               child: _FilterIconButton(
+                key: TutorialStepKeys.historyFilterIcon,
                 count: filter.activeFiltersCount,
                 isActive: filter.isAdvanced,
                 onTap: widget.onAdvancedTap,
@@ -186,8 +189,11 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
             borderRadius: BorderRadius.circular(KuberRadius.md),
             border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
           ),
-          child:
-              Icon(Icons.search_rounded, size: 20, color: cs.onSurfaceVariant),
+          child: Icon(
+            Icons.search_rounded,
+            size: 20,
+            color: cs.onSurfaceVariant,
+          ),
         ),
       ),
     );
@@ -199,13 +205,23 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
       controller: _searchController,
       focusNode: _focusNode,
       textAlignVertical: TextAlignVertical.center,
-      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurface),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        fontSize: 14,
+        color: cs.onSurface,
+      ),
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: 'Search transactions...',
-        hintStyle: theme.textTheme.bodyMedium?.copyWith(fontSize: 14, color: cs.onSurfaceVariant),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          fontSize: 14,
+          color: cs.onSurfaceVariant,
+        ),
         prefixIcon: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, size: 20, color: cs.onSurfaceVariant),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            size: 20,
+            color: cs.onSurfaceVariant,
+          ),
           onPressed: _onSearchCancel,
         ),
         filled: true,
@@ -283,6 +299,7 @@ class _FilterIconButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _FilterIconButton({
+    super.key,
     required this.count,
     required this.isActive,
     required this.onTap,
@@ -303,7 +320,9 @@ class _FilterIconButton extends StatelessWidget {
               color: cs.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(KuberRadius.md),
               border: Border.all(
-                color: isActive ? cs.primary : cs.outline.withValues(alpha: 0.3),
+                color: isActive
+                    ? cs.primary
+                    : cs.outline.withValues(alpha: 0.3),
               ),
             ),
             child: Icon(
@@ -320,19 +339,22 @@ class _FilterIconButton extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 tween: Tween(begin: 0.0, end: 1.0),
                 builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: value,
-                    child: child,
-                  );
+                  return Transform.scale(scale: value, child: child);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: cs.primary,
                     borderRadius: BorderRadius.circular(KuberRadius.sm),
                     border: Border.all(color: cs.surface, width: 2),
                   ),
-                  constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
                   child: Text(
                     '$count',
                     style: const TextStyle(
@@ -355,10 +377,7 @@ class _ClearButton extends StatelessWidget {
   final bool isEnabled;
   final VoidCallback onTap;
 
-  const _ClearButton({
-    required this.isEnabled,
-    required this.onTap,
-  });
+  const _ClearButton({required this.isEnabled, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -374,7 +393,7 @@ class _ClearButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: cs.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: isEnabled 
+            border: isEnabled
                 ? Border.all(color: cs.error.withValues(alpha: 0.5))
                 : null,
           ),

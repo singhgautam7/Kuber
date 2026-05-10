@@ -117,14 +117,22 @@ class KuberBottomSheet extends StatelessWidget {
                     top: 0,
                     bottom: 0,
                     child: Center(
-                      child: IconButton(
-                        onPressed: () =>
-                            Navigator.of(context, rootNavigator: true).pop(),
-                        icon: const Icon(Icons.close_rounded),
-                        style: IconButton.styleFrom(
-                          backgroundColor: cs.surfaceContainerHigh,
-                          padding: const EdgeInsets.all(8),
-                          shape: const CircleBorder(),
+                      child: SizedBox.square(
+                        dimension: 40,
+                        child: IconButton(
+                          onPressed: () =>
+                              Navigator.of(context, rootNavigator: true).pop(),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          padding: EdgeInsets.zero,
+                          alignment: Alignment.center,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 40,
+                            height: 40,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: cs.surfaceContainerHigh,
+                            shape: const CircleBorder(),
+                          ),
                         ),
                       ),
                     ),
@@ -134,11 +142,7 @@ class KuberBottomSheet extends StatelessWidget {
             ),
 
             // ── Boundary divider ─────────────────────────────────────────
-            Divider(
-              height: 1,
-              thickness: 0.5,
-              color: cs.outline,
-            ),
+            Divider(height: 1, thickness: 0.5, color: cs.outline),
 
             // ── Scrollable body ──────────────────────────────────────────
             Flexible(

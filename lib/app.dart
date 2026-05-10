@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
+import 'features/onboarding/widgets/onboarding_tutorial_nudge.dart';
 import 'features/settings/providers/settings_provider.dart';
+import 'features/tutorial/widgets/tutorial_overlay.dart';
 
 class KuberApp extends ConsumerWidget {
   const KuberApp({super.key});
@@ -29,10 +31,10 @@ class KuberApp extends ConsumerWidget {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness:
-                isDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness:
-                isDark ? Brightness.dark : Brightness.light,
+            statusBarIconBrightness: isDark
+                ? Brightness.light
+                : Brightness.dark,
+            statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
           ),
           child: ColoredBox(
             color: Theme.of(context).colorScheme.surface,
@@ -40,7 +42,9 @@ class KuberApp extends ConsumerWidget {
               bottom: false,
               left: false,
               right: false,
-              child: LockScreen(child: child!),
+              child: OnboardingTutorialNudge(
+                child: TutorialOverlay(child: LockScreen(child: child!)),
+              ),
             ),
           ),
         );

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' show DateUtils;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../data/transaction.dart';
 import '../data/transaction_repository.dart';
@@ -12,7 +12,7 @@ import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
-  return TransactionRepository(ref.watch(isarProvider));
+  return TransactionRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final transactionListProvider =
@@ -36,7 +36,10 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
+      ref
+          .read(budgetServiceProvider)
+          .checkAlerts(t.categoryId)
+          .catchError((_) {});
     }
     return id;
   }
@@ -46,7 +49,10 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
+      ref
+          .read(budgetServiceProvider)
+          .checkAlerts(t.categoryId)
+          .catchError((_) {});
     }
     return id;
   }
@@ -68,7 +74,10 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t != null && t.type == 'expense' && !t.isTransfer) {
-      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
+      ref
+          .read(budgetServiceProvider)
+          .checkAlerts(t.categoryId)
+          .catchError((_) {});
     }
   }
 
@@ -77,7 +86,10 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     ref.invalidateSelf();
     _invalidateDependencies();
     if (t.type == 'expense') {
-      ref.read(budgetServiceProvider).checkAlerts(t.categoryId).catchError((_) {});
+      ref
+          .read(budgetServiceProvider)
+          .checkAlerts(t.categoryId)
+          .catchError((_) {});
     }
   }
 
@@ -128,44 +140,49 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
 
 /// Pre-computed spending stats for the dashboard card.
 final spendingStatsProvider =
-    Provider<({double avgDaily, double monthTotal, double projected, int daysElapsed})>((ref) {
-  final txns = ref.watch(transactionListProvider).valueOrNull;
-  if (txns == null || txns.isEmpty) {
-    return (avgDaily: 0, monthTotal: 0, projected: 0, daysElapsed: 0);
-  }
+    Provider<
+      ({double avgDaily, double monthTotal, double projected, int daysElapsed})
+    >((ref) {
+      final txns = ref.watch(transactionListProvider).valueOrNull;
+      if (txns == null || txns.isEmpty) {
+        return (avgDaily: 0, monthTotal: 0, projected: 0, daysElapsed: 0);
+      }
 
-  final now = DateTime.now();
-  final cutoff90 = now.subtract(const Duration(days: 90));
-  final monthStart = DateTime(now.year, now.month, 1);
-  final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+      final now = DateTime.now();
+      final cutoff90 = now.subtract(const Duration(days: 90));
+      final monthStart = DateTime(now.year, now.month, 1);
+      final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
 
-  final expenses = txns.where((t) =>
-      t.type == 'expense' && !t.isTransfer && !t.isBalanceAdjustment);
+      final expenses = txns.where(
+        (t) => t.type == 'expense' && !t.isTransfer && !t.isBalanceAdjustment,
+      );
 
-  final monthTotal = expenses
-      .where((t) => !t.createdAt.isBefore(monthStart))
-      .fold<double>(0.0, (s, t) => s + t.amount);
+      final monthTotal = expenses
+          .where((t) => !t.createdAt.isBefore(monthStart))
+          .fold<double>(0.0, (s, t) => s + t.amount);
 
-  final last90 = expenses.where((t) => !t.createdAt.isBefore(cutoff90)).toList();
-  final last90Total = last90.fold<double>(0.0, (s, t) => s + t.amount);
+      final last90 = expenses
+          .where((t) => !t.createdAt.isBefore(cutoff90))
+          .toList();
+      final last90Total = last90.fold<double>(0.0, (s, t) => s + t.amount);
 
-  double avgDaily = 0;
-  if (last90.isNotEmpty) {
-    final firstDate = last90
-        .map((e) => e.createdAt)
-        .reduce((min, e) => e.isBefore(min) ? e : min);
-    final diff = now.difference(firstDate).inDays + 1;
-    final daysActive = diff.clamp(1, 90);
-    avgDaily = last90Total / daysActive;
-  }
+      double avgDaily = 0;
+      if (last90.isNotEmpty) {
+        final firstDate = last90
+            .map((e) => e.createdAt)
+            .reduce((min, e) => e.isBefore(min) ? e : min);
+        final diff = now.difference(firstDate).inDays + 1;
+        final daysActive = diff.clamp(1, 90);
+        avgDaily = last90Total / daysActive;
+      }
 
-  return (
-    avgDaily: avgDaily,
-    monthTotal: monthTotal,
-    projected: avgDaily * daysInMonth,
-    daysElapsed: now.day,
-  );
-});
+      return (
+        avgDaily: avgDaily,
+        monthTotal: monthTotal,
+        projected: avgDaily * daysInMonth,
+        daysElapsed: now.day,
+      );
+    });
 
 final monthlyTransactionsProvider =
     FutureProvider.family<List<Transaction>, ({int year, int month})>((
@@ -178,5 +195,9 @@ final monthlyTransactionsProvider =
       final nextYear = params.month == 12 ? params.year + 1 : params.year;
       final end = DateTime(nextYear, nextMonth);
 
-      return all.where((t) => !t.createdAt.isBefore(start) && t.createdAt.isBefore(end)).toList();
+      return all
+          .where(
+            (t) => !t.createdAt.isBefore(start) && t.createdAt.isBefore(end),
+          )
+          .toList();
     });

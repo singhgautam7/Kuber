@@ -14,6 +14,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 import '../widgets/home_smart_insights.dart';
 import '../widgets/spending_stats_card.dart';
 import '../widgets/budget_snapshot_card.dart';
@@ -85,9 +86,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final userName = ref.watch(settingsProvider.select(
-      (async) => async.valueOrNull?.userName ?? '',
-    ));
+    final userName = ref.watch(
+      settingsProvider.select((async) => async.valueOrNull?.userName ?? ''),
+    );
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final summaryAsync = ref.watch(monthlySummaryProvider);
@@ -111,12 +112,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   const gold = Color(0xFFFFB300);
                   // Gradient always spans full width; stops move the highlight band
                   final bandStart = (t - 0.18).clamp(0.0, 1.0);
-                  final bandMid   = t.clamp(0.0, 1.0);
-                  final bandEnd   = (t + 0.18).clamp(0.0, 1.0);
+                  final bandMid = t.clamp(0.0, 1.0);
+                  final bandEnd = (t + 0.18).clamp(0.0, 1.0);
                   return GestureDetector(
                     onTap: () => context.push('/more/ask-kuber'),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.centerLeft,
@@ -131,12 +135,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           stops: [0.0, bandStart, bandMid, bandEnd, 1.0],
                         ),
                         borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: gold.withValues(alpha: 0.55), width: 1.2),
+                        border: Border.all(
+                          color: gold.withValues(alpha: 0.55),
+                          width: 1.2,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.auto_awesome_rounded, size: 13, color: gold),
+                          const Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 13,
+                            color: gold,
+                          ),
                           const SizedBox(width: 5),
                           Text(
                             'Ask Kuber',
@@ -159,12 +170,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                   final cs = Theme.of(context).colorScheme;
                   const blue = Color(0xFF3B82F6);
                   return Tooltip(
-                    message: isPrivate ? 'Privacy mode: On' : 'Privacy mode: Off',
+                    message: isPrivate
+                        ? 'Privacy mode: On'
+                        : 'Privacy mode: Off',
                     triggerMode: TooltipTriggerMode.longPress,
                     child: GestureDetector(
-                      onTap: () => ref.read(settingsProvider.notifier).togglePrivacyMode(),
+                      onTap: () => ref
+                          .read(settingsProvider.notifier)
+                          .togglePrivacyMode(),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        key: TutorialStepKeys.privacyModeIcon,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
                         decoration: BoxDecoration(
                           color: cs.surfaceContainerHigh,
                           borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -175,7 +194,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           ),
                         ),
                         child: Icon(
-                          isPrivate ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                          isPrivate
+                              ? Icons.visibility_off_rounded
+                              : Icons.visibility_rounded,
                           size: 16,
                           color: isPrivate ? blue : cs.onSurfaceVariant,
                         ),
@@ -217,6 +238,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
           // [A] Balance Hero Card
           RepaintBoundary(
+            key: TutorialStepKeys.dashboardBalanceCard,
             child: summaryAsync.when(
               loading: () => const SizedBox(
                 height: 180,
@@ -229,7 +251,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           const SizedBox(height: KuberSpacing.xl),
 
           // Quick Add
-          const QuickAddWidget(),
+          QuickAddWidget(key: TutorialStepKeys.quickAddFab),
           const SizedBox(height: KuberSpacing.md),
           const SizedBox(height: KuberSpacing.md),
 
@@ -306,11 +328,17 @@ class _BalanceHeroCard extends ConsumerWidget {
     final isPositive = summary.net >= 0;
     final netColor = isPositive ? cs.tertiary : cs.error;
     final prefix = isPositive ? '+' : '-';
-    final formattedNet = formatter.formatCurrency(summary.net.abs(), symbol: symbol).trim();
+    final formattedNet = formatter
+        .formatCurrency(summary.net.abs(), symbol: symbol)
+        .trim();
     final formattedIncome = maskAmount(
-        formatter.formatCurrency(summary.totalIncome, symbol: symbol), isPrivate);
+      formatter.formatCurrency(summary.totalIncome, symbol: symbol),
+      isPrivate,
+    );
     final formattedExpense = maskAmount(
-        formatter.formatCurrency(summary.totalExpense, symbol: symbol), isPrivate);
+      formatter.formatCurrency(summary.totalExpense, symbol: symbol),
+      isPrivate,
+    );
 
     final total = summary.totalIncome + summary.totalExpense;
     final incPct = total > 0 ? summary.totalIncome / total : 0.5;

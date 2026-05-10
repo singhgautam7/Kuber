@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../data/transaction.dart';
 import '../data/transaction_suggestion.dart';
 
@@ -17,16 +17,18 @@ class SuggestionService {
         .nameLowerEqualTo(key)
         .findFirst();
     await isar.writeTxn(() async {
-      isar.transactionSuggestions.put(TransactionSuggestion()
-        ..id = existing?.id ?? Isar.autoIncrement
-        ..nameLower = key
-        ..displayName = txn.name.trim()
-        ..categoryId = txn.categoryId.isEmpty ? null : txn.categoryId
-        ..accountId = txn.accountId.isEmpty ? null : txn.accountId
-        ..amount = txn.amount
-        ..type = txn.type
-        ..createdAt = existing?.createdAt ?? DateTime.now()
-        ..updatedAt = DateTime.now());
+      isar.transactionSuggestions.put(
+        TransactionSuggestion()
+          ..id = existing?.id ?? Isar.autoIncrement
+          ..nameLower = key
+          ..displayName = txn.name.trim()
+          ..categoryId = txn.categoryId.isEmpty ? null : txn.categoryId
+          ..accountId = txn.accountId.isEmpty ? null : txn.accountId
+          ..amount = txn.amount
+          ..type = txn.type
+          ..createdAt = existing?.createdAt ?? DateTime.now()
+          ..updatedAt = DateTime.now(),
+      );
     });
   }
 
@@ -61,5 +63,5 @@ class SuggestionService {
 }
 
 final suggestionServiceProvider = Provider<SuggestionService>((ref) {
-  return SuggestionService(ref.watch(isarProvider));
+  return SuggestionService(ref.watch(tutorialAwareIsarProvider));
 });

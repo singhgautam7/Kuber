@@ -1,5 +1,8 @@
 class PrefsKeys {
   static const onboarded = 'kuber_onboarded';
+  static const tutorialComplete = 'tutorial_complete';
+  static const onboardingTutorialNudgePending =
+      'kuber_onboarding_tutorial_nudge_pending';
   static const userName = 'kuber_user_name';
   static const currency = 'currency';
   static const themeMode = 'theme_mode';
@@ -9,10 +12,13 @@ class PrefsKeys {
 
   // Migration Keys
   static const migratedTxnLinkedRuleV1 = 'kuber_migrated_txn_linked_rule_v1';
-  static const migratedSeedLedgerCategoryV1 = 'kuber_migrated_seed_ledger_category_v1';
-  static const migratedSeedLoanInvestmentCategoryV1 = 'kuber_migrated_seed_loan_investment_category_v1';
+  static const migratedSeedLedgerCategoryV1 =
+      'kuber_migrated_seed_ledger_category_v1';
+  static const migratedSeedLoanInvestmentCategoryV1 =
+      'kuber_migrated_seed_loan_investment_category_v1';
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
-  static const migratedSuggestionBackfillV1 = 'kuber_migrated_suggestion_backfill_v1';
+  static const migratedSuggestionBackfillV1 =
+      'kuber_migrated_suggestion_backfill_v1';
 
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';

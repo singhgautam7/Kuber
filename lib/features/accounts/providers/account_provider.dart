@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
@@ -16,13 +16,13 @@ final triggerAddAccountProvider = StateProvider<bool>((ref) => false);
 final pendingAccountSelectionProvider = StateProvider<int?>((ref) => null);
 
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
-  return AccountRepository(ref.watch(isarProvider));
+  return AccountRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final accountListProvider =
     AsyncNotifierProvider<AccountListNotifier, List<Account>>(
-  AccountListNotifier.new,
-);
+      AccountListNotifier.new,
+    );
 
 class AccountListNotifier extends AsyncNotifier<List<Account>> {
   @override
@@ -52,11 +52,13 @@ final accountMapProvider = FutureProvider<Map<int, Account>>((ref) async {
 /// Computed balance for an account.
 /// Unified formula: initialBalance + income - expense.
 /// CC initial balance is stored as negative (debt), so negative balance = debt.
-final accountBalanceProvider =
-    FutureProvider.family<double, int>((ref, accountId) async {
+final accountBalanceProvider = FutureProvider.family<double, int>((
+  ref,
+  accountId,
+) async {
   ref.watch(transactionListProvider);
   ref.watch(accountListProvider);
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   final account = await isar.accounts.get(accountId);
   if (account == null) return 0.0;
 
@@ -67,17 +69,19 @@ final accountBalanceProvider =
       .findAll();
 
   return account.initialBalance +
-      txns.fold<double>(0.0, (sum, t) =>
-          t.type == 'income' ? sum + t.amount : sum - t.amount);
+      txns.fold<double>(
+        0.0,
+        (sum, t) => t.type == 'income' ? sum + t.amount : sum - t.amount,
+      );
 });
 
 final accountLatestTransactionProvider =
     FutureProvider.family<Transaction?, int>((ref, accountId) async {
-  ref.watch(transactionListProvider);
-  final isar = ref.watch(isarProvider);
-  return await isar.transactions
-      .filter()
-      .accountIdEqualTo(accountId.toString())
-      .sortByCreatedAtDesc()
-      .findFirst();
-});
+      ref.watch(transactionListProvider);
+      final isar = ref.watch(tutorialAwareIsarProvider);
+      return await isar.transactions
+          .filter()
+          .accountIdEqualTo(accountId.toString())
+          .sortByCreatedAtDesc()
+          .findFirst();
+    });
