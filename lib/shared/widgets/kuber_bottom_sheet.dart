@@ -38,6 +38,7 @@ class KuberBottomSheet extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: const BorderRadius.vertical(

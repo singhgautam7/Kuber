@@ -5,12 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../../core/utils/formatters.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/ledger.dart';
 import '../providers/ledger_provider.dart';
@@ -29,7 +30,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
   String? _selectedAccountId;
   DateTime _selectedDate = DateTime.now();
 
-  double get _amount => double.tryParse(_amountController.text.trim()) ?? 0;
+  double get _amount => double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void initState() {
@@ -82,8 +83,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}')),
+              CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
             ],
             style: GoogleFonts.inter(
               fontSize: 20,

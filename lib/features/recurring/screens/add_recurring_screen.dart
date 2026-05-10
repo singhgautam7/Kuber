@@ -6,12 +6,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../../../shared/widgets/skeleton_loader.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
@@ -50,7 +51,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   bool get _canSave =>
       _nameController.text.trim().isNotEmpty &&
       _amountController.text.trim().isNotEmpty &&
-      double.tryParse(_amountController.text.trim()) != null &&
+      double.tryParse(_amountController.text.trim().replaceAll(',', '')) != null &&
       _selectedCategoryId != null &&
       _selectedAccountId != null;
 
@@ -275,7 +276,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+              CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
             ],
             onChanged: (_) => setState(() {}),
           ),

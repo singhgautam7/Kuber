@@ -5,12 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../../core/utils/formatters.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
@@ -161,8 +162,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}')),
+                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                     ],
                     suffixIcon: _calcButton(_investedController),
                   ),
@@ -176,8 +176,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,2}')),
+                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                     ],
                     suffixIcon: _calcButton(_currentValueController),
                   ),
@@ -522,7 +521,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => KuberCalculator(
-        initialValue: double.tryParse(controller.text.trim()) ?? 0,
+        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
           setState(() {
             controller.text = result == result.truncateToDouble()
@@ -542,7 +541,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     if (_nameController.text.trim().isEmpty) return false;
     if (_autoDebit) {
       final sipAmt =
-          double.tryParse(_sipAmountController.text.trim()) ?? 0;
+          double.tryParse(_sipAmountController.text.trim().replaceAll(',', '')) ?? 0;
       if (sipAmt <= 0 || _sipDate == null || _selectedAccountId == null) {
         return false;
       }
@@ -580,7 +579,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     );
 
     final sipAmount =
-        double.tryParse(_sipAmountController.text.trim());
+        double.tryParse(_sipAmountController.text.trim().replaceAll(',', ''));
 
     if (_isEditing) {
       final existing = widget.existing!;
@@ -591,13 +590,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
 
       // The field now shows the total desired invested; compute delta
       final desiredTotal =
-          double.tryParse(_investedController.text.trim()) ?? currentTotalInvested;
+          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? currentTotalInvested;
       final additionalAmount = (desiredTotal - currentTotalInvested)
           .clamp(0.0, double.infinity);
 
       // If currentValue field is empty, auto-fill with desiredTotal
       double? currentValue =
-          double.tryParse(_currentValueController.text.trim());
+          double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
       currentValue ??= desiredTotal > 0 ? desiredTotal : existing.currentValue;
 
       final inv = existing
@@ -626,11 +625,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       }
     } else {
       final initialAmount =
-          double.tryParse(_investedController.text.trim()) ?? 0;
+          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? 0;
 
       // Auto-fill currentValue with initialAmount if not explicitly set
       double? currentValue =
-          double.tryParse(_currentValueController.text.trim());
+          double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
       if (currentValue == null && initialAmount > 0) {
         currentValue = initialAmount;
       }

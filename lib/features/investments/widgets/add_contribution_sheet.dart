@@ -31,7 +31,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
   DateTime _selectedDate = DateTime.now();
   final _noteController = TextEditingController();
 
-  double get _amount => double.tryParse(_amountController.text.trim()) ?? 0;
+  double get _amount => double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void initState() {
