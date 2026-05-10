@@ -42,4 +42,7 @@ class PrefsKeys {
   static const analyticsFilterType = 'kuber_analytics_filter_type';
   static const analyticsFilterFrom = 'kuber_analytics_filter_from';
   static const analyticsFilterTo = 'kuber_analytics_filter_to';
+
+  // Tutorial
+  static const tutorialComplete = 'tutorial_complete';
 }

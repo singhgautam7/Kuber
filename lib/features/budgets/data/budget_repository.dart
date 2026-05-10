@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar_community/isar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import 'budget.dart';
 
 final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   return BudgetRepository(isar);
 });
 

@@ -6,8 +6,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_loader.dart';
 import '../../dev/providers/dev_mode_provider.dart';
 import '../../settings/widgets/settings_widgets.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../../tutorial/providers/tutorial_provider.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
+import '../../tutorial/services/tutorial_mock_data_service.dart';
 
 class _SearchableItem {
   final String label;
@@ -47,7 +52,8 @@ class _SearchableItem {
   }
 }
 
-List<_SearchableItem> _buildItems(bool isDevMode) => [
+List<_SearchableItem> _buildItems(
+    bool isDevMode, BuildContext context, WidgetRef ref) => [
       // AI Assistant
       _SearchableItem(
         label: 'Ask Kuber',
@@ -113,6 +119,14 @@ List<_SearchableItem> _buildItems(bool isDevMode) => [
         ),
       ),
       _SearchableItem(label: 'Submit a Feedback', subtitle: 'Report a bug or suggest a feature', icon: Icons.feedback_outlined, section: 'Contact Us', route: '/more/feedback'),
+      // Tutorial
+      _SearchableItem(
+        label: 'App Tutorial',
+        subtitle: 'Replay the feature walkthrough',
+        icon: Icons.school_rounded,
+        section: 'Tutorial',
+        onAction: () => _launchTutorialFromSearch(context, ref),
+      ),
       // Dev Tools (conditional)
       if (isDevMode)
         _SearchableItem(label: 'Dev Tools', subtitle: 'Developer-only tools', icon: Icons.bug_report_outlined, section: 'Dev', route: '/more/dev-tools'),
@@ -152,7 +166,7 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
-    final allItems = _buildItems(isDevMode);
+    final allItems = _buildItems(isDevMode, context, ref);
     final filtered = _query.isEmpty
         ? allItems
         : allItems.where((item) => item.matches(_query)).toList();
@@ -344,5 +358,37 @@ class _SearchResultItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> _launchTutorialFromSearch(
+    BuildContext context, WidgetRef ref) async {
+  final txns = await ref.read(transactionRepositoryProvider).getAll();
+  final useSandbox = txns.isNotEmpty;
+
+  if (!context.mounted) return;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const KuberLoader(label: 'Preparing tutorial...'),
+  );
+
+  try {
+    if (useSandbox) {
+      final sandbox = await openSandboxIsar();
+      ref.read(tutorialSandboxIsarProvider.notifier).state = sandbox;
+      ref.read(tutorialNotifierProvider.notifier).setSandboxMode(true);
+      await TutorialMockDataService().generateMockData(sandbox);
+    } else {
+      ref.read(tutorialNotifierProvider.notifier).setSandboxMode(false);
+      await TutorialMockDataService()
+          .generateMockData(ref.read(tutorialAwareIsarProvider));
+    }
+  } finally {
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+      context.push('/tutorial');
+    }
   }
 }

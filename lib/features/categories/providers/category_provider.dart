@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../data/category.dart';
 import '../data/category_group.dart';
 import '../data/category_group_repository.dart';
@@ -13,13 +13,13 @@ import '../../transactions/providers/transaction_provider.dart';
 import '../../budgets/providers/budget_provider.dart';
 
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
-  return CategoryRepository(ref.watch(isarProvider));
+  return CategoryRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final categoryGroupRepositoryProvider = Provider<CategoryGroupRepository>((
   ref,
 ) {
-  return CategoryGroupRepository(ref.watch(isarProvider));
+  return CategoryGroupRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final categoryListProvider =
@@ -87,7 +87,7 @@ final categoryRecentTransactionProvider =
     FutureProvider.family<Transaction?, int>((ref, categoryId) async {
       // Watch transactionListProvider to re-compute when transactions change
       ref.watch(transactionListProvider);
-      final isar = ref.watch(isarProvider);
+      final isar = ref.watch(tutorialAwareIsarProvider);
       final categoryIdStr = categoryId.toString();
 
       return await isar.transactions
@@ -120,7 +120,7 @@ final categoryStatsProvider = FutureProvider<Map<int, CategoryStats>>((
 ) async {
   // Re-fetch when transactions change
   ref.watch(transactionListProvider);
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
 
   final txns = await isar.transactions.where().findAll();
 

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
@@ -16,7 +16,7 @@ final triggerAddAccountProvider = StateProvider<bool>((ref) => false);
 final pendingAccountSelectionProvider = StateProvider<int?>((ref) => null);
 
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
-  return AccountRepository(ref.watch(isarProvider));
+  return AccountRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final accountListProvider =
@@ -56,7 +56,7 @@ final accountBalanceProvider =
     FutureProvider.family<double, int>((ref, accountId) async {
   ref.watch(transactionListProvider);
   ref.watch(accountListProvider);
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   final account = await isar.accounts.get(accountId);
   if (account == null) return 0.0;
 
@@ -74,7 +74,7 @@ final accountBalanceProvider =
 final accountLatestTransactionProvider =
     FutureProvider.family<Transaction?, int>((ref, accountId) async {
   ref.watch(transactionListProvider);
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   return await isar.transactions
       .filter()
       .accountIdEqualTo(accountId.toString())

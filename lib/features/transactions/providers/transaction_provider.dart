@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' show DateUtils;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../data/transaction.dart';
 import '../data/transaction_repository.dart';
@@ -12,7 +12,7 @@ import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
-  return TransactionRepository(ref.watch(isarProvider));
+  return TransactionRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final transactionListProvider =

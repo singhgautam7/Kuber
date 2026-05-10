@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -13,7 +13,7 @@ import '../data/loan_repository.dart';
 import '../utils/loan_calculations.dart' as calc;
 
 final loanRepositoryProvider = Provider<LoanRepository>((ref) {
-  return LoanRepository(ref.watch(isarProvider));
+  return LoanRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final loanListProvider =
@@ -81,7 +81,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
   }
 
   Future<void> deleteLoan(Loan loan) async {
-    final isar = ref.read(isarProvider);
+    final isar = ref.read(tutorialAwareIsarProvider);
     final attachments = ref.read(attachmentServiceProvider);
 
     // Delete all linked transactions

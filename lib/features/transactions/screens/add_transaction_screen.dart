@@ -33,6 +33,7 @@ import '../widgets/transfer_account_tile.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -229,6 +230,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                     // Type segmented button
                     TransactionTypeSelector(
+                      key: TutorialStepKeys.transactionTypeToggle,
                       selected: _type,
                       onSelected: _onTypeChanged,
                       enabled: !_isEditing,
@@ -244,6 +246,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
                       // Amount input
                       AmountInput(
+                        key: TutorialStepKeys.amountField,
                         controller: _amountController,
                         amountColor: _typeColor,
                       ),
@@ -284,12 +287,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       const SizedBox(height: KuberSpacing.md),
 
       TagsTile(
+        key: TutorialStepKeys.tagsPicker,
         selectedTags: _selectedTags,
         onTap: _showTagSelector,
       ),
       const SizedBox(height: KuberSpacing.md),
 
       NotesField(
+        key: TutorialStepKeys.notesField,
         controller: _notesController,
         focusNode: showNotesPrefixIcon ? null : _notesFocusNode,
         showPrefixIcon: showNotesPrefixIcon,
@@ -442,6 +447,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Widget _buildAutocompleteField(ColorScheme cs, TextTheme textTheme) {
     return RawAutocomplete<TransactionSuggestion>(
+      key: TutorialStepKeys.descriptionField,
       textEditingController: _nameController,
       focusNode: _nameFocusNode,
       displayStringForOption: (s) => s.displayName,
@@ -486,6 +492,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       },
       optionsViewBuilder: (context, onSelected, options) =>
           TransactionSuggestionOverlay(
+            key: TutorialStepKeys.suggestionList,
             options: options,
             onSelected: onSelected,
           ),
@@ -510,6 +517,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? catMap[_selectedCategoryId]
                   : null;
               return SelectorTile(
+                key: TutorialStepKeys.categoryPicker,
                 label: 'CATEGORY',
                 icon: cat != null
                     ? IconMapper.fromString(cat.icon)
@@ -533,6 +541,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   ? accs.where((a) => a.id == _selectedAccountId).firstOrNull
                   : null;
               return SelectorTile(
+                key: TutorialStepKeys.accountPicker,
                 label: 'FROM ACCOUNT',
                 icon: acc != null
                     ? resolveAccountIcon(acc)

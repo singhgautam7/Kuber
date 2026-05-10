@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../data/transaction.dart';
 import '../data/transaction_suggestion.dart';
 
@@ -61,5 +61,5 @@ class SuggestionService {
 }
 
 final suggestionServiceProvider = Provider<SuggestionService>((ref) {
-  return SuggestionService(ref.watch(isarProvider));
+  return SuggestionService(ref.watch(tutorialAwareIsarProvider));
 });

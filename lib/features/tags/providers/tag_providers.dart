@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../data/tag.dart';
 import '../data/tag_repository.dart';
 import '../data/transaction_tag.dart';
@@ -8,7 +8,7 @@ import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 
 final tagRepositoryProvider = Provider<TagRepository>((ref) {
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   return TagRepository(isar);
 });
 
@@ -35,7 +35,7 @@ final tagRecentTransactionProvider =
     FutureProvider.family<Transaction?, int>((ref, tagId) async {
   // Watch transactionListProvider to re-compute when transactions change
   ref.watch(transactionListProvider);
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
 
   final junctions = await isar.transactionTags
       .filter()
@@ -57,7 +57,7 @@ final tagRecentTransactionProvider =
 });
 
 final tagTransactionCountProvider = StreamProvider.family<int, int>((ref, tagId) {
-  final isar = ref.watch(isarProvider);
+  final isar = ref.watch(tutorialAwareIsarProvider);
   return isar.transactionTags
       .filter()
       .tagIdEqualTo(tagId)

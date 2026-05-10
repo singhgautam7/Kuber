@@ -8,6 +8,8 @@ import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/settings/providers/settings_provider.dart' show settingsProvider, SwipeMode, NavBarStyle;
 import '../../features/history/providers/selection_provider.dart';
+import '../../features/tutorial/models/tutorial_step_keys.dart';
+import '../../features/tutorial/widgets/tutorial_overlay.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
@@ -275,6 +277,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
                 child: GestureDetector(
                   onLongPress: _openSpeedDial,
                   child: FloatingActionButton(
+                    key: TutorialStepKeys.quickAddFab,
                     onPressed: _onAddTapped,
                     backgroundColor: cs.primary,
                     foregroundColor: Colors.white,
@@ -322,7 +325,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 
         SystemNavigator.pop();
       },
-      child: content,
+      child: TutorialOverlay(child: content),
     );
   }
 }
@@ -431,6 +434,7 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                   // Add button — always visible in Modern mode
                   const SizedBox(width: KuberSpacing.sm),
                   GestureDetector(
+                    key: TutorialStepKeys.quickAddFab,
                     onTap: widget.onAddTapped,
                     onLongPress: widget.onAddLongPress,
                     child: Container(

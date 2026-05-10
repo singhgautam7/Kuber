@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/history_filter.dart';
 import '../providers/history_filter_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 class HistoryFilterWidget extends ConsumerStatefulWidget {
   final VoidCallback onAdvancedTap;
@@ -144,6 +145,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
             const SizedBox(width: 8),
             // Filter Icon with Badge
             Tooltip(
+              key: TutorialStepKeys.historyFilterIcon,
               message: 'Advanced filters',
               triggerMode: TooltipTriggerMode.longPress,
               child: _FilterIconButton(

@@ -15,6 +15,7 @@ import '../data/transaction.dart';
 import '../helpers/transaction_filters.dart';
 import '../providers/transaction_provider.dart';
 import '../../tags/providers/tag_providers.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../export/widgets/export_bottom_sheet.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../history/models/history_filter.dart';
@@ -117,6 +118,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
               SliverToBoxAdapter(
                 child: HistoryFilterWidget(
+                  key: TutorialStepKeys.historyQuickFilters,
                   onAdvancedTap: () => context.push('/history/filter'),
                 ),
               ),
@@ -301,6 +303,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         final hasMore = displayedGroups.length < groups.length;
 
                         return SliverPadding(
+                          key: TutorialStepKeys.historyList,
                           padding: EdgeInsets.only(
                             bottom: hasMore ? 0 : navBarBottomPadding(context),
                             left: KuberSpacing.lg,
@@ -319,6 +322,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 );
                               } else {
                                 return TransactionDayCard(
+                                  key: index == 1
+                                      ? TutorialStepKeys.historyFirstItem
+                                      : null,
                                   transactions: group.transactions,
                                   onDelete: _deleteWithUndo,
                                   onTap: (t) => _showTransactionDetail(t),

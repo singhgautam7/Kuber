@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/ledger.dart';
@@ -12,7 +12,7 @@ import '../data/ledger_repository.dart';
 import '../utils/ledger_calculations.dart' as calc;
 
 final ledgerRepositoryProvider = Provider<LedgerRepository>((ref) {
-  return LedgerRepository(ref.watch(isarProvider));
+  return LedgerRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final ledgerListProvider =
@@ -125,7 +125,7 @@ class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
   }
 
   Future<void> deleteLedger(Ledger ledger) async {
-    final isar = ref.read(isarProvider);
+    final isar = ref.read(tutorialAwareIsarProvider);
 
     // Delete all linked transactions
     final linkedTxns = await isar.transactions

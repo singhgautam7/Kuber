@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -13,7 +13,7 @@ import '../data/investment_repository.dart';
 import '../utils/investment_calculations.dart' as calc;
 
 final investmentRepositoryProvider = Provider<InvestmentRepository>((ref) {
-  return InvestmentRepository(ref.watch(isarProvider));
+  return InvestmentRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final investmentListProvider =
@@ -95,7 +95,7 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
   }
 
   Future<void> deleteInvestment(Investment investment) async {
-    final isar = ref.read(isarProvider);
+    final isar = ref.read(tutorialAwareIsarProvider);
     final attachments = ref.read(attachmentServiceProvider);
 
     final linkedTxns = await isar.transactions

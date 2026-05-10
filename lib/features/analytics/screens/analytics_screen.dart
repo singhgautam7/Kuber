@@ -23,6 +23,7 @@ import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
 import '../widgets/top_filter_row.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -278,6 +279,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               )
             else
               SliverPadding(
+                key: TutorialStepKeys.analyticsPage,
                 padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
                 sliver: SliverList.builder(
                   itemCount: 8,
@@ -287,6 +289,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       child: _buildSummaryCard(ref, colorScheme, textTheme, totalIncome, totalExpense, netAmount),
                     ),
                     1 => Padding(
+                      key: TutorialStepKeys.spendingTrendsChart,
                       padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
                       child: RepaintBoundary(
                         child: KuberBarChart(
@@ -314,9 +317,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         ),
                       ),
                     ),
-                    4 => const Padding(
-                      padding: EdgeInsets.only(bottom: KuberSpacing.lg),
-                      child: RepaintBoundary(
+                    4 => Padding(
+                      key: TutorialStepKeys.categoryBreakdownChart,
+                      padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+                      child: const RepaintBoundary(
                         child: CategoryGroupStatsWidget(),
                       ),
                     ),

@@ -14,6 +14,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
 import '../widgets/home_smart_insights.dart';
 import '../widgets/spending_stats_card.dart';
 import '../widgets/budget_snapshot_card.dart';
@@ -162,6 +163,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                     message: isPrivate ? 'Privacy mode: On' : 'Privacy mode: Off',
                     triggerMode: TooltipTriggerMode.longPress,
                     child: GestureDetector(
+                      key: TutorialStepKeys.privacyModeIcon,
                       onTap: () => ref.read(settingsProvider.notifier).togglePrivacyMode(),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
@@ -217,6 +219,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
           // [A] Balance Hero Card
           RepaintBoundary(
+            key: TutorialStepKeys.dashboardBalanceCard,
             child: summaryAsync.when(
               loading: () => const SizedBox(
                 height: 180,

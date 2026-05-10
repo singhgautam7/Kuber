@@ -7,9 +7,15 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../shared/widgets/kuber_loader.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
-import '../../settings/widgets/settings_widgets.dart';
 import '../../dev/providers/dev_mode_provider.dart';
+import '../../settings/widgets/settings_widgets.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../../tutorial/models/tutorial_step_keys.dart';
+import '../../tutorial/providers/tutorial_provider.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
+import '../../tutorial/services/tutorial_mock_data_service.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -64,6 +70,7 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () => context.push('/more/tags'),
                     ),
                     _MenuItem(
+                      key: TutorialStepKeys.moreBudgetsItem,
                       icon: Icons.pie_chart_rounded,
                       label: 'Budgets',
                       subtitle: 'Track and control your monthly spending',
@@ -103,6 +110,7 @@ class MoreScreen extends ConsumerWidget {
                   title: 'Tools',
                   items: [
                     _MenuItem(
+                      key: TutorialStepKeys.moreAskKuberItem,
                       icon: Icons.auto_awesome_rounded,
                       label: 'Ask Kuber (Beta)',
                       subtitle: 'On-device smart assistant',
@@ -131,6 +139,7 @@ class MoreScreen extends ConsumerWidget {
                       onTap: () => context.push('/more/settings'),
                     ),
                     _MenuItem(
+                      key: TutorialStepKeys.moreDataItem,
                       icon: Icons.storage_rounded,
                       label: 'Data',
                       subtitle: 'Export and clear your data',
@@ -170,6 +179,21 @@ class MoreScreen extends ConsumerWidget {
                         subtitle: 'Developer-only tools',
                         onTap: () => context.push('/more/dev-tools'),
                       ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // Tutorial section
+                _MenuSection(
+                  title: 'Tutorial',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.school_rounded,
+                      label: 'App Tutorial',
+                      subtitle: 'Replay the feature walkthrough',
+                      onTap: () => _launchTutorialFromMore(context, ref),
+                    ),
                   ],
                 ),
 
@@ -275,6 +299,7 @@ class _MenuItem extends StatelessWidget {
   final Color? color;
 
   const _MenuItem({
+    super.key,
     required this.icon,
     required this.label,
     required this.subtitle,
@@ -327,5 +352,36 @@ class _MenuItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> _launchTutorialFromMore(
+    BuildContext context, WidgetRef ref) async {
+  final txns = await ref.read(transactionRepositoryProvider).getAll();
+  final useSandbox = txns.isNotEmpty;
+
+  if (!context.mounted) return;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const KuberLoader(label: 'Preparing tutorial...'),
+  );
+
+  try {
+    if (useSandbox) {
+      final sandbox = await openSandboxIsar();
+      ref.read(tutorialSandboxIsarProvider.notifier).state = sandbox;
+      ref.read(tutorialNotifierProvider.notifier).setSandboxMode(true);
+      await TutorialMockDataService().generateMockData(sandbox);
+    } else {
+      ref.read(tutorialNotifierProvider.notifier).setSandboxMode(false);
+      await TutorialMockDataService().generateMockData(ref.read(tutorialAwareIsarProvider));
+    }
+  } finally {
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+      context.push('/tutorial');
+    }
   }
 }

@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/database/isar_service.dart';
+import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/recurring_repository.dart';
 import '../data/recurring_rule.dart';
 
 final recurringRepositoryProvider = Provider<RecurringRepository>((ref) {
-  return RecurringRepository(ref.watch(isarProvider));
+  return RecurringRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
 final recurringListProvider =
