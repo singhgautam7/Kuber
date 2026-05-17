@@ -50,6 +50,8 @@ import '../../features/dev/screens/db_explorer_screen.dart';
 import '../../features/dev/screens/db_collection_screen.dart';
 import '../../features/budgets/screens/budgets_screen.dart';
 import '../../features/budgets/screens/add_edit_budget_screen.dart';
+import '../../features/widget_editor/models/home_widget_config.dart';
+import '../../features/widget_editor/screens/widget_editor_screen.dart';
 import '../../core/utils/prefs_keys.dart';
 import '../../main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -528,6 +530,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddInvestmentScreen(existing: state.extra as Investment?),
+      ),
+      GoRoute(
+        path: '/widget-editor/home',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) =>
+            const WidgetEditorScreen(scope: WidgetEditorScope.home),
+      ),
+      GoRoute(
+        path: '/widget-editor/analytics',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) =>
+            const WidgetEditorScreen(scope: WidgetEditorScope.analytics),
       ),
     ],
   );

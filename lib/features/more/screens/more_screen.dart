@@ -155,34 +155,7 @@ class MoreScreen extends ConsumerWidget {
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // About section
-                _MenuSection(
-                  title: 'About',
-                  items: [
-                    _MenuItem(
-                      icon: Icons.info_outline_rounded,
-                      label: 'About Kuber',
-                      subtitle: 'Vision, origin, and developer',
-                      onTap: () => context.pushNamed('about'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.security_outlined,
-                      label: 'Permissions',
-                      subtitle: 'App limits and security',
-                      onTap: () => context.pushNamed('permissions'),
-                    ),
-                    if (isDevMode)
-                      _MenuItem(
-                        icon: Icons.bug_report,
-                        label: 'Dev Tools',
-                        subtitle: 'Developer-only tools',
-                        onTap: () => context.push('/more/dev-tools'),
-                      ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
+                // Tutorial Section
                 _MenuSection(
                   title: 'Tutorial',
                   items: [
@@ -241,6 +214,64 @@ class MoreScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // About section
+                _MenuSection(
+                  title: 'About',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.info_outline_rounded,
+                      label: 'About Kuber',
+                      subtitle: 'Vision, origin, and developer',
+                      onTap: () => context.pushNamed('about'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.security_outlined,
+                      label: 'Permissions',
+                      subtitle: 'App limits and security',
+                      onTap: () => context.pushNamed('permissions'),
+                    ),
+                    if (isDevMode)
+                      _MenuItem(
+                        icon: Icons.bug_report,
+                        label: 'Dev Tools',
+                        subtitle: 'Developer-only tools',
+                        onTap: () => context.push('/more/dev-tools'),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xxl),
+
+                // Footer
+                Column(
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        children: [
+                          const TextSpan(text: "Made with "),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: Colors.redAccent,
+                              size: 14,
+                            ),
+                          ),
+                          const TextSpan(text: " in India"),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
               ]),
             ),
           ),

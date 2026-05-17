@@ -9,6 +9,8 @@ import 'package:kuber/features/categories/providers/category_provider.dart';
 import 'package:kuber/features/settings/providers/settings_provider.dart';
 import 'package:kuber/core/services/notification_service.dart';
 import 'package:kuber/core/utils/formatters.dart';
+import 'package:kuber/features/notifications/data/app_notification.dart';
+import 'package:kuber/features/notifications/providers/notification_provider.dart';
 import '../../helpers/mock_repositories.dart';
 import '../../helpers/test_factories.dart';
 import '../../helpers/riverpod_test_helper.dart';
@@ -17,18 +19,32 @@ void main() {
   late MockBudgetRepository mockBudgetRepo;
   late MockCategoryRepository mockCategoryRepo;
   late MockNotificationService mockNotification;
+  late MockNotificationRepository mockNotificationRepo;
   late ProviderContainer container;
 
   setUp(() {
     mockBudgetRepo = MockBudgetRepository();
     mockCategoryRepo = MockCategoryRepository();
     mockNotification = MockNotificationService();
+    mockNotificationRepo = MockNotificationRepository();
+
+    // Default: in-app notification insert succeeds. Tests can override per-case.
+    when(() => mockNotificationRepo.add(
+          type: any(named: 'type'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          payload: any(named: 'payload'),
+          iconHint: any(named: 'iconHint'),
+          createdAt: any(named: 'createdAt'),
+        )).thenAnswer((_) async => true);
 
     container = createTestContainer(
       overrides: [
         budgetRepositoryProvider.overrideWithValue(mockBudgetRepo),
         categoryRepositoryProvider.overrideWithValue(mockCategoryRepo),
         notificationServiceProvider.overrideWithValue(mockNotification),
+        notificationRepositoryProvider
+            .overrideWithValue(mockNotificationRepo),
         formatterProvider.overrideWithValue(AppFormatter()),
       ],
     );
@@ -42,6 +58,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(Budget());
     registerFallbackValue(<BudgetAlert>[]);
+    registerFallbackValue(NotificationType.general);
   });
 
   group('BudgetService.checkAlerts', () {
@@ -107,10 +124,12 @@ void main() {
       final cat = makeCategory(id: 1, name: 'Food');
       when(() => mockCategoryRepo.getAll())
           .thenAnswer((_) async => [cat]);
-      when(() => mockNotification.showBudgetAlertNotification(
+      when(() => mockNotification.showAppNotification(
+            type: any(named: 'type'),
             id: any(named: 'id'),
             title: any(named: 'title'),
             body: any(named: 'body'),
+            payload: any(named: 'payload'),
           )).thenAnswer((_) async {});
       when(() => mockBudgetRepo.saveBudget(any(), any()))
           .thenAnswer((_) async => 1);
@@ -119,10 +138,12 @@ void main() {
       await service.checkAlerts('1');
 
       verify(() => mockBudgetRepo.saveBudget(any(), any())).called(1);
-      verify(() => mockNotification.showBudgetAlertNotification(
+      verify(() => mockNotification.showAppNotification(
+            type: any(named: 'type'),
             id: any(named: 'id'),
             title: any(named: 'title'),
             body: any(named: 'body'),
+            payload: any(named: 'payload'),
           )).called(1);
     });
 
@@ -149,10 +170,12 @@ void main() {
       final cat = makeCategory(id: 1, name: 'Food');
       when(() => mockCategoryRepo.getAll())
           .thenAnswer((_) async => [cat]);
-      when(() => mockNotification.showBudgetAlertNotification(
+      when(() => mockNotification.showAppNotification(
+            type: any(named: 'type'),
             id: any(named: 'id'),
             title: any(named: 'title'),
             body: any(named: 'body'),
+            payload: any(named: 'payload'),
           )).thenAnswer((_) async {});
       when(() => mockBudgetRepo.saveBudget(any(), any()))
           .thenAnswer((_) async => 1);
@@ -189,10 +212,12 @@ void main() {
       await service.checkAlerts('1');
 
       verify(() => mockBudgetRepo.saveBudget(any(), any())).called(1);
-      verifyNever(() => mockNotification.showBudgetAlertNotification(
+      verifyNever(() => mockNotification.showAppNotification(
+            type: any(named: 'type'),
             id: any(named: 'id'),
             title: any(named: 'title'),
             body: any(named: 'body'),
+            payload: any(named: 'payload'),
           ));
     });
 

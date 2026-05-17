@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -13,10 +14,15 @@ import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
 
 import '../widgets/settings_widgets.dart';
+import '../widgets/settings_choice_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/services/biometric_service.dart';
+
+// Imports for widget configurations and count
+import '../../widget_editor/providers/widget_editor_provider.dart';
+import '../../widget_editor/models/home_widget_config.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -61,6 +67,167 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  void _showThemeSheet(BuildContext context, ThemeMode current) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SettingsChoiceSheet<ThemeMode>(
+        title: 'Theme',
+        subtitle: 'Appearance',
+        selectedValue: current,
+        choices: const [
+          SettingsChoice(
+            value: ThemeMode.light,
+            label: 'Light',
+            subtitle: 'Bright surfaces, dark text',
+            icon: Icons.light_mode_outlined,
+          ),
+          SettingsChoice(
+            value: ThemeMode.dark,
+            label: 'Dark',
+            subtitle: 'Black surfaces, light text',
+            icon: Icons.dark_mode_outlined,
+          ),
+          SettingsChoice(
+            value: ThemeMode.system,
+            label: 'System',
+            subtitle: 'Follow your phone setting',
+            icon: Icons.settings_brightness_outlined,
+          ),
+        ],
+        onSelected: (val) {
+          setState(() => _tempThemeMode = val);
+          ref.read(settingsProvider.notifier).setThemeMode(val);
+        },
+      ),
+    );
+  }
+
+  void _showBottomNavSheet(BuildContext context, NavBarStyle current) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SettingsChoiceSheet<NavBarStyle>(
+        title: 'Bottom Navigation',
+        subtitle: 'Appearance',
+        selectedValue: current,
+        choices: const [
+          SettingsChoice(
+            value: NavBarStyle.classic,
+            label: 'Classic',
+            subtitle: 'Standard bar',
+            icon: Icons.view_headline_rounded,
+          ),
+          SettingsChoice(
+            value: NavBarStyle.modern,
+            label: 'Modern',
+            subtitle: 'Floating pill',
+            icon: Icons.lens_rounded,
+          ),
+        ],
+        onSelected: (val) {
+          setState(() => _tempNavBarStyle = val);
+          ref.read(settingsProvider.notifier).setNavBarStyle(val);
+        },
+      ),
+    );
+  }
+
+  void _showNumberFormatSheet(BuildContext context, NumberSystem current) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SettingsChoiceSheet<NumberSystem>(
+        title: 'Number Format',
+        subtitle: 'Money Display',
+        selectedValue: current,
+        choices: const [
+          SettingsChoice(
+            value: NumberSystem.indian,
+            label: 'Indian',
+            subtitle: '1,23,000.00',
+            icon: Icons.language_rounded,
+          ),
+          SettingsChoice(
+            value: NumberSystem.international,
+            label: 'International',
+            subtitle: '123,000.00',
+            icon: Icons.public_rounded,
+          ),
+        ],
+        onSelected: (val) {
+          setState(() => _tempNumberSystem = val);
+          ref.read(settingsProvider.notifier).setNumberSystem(val);
+        },
+      ),
+    );
+  }
+
+  void _showHorizontalSwipeSheet(BuildContext context, SwipeMode current) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SettingsChoiceSheet<SwipeMode>(
+        title: 'Horizontal Swipe',
+        subtitle: 'Transactions',
+        selectedValue: current,
+        choices: const [
+          SettingsChoice(
+            value: SwipeMode.changeTabs,
+            label: 'Change tabs',
+            subtitle: 'Quickly switch between main app sections by swiping across the screen',
+            icon: Icons.swap_horiz_rounded,
+          ),
+          SettingsChoice(
+            value: SwipeMode.performActions,
+            label: 'Row actions',
+            subtitle: 'Perform quick actions like edit or delete by swiping on individual history items',
+            icon: Icons.swipe_rounded,
+          ),
+        ],
+        onSelected: (val) {
+          setState(() => _tempSwipeMode = val);
+          ref.read(settingsProvider.notifier).setSwipeMode(val);
+        },
+      ),
+    );
+  }
+
+  Widget _trailingWidget(BuildContext context, {String? text}) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (text != null && text.isNotEmpty) ...[
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: KuberSpacing.sm),
+        ],
+        Icon(
+          Icons.chevron_right_rounded,
+          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+          size: 20,
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,339 +250,197 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentBiometricsEnabled = _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
     final currency = currencyFromCode(currencyCode);
 
+    final themeStr = currentTheme == ThemeMode.light
+        ? 'Light'
+        : currentTheme == ThemeMode.dark
+            ? 'Dark'
+            : 'System';
+    final navStr = currentNavBarStyle == NavBarStyle.classic ? 'Classic' : 'Modern';
+    final numberStr = currentNumberSystem == NumberSystem.indian ? 'Indian' : 'International';
+    final swipeStr = currentSwipeMode == SwipeMode.changeTabs ? 'Change tabs' : 'Row actions';
+
+    // Widget configurations and counts
+    final homeWidgets = ref.watch(homeWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
+    final enabledHomeCount = homeWidgets.where((w) => w.enabled).length;
+
+    final analyticsWidgets = ref.watch(analyticsWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
+    final enabledAnalyticsCount = analyticsWidgets.where((w) => w.enabled).length;
+
     return Scaffold(
-        backgroundColor: cs.surface,
-        body: CustomScrollView(
-          slivers: [
-            const SliverToBoxAdapter(
-              child: KuberAppBar(showBack: true, showHome: true, title: ''),
-            ),
-            // Page header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'App\nSettings',
-                      style: GoogleFonts.inter(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        height: 1.15,
-                        letterSpacing: -0.5,
-                      ),
+      backgroundColor: cs.surface,
+      body: CustomScrollView(
+        slivers: [
+          const SliverToBoxAdapter(
+            child: KuberAppBar(showBack: true, showHome: true, title: ''),
+          ),
+          // Page header
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Settings',
+                    style: GoogleFonts.inter(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                      height: 1.15,
+                      letterSpacing: -0.5,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Customize your experience and preferences.',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: cs.onSurfaceVariant,
-                      ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Customize how Kuber looks, feels and behaves for you.',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: cs.onSurfaceVariant,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+          ),
 
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // APPEARANCE
-                  _SectionLabel(label: 'APPEARANCE'),
-                  const SizedBox(height: KuberSpacing.sm),
-                  _SettingsCard(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.lg,
-                          vertical: KuberSpacing.md,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const SquircleIcon(icon: Icons.palette_outlined, size: 18, padding: 8),
-                                const SizedBox(width: KuberSpacing.md),
-                                Text(
-                                  'Theme',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: KuberSpacing.md),
-                            SettingsCardSelector<ThemeMode>(
-                              options: const [
-                                SelectorOption(
-                                  value: ThemeMode.light,
-                                  label: 'LIGHT',
-                                  icon: Icons.light_mode_outlined,
-                                ),
-                                SelectorOption(
-                                  value: ThemeMode.dark,
-                                  label: 'DARK',
-                                  icon: Icons.dark_mode_outlined,
-                                ),
-                                SelectorOption(
-                                  value: ThemeMode.system,
-                                  label: 'SYSTEM',
-                                  icon: Icons.settings_brightness_outlined,
-                                ),
-                              ],
-                              selectedValue: currentTheme,
-                              onSelected: (val) {
-                                setState(() => _tempThemeMode = val);
-                                ref.read(settingsProvider.notifier).setThemeMode(val);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      Divider(height: 1, color: cs.outline),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.lg,
-                          vertical: KuberSpacing.md,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const SquircleIcon(icon: Icons.space_dashboard_rounded, size: 18, padding: 8),
-                                const SizedBox(width: KuberSpacing.md),
-                                Text(
-                                  'Bottom Navigation UI',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: KuberSpacing.md),
-                            SettingsCardSelector<NavBarStyle>(
-                              options: const [
-                                SelectorOption(
-                                  value: NavBarStyle.classic,
-                                  label: 'Classic',
-                                  subtitle: 'Standard bar',
-                                  icon: Icons.view_headline_rounded,
-                                ),
-                                SelectorOption(
-                                  value: NavBarStyle.modern,
-                                  label: 'Modern',
-                                  subtitle: 'Floating pill',
-                                  icon: Icons.lens_rounded,
-                                ),
-                              ],
-                              selectedValue: currentNavBarStyle,
-                              onSelected: (val) {
-                                setState(() => _tempNavBarStyle = val);
-                                ref.read(settingsProvider.notifier).setNavBarStyle(val);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // PREFERENCE
-                _SectionLabel(label: 'PREFERENCE'),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // PROFILE
+                const _SectionLabel(label: 'PROFILE'),
+                const _SectionDescription('How Kuber knows you.'),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
-                    // Your Name
                     _SettingsTile(
                       icon: Icons.person_outline_rounded,
                       label: 'Your Name',
                       onTap: () => _showNameBottomSheet(context),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _userNameController.text.isEmpty ? 'Set your name' : _userNameController.text,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: KuberSpacing.sm),
-                          Icon(Icons.chevron_right_rounded,
-                              color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
-                        ],
+                      trailing: _trailingWidget(
+                        context,
+                        text: _userNameController.text.isEmpty
+                            ? 'Set your name'
+                            : _userNameController.text,
                       ),
                     ),
-                    Divider(height: 1, color: cs.outline),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
 
-                    // Currency
+                // APPEARANCE
+                const _SectionLabel(label: 'APPEARANCE'),
+                const _SectionDescription('How Kuber looks to you.'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.palette_outlined,
+                      label: 'Theme',
+                      subtitle: 'Light, dark, or match your phone',
+                      onTap: () => _showThemeSheet(context, currentTheme),
+                      trailing: _trailingWidget(context, text: themeStr),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.space_dashboard_rounded,
+                      label: 'Bottom Navigation',
+                      subtitle: 'Standard bar or floating pill',
+                      onTap: () => _showBottomNavSheet(context, currentNavBarStyle),
+                      trailing: _trailingWidget(context, text: navStr),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
+
+                // WIDGETS
+                const _SectionLabel(label: 'WIDGETS'),
+                const _SectionDescription('Choose what shows on Home and Analytics.'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.home_outlined,
+                      label: 'Home Widgets',
+                      subtitle: '$enabledHomeCount enabled · drag to reorder',
+                      onTap: () => context.push('/widget-editor/home'),
+                      trailing: _trailingWidget(context),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.insert_chart_outlined_rounded,
+                      label: 'Analytics Widgets',
+                      subtitle: '$enabledAnalyticsCount enabled · drag to reorder',
+                      onTap: () => context.push('/widget-editor/analytics'),
+                      trailing: _trailingWidget(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
+
+                // MONEY DISPLAY
+                const _SectionLabel(label: 'MONEY DISPLAY'),
+                const _SectionDescription('How currency and amounts are shown across the app.'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
                     _SettingsTile(
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Currency',
+                      subtitle: 'Symbol and code shown on amounts',
                       onTap: () => _showCurrencyPicker(context, currencyCode),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${currency.symbol} ${currency.code}',
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: KuberSpacing.sm),
-                          Icon(Icons.chevron_right_rounded,
-                              color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
-                        ],
+                      trailing: _trailingWidget(
+                        context,
+                        text: '${currency.symbol} ${currency.code}',
                       ),
                     ),
                     Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.money_rounded,
+                      label: 'Number Format',
+                      subtitle: 'Indian (1,23,000) or International (123,000)',
+                      onTap: () => _showNumberFormatSheet(context, currentNumberSystem),
+                      trailing: _trailingWidget(context, text: numberStr),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
 
-                    // Number Format
-                    Padding(
-                      padding: const EdgeInsets.all(KuberSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const SquircleIcon(icon: Icons.money_rounded, size: 18, padding: 8),
-                              const SizedBox(width: KuberSpacing.md),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Number Format',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.onSurface,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Balances display',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11,
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              // Text(
-                              //   currentNumberSystem == NumberSystem.indian ? 'Indian (₹)' : 'International',
-                              //   style: GoogleFonts.inter(
-                              //     fontSize: 13,
-                              //     fontWeight: FontWeight.w500,
-                              //     color: cs.primary,
-                              //   ),
-                              // ),
-                            ],
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          SettingsCardSelector<NumberSystem>(
-                            options: const [
-                              SelectorOption(
-                                value: NumberSystem.indian,
-                                label: 'Indian',
-                                subtitle: '1,23,000.00',
-                                icon: Icons. language_rounded,
-                              ),
-                              SelectorOption(
-                                value: NumberSystem.international,
-                                label: 'International',
-                                subtitle: '123,000.00',
-                                icon: Icons.public_rounded,
-                              ),
-                            ],
-                            selectedValue: currentNumberSystem,
-                            onSelected: (val) {
-                              setState(() => _tempNumberSystem = val);
-                              ref.read(settingsProvider.notifier).setNumberSystem(val);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    Divider(height: 1, color: cs.outline),
-                    // Default Account
+                // TRANSACTIONS
+                const _SectionLabel(label: 'TRANSACTIONS'),
+                const _SectionDescription('Your defaults when adding new entries.'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
                     _SettingsTile(
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Default Account',
-                      subtitle: 'Used by Quick Add',
+                      subtitle: 'Pre-selected when you Quick Add',
                       onTap: () => _showDefaultAccountPicker(context, accounts, defaultAccId),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            defaultAccName,
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: KuberSpacing.sm),
-                          Icon(Icons.chevron_right_rounded,
-                              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                              size: 20),
-                        ],
-                      ),
+                      trailing: _trailingWidget(context, text: defaultAccName),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.swap_horiz_rounded,
+                      label: 'Horizontal Swipe',
+                      subtitle: 'What swiping left or right does',
+                      onTap: () => _showHorizontalSwipeSheet(context, currentSwipeMode),
+                      trailing: _trailingWidget(context, text: swipeStr),
                     ),
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.xl),
 
-                // SWIPE GESTURES
-                _SectionLabel(label: 'SWIPE GESTURES'),
-                const SizedBox(height: KuberSpacing.sm),
-                Column(
-                  children: [
-                    _SelectableCard(
-                      title: 'Horizontal swipe to change tabs',
-                      subtitle: 'Quickly switch between main app sections by swiping across the screen.',
-                      isSelected: currentSwipeMode == SwipeMode.changeTabs,
-                      onTap: () {
-                        setState(() => _tempSwipeMode = SwipeMode.changeTabs);
-                        ref.read(settingsProvider.notifier).setSwipeMode(SwipeMode.changeTabs);
-                      },
-                    ),
-                    const SizedBox(height: KuberSpacing.sm),
-                    _SelectableCard(
-                      title: 'Swipe left/right on transactions',
-                      subtitle: 'Perform quick actions like edit or delete by swiping on individual history items.',
-                      isSelected: currentSwipeMode == SwipeMode.performActions,
-                      onTap: () {
-                        setState(() => _tempSwipeMode = SwipeMode.performActions);
-                        ref.read(settingsProvider.notifier).setSwipeMode(SwipeMode.performActions);
-                      },
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // SECURITY & PRIVACY
-                _SectionLabel(label: 'SECURITY & PRIVACY'),
+                // PRIVACY & SECURITY
+                const _SectionLabel(label: 'PRIVACY & SECURITY'),
+                const _SectionDescription('Keep your numbers private and your app locked.'),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.visibility_off_outlined,
                       label: 'Privacy Mode',
-                      subtitle: 'Hide all balance and amount values',
+                      subtitle: 'Hide all balances and amounts',
                       trailing: Switch(
                         value: ref.watch(privacyModeProvider),
                         onChanged: (_) => ref.read(settingsProvider.notifier).togglePrivacyMode(),
@@ -426,7 +451,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _SettingsTile(
                       icon: Icons.fingerprint_rounded,
                       label: 'Biometric Lock',
-                      subtitle: 'FaceID or Fingerprint',
+                      subtitle: 'Unlock with FaceID or Fingerprint',
                       trailing: Switch(
                         value: currentBiometricsEnabled,
                         onChanged: (val) async {
@@ -470,10 +495,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: KuberSpacing.xl),
 
-
+                // ABOUT
+                const _SectionLabel(label: 'ABOUT'),
+                const _SectionDescription('Learn about Kuber and the person behind it.'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.info_outline_rounded,
+                      label: 'About Kuber',
+                      subtitle: 'Vision, origin, and a letter from the developer',
+                      onTap: () => context.push('/more/about'),
+                      trailing: _trailingWidget(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xxl),
               ]),
             ),
           ),
@@ -774,9 +813,33 @@ class _SectionLabel extends StatelessWidget {
         label,
         style: GoogleFonts.inter(
           fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.8,
+          color: cs.primary,
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionDescription extends StatelessWidget {
+  final String text;
+  const _SectionDescription(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpacing.xs, 4, KuberSpacing.xs, KuberSpacing.sm,
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.inter(
+          fontSize: 12.5,
           color: cs.onSurfaceVariant,
+          height: 1.4,
+          letterSpacing: -0.1,
         ),
       ),
     );
@@ -864,71 +927,3 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
-
-class _SelectableCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _SelectableCard({
-    required this.title,
-    required this.subtitle,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outline,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? cs.primary : cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected) ...[
-              const SizedBox(width: KuberSpacing.md),
-              Icon(Icons.check_circle_rounded, color: cs.primary, size: 20),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-

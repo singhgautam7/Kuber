@@ -22,6 +22,8 @@ import '../../investments/data/investment.dart';
 import '../../transactions/data/transaction_suggestion.dart';
 import '../../tools/bill_splitter/data/person.dart';
 import '../../tools/bill_splitter/data/bill.dart';
+import '../../notifications/data/app_notification.dart';
+import '../../widget_editor/data/widget_preference.dart';
 
 class CollectionMeta {
   final String name;
@@ -53,6 +55,10 @@ class DbExplorerScreen extends ConsumerWidget {
       CollectionMeta('TransactionSuggestion', (i) => i.collection<TransactionSuggestion>().count()),
       CollectionMeta('Person', (i) => i.collection<Person>().count()),
       CollectionMeta('Bill', (i) => i.collection<Bill>().count()),
+      CollectionMeta('AppNotification',
+          (i) => i.collection<AppNotification>().count()),
+      CollectionMeta('WidgetPreference',
+          (i) => i.collection<WidgetPreference>().count()),
     ]..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(

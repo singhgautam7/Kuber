@@ -16,6 +16,8 @@ import '../../features/investments/data/investment.dart';
 import '../../features/transactions/data/transaction_suggestion.dart';
 import '../../features/tools/bill_splitter/data/person.dart';
 import '../../features/tools/bill_splitter/data/bill.dart';
+import '../../features/notifications/data/app_notification.dart';
+import '../../features/widget_editor/data/widget_preference.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -40,6 +42,8 @@ class IsarService {
         TransactionSuggestionSchema,
         PersonSchema,
         BillSchema,
+        AppNotificationSchema,
+        WidgetPreferenceSchema,
       ],
       directory: dir.path,
     );

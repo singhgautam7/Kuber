@@ -69,7 +69,7 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
                 ),
                 const SizedBox(height: KuberSpacing.md),
                 Text(
-                  'Track expenses, plan budgets, monitor portfolios — and ask Kuber for answers.',
+                  'Track expenses, plan budgets, monitor portfolios, and ask Kuber for answers.',
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     height: 1.38,

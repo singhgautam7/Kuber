@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-import '../../core/theme/app_theme.dart';
-import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
+import '../../features/settings/providers/settings_provider.dart' show formatterProvider, currencyProvider;
 
 class KuberCalculator extends ConsumerStatefulWidget {
   final double initialValue;
@@ -31,8 +29,8 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   void initState() {
     super.initState();
     if (widget.initialValue > 0) {
-      _expression = _formatNumber(widget.initialValue);
       _rawExpression = widget.initialValue.toString();
+      _expression = _formatExpressionString(_rawExpression);
       _previewResult = null;
     }
   }
@@ -44,14 +42,13 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   void _onDigit(String digit) {
     HapticFeedback.selectionClick();
     setState(() {
-      if (digit == '.' && _expression.endsWith('.')) return;
+      if (digit == '.' && _rawExpression.endsWith('.')) return;
       if (digit == '.' && _endsWithOperator()) {
-        _expression += '0.';
         _rawExpression += '0.';
       } else {
-        _expression += digit;
         _rawExpression += digit;
       }
+      _expression = _formatExpressionString(_rawExpression);
       _updatePreview();
     });
   }
@@ -60,13 +57,12 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
     HapticFeedback.selectionClick();
     setState(() {
       if (_endsWithOperator()) {
-        _expression = _expression.substring(0, _expression.length - 1) + op;
         _rawExpression =
             _rawExpression.substring(0, _rawExpression.length - 1) + op;
-      } else if (_expression.isNotEmpty) {
-        _expression += op;
+      } else if (_rawExpression.isNotEmpty) {
         _rawExpression += op;
       }
+      _expression = _formatExpressionString(_rawExpression);
       _updatePreview();
     });
   }
@@ -74,9 +70,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   void _onBackspace() {
     HapticFeedback.selectionClick();
     setState(() {
-      if (_expression.isEmpty) return;
-      _expression = _expression.substring(0, _expression.length - 1);
+      if (_rawExpression.isEmpty) return;
       _rawExpression = _rawExpression.substring(0, _rawExpression.length - 1);
+      _expression = _formatExpressionString(_rawExpression);
       _updatePreview();
     });
   }
@@ -95,8 +91,8 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
     final result = _evaluate(_rawExpression);
     if (result == null) return;
     setState(() {
-      _expression = _formatNumber(result);
       _rawExpression = result.toString();
+      _expression = _formatExpressionString(_rawExpression);
       _previewResult = null;
     });
   }
@@ -114,7 +110,6 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
       if (lastOpIdx == -1) {
         final v = double.tryParse(expr) ?? 0;
         final result = v / 100;
-        _expression = _formatNumber(result);
         _rawExpression = result.toString();
       } else {
         final left = double.tryParse(expr.substring(0, lastOpIdx).trim()) ?? 0;
@@ -122,8 +117,8 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
         final pct = left * right / 100;
         final prefix = expr.substring(0, lastOpIdx + 1);
         _rawExpression = '$prefix$pct';
-        _expression = '$prefix${_formatNumber(pct)}';
       }
+      _expression = _formatExpressionString(_rawExpression);
       _updatePreview();
     });
   }
@@ -200,6 +195,68 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
     return ref.read(formatterProvider).formatNumber(val, decimalDigits: 2);
   }
 
+  String _formatExpressionString(String raw) {
+    if (raw.isEmpty) return '';
+
+    // Operators are +, −, ×, ÷
+    final pattern = RegExp(r'([+−×÷%])');
+    final parts = raw.split(pattern);
+    final matches = pattern.allMatches(raw).map((m) => m.group(0)!).toList();
+
+    final formattedParts = <String>[];
+    for (final part in parts) {
+      final trimmed = part.trim();
+      if (trimmed.isEmpty) {
+        formattedParts.add('');
+        continue;
+      }
+
+      if (trimmed == '.') {
+        formattedParts.add('.');
+        continue;
+      }
+
+      if (trimmed.endsWith('.')) {
+        final numStr = trimmed.substring(0, trimmed.length - 1);
+        final parsed = double.tryParse(numStr);
+        if (parsed != null) {
+          formattedParts.add('${_formatNumber(parsed)}.');
+        } else {
+          formattedParts.add(trimmed);
+        }
+      } else {
+        final parsed = double.tryParse(trimmed);
+        if (parsed != null) {
+          if (trimmed.contains('.')) {
+            final splitVal = trimmed.split('.');
+            final integralPart = double.tryParse(splitVal[0]) ?? 0;
+            final formattedIntegral = ref.read(formatterProvider).formatNumber(integralPart, decimalDigits: 0);
+            formattedParts.add('$formattedIntegral.${splitVal[1]}');
+          } else {
+            formattedParts.add(_formatNumber(parsed));
+          }
+        } else {
+          formattedParts.add(trimmed);
+        }
+      }
+    }
+
+    final buffer = StringBuffer();
+    for (int i = 0; i < formattedParts.length; i++) {
+      buffer.write(formattedParts[i]);
+      if (i < matches.length) {
+        final op = matches[i];
+        if (op == '%') {
+          buffer.write(op);
+        } else {
+          buffer.write(' $op ');
+        }
+      }
+    }
+
+    return buffer.toString().trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -255,19 +312,20 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
         Container(
           color: cs.surface,
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom + KuberSpacing.lg,
+            bottom: MediaQuery.of(context).padding.bottom + 12.0,
           ),
           child: Column(
             children: [
-              // Display area
               _buildDisplay(),
-              const SizedBox(height: KuberSpacing.lg),
-              // Button grid
+              const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: _buildButtonGrid(),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: _buildHeroCTA(),
               ),
             ],
           ),
@@ -278,21 +336,27 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
 
   Widget _buildDisplay() {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final currency = ref.watch(currencyProvider);
+
+    final resultStr = _previewResult ?? (_expression.isEmpty ? '0' : _expression);
+    final hasExpression = _expression.isNotEmpty;
+
     return Container(
       width: double.infinity,
-      height: 120,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      height: 140,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+      alignment: Alignment.bottomRight,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Preview line — always present, fades in/out
           AnimatedOpacity(
-            opacity: _previewResult != null ? 1.0 : 0.0,
+            opacity: hasExpression ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 150),
             child: Text(
-              _previewResult ?? '',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              _expression,
+              style: textTheme.bodyMedium?.copyWith(
                 color: cs.onSurfaceVariant,
               ),
               maxLines: 1,
@@ -301,18 +365,36 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
             ),
           ),
           const SizedBox(height: 4),
-          // Main expression line
-          Text(
-            _expression.isEmpty ? '0' : _expression,
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: cs.onSurface,
-              letterSpacing: -1,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.right,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                currency.symbol,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w400,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  resultStr,
+                  style: textTheme.displayLarge?.copyWith(
+                    fontSize: 56,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -2,
+                    color: cs.onSurface,
+                    height: 1.1,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -320,106 +402,251 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   Widget _buildButtonGrid() {
-    final cs = Theme.of(context).colorScheme;
-    final rows = [
-      // Row 1: C (red), % (blue), ⌫ (red), ÷ (blue)
-      [
-        _CalcBtn('C', _onClear, color: cs.error),
-        _CalcBtn('%', _onPercent, color: cs.primary),
-        _CalcBtn('⌫', _onBackspace,
-            color: cs.error, icon: Icons.backspace_outlined),
-        _CalcBtn('÷', () => _onOperator('÷'), color: cs.primary),
-      ],
-      // Row 2: 7, 8, 9, × (blue)
-      [
-        _CalcBtn('7', () => _onDigit('7')),
-        _CalcBtn('8', () => _onDigit('8')),
-        _CalcBtn('9', () => _onDigit('9')),
-        _CalcBtn('×', () => _onOperator('×'), color: cs.primary),
-      ],
-      // Row 3: 4, 5, 6, − (blue)
-      [
-        _CalcBtn('4', () => _onDigit('4')),
-        _CalcBtn('5', () => _onDigit('5')),
-        _CalcBtn('6', () => _onDigit('6')),
-        _CalcBtn('−', () => _onOperator('−'), color: cs.primary),
-      ],
-      // Row 4: 1, 2, 3, + (blue)
-      [
-        _CalcBtn('1', () => _onDigit('1')),
-        _CalcBtn('2', () => _onDigit('2')),
-        _CalcBtn('3', () => _onDigit('3')),
-        _CalcBtn('+', () => _onOperator('+'), color: cs.primary),
-      ],
-      // Row 5: ., 0, = (blue), ✓ (blue filled)
-      [
-        _CalcBtn('.', () => _onDigit('.')),
-        _CalcBtn('0', () => _onDigit('0')),
-        _CalcBtn('=', _onEquals, color: cs.primary),
-        _CalcBtn('✓', _onConfirm,
-            color: cs.onPrimary, backgroundColor: cs.primary,
-            icon: Icons.check_rounded),
-      ],
-    ];
-
     return Column(
-      children: rows
-          .map((row) => Padding(
-                padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                child: Row(
-                  children: row
-                      .map((btn) => Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: KuberSpacing.xs),
-                              child: _buildButton(btn),
-                            ),
-                          ))
-                      .toList(),
-                ),
-              ))
-          .toList(),
+      children: [
+        Row(
+          children: [
+            _CalcKey(
+              label: 'C',
+              onTap: _onClear,
+              kind: _CalcKeyKind.danger,
+            ),
+            _CalcKey(
+              label: '%',
+              onTap: _onPercent,
+              kind: _CalcKeyKind.operator,
+            ),
+            _CalcKey(
+              label: '⌫',
+              onTap: _onBackspace,
+              kind: _CalcKeyKind.number,
+              icon: Icons.backspace_outlined,
+            ),
+            _CalcKey(
+              label: '÷',
+              onTap: () => _onOperator('÷'),
+              kind: _CalcKeyKind.operator,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _CalcKey(
+              label: '7',
+              onTap: () => _onDigit('7'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '8',
+              onTap: () => _onDigit('8'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '9',
+              onTap: () => _onDigit('9'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '×',
+              onTap: () => _onOperator('×'),
+              kind: _CalcKeyKind.operator,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _CalcKey(
+              label: '4',
+              onTap: () => _onDigit('4'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '5',
+              onTap: () => _onDigit('5'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '6',
+              onTap: () => _onDigit('6'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '−',
+              onTap: () => _onOperator('−'),
+              kind: _CalcKeyKind.operator,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _CalcKey(
+              label: '1',
+              onTap: () => _onDigit('1'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '2',
+              onTap: () => _onDigit('2'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '3',
+              onTap: () => _onDigit('3'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '+',
+              onTap: () => _onOperator('+'),
+              kind: _CalcKeyKind.operator,
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _CalcKey(
+              label: '.',
+              onTap: () => _onDigit('.'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '0',
+              onTap: () => _onDigit('0'),
+              kind: _CalcKeyKind.number,
+            ),
+            _CalcKey(
+              label: '=',
+              onTap: _onEquals,
+              kind: _CalcKeyKind.operator,
+              flex: 2,
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildButton(_CalcBtn btn) {
+  Widget _buildHeroCTA() {
     final cs = Theme.of(context).colorScheme;
-    final bool isFilled = btn.backgroundColor != null;
-    final Color bgColor = btn.backgroundColor ?? cs.surfaceContainerHigh;
-    final Color fgColor = btn.color ?? cs.onSurface;
+    final textTheme = Theme.of(context).textTheme;
+    final currency = ref.watch(currencyProvider);
+
+    final evaluated = _evaluate(_rawExpression) ?? double.tryParse(_rawExpression) ?? 0.0;
+    final formattedResult = _formatNumber(evaluated);
 
     return GestureDetector(
-      onTap: btn.onTap,
+      onTap: _onConfirm,
       child: Container(
         height: 56,
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: !isFilled ? Border.all(color: cs.outline) : null,
+          color: cs.primary,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withValues(alpha: 0.18),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         alignment: Alignment.center,
-        child: btn.icon != null
-            ? Icon(btn.icon, size: 20, color: fgColor)
-            : Text(
-                btn.label,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: fgColor,
-                ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_rounded, color: cs.onPrimary, size: 22),
+            const SizedBox(width: 10),
+            Text(
+              'Use ${currency.symbol}$formattedResult',
+              style: textTheme.titleSmall?.copyWith(
+                color: cs.onPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _CalcBtn {
+enum _CalcKeyKind {
+  number,
+  operator,
+  danger,
+}
+
+class _CalcKey extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
-  final Color? color;
-  final Color? backgroundColor;
   final IconData? icon;
+  final _CalcKeyKind kind;
+  final int flex;
 
-  _CalcBtn(this.label, this.onTap,
-      {this.color, this.backgroundColor, this.icon});
+  const _CalcKey({
+    required this.label,
+    required this.onTap,
+    required this.kind,
+    this.icon,
+    this.flex = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    final Color bgColor;
+    final Color fgColor;
+    final Border? border;
+
+    switch (kind) {
+      case _CalcKeyKind.number:
+        bgColor = cs.surfaceContainer;
+        fgColor = cs.onSurface;
+        border = Border.all(color: cs.outline);
+        break;
+      case _CalcKeyKind.operator:
+        bgColor = cs.primary.withValues(alpha: 0.10);
+        fgColor = cs.primary;
+        border = Border.all(color: cs.primary.withValues(alpha: 0.18));
+        break;
+      case _CalcKeyKind.danger:
+        bgColor = cs.error.withValues(alpha: 0.10);
+        fgColor = cs.error;
+        border = Border.all(color: cs.error.withValues(alpha: 0.10));
+        break;
+    }
+
+    return Expanded(
+      flex: flex,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 54,
+            decoration: BoxDecoration(
+              color: bgColor,
+              border: border,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            alignment: Alignment.center,
+            child: icon != null
+                ? Icon(icon, size: 22, color: fgColor)
+                : Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: fgColor,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
 }

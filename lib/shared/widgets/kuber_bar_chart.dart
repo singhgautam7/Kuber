@@ -4,11 +4,15 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../features/history/providers/history_filter_provider.dart';
 import '../../features/settings/providers/settings_provider.dart';
+import '../utils/chart_bucket.dart';
 import 'package:go_router/go_router.dart';
+
+export '../utils/chart_bucket.dart' show KuberChartBucket, KuberChartBucketLabel;
 
 // ---------------------------------------------------------------------------
 // Data model
@@ -50,12 +54,29 @@ class KuberBarChart extends ConsumerStatefulWidget {
   final String? subtitle;
   final double height;
 
+  /// Analytics-only: show the X-axis bucket dropdown next to the chart-type
+  /// toggle. Hidden when there's only one available bucket.
+  final bool enableBucketDropdown;
+  final KuberChartBucket bucket;
+  final List<KuberChartBucket> availableBuckets;
+  final ValueChanged<KuberChartBucket>? onBucketChanged;
+
   const KuberBarChart({
     super.key,
     required this.buckets,
     required this.title,
     this.subtitle,
     this.height = 200,
+    this.enableBucketDropdown = false,
+    this.bucket = KuberChartBucket.day,
+    this.availableBuckets = const [
+      KuberChartBucket.day,
+      KuberChartBucket.week,
+      KuberChartBucket.month,
+      KuberChartBucket.quarter,
+      KuberChartBucket.year,
+    ],
+    this.onBucketChanged,
   });
 
   @override
@@ -71,6 +92,13 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   late final Animation<double> _detailFade;
   late final Animation<Offset> _detailSlide;
   BoxConstraints? _latestConstraints;
+
+  // Drives the horizontal scroll in scroll mode. Used to auto-jump to the
+  // rightmost (newest) bucket whenever the data set changes — users expect
+  // to see the most recent period first, with the ability to swipe right→left
+  // to view older buckets.
+  final ScrollController _scrollController = ScrollController();
+  int _lastBucketCount = -1;
 
   // Visual gap between stacked bar segments (data-space units)
   static const double _segmentGap = 2.0;
@@ -92,7 +120,17 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   @override
   void dispose() {
     _detailAnim.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Jumps the scroll position to the rightmost bar — used on initial render
+  /// and whenever the bucket count changes (filter switch, bucket dropdown).
+  void _maybeJumpToEnd() {
+    if (!_scrollController.hasClients) return;
+    final pos = _scrollController.position;
+    if (pos.maxScrollExtent <= 0) return;
+    _scrollController.jumpTo(pos.maxScrollExtent);
   }
 
   void _onTap(int index) {
@@ -182,7 +220,15 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
             clipBehavior: Clip.none,
             children: [
               Container(
-                padding: const EdgeInsets.all(KuberSpacing.lg),
+                // Asymmetric padding: less on the left so the plot area
+                // gets more room, with the right side keeping enough room
+                // for the legend/dropdown chrome.
+                padding: const EdgeInsets.fromLTRB(
+                  KuberSpacing.sm,
+                  KuberSpacing.lg,
+                  KuberSpacing.lg,
+                  KuberSpacing.lg,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -193,7 +239,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                 ),
                 child: Column(
                   children: [
-                    // Legend (left) + chart type tabs (right)
+                    // Legend (left) + chart type tabs + optional bucket dropdown
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -211,6 +257,16 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                           current: _chartType,
                           onChanged: _switchChartType,
                         ),
+                        if (widget.enableBucketDropdown &&
+                            widget.availableBuckets.length > 1) ...[
+                          const SizedBox(width: KuberSpacing.sm),
+                          _BucketDropdown(
+                            current: widget.bucket,
+                            options: widget.availableBuckets,
+                            onChanged: (v) =>
+                                widget.onBucketChanged?.call(v),
+                          ),
+                        ],
                       ],
                     ),
 
@@ -221,8 +277,108 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                       height: widget.height,
                       child: LayoutBuilder(
                         builder: (context, constraints) {
+                          // Decide fit vs horizontal scroll dynamically based
+                          // on the viewport width and bucket count.
+                          final fitCount = constraints.maxWidth <= 0
+                              ? widget.buckets.length
+                              : (constraints.maxWidth / _minSlotWidthDp)
+                                  .floor();
+                          final shouldScroll = widget.buckets.length > fitCount
+                              && widget.buckets.length > 1;
+
+                          if (shouldScroll) {
+                            // Scrolling: fixed Y-axis + scrollable plot. The
+                            // tooltip lives INSIDE the scroll, so its
+                            // positioning math is unchanged (uses the wide
+                            // plot's bucket-relative slot width).
+                            final plotWidth =
+                                widget.buckets.length * _minSlotWidthDp;
+                            final plotConstraints = BoxConstraints(
+                              maxWidth: plotWidth,
+                              maxHeight: constraints.maxHeight,
+                            );
+                            // Post-frame: cache constraints AND auto-scroll
+                            // to the rightmost (newest) bar when the bucket
+                            // count changes (filter switch, bucket dropdown).
+                            WidgetsBinding.instance
+                                .addPostFrameCallback((_) {
+                              if (!mounted) return;
+                              if (_latestConstraints != plotConstraints) {
+                                setState(() {
+                                  _latestConstraints = plotConstraints;
+                                });
+                              }
+                              if (_lastBucketCount !=
+                                  widget.buckets.length) {
+                                _lastBucketCount = widget.buckets.length;
+                                _maybeJumpToEnd();
+                              }
+                            });
+                            return Row(
+                              children: [
+                                SizedBox(
+                                  width: _fixedYAxisWidth,
+                                  child: _YAxisColumn(
+                                    maxY: _maxY,
+                                    gridInterval: _gridInterval,
+                                  ),
+                                ),
+                                Expanded(
+                                  // We use a custom clipper to clip the bars horizontally (so they don't paint
+                                  // over the Y-axis or right padding) but leave them unclipped vertically
+                                  // so the tooltip overlay can extend above the chart bounds.
+                                  child: ClipRect(
+                                    clipper: const _HorizontalClipper(),
+                                    child: SingleChildScrollView(
+                                      controller: _scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      clipBehavior: Clip.none,
+                                      child: SizedBox(
+                                        width: plotWidth,
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            _chartType == KuberChartType.bar
+                                                ? _buildBarChart(
+                                                    plotConstraints,
+                                                    cs,
+                                                    showLeftTitles: false,
+                                                  )
+                                                : _buildLineChart(
+                                                    cs,
+                                                    showLeftTitles: false,
+                                                  ),
+                                            if (_touchedIndex >= 0 &&
+                                                _touchedIndex <
+                                                    widget.buckets.length)
+                                              _TooltipOverlay(
+                                                bucket: widget
+                                                    .buckets[_touchedIndex],
+                                                touchedIndex: _touchedIndex,
+                                                totalBuckets:
+                                                    widget.buckets.length,
+                                                maxWidth: plotWidth,
+                                                chartHeight:
+                                                    constraints.maxHeight,
+                                                maxY: _maxY,
+                                                slide: _detailSlide,
+                                                fade: _detailFade,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+
+                          // Fit mode: the original layout — tooltip lives in
+                          // the outer Stack and is offset by card padding.
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted && _latestConstraints != constraints) {
+                            if (mounted &&
+                                _latestConstraints != constraints) {
                               setState(() {
                                 _latestConstraints = constraints;
                               });
@@ -237,10 +393,16 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                   ],
                 ),
               ),
-              // Tooltip overlay
+              // Tooltip overlay (fit mode only — scroll mode renders its
+              // own tooltip inside the scrollable above).
               if (_touchedIndex >= 0 &&
                   _touchedIndex < widget.buckets.length &&
-                  _latestConstraints != null)
+                  _latestConstraints != null &&
+                  widget.buckets.length <=
+                      ((_latestConstraints!.maxWidth /
+                                  _minSlotWidthDp)
+                              .floor()
+                          .clamp(1, widget.buckets.length)))
                 _TooltipOverlay(
                   bucket: widget.buckets[_touchedIndex],
                   touchedIndex: _touchedIndex,
@@ -261,39 +423,72 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   }
 
   // ---------------------------------------------------------------------------
+  // Horizontal scroll config
+  // ---------------------------------------------------------------------------
+
+  /// Minimum width per bar slot. When the total plot can't fit this many
+  /// pixels per bar in the viewport, we switch to horizontal scroll.
+  static const double _minSlotWidthDp = 36.0;
+
+  /// Width of the fixed Y-axis column in scroll mode. Kept compact so the
+  /// plot area gets as much horizontal room as possible.
+  static const double _fixedYAxisWidth = 32.0;
+
+  // ---------------------------------------------------------------------------
   // Shared axis titles
   // ---------------------------------------------------------------------------
 
-  FlTitlesData _titlesData(ColorScheme cs, TextTheme tt) {
+  /// Build [FlTitlesData] for the chart.
+  /// When [showLeftTitles] is false, the Y-axis labels are hidden — used in
+  /// horizontal-scroll mode where the Y-axis lives outside the scroll.
+  FlTitlesData _titlesData(
+    ColorScheme cs,
+    TextTheme tt, {
+    bool showLeftTitles = true,
+  }) {
     final axisStyle = tt.labelSmall?.copyWith(
       fontSize: 10,
       color: cs.onSurfaceVariant,
     );
 
     return FlTitlesData(
-      leftTitles: AxisTitles(
-        sideTitles: SideTitles(
-          showTitles: true,
-          reservedSize: 44,
-          getTitlesWidget: (value, meta) {
-            if (value == meta.max && (value % _gridInterval) != 0) {
-              return const SizedBox.shrink();
-            }
-            final formatter = ref.watch(formatterProvider);
-            final isPrivate = ref.watch(privacyModeProvider);
-            if (value == meta.min) {
-              return Text(
-                maskAmount(formatter.formatCurrency(0), isPrivate),
-                style: axisStyle,
-              );
-            }
-            return Text(
-              maskAmount(formatter.formatCompactCurrency(value), isPrivate),
-              style: axisStyle,
-            );
-          },
-        ),
-      ),
+      // In horizontal-scroll mode the Y-axis is rendered externally as a
+      // fixed column. We pass a fully-empty AxisTitles here so fl_chart
+      // doesn't auto-generate any left titles inside the plot area.
+      leftTitles: showLeftTitles
+          ? AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 32,
+                // Force the label interval to match our gridline interval,
+                // otherwise fl_chart auto-picks an interval that produces
+                // odd values (e.g. 18, 37, 56) which don't align with the
+                // visible gridlines.
+                interval: _gridInterval,
+                getTitlesWidget: (value, meta) {
+                  if (value == meta.max && (value % _gridInterval) != 0) {
+                    return const SizedBox.shrink();
+                  }
+                  final formatter = ref.watch(formatterProvider);
+                  final isPrivate = ref.watch(privacyModeProvider);
+                  // No ₹ symbol on axis labels — keeps the column narrow
+                  // so the plot gets more room. Currency is unambiguous
+                  // from the tooltip and summary cards above.
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Text(
+                      maskAmount(
+                        formatter.formatCompactCurrency(value, symbol: ''),
+                        isPrivate,
+                      ),
+                      style: axisStyle,
+                      textAlign: TextAlign.right,
+                    ),
+                  );
+                },
+              ),
+            )
+          : const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       rightTitles: const AxisTitles(
         sideTitles: SideTitles(showTitles: false),
       ),
@@ -304,7 +499,15 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         sideTitles: SideTitles(
           showTitles: true,
           reservedSize: 42,
+          // interval: 1 prevents fl_chart from emitting fractional ticks
+          // (which truncate to the same bucket index and render duplicate
+          // X-axis labels in line mode).
+          interval: 1,
           getTitlesWidget: (value, meta) {
+            // Only render a label when value sits exactly on an integer tick.
+            if ((value - value.roundToDouble()).abs() > 0.001) {
+              return const SizedBox.shrink();
+            }
             final i = value.toInt();
             if (i < 0 || i >= widget.buckets.length) {
               return const SizedBox.shrink();
@@ -355,7 +558,11 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   // Bar chart
   // ---------------------------------------------------------------------------
 
-  Widget _buildBarChart(BoxConstraints constraints, ColorScheme cs) {
+  Widget _buildBarChart(
+    BoxConstraints constraints,
+    ColorScheme cs, {
+    bool showLeftTitles = true,
+  }) {
     final slotWidth = constraints.maxWidth / widget.buckets.length;
     final barWidth = (slotWidth * 0.55).clamp(12.0, 32.0);
     final double dataGap = (_maxY * _segmentGap) / widget.height;
@@ -384,7 +591,11 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         ),
         gridData: _gridData(cs),
         borderData: FlBorderData(show: false),
-        titlesData: _titlesData(cs, Theme.of(context).textTheme),
+        titlesData: _titlesData(
+          cs,
+          Theme.of(context).textTheme,
+          showLeftTitles: showLeftTitles,
+        ),
         barGroups: _buildBarGroups(barWidth, dataGap, cs),
       ),
     ),
@@ -457,7 +668,7 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
   // Line chart
   // ---------------------------------------------------------------------------
 
-  Widget _buildLineChart(ColorScheme cs) {
+  Widget _buildLineChart(ColorScheme cs, {bool showLeftTitles = true}) {
     return RepaintBoundary(
       child: LineChart(
       LineChartData(
@@ -497,7 +708,11 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
         ),
         gridData: _gridData(cs),
         borderData: FlBorderData(show: false),
-        titlesData: _titlesData(cs, Theme.of(context).textTheme),
+        titlesData: _titlesData(
+          cs,
+          Theme.of(context).textTheme,
+          showLeftTitles: showLeftTitles,
+        ),
         lineBarsData: [
           _lineData(
             cs.tertiary,
@@ -683,6 +898,11 @@ class _TooltipOverlay extends ConsumerWidget {
     final net = bucket.income - bucket.expense;
     final tt = Theme.of(context).textTheme;
 
+    // Whole-number, locale-aware currency. Strip trailing ".00" for the
+    // common "1234.00" → "1234" case.
+    String whole(double v) =>
+        formatter.formatCurrency(v.roundToDouble()).replaceAll('.00', '');
+
     final double cardWidth = 160;
     final double slotWidth = maxWidth / totalBuckets;
     final double barCenter = (touchedIndex + 0.5) * slotWidth;
@@ -761,14 +981,14 @@ class _TooltipOverlay extends ConsumerWidget {
                       const SizedBox(height: KuberSpacing.sm),
                       _TooltipRow(
                         label: 'Income',
-                        amount: maskAmount('+${formatter.formatCurrency(bucket.income)}', isPrivate),
+                        amount: maskAmount('+${whole(bucket.income)}', isPrivate),
                         color: cs.tertiary,
                         labelColor: cs.onSurfaceVariant,
                       ),
                       const SizedBox(height: 4),
                       _TooltipRow(
                         label: 'Expense',
-                        amount: maskAmount('-${formatter.formatCurrency(bucket.expense)}', isPrivate),
+                        amount: maskAmount('-${whole(bucket.expense)}', isPrivate),
                         color: cs.error,
                         labelColor: cs.onSurfaceVariant,
                       ),
@@ -782,7 +1002,9 @@ class _TooltipOverlay extends ConsumerWidget {
                       ),
                       _TooltipRow(
                         label: 'Net',
-                        amount: maskAmount(formatter.formatCurrency(net), isPrivate),
+                        amount: maskAmount(
+                            (net >= 0 ? whole(net) : '-${whole(net.abs())}'),
+                            isPrivate),
                         color: cs.onSurface,
                         labelColor: cs.onSurface,
                         isBold: true,
@@ -877,3 +1099,158 @@ class _TooltipRow extends StatelessWidget {
     );
   }
 }
+
+/// Fixed Y-axis column shown when the chart enters horizontal-scroll mode.
+/// Renders the same gridline values as the in-chart Y-axis would, but stays
+/// pinned outside the scrollable plot.
+class _YAxisColumn extends ConsumerWidget {
+  final double maxY;
+  final double gridInterval;
+  const _YAxisColumn({required this.maxY, required this.gridInterval});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final formatter = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
+    final style = tt.labelSmall?.copyWith(
+      fontSize: 10,
+      color: cs.onSurfaceVariant,
+    );
+
+    // Build tick values from 0 → maxY at every gridInterval.
+    final ticks = <double>[];
+    for (var v = 0.0; v <= maxY + 0.001; v += gridInterval) {
+      ticks.add(v);
+    }
+
+    return LayoutBuilder(
+      builder: (context, c) {
+        // The plot area inside fl_chart sits *above* the bottom-titles
+        // reserved height. Match that here so labels line up with gridlines.
+        const bottomTitlesReserved = 42.0;
+        final plotHeight = (c.maxHeight - bottomTitlesReserved).clamp(0.0, c.maxHeight);
+        return Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              for (final v in ticks)
+                Positioned(
+                  right: 0,
+                  top: plotHeight - (plotHeight * (v / (maxY == 0 ? 1 : maxY))) - 6,
+                  // Drop the currency symbol on the Y-axis labels — the
+                  // ₹ prefix doubles label width and forces the column to
+                  // grow, eating into the plot area. Tooltip + summary
+                  // already make the currency explicit.
+                  child: Text(
+                    maskAmount(
+                      formatter.formatCompactCurrency(v, symbol: ''),
+                      isPrivate,
+                    ),
+                    style: style,
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// X-axis bucket dropdown — shown only when `enableBucketDropdown` is true
+/// and there's more than one option available for the current date range.
+/// All five values are always rendered as menu items, with disabled rows
+/// dimmed.
+class _BucketDropdown extends StatelessWidget {
+  final KuberChartBucket current;
+  final List<KuberChartBucket> options;
+  final ValueChanged<KuberChartBucket> onChanged;
+
+  const _BucketDropdown({
+    required this.current,
+    required this.options,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return PopupMenuButton<KuberChartBucket>(
+      offset: const Offset(0, 36),
+      tooltip: 'X-axis bucket',
+      onSelected: onChanged,
+      itemBuilder: (_) => [
+        for (final b in KuberChartBucket.values)
+          PopupMenuItem(
+            value: b,
+            enabled: options.contains(b),
+            child: Row(
+              children: [
+                Icon(
+                  current == b ? Icons.check_rounded : Icons.remove_rounded,
+                  size: 16,
+                  color: current == b
+                      ? cs.primary
+                      : cs.onSurfaceVariant.withValues(alpha: 0.0),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  b.label,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight:
+                        current == b ? FontWeight.w700 : FontWeight.w500,
+                    color: options.contains(b)
+                        ? cs.onSurface
+                        : cs.onSurfaceVariant.withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.sm),
+          border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              current.label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.unfold_more_rounded,
+                size: 14, color: cs.onSurfaceVariant),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HorizontalClipper extends CustomClipper<Rect> {
+  const _HorizontalClipper();
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, -2000, size.width, size.height + 2000);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
+}
+

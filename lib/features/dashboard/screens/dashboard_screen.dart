@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -10,11 +9,18 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
+import '../../../shared/widgets/edit_widgets_button.dart';
+import '../../notifications/data/app_notification.dart';
+import '../../notifications/providers/notification_provider.dart';
+import '../../notifications/utils/deep_link_handler.dart';
+import '../../notifications/widgets/notifications_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
+import '../../widget_editor/models/home_widget_config.dart';
+import '../../widget_editor/providers/widget_editor_provider.dart';
+import '../widgets/home_header.dart';
 import '../widgets/home_smart_insights.dart';
 import '../widgets/spending_stats_card.dart';
 import '../widgets/budget_snapshot_card.dart';
@@ -48,40 +54,80 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   late final String _subtitle;
-  late final AnimationController _shimmerCtrl;
-  late final Animation<double> _shimmerAnim;
-  int _shimmerCount = 0;
-  static const _shimmerMaxRuns = 7;
 
   @override
   void initState() {
     super.initState();
     _subtitle = _subtitles[Random().nextInt(_subtitles.length)];
-    _shimmerCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    );
-    _shimmerCtrl.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _shimmerCount++;
-        if (_shimmerCount < _shimmerMaxRuns && mounted) {
-          _shimmerCtrl.forward(from: 0.0);
+
+    // Consume any cold-start notification payload now that the dashboard is
+    // mounted and the router is alive.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final payload = ref.read(pendingDeeplinkProvider);
+      if (payload == null || payload.isEmpty) return;
+      ref.read(pendingDeeplinkProvider.notifier).state = null;
+      final repo = ref.read(notificationRepositoryProvider);
+      final all = await repo.list();
+      AppNotification? match;
+      for (final n in all) {
+        if (n.payload == payload) {
+          match = n;
+          break;
         }
       }
+      if (!mounted || match == null) return;
+      await handleNotificationTap(context, ref, match);
     });
-    _shimmerCtrl.forward();
-    // Range [-0.18, 1.18] so the band enters from off-screen left and exits
-    // fully off-screen right before the animation completes — no stuck edge.
-    _shimmerAnim = Tween<double>(begin: -0.18, end: 1.18).animate(_shimmerCtrl);
   }
 
-  @override
-  void dispose() {
-    _shimmerCtrl.dispose();
-    super.dispose();
+  Future<void> _openNotificationsSheet() async {
+    final repo = ref.read(notificationRepositoryProvider);
+    final list = await repo.list();
+    if (!mounted) return;
+    await NotificationsSheet.show(
+      context,
+      notifications: list,
+      onClearAll: () async {
+        await repo.clearAll();
+      },
+      onTapNotification: (n) async {
+        await handleNotificationTap(context, ref, n);
+      },
+    );
+    // Mark everything read once the sheet is open / dismissed.
+    await repo.markAllRead();
+  }
+
+  /// Map a widget id from the catalog to its actual implementation. Hidden
+  /// widgets are simply not constructed — their providers never run.
+  Widget _buildHomeWidget(String id) {
+    switch (id) {
+      case 'balance_hero':
+        return RepaintBoundary(
+          key: TutorialStepKeys.dashboardBalanceCard,
+          child: const _BalanceHeroSection(),
+        );
+      case 'quick_add':
+        return QuickAddWidget(key: TutorialStepKeys.quickAddFab);
+      case 'spending_stats':
+        return const RepaintBoundary(child: SpendingStatsCard());
+      case 'home_accounts':
+        return const RepaintBoundary(child: HomeAccountsCard());
+      case 'seven_day_chart':
+        return const RepaintBoundary(child: _SevenDayChartSection());
+      case 'smart_insights':
+        return const RepaintBoundary(child: HomeSmartInsights());
+      case 'budget_snapshot':
+        return const RepaintBoundary(child: BudgetSnapshotCard());
+      case 'upcoming_recurring':
+        return const RepaintBoundary(child: HomeRecurringCard());
+      case 'recent_transactions':
+        return const RepaintBoundary(child: HomeRecentTransactionsCard());
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   @override
@@ -91,8 +137,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     );
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final summaryAsync = ref.watch(monthlySummaryProvider);
-    final chartAsync = ref.watch(last7DaysSummaryProvider);
+    final widgetsAsync = ref.watch(homeWidgetsProvider);
 
     return Scaffold(
       body: ListView(
@@ -102,114 +147,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           bottom: navBarBottomPadding(context),
         ),
         children: [
-          KuberAppBar(
-            horizontalPadding: 0,
-            actions: [
-              AnimatedBuilder(
-                animation: _shimmerAnim,
-                builder: (_, __) {
-                  final t = _shimmerAnim.value;
-                  const gold = Color(0xFFFFB300);
-                  // Gradient always spans full width; stops move the highlight band
-                  final bandStart = (t - 0.18).clamp(0.0, 1.0);
-                  final bandMid = t.clamp(0.0, 1.0);
-                  final bandEnd = (t + 0.18).clamp(0.0, 1.0);
-                  return GestureDetector(
-                    onTap: () => context.push('/more/ask-kuber'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            gold.withValues(alpha: 0.08),
-                            gold.withValues(alpha: 0.08),
-                            gold.withValues(alpha: 0.30),
-                            gold.withValues(alpha: 0.08),
-                            gold.withValues(alpha: 0.08),
-                          ],
-                          stops: [0.0, bandStart, bandMid, bandEnd, 1.0],
-                        ),
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(
-                          color: gold.withValues(alpha: 0.55),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.auto_awesome_rounded,
-                            size: 13,
-                            color: gold,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            'Ask Kuber',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: gold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-              Consumer(
-                builder: (context, ref, _) {
-                  final isPrivate = ref.watch(privacyModeProvider);
-                  final cs = Theme.of(context).colorScheme;
-                  const blue = Color(0xFF3B82F6);
-                  return Tooltip(
-                    message: isPrivate
-                        ? 'Privacy mode: On'
-                        : 'Privacy mode: Off',
-                    triggerMode: TooltipTriggerMode.longPress,
-                    child: GestureDetector(
-                      onTap: () => ref
-                          .read(settingsProvider.notifier)
-                          .togglePrivacyMode(),
-                      child: Container(
-                        key: TutorialStepKeys.privacyModeIcon,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
-                          border: Border.all(
-                            color: isPrivate
-                                ? blue
-                                : cs.outline.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Icon(
-                          isPrivate
-                              ? Icons.visibility_off_rounded
-                              : Icons.visibility_rounded,
-                          size: 16,
-                          color: isPrivate ? blue : cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
+          HomeHeader(
+            unreadCount: ref.watch(unreadCountProvider).valueOrNull ?? 0,
+            onTapNotifications: _openNotificationsSheet,
           ),
           const SizedBox(height: KuberSpacing.lg),
 
-          // Greeting
+          // Greeting — fixed, not part of the editor
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -236,70 +180,74 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
           const SizedBox(height: KuberSpacing.lg),
 
-          // [A] Balance Hero Card
-          RepaintBoundary(
-            key: TutorialStepKeys.dashboardBalanceCard,
-            child: summaryAsync.when(
-              loading: () => const SizedBox(
-                height: 180,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (summary) => _BalanceHeroCard(summary: summary),
-            ),
+          // Dynamic widget list — order + enabled comes from Isar via the
+          // widget editor. Disabled widgets are not constructed at all, so
+          // their providers don't run.
+          ...widgetsAsync.when(
+            loading: () => const <Widget>[],
+            error: (_, __) => const <Widget>[],
+            data: (configs) {
+              final visible = configs.where((c) => c.enabled).toList();
+              return [
+                for (final c in visible) ...[
+                  _buildHomeWidget(c.id),
+                  const SizedBox(height: KuberSpacing.xl),
+                ],
+                const EditWidgetsButton(scope: WidgetEditorScope.home),
+              ];
+            },
           ),
-          const SizedBox(height: KuberSpacing.xl),
-
-          // Quick Add
-          QuickAddWidget(key: TutorialStepKeys.quickAddFab),
-          const SizedBox(height: KuberSpacing.md),
-          const SizedBox(height: KuberSpacing.md),
-
-          // [A.1] Spending Stats
-          const RepaintBoundary(child: SpendingStatsCard()),
-          const SizedBox(height: KuberSpacing.md),
-
-          // [B] Bank Accounts
-          const RepaintBoundary(child: HomeAccountsCard()),
-          const SizedBox(height: KuberSpacing.xl),
-
-          // [C] 7-Day Chart
-          RepaintBoundary(
-            child: chartAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (e, _) => const SizedBox.shrink(),
-              data: (days) {
-                final hasData = days.any((d) => d.income > 0 || d.expense > 0);
-                if (!hasData) {
-                  return const _SpendingAnalysisEmpty();
-                }
-                return KuberBarChart(
-                  title: 'LAST 7 DAYS',
-                  buckets: _buildLast7DaysBuckets(days),
-                  height: 200,
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-
-          // [A.2] Smart Insights
-          const RepaintBoundary(child: HomeSmartInsights()),
-
-          // Budget Snapshot
-          const RepaintBoundary(child: BudgetSnapshotCard()),
-
-          // [C.5] Upcoming Recurring
-          const RepaintBoundary(child: HomeRecurringCard()),
-
-          // [D] Recent Transactions
-          const RepaintBoundary(child: HomeRecentTransactionsCard()),
         ],
       ),
     );
   }
+}
 
-  List<KuberBarBucket> _buildLast7DaysBuckets(List<DaySummary> days) {
+/// Wrapper that fetches monthly summary lazily so the underlying provider
+/// only ticks when the user has the Balance Hero widget enabled.
+class _BalanceHeroSection extends ConsumerWidget {
+  const _BalanceHeroSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summaryAsync = ref.watch(monthlySummaryProvider);
+    return summaryAsync.when(
+      loading: () => const SizedBox(
+        height: 180,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Center(child: Text('Error: $e')),
+      data: (summary) => _BalanceHeroCard(summary: summary),
+    );
+  }
+}
+
+/// Wrapper that fetches the 7-day summary lazily — keeps the provider idle
+/// when the chart is hidden.
+class _SevenDayChartSection extends ConsumerWidget {
+  const _SevenDayChartSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final chartAsync = ref.watch(last7DaysSummaryProvider);
+    return chartAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (e, _) => const SizedBox.shrink(),
+      data: (days) {
+        final hasData = days.any((d) => d.income > 0 || d.expense > 0);
+        if (!hasData) {
+          return const _SpendingAnalysisEmpty();
+        }
+        return KuberBarChart(
+          title: 'LAST 7 DAYS',
+          buckets: _last7DaysBuckets(days),
+          height: 200,
+        );
+      },
+    );
+  }
+
+  static List<KuberBarBucket> _last7DaysBuckets(List<DaySummary> days) {
     return List.generate(days.length, (i) {
       final d = days[i];
       return KuberBarBucket(

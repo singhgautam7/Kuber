@@ -129,7 +129,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       context,
       const KuberInfoConfig(
         title: 'Ask Kuber',
-        description: 'Ask anything about your finances in plain English. Kuber runs entirely on-device — no internet, no data shared.',
+        description: 'Ask anything about your finances in plain English. Kuber runs entirely on-device (no internet required, no data shared).',
         items: [
           KuberInfoItem(
             icon: Icons.currency_rupee_rounded,
@@ -560,7 +560,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       final topCat =
           categories.where((c) => c.id.toString() == topEntry.key).firstOrNull;
       return _QueryResult(
-        'Your top spending category $periodLabel is ${topCat?.name ?? "Unknown"} — ${formatter.formatCurrency(topEntry.value)}.',
+        'Your top spending category $periodLabel is ${topCat?.name ?? "Unknown"} at ${formatter.formatCurrency(topEntry.value)}.',
         KuberThinkingInfo(
           dateFilter: thinkingDateFilter,
           scanned: ['Transactions', 'Categories'],
@@ -623,7 +623,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
       }
       final top = expenses.first;
       return _QueryResult(
-        'Your biggest expense is "${top.name}" — ${formatter.formatCurrency(top.amount)} on ${_fmtDate(top.createdAt)}.',
+        'Your biggest expense is "${top.name}" (${formatter.formatCurrency(top.amount)}) on ${_fmtDate(top.createdAt)}.',
         KuberThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
       );
     }
@@ -746,7 +746,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
         );
       }
       final lines = top
-          .map((t) => '• ${t.name} — ${formatter.formatCurrency(t.amount)} on ${_fmtDate(t.createdAt)}')
+          .map((t) => '• ${t.name} - ${formatter.formatCurrency(t.amount)} on ${_fmtDate(t.createdAt)}')
           .join('\n');
       return _QueryResult(
         'Your 3 most recent transactions:\n$lines',

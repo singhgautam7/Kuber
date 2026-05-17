@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/utils/prefs_keys.dart';
+import '../../../shared/utils/chart_bucket.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -22,21 +23,35 @@ class AnalyticsFilter {
   final DateTime from;
   final DateTime to;
 
+  /// User-chosen chart bucket. `null` = auto-pick (best fit for range).
+  /// Reset to `null` whenever the date range changes — explicit user choice
+  /// only persists within the current filter session.
+  final KuberChartBucket? userBucket;
+
   AnalyticsFilter({
     required this.type,
     required this.from,
     required this.to,
+    this.userBucket,
   });
+
+  /// The bucket to render the chart with — user choice when set, otherwise
+  /// auto-pick from the date range.
+  KuberChartBucket get effectiveBucket =>
+      userBucket ?? bestBucketForRange(from, to);
 
   AnalyticsFilter copyWith({
     FilterType? type,
     DateTime? from,
     DateTime? to,
+    KuberChartBucket? userBucket,
+    bool clearUserBucket = false,
   }) {
     return AnalyticsFilter(
       type: type ?? this.type,
       from: from ?? this.from,
       to: to ?? this.to,
+      userBucket: clearUserBucket ? null : (userBucket ?? this.userBucket),
     );
   }
 }
@@ -138,8 +153,17 @@ class AnalyticsFilterNotifier extends StateNotifier<AnalyticsFilter> {
         break;
     }
 
+    // Any time the date range changes, reset the user's bucket override —
+    // auto-pick (`effectiveBucket`) takes over until they explicitly choose
+    // a different bucket for the new range.
     state = AnalyticsFilter(type: type, from: newFrom, to: newTo);
     _persist(type, newFrom, newTo).ignore();
+  }
+
+  /// Override the auto-picked chart bucket. Cleared automatically the next
+  /// time the date range changes.
+  void setBucket(KuberChartBucket bucket) {
+    state = state.copyWith(userBucket: bucket);
   }
 
   void reset() {

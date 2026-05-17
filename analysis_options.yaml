@@ -25,6 +25,10 @@ linter:
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
 analyzer:
+  exclude:
+    # Design handoff bundle from Claude Design — reference HTML/CSS mocks
+    # plus standalone Dart drafts that aren't part of the package context.
+    - specs/**
   errors:
     experimental_member_use: ignore
     unnecessary_underscores: ignore

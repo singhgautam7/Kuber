@@ -36,12 +36,12 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    
+
     // Style configuration
     final Color backgroundColor;
     final Color foregroundColor;
     final BorderSide? borderSide;
-    
+
     switch (type) {
       case AppButtonType.primary:
         backgroundColor = cs.primary;
@@ -56,7 +56,7 @@ class AppButton extends StatelessWidget {
       case AppButtonType.outline:
         backgroundColor = Colors.transparent;
         foregroundColor = cs.onSurface;
-        borderSide = BorderSide(color: cs.outline.withValues(alpha: 0.3));
+        borderSide = BorderSide(color: cs.outline);
         break;
       case AppButtonType.danger:
         backgroundColor = Colors.transparent;

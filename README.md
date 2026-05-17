@@ -1,6 +1,6 @@
 # Kubera
 
-Kubera is a modern, local-first personal finance app designed to help you track expenses, analyze spending, and gain meaningful insights into your financial habits — all while keeping your data completely private.
+Kubera is a modern, local-first personal finance app designed to help you track expenses, analyze spending, and gain meaningful insights into your financial habits, all while keeping your data completely private.
 
 ---
 
