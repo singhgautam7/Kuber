@@ -268,6 +268,20 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       // Shared form fields
                       ..._buildSharedFormFields(showNotesPrefixIcon: false),
                     ],
+
+                    // Save & Add Another — only for new (non-edit) entries.
+                    // Sits in the scrolling form area, NOT in the sticky
+                    // bottom bar. Preserves type/account/category/date and
+                    // clears amount/name/notes after a successful save.
+                    if (!_isEditing) ...[
+                      AppButton(
+                        label: 'Save & Add Another',
+                        type: AppButtonType.outline,
+                        fullWidth: true,
+                        onPressed: () => _save(keepOpen: true),
+                      ),
+                      const SizedBox(height: KuberSpacing.lg),
+                    ],
                   ],
                 ),
               ),
@@ -608,7 +622,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
@@ -637,7 +650,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
@@ -665,7 +677,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
@@ -737,7 +748,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
-      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -779,7 +789,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         final unformattedText = suggestion.amount == suggestion.amount!.truncateToDouble()
             ? suggestion.amount!.toInt().toString()
             : suggestion.amount!.toStringAsFixed(2);
-            
+
         _amountController.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
           TextEditingValue.empty,
           TextEditingValue(
@@ -804,9 +814,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   // ── Save Logic ───────────────────────────────────────────────────────────
 
-  Future<void> _save() async {
+  /// When [keepOpen] is true (the "Save & Add Another" path), the form stays
+  /// mounted after a successful save. Amount/name/notes are cleared while
+  /// type, account, category, and date are preserved; focus returns to the
+  /// amount field. Disabled in edit mode.
+  Future<void> _save({bool keepOpen = false}) async {
     if (_type == 'transfer') {
-      await _saveTransfer();
+      await _saveTransfer(keepOpen: keepOpen);
       return;
     }
 
@@ -885,6 +899,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     if (!mounted) return;
+
+    if (keepOpen && !_isEditing) {
+      _resetForAnother('Transaction Saved! Add another?');
+      return;
+    }
+
     context.pop();
     showKuberSnackBar(
       context,
@@ -892,7 +912,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
   }
 
-  Future<void> _saveTransfer() async {
+  /// Clears the inputs that change per-entry while preserving the
+  /// "scaffolding" the user already picked (type, account, category, date).
+  void _resetForAnother(String message) {
+    setState(() {
+      _nameController.clear();
+      _amountController.clear();
+      _notesController.clear();
+      _selectedTags = [];
+      _pendingAttachments.clear();
+      _removedAttachments.clear();
+      _attachmentPaths = [];
+    });
+    _nameFocusNode.requestFocus();
+    showKuberSnackBar(context, message);
+  }
+
+  Future<void> _saveTransfer({bool keepOpen = false}) async {
     final amount = double.tryParse(_amountController.text.trim().replaceAll(',', ''));
     if (amount == null || amount <= 0) {
       showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
@@ -958,6 +994,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     if (!mounted) return;
+
+    if (keepOpen && !_isEditing) {
+      _resetForAnother('Transaction saved! Add another');
+      return;
+    }
+
     context.pop();
     showKuberSnackBar(
       context,

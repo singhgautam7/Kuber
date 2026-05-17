@@ -3,6 +3,8 @@ import '../data/budget.dart';
 import '../data/budget_repository.dart';
 import '../../../core/services/notification_service.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../notifications/data/app_notification.dart';
+import '../../notifications/providers/notification_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {
@@ -16,6 +18,16 @@ class BudgetService {
 
   Future<void> init() async {
     await ref.read(budgetRepositoryProvider).evaluateBudgets();
+  }
+
+  /// Iterate over every active budget and run the alert check. Cheap enough
+  /// to run on app open — `checkAlerts` short-circuits via `isTriggered`.
+  Future<void> checkAllOnAppOpen() async {
+    final budgets = await ref.read(budgetRepositoryProvider).getAll();
+    for (final b in budgets) {
+      if (!b.isActive) continue;
+      await checkAlerts(b.categoryId);
+    }
   }
 
   Future<void> checkAlerts(String categoryId) async {
@@ -71,14 +83,27 @@ class BudgetService {
             body = "You've spent ${ref.read(formatterProvider).formatCurrency(alert.value)} in ${cat.name} category";
           }
 
-          final notificationId = budget.id * 10 + i;
-          await ref.read(notificationServiceProvider).showBudgetAlertNotification(
-            id: notificationId,
-            title: title,
-            body: body,
-          );
+          final payload = 'budget:${budget.id}';
+          final inserted =
+              await ref.read(notificationRepositoryProvider).add(
+                    type: NotificationType.budgetAlert,
+                    title: title,
+                    body: body,
+                    payload: payload,
+                  );
+
+          if (inserted) {
+            final notificationId = budget.id * 10 + i;
+            await ref.read(notificationServiceProvider).showAppNotification(
+                  type: NotificationType.budgetAlert,
+                  id: notificationId,
+                  title: title,
+                  body: body,
+                  payload: payload,
+                );
+          }
         }
-      } 
+      }
       // RESET logic: If spending drops below threshold again
       else if (!isAboveThreshold && alert.isTriggered) {
         alert.isTriggered = false;

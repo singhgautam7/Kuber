@@ -11,6 +11,8 @@ import 'package:kuber/features/budgets/data/budget.dart';
 import 'package:kuber/features/ledger/data/ledger.dart';
 import 'package:kuber/features/loans/data/loan.dart';
 import 'package:kuber/features/investments/data/investment.dart';
+import 'package:kuber/features/notifications/data/app_notification.dart';
+import 'package:kuber/features/widget_editor/data/widget_preference.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -24,6 +26,8 @@ const _allSchemas = [
   LedgerSchema,
   LoanSchema,
   InvestmentSchema,
+  AppNotificationSchema,
+  WidgetPreferenceSchema,
 ];
 
 bool _isarInitialized = false;

@@ -5,6 +5,7 @@ import 'package:kuber/features/accounts/data/account_repository.dart';
 import 'package:kuber/features/categories/data/category_repository.dart';
 import 'package:kuber/features/recurring/data/recurring_repository.dart';
 import 'package:kuber/features/tags/data/tag_repository.dart';
+import 'package:kuber/features/notifications/data/notification_repository.dart';
 import 'package:kuber/core/services/notification_service.dart';
 import 'package:kuber/core/services/attachment_service.dart';
 
@@ -23,3 +24,5 @@ class MockRecurringRepository extends Mock implements RecurringRepository {}
 class MockTagRepository extends Mock implements TagRepository {}
 
 class MockNotificationService extends Mock implements NotificationService {}
+
+class MockNotificationRepository extends Mock implements NotificationRepository {}

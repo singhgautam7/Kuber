@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/edit_widgets_button.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
@@ -230,6 +232,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
 
+                const SizedBox(height: KuberSpacing.xl),
+
+                // WIDGETS — edit home / analytics widget configuration
+                _SectionLabel(label: 'WIDGETS'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    EditWidgetsSettingsRows(
+                      onHomeTap: () => context.push('/widget-editor/home'),
+                      onAnalyticsTap: () =>
+                          context.push('/widget-editor/analytics'),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: KuberSpacing.xl),
 
                 // PREFERENCE

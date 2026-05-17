@@ -5,14 +5,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
+import 'features/budgets/services/budget_service.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/tutorial/widgets/tutorial_overlay.dart';
 
-class KuberApp extends ConsumerWidget {
+class KuberApp extends ConsumerStatefulWidget {
   const KuberApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<KuberApp> createState() => _KuberAppState();
+}
+
+class _KuberAppState extends ConsumerState<KuberApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Run on-open budget alert check once. Uses ProviderScope's overrides
+    // (Isar etc), so must be deferred until after the scope is in place.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(budgetServiceProvider).checkAllOnAppOpen();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
 

@@ -2,6 +2,8 @@ import 'package:isar_community/isar.dart';
 
 import '../../investments/data/investment.dart';
 import '../../loans/data/loan.dart';
+import '../../notifications/data/app_notification.dart';
+import '../../notifications/data/notification_repository.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/services/suggestion_service.dart';
 import 'recurring_repository.dart';
@@ -19,15 +21,20 @@ class RecurringProcessor {
     final repo = RecurringRepository(isar);
     final dueRules = await repo.getDue(now);
     final suggestionService = SuggestionService(isar);
+    final notificationRepo = NotificationRepository(isar);
 
     int totalCreated = 0;
     final createdRecurring = <Transaction>[];
+    // Collected per (ruleId) so each rule produces at most one notification
+    // for this run, regardless of how many missed dates it covers.
+    final recurringNotifications = <int, _PendingNotification>{};
 
     await isar.writeTxn(() async {
       for (final rule in dueRules) {
         if (RecurringRepository.isExpired(rule)) continue;
 
         var dueDate = rule.nextDueAt;
+        int created = 0;
 
         // Create transactions for each missed due date
         while (dueDate.isBefore(now)) {
@@ -60,11 +67,22 @@ class RecurringProcessor {
           await isar.transactions.put(t);
           createdRecurring.add(t);
           totalCreated++;
+          created++;
 
           rule.executionCount++;
           dueDate = RecurringRepository.computeNextDue(rule, dueDate);
 
           if (RecurringRepository.isExpired(rule)) break;
+        }
+
+        if (created > 0) {
+          recurringNotifications[rule.id] = _PendingNotification(
+            title: created == 1
+                ? 'New recurring transaction'
+                : '$created recurring transactions added',
+            body: '${rule.name} — added while you were away',
+            payload: 'recurring:${rule.id}',
+          );
         }
 
         rule.nextDueAt = dueDate;
@@ -77,15 +95,32 @@ class RecurringProcessor {
       suggestionService.upsertSuggestion(t).ignore();
     }
 
+    // In-app notifications only — see plan §2. No OS notification for the
+    // batched on-open processing run.
+    for (final n in recurringNotifications.values) {
+      await notificationRepo.add(
+        type: NotificationType.recurringTransaction,
+        title: n.title,
+        body: n.body,
+        payload: n.payload,
+      );
+    }
+
     // Process loan auto-payments and investment SIP auto-debits
-    totalCreated += await _processLoanAutoPayments(now, suggestionService);
-    totalCreated += await _processInvestmentSipDebits(now, suggestionService);
+    totalCreated += await _processLoanAutoPayments(
+        now, suggestionService, notificationRepo);
+    totalCreated += await _processInvestmentSipDebits(
+        now, suggestionService, notificationRepo);
 
     return totalCreated;
   }
 
   /// Creates EMI transactions for loans with autoAddTransaction on their bill date.
-  Future<int> _processLoanAutoPayments(DateTime now, SuggestionService suggestionService) async {
+  Future<int> _processLoanAutoPayments(
+    DateTime now,
+    SuggestionService suggestionService,
+    NotificationRepository notificationRepo,
+  ) async {
     final today = now.day;
     final loans = await isar.loans
         .filter()
@@ -127,6 +162,13 @@ class RecurringProcessor {
         await isar.transactions.put(t);
       });
       suggestionService.upsertSuggestion(t).ignore();
+
+      await notificationRepo.add(
+        type: NotificationType.loanEmi,
+        title: 'Loan EMI deducted',
+        body: '${loan.name} — EMI added to your transactions',
+        payload: 'loan:${loan.uid}',
+      );
       created++;
     }
 
@@ -134,7 +176,11 @@ class RecurringProcessor {
   }
 
   /// Creates SIP contribution transactions for investments with autoDebit on their SIP date.
-  Future<int> _processInvestmentSipDebits(DateTime now, SuggestionService suggestionService) async {
+  Future<int> _processInvestmentSipDebits(
+    DateTime now,
+    SuggestionService suggestionService,
+    NotificationRepository notificationRepo,
+  ) async {
     final today = now.day;
     final investments = await isar.investments
         .filter()
@@ -177,9 +223,26 @@ class RecurringProcessor {
         await isar.transactions.put(t);
       });
       suggestionService.upsertSuggestion(t).ignore();
+
+      // Investment SIP debits are surfaced under the recurring-transaction
+      // type since there's no dedicated investment notification channel.
+      await notificationRepo.add(
+        type: NotificationType.recurringTransaction,
+        title: 'Investment contribution added',
+        body: '${inv.name} — SIP contribution recorded',
+        payload: 'investment:${inv.uid}',
+      );
       created++;
     }
 
     return created;
   }
+}
+
+class _PendingNotification {
+  final String title;
+  final String body;
+  final String payload;
+  _PendingNotification(
+      {required this.title, required this.body, required this.payload});
 }

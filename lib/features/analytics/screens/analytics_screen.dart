@@ -9,7 +9,11 @@ import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/utils/chart_bucket.dart';
+import '../../../shared/widgets/edit_widgets_button.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
+import '../../widget_editor/models/home_widget_config.dart';
+import '../../widget_editor/providers/widget_editor_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/helpers/transaction_filters.dart';
@@ -61,218 +65,212 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     AnalyticsFilter filter,
   ) {
     txns = txns.validForCalculations.toList();
-    List<_MutableBucket> buckets = [];
 
-    switch (filter.type) {
-      case FilterType.today:
-        buckets = [
-          _MutableBucket(
-            'Dawn',
-            '',
-            date: filter.from,
-            endDate: filter.from.add(const Duration(hours: 5, minutes: 59)),
-          ),
-          _MutableBucket(
-            'Morning',
-            '',
-            date: filter.from.add(const Duration(hours: 6)),
-            endDate: filter.from.add(const Duration(hours: 10, minutes: 59)),
-          ),
-          _MutableBucket(
-            'Noon',
-            '',
-            date: filter.from.add(const Duration(hours: 11)),
-            endDate: filter.from.add(const Duration(hours: 13, minutes: 59)),
-          ),
-          _MutableBucket(
-            'Evening',
-            '',
-            date: filter.from.add(const Duration(hours: 14)),
-            endDate: filter.from.add(const Duration(hours: 18, minutes: 59)),
-          ),
-          _MutableBucket(
-            'Night',
-            '',
-            date: filter.from.add(const Duration(hours: 19)),
-            endDate: filter.to,
-          ),
-        ];
-        for (final t in txns) {
-          final h = t.createdAt.hour;
-          int idx;
-          if (h < 6) {
-            idx = 0;
-          } else if (h < 11) {
-            idx = 1;
-          } else if (h < 14) {
-            idx = 2;
-          } else if (h < 19) {
-            idx = 3;
-          } else {
-            idx = 4;
-          }
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
-          }
-        }
-        break;
-
-      case FilterType.thisWeek:
-      case FilterType.lastWeek:
-        // Show 7 days range
-        final daysCount = filter.to.difference(filter.from).inDays + 1;
-        buckets = List.generate(daysCount, (i) {
-          final d = filter.from.add(Duration(days: i));
-          return _MutableBucket(
-            DateFormat('d').format(d),
-            DateFormat('MMM').format(d).toUpperCase(),
-            date: d,
-          );
-        });
-        for (final t in txns) {
-          final diff = t.createdAt.difference(filter.from).inDays;
-          if (diff < 0 || diff >= daysCount) continue;
-          if (t.type == 'income') {
-            buckets[diff].income += t.amount;
-          } else {
-            buckets[diff].expense += t.amount;
-          }
-        }
-        break;
-
-      case FilterType.thisMonth:
-      case FilterType.lastMonth:
-        // Divide into 4 or 5 weeks
-        final daysInMonth = filter.to.difference(filter.from).inDays + 1;
-        final weekCount = (daysInMonth / 7).ceil();
-        buckets = List.generate(weekCount, (i) {
-          final startDay = filter.from.add(Duration(days: i * 7));
-          final endDay = i == weekCount - 1
-              ? filter.to
-              : startDay.add(const Duration(days: 6));
-          return _MutableBucket(
-            'Week',
-            '${i + 1}',
-            date: startDay,
-            endDate: endDay,
-          );
-        });
-        for (final t in txns) {
-          final dayDiff = t.createdAt.difference(filter.from).inDays;
-          final week = (dayDiff / 7).floor();
-          final idx = week.clamp(0, weekCount - 1);
-          if (t.type == 'income') {
-            buckets[idx].income += t.amount;
-          } else {
-            buckets[idx].expense += t.amount;
-          }
-        }
-        break;
-
-      case FilterType.thisYear:
-      case FilterType.all:
-      case FilterType.custom:
-        // If > 6 months, show months. Otherwise show weeks.
-        final monthsDiff =
-            (filter.to.year - filter.from.year) * 12 +
-            filter.to.month -
-            filter.from.month;
-        if (monthsDiff >= 6 ||
-            filter.type == FilterType.all ||
-            filter.type == FilterType.thisYear) {
-          // Quarterly or monthly depending on range
-          if (monthsDiff > 12) {
-            // Show Quarters
-            final quarters = (monthsDiff / 3).ceil().clamp(1, 12);
-            buckets = List.generate(quarters, (i) {
-              final m = DateTime(
-                filter.from.year,
-                filter.from.month + i * 3,
-                1,
-              );
-              final endM = DateTime(
-                m.year,
-                m.month + 3,
-                0,
-              ); // Last day of quarter
-              return _MutableBucket(
-                'Q${((m.month - 1) / 3).floor() + 1}',
-                DateFormat('yy').format(m),
-                date: m,
-                endDate: endM.isAfter(filter.to) ? filter.to : endM,
-              );
-            });
-            for (final t in txns) {
-              final mDiff =
-                  (t.createdAt.year - filter.from.year) * 12 +
-                  t.createdAt.month -
-                  filter.from.month;
-              final idx = (mDiff / 3).floor().clamp(0, quarters - 1);
-              if (t.type == 'income') {
-                buckets[idx].income += t.amount;
-              } else {
-                buckets[idx].expense += t.amount;
-              }
-            }
-          } else {
-            // Show Months
-            final count = monthsDiff + 1;
-            buckets = List.generate(count, (i) {
-              final m = DateTime(filter.from.year, filter.from.month + i, 1);
-              final endM = DateTime(m.year, m.month + 1, 0);
-              return _MutableBucket(
-                DateFormat('MMM').format(m),
-                DateFormat('yy').format(m),
-                date: m,
-                endDate: endM.isAfter(filter.to) ? filter.to : endM,
-              );
-            });
-            for (final t in txns) {
-              final idx =
-                  (t.createdAt.year - filter.from.year) * 12 +
-                  t.createdAt.month -
-                  filter.from.month;
-              if (idx >= 0 && idx < count) {
-                if (t.type == 'income') {
-                  buckets[idx].income += t.amount;
-                } else {
-                  buckets[idx].expense += t.amount;
-                }
-              }
-            }
-          }
-        } else {
-          // Show weeks
-          final days = filter.to.difference(filter.from).inDays + 1;
-          final weeks = (days / 7).ceil();
-          buckets = List.generate(weeks, (i) {
-            final startDay = filter.from.add(Duration(days: i * 7));
-            final endDay = i == weeks - 1
-                ? filter.to
-                : startDay.add(const Duration(days: 6));
-            return _MutableBucket(
-              'Week',
-              '${i + 1}',
-              date: startDay,
-              endDate: endDay,
-            );
-          });
-          for (final t in txns) {
-            final idx = (t.createdAt.difference(filter.from).inDays / 7)
-                .floor()
-                .clamp(0, weeks - 1);
-            if (t.type == 'income') {
-              buckets[idx].income += t.amount;
-            } else {
-              buckets[idx].expense += t.amount;
-            }
-          }
-        }
-        break;
+    // "Today" remains a special case — its 5 time-of-day slots are more
+    // useful than a single day bar. Only Day is available in the dropdown
+    // for a 1-day range anyway, so the dropdown stays hidden here.
+    if (filter.type == FilterType.today) {
+      return _buildTimeOfDayBuckets(txns, filter);
     }
 
+    switch (filter.effectiveBucket) {
+      case KuberChartBucket.day:
+        return _buildDayBuckets(txns, filter.from, filter.to);
+      case KuberChartBucket.week:
+        return _buildWeekBuckets(txns, filter.from, filter.to);
+      case KuberChartBucket.month:
+        return _buildMonthBuckets(txns, filter.from, filter.to);
+      case KuberChartBucket.quarter:
+        return _buildQuarterBuckets(txns, filter.from, filter.to);
+      case KuberChartBucket.year:
+        return _buildYearBuckets(txns, filter.from, filter.to);
+    }
+  }
+
+  List<KuberBarBucket> _buildTimeOfDayBuckets(
+      List<Transaction> txns, AnalyticsFilter filter) {
+    final buckets = [
+      _MutableBucket('Dawn', '',
+          date: filter.from,
+          endDate: filter.from.add(const Duration(hours: 5, minutes: 59))),
+      _MutableBucket('Morning', '',
+          date: filter.from.add(const Duration(hours: 6)),
+          endDate: filter.from.add(const Duration(hours: 10, minutes: 59))),
+      _MutableBucket('Noon', '',
+          date: filter.from.add(const Duration(hours: 11)),
+          endDate: filter.from.add(const Duration(hours: 13, minutes: 59))),
+      _MutableBucket('Evening', '',
+          date: filter.from.add(const Duration(hours: 14)),
+          endDate: filter.from.add(const Duration(hours: 18, minutes: 59))),
+      _MutableBucket('Night', '',
+          date: filter.from.add(const Duration(hours: 19)),
+          endDate: filter.to),
+    ];
+    for (final t in txns) {
+      final h = t.createdAt.hour;
+      int idx;
+      if (h < 6) {
+        idx = 0;
+      } else if (h < 11) {
+        idx = 1;
+      } else if (h < 14) {
+        idx = 2;
+      } else if (h < 19) {
+        idx = 3;
+      } else {
+        idx = 4;
+      }
+      if (t.type == 'income') {
+        buckets[idx].income += t.amount;
+      } else {
+        buckets[idx].expense += t.amount;
+      }
+    }
+    return _toKuber(buckets);
+  }
+
+  List<KuberBarBucket> _buildDayBuckets(
+      List<Transaction> txns, DateTime from, DateTime to) {
+    final fromDay = DateTime(from.year, from.month, from.day);
+    final daysCount = DateTime(to.year, to.month, to.day)
+            .difference(fromDay)
+            .inDays +
+        1;
+    final buckets = List.generate(daysCount, (i) {
+      final d = fromDay.add(Duration(days: i));
+      return _MutableBucket(
+        DateFormat('d').format(d),
+        DateFormat('MMM').format(d).toUpperCase(),
+        date: d,
+      );
+    });
+    for (final t in txns) {
+      final txDay = DateTime(
+          t.createdAt.year, t.createdAt.month, t.createdAt.day);
+      final diff = txDay.difference(fromDay).inDays;
+      if (diff < 0 || diff >= daysCount) continue;
+      if (t.type == 'income') {
+        buckets[diff].income += t.amount;
+      } else {
+        buckets[diff].expense += t.amount;
+      }
+    }
+    return _toKuber(buckets);
+  }
+
+  List<KuberBarBucket> _buildWeekBuckets(
+      List<Transaction> txns, DateTime from, DateTime to) {
+    final fromDay = DateTime(from.year, from.month, from.day);
+    final days = DateTime(to.year, to.month, to.day)
+            .difference(fromDay)
+            .inDays +
+        1;
+    final weeks = (days / 7).ceil().clamp(1, 1000);
+    final buckets = List.generate(weeks, (i) {
+      final start = fromDay.add(Duration(days: i * 7));
+      final end =
+          i == weeks - 1 ? to : start.add(const Duration(days: 6));
+      return _MutableBucket('Week', '${i + 1}', date: start, endDate: end);
+    });
+    for (final t in txns) {
+      final dayDiff = t.createdAt.difference(fromDay).inDays;
+      final idx = (dayDiff / 7).floor().clamp(0, weeks - 1);
+      if (t.type == 'income') {
+        buckets[idx].income += t.amount;
+      } else {
+        buckets[idx].expense += t.amount;
+      }
+    }
+    return _toKuber(buckets);
+  }
+
+  List<KuberBarBucket> _buildMonthBuckets(
+      List<Transaction> txns, DateTime from, DateTime to) {
+    final monthsDiff =
+        (to.year - from.year) * 12 + to.month - from.month;
+    final count = (monthsDiff + 1).clamp(1, 240);
+    final buckets = List.generate(count, (i) {
+      final m = DateTime(from.year, from.month + i, 1);
+      final endM = DateTime(m.year, m.month + 1, 0);
+      return _MutableBucket(
+        DateFormat('MMM').format(m),
+        DateFormat('yy').format(m),
+        date: m,
+        endDate: endM.isAfter(to) ? to : endM,
+      );
+    });
+    for (final t in txns) {
+      final idx = (t.createdAt.year - from.year) * 12 +
+          t.createdAt.month -
+          from.month;
+      if (idx < 0 || idx >= count) continue;
+      if (t.type == 'income') {
+        buckets[idx].income += t.amount;
+      } else {
+        buckets[idx].expense += t.amount;
+      }
+    }
+    return _toKuber(buckets);
+  }
+
+  List<KuberBarBucket> _buildQuarterBuckets(
+      List<Transaction> txns, DateTime from, DateTime to) {
+    final fromQStartMonth = ((from.month - 1) ~/ 3) * 3 + 1;
+    final fromQ = DateTime(from.year, fromQStartMonth, 1);
+    final toQStartMonth = ((to.month - 1) ~/ 3) * 3 + 1;
+    final toQ = DateTime(to.year, toQStartMonth, 1);
+    final monthsDiff = (toQ.year - fromQ.year) * 12 + toQ.month - fromQ.month;
+    final count = (monthsDiff ~/ 3 + 1).clamp(1, 80);
+    final buckets = List.generate(count, (i) {
+      final qStart = DateTime(fromQ.year, fromQ.month + i * 3, 1);
+      final qEnd = DateTime(qStart.year, qStart.month + 3, 0);
+      final q = ((qStart.month - 1) ~/ 3) + 1;
+      return _MutableBucket(
+        'Q$q',
+        DateFormat('yy').format(qStart),
+        date: qStart,
+        endDate: qEnd.isAfter(to) ? to : qEnd,
+      );
+    });
+    for (final t in txns) {
+      final tQStartMonth = ((t.createdAt.month - 1) ~/ 3) * 3 + 1;
+      final tQ = DateTime(t.createdAt.year, tQStartMonth, 1);
+      final mDiff = (tQ.year - fromQ.year) * 12 + tQ.month - fromQ.month;
+      final idx = (mDiff ~/ 3).clamp(0, count - 1);
+      if (t.type == 'income') {
+        buckets[idx].income += t.amount;
+      } else {
+        buckets[idx].expense += t.amount;
+      }
+    }
+    return _toKuber(buckets);
+  }
+
+  List<KuberBarBucket> _buildYearBuckets(
+      List<Transaction> txns, DateTime from, DateTime to) {
+    final years = (to.year - from.year + 1).clamp(1, 50);
+    final buckets = List.generate(years, (i) {
+      final yStart = DateTime(from.year + i, 1, 1);
+      final yEnd = DateTime(from.year + i, 12, 31);
+      return _MutableBucket(
+        '${from.year + i}',
+        '',
+        date: yStart,
+        endDate: yEnd.isAfter(to) ? to : yEnd,
+      );
+    });
+    for (final t in txns) {
+      final idx = (t.createdAt.year - from.year).clamp(0, years - 1);
+      if (t.type == 'income') {
+        buckets[idx].income += t.amount;
+      } else {
+        buckets[idx].expense += t.amount;
+      }
+    }
+    return _toKuber(buckets);
+  }
+
+  List<KuberBarBucket> _toKuber(List<_MutableBucket> buckets) {
     return List.generate(buckets.length, (i) {
       final b = buckets[i];
       return KuberBarBucket(
@@ -337,7 +335,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             ),
           ),
 
-          // ── Analytics widgets (lazy — only built when scrolled into view) ─
+          // ── Analytics widgets (dynamic order + visibility from editor) ─
           if (isEmpty)
             const SliverPadding(
               padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
@@ -357,74 +355,30 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              sliver: SliverList.builder(
-                itemCount: 8,
-                itemBuilder: (context, index) => switch (index) {
-                  0 => Padding(
-                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                    child: _buildSummaryCard(
-                      ref,
-                      colorScheme,
-                      textTheme,
-                      totalIncome,
-                      totalExpense,
-                      netAmount,
-                    ),
-                  ),
-                  1 => Padding(
-                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                    child: RepaintBoundary(
-                      child: KuberBarChart(
-                        key: TutorialStepKeys.spendingTrendsChart,
-                        title: 'Spending Trend',
-                        buckets: buckets,
-                        height: 200,
-                      ),
-                    ),
-                  ),
-                  2 => Padding(
-                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                    child: RepaintBoundary(
-                      child: AvgWeeklyHeatmap(
-                        transactions: periodTxns,
-                        precomputedDailyAverages: computed.dailyAverages,
-                      ),
-                    ),
-                  ),
-                  3 => Padding(
-                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                    child: RepaintBoundary(
-                      child: TransactionSizeDistribution(
-                        transactions: periodTxns,
-                        precomputedDistribution: computed.sizeDistribution,
-                      ),
-                    ),
-                  ),
-                  4 => Padding(
-                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                    child: RepaintBoundary(
-                      child: CategoryGroupStatsWidget(
-                        key: TutorialStepKeys.categoryBreakdownChart,
-                      ),
-                    ),
-                  ),
-                  5 => Padding(
-                    padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
-                    child: RepaintBoundary(
-                      child: TagWiseAnalytics(transactions: periodTxns),
-                    ),
-                  ),
-                  6 => _buildBiggestTransactionsSection(
-                    colorScheme,
-                    textTheme,
-                    top5,
-                    isMoreTab: false,
-                    biggestType: biggestType,
-                    categoryMap: categoryMap,
-                  ),
-                  7 => SizedBox(height: navBarBottomPadding(context)),
-                  _ => const SizedBox.shrink(),
-                },
+              sliver: _AnalyticsWidgetList(
+                filter: filter,
+                buckets: buckets,
+                periodTxns: periodTxns,
+                computed: computed,
+                top5: top5,
+                biggestType: biggestType,
+                categoryMap: categoryMap,
+                totalIncome: totalIncome,
+                totalExpense: totalExpense,
+                netAmount: netAmount,
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+                buildSummary: (cs, tt, inc, exp, net) =>
+                    _buildSummaryCard(ref, cs, tt, inc, exp, net),
+                buildBiggest: (cs, tt, t5, bt, cm) =>
+                    _buildBiggestTransactionsSection(
+                  cs,
+                  tt,
+                  t5,
+                  isMoreTab: false,
+                  biggestType: bt,
+                  categoryMap: cm,
+                ),
               ),
             ),
         ],
@@ -726,6 +680,143 @@ class _SummaryTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Dynamic analytics widget list — order + enabled flags come from
+/// `analyticsWidgetsProvider`. Hidden widgets are not constructed; their
+/// underlying providers stay idle until re-enabled.
+class _AnalyticsWidgetList extends ConsumerWidget {
+  final AnalyticsFilter filter;
+  final List<KuberBarBucket> buckets;
+  final List<Transaction> periodTxns;
+  final AnalyticsComputed computed;
+  final List<Transaction> top5;
+  final String biggestType;
+  final Map<int, dynamic> categoryMap;
+  final double totalIncome;
+  final double totalExpense;
+  final double netAmount;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+
+  final Widget Function(ColorScheme cs, TextTheme tt, double inc, double exp,
+      double net) buildSummary;
+  final Widget Function(ColorScheme cs, TextTheme tt, List<Transaction> t5,
+      String bt, Map<int, dynamic> cm) buildBiggest;
+
+  const _AnalyticsWidgetList({
+    required this.filter,
+    required this.buckets,
+    required this.periodTxns,
+    required this.computed,
+    required this.top5,
+    required this.biggestType,
+    required this.categoryMap,
+    required this.totalIncome,
+    required this.totalExpense,
+    required this.netAmount,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.buildSummary,
+    required this.buildBiggest,
+  });
+
+  Widget _buildWidget(BuildContext ctx, WidgetRef ref, String id) {
+    final bottom = const EdgeInsets.only(bottom: KuberSpacing.lg);
+    switch (id) {
+      case 'summary_card':
+        return Padding(
+          padding: bottom,
+          child: buildSummary(colorScheme, textTheme, totalIncome,
+              totalExpense, netAmount),
+        );
+      case 'spending_trend':
+        return Padding(
+          padding: bottom,
+          child: RepaintBoundary(
+            child: KuberBarChart(
+              key: TutorialStepKeys.spendingTrendsChart,
+              title: 'Spending Trend',
+              buckets: buckets,
+              height: 200,
+              enableBucketDropdown: filter.type != FilterType.today,
+              bucket: filter.effectiveBucket,
+              availableBuckets:
+                  availableBucketsForRange(filter.from, filter.to),
+              onBucketChanged: (b) =>
+                  ref.read(analyticsFilterProvider.notifier).setBucket(b),
+            ),
+          ),
+        );
+      case 'weekly_heatmap':
+        return Padding(
+          padding: bottom,
+          child: RepaintBoundary(
+            child: AvgWeeklyHeatmap(
+              transactions: periodTxns,
+              precomputedDailyAverages: computed.dailyAverages,
+            ),
+          ),
+        );
+      case 'size_distribution':
+        return Padding(
+          padding: bottom,
+          child: RepaintBoundary(
+            child: TransactionSizeDistribution(
+              transactions: periodTxns,
+              precomputedDistribution: computed.sizeDistribution,
+            ),
+          ),
+        );
+      case 'category_breakdown':
+        return Padding(
+          padding: bottom,
+          child: RepaintBoundary(
+            child: CategoryGroupStatsWidget(
+              key: TutorialStepKeys.categoryBreakdownChart,
+            ),
+          ),
+        );
+      case 'tag_analytics':
+        return Padding(
+          padding: bottom,
+          child: RepaintBoundary(
+            child: TagWiseAnalytics(transactions: periodTxns),
+          ),
+        );
+      case 'biggest_transactions':
+        return buildBiggest(
+            colorScheme, textTheme, top5, biggestType, categoryMap);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final widgetsAsync = ref.watch(analyticsWidgetsProvider);
+    return widgetsAsync.when(
+      loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+      data: (configs) {
+        final visible = configs.where((c) => c.enabled).toList();
+        return SliverList.builder(
+          // +2 for EditWidgetsButton + bottom nav spacer.
+          itemCount: visible.length + 2,
+          itemBuilder: (ctx, i) {
+            if (i == visible.length) {
+              return const EditWidgetsButton(
+                  scope: WidgetEditorScope.analytics);
+            }
+            if (i == visible.length + 1) {
+              return SizedBox(height: navBarBottomPadding(ctx));
+            }
+            return _buildWidget(ctx, ref, visible[i].id);
+          },
+        );
+      },
     );
   }
 }

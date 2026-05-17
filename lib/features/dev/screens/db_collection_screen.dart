@@ -22,6 +22,8 @@ import '../../investments/data/investment.dart';
 import '../../transactions/data/transaction_suggestion.dart';
 import '../../tools/bill_splitter/data/person.dart';
 import '../../tools/bill_splitter/data/bill.dart';
+import '../../notifications/data/app_notification.dart';
+import '../../widget_editor/data/widget_preference.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -108,6 +110,14 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           break;
         case 'Bill':
           final list = await isar.collection<Bill>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'AppNotification':
+          final list = await isar.collection<AppNotification>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'WidgetPreference':
+          final list = await isar.collection<WidgetPreference>().where().findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }

@@ -14,6 +14,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/kuber_date_range_selector.dart';
+import '../../analytics/providers/analytics_provider.dart' show FilterType;
 
 class AdvancedFilterScreen extends ConsumerStatefulWidget {
   const AdvancedFilterScreen({super.key});
@@ -88,36 +90,31 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
   }
 
   Future<void> _selectDateRange() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      initialDateRange: _localFilter.from != null && _localFilter.to != null
-          ? DateTimeRange(start: _localFilter.from!, end: _localFilter.to!)
-          : null,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary,
-              onPrimary: Theme.of(context).colorScheme.onPrimary,
-              surface: Theme.of(context).colorScheme.surface,
-              onSurface: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final initFrom = _localFilter.from ?? today;
+    final initTo = _localFilter.to ?? today;
 
-    if (picked != null) {
-      setState(() {
-        _localFilter = _localFilter.copyWith(
-          from: picked.start,
-          to: picked.end,
-        );
-      });
-    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => KuberDateRangeSelector(
+          primaryButtonLabel: 'Select Range',
+          initialType: FilterType.custom,
+          initialFrom: initFrom,
+          initialTo: initTo,
+          onApply: (result) {
+            if (!mounted) return;
+            setState(() {
+              _localFilter = _localFilter.copyWith(
+                from: result.from,
+                to: result.to,
+              );
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
