@@ -150,20 +150,20 @@ class _HraCalculatorScreenState extends ConsumerState<HraCalculatorScreen> {
                           ),
                           const SizedBox(height: KuberSpacing.lg),
                           ToolStatRow(
-                            label: 'Rule 1 — HRA Received',
+                            label: 'Rule 1: HRA Received',
                             value: formatter.formatCurrency(result.rule1,
                                 symbol: currency.symbol),
                           ),
                           const SizedBox(height: KuberSpacing.sm),
                           ToolStatRow(
-                            label: 'Rule 2 — Rent − 10% Basic',
+                            label: 'Rule 2: Rent − 10% Basic',
                             value: formatter.formatCurrency(result.rule2,
                                 symbol: currency.symbol),
                           ),
                           const SizedBox(height: KuberSpacing.sm),
                           ToolStatRow(
                             label:
-                                'Rule 3 — ${_cityIndex == 0 ? '50' : '40'}% of Basic',
+                                'Rule 3: ${_cityIndex == 0 ? '50' : '40'}% of Basic',
                             value: formatter.formatCurrency(result.rule3,
                                 symbol: currency.symbol),
                           ),

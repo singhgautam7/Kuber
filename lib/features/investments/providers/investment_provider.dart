@@ -60,7 +60,7 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
 
     // Create initial contribution if amount > 0
     if (initialAmount > 0 && accountId != null) {
-      final txnName = 'Contribution — ${name.trim()}';
+      final txnName = 'Contribution - ${name.trim()}';
       final txn = Transaction()
         ..name = txnName
         ..nameLower = txnName.toLowerCase()
@@ -125,7 +125,7 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
     required String accountId,
     String? note,
   }) async {
-    final txnName = 'Contribution — ${investment.name}';
+    final txnName = 'Contribution - ${investment.name}';
     final txn = Transaction()
       ..name = txnName
       ..nameLower = txnName.toLowerCase()

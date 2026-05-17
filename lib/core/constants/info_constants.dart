@@ -248,7 +248,7 @@ class InfoConstants {
         icon: Icons.percent_rounded,
         title: 'Annual Rate',
         description:
-            'Enter yearly interest rate — monthly rate is calculated automatically.',
+            'Enter yearly interest rate; the monthly rate is calculated automatically.',
       ),
       KuberInfoItem(
         icon: Icons.calendar_month_outlined,
@@ -266,7 +266,7 @@ class InfoConstants {
         icon: Icons.trending_up_rounded,
         title: 'SIP (Monthly)',
         description:
-            'Systematic Investment Plan — invest a fixed amount each month.',
+            'Systematic Investment Plan (SIP): Invest a fixed amount each month.',
       ),
       KuberInfoItem(
         icon: Icons.payments_outlined,

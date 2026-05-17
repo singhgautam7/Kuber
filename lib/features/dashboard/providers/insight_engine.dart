@@ -495,7 +495,7 @@ class InsightEngine {
       return [
         KuberInsight(
           type: InsightType.savingsTrend,
-          message: 'You\'re saving money this month — keep it up!',
+          message: 'You\'re saving money this month. Keep it up!',
           emoji: '🎯',
           confidence: 0.7,
           isPositive: true,
@@ -671,7 +671,7 @@ class InsightEngine {
       KuberInsight(
         type: InsightType.spendingHighToday,
         message:
-            "You've spent $amountStr today — $diffStr above your 30-day daily average of $medStr",
+            "You've spent $amountStr today, which is $diffStr above your 30-day daily average of $medStr",
         confidence: (todayTotal / (dailyMedian * 2)).clamp(0.5, 1.0),
         isPositive: false,
         iconData: icon,
@@ -741,7 +741,7 @@ class InsightEngine {
       KuberInsight(
         type: InsightType.spendingFasterThisWeek,
         message:
-            "You're spending $weekStr/day this week — $diffStr faster than your usual $baseStr/day",
+            "You're spending $weekStr/day this week, which is $diffStr faster than your usual $baseStr/day",
         confidence: (thisWeekDaily / (baselineDaily * 1.3)).clamp(0.5, 0.9),
         isPositive: false,
         iconData: icon,

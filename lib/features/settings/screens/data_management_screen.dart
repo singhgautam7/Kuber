@@ -125,7 +125,7 @@ class DataManagementScreen extends ConsumerWidget {
         icon: Icons.delete_forever_rounded,
         title: 'Clear All Data?',
         description:
-            'This will permanently delete ALL data — transactions, accounts, categories, tags, budgets, recurring rules, and suggestions. This action cannot be undone.',
+            'This will permanently delete ALL data, including transactions, accounts, categories, tags, budgets, recurring rules, and suggestions. This action cannot be undone.',
         confirmLabel: 'Clear All Data',
         destructive: true,
         onConfirm: () => ref.read(dataControllerProvider.notifier).clearAllData(),

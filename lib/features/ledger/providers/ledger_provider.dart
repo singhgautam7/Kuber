@@ -150,7 +150,7 @@ class LedgerListNotifier extends AsyncNotifier<List<Ledger>> {
     required String accountId,
     DateTime? date,
   }) async {
-    final txnName = 'Payment — ${ledger.personName}';
+    final txnName = 'Payment - ${ledger.personName}';
     // Lent: money coming back = income. Borrowed: money going out = expense.
     final txnType = ledger.type == 'lent' ? 'income' : 'expense';
 

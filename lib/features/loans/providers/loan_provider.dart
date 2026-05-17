@@ -111,7 +111,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
     required DateTime date,
     String? accountId,
   }) async {
-    final txnName = 'EMI — ${loan.name}';
+    final txnName = 'EMI - ${loan.name}';
     final txn = Transaction()
       ..name = txnName
       ..nameLower = txnName.toLowerCase()
@@ -135,7 +135,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
     String? accountId,
     String? note,
   }) async {
-    final txnName = 'Extra Payment — ${loan.name}';
+    final txnName = 'Extra Payment - ${loan.name}';
     final txn = Transaction()
       ..name = txnName
       ..nameLower = txnName.toLowerCase()
@@ -159,7 +159,7 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
     required DateTime date,
     String? accountId,
   }) async {
-    final txnName = 'Loan Closure — ${loan.name}';
+    final txnName = 'Loan Closure - ${loan.name}';
     final txn = Transaction()
       ..name = txnName
       ..nameLower = txnName.toLowerCase()

@@ -53,10 +53,10 @@ class LedgerReminderProcessor {
       final title = isLent ? 'Money to collect' : 'Money to repay';
       final daysOverdue = today.difference(expectedDay).inDays;
       final body = daysOverdue == 0
-          ? '${l.personName} — due today'
+          ? '${l.personName} - due today'
           : daysOverdue == 1
-              ? '${l.personName} — 1 day overdue'
-              : '${l.personName} — $daysOverdue days overdue';
+              ? '${l.personName} - 1 day overdue'
+              : '${l.personName} - $daysOverdue days overdue';
 
       final payload = 'ledger:${l.uid}';
       final inserted = await notificationRepo.add(

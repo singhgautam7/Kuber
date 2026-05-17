@@ -80,7 +80,7 @@ class RecurringProcessor {
             title: created == 1
                 ? 'New recurring transaction'
                 : '$created recurring transactions added',
-            body: '${rule.name} — added while you were away',
+            body: '${rule.name} - added while you were away',
             payload: 'recurring:${rule.id}',
           );
         }
@@ -145,7 +145,7 @@ class RecurringProcessor {
 
       if (existing.isNotEmpty) continue;
 
-      final txnName = 'EMI — ${loan.name}';
+      final txnName = 'EMI - ${loan.name}';
       late Transaction t;
       await isar.writeTxn(() async {
         t = Transaction()
@@ -166,7 +166,7 @@ class RecurringProcessor {
       await notificationRepo.add(
         type: NotificationType.loanEmi,
         title: 'Loan EMI deducted',
-        body: '${loan.name} — EMI added to your transactions',
+        body: '${loan.name} - EMI added to your transactions',
         payload: 'loan:${loan.uid}',
       );
       created++;
@@ -206,7 +206,7 @@ class RecurringProcessor {
 
       if (existing.isNotEmpty) continue;
 
-      final txnName = 'Contribution — ${inv.name}';
+      final txnName = 'Contribution - ${inv.name}';
       late Transaction t;
       await isar.writeTxn(() async {
         t = Transaction()
@@ -229,7 +229,7 @@ class RecurringProcessor {
       await notificationRepo.add(
         type: NotificationType.recurringTransaction,
         title: 'Investment contribution added',
-        body: '${inv.name} — SIP contribution recorded',
+        body: '${inv.name} - SIP contribution recorded',
         payload: 'investment:${inv.uid}',
       );
       created++;
