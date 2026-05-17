@@ -12,7 +12,6 @@ import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
-import '../../../core/utils/formatters.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/loan.dart';
 import '../providers/loan_provider.dart';

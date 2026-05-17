@@ -324,46 +324,48 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                                   ),
                                 ),
                                 Expanded(
-                                  // clipBehavior: Clip.none lets the tooltip
-                                  // overlay (which extends above the bar)
-                                  // render outside the scroll viewport's
-                                  // vertical bounds.
-                                  child: SingleChildScrollView(
-                                    controller: _scrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    clipBehavior: Clip.none,
-                                    child: SizedBox(
-                                      width: plotWidth,
-                                      child: Stack(
-                                        clipBehavior: Clip.none,
-                                        children: [
-                                          _chartType == KuberChartType.bar
-                                              ? _buildBarChart(
-                                                  plotConstraints,
-                                                  cs,
-                                                  showLeftTitles: false,
-                                                )
-                                              : _buildLineChart(
-                                                  cs,
-                                                  showLeftTitles: false,
-                                                ),
-                                          if (_touchedIndex >= 0 &&
-                                              _touchedIndex <
-                                                  widget.buckets.length)
-                                            _TooltipOverlay(
-                                              bucket: widget
-                                                  .buckets[_touchedIndex],
-                                              touchedIndex: _touchedIndex,
-                                              totalBuckets:
-                                                  widget.buckets.length,
-                                              maxWidth: plotWidth,
-                                              chartHeight:
-                                                  constraints.maxHeight,
-                                              maxY: _maxY,
-                                              slide: _detailSlide,
-                                              fade: _detailFade,
-                                            ),
-                                        ],
+                                  // We use a custom clipper to clip the bars horizontally (so they don't paint
+                                  // over the Y-axis or right padding) but leave them unclipped vertically
+                                  // so the tooltip overlay can extend above the chart bounds.
+                                  child: ClipRect(
+                                    clipper: const _HorizontalClipper(),
+                                    child: SingleChildScrollView(
+                                      controller: _scrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      clipBehavior: Clip.none,
+                                      child: SizedBox(
+                                        width: plotWidth,
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            _chartType == KuberChartType.bar
+                                                ? _buildBarChart(
+                                                    plotConstraints,
+                                                    cs,
+                                                    showLeftTitles: false,
+                                                  )
+                                                : _buildLineChart(
+                                                    cs,
+                                                    showLeftTitles: false,
+                                                  ),
+                                            if (_touchedIndex >= 0 &&
+                                                _touchedIndex <
+                                                    widget.buckets.length)
+                                              _TooltipOverlay(
+                                                bucket: widget
+                                                    .buckets[_touchedIndex],
+                                                touchedIndex: _touchedIndex,
+                                                totalBuckets:
+                                                    widget.buckets.length,
+                                                maxWidth: plotWidth,
+                                                chartHeight:
+                                                    constraints.maxHeight,
+                                                maxY: _maxY,
+                                                slide: _detailSlide,
+                                                fade: _detailFade,
+                                              ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1239,3 +1241,16 @@ class _BucketDropdown extends StatelessWidget {
     );
   }
 }
+
+class _HorizontalClipper extends CustomClipper<Rect> {
+  const _HorizontalClipper();
+
+  @override
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, -2000, size.width, size.height + 2000);
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
+}
+
