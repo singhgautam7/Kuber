@@ -62,37 +62,8 @@ class AboutScreen extends ConsumerWidget {
                 _DeveloperLetter(userName: userName),
                 const SizedBox(height: KuberSpacing.xxl),
 
-                // Why Kuber
-                _AboutCard(
-                  title: "Why Kuber?",
-                  child: Column(
-                    children: [
-                      const _BulletPoint(
-                        icon: Icons.bolt_rounded,
-                        title: "Fast transaction entry",
-                        subtitle: "Log expenses in under 3 seconds.",
-                      ),
-                      const SizedBox(height: KuberSpacing.lg),
-                      const _BulletPoint(
-                        icon: Icons.auto_awesome_mosaic_rounded,
-                        title: "Minimal design",
-                        subtitle: "Focus on your data, not the interface.",
-                      ),
-                      const SizedBox(height: KuberSpacing.lg),
-                      const _BulletPoint(
-                        icon: Icons.cloud_off_rounded,
-                        title: "Works offline",
-                        subtitle: "Full functionality without an active connection.",
-                      ),
-                      const SizedBox(height: KuberSpacing.lg),
-                      const _BulletPoint(
-                        icon: Icons.repeat_rounded,
-                        title: "Built for consistency",
-                        subtitle: "Reliable tools for long-term habits.",
-                      ),
-                    ],
-                  ),
-                ),
+                // Why Kuber — visual feature grid (no _AboutCard wrapper)
+                const _WhyKuberSection(),
                 const SizedBox(height: KuberSpacing.xl),
 
                 // What is Kuber
@@ -279,12 +250,69 @@ class _AboutCard extends StatelessWidget {
   }
 }
 
-class _BulletPoint extends StatelessWidget {
+class _WhyKuberSection extends StatelessWidget {
+  const _WhyKuberSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 14),
+          child: Text(
+            'WHY KUBER?',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: cs.primary,
+            ),
+          ),
+        ),
+        GridView.count(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: 0.95,
+          children: const [
+            _WhyKuberFeatureTile(
+              icon: Icons.bolt_rounded,
+              title: "Fast transaction entry",
+              subtitle: "Log expenses in under 3 seconds.",
+            ),
+            _WhyKuberFeatureTile(
+              icon: Icons.auto_awesome_mosaic_rounded,
+              title: "Minimal design",
+              subtitle: "Focus on your data, not the interface.",
+            ),
+            _WhyKuberFeatureTile(
+              icon: Icons.cloud_off_rounded,
+              title: "Works offline",
+              subtitle: "Full functionality without an active connection.",
+            ),
+            _WhyKuberFeatureTile(
+              icon: Icons.repeat_rounded,
+              title: "Built for consistency",
+              subtitle: "Reliable tools for long-term habits.",
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _WhyKuberFeatureTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
 
-  const _BulletPoint({
+  const _WhyKuberFeatureTile({
     required this.icon,
     required this.title,
     required this.subtitle,
@@ -293,36 +321,89 @@ class _BulletPoint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 20, color: cs.primary),
-        const SizedBox(width: KuberSpacing.md),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outline),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // Top-aligned gradient overlay
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 64,
+            child: IgnorePointer(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      cs.primary.withValues(alpha: 0.08),
+                      Colors.transparent,
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: cs.onSurfaceVariant,
-                  height: 1.4,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon Disc
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.20),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                    height: 1.25,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Expanded(
+                  child: Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.5,
+                      color: cs.onSurfaceVariant,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -454,116 +535,141 @@ class _DeveloperLetter extends StatelessWidget {
                 // Signature Card
                 Material(
                   color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: () {
-                      final uri = Uri.parse("https://singhgautam.com");
-                      launchUrl(uri);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: cs.surface,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: cs.outline),
-                      ),
-                      child: Row(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: cs.outline),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () {
+                        final uri = Uri.parse("https://singhgautam.com");
+                        launchUrl(uri);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Avatar Disc
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  cs.primary,
-                                  cs.primary.withValues(alpha: 0.67),
-                                ],
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              "GS",
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Signature Column
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                          // Top Row
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            child: Row(
                               children: [
-                                Text(
-                                  "SIGNED",
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurfaceVariant,
-                                    letterSpacing: 0.4,
+                                // Avatar Disc
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        cs.primary,
+                                        cs.primary.withValues(alpha: 0.67),
+                                      ],
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "GS",
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      letterSpacing: -0.5,
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      "Gautam",
-                                      style: GoogleFonts.playfairDisplay(
-                                        fontStyle: FontStyle.italic,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w700,
-                                        color: cs.onSurface,
-                                        letterSpacing: -0.3,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor: cs.primary.withValues(alpha: 0.44),
-                                        decorationStyle: TextDecorationStyle.solid,
+                                const SizedBox(width: 12),
+                                // Signature Column
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        "SIGNED",
+                                        style: GoogleFonts.inter(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurfaceVariant,
+                                          letterSpacing: 0.4,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Icon(
-                                      Icons.arrow_outward_rounded,
-                                      size: 14,
-                                      color: cs.primary,
-                                    ),
-                                  ],
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              "Gautam",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.playfairDisplay(
+                                                fontStyle: FontStyle.italic,
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w700,
+                                                color: cs.onSurface,
+                                                letterSpacing: -0.3,
+                                                decoration: TextDecoration.underline,
+                                                decorationColor: cs.primary.withValues(alpha: 0.44),
+                                                decorationStyle: TextDecorationStyle.solid,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          // Icon(
+                                          //   Icons.arrow_outward_rounded,
+                                          //   size: 14,
+                                          //   color: cs.primary,
+                                          // ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          // URL chip
+                          // Separator Border
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh,
-                              border: Border.all(color: cs.outline),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
+                            height: 1,
+                            color: cs.outline,
+                          ),
+                          // URL Footer Row
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            color: cs.surfaceContainerHigh,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "singhgautam",
+                                  "singhgautam.com",
                                   style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 11,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
                                     color: cs.onSurfaceVariant,
+                                    letterSpacing: 0.1,
                                   ),
                                 ),
-                                Text(
-                                  ".com",
-                                  style: GoogleFonts.jetBrainsMono(
-                                    fontSize: 11,
-                                    color: cs.onSurfaceVariant,
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "VISIT",
+                                      style: GoogleFonts.inter(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: cs.primary,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.arrow_outward_rounded,
+                                      size: 12,
+                                      color: cs.primary,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
