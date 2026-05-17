@@ -26,34 +26,34 @@ class AboutScreen extends ConsumerWidget {
             child: KuberAppBar(showBack: true, showHome: true, title: ''),
           ),
           // Header section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'About\nKuber',
-                    style: GoogleFonts.inter(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      height: 1.15,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Learn more about the vision, the origin, and the person behind the app.',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // SliverToBoxAdapter(
+          //   child: Padding(
+          //     padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          //     child: Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: [
+          //         Text(
+          //           'About Kuber',
+          //           style: GoogleFonts.inter(
+          //             fontSize: 32,
+          //             fontWeight: FontWeight.w800,
+          //             color: cs.onSurface,
+          //             height: 1.15,
+          //             letterSpacing: -0.5,
+          //           ),
+          //         ),
+          //         const SizedBox(height: 6),
+          //         Text(
+          //           'Learn more about the vision, the origin, and the person behind the app.',
+          //           style: GoogleFonts.inter(
+          //             fontSize: 13,
+          //             color: cs.onSurfaceVariant,
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
