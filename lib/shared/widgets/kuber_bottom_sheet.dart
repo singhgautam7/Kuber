@@ -38,7 +38,9 @@ class KuberBottomSheet extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: const BorderRadius.vertical(
@@ -121,8 +123,7 @@ class KuberBottomSheet extends StatelessWidget {
                       child: SizedBox.square(
                         dimension: 40,
                         child: IconButton(
-                          onPressed: () =>
-                              Navigator.of(context, rootNavigator: true).pop(),
+                          onPressed: () => Navigator.of(context).pop(),
                           icon: const Icon(Icons.close_rounded, size: 20),
                           padding: EdgeInsets.zero,
                           alignment: Alignment.center,

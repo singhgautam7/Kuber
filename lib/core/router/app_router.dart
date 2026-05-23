@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
@@ -59,7 +58,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
 import '../../features/splash/screens/splash_screen.dart';
-import '../../features/history/providers/selection_provider.dart';
 import '../../features/tools/tools_hub_screen.dart';
 import '../../features/tools/currency_converter/currency_converter_screen.dart';
 import '../../features/tools/emi_calculator/emi_calculator_screen.dart';
@@ -82,6 +80,12 @@ final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
 final _shellHistoryKey = GlobalKey<NavigatorState>(debugLabel: 'history');
 final _shellAnalyticsKey = GlobalKey<NavigatorState>(debugLabel: 'analytics');
 final _shellMoreKey = GlobalKey<NavigatorState>(debugLabel: 'more');
+final shellNavigatorKeys = [
+  _shellDashboardKey,
+  _shellHistoryKey,
+  _shellAnalyticsKey,
+  _shellMoreKey,
+];
 
 /// A [Listenable] that notifies when a [Stream] emits a value.
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -257,10 +261,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const _RootTabBackScope(
-                  tabIndex: 0,
-                  child: DashboardScreen(),
-                ),
+                builder: (context, state) => const DashboardScreen(),
               ),
             ],
           ),
@@ -269,10 +270,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/history',
-                builder: (context, state) => const _RootTabBackScope(
-                  tabIndex: 1,
-                  child: HistoryScreen(),
-                ),
+                builder: (context, state) => const HistoryScreen(),
               ),
             ],
           ),
@@ -281,10 +279,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/analytics',
-                builder: (context, state) => const _RootTabBackScope(
-                  tabIndex: 2,
-                  child: AnalyticsScreen(),
-                ),
+                builder: (context, state) => const AnalyticsScreen(),
               ),
             ],
           ),
@@ -293,8 +288,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/more',
-                builder: (context, state) =>
-                    const _RootTabBackScope(tabIndex: 3, child: MoreScreen()),
+                builder: (context, state) => const MoreScreen(),
                 routes: [
                   GoRoute(
                     path: 'accounts',
@@ -546,35 +540,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-class _RootTabBackScope extends ConsumerWidget {
-  final int tabIndex;
-  final Widget child;
-
-  const _RootTabBackScope({required this.tabIndex, required this.child});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSelectionMode = ref.watch(isSelectionModeProvider);
-
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-
-        if (tabIndex == 1 && isSelectionMode) {
-          ref.read(transactionSelectionProvider.notifier).clear();
-          return;
-        }
-
-        if (tabIndex == 0) {
-          SystemNavigator.pop();
-          return;
-        }
-
-        context.go('/');
-      },
-      child: child,
-    );
-  }
-}

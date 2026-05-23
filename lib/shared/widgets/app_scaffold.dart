@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
-import '../../features/settings/providers/settings_provider.dart' show settingsProvider, SwipeMode, NavBarStyle;
+import '../../features/settings/providers/settings_provider.dart'
+    show settingsProvider, SwipeMode, NavBarStyle;
 import '../../features/history/providers/selection_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
+
+final currentShellTabIndexProvider = StateProvider<int>((ref) => 0);
 
 class AppScaffold extends ConsumerStatefulWidget {
   final StatefulNavigationShell? navigationShell;
@@ -37,8 +39,9 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   @override
   void initState() {
     super.initState();
-    _pageController =
-        PageController(initialPage: widget.navigationShell?.currentIndex ?? 0);
+    _pageController = PageController(
+      initialPage: widget.navigationShell?.currentIndex ?? 0,
+    );
     _dialController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
@@ -69,6 +72,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     }
     if (widget.navigationShell!.currentIndex !=
         oldWidget.navigationShell!.currentIndex) {
+      ref.read(currentShellTabIndexProvider.notifier).state =
+          widget.navigationShell!.currentIndex;
       if (_pageController.hasClients &&
           _pageController.page?.round() !=
               widget.navigationShell!.currentIndex) {
@@ -83,13 +88,15 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
           _pageController.jumpToPage(jumpTo);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
-            _pageController.animateToPage(
-              targetIndex,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            ).then((_) {
-              _isAnimatingProgrammatically = false;
-            });
+            _pageController
+                .animateToPage(
+                  targetIndex,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                )
+                .then((_) {
+                  _isAnimatingProgrammatically = false;
+                });
           });
         } else {
           _pageController.animateToPage(
@@ -108,6 +115,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (_showSpeedDial) _closeSpeedDial();
 
     ref.read(transactionSelectionProvider.notifier).clear();
+    ref.read(currentShellTabIndexProvider.notifier).state = index;
 
     widget.navigationShell!.goBranch(
       index,
@@ -122,13 +130,15 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         _pageController.jumpToPage(jumpTo);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          ).then((_) {
-            _isAnimatingProgrammatically = false;
-          });
+          _pageController
+              .animateToPage(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              )
+              .then((_) {
+                _isAnimatingProgrammatically = false;
+              });
         });
       } else {
         _pageController.animateToPage(
@@ -145,6 +155,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
     ref.read(transactionSelectionProvider.notifier).clear();
+    ref.read(currentShellTabIndexProvider.notifier).state = index;
     widget.navigationShell!.goBranch(index);
   }
 
@@ -175,6 +186,12 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     final currentIndex = widget.navigationShell!.currentIndex;
+    if (ref.read(currentShellTabIndexProvider) != currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(currentShellTabIndexProvider.notifier).state = currentIndex;
+      });
+    }
 
     final isSelectionMode = ref.watch(isSelectionModeProvider);
     final width = MediaQuery.of(context).size.width;
@@ -298,32 +315,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       );
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) {
-        if (didPop) return;
-        final currentIndex = widget.navigationShell?.currentIndex ?? 0;
-        final isSelectionMode = ref.read(isSelectionModeProvider);
-
-        if (_showSpeedDial) {
-          _closeSpeedDial();
-          return;
-        }
-
-        if (isSelectionMode) {
-          ref.read(transactionSelectionProvider.notifier).clear();
-          return;
-        }
-
-        if (currentIndex != 0) {
-          _onTabTapped(0);
-          return;
-        }
-
-        SystemNavigator.pop();
-      },
-      child: content,
-    );
+    return content;
   }
 }
 
@@ -404,10 +396,7 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(KuberRadius.xl),
-                        border: Border.all(
-                          color: cs.outlineVariant,
-                          width: 1,
-                        ),
+                        border: Border.all(color: cs.outlineVariant, width: 1),
                       ),
                       child: Row(
                         children: List.generate(kuberNavItems.length, (i) {
@@ -462,10 +451,7 @@ class _KuberAnimatedNavBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  const _KuberAnimatedNavBar({
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const _KuberAnimatedNavBar({required this.currentIndex, required this.onTap});
 
   @override
   State<_KuberAnimatedNavBar> createState() => _KuberAnimatedNavBarState();
@@ -482,7 +468,9 @@ class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        border: Border(top: BorderSide(color: cs.outline.withValues(alpha: 0.4))),
+        border: Border(
+          top: BorderSide(color: cs.outline.withValues(alpha: 0.4)),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -546,9 +534,10 @@ class _NavBarItemState extends State<_NavBarItem>
       duration: widget.animDuration,
       value: widget.isSelected ? 1.0 : 0.0,
     );
-    _scaleAnim = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
-    );
+    _scaleAnim = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -620,7 +609,9 @@ class _NavBarItemState extends State<_NavBarItem>
                   width: 56,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: widget.cs.primaryContainer.withValues(alpha: t * 0.1),
+                    color: widget.cs.primaryContainer.withValues(
+                      alpha: t * 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(KuberRadius.lg),
                   ),
                   alignment: Alignment.center,
@@ -632,7 +623,9 @@ class _NavBarItemState extends State<_NavBarItem>
                 duration: widget.animDuration,
                 style: widget.tt.labelSmall!.copyWith(
                   fontSize: 11,
-                  fontWeight: widget.isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: widget.isSelected
+                      ? FontWeight.w700
+                      : FontWeight.w500,
                   color: widget.isSelected ? selectedColor : unselectedColor,
                 ),
                 child: Text(widget.item.label),
@@ -739,8 +732,10 @@ class _SpeedDialMenu extends AnimatedWidget {
   }) {
     final cs = Theme.of(context).colorScheme;
     final delay = (index * 0.15).clamp(0.0, 0.5);
-    final progress =
-        ((_progress.value - delay) / (1.0 - delay)).clamp(0.0, 1.0);
+    final progress = ((_progress.value - delay) / (1.0 - delay)).clamp(
+      0.0,
+      1.0,
+    );
 
     return Opacity(
       opacity: progress,
