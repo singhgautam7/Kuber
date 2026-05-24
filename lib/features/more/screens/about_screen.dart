@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../dev/widgets/version_tap_detector.dart';
+import '../widgets/about_sections.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -25,6 +26,7 @@ class AboutScreen extends ConsumerWidget {
           const SliverToBoxAdapter(
             child: KuberAppBar(showBack: true, showHome: true, title: ''),
           ),
+
           // Header section
           // SliverToBoxAdapter(
           //   child: Padding(
@@ -54,7 +56,6 @@ class AboutScreen extends ConsumerWidget {
           //     ),
           //   ),
           // ),
-
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
             sliver: SliverList(
@@ -67,33 +68,11 @@ class AboutScreen extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // What is Kuber
-                _AboutCard(
-                  title: "What is Kuber?",
-                  child: Text(
-                    "Kuber is a simple and fast expense tracking app designed to help you stay consistent with your finances without unnecessary complexity.",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: cs.onSurface,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
+                const AboutWhatIsKuberSection(),
                 const SizedBox(height: KuberSpacing.xl),
 
                 // Meaning Section
-                _AboutCard(
-                  title: "What does 'Kuber' mean?",
-                  child: Text(
-                    "Kuber (or Kubera) is known in Indian mythology as the guardian of wealth and prosperity.\n\n"
-                    "He represents not just riches, but the responsibility of managing wealth wisely.\n\n"
-                    "Kuber is not about having more. It's about being aware of what you have.",
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: cs.onSurface,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
+                const AboutKuberMeaningSection(),
                 const SizedBox(height: KuberSpacing.xl),
 
                 // App Info Section
@@ -115,7 +94,9 @@ class AboutScreen extends ConsumerWidget {
                             ),
                             Consumer(
                               builder: (context, ref, _) {
-                                final version = ref.watch(appVersionProvider).valueOrNull ?? '1.1.0';
+                                final version =
+                                    ref.watch(appVersionProvider).valueOrNull ??
+                                    '1.1.0';
                                 return Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
@@ -124,7 +105,9 @@ class AboutScreen extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     color: cs.surfaceContainerHigh,
                                     borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(color: cs.outlineVariant),
+                                    border: Border.all(
+                                      color: cs.outlineVariant,
+                                    ),
                                   ),
                                   child: Text(
                                     "v$version",
@@ -144,14 +127,21 @@ class AboutScreen extends ConsumerWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: cs.surfaceContainerLow.withValues(alpha: 0.5),
+                            color: cs.surfaceContainerLow.withValues(
+                              alpha: 0.5,
+                            ),
                             borderRadius: BorderRadius.circular(KuberRadius.sm),
-                            border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
+                            border: Border.all(
+                              color: cs.outline.withValues(alpha: 0.1),
+                            ),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.lock_outline_rounded,
-                                  size: 14, color: cs.primary),
+                              Icon(
+                                Icons.lock_outline_rounded,
+                                size: 14,
+                                color: cs.primary,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -214,8 +204,7 @@ class AboutScreen extends ConsumerWidget {
 
 class _AboutCard extends StatelessWidget {
   final Widget child;
-  final String? title;
-  const _AboutCard({required this.child, this.title});
+  const _AboutCard({required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -230,21 +219,7 @@ class _AboutCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (title != null) ...[
-            Text(
-              title!.toUpperCase(),
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
-                color: cs.primary,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.lg),
-          ],
-          child,
-        ],
+        children: [child],
       ),
     );
   }
@@ -369,11 +344,7 @@ class _WhyKuberFeatureTile extends StatelessWidget {
                     ),
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
-                    icon,
-                    size: 20,
-                    color: cs.primary,
-                  ),
+                  child: Icon(icon, size: 20, color: cs.primary),
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -511,22 +482,30 @@ class _DeveloperLetter extends StatelessWidget {
                   TextSpan(
                     style: textStyleRegular,
                     children: [
-                      TextSpan(text: "Hey $name,\n\n", style: textStyleSemiBold),
-                      const TextSpan(
-                        text: "First of all, thank you for installing Kuber.\n\n"
-                              "Finance is one of the hardest things to stay consistent with.\n"
-                              "I realized this quite late myself how important it is to simply track where your money goes.\n"
-                              "Honestly, just building the habit already puts you ahead of most people.\n\n"
-                              "I tried many apps, but none of them truly fit my needs.\n"
-                              "Some were too complex, some too slow, some were too fancy to be an expense manager, and some just didn't feel right for everyday use.\n\n",
+                      TextSpan(
+                        text: "Hey $name,\n\n",
+                        style: textStyleSemiBold,
                       ),
-                      TextSpan(text: "So I decided to build one.\n\n", style: textStyleSemiBold),
                       const TextSpan(
-                        text: "Kuber is designed to be simple, fast, and focused - something you can open, log a transaction in seconds, and move on with your day.\n"
-                              "No clutter, no friction. Just clarity.\n\n"
-                              "This is my small attempt to make personal finance easier for you.\n\n"
-                              "Use it consistently, track every little transaction, and over time, you'll see the difference it makes.\n\n"
-                              "Thank you for trusting on something I built with a lot of thoughts and care.",
+                        text:
+                            "First of all, thank you for installing Kuber.\n\n"
+                            "Finance is one of the hardest things to stay consistent with.\n"
+                            "I realized this quite late myself how important it is to simply track where your money goes.\n"
+                            "Honestly, just building the habit already puts you ahead of most people.\n\n"
+                            "I tried many apps, but none of them truly fit my needs.\n"
+                            "Some were too complex, some too slow, some were too fancy to be an expense manager, and some just didn't feel right for everyday use.\n\n",
+                      ),
+                      TextSpan(
+                        text: "So I decided to build one.\n\n",
+                        style: textStyleSemiBold,
+                      ),
+                      const TextSpan(
+                        text:
+                            "Kuber is designed to be simple, fast, and focused - something you can open, log a transaction in seconds, and move on with your day.\n"
+                            "No clutter, no friction. Just clarity.\n\n"
+                            "This is my small attempt to make personal finance easier for you.\n\n"
+                            "Use it consistently, track every little transaction, and over time, you'll see the difference it makes.\n\n"
+                            "Thank you for trusting on something I built with a lot of thoughts and care.",
                       ),
                     ],
                   ),
@@ -552,7 +531,10 @@ class _DeveloperLetter extends StatelessWidget {
                         children: [
                           // Top Row
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
                             child: Row(
                               children: [
                                 // Avatar Disc
@@ -585,7 +567,8 @@ class _DeveloperLetter extends StatelessWidget {
                                 // Signature Column
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
@@ -604,16 +587,23 @@ class _DeveloperLetter extends StatelessWidget {
                                             child: Text(
                                               "Gautam",
                                               overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.playfairDisplay(
-                                                fontStyle: FontStyle.italic,
-                                                fontSize: 22,
-                                                fontWeight: FontWeight.w700,
-                                                color: cs.onSurface,
-                                                letterSpacing: -0.3,
-                                                decoration: TextDecoration.underline,
-                                                decorationColor: cs.primary.withValues(alpha: 0.44),
-                                                decorationStyle: TextDecorationStyle.solid,
-                                              ),
+                                              style:
+                                                  GoogleFonts.playfairDisplay(
+                                                    fontStyle: FontStyle.italic,
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: cs.onSurface,
+                                                    letterSpacing: -0.3,
+                                                    decoration: TextDecoration
+                                                        .underline,
+                                                    decorationColor: cs.primary
+                                                        .withValues(
+                                                          alpha: 0.44,
+                                                        ),
+                                                    decorationStyle:
+                                                        TextDecorationStyle
+                                                            .solid,
+                                                  ),
                                             ),
                                           ),
                                           const SizedBox(width: 6),
@@ -631,13 +621,13 @@ class _DeveloperLetter extends StatelessWidget {
                             ),
                           ),
                           // Separator Border
-                          Container(
-                            height: 1,
-                            color: cs.outline,
-                          ),
+                          Container(height: 1, color: cs.outline),
                           // URL Footer Row
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                             color: cs.surfaceContainerHigh,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -720,11 +710,7 @@ class _FeedbackTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: cs.outline),
               ),
-              child: Icon(
-                icon,
-                size: 18,
-                color: cs.primary,
-              ),
+              child: Icon(icon, size: 18, color: cs.primary),
             ),
             const SizedBox(width: 12),
             // Text Column
@@ -805,7 +791,9 @@ class _FeedbackCard extends StatelessWidget {
             subtitle: "Help others discover the app",
             onTap: () {
               launchUrl(
-                Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
+                Uri.parse(
+                  'https://play.google.com/store/apps/details?id=com.grs.kuber',
+                ),
                 mode: LaunchMode.externalApplication,
               );
             },

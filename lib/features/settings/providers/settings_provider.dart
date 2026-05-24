@@ -20,8 +20,7 @@ final appVersionProvider = FutureProvider<String>((ref) async {
   return packageInfo.version;
 });
 
-final settingsProvider =
-    AsyncNotifierProvider<SettingsNotifier, SettingsState>(
+final settingsProvider = AsyncNotifierProvider<SettingsNotifier, SettingsState>(
   SettingsNotifier.new,
 );
 
@@ -41,7 +40,13 @@ final privacyModeProvider = Provider<bool>((ref) {
 });
 
 final navBarStyleProvider = Provider<NavBarStyle>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.navBarStyle ?? NavBarStyle.modern;
+  return ref.watch(settingsProvider).valueOrNull?.navBarStyle ??
+      NavBarStyle.modern;
+});
+
+final moreTabLayoutProvider = Provider<MoreTabLayout>((ref) {
+  return ref.watch(settingsProvider).valueOrNull?.moreTabLayout ??
+      MoreTabLayout.simple;
 });
 
 final thresholdFloorProvider = Provider<double>((ref) {
@@ -52,21 +57,13 @@ final thresholdCeilingProvider = Provider<double>((ref) {
   return ref.watch(settingsProvider).valueOrNull?.thresholdCeiling ?? 2000;
 });
 
-enum NumberSystem {
-  indian,
-  international,
-}
+enum NumberSystem { indian, international }
 
+enum SwipeMode { changeTabs, performActions }
 
-enum SwipeMode {
-  changeTabs,
-  performActions,
-}
+enum NavBarStyle { classic, modern }
 
-enum NavBarStyle {
-  classic,
-  modern,
-}
+enum MoreTabLayout { simple, modern }
 
 class SettingsState {
   final ThemeMode themeMode;
@@ -81,6 +78,7 @@ class SettingsState {
   final double thresholdFloor;
   final double thresholdCeiling;
   final NavBarStyle navBarStyle;
+  final MoreTabLayout moreTabLayout;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -95,6 +93,7 @@ class SettingsState {
     this.thresholdFloor = 500,
     this.thresholdCeiling = 2000,
     this.navBarStyle = NavBarStyle.classic,
+    this.moreTabLayout = MoreTabLayout.simple,
   });
 
   SettingsState copyWith({
@@ -109,6 +108,7 @@ class SettingsState {
     double? thresholdFloor,
     double? thresholdCeiling,
     NavBarStyle? navBarStyle,
+    MoreTabLayout? moreTabLayout,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -123,6 +123,7 @@ class SettingsState {
       thresholdFloor: thresholdFloor ?? this.thresholdFloor,
       thresholdCeiling: thresholdCeiling ?? this.thresholdCeiling,
       navBarStyle: navBarStyle ?? this.navBarStyle,
+      moreTabLayout: moreTabLayout ?? this.moreTabLayout,
     );
   }
 }
@@ -137,13 +138,18 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final dateFormat = prefs.getString('date_format') ?? 'dd/MM/yyyy';
     final userName = prefs.getString(PrefsKeys.userName) ?? '';
     final swipeModeIndex = prefs.getInt(PrefsKeys.swipeMode) ?? 0;
-    final biometricsEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
+    final biometricsEnabled =
+        prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
     final numberSystemIndex = prefs.getInt(PrefsKeys.numberSystem) ?? 0;
     final defaultAccountId = prefs.getString(PrefsKeys.defaultAccountId);
     final privacyMode = prefs.getBool(PrefsKeys.privacyMode) ?? false;
     final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
-    final thresholdCeiling = prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
-    final navBarStyleIndex = prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
+    final thresholdCeiling =
+        prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
+    final navBarStyleIndex =
+        prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
+    final moreTabLayoutIndex =
+        prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.simple.index;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -158,6 +164,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       thresholdFloor: thresholdFloor,
       thresholdCeiling: thresholdCeiling,
       navBarStyle: NavBarStyle.values[navBarStyleIndex],
+      moreTabLayout: MoreTabLayout.values[moreTabLayoutIndex],
     );
   }
 
@@ -169,24 +176,33 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       await prefs.setString(PrefsKeys.defaultAccountId, id);
     }
     final cur = state.requireValue;
-    state = AsyncData(SettingsState(
-      themeMode: cur.themeMode,
-      currency: cur.currency,
-      dateFormat: cur.dateFormat,
-      userName: cur.userName,
-      swipeMode: cur.swipeMode,
-      biometricsEnabled: cur.biometricsEnabled,
-      numberSystem: cur.numberSystem,
-      defaultAccountId: id,
-      privacyMode: cur.privacyMode,
-      navBarStyle: cur.navBarStyle,
-    ));
+    state = AsyncData(
+      SettingsState(
+        themeMode: cur.themeMode,
+        currency: cur.currency,
+        dateFormat: cur.dateFormat,
+        userName: cur.userName,
+        swipeMode: cur.swipeMode,
+        biometricsEnabled: cur.biometricsEnabled,
+        numberSystem: cur.numberSystem,
+        defaultAccountId: id,
+        privacyMode: cur.privacyMode,
+        navBarStyle: cur.navBarStyle,
+        moreTabLayout: cur.moreTabLayout,
+      ),
+    );
   }
 
   Future<void> setNavBarStyle(NavBarStyle style) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefsKeys.navBarStyle, style.index);
     state = AsyncData(state.requireValue.copyWith(navBarStyle: style));
+  }
+
+  Future<void> setMoreTabLayout(MoreTabLayout layout) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.moreTabLayout, layout.index);
+    state = AsyncData(state.requireValue.copyWith(moreTabLayout: layout));
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -229,10 +245,12 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(PrefsKeys.thresholdFloor, floor);
     await prefs.setDouble(PrefsKeys.thresholdCeiling, ceiling);
-    state = AsyncData(state.requireValue.copyWith(
-      thresholdFloor: floor,
-      thresholdCeiling: ceiling,
-    ));
+    state = AsyncData(
+      state.requireValue.copyWith(
+        thresholdFloor: floor,
+        thresholdCeiling: ceiling,
+      ),
+    );
   }
 
   Future<void> togglePrivacyMode() async {

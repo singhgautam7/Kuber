@@ -26,6 +26,70 @@ import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../settings/providers/info_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../../categories/widgets/category_widgets.dart';
+
+final categorySpendBreakdownProvider =
+    FutureProvider<
+      ({
+        double total,
+        double? trendPct,
+        int categoryCount,
+        List<CategorySpendSlice> topSlices,
+      })
+    >((ref) async {
+      final categories = await ref.watch(categoryListProvider.future);
+      final txns = await ref.watch(transactionListProvider.future);
+      final categoryById = {for (final c in categories) c.id: c};
+      final now = DateTime.now();
+      final monthStart = DateTime(now.year, now.month);
+      final nextMonth = DateTime(now.year, now.month + 1);
+      final lastMonthStart = DateTime(now.year, now.month - 1);
+
+      final currentTotals = <int, double>{};
+      double currentTotal = 0;
+      double lastTotal = 0;
+
+      for (final t in txns) {
+        if (t.type != 'expense' || t.isTransfer || t.isBalanceAdjustment) {
+          continue;
+        }
+        final date = t.createdAt;
+        if (!date.isBefore(monthStart) && date.isBefore(nextMonth)) {
+          final categoryId = int.tryParse(t.categoryId);
+          if (categoryId == null || !categoryById.containsKey(categoryId)) {
+            continue;
+          }
+          currentTotals[categoryId] =
+              (currentTotals[categoryId] ?? 0) + t.amount;
+          currentTotal += t.amount;
+        } else if (!date.isBefore(lastMonthStart) &&
+            date.isBefore(monthStart)) {
+          lastTotal += t.amount;
+        }
+      }
+
+      final slices = currentTotals.entries.map((entry) {
+        final category = categoryById[entry.key]!;
+        return CategorySpendSlice(
+          categoryId: entry.key,
+          name: category.name,
+          color: Color(category.colorValue),
+          amount: entry.value,
+        );
+      }).toList()..sort((a, b) => b.amount.compareTo(a.amount));
+
+      final trendPct = lastTotal > 0
+          ? ((currentTotal - lastTotal) / lastTotal) * 100
+          : null;
+
+      return (
+        total: currentTotal,
+        trendPct: trendPct,
+        categoryCount: currentTotals.length,
+        topSlices: slices.take(5).toList(),
+      );
+    });
 
 class CategoriesScreen extends ConsumerWidget {
   const CategoriesScreen({super.key});
@@ -37,15 +101,20 @@ class CategoriesScreen extends ConsumerWidget {
     final groupsAsync = ref.watch(categoryGroupListProvider);
 
     // Auto-trigger info sheet
-    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoCategories), (prev, next) {
-      if (next.hasValue && next.value == false) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          KuberInfoBottomSheet.show(context, InfoConstants.categories);
-          ref.read(infoSeenProvider(PrefsKeys.seenInfoCategories).notifier).markSeen();
-        });
-      }
-    });
+    ref.listen<AsyncValue<bool>>(
+      infoSeenProvider(PrefsKeys.seenInfoCategories),
+      (prev, next) {
+        if (next.hasValue && next.value == false) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            KuberInfoBottomSheet.show(context, InfoConstants.categories);
+            ref
+                .read(infoSeenProvider(PrefsKeys.seenInfoCategories).notifier)
+                .markSeen();
+          });
+        }
+      },
+    );
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -78,8 +147,47 @@ class CategoriesScreen extends ConsumerWidget {
                 ),
               ),
 
-              // KPI Grid
-              const SliverToBoxAdapter(child: _CategoryKpisGrid()),
+              // Spend hero — hidden when there is no expense activity this
+              // month so we don't render an empty ₹0 / 0 categories card.
+              SliverToBoxAdapter(
+                child: ref
+                    .watch(categorySpendBreakdownProvider)
+                    .when(
+                      data: (breakdown) {
+                        if (breakdown.total <= 0 ||
+                            breakdown.topSlices.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            KuberSpacing.lg,
+                            0,
+                            KuberSpacing.lg,
+                            KuberSpacing.lg,
+                          ),
+                          child: CategorySpendHero(
+                            total: breakdown.total,
+                            trendPct: breakdown.trendPct,
+                            categoryCount: breakdown.categoryCount,
+                            topSlices: breakdown.topSlices,
+                          ),
+                        );
+                      },
+                      loading: () => const Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          KuberSpacing.lg,
+                          0,
+                          KuberSpacing.lg,
+                          KuberSpacing.lg,
+                        ),
+                        child: SizedBox(
+                          height: 180,
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      ),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+              ),
 
               if (categories.isEmpty)
                 SliverFillRemaining(
@@ -128,7 +236,7 @@ class CategoriesScreen extends ConsumerWidget {
                             delegate: SliverChildBuilderDelegate(
                               (context, index) => Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: _CategoryListItem(
+                                child: CategoryListItem(
                                   category: groupCategories[index],
                                   onTap: () => _showCategoryDetails(
                                     context,
@@ -162,7 +270,7 @@ class CategoriesScreen extends ConsumerWidget {
                           delegate: SliverChildBuilderDelegate(
                             (context, index) => Padding(
                               padding: const EdgeInsets.only(bottom: 12),
-                              child: _CategoryListItem(
+                              child: CategoryListItem(
                                 category: ungrouped[index],
                                 onTap: () => _showCategoryDetails(
                                   context,
@@ -203,94 +311,93 @@ class CategoriesScreen extends ConsumerWidget {
       useRootNavigator: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (context) => Padding(
-          padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.xl,
-            0,
-            KuberSpacing.xl,
-            KuberSpacing.xl,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.xl,
+          0,
+          KuberSpacing.xl,
+          KuberSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 8),
 
-              // Header with Title + Close
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Add New',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
+            // Header with Title + Close
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Add New',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () =>
-                        Navigator.of(context, rootNavigator: true).pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        size: 18,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _buildAddOption(
-                context,
-                icon: Icons.category_rounded,
-                title: 'Add Category',
-                description: 'Classify your transactions for better tracking',
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push(
-                    '/category/add',
-                    extra: const CategoryRouteArgs(
-                      returnToCategoryPicker: false,
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              _buildAddOption(
-                context,
-                icon: Icons.grid_view_rounded,
-                title: 'Add Group',
-                description:
-                    'Organize categories into sections for better clarity',
-                onTap: () {
-                  Navigator.pop(context);
-                  _showAddGroupDialog(context);
-                },
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildAddOption(
+              context,
+              icon: Icons.category_rounded,
+              title: 'Add Category',
+              description: 'Classify your transactions for better tracking',
+              onTap: () {
+                Navigator.pop(context);
+                context.push(
+                  '/category/add',
+                  extra: const CategoryRouteArgs(returnToCategoryPicker: false),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildAddOption(
+              context,
+              icon: Icons.grid_view_rounded,
+              title: 'Add Group',
+              description:
+                  'Organize categories into sections for better clarity',
+              onTap: () {
+                Navigator.pop(context);
+                _showAddGroupDialog(context);
+              },
+            ),
+          ],
         ),
+      ),
     );
   }
 
@@ -525,9 +632,9 @@ class CategoriesScreen extends ConsumerWidget {
           fullWidth: true,
           onPressed: () {
             ref.read(historyFilterProvider.notifier).clearAll();
-            ref.read(historyFilterProvider.notifier).setFilters(
-                  categoryIds: {cat.id.toString()},
-                );
+            ref
+                .read(historyFilterProvider.notifier)
+                .setFilters(categoryIds: {cat.id.toString()});
             context.go('/history');
           },
         ),
@@ -785,6 +892,7 @@ class _GroupHeader extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _CategoryKpisGrid extends ConsumerWidget {
   const _CategoryKpisGrid();
 
@@ -884,6 +992,7 @@ class _CategoryKpisGrid extends ConsumerWidget {
   }
 }
 
+// ignore: unused_element
 class _CategoryListItem extends ConsumerWidget {
   final Category category;
   final VoidCallback onTap;

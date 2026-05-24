@@ -12,7 +12,8 @@ import '../../../core/utils/transfer_helpers.dart';
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart'
+    show formatterProvider, NumberSystem;
 import '../../../core/utils/formatters.dart';
 import '../data/transaction.dart';
 import '../providers/suggestion_provider.dart';
@@ -40,8 +41,14 @@ import '../../tutorial/models/tutorial_step_keys.dart';
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
   final String? initialType;
+  final int? initialAccountId;
 
-  const AddTransactionScreen({super.key, this.transaction, this.initialType});
+  const AddTransactionScreen({
+    super.key,
+    this.transaction,
+    this.initialType,
+    this.initialAccountId,
+  });
 
   @override
   ConsumerState<AddTransactionScreen> createState() =>
@@ -102,6 +109,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _loadTags();
     } else {
       _type = widget.initialType ?? 'expense';
+      _selectedAccountId = widget.initialAccountId;
     }
   }
 
@@ -785,18 +793,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     setState(() {
       _nameController.text = suggestion.displayName;
       if (suggestion.amount != null) {
-        final isIndian = ref.read(formatterProvider).system == NumberSystem.indian;
-        final unformattedText = suggestion.amount == suggestion.amount!.truncateToDouble()
+        final isIndian =
+            ref.read(formatterProvider).system == NumberSystem.indian;
+        final unformattedText =
+            suggestion.amount == suggestion.amount!.truncateToDouble()
             ? suggestion.amount!.toInt().toString()
             : suggestion.amount!.toStringAsFixed(2);
 
-        _amountController.value = CurrencyInputFormatter(isIndian: isIndian).formatEditUpdate(
-          TextEditingValue.empty,
-          TextEditingValue(
-            text: unformattedText,
-            selection: TextSelection.collapsed(offset: unformattedText.length),
-          ),
-        );
+        _amountController.value = CurrencyInputFormatter(isIndian: isIndian)
+            .formatEditUpdate(
+              TextEditingValue.empty,
+              TextEditingValue(
+                text: unformattedText,
+                selection: TextSelection.collapsed(
+                  offset: unformattedText.length,
+                ),
+              ),
+            );
       }
       if (categoryExists) {
         _selectedCategoryId = int.tryParse(suggestion.categoryId!);
@@ -825,7 +838,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     final name = _nameController.text.trim();
-    final amount = double.tryParse(_amountController.text.trim().replaceAll(',', ''));
+    final amount = double.tryParse(
+      _amountController.text.trim().replaceAll(',', ''),
+    );
 
     if (name.isEmpty) {
       showKuberSnackBar(
@@ -929,7 +944,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _saveTransfer({bool keepOpen = false}) async {
-    final amount = double.tryParse(_amountController.text.trim().replaceAll(',', ''));
+    final amount = double.tryParse(
+      _amountController.text.trim().replaceAll(',', ''),
+    );
     if (amount == null || amount <= 0) {
       showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
       return;

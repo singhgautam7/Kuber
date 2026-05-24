@@ -40,6 +40,7 @@ class PrefsKeys {
   static const thresholdFloor = 'kuber_threshold_floor';
   static const thresholdCeiling = 'kuber_threshold_ceiling';
   static const navBarStyle = 'nav_bar_style';
+  static const moreTabLayout = 'more_tab_layout';
 
   // Tools hub
   static const toolsViewMode = 'kuber_tools_view_mode';
@@ -50,5 +51,6 @@ class PrefsKeys {
   static const analyticsFilterTo = 'kuber_analytics_filter_to';
 
   // Notifications
-  static const notificationPermissionAsked = 'kuber_notification_permission_asked';
+  static const notificationPermissionAsked =
+      'kuber_notification_permission_asked';
 }

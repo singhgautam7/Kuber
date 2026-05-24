@@ -15,7 +15,12 @@ class RecurringRule {
 
   String? notes;
 
-  late String frequency; // 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly' | 'custom'
+  String? icon;
+
+  int? colorValue;
+
+  late String
+  frequency; // 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly' | 'custom'
   int? customDays; // only used when frequency == 'custom'
 
   late DateTime startDate;
@@ -42,6 +47,8 @@ class RecurringRule {
     'categoryId': categoryId,
     'accountId': accountId,
     'notes': notes,
+    'icon': icon,
+    'colorValue': colorValue,
     'frequency': frequency,
     'customDays': customDays,
     'startDate': startDate.toIso8601String(),

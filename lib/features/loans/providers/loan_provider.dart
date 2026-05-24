@@ -16,8 +16,7 @@ final loanRepositoryProvider = Provider<LoanRepository>((ref) {
   return LoanRepository(ref.watch(isarProvider));
 });
 
-final loanListProvider =
-    AsyncNotifierProvider<LoanListNotifier, List<Loan>>(
+final loanListProvider = AsyncNotifierProvider<LoanListNotifier, List<Loan>>(
   LoanListNotifier.new,
 );
 
@@ -32,6 +31,8 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
     required String loanType,
     required String lenderName,
     String? referenceNumber,
+    String? icon,
+    int? colorValue,
     required double principalAmount,
     required double emiAmount,
     String? rateType,
@@ -54,6 +55,8 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
       ..loanType = loanType
       ..lenderName = lenderName.trim()
       ..referenceNumber = referenceNumber?.trim()
+      ..icon = icon
+      ..colorValue = colorValue
       ..principalAmount = principalAmount
       ..emiAmount = emiAmount
       ..rateType = rateType
@@ -185,20 +188,20 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
 /// All transactions linked to a specific loan, sorted newest-first.
 final loanTransactionsProvider =
     FutureProvider.family<List<Transaction>, String>((ref, loanUid) async {
-  final all = await ref.watch(transactionListProvider.future);
-  return all
-      .where((t) => t.linkedRuleId == loanUid && t.linkedRuleType == 'loan')
-      .toList()
-    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-});
+      final all = await ref.watch(transactionListProvider.future);
+      return all
+          .where((t) => t.linkedRuleId == loanUid && t.linkedRuleType == 'loan')
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
 
 /// Summary: total outstanding and total paid.
 final loanSummaryProvider =
     FutureProvider<({double outstanding, double totalPaid})>((ref) async {
-  final loans = await ref.watch(loanListProvider.future);
-  final txns = await ref.watch(transactionListProvider.future);
-  return (
-    outstanding: calc.totalOutstanding(loans, txns),
-    totalPaid: calc.totalPaidAllLoans(loans, txns),
-  );
-});
+      final loans = await ref.watch(loanListProvider.future);
+      final txns = await ref.watch(transactionListProvider.future);
+      return (
+        outstanding: calc.totalOutstanding(loans, txns),
+        totalPaid: calc.totalPaidAllLoans(loans, txns),
+      );
+    });

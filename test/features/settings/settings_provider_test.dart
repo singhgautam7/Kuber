@@ -112,4 +112,6 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   Future<void> setThresholds(double floor, double ceiling) async {}
   @override
   Future<void> setNavBarStyle(NavBarStyle style) async {}
+  @override
+  Future<void> setMoreTabLayout(MoreTabLayout layout) async {}
 }

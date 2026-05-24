@@ -28,49 +28,55 @@ const RecurringRuleSchema = CollectionSchema(
       name: r'categoryId',
       type: IsarType.string,
     ),
-    r'createdAt': PropertySchema(
+    r'colorValue': PropertySchema(
       id: 3,
+      name: r'colorValue',
+      type: IsarType.long,
+    ),
+    r'createdAt': PropertySchema(
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'customDays': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'customDays',
       type: IsarType.long,
     ),
-    r'endAfter': PropertySchema(id: 5, name: r'endAfter', type: IsarType.long),
+    r'endAfter': PropertySchema(id: 6, name: r'endAfter', type: IsarType.long),
     r'endDate': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'endDate',
       type: IsarType.dateTime,
     ),
-    r'endType': PropertySchema(id: 7, name: r'endType', type: IsarType.string),
+    r'endType': PropertySchema(id: 8, name: r'endType', type: IsarType.string),
     r'executionCount': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'executionCount',
       type: IsarType.long,
     ),
     r'frequency': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'frequency',
       type: IsarType.string,
     ),
-    r'isPaused': PropertySchema(id: 10, name: r'isPaused', type: IsarType.bool),
-    r'name': PropertySchema(id: 11, name: r'name', type: IsarType.string),
+    r'icon': PropertySchema(id: 11, name: r'icon', type: IsarType.string),
+    r'isPaused': PropertySchema(id: 12, name: r'isPaused', type: IsarType.bool),
+    r'name': PropertySchema(id: 13, name: r'name', type: IsarType.string),
     r'nextDueAt': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'nextDueAt',
       type: IsarType.dateTime,
     ),
-    r'notes': PropertySchema(id: 13, name: r'notes', type: IsarType.string),
+    r'notes': PropertySchema(id: 15, name: r'notes', type: IsarType.string),
     r'startDate': PropertySchema(
-      id: 14,
+      id: 16,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
-    r'type': PropertySchema(id: 15, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 17, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 16,
+      id: 18,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -115,6 +121,12 @@ int _recurringRuleEstimateSize(
   bytesCount += 3 + object.categoryId.length * 3;
   bytesCount += 3 + object.endType.length * 3;
   bytesCount += 3 + object.frequency.length * 3;
+  {
+    final value = object.icon;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   {
     final value = object.notes;
@@ -135,20 +147,22 @@ void _recurringRuleSerialize(
   writer.writeString(offsets[0], object.accountId);
   writer.writeDouble(offsets[1], object.amount);
   writer.writeString(offsets[2], object.categoryId);
-  writer.writeDateTime(offsets[3], object.createdAt);
-  writer.writeLong(offsets[4], object.customDays);
-  writer.writeLong(offsets[5], object.endAfter);
-  writer.writeDateTime(offsets[6], object.endDate);
-  writer.writeString(offsets[7], object.endType);
-  writer.writeLong(offsets[8], object.executionCount);
-  writer.writeString(offsets[9], object.frequency);
-  writer.writeBool(offsets[10], object.isPaused);
-  writer.writeString(offsets[11], object.name);
-  writer.writeDateTime(offsets[12], object.nextDueAt);
-  writer.writeString(offsets[13], object.notes);
-  writer.writeDateTime(offsets[14], object.startDate);
-  writer.writeString(offsets[15], object.type);
-  writer.writeDateTime(offsets[16], object.updatedAt);
+  writer.writeLong(offsets[3], object.colorValue);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeLong(offsets[5], object.customDays);
+  writer.writeLong(offsets[6], object.endAfter);
+  writer.writeDateTime(offsets[7], object.endDate);
+  writer.writeString(offsets[8], object.endType);
+  writer.writeLong(offsets[9], object.executionCount);
+  writer.writeString(offsets[10], object.frequency);
+  writer.writeString(offsets[11], object.icon);
+  writer.writeBool(offsets[12], object.isPaused);
+  writer.writeString(offsets[13], object.name);
+  writer.writeDateTime(offsets[14], object.nextDueAt);
+  writer.writeString(offsets[15], object.notes);
+  writer.writeDateTime(offsets[16], object.startDate);
+  writer.writeString(offsets[17], object.type);
+  writer.writeDateTime(offsets[18], object.updatedAt);
 }
 
 RecurringRule _recurringRuleDeserialize(
@@ -161,21 +175,23 @@ RecurringRule _recurringRuleDeserialize(
   object.accountId = reader.readString(offsets[0]);
   object.amount = reader.readDouble(offsets[1]);
   object.categoryId = reader.readString(offsets[2]);
-  object.createdAt = reader.readDateTime(offsets[3]);
-  object.customDays = reader.readLongOrNull(offsets[4]);
-  object.endAfter = reader.readLongOrNull(offsets[5]);
-  object.endDate = reader.readDateTimeOrNull(offsets[6]);
-  object.endType = reader.readString(offsets[7]);
-  object.executionCount = reader.readLong(offsets[8]);
-  object.frequency = reader.readString(offsets[9]);
+  object.colorValue = reader.readLongOrNull(offsets[3]);
+  object.createdAt = reader.readDateTime(offsets[4]);
+  object.customDays = reader.readLongOrNull(offsets[5]);
+  object.endAfter = reader.readLongOrNull(offsets[6]);
+  object.endDate = reader.readDateTimeOrNull(offsets[7]);
+  object.endType = reader.readString(offsets[8]);
+  object.executionCount = reader.readLong(offsets[9]);
+  object.frequency = reader.readString(offsets[10]);
+  object.icon = reader.readStringOrNull(offsets[11]);
   object.id = id;
-  object.isPaused = reader.readBool(offsets[10]);
-  object.name = reader.readString(offsets[11]);
-  object.nextDueAt = reader.readDateTime(offsets[12]);
-  object.notes = reader.readStringOrNull(offsets[13]);
-  object.startDate = reader.readDateTime(offsets[14]);
-  object.type = reader.readString(offsets[15]);
-  object.updatedAt = reader.readDateTime(offsets[16]);
+  object.isPaused = reader.readBool(offsets[12]);
+  object.name = reader.readString(offsets[13]);
+  object.nextDueAt = reader.readDateTime(offsets[14]);
+  object.notes = reader.readStringOrNull(offsets[15]);
+  object.startDate = reader.readDateTime(offsets[16]);
+  object.type = reader.readString(offsets[17]);
+  object.updatedAt = reader.readDateTime(offsets[18]);
   return object;
 }
 
@@ -193,32 +209,36 @@ P _recurringRuleDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readDateTime(offset)) as P;
-    case 4:
       return (reader.readLongOrNull(offset)) as P;
+    case 4:
+      return (reader.readDateTime(offset)) as P;
     case 5:
       return (reader.readLongOrNull(offset)) as P;
     case 6:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 8:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 10:
-      return (reader.readBool(offset)) as P;
-    case 11:
       return (reader.readString(offset)) as P;
-    case 12:
-      return (reader.readDateTime(offset)) as P;
-    case 13:
+    case 11:
       return (reader.readStringOrNull(offset)) as P;
+    case 12:
+      return (reader.readBool(offset)) as P;
+    case 13:
+      return (reader.readString(offset)) as P;
     case 14:
       return (reader.readDateTime(offset)) as P;
     case 15:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 16:
+      return (reader.readDateTime(offset)) as P;
+    case 17:
+      return (reader.readString(offset)) as P;
+    case 18:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -788,6 +808,79 @@ extension RecurringRuleQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'categoryId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  colorValueIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'colorValue'),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  colorValueIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'colorValue'),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  colorValueEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'colorValue', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  colorValueGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'colorValue',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  colorValueLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'colorValue',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  colorValueBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'colorValue',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
       );
     });
   }
@@ -1399,6 +1492,168 @@ extension RecurringRuleQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'frequency', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'icon'),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'icon'),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition> iconEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'icon',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'icon',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'icon',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition> iconBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'icon',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'icon',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'icon',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'icon',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition> iconMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'icon',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'icon', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterFilterCondition>
+  iconIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'icon', value: ''),
       );
     });
   }
@@ -2128,6 +2383,19 @@ extension RecurringRuleQuerySortBy
     });
   }
 
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> sortByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy>
+  sortByColorValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
   QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -2215,6 +2483,18 @@ extension RecurringRuleQuerySortBy
   sortByFrequencyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'frequency', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> sortByIcon() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'icon', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> sortByIconDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'icon', Sort.desc);
     });
   }
 
@@ -2347,6 +2627,19 @@ extension RecurringRuleQuerySortThenBy
     });
   }
 
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> thenByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy>
+  thenByColorValueDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
   QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -2434,6 +2727,18 @@ extension RecurringRuleQuerySortThenBy
   thenByFrequencyDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'frequency', Sort.desc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> thenByIcon() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'icon', Sort.asc);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QAfterSortBy> thenByIconDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'icon', Sort.desc);
     });
   }
 
@@ -2562,6 +2867,12 @@ extension RecurringRuleQueryWhereDistinct
     });
   }
 
+  QueryBuilder<RecurringRule, RecurringRule, QDistinct> distinctByColorValue() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'colorValue');
+    });
+  }
+
   QueryBuilder<RecurringRule, RecurringRule, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -2606,6 +2917,14 @@ extension RecurringRuleQueryWhereDistinct
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'frequency', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<RecurringRule, RecurringRule, QDistinct> distinctByIcon({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'icon', caseSensitive: caseSensitive);
     });
   }
 
@@ -2684,6 +3003,12 @@ extension RecurringRuleQueryProperty
     });
   }
 
+  QueryBuilder<RecurringRule, int?, QQueryOperations> colorValueProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'colorValue');
+    });
+  }
+
   QueryBuilder<RecurringRule, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
@@ -2723,6 +3048,12 @@ extension RecurringRuleQueryProperty
   QueryBuilder<RecurringRule, String, QQueryOperations> frequencyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'frequency');
+    });
+  }
+
+  QueryBuilder<RecurringRule, String?, QQueryOperations> iconProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'icon');
     });
   }
 

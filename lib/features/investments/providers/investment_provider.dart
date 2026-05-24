@@ -18,8 +18,8 @@ final investmentRepositoryProvider = Provider<InvestmentRepository>((ref) {
 
 final investmentListProvider =
     AsyncNotifierProvider<InvestmentListNotifier, List<Investment>>(
-  InvestmentListNotifier.new,
-);
+      InvestmentListNotifier.new,
+    );
 
 class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
   @override
@@ -30,6 +30,8 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
   Future<int> addInvestment({
     required String name,
     required String investmentType,
+    String? icon,
+    int? colorValue,
     double? currentValue,
     bool autoDebit = false,
     double? sipAmount,
@@ -46,6 +48,8 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
       ..uid = uid
       ..name = name.trim()
       ..investmentType = investmentType
+      ..icon = icon
+      ..colorValue = colorValue
       ..currentValue = currentValue
       ..autoDebit = autoDebit
       ..sipAmount = sipAmount
@@ -86,7 +90,10 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
     ref.invalidateSelf();
   }
 
-  Future<void> updateCurrentValue(Investment investment, double? newValue) async {
+  Future<void> updateCurrentValue(
+    Investment investment,
+    double? newValue,
+  ) async {
     investment
       ..currentValue = newValue
       ..updatedAt = DateTime.now();
@@ -146,36 +153,51 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
 
 /// All transactions linked to a specific investment, sorted newest-first.
 final investmentTransactionsProvider =
-    FutureProvider.family<List<Transaction>, String>((ref, investmentUid) async {
-  final all = await ref.watch(transactionListProvider.future);
-  return all
-      .where((t) =>
-          t.linkedRuleId == investmentUid && t.linkedRuleType == 'investment')
-      .toList()
-    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-});
+    FutureProvider.family<List<Transaction>, String>((
+      ref,
+      investmentUid,
+    ) async {
+      final all = await ref.watch(transactionListProvider.future);
+      return all
+          .where(
+            (t) =>
+                t.linkedRuleId == investmentUid &&
+                t.linkedRuleType == 'investment',
+          )
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
 
 /// Total amount invested for a specific investment uid.
-final totalInvestedForProvider =
-    FutureProvider.family<double, String>((ref, investmentUid) async {
+final totalInvestedForProvider = FutureProvider.family<double, String>((
+  ref,
+  investmentUid,
+) async {
   final all = await ref.watch(transactionListProvider.future);
   return all
-      .where((t) =>
-          t.linkedRuleId == investmentUid &&
-          t.linkedRuleType == 'investment')
+      .where(
+        (t) =>
+            t.linkedRuleId == investmentUid && t.linkedRuleType == 'investment',
+      )
       .fold<double>(0.0, (s, t) => s + t.amount);
 });
 
 /// Summary: total invested, current value, gain/loss.
-final investmentSummaryProvider = FutureProvider<
-    ({double totalInvested, double currentValue, double gainLoss, int assetCount})>(
-    (ref) async {
-  final investments = await ref.watch(investmentListProvider.future);
-  final txns = await ref.watch(transactionListProvider.future);
-  return (
-    totalInvested: calc.totalInvestedAll(investments, txns),
-    currentValue: calc.totalCurrentValueAll(investments),
-    gainLoss: calc.totalGainLossAll(investments, txns),
-    assetCount: calc.totalAssetCount(investments),
-  );
-});
+final investmentSummaryProvider =
+    FutureProvider<
+      ({
+        double totalInvested,
+        double currentValue,
+        double gainLoss,
+        int assetCount,
+      })
+    >((ref) async {
+      final investments = await ref.watch(investmentListProvider.future);
+      final txns = await ref.watch(transactionListProvider.future);
+      return (
+        totalInvested: calc.totalInvestedAll(investments, txns),
+        currentValue: calc.totalCurrentValueAll(investments),
+        gainLoss: calc.totalGainLossAll(investments, txns),
+        assetCount: calc.totalAssetCount(investments),
+      );
+    });

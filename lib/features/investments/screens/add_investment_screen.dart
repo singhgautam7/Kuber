@@ -6,11 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/form_widgets.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart'
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
@@ -34,6 +37,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
   final _sipAmountController = TextEditingController();
   int? _sipDate;
   String? _selectedAccountId;
+  IconData _selectedIcon = Icons.show_chart;
+  Color? _selectedColor;
   final _notesController = TextEditingController();
   bool _isEditing = false;
 
@@ -54,6 +59,10 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       }
       _sipDate = e.sipDate;
       _selectedAccountId = e.accountId;
+      _selectedIcon = e.icon != null
+          ? IconMapper.fromString(e.icon!)
+          : Icons.show_chart;
+      _selectedColor = e.colorValue != null ? Color(e.colorValue!) : null;
       _notesController.text = e.notes ?? '';
     }
   }
@@ -71,6 +80,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    _selectedColor ??= cs.primary;
     final symbol = ref.watch(currencyProvider).symbol;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
     final selectedAccount = accounts
@@ -107,10 +117,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.onDrag,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -126,6 +134,23 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
 
                   const SizedBox(height: 24),
 
+                  _FieldLabel('ICON & COLOR'),
+                  const SizedBox(height: 8),
+                  FormIconPicker(
+                    icons: _investmentIcons,
+                    selected: _selectedIcon,
+                    onChanged: (icon) => setState(() => _selectedIcon = icon),
+                  ),
+                  const SizedBox(height: 12),
+                  FormColorPicker(
+                    colors: _formPalette(context),
+                    selected: _selectedColor!,
+                    onChanged: (color) =>
+                        setState(() => _selectedColor = color),
+                  ),
+
+                  const SizedBox(height: 24),
+
                   // Type
                   _FieldLabel('INVESTMENT TYPE'),
                   const SizedBox(height: 8),
@@ -134,16 +159,23 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     runSpacing: 8,
                     children: [
                       _typeChip('SIP', Icons.savings_outlined, 'sip'),
-                      _typeChip('Mutual Fund', Icons.pie_chart_outline,
-                          'mutual_fund'),
-                      _typeChip('Stocks',
-                          Icons.candlestick_chart_outlined, 'stocks'),
                       _typeChip(
-                          'Crypto', Icons.currency_bitcoin, 'crypto'),
+                        'Mutual Fund',
+                        Icons.pie_chart_outline,
+                        'mutual_fund',
+                      ),
                       _typeChip(
-                          'Trading', Icons.trending_up, 'trading'),
+                        'Stocks',
+                        Icons.candlestick_chart_outlined,
+                        'stocks',
+                      ),
+                      _typeChip('Crypto', Icons.currency_bitcoin, 'crypto'),
+                      _typeChip('Trading', Icons.trending_up, 'trading'),
                       _typeChip(
-                          'Real Estate', Icons.apartment_outlined, 'real_estate'),
+                        'Real Estate',
+                        Icons.apartment_outlined,
+                        'real_estate',
+                      ),
                       _typeChip('Other', Icons.show_chart, 'other'),
                     ],
                   ),
@@ -151,9 +183,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   const SizedBox(height: 24),
 
                   // Amounts
-                  _FieldLabel(_isEditing
-                      ? 'TOTAL INVESTED (INCL. NEW CONTRIBUTION)'
-                      : 'INVESTED AMOUNT (INITIAL)'),
+                  _FieldLabel(
+                    _isEditing
+                        ? 'TOTAL INVESTED (INCL. NEW CONTRIBUTION)'
+                        : 'INVESTED AMOUNT (INITIAL)',
+                  ),
                   const SizedBox(height: 8),
                   _buildTextField(
                     controller: _investedController,
@@ -161,7 +195,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
+                      CurrencyInputFormatter(
+                        isIndian:
+                            ref.watch(formatterProvider).system ==
+                            NumberSystem.indian,
+                      ),
                     ],
                     suffixIcon: _calcButton(_investedController),
                   ),
@@ -175,7 +213,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
+                      CurrencyInputFormatter(
+                        isIndian:
+                            ref.watch(formatterProvider).system ==
+                            NumberSystem.indian,
+                      ),
                     ],
                     suffixIcon: _calcButton(_currentValueController),
                   ),
@@ -190,11 +232,12 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
@@ -210,8 +253,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                               ),
                             ),
                           ),
-                          Icon(Icons.chevron_right,
-                              color: cs.onSurfaceVariant, size: 20),
+                          Icon(
+                            Icons.chevron_right,
+                            color: cs.onSurfaceVariant,
+                            size: 20,
+                          ),
                         ],
                       ),
                     ),
@@ -224,18 +270,19 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainerHighest,
-                      borderRadius:
-                          BorderRadius.circular(KuberRadius.md),
+                      borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.savings_outlined,
-                            size: 20, color: cs.onSurfaceVariant),
+                        Icon(
+                          Icons.savings_outlined,
+                          size: 20,
+                          color: cs.onSurfaceVariant,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Enable Auto-Debit SIP',
@@ -257,8 +304,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                         ),
                         Switch(
                           value: _autoDebit,
-                          onChanged: (v) =>
-                              setState(() => _autoDebit = v),
+                          onChanged: (v) => setState(() => _autoDebit = v),
                         ),
                       ],
                     ),
@@ -269,8 +315,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     duration: const Duration(milliseconds: 200),
                     child: _autoDebit
                         ? Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const SizedBox(height: 24),
 
@@ -283,10 +328,10 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d+\.?\d{0,2}')),
+                                    RegExp(r'^\d+\.?\d{0,2}'),
+                                  ),
                                 ],
-                                suffixIcon:
-                                    _calcButton(_sipAmountController),
+                                suffixIcon: _calcButton(_sipAmountController),
                               ),
 
                               const SizedBox(height: 24),
@@ -295,11 +340,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                               const SizedBox(height: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16),
+                                  horizontal: 16,
+                                ),
                                 decoration: BoxDecoration(
                                   color: cs.surfaceContainerHighest,
                                   borderRadius: BorderRadius.circular(
-                                      KuberRadius.md),
+                                    KuberRadius.md,
+                                  ),
                                 ),
                                 child: DropdownButtonHideUnderline(
                                   child: DropdownButton<int>(
@@ -311,8 +358,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                         color: cs.onSurfaceVariant,
                                       ),
                                     ),
-                                    dropdownColor:
-                                        cs.surfaceContainer,
+                                    dropdownColor: cs.surfaceContainer,
                                     style: GoogleFonts.inter(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -323,13 +369,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                       (i) => DropdownMenuItem(
                                         value: i + 1,
                                         child: Text(
-                                            '${i + 1}${_ordinal(i + 1)} of month'),
+                                          '${i + 1}${_ordinal(i + 1)} of month',
+                                        ),
                                       ),
                                     ),
                                     onChanged: (v) {
                                       if (v != null) {
-                                        setState(
-                                            () => _sipDate = v);
+                                        setState(() => _sipDate = v);
                                       }
                                     },
                                   ),
@@ -341,20 +387,18 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                               _FieldLabel('CHOOSE ACCOUNT'),
                               const SizedBox(height: 8),
                               GestureDetector(
-                                onTap: () =>
-                                    _pickAccount(context),
+                                onTap: () => _pickAccount(context),
                                 child: Container(
                                   width: double.infinity,
-                                  padding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: cs
-                                        .surfaceContainerHighest,
-                                    borderRadius:
-                                        BorderRadius.circular(
-                                            KuberRadius.md),
+                                    color: cs.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(
+                                      KuberRadius.md,
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
@@ -362,22 +406,20 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                         child: Text(
                                           selectedAccount?.name ??
                                               'Select account',
-                                          style:
-                                              GoogleFonts.inter(
+                                          style: GoogleFonts.inter(
                                             fontSize: 14,
-                                            fontWeight:
-                                                FontWeight.w600,
-                                            color: selectedAccount !=
-                                                    null
+                                            fontWeight: FontWeight.w600,
+                                            color: selectedAccount != null
                                                 ? cs.onSurface
                                                 : cs.onSurfaceVariant,
                                           ),
                                         ),
                                       ),
-                                      Icon(Icons.chevron_right,
-                                          color:
-                                              cs.onSurfaceVariant,
-                                          size: 20),
+                                      Icon(
+                                        Icons.chevron_right,
+                                        color: cs.onSurfaceVariant,
+                                        size: 20,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -394,8 +436,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   const SizedBox(height: 8),
                   _buildTextField(
                     controller: _notesController,
-                    hint:
-                        'Long term goals, strategy, or reference info...',
+                    hint: 'Long term goals, strategy, or reference info...',
                     maxLines: 3,
                   ),
 
@@ -408,7 +449,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
           // Save button
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, 8, KuberSpacing.lg, KuberSpacing.lg),
+              KuberSpacing.lg,
+              8,
+              KuberSpacing.lg,
+              KuberSpacing.lg,
+            ),
             child: AppButton(
               label: _isEditing ? 'SAVE CHANGES' : 'ADD INVESTMENT',
               type: AppButtonType.primary,
@@ -435,9 +480,11 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 16,
-                color: isSelected ? Colors.white : cs.onSurfaceVariant),
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : cs.onSurfaceVariant,
+            ),
             const SizedBox(width: 6),
             Text(
               label,
@@ -516,11 +563,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => KuberCalculator(
-        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
+        initialValue:
+            double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
           setState(() {
             controller.text = result == result.truncateToDouble()
@@ -540,7 +589,10 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     if (_nameController.text.trim().isEmpty) return false;
     if (_autoDebit) {
       final sipAmt =
-          double.tryParse(_sipAmountController.text.trim().replaceAll(',', '')) ?? 0;
+          double.tryParse(
+            _sipAmountController.text.trim().replaceAll(',', ''),
+          ) ??
+          0;
       if (sipAmt <= 0 || _sipDate == null || _selectedAccountId == null) {
         return false;
       }
@@ -556,8 +608,9 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
@@ -570,15 +623,15 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
   }
 
   Future<void> _save(BuildContext context) async {
-    final categories =
-        ref.read(categoryListProvider).valueOrNull ?? [];
+    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
     final investCat = categories.firstWhere(
       (c) => c.name == 'Investment',
       orElse: () => categories.first,
     );
 
-    final sipAmount =
-        double.tryParse(_sipAmountController.text.trim().replaceAll(',', ''));
+    final sipAmount = double.tryParse(
+      _sipAmountController.text.trim().replaceAll(',', ''),
+    );
 
     if (_isEditing) {
       final existing = widget.existing!;
@@ -589,18 +642,26 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
 
       // The field now shows the total desired invested; compute delta
       final desiredTotal =
-          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? currentTotalInvested;
-      final additionalAmount = (desiredTotal - currentTotalInvested)
-          .clamp(0.0, double.infinity);
+          double.tryParse(
+            _investedController.text.trim().replaceAll(',', ''),
+          ) ??
+          currentTotalInvested;
+      final additionalAmount = (desiredTotal - currentTotalInvested).clamp(
+        0.0,
+        double.infinity,
+      );
 
       // If currentValue field is empty, auto-fill with desiredTotal
-      double? currentValue =
-          double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
+      double? currentValue = double.tryParse(
+        _currentValueController.text.trim().replaceAll(',', ''),
+      );
       currentValue ??= desiredTotal > 0 ? desiredTotal : existing.currentValue;
 
       final inv = existing
         ..name = _nameController.text.trim()
         ..investmentType = _investmentType
+        ..icon = IconMapper.toStringName(_selectedIcon)
+        ..colorValue = _selectedColor?.toARGB32()
         ..currentValue = currentValue
         ..autoDebit = _autoDebit
         ..sipAmount = _autoDebit ? sipAmount : null
@@ -615,7 +676,9 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
 
       // Create a contribution only for the delta
       if (additionalAmount > 0 && _selectedAccountId != null) {
-        await ref.read(investmentListProvider.notifier).addContribution(
+        await ref
+            .read(investmentListProvider.notifier)
+            .addContribution(
               investment: inv,
               amount: additionalAmount,
               date: DateTime.now(),
@@ -624,18 +687,26 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       }
     } else {
       final initialAmount =
-          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? 0;
+          double.tryParse(
+            _investedController.text.trim().replaceAll(',', ''),
+          ) ??
+          0;
 
       // Auto-fill currentValue with initialAmount if not explicitly set
-      double? currentValue =
-          double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
+      double? currentValue = double.tryParse(
+        _currentValueController.text.trim().replaceAll(',', ''),
+      );
       if (currentValue == null && initialAmount > 0) {
         currentValue = initialAmount;
       }
 
-      await ref.read(investmentListProvider.notifier).addInvestment(
+      await ref
+          .read(investmentListProvider.notifier)
+          .addInvestment(
             name: _nameController.text.trim(),
             investmentType: _investmentType,
+            icon: IconMapper.toStringName(_selectedIcon),
+            colorValue: _selectedColor?.toARGB32(),
             currentValue: currentValue,
             autoDebit: _autoDebit,
             sipAmount: _autoDebit ? sipAmount : null,
@@ -684,4 +755,33 @@ class _FieldLabel extends StatelessWidget {
       ),
     );
   }
+}
+
+const _investmentIcons = [
+  Icons.savings,
+  Icons.pie_chart,
+  Icons.show_chart,
+  Icons.currency_bitcoin,
+  Icons.trending_up,
+  Icons.apartment,
+  Icons.account_balance,
+  Icons.wallet,
+  Icons.store,
+  Icons.payments,
+  Icons.currency_rupee,
+  Icons.more_horiz,
+];
+
+List<Color> _formPalette(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  return [
+    cs.primary,
+    cs.tertiary,
+    cs.error,
+    cs.secondary,
+    cs.onSurfaceVariant,
+    cs.primaryContainer,
+    cs.tertiaryContainer,
+    cs.errorContainer,
+  ];
 }

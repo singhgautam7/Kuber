@@ -315,7 +315,17 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       );
     }
 
-    return content;
+    // On Android 13+ (predictive back), the OS only calls handlePopRoute()
+    // if the framework has registered an OnBackInvokedCallback. Without a
+    // PopScope(canPop: false), the OS exits the app directly when nothing
+    // is poppable — bypassing our didPopRoute() in app.dart. This PopScope
+    // ensures the back callback is registered whenever we need custom
+    // handling (non-Home tab → switch to Home, selection mode → clear).
+    // The actual back logic lives in app.dart's didPopRoute().
+    return PopScope(
+      canPop: currentIndex == 0 && !isSelectionMode,
+      child: content,
+    );
   }
 }
 
