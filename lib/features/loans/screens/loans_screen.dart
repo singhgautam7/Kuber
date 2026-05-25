@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
@@ -92,8 +91,7 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
               SliverToBoxAdapter(
                 child: KuberPageHeader(
                   title: 'Loans',
-                  description:
-                      'Track your EMIs, outstanding balances and repayment progress.',
+                  description:'',
                   actionTooltip: 'Add Loan',
                   onAction: () => context.push('/loans/add'),
                 ),
@@ -197,12 +195,8 @@ class _LoanRow extends StatelessWidget {
         loan.lenderName,
         if (loan.referenceNumber?.isNotEmpty ?? false) loan.referenceNumber,
       ].whereType<String>().join(' · '),
-      icon: loan.icon != null
-          ? IconMapper.fromString(loan.icon!)
-          : _loanTypeIcon(loan.loanType),
-      iconColor: loan.colorValue != null
-          ? Color(loan.colorValue!)
-          : _loanTypeColor(context, loan.loanType),
+      icon: _loanTypeIcon(loan.loanType),
+      iconColor: _loanTypeColor(context, loan.loanType),
       principal: loan.principalAmount,
       paid: calc.computeTotalPaid(loan.uid, allTxns),
       outstanding: calc

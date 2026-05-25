@@ -10,14 +10,11 @@ class Investment {
 
   late String name; // e.g. "Bitcoin", "HDFC Index Fund"
 
-  late String
-  investmentType; // 'sip' | 'mutual_fund' | 'stocks' | 'crypto' | 'trading' | 'other'
-
-  String? icon;
-
-  int? colorValue;
+  late String investmentType; // 'sip' | 'mutual_fund' | 'stocks' | 'crypto' | 'trading' | 'other'
 
   double? currentValue; // User-updated manually, for P&L display
+
+  double? investedAmount; // Total amount invested (initial + contributions)
 
   bool autoDebit = false; // Enable auto-debit for SIP
 
@@ -40,9 +37,8 @@ class Investment {
     'uid': uid,
     'name': name,
     'investmentType': investmentType,
-    'icon': icon,
-    'colorValue': colorValue,
     'currentValue': currentValue,
+    'investedAmount': investedAmount,
     'autoDebit': autoDebit,
     'sipAmount': sipAmount,
     'sipDate': sipDate,

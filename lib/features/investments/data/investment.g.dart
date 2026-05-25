@@ -32,38 +32,32 @@ const InvestmentSchema = CollectionSchema(
       name: r'categoryId',
       type: IsarType.string,
     ),
-    r'colorValue': PropertySchema(
-      id: 3,
-      name: r'colorValue',
-      type: IsarType.long,
-    ),
     r'createdAt': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'currentValue': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'currentValue',
       type: IsarType.double,
     ),
-    r'icon': PropertySchema(id: 6, name: r'icon', type: IsarType.string),
     r'investmentType': PropertySchema(
-      id: 7,
+      id: 5,
       name: r'investmentType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 8, name: r'name', type: IsarType.string),
-    r'notes': PropertySchema(id: 9, name: r'notes', type: IsarType.string),
+    r'name': PropertySchema(id: 6, name: r'name', type: IsarType.string),
+    r'notes': PropertySchema(id: 7, name: r'notes', type: IsarType.string),
     r'sipAmount': PropertySchema(
-      id: 10,
+      id: 8,
       name: r'sipAmount',
       type: IsarType.double,
     ),
-    r'sipDate': PropertySchema(id: 11, name: r'sipDate', type: IsarType.long),
-    r'uid': PropertySchema(id: 12, name: r'uid', type: IsarType.string),
+    r'sipDate': PropertySchema(id: 9, name: r'sipDate', type: IsarType.long),
+    r'uid': PropertySchema(id: 10, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 13,
+      id: 11,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -97,12 +91,6 @@ int _investmentEstimateSize(
     }
   }
   bytesCount += 3 + object.categoryId.length * 3;
-  {
-    final value = object.icon;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   bytesCount += 3 + object.investmentType.length * 3;
   bytesCount += 3 + object.name.length * 3;
   {
@@ -124,17 +112,15 @@ void _investmentSerialize(
   writer.writeString(offsets[0], object.accountId);
   writer.writeBool(offsets[1], object.autoDebit);
   writer.writeString(offsets[2], object.categoryId);
-  writer.writeLong(offsets[3], object.colorValue);
-  writer.writeDateTime(offsets[4], object.createdAt);
-  writer.writeDouble(offsets[5], object.currentValue);
-  writer.writeString(offsets[6], object.icon);
-  writer.writeString(offsets[7], object.investmentType);
-  writer.writeString(offsets[8], object.name);
-  writer.writeString(offsets[9], object.notes);
-  writer.writeDouble(offsets[10], object.sipAmount);
-  writer.writeLong(offsets[11], object.sipDate);
-  writer.writeString(offsets[12], object.uid);
-  writer.writeDateTime(offsets[13], object.updatedAt);
+  writer.writeDateTime(offsets[3], object.createdAt);
+  writer.writeDouble(offsets[4], object.currentValue);
+  writer.writeString(offsets[5], object.investmentType);
+  writer.writeString(offsets[6], object.name);
+  writer.writeString(offsets[7], object.notes);
+  writer.writeDouble(offsets[8], object.sipAmount);
+  writer.writeLong(offsets[9], object.sipDate);
+  writer.writeString(offsets[10], object.uid);
+  writer.writeDateTime(offsets[11], object.updatedAt);
 }
 
 Investment _investmentDeserialize(
@@ -147,18 +133,16 @@ Investment _investmentDeserialize(
   object.accountId = reader.readStringOrNull(offsets[0]);
   object.autoDebit = reader.readBool(offsets[1]);
   object.categoryId = reader.readString(offsets[2]);
-  object.colorValue = reader.readLongOrNull(offsets[3]);
-  object.createdAt = reader.readDateTime(offsets[4]);
-  object.currentValue = reader.readDoubleOrNull(offsets[5]);
-  object.icon = reader.readStringOrNull(offsets[6]);
+  object.createdAt = reader.readDateTime(offsets[3]);
+  object.currentValue = reader.readDoubleOrNull(offsets[4]);
   object.id = id;
-  object.investmentType = reader.readString(offsets[7]);
-  object.name = reader.readString(offsets[8]);
-  object.notes = reader.readStringOrNull(offsets[9]);
-  object.sipAmount = reader.readDoubleOrNull(offsets[10]);
-  object.sipDate = reader.readLongOrNull(offsets[11]);
-  object.uid = reader.readString(offsets[12]);
-  object.updatedAt = reader.readDateTime(offsets[13]);
+  object.investmentType = reader.readString(offsets[5]);
+  object.name = reader.readString(offsets[6]);
+  object.notes = reader.readStringOrNull(offsets[7]);
+  object.sipAmount = reader.readDoubleOrNull(offsets[8]);
+  object.sipDate = reader.readLongOrNull(offsets[9]);
+  object.uid = reader.readString(offsets[10]);
+  object.updatedAt = reader.readDateTime(offsets[11]);
   return object;
 }
 
@@ -176,26 +160,22 @@ P _investmentDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
-    case 4:
       return (reader.readDateTime(offset)) as P;
+    case 4:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 5:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
-    case 8:
-      return (reader.readString(offset)) as P;
-    case 9:
       return (reader.readStringOrNull(offset)) as P;
-    case 10:
+    case 8:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 11:
+    case 9:
       return (reader.readLongOrNull(offset)) as P;
-    case 12:
+    case 10:
       return (reader.readString(offset)) as P;
-    case 13:
+    case 11:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -615,79 +595,6 @@ extension InvestmentQueryFilter
     });
   }
 
-  QueryBuilder<Investment, Investment, QAfterFilterCondition>
-  colorValueIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'colorValue'),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition>
-  colorValueIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'colorValue'),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> colorValueEqualTo(
-    int? value,
-  ) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'colorValue', value: value),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition>
-  colorValueGreaterThan(int? value, {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'colorValue',
-          value: value,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition>
-  colorValueLessThan(int? value, {bool include = false}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'colorValue',
-          value: value,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> colorValueBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'colorValue',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
-    });
-  }
-
   QueryBuilder<Investment, Investment, QAfterFilterCondition> createdAtEqualTo(
     DateTime value,
   ) {
@@ -834,168 +741,6 @@ extension InvestmentQueryFilter
 
           epsilon: epsilon,
         ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'icon'),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'icon'),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'icon',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'icon',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'icon', value: ''),
-      );
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterFilterCondition> iconIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'icon', value: ''),
       );
     });
   }
@@ -1924,18 +1669,6 @@ extension InvestmentQuerySortBy
     });
   }
 
-  QueryBuilder<Investment, Investment, QAfterSortBy> sortByColorValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterSortBy> sortByColorValueDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.desc);
-    });
-  }
-
   QueryBuilder<Investment, Investment, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -1957,18 +1690,6 @@ extension InvestmentQuerySortBy
   QueryBuilder<Investment, Investment, QAfterSortBy> sortByCurrentValueDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentValue', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterSortBy> sortByIcon() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterSortBy> sortByIconDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.desc);
     });
   }
 
@@ -2096,18 +1817,6 @@ extension InvestmentQuerySortThenBy
     });
   }
 
-  QueryBuilder<Investment, Investment, QAfterSortBy> thenByColorValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterSortBy> thenByColorValueDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.desc);
-    });
-  }
-
   QueryBuilder<Investment, Investment, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -2129,18 +1838,6 @@ extension InvestmentQuerySortThenBy
   QueryBuilder<Investment, Investment, QAfterSortBy> thenByCurrentValueDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentValue', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterSortBy> thenByIcon() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QAfterSortBy> thenByIconDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.desc);
     });
   }
 
@@ -2266,12 +1963,6 @@ extension InvestmentQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Investment, Investment, QDistinct> distinctByColorValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'colorValue');
-    });
-  }
-
   QueryBuilder<Investment, Investment, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -2281,14 +1972,6 @@ extension InvestmentQueryWhereDistinct
   QueryBuilder<Investment, Investment, QDistinct> distinctByCurrentValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentValue');
-    });
-  }
-
-  QueryBuilder<Investment, Investment, QDistinct> distinctByIcon({
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'icon', caseSensitive: caseSensitive);
     });
   }
 
@@ -2372,12 +2055,6 @@ extension InvestmentQueryProperty
     });
   }
 
-  QueryBuilder<Investment, int?, QQueryOperations> colorValueProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'colorValue');
-    });
-  }
-
   QueryBuilder<Investment, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
@@ -2387,12 +2064,6 @@ extension InvestmentQueryProperty
   QueryBuilder<Investment, double?, QQueryOperations> currentValueProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentValue');
-    });
-  }
-
-  QueryBuilder<Investment, String?, QQueryOperations> iconProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'icon');
     });
   }
 

@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
@@ -28,7 +29,9 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
+import '../../transactions/data/transaction.dart';
 import '../data/account.dart';
+import '../providers/account_provider.dart';
 
 class AccountCard extends ConsumerWidget {
   final Account account;
@@ -51,6 +54,9 @@ class AccountCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
+    final lastTx = ref
+        .watch(accountLatestTransactionProvider(account.id))
+        .valueOrNull;
 
     final accentColor = resolveAccountColor(account);
     final iconData = resolveAccountIcon(account);
@@ -209,6 +215,12 @@ class AccountCard extends ConsumerWidget {
                   masked: masked,
                 ),
               ],
+
+              // --- Last activity -------------------------------------------
+              if (lastTx != null) ...[
+                const SizedBox(height: 12),
+                _LastActivityRow(transaction: lastTx, fmt: fmt, masked: masked),
+              ],
             ],
           ),
         ),
@@ -354,15 +366,18 @@ class _Utilization extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final pct = limit <= 0 ? 0.0 : (outstanding / limit).clamp(0.0, 1.0);
+    final rawPct = limit <= 0 ? 0.0 : outstanding / limit;
+    final pct = rawPct.clamp(0.0, 1.0);
     final available = (limit - outstanding).clamp(0.0, double.infinity);
 
-    // Color steps — green-ish < 30%, amber 30–70%, red > 70%
-    final fillColor = pct < 0.30
+    // Color steps — green < 30%, amber 30–<100%, red at or over 100%.
+    // Over-limit is checked against the raw (un-clamped) ratio so the bar
+    // clearly turns red the moment outstanding == limit.
+    final fillColor = rawPct >= 1.0
+        ? cs.error
+        : rawPct < 0.30
         ? cs.tertiary
-        : pct < 0.70
-        ? const Color(0xFFF59E0B) // warning — no slot on ColorScheme
-        : cs.error;
+        : const Color(0xFFF59E0B); // warning — no slot on ColorScheme
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -420,3 +435,79 @@ class _Utilization extends StatelessWidget {
   }
 }
 
+class _LastActivityRow extends StatelessWidget {
+  final Transaction transaction;
+  final dynamic fmt;
+  final bool masked;
+  const _LastActivityRow({
+    required this.transaction,
+    required this.fmt,
+    required this.masked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isExpense = transaction.type == 'expense';
+    final amountColor = isExpense ? cs.error : cs.tertiary;
+    final relTime = _formatRelative(transaction.createdAt);
+
+    return Container(
+      padding: const EdgeInsets.only(top: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.schedule_rounded,
+            size: 13,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              transaction.name,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '· $relTime',
+            style: GoogleFonts.inter(
+              fontSize: 11.5,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '${isExpense ? '−' : '+'}'
+            '${maskAmount(fmt.formatCurrency(transaction.amount.abs()), masked)}',
+            style: GoogleFonts.inter(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: amountColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatRelative(DateTime at) {
+    final now = DateTime.now();
+    final diff = now.difference(at);
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays == 1) return 'yesterday';
+    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    return DateFormat('MMM d').format(at);
+  }
+}

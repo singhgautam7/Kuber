@@ -72,217 +72,211 @@ class LoansHero extends ConsumerWidget {
       'MMM yyyy',
     ).format(DateTime.now()).toUpperCase();
 
+    // Loans hero accent flips to error when there's outstanding debt.
+    final heroAccent = totalOutstanding > 0 ? cs.error : cs.primary;
+
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(KuberRadius.xl),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.alphaBlend(
+              heroAccent.withValues(alpha: 0.16),
+              cs.surfaceContainer,
+            ),
+            cs.surfaceContainer,
+          ],
+          stops: const [0.0, 0.75],
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
         children: [
-          Positioned(
-            top: -60,
-            right: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cs.primary.withValues(alpha: 0.10),
-                ),
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'TOTAL OUTSTANDING DEBT',
-                            style: GoogleFonts.inter(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh,
-                            border: Border.all(color: cs.outline),
-                            borderRadius: BorderRadius.circular(KuberRadius.sm),
-                          ),
-                          child: Text(
-                            monthLabel,
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            maskAmount(
-                              fmt.formatCurrency(totalOutstanding),
-                              masked,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: cs.onSurface,
-                              letterSpacing: -0.8,
-                              height: 1.1,
-                            ),
-                          ),
-                        ),
-                        if (totalPrincipal > 0)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4, left: 8),
-                            child: Container(
-                              padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
-                              decoration: BoxDecoration(
-                                color: cs.tertiary.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(
-                                  KuberRadius.full,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.trending_down_rounded,
-                                    size: 14,
-                                    color: cs.tertiary,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${(paidPct * 100).toStringAsFixed(0)}% paid',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 11.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: cs.tertiary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text.rich(
-                      TextSpan(
+                    Expanded(
+                      child: Text(
+                        'TOTAL OUTSTANDING DEBT',
                         style: GoogleFonts.inter(
-                          fontSize: 11.5,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
+                          letterSpacing: 1.4,
                         ),
-                        children: [
-                          TextSpan(
-                            text: activeCount == 0
-                                ? 'no active loans'
-                                : '$activeCount active loan${activeCount == 1 ? '' : 's'}',
-                            style: GoogleFonts.inter(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          if (activeCount > 0 && nextDueLabel != null)
-                            TextSpan(text: ' · next EMI $nextDueLabel'),
-                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        border: Border.all(color: cs.outline),
+                        borderRadius: BorderRadius.circular(KuberRadius.sm),
+                      ),
+                      child: Text(
+                        monthLabel,
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 0.4,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    border: Border.all(color: cs.outline),
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: SizedBox(
-                          height: 8,
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        maskAmount(
+                          fmt.formatCurrency(totalOutstanding),
+                          masked,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                          letterSpacing: -0.8,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                    if (totalPrincipal > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4, left: 8),
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
+                          decoration: BoxDecoration(
+                            color: cs.tertiary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              KuberRadius.full,
+                            ),
+                          ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (paidPct > 0)
-                                Expanded(
-                                  flex: (paidPct * 1000).round().clamp(1, 1000),
-                                  child: ColoredBox(color: cs.tertiary),
+                              Icon(
+                                Icons.trending_down_rounded,
+                                size: 14,
+                                color: cs.tertiary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${(paidPct * 100).toStringAsFixed(0)}% paid',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.tertiary,
                                 ),
-                              Expanded(
-                                flex: ((1 - paidPct) * 1000).round().clamp(
-                                  1,
-                                  1000,
-                                ),
-                                child: ColoredBox(color: cs.outlineVariant),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _LegendBlock(
-                              color: cs.tertiary,
-                              label: 'Paid',
-                              value: maskAmount(
-                                fmt.formatCurrency(totalPaid),
-                                masked,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: _LegendBlock(
-                              color: cs.outlineVariant,
-                              label: 'Outstanding',
-                              value: maskAmount(
-                                fmt.formatCurrency(totalOutstanding),
-                                masked,
-                              ),
-                              alignEnd: true,
-                            ),
-                          ),
-                        ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text.rich(
+                  TextSpan(
+                    style: GoogleFonts.inter(
+                      fontSize: 11.5,
+                      color: cs.onSurfaceVariant,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: activeCount == 0
+                            ? 'no active loans'
+                            : '$activeCount active loan${activeCount == 1 ? '' : 's'}',
+                        style: GoogleFonts.inter(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
+                        ),
                       ),
+                      if (activeCount > 0 && nextDueLabel != null)
+                        TextSpan(text: ' · next EMI $nextDueLabel'),
                     ],
                   ),
                 ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: cs.surface,
+                border: Border.all(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberRadius.lg),
               ),
-            ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: SizedBox(
+                      height: 8,
+                      child: Row(
+                        children: [
+                          if (paidPct > 0)
+                            Expanded(
+                              flex: (paidPct * 1000).round().clamp(1, 1000),
+                              child: ColoredBox(color: cs.tertiary),
+                            ),
+                          Expanded(
+                            flex: ((1 - paidPct) * 1000).round().clamp(1, 1000),
+                            child: ColoredBox(color: cs.outlineVariant),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _LegendBlock(
+                          color: cs.tertiary,
+                          label: 'Paid',
+                          value: maskAmount(
+                            fmt.formatCurrency(totalPaid),
+                            masked,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: _LegendBlock(
+                          color: cs.outlineVariant,
+                          label: 'Outstanding',
+                          value: maskAmount(
+                            fmt.formatCurrency(totalOutstanding),
+                            masked,
+                          ),
+                          alignEnd: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

@@ -130,7 +130,7 @@ class _AccountsBody extends ConsumerWidget {
         SliverToBoxAdapter(
           child: KuberPageHeader(
             title: 'Manage\nAccounts',
-            description: 'Overview of your linked financial institutions.',
+            description: '',
             actionTooltip: 'Add Account',
             onAction: () => context.push('/accounts/add'),
           ),

@@ -31,8 +31,6 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
     required String loanType,
     required String lenderName,
     String? referenceNumber,
-    String? icon,
-    int? colorValue,
     required double principalAmount,
     required double emiAmount,
     String? rateType,
@@ -55,8 +53,6 @@ class LoanListNotifier extends AsyncNotifier<List<Loan>> {
       ..loanType = loanType
       ..lenderName = lenderName.trim()
       ..referenceNumber = referenceNumber?.trim()
-      ..icon = icon
-      ..colorValue = colorValue
       ..principalAmount = principalAmount
       ..emiAmount = emiAmount
       ..rateType = rateType

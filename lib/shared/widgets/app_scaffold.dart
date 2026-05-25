@@ -72,8 +72,15 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     }
     if (widget.navigationShell!.currentIndex !=
         oldWidget.navigationShell!.currentIndex) {
-      ref.read(currentShellTabIndexProvider.notifier).state =
-          widget.navigationShell!.currentIndex;
+      // Defer the provider mutation until after the current build phase to
+      // avoid `Tried to modify a provider while the widget tree was building`
+      // when GoRouter swaps the shell branch (e.g. View Transactions from
+      // the home accounts sheet routes us to the History tab mid-build).
+      final newIndex = widget.navigationShell!.currentIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(currentShellTabIndexProvider.notifier).state = newIndex;
+      });
       if (_pageController.hasClients &&
           _pageController.page?.round() !=
               widget.navigationShell!.currentIndex) {
@@ -335,7 +342,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       },
       child: content,
     );
-
   }
 }
 

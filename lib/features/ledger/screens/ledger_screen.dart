@@ -94,7 +94,7 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
               SliverToBoxAdapter(
                 child: KuberPageHeader(
                   title: 'Lent &\nBorrowed',
-                  description: 'Track money owed to and by you.',
+                  description: '',
                   actionTooltip: 'Add Entry',
                   onAction: () => context.push('/ledger/add'),
                 ),

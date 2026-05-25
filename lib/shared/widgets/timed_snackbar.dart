@@ -124,11 +124,23 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
   late final AnimationController _progressCtrl;
   bool _actionFired = false;
 
+  // Drag-to-dismiss state (in logical pixels). dx > 0 = right, dy < 0 = up.
+  // Reset to (0, 0) on a non-dismiss drag end.
+  Offset _dragOffset = Offset.zero;
+
+  // Above either threshold a dismiss is committed even if velocity is low.
+  static const double _kSwipeDistanceThreshold = 80.0;
+  // Above either velocity (px/s) a fling commits even with low distance.
+  static const double _kSwipeVelocityThreshold = 600.0;
+
   @override
   void initState() {
     super.initState();
     _slideCtrl = AnimationController(vsync: this, duration: _kAnimDuration);
-    _slideAnim = CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOutCubic);
+    _slideAnim = CurvedAnimation(
+      parent: _slideCtrl,
+      curve: Curves.easeOutCubic,
+    );
     _progressCtrl = AnimationController(vsync: this, duration: _kSnackDuration);
     widget.controller._attach(this);
     _slideCtrl.forward();
@@ -155,6 +167,42 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
     cb?.call();
   }
 
+  void _onDragStart(DragStartDetails _) {
+    // Pause the auto-dismiss timer once a drag begins — without this the
+    // snackbar can disappear mid-swipe and leave a janky frame.
+    _progressCtrl.stop();
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    setState(() {
+      // Allow horizontal movement freely; vertical only upward (dy ≤ 0)
+      // since the snackbar lives at the top of the screen.
+      final dx = _dragOffset.dx + details.delta.dx;
+      final dy = (_dragOffset.dy + details.delta.dy).clamp(-200.0, 0.0);
+      _dragOffset = Offset(dx, dy);
+    });
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final v = details.velocity.pixelsPerSecond;
+    final distanceMet =
+        _dragOffset.dx.abs() >= _kSwipeDistanceThreshold ||
+        _dragOffset.dy <= -_kSwipeDistanceThreshold;
+    final velocityMet =
+        v.dx.abs() >= _kSwipeVelocityThreshold ||
+        v.dy <= -_kSwipeVelocityThreshold;
+
+    if (distanceMet || velocityMet) {
+      widget.onRequestClose();
+      return;
+    }
+
+    // Not dismissed — settle the snackbar back to its resting position
+    // and resume the auto-dismiss countdown.
+    setState(() => _dragOffset = Offset.zero);
+    _progressCtrl.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -169,109 +217,130 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
         animation: _slideAnim,
         builder: (context, child) {
           final t = _slideAnim.value;
+          // Compose the entry-animation slide with the user's drag offset
+          // and fade the snackbar as it travels off screen so the dismiss
+          // reads as intentional.
+          final entryOffset = Offset(0, (1 - t) * -80);
+          final totalOffset = entryOffset + _dragOffset;
+          final dragDistance = _dragOffset.distance;
+          // Cap the fade at ~50% drag-progress; full fade kicks in only
+          // when the user actually flings the snackbar away.
+          final dragFade = (dragDistance / 200).clamp(0.0, 0.5);
           return Transform.translate(
-            offset: Offset(0, (1 - t) * -80),
-            child: Opacity(opacity: t, child: child),
+            offset: totalOffset,
+            child: Opacity(
+              opacity: (t * (1 - dragFade)).clamp(0.0, 1.0),
+              child: child,
+            ),
           );
         },
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: widget.isError ? cs.error : cs.outline),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: _onDragStart,
+          onHorizontalDragUpdate: _onDragUpdate,
+          onHorizontalDragEnd: _onDragEnd,
+          onVerticalDragStart: _onDragStart,
+          onVerticalDragUpdate: _onDragUpdate,
+          onVerticalDragEnd: _onDragEnd,
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                color: cs.surfaceContainer,
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border: Border.all(
+                  color: widget.isError ? cs.error : cs.outline,
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Left bar indicator
-                Container(
-                  width: 4,
-                  height: 48,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  // Left bar indicator
+                  Container(
+                    width: 4,
+                    height: 48,
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: barColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(
+                    widget.isError
+                        ? Icons.error_outline_rounded
+                        : Icons.check_circle_outline_rounded,
                     color: barColor,
-                    borderRadius: BorderRadius.circular(2),
+                    size: 22,
                   ),
-                ),
-                const SizedBox(width: 12),
-                Icon(
-                  widget.isError
-                      ? Icons.error_outline_rounded
-                      : Icons.check_circle_outline_rounded,
-                  color: barColor,
-                  size: 22,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.message,
-                          style: TextStyle(
-                            color: cs.onSurface,
-                            fontSize: 14,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.message,
+                            style: TextStyle(color: cs.onSurface, fontSize: 14),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        AnimatedBuilder(
-                          animation: _progressCtrl,
-                          builder: (context, _) {
-                            return LinearProgressIndicator(
-                              value: 1.0 - _progressCtrl.value,
-                              minHeight: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(cs.primary),
-                              backgroundColor: cs.outline,
-                              borderRadius: BorderRadius.circular(1),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                if (widget.secondaryActionLabel != null)
-                  TextButton(
-                    onPressed: () => _handleAction(widget.onSecondaryAction),
-                    child: Text(
-                      widget.secondaryActionLabel!,
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
+                          const SizedBox(height: 8),
+                          AnimatedBuilder(
+                            animation: _progressCtrl,
+                            builder: (context, _) {
+                              return LinearProgressIndicator(
+                                value: 1.0 - _progressCtrl.value,
+                                minHeight: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  cs.primary,
+                                ),
+                                backgroundColor: cs.outline,
+                                borderRadius: BorderRadius.circular(1),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                if (widget.actionLabel != null)
-                  TextButton(
-                    onPressed: () => _handleAction(widget.onAction),
-                    child: Text(
-                      widget.actionLabel!,
-                      style: TextStyle(
-                        color: cs.primary,
-                        fontWeight: FontWeight.w600,
+                  const SizedBox(width: 4),
+                  if (widget.secondaryActionLabel != null)
+                    TextButton(
+                      onPressed: () => _handleAction(widget.onSecondaryAction),
+                      child: Text(
+                        widget.secondaryActionLabel!,
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
+                  if (widget.actionLabel != null)
+                    TextButton(
+                      onPressed: () => _handleAction(widget.onAction),
+                      child: Text(
+                        widget.actionLabel!,
+                        style: TextStyle(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    color: cs.onSurfaceVariant,
+                    onPressed: widget.onRequestClose,
                   ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  color: cs.onSurfaceVariant,
-                  onPressed: widget.onRequestClose,
-                ),
-                const SizedBox(width: 4),
-              ],
+                  const SizedBox(width: 4),
+                ],
+              ),
             ),
           ),
         ),

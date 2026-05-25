@@ -792,7 +792,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     setState(() {
       _nameController.text = suggestion.displayName;
-      if (suggestion.amount != null) {
+      // Respect a user-entered amount: only autofill when the field is
+      // empty or parses to zero. The amount field uses thousands grouping
+      // (commas), so strip those before parsing.
+      final currentAmount = double.tryParse(
+        _amountController.text.trim().replaceAll(',', ''),
+      );
+      final amountIsEmpty = currentAmount == null || currentAmount == 0;
+      if (suggestion.amount != null && amountIsEmpty) {
         final isIndian =
             ref.read(formatterProvider).system == NumberSystem.indian;
         final unformattedText =

@@ -13,6 +13,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/info_provider.dart';
@@ -111,8 +112,8 @@ class RecurringScreen extends ConsumerWidget {
               ),
               SliverToBoxAdapter(
                 child: KuberPageHeader(
-                  title: 'Manage\nAutomations',
-                  description: 'Your active subscriptions and bill automations',
+                  title: 'Recurring\nTransactions',
+                  description: '',
                   actionTooltip: 'Add Recurring',
                   onAction: () => context.push('/recurring/add'),
                 ),
@@ -170,14 +171,10 @@ class RecurringScreen extends ConsumerWidget {
                             ruleName: rule.name,
                             frequencyLabel: _frequencyLabel(rule.frequency),
                             accountName: accountName,
-                            icon: rule.icon != null
-                                ? IconMapper.fromString(rule.icon!)
-                                : cat != null
+                            icon: cat != null
                                 ? IconMapper.fromString(cat.icon)
                                 : Icons.category_outlined,
-                            iconColor: rule.colorValue != null
-                                ? Color(rule.colorValue!)
-                                : cat != null
+                            iconColor: cat != null
                                 ? harmonizeCategory(
                                     context,
                                     Color(cat.colorValue),
@@ -230,6 +227,11 @@ class RecurringScreen extends ConsumerWidget {
                                   amount: t.type == 'expense'
                                       ? -t.amount
                                       : t.amount,
+                                  onTap: () => showTransactionDetailSheet(
+                                    context,
+                                    ref,
+                                    t,
+                                  ),
                                 );
                               }),
                             ],

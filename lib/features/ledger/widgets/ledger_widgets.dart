@@ -66,110 +66,104 @@ class LedgerHero extends ConsumerWidget {
         color: cs.surfaceContainer,
         border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(KuberRadius.xl),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.alphaBlend(
+              netColor.withValues(alpha: 0.16),
+              cs.surfaceContainer,
+            ),
+            cs.surfaceContainer,
+          ],
+          stops: const [0.0, 0.75],
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
         children: [
-          Positioned(
-            top: -60,
-            right: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: netColor.withValues(alpha: 0.10),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'NET POSITION',
+                  style: GoogleFonts.inter(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 1.4,
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'NET POSITION',
-                      style: GoogleFonts.inter(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.4,
-                      ),
+                const SizedBox(height: 4),
+                Text(
+                  isFlat
+                      ? '₹0'
+                      : '${isFavour ? '+' : '−'}'
+                            '${maskAmount(fmt.formatCurrency(net.abs()), masked)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: netColor,
+                    letterSpacing: -0.8,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text.rich(
+                  TextSpan(
+                    style: GoogleFonts.inter(
+                      fontSize: 11.5,
+                      color: cs.onSurfaceVariant,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isFlat
-                          ? '₹0'
-                          : '${isFavour ? '+' : '−'}'
-                                '${maskAmount(fmt.formatCurrency(net.abs()), masked)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: netColor,
-                        letterSpacing: -0.8,
-                        height: 1.1,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text.rich(
+                    children: [
                       TextSpan(
+                        text: isFlat
+                            ? 'evens out'
+                            : isFavour
+                            ? 'in your favour'
+                            : 'owed to others',
+                      ),
+                      const TextSpan(text: ' · '),
+                      TextSpan(
+                        text:
+                            '$activeCount active entr${activeCount == 1 ? 'y' : 'ies'}',
                         style: GoogleFonts.inter(
                           fontSize: 11.5,
-                          color: cs.onSurfaceVariant,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface,
                         ),
-                        children: [
-                          TextSpan(
-                            text: isFlat
-                                ? 'evens out'
-                                : isFavour
-                                ? 'in your favour'
-                                : 'owed to others',
-                          ),
-                          const TextSpan(text: ' · '),
-                          TextSpan(
-                            text:
-                                '$activeCount active entr${activeCount == 1 ? 'y' : 'ies'}',
-                            style: GoogleFonts.inter(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _SideCard(
-                        side: _Side.receive,
-                        amount: toReceive,
-                        peopleCount: receiveCount,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _SideCard(
-                        side: _Side.owe,
-                        amount: owed,
-                        peopleCount: oweCount,
-                      ),
-                    ),
-                  ],
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _SideCard(
+                    side: _Side.receive,
+                    amount: toReceive,
+                    peopleCount: receiveCount,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _SideCard(
+                    side: _Side.owe,
+                    amount: owed,
+                    peopleCount: oweCount,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

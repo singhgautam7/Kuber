@@ -79,190 +79,189 @@ class NetWorthHeroCard extends ConsumerWidget {
     final total = totalAssets + totalDebt;
     final assetPct = total <= 0 ? 0.0 : (totalAssets / total).clamp(0.0, 1.0);
 
+    // Hero accent flips to error when net worth is negative — the gradient
+    // and the sparkline both pick this up so a debt-heavy state reads at a
+    // glance.
+    final isNegative = netWorth < 0;
+    final heroAccent = isNegative ? cs.error : cs.primary;
+
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.xl),
         border: Border.all(color: cs.outline),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.alphaBlend(
+              heroAccent.withValues(alpha: 0.16),
+              cs.surfaceContainer,
+            ),
+            cs.surfaceContainer,
+          ],
+          stops: const [0.0, 0.75],
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Soft accent disc, mirrors the dashboard's hero treatment.
-          Positioned(
-            top: -60,
-            right: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cs.primary.withValues(alpha: 0.10),
+          // --- Top: eyebrow + month + amount + trend -----------------
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'TOTAL NET WORTH',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                    ),
+                    _MonthPill(label: monthLabel),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        maskAmount(
+                          '${netWorth < 0 ? '−' : ''}${fmt.formatCurrency(netWorth.abs())}',
+                          masked,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: netWorth < 0 ? cs.error : cs.onSurface,
+                          letterSpacing: -1,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                    if (hasTrend)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4, left: 8),
+                        child: _TrendPill(
+                          up: trendUp,
+                          percent: trendPercent!,
+                          color: trendColor,
+                          bg: trendBg,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  hasTrend
+                      ? '${trendAbsolute! >= 0 ? '+' : '−'}'
+                            '${maskAmount(fmt.formatCurrency(trendAbsolute!.abs()), masked)}'
+                            ' vs last month  ·  6-month trend'
+                      : '6-month trend',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // --- Sparkline -----------------------------------------------
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+            child: SizedBox(
+              height: 76,
+              child: CustomPaint(
+                painter: _SparklinePainter(
+                  data: series,
+                  lineColor: heroAccent,
+                  fillColor: heroAccent.withValues(alpha: 0.18),
+                  dotRingColor: cs.surfaceContainer,
+                  tickColor: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                  labels: _last6MonthLabels(),
                 ),
               ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // --- Top: eyebrow + month + amount + trend -----------------
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'TOTAL NET WORTH',
-                            style: GoogleFonts.inter(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                        ),
-                        _MonthPill(label: monthLabel),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            maskAmount(
-                              '${netWorth < 0 ? '−' : ''}${fmt.formatCurrency(netWorth.abs())}',
-                              masked,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: netWorth < 0 ? cs.error : cs.onSurface,
-                              letterSpacing: -1,
-                              height: 1.1,
-                            ),
-                          ),
-                        ),
-                        if (hasTrend)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 4, left: 8),
-                            child: _TrendPill(
-                              up: trendUp,
-                              percent: trendPercent!,
-                              color: trendColor,
-                              bg: trendBg,
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      hasTrend
-                          ? '${trendAbsolute! >= 0 ? '+' : '−'}'
-                                '${maskAmount(fmt.formatCurrency(trendAbsolute!.abs()), masked)}'
-                                ' vs last month  ·  6-month trend'
-                          : '6-month trend',
-                      style: GoogleFonts.inter(
-                        fontSize: 11.5,
-                        color: cs.onSurfaceVariant,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
 
-              // --- Sparkline -----------------------------------------------
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
-                child: SizedBox(
-                  height: 76,
-                  child: CustomPaint(
-                    painter: _SparklinePainter(
-                      data: series,
-                      lineColor: cs.primary,
-                      fillColor: cs.primary.withValues(alpha: 0.18),
-                      dotRingColor: cs.surfaceContainer,
-                      tickColor: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                      labels: _last6MonthLabels(),
-                    ),
-                  ),
-                ),
+          // --- Assets / Debt breakdown ---------------------------------
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
+            child: Container(
+              decoration: BoxDecoration(
+                color: cs.surface,
+                borderRadius: BorderRadius.circular(KuberRadius.lg),
+                border: Border.all(color: cs.outline),
               ),
-
-              // --- Assets / Debt breakdown ---------------------------------
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
-                    border: Border.all(color: cs.outline),
-                  ),
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Divided bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: SizedBox(
-                          height: 8,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: (assetPct * 1000).round().clamp(1, 1000),
-                                child: ColoredBox(color: cs.tertiary),
-                              ),
-                              if (totalDebt > 0)
-                                Expanded(
-                                  flex: ((1 - assetPct) * 1000).round().clamp(
-                                    1,
-                                    1000,
-                                  ),
-                                  child: ColoredBox(color: cs.error),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Divided bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: SizedBox(
+                      height: 8,
+                      child: Row(
                         children: [
                           Expanded(
-                            child: _LegendBlock(
-                              dotColor: cs.tertiary,
-                              label: 'Assets',
-                              value: maskAmount(
-                                fmt.formatCurrency(totalAssets),
-                                masked,
-                              ),
-                            ),
+                            flex: (assetPct * 1000).round().clamp(1, 1000),
+                            child: ColoredBox(color: cs.tertiary),
                           ),
-                          Expanded(
-                            child: _LegendBlock(
-                              dotColor: cs.error,
-                              label: 'Debt',
-                              value: maskAmount(
-                                fmt.formatCurrency(totalDebt),
-                                masked,
+                          if (totalDebt > 0)
+                            Expanded(
+                              flex: ((1 - assetPct) * 1000).round().clamp(
+                                1,
+                                1000,
                               ),
-                              alignEnd: true,
+                              child: ColoredBox(color: cs.error),
                             ),
-                          ),
                         ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _LegendBlock(
+                          dotColor: cs.tertiary,
+                          label: 'Assets',
+                          value: maskAmount(
+                            fmt.formatCurrency(totalAssets),
+                            masked,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: _LegendBlock(
+                          dotColor: cs.error,
+                          label: 'Debt',
+                          value: maskAmount(
+                            fmt.formatCurrency(totalDebt),
+                            masked,
+                          ),
+                          alignEnd: true,
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),

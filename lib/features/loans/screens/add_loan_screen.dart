@@ -7,14 +7,11 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/app_button.dart';
-import '../../../shared/widgets/form_widgets.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/loan.dart';
 import '../providers/loan_provider.dart';
@@ -41,8 +38,6 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   int _billDate = 1;
   DateTime _startDate = DateTime.now();
   String? _selectedAccountId;
-  IconData _selectedIcon = Icons.work;
-  Color? _selectedColor;
   bool _autoAddTransaction = false;
   final _notesController = TextEditingController();
   bool _isEditing = false;
@@ -53,8 +48,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final e = widget.existing;
     if (e != null) {
       _isEditing = true;
-      _principalController.text =
-          e.principalAmount == e.principalAmount.truncateToDouble()
+      _principalController.text = e.principalAmount == e.principalAmount.truncateToDouble()
           ? e.principalAmount.toInt().toString()
           : e.principalAmount.toStringAsFixed(2);
       _loanType = e.loanType;
@@ -70,18 +64,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       _billDate = e.billDate;
       _startDate = e.startDate;
       _selectedAccountId = e.accountId;
-      _selectedIcon = e.icon != null
-          ? IconMapper.fromString(e.icon!)
-          : Icons.work;
-      _selectedColor = e.colorValue != null ? Color(e.colorValue!) : null;
       _autoAddTransaction = e.autoAddTransaction;
       _notesController.text = e.notes ?? '';
     }
   }
 
   double get _principalAmount =>
-      double.tryParse(_principalController.text.trim().replaceAll(',', '')) ??
-      0;
+      double.tryParse(_principalController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void dispose() {
@@ -98,7 +87,6 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    _selectedColor ??= cs.primary;
     final symbol = ref.watch(currencyProvider).symbol;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
     final selectedAccount = accounts
@@ -123,8 +111,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -139,11 +129,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      CurrencyInputFormatter(
-                        isIndian:
-                            ref.watch(formatterProvider).system ==
-                            NumberSystem.indian,
-                      ),
+                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                     ],
                     suffixIcon: GestureDetector(
                       onTap: () => _openCalculator(context),
@@ -152,13 +138,12 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                         height: 44,
                         margin: const EdgeInsets.only(right: 4),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          borderRadius:
+                              BorderRadius.circular(KuberRadius.md),
                           border: Border.all(color: cs.outline),
                         ),
-                        child: Icon(
-                          Icons.calculate_outlined,
-                          color: cs.onSurfaceVariant,
-                        ),
+                        child: Icon(Icons.calculate_outlined,
+                            color: cs.onSurfaceVariant),
                       ),
                     ),
                   ),
@@ -173,18 +158,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     runSpacing: 8,
                     children: [
                       _typeChip('Home', Icons.home_outlined, 'home'),
+                      _typeChip('Vehicle', Icons.directions_car_outlined,
+                          'vehicle'),
                       _typeChip(
-                        'Vehicle',
-                        Icons.directions_car_outlined,
-                        'vehicle',
-                      ),
-                      _typeChip('Personal', Icons.work_outline, 'personal'),
+                          'Personal', Icons.work_outline, 'personal'),
+                      _typeChip('Education', Icons.school_outlined,
+                          'education'),
                       _typeChip(
-                        'Education',
-                        Icons.school_outlined,
-                        'education',
-                      ),
-                      _typeChip('Other', Icons.description_outlined, 'other'),
+                          'Other', Icons.description_outlined, 'other'),
                     ],
                   ),
 
@@ -196,23 +177,6 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                   _buildTextField(
                     controller: _nameController,
                     hint: 'e.g. Home Mortgage - 5th Ave',
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  _FieldLabel('ICON & COLOR'),
-                  const SizedBox(height: 8),
-                  FormIconPicker(
-                    icons: _loanIcons,
-                    selected: _selectedIcon,
-                    onChanged: (icon) => setState(() => _selectedIcon = icon),
-                  ),
-                  const SizedBox(height: 12),
-                  FormColorPicker(
-                    colors: _formPalette(context),
-                    selected: _selectedColor!,
-                    onChanged: (color) =>
-                        setState(() => _selectedColor = color),
                   ),
 
                   const SizedBox(height: 24),
@@ -246,11 +210,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     prefix: symbol,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      CurrencyInputFormatter(
-                        isIndian:
-                            ref.watch(formatterProvider).system ==
-                            NumberSystem.indian,
-                      ),
+                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                     ],
                     suffixIcon: GestureDetector(
                       onTap: () => _openCalculatorFor(_emiController),
@@ -259,13 +219,12 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                         height: 44,
                         margin: const EdgeInsets.only(right: 4),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          borderRadius:
+                              BorderRadius.circular(KuberRadius.md),
                           border: Border.all(color: cs.outline),
                         ),
-                        child: Icon(
-                          Icons.calculate_outlined,
-                          color: cs.onSurfaceVariant,
-                        ),
+                        child: Icon(Icons.calculate_outlined,
+                            color: cs.onSurfaceVariant),
                       ),
                     ),
                   ),
@@ -283,11 +242,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                           hint: 'e.g. 8.45',
                           keyboardType: TextInputType.number,
                           inputFormatters: [
-                            CurrencyInputFormatter(
-                              isIndian:
-                                  ref.watch(formatterProvider).system ==
-                                  NumberSystem.indian,
-                            ),
+                            CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                           ],
                         ),
                       ),
@@ -308,27 +263,22 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                          horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.event_outlined,
-                            size: 16,
-                            color: cs.onSurfaceVariant,
-                          ),
+                          Icon(Icons.event_outlined,
+                              size: 16, color: cs.onSurfaceVariant),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               _loanStartDate != null
-                                  ? DateFormat(
-                                      'MMM d, yyyy',
-                                    ).format(_loanStartDate!)
+                                  ? DateFormat('MMM d, yyyy')
+                                      .format(_loanStartDate!)
                                   : 'No date set',
                               style: GoogleFonts.inter(
                                 fontSize: 14,
@@ -341,13 +291,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                           ),
                           if (_loanStartDate != null)
                             GestureDetector(
-                              onTap: () =>
-                                  setState(() => _loanStartDate = null),
-                              child: Icon(
-                                Icons.close,
-                                size: 16,
-                                color: cs.onSurfaceVariant,
-                              ),
+                              onTap: () => setState(
+                                  () => _loanStartDate = null),
+                              child: Icon(Icons.close,
+                                  size: 16,
+                                  color: cs.onSurfaceVariant),
                             ),
                         ],
                       ),
@@ -373,7 +321,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
+                      borderRadius:
+                          BorderRadius.circular(KuberRadius.md),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<int>(
@@ -409,12 +358,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                          horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
@@ -430,11 +378,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                               ),
                             ),
                           ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: cs.onSurfaceVariant,
-                            size: 20,
-                          ),
+                          Icon(Icons.chevron_right,
+                              color: cs.onSurfaceVariant, size: 20),
                         ],
                       ),
                     ),
@@ -448,19 +393,18 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        borderRadius:
+                            BorderRadius.circular(KuberRadius.md),
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.calendar_month,
-                            size: 20,
-                            color: cs.onSurfaceVariant,
-                          ),
+                          Icon(Icons.calendar_month,
+                              size: 20, color: cs.onSurfaceVariant),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Auto-Payment',
@@ -510,11 +454,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           // Save button
           Padding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              8,
-              KuberSpacing.lg,
-              KuberSpacing.lg,
-            ),
+                KuberSpacing.lg, 8, KuberSpacing.lg, KuberSpacing.lg),
             child: AppButton(
               label: _isEditing ? 'SAVE CHANGES' : 'CONFIRM & ADD LOAN',
               type: AppButtonType.primary,
@@ -541,11 +481,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? Colors.white : cs.onSurfaceVariant,
-            ),
+            Icon(icon,
+                size: 16,
+                color: isSelected ? Colors.white : cs.onSurfaceVariant),
             const SizedBox(width: 6),
             Text(
               label,
@@ -565,11 +503,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final cs = Theme.of(context).colorScheme;
     final isSelected = _rateType == value;
     return GestureDetector(
-      onTap: () => setState(() => _rateType = isSelected ? null : value),
+      onTap: () =>
+          setState(() => _rateType = isSelected ? null : value),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHighest,
+          color: isSelected
+              ? cs.primary
+              : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: Text(
@@ -638,7 +579,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_today, size: 16, color: cs.onSurfaceVariant),
+            Icon(Icons.calendar_today,
+                size: 16, color: cs.onSurfaceVariant),
             const SizedBox(width: 10),
             Text(
               DateFormat('MMM d, yyyy').format(date),
@@ -658,8 +600,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     return _principalAmount > 0 &&
         _nameController.text.trim().isNotEmpty &&
         _emiController.text.trim().isNotEmpty &&
-        (double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0) >
-            0 &&
+        (double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0) > 0 &&
         _selectedAccountId != null;
   }
 
@@ -676,13 +617,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => KuberCalculator(
-        initialValue:
-            double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
+        initialValue: double.tryParse(controller.text.trim().replaceAll(',', '')) ?? 0,
         onConfirm: (result) {
           setState(() {
             controller.text = result == result.truncateToDouble()
@@ -706,9 +645,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
@@ -746,17 +684,15 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
   Future<void> _save(BuildContext context) async {
     // Find "Loan EMI" category
-    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
+    final categories =
+        ref.read(categoryListProvider).valueOrNull ?? [];
     final loanCat = categories.firstWhere(
       (c) => c.name == 'Loan EMI',
       orElse: () => categories.first,
     );
 
-    final emi =
-        double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0;
-    final interest = double.tryParse(
-      _interestController.text.trim().replaceAll(',', ''),
-    );
+    final emi = double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0;
+    final interest = double.tryParse(_interestController.text.trim().replaceAll(',', ''));
 
     if (_isEditing) {
       final loan = widget.existing!
@@ -766,8 +702,6 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         ..referenceNumber = _refController.text.trim().isNotEmpty
             ? _refController.text.trim()
             : null
-        ..icon = IconMapper.toStringName(_selectedIcon)
-        ..colorValue = _selectedColor?.toARGB32()
         ..principalAmount = _principalAmount
         ..emiAmount = emi
         ..rateType = _rateType
@@ -784,17 +718,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
       await ref.read(loanListProvider.notifier).updateLoan(loan);
     } else {
-      await ref
-          .read(loanListProvider.notifier)
-          .addLoan(
+      await ref.read(loanListProvider.notifier).addLoan(
             name: _nameController.text.trim(),
             loanType: _loanType,
             lenderName: _lenderController.text.trim(),
             referenceNumber: _refController.text.trim().isNotEmpty
                 ? _refController.text.trim()
                 : null,
-            icon: IconMapper.toStringName(_selectedIcon),
-            colorValue: _selectedColor?.toARGB32(),
             principalAmount: _principalAmount,
             emiAmount: emi,
             rateType: _rateType,
@@ -832,33 +762,4 @@ class _FieldLabel extends StatelessWidget {
       ),
     );
   }
-}
-
-const _loanIcons = [
-  Icons.home,
-  Icons.directions_car,
-  Icons.school,
-  Icons.work,
-  Icons.credit_card,
-  Icons.account_balance,
-  Icons.store,
-  Icons.flight,
-  Icons.savings,
-  Icons.payments,
-  Icons.wallet,
-  Icons.more_horiz,
-];
-
-List<Color> _formPalette(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
-  return [
-    cs.primary,
-    cs.tertiary,
-    cs.error,
-    cs.secondary,
-    cs.onSurfaceVariant,
-    cs.primaryContainer,
-    cs.tertiaryContainer,
-    cs.errorContainer,
-  ];
 }

@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
@@ -79,7 +78,7 @@ class InvestmentsScreen extends ConsumerWidget {
                 child: KuberPageHeader(
                   title: 'Investments',
                   description:
-                      'Track your portfolio value, contributions and growth.',
+                      '',
                   actionTooltip: 'Add Investment',
                   onAction: () => context.push('/investments/add'),
                 ),
@@ -193,12 +192,8 @@ class _InvestmentRow extends ConsumerWidget {
     return InvestmentCard(
       name: investment.name,
       assetTypeLabel: label.toUpperCase(),
-      icon: investment.icon != null
-          ? IconMapper.fromString(investment.icon!)
-          : _investmentIcon(investment.investmentType),
-      iconColor: investment.colorValue != null
-          ? Color(investment.colorValue!)
-          : _assetColor(context, label),
+      icon: _investmentIcon(investment.investmentType),
+      iconColor: _assetColor(context, label),
       quantityLabel: investment.autoDebit && investment.sipAmount != null
           ? 'SIP ${fmt.formatCurrency(investment.sipAmount!)}'
           : null,

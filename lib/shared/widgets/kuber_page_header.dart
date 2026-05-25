@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 class KuberPageHeader extends StatelessWidget {
   final String title;
-  final String description;
+
+  /// Optional supporting copy under the title. When null or empty, the
+  /// description Text + its spacer are skipped entirely and the action
+  /// FAB is centered vertically against the title.
+  final String? description;
   final IconData actionIcon;
   final VoidCallback? onAction;
   final String? actionTooltip;
@@ -11,7 +15,7 @@ class KuberPageHeader extends StatelessWidget {
   const KuberPageHeader({
     super.key,
     required this.title,
-    required this.description,
+    this.description,
     this.actionIcon = Icons.add_rounded,
     this.onAction,
     this.actionTooltip,
@@ -21,11 +25,17 @@ class KuberPageHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final hasDescription = description != null && description!.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // Center-align with title when there's no description; top-align
+        // when description is present so the FAB lines up with the title
+        // rather than floating to the visual middle of the two-line block.
+        crossAxisAlignment: hasDescription
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           // Content
           Expanded(
@@ -42,22 +52,26 @@ class KuberPageHeader extends StatelessWidget {
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 13,
-                    color: cs.onSurfaceVariant,
+                if (hasDescription) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    description!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 13,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
 
-          // Action Button
+          // Action Button. The 4 px top-padding only matters in the
+          // has-description case (to optically align with the title
+          // baseline); skip it when we're centering against title alone.
           if (onAction != null)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: EdgeInsets.only(top: hasDescription ? 4 : 0),
               child: Tooltip(
                 message: actionTooltip ?? '',
                 child: GestureDetector(
@@ -90,11 +104,7 @@ class KuberPageHeader extends StatelessWidget {
                               strokeWidth: 2.5,
                             ),
                           )
-                        : Icon(
-                            actionIcon,
-                            color: Colors.white,
-                            size: 26,
-                          ),
+                        : Icon(actionIcon, color: Colors.white, size: 26),
                   ),
                 ),
               ),

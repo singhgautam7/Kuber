@@ -35,7 +35,11 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../dev/providers/dev_mode_provider.dart';
-import '../../settings/providers/settings_provider.dart' show appVersionProvider;
+import '../../notifications/providers/notification_provider.dart';
+import '../../notifications/utils/deep_link_handler.dart';
+import '../../notifications/widgets/notifications_sheet.dart';
+import '../../settings/providers/settings_provider.dart'
+    show appVersionProvider;
 import '../../tutorial/models/tutorial_step_keys.dart';
 // TODO: re-use the existing `launchTutorialFromMore(context, ref)` helper
 // declared in more_screen.dart — export it from there or move it into a
@@ -75,20 +79,13 @@ class MoreScreenModern extends ConsumerWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // 01 / MANAGE -------------------------------------------------
-                _GroupHead(
-                  num: '01',
-                  name: 'Manage',
-                  hint: '$accountCount space${accountCount == 1 ? '' : 's'}',
-                ),
+                const _GroupHead(num: '01', name: 'Manage', hint: '8 spaces'),
                 _HeroTile(
                   icon: Icons.account_balance_wallet,
                   label: 'ACCOUNTS',
                   title: 'Your wallets and\nbank accounts',
                   meta:
                       '$accountCount account${accountCount == 1 ? '' : 's'} tracked',
-                  // accountCount is the only stable signal at this layer; the
-                  // total tracked amount would require summing balance providers
-                  // — wire that in when reusing _NetWorthCard's computation.
                   onTap: () => context.push('/more/accounts'),
                 ),
                 const SizedBox(height: KuberSpacing.sm),
@@ -131,17 +128,13 @@ class MoreScreenModern extends ConsumerWidget {
                       sub: 'EMIs and repayment',
                       onTap: () => context.push('/more/loans'),
                     ),
+                    _ManageTileData(
+                      icon: Icons.show_chart_rounded,
+                      label: 'Investments',
+                      sub: 'Portfolio and growth',
+                      onTap: () => context.push('/more/investments'),
+                    ),
                   ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                _HeroTile(
-                  icon: Icons.show_chart,
-                  label: 'PORTFOLIO',
-                  title: 'Investments',
-                  titleSize: 18,
-                  meta: 'Track portfolio value and growth',
-                  accent: _HeroAccent.income,
-                  onTap: () => context.push('/more/investments'),
                 ),
 
                 const SizedBox(height: KuberSpacing.xl),
@@ -194,6 +187,12 @@ class MoreScreenModern extends ConsumerWidget {
                       onTap: () => context.push('/more/data'),
                     ),
                     _CompactRowData(
+                      icon: Icons.notifications_outlined,
+                      label: 'Notifications',
+                      sub: 'Recent alerts and reminders',
+                      onTap: () => _openNotificationsSheet(context, ref),
+                    ),
+                    _CompactRowData(
                       icon: Icons.build,
                       label: 'Troubleshoot',
                       sub: 'Fix data and suggestion issues',
@@ -224,9 +223,34 @@ class MoreScreenModern extends ConsumerWidget {
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // 05 / HELP US ------------------------------------------------
+                // 05 / CONTACT US ---------------------------------------------
+                const _GroupHead(num: '05', name: 'Contact Us'),
+                _DenseList(
+                  rows: [
+                    _DenseRowData(
+                      icon: Icons.info_outline_rounded,
+                      label: 'About Kuber',
+                      onTap: () => context.pushNamed('about'),
+                    ),
+                    _DenseRowData(
+                      icon: Icons.security_outlined,
+                      label: 'Permissions',
+                      onTap: () => context.pushNamed('permissions'),
+                    ),
+                    if (isDevMode)
+                      _DenseRowData(
+                        icon: Icons.bug_report,
+                        label: 'Dev Tools',
+                        onTap: () => context.push('/more/dev-tools'),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // 06 / HELP US ------------------------------------------------
                 const _GroupHead(
-                  num: '05',
+                  num: '06',
                   name: 'Help Us',
                   hint: 'Tap to support',
                 ),
@@ -264,10 +288,10 @@ class MoreScreenModern extends ConsumerWidget {
                   ],
                 ),
 
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpacing.xxl),
 
-                // ABOUT (footnote) -------------------------------------------
-                _AboutFootnote(isDevMode: isDevMode),
+                // FOOTER ------------------------------------------------------
+                const _MadeInIndiaFooter(),
                 const SizedBox(height: KuberSpacing.xl),
               ]),
             ),
@@ -335,15 +359,11 @@ class _GroupHead extends StatelessWidget {
 // Hero tile (Manage / Investments)
 // ---------------------------------------------------------------------------
 
-enum _HeroAccent { primary, income }
-
 class _HeroTile extends StatelessWidget {
   final IconData icon;
   final String label; // eyebrow
   final String title;
-  final double titleSize;
   final String meta;
-  final _HeroAccent accent;
   final VoidCallback onTap;
 
   const _HeroTile({
@@ -352,17 +372,12 @@ class _HeroTile extends StatelessWidget {
     required this.title,
     required this.meta,
     required this.onTap,
-    this.titleSize = 22,
-    this.accent = _HeroAccent.primary,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final accentColor = switch (accent) {
-      _HeroAccent.primary => cs.primary,
-      _HeroAccent.income => cs.tertiary,
-    };
+    final accentColor = cs.primary;
 
     return Material(
       color: Colors.transparent,
@@ -374,82 +389,75 @@ class _HeroTile extends StatelessWidget {
             color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(KuberRadius.lg),
             border: Border.all(color: cs.outline),
+            gradient: LinearGradient(
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Color.alphaBlend(
+                  accentColor.withValues(alpha: 0.16),
+                  cs.surfaceContainer,
+                ),
+                cs.surfaceContainer,
+              ],
+              stops: const [0.0, 0.75],
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           padding: const EdgeInsets.all(KuberSpacing.lg),
-          child: Stack(
+          child: Row(
             children: [
-              // Diffuse accent glow (no shadow — borders only)
-              Positioned(
-                right: -40,
-                top: -40,
-                child: IgnorePointer(
-                  child: Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: accentColor.withValues(alpha: 0.08),
-                    ),
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(KuberRadius.lg),
+                  border: Border.all(
+                    color: accentColor.withValues(alpha: 0.25),
                   ),
                 ),
+                alignment: Alignment.center,
+                child: Icon(icon, size: 26, color: accentColor),
               ),
-              Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.10),
-                      borderRadius: BorderRadius.circular(KuberRadius.lg),
-                      border: Border.all(
-                        color: accentColor.withValues(alpha: 0.25),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurfaceVariant,
+                        letterSpacing: 1.0,
                       ),
                     ),
-                    alignment: Alignment.center,
-                    child: Icon(icon, size: 26, color: accentColor),
-                  ),
-                  const SizedBox(width: KuberSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: GoogleFonts.inter(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          title,
-                          style: GoogleFonts.inter(
-                            fontSize: titleSize,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurface,
-                            letterSpacing: -0.4,
-                            height: 1.15,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          meta,
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 4),
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: cs.onSurface,
+                        letterSpacing: -0.4,
+                        height: 1.15,
+                      ),
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      meta,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ],
           ),
@@ -484,17 +492,38 @@ class _ManageGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: KuberSpacing.sm,
-        mainAxisSpacing: KuberSpacing.sm,
-        childAspectRatio: 1.45,
-      ),
-      itemBuilder: (_, i) => _ManageTile(data: items[i]),
+    // Manual Column-of-Rows so the last (odd) row only takes one tile's
+    // height instead of reserving an empty second cell — keeps the gap
+    // before the next section consistent regardless of item count.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gap = KuberSpacing.sm;
+        final tileWidth = (constraints.maxWidth - gap) / 2;
+        final tileHeight = tileWidth / 1.45;
+        final rows = <Widget>[];
+        for (int i = 0; i < items.length; i += 2) {
+          if (i > 0) rows.add(const SizedBox(height: gap));
+          final left = items[i];
+          final right = i + 1 < items.length ? items[i + 1] : null;
+          rows.add(
+            SizedBox(
+              height: tileHeight,
+              child: Row(
+                children: [
+                  Expanded(child: _ManageTile(data: left)),
+                  const SizedBox(width: gap),
+                  Expanded(
+                    child: right != null
+                        ? _ManageTile(data: right)
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        return Column(children: rows);
+      },
     );
   }
 }
@@ -1023,132 +1052,63 @@ class _HelpTile extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// About footnote (inline text links + made-in-India + version)
+// Made-in-India footer (icon + line + version stamp)
 // ---------------------------------------------------------------------------
 
-class _AboutFootnote extends ConsumerWidget {
-  final bool isDevMode;
-  const _AboutFootnote({required this.isDevMode});
+class _MadeInIndiaFooter extends ConsumerWidget {
+  const _MadeInIndiaFooter();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-
-    final links = <_AboutLink>[
-      _AboutLink(
-        icon: Icons.info_outline_rounded,
-        label: 'About Kuber',
-        onTap: () => context.pushNamed('about'),
-      ),
-      _AboutLink(
-        icon: Icons.security_outlined,
-        label: 'Permissions',
-        onTap: () => context.pushNamed('permissions'),
-      ),
-      if (isDevMode)
-        _AboutLink(
-          icon: Icons.bug_report,
-          label: 'Dev Tools',
-          onTap: () => context.push('/more/dev-tools'),
+    final version = ref.watch(appVersionProvider).valueOrNull;
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: GoogleFonts.inter(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w500,
+          color: cs.onSurfaceVariant,
         ),
-    ];
-
-    return Column(
-      children: [
-        Container(height: 1, color: cs.outline),
-        const SizedBox(height: KuberSpacing.md),
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 6,
-          runSpacing: 4,
-          children: [
-            for (int i = 0; i < links.length; i++) ...[
-              _AboutLinkText(link: links[i]),
-              if (i < links.length - 1)
-                Text(
-                  '·',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: cs.outlineVariant,
-                  ),
-                ),
-            ],
-          ],
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        // Made-in-India + version stamp on a single line.
-        Consumer(
-          builder: (context, ref, _) {
-            final version = ref.watch(appVersionProvider).valueOrNull;
-            return RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: GoogleFonts.inter(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurfaceVariant,
-                ),
-                children: [
-                  const TextSpan(text: 'Made with '),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: Icon(
-                      Icons.favorite_rounded,
-                      color: Colors.redAccent,
-                      size: 13,
-                    ),
-                  ),
-                  TextSpan(
-                    text: version != null
-                        ? ' in India · v$version'
-                        : ' in India',
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _AboutLink {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  _AboutLink({required this.icon, required this.label, required this.onTap});
-}
-
-class _AboutLinkText extends StatelessWidget {
-  final _AboutLink link;
-  const _AboutLinkText({required this.link});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: link.onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(link.icon, size: 13, color: cs.onSurfaceVariant),
-            const SizedBox(width: 5),
-            Text(
-              link.label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: cs.onSurface,
-              ),
+        children: [
+          const TextSpan(text: 'Made with '),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
+              Icons.favorite_rounded,
+              color: Colors.redAccent,
+              size: 13,
             ),
-          ],
-        ),
+          ),
+          TextSpan(
+            text: version != null ? ' in India · v$version' : ' in India',
+          ),
+        ],
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Notifications sheet opener — mirrors dashboard's _openNotificationsSheet
+// ---------------------------------------------------------------------------
+
+Future<void> _openNotificationsSheet(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  final repo = ref.read(notificationRepositoryProvider);
+  final list = await repo.list();
+  if (!context.mounted) return;
+  await NotificationsSheet.show(
+    context,
+    notifications: list,
+    onClearAll: () async {
+      await repo.clearAll();
+    },
+    onTapNotification: (n) async {
+      await handleNotificationTap(context, ref, n);
+    },
+  );
+  await repo.markAllRead();
 }

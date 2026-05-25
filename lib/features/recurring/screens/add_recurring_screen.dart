@@ -12,9 +12,7 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider, NumberSystem;
-import '../../../shared/widgets/form_widgets.dart';
+import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../../../shared/widgets/skeleton_loader.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
@@ -42,8 +40,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   DateTime _startDate = DateTime.now();
   String _frequency = 'monthly';
   String _endType = 'never';
-  IconData _selectedIcon = Icons.receipt_long;
-  Color? _selectedColor;
   final _endAfterController = TextEditingController();
   DateTime? _endDate;
 
@@ -55,8 +51,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   bool get _canSave =>
       _nameController.text.trim().isNotEmpty &&
       _amountController.text.trim().isNotEmpty &&
-      double.tryParse(_amountController.text.trim().replaceAll(',', '')) !=
-          null &&
+      double.tryParse(_amountController.text.trim().replaceAll(',', '')) != null &&
       _selectedCategoryId != null &&
       _selectedAccountId != null;
 
@@ -75,8 +70,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
     final rule = widget.existingRule;
     if (rule != null) {
       _nameController.text = rule.name;
-      _amountController.text = rule.amount % 1 == 0
-          ? rule.amount.toStringAsFixed(0)
+      _amountController.text = rule.amount % 1 == 0 
+          ? rule.amount.toStringAsFixed(0) 
           : rule.amount.toStringAsFixed(2);
       _notesController.text = rule.notes ?? '';
       _type = rule.type;
@@ -85,10 +80,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       _startDate = rule.startDate;
       _frequency = rule.frequency;
       _endType = rule.endType;
-      _selectedIcon = rule.icon != null
-          ? IconMapper.fromString(rule.icon!)
-          : Icons.receipt_long;
-      _selectedColor = rule.colorValue != null ? Color(rule.colorValue!) : null;
       if (rule.customDays != null) {
         _customDaysController.text = rule.customDays.toString();
       }
@@ -190,8 +181,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       ..notes = _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim()
-      ..icon = IconMapper.toStringName(_selectedIcon)
-      ..colorValue = _selectedColor?.toARGB32()
       ..frequency = _frequency
       ..customDays = _frequency == 'custom'
           ? int.tryParse(_customDaysController.text.trim())
@@ -217,7 +206,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    _selectedColor ??= cs.primary;
     final textTheme = Theme.of(context).textTheme;
     final categories = ref.watch(categoryListProvider);
     final accounts = ref.watch(accountListProvider);
@@ -264,21 +252,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           ),
           const SizedBox(height: KuberSpacing.xl),
 
-          _FieldLabel('ICON & COLOR'),
-          const SizedBox(height: 8),
-          FormIconPicker(
-            icons: _recurringIcons,
-            selected: _selectedIcon,
-            onChanged: (icon) => setState(() => _selectedIcon = icon),
-          ),
-          const SizedBox(height: 12),
-          FormColorPicker(
-            colors: _formPalette(context),
-            selected: _selectedColor!,
-            onChanged: (color) => setState(() => _selectedColor = color),
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-
           // Name
           TextField(
             controller: _nameController,
@@ -303,10 +276,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
             ),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              CurrencyInputFormatter(
-                isIndian:
-                    ref.watch(formatterProvider).system == NumberSystem.indian,
-              ),
+              CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
             ],
             onChanged: (_) => setState(() {}),
           ),
@@ -411,7 +381,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                   child: Text(
                     f.$2,
                     style: textTheme.bodyMedium?.copyWith(
-                      color: selected ? cs.primary : cs.onSurfaceVariant,
+                      color: selected
+                          ? cs.primary
+                          : cs.onSurfaceVariant,
                       fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
@@ -428,15 +400,16 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     padding: const EdgeInsets.only(top: KuberSpacing.md),
                     child: TextField(
                       controller: _customDaysController,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurface,
-                      ),
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: cs.onSurface),
                       decoration: const InputDecoration(
                         labelText: 'Every X days',
                         hintText: 'e.g. 10',
                       ),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                     ),
                   )
                 : const SizedBox.shrink(),
@@ -470,9 +443,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     width: 80,
                     child: TextField(
                       controller: _endAfterController,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurface,
-                      ),
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: cs.onSurface),
                       decoration: const InputDecoration(
                         hintText: '#',
                         isDense: true,
@@ -482,7 +454,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                         ),
                       ),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                     ),
                   )
                 : null,
@@ -532,54 +506,6 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   }
 }
 
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: cs.onSurfaceVariant,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-}
-
-const _recurringIcons = [
-  Icons.receipt_long,
-  Icons.subscriptions,
-  Icons.home,
-  Icons.wifi,
-  Icons.electrical_services,
-  Icons.water_drop,
-  Icons.savings,
-  Icons.favorite,
-  Icons.school,
-  Icons.work,
-  Icons.payments,
-  Icons.more_horiz,
-];
-
-List<Color> _formPalette(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
-  return [
-    cs.primary,
-    cs.tertiary,
-    cs.error,
-    cs.secondary,
-    cs.onSurfaceVariant,
-    cs.primaryContainer,
-    cs.tertiaryContainer,
-    cs.errorContainer,
-  ];
-}
-
 class _PickerTile extends StatelessWidget {
   final String label;
   final String? value;
@@ -627,7 +553,9 @@ class _PickerTile extends StatelessWidget {
                   Text(
                     value ?? 'Select',
                     style: textTheme.bodyMedium?.copyWith(
-                      color: value != null ? cs.onSurface : cs.onSurfaceVariant,
+                      color: value != null
+                          ? cs.onSurface
+                          : cs.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -674,7 +602,10 @@ class _AccountChip extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _AccountChip({required this.icon, required this.color});
+  const _AccountChip({
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -721,14 +652,18 @@ class _EndRadio extends StatelessWidget {
               value == groupValue
                   ? Icons.radio_button_checked
                   : Icons.radio_button_off,
-              color: value == groupValue ? cs.primary : cs.onSurfaceVariant,
+              color: value == groupValue
+                  ? cs.primary
+                  : cs.onSurfaceVariant,
               size: 20,
             ),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Text(
                 label,
-                style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
+                style: textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface,
+                ),
               ),
             ),
             // ignore: use_null_aware_elements

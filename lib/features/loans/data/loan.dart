@@ -10,16 +10,11 @@ class Loan {
 
   late String name; // e.g. "Home Loan", "Bike Loan"
 
-  late String
-  loanType; // 'home' | 'vehicle' | 'personal' | 'education' | 'other'
+  late String loanType; // 'home' | 'vehicle' | 'personal' | 'education' | 'other'
 
   late String lenderName; // e.g. "HDFC Housing Finance"
 
   String? referenceNumber; // e.g. "#HL-8829"
-
-  String? icon;
-
-  int? colorValue;
 
   late double principalAmount; // Total loan principal (informational)
 
@@ -58,8 +53,6 @@ class Loan {
     'loanType': loanType,
     'lenderName': lenderName,
     'referenceNumber': referenceNumber,
-    'icon': icon,
-    'colorValue': colorValue,
     'principalAmount': principalAmount,
     'emiAmount': emiAmount,
     'rateType': rateType,

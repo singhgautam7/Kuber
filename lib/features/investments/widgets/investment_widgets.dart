@@ -74,186 +74,172 @@ class PortfolioHero extends ConsumerWidget {
         color: cs.surfaceContainer,
         border: Border.all(color: cs.outline),
         borderRadius: BorderRadius.circular(KuberRadius.xl),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.alphaBlend(
+              gainColor.withValues(alpha: 0.16),
+              cs.surfaceContainer,
+            ),
+            cs.surfaceContainer,
+          ],
+          stops: const [0.0, 0.75],
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Positioned(
-            top: -60,
-            right: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: gainColor.withValues(alpha: 0.10),
-                ),
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'PORTFOLIO VALUE',
-                            style: GoogleFonts.inter(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
+                    Expanded(
+                      child: Text(
+                        'PORTFOLIO VALUE',
+                        style: GoogleFonts.inter(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 1.4,
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh,
-                            border: Border.all(color: cs.outline),
-                            borderRadius: BorderRadius.circular(KuberRadius.sm),
-                          ),
-                          child: Text(
-                            monthLabel,
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 0.4,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            maskAmount(
-                              fmt.formatCurrency(currentValue),
-                              masked,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: cs.onSurface,
-                              letterSpacing: -0.8,
-                              height: 1.1,
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        border: Border.all(color: cs.outline),
+                        borderRadius: BorderRadius.circular(KuberRadius.sm),
+                      ),
+                      child: Text(
+                        monthLabel,
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 0.4,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 4, left: 8),
-                          child: Container(
-                            padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
-                            decoration: BoxDecoration(
-                              color: gainBg,
-                              borderRadius: BorderRadius.circular(
-                                KuberRadius.full,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  isGain
-                                      ? Icons.trending_up_rounded
-                                      : Icons.trending_down_rounded,
-                                  size: 14,
-                                  color: gainColor,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: gainColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${isGain ? '+' : '−'}${maskAmount(fmt.formatCurrency(gainLoss.abs()), masked)} '
-                      '${isGain ? 'unrealised gain' : 'unrealised loss'} · since you started',
-                      style: GoogleFonts.inter(
-                        fontSize: 11.5,
-                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        maskAmount(fmt.formatCurrency(currentValue), masked),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                          letterSpacing: -0.8,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4, left: 8),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
+                        decoration: BoxDecoration(
+                          color: gainBg,
+                          borderRadius: BorderRadius.circular(KuberRadius.full),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isGain
+                                  ? Icons.trending_up_rounded
+                                  : Icons.trending_down_rounded,
+                              size: 14,
+                              color: gainColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
+                              style: GoogleFonts.inter(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: gainColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${isGain ? '+' : '−'}${maskAmount(fmt.formatCurrency(gainLoss.abs()), masked)} '
+                  '${isGain ? 'unrealised gain' : 'unrealised loss'} · since you started',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
+            child: SizedBox(
+              height: 68,
+              child: CustomPaint(
+                painter: _SparkPainter(
+                  data: series,
+                  lineColor: gainColor,
+                  fillColor: gainColor.withValues(alpha: 0.18),
+                  dotRingColor: cs.surfaceContainer,
+                ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
-                child: SizedBox(
-                  height: 68,
-                  child: CustomPaint(
-                    painter: _SparkPainter(
-                      data: series,
-                      lineColor: gainColor,
-                      fillColor: gainColor.withValues(alpha: 0.18),
-                      dotRingColor: cs.surfaceContainer,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: cs.surface,
+                border: Border.all(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberRadius.lg),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _BreakdownColumn(
+                      label: 'INVESTED',
+                      value: maskAmount(fmt.formatCurrency(invested), masked),
+                      color: cs.onSurface,
                     ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    border: Border.all(color: cs.outline),
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _BreakdownColumn(
-                          label: 'INVESTED',
-                          value: maskAmount(
-                            fmt.formatCurrency(invested),
-                            masked,
-                          ),
-                          color: cs.onSurface,
-                        ),
+                  Expanded(
+                    child: _BreakdownColumn(
+                      label: 'CURRENT',
+                      value: maskAmount(
+                        fmt.formatCurrency(currentValue),
+                        masked,
                       ),
-                      Expanded(
-                        child: _BreakdownColumn(
-                          label: 'CURRENT',
-                          value: maskAmount(
-                            fmt.formatCurrency(currentValue),
-                            masked,
-                          ),
-                          color: gainColor,
-                          alignEnd: true,
-                        ),
-                      ),
-                    ],
+                      color: gainColor,
+                      alignEnd: true,
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ],
       ),

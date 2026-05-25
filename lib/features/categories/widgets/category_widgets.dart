@@ -84,143 +84,139 @@ class CategorySpendHero extends ConsumerWidget {
     final othersAmount = (total - topSum).clamp(0, double.infinity).toDouble();
     final hasOthers = othersAmount > 0 && categoryCount > top.length;
 
-    Widget seg(double width, Color color) => SizedBox(
-      width: width,
-      child: ColoredBox(color: color),
-    );
+    // Container (rather than SizedBox + ColoredBox) so the segment expands
+    // to fill both axes inside its Expanded parent. The earlier ColoredBox
+    // had no intrinsic height and collapsed to 0 px under the Row's default
+    // CrossAxisAlignment.center, hiding the entire stacked bar.
+    Widget seg(Color color) => Container(color: color);
 
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.xl),
         border: Border.all(color: cs.outline),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.alphaBlend(
+              cs.primary.withValues(alpha: 0.16),
+              cs.surfaceContainer,
+            ),
+            cs.surfaceContainer,
+          ],
+          stops: const [0.0, 0.75],
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned(
-            top: -60,
-            right: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cs.primary.withValues(alpha: 0.10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$monthLabel Spend by Category'.toUpperCase(),
+                        style: GoogleFonts.inter(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurfaceVariant,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        maskAmount(fmt.formatCurrency(total), masked),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                          letterSpacing: -0.6,
+                          height: 1.1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text.rich(
+                        TextSpan(
+                          style: GoogleFonts.inter(
+                            fontSize: 11.5,
+                            color: cs.onSurfaceVariant,
+                          ),
+                          children: [
+                            const TextSpan(text: 'across '),
+                            TextSpan(
+                              text: '$categoryCount categories',
+                              style: GoogleFonts.inter(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w700,
+                                color: cs.onSurface,
+                              ),
+                            ),
+                            TextSpan(
+                              text:
+                                  ' · ${DateTime.now().day} day${DateTime.now().day == 1 ? '' : 's'} into $monthLabel',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (trendPct != null) _TrendChip(percent: trendPct!),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // Stacked bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: SizedBox(
+                height: 14,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final s in top)
+                      Expanded(
+                        flex: ((s.amount / total) * 1000).round().clamp(
+                          1,
+                          1000,
+                        ),
+                        child: seg(s.color),
+                      ),
+                    if (hasOthers)
+                      Expanded(
+                        flex: ((othersAmount / total) * 1000).round().clamp(
+                          1,
+                          1000,
+                        ),
+                        child: seg(cs.outlineVariant),
+                      ),
+                  ],
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$monthLabel Spend by Category'.toUpperCase(),
-                            style: GoogleFonts.inter(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            maskAmount(fmt.formatCurrency(total), masked),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: cs.onSurface,
-                              letterSpacing: -0.6,
-                              height: 1.1,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text.rich(
-                            TextSpan(
-                              style: GoogleFonts.inter(
-                                fontSize: 11.5,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              children: [
-                                const TextSpan(text: 'across '),
-                                TextSpan(
-                                  text: '$categoryCount categories',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurface,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text:
-                                      ' · ${DateTime.now().day} day${DateTime.now().day == 1 ? '' : 's'} into $monthLabel',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (trendPct != null) _TrendChip(percent: trendPct!),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                // Stacked bar
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: SizedBox(
-                    height: 14,
-                    child: Row(
-                      children: [
-                        for (final s in top)
-                          Expanded(
-                            flex: ((s.amount / total) * 1000).round().clamp(
-                              1,
-                              1000,
-                            ),
-                            child: seg(double.infinity, s.color),
-                          ),
-                        if (hasOthers)
-                          Expanded(
-                            flex: ((othersAmount / total) * 1000).round().clamp(
-                              1,
-                              1000,
-                            ),
-                            child: seg(double.infinity, cs.outlineVariant),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _LegendGrid(
-                  slices: top,
-                  others: hasOthers
-                      ? CategorySpendSlice(
-                          categoryId: -1,
-                          name:
-                              '${categoryCount - top.length} other${categoryCount - top.length == 1 ? '' : 's'}',
-                          color: cs.outlineVariant,
-                          amount: othersAmount,
-                        )
-                      : null,
-                ),
-              ],
+            const SizedBox(height: 12),
+            _LegendGrid(
+              slices: top,
+              others: hasOthers
+                  ? CategorySpendSlice(
+                      categoryId: -1,
+                      name:
+                          '${categoryCount - top.length} other${categoryCount - top.length == 1 ? '' : 's'}',
+                      color: cs.outlineVariant,
+                      amount: othersAmount,
+                    )
+                  : null,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -234,11 +230,13 @@ class _TrendChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final up = percent >= 0;
-    final color = up ? cs.error : cs.tertiary;
-    // Note: trending UP on spend is bad — error tone is correct here.
+    // Per product call: tint by sign — negative percentages render in
+    // error (red), positive in tertiary (green) — regardless of whether the
+    // underlying metric is spend (UP = bad) or income (UP = good).
+    final color = up ? cs.tertiary : cs.error;
     final bg = up
-        ? cs.error.withValues(alpha: 0.12)
-        : cs.tertiary.withValues(alpha: 0.12);
+        ? cs.tertiary.withValues(alpha: 0.12)
+        : cs.error.withValues(alpha: 0.12);
     return Container(
       padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
       decoration: BoxDecoration(
@@ -337,10 +335,31 @@ class _LegendGrid extends ConsumerWidget {
 class CategoryListItem extends ConsumerWidget {
   final Category category;
   final VoidCallback onTap;
+
+  /// This category's expense for the current month — sourced from the
+  /// shared `txns.aggregate(filter)` helper so the row total matches the
+  /// hero exactly. Pass `null` to fall back to all-time `stats.totalSpent`
+  /// (income rows do this since there's no monthly income hero to align
+  /// with).
+  final double? thisMonthSpent;
+
+  /// This category's transaction count for the current month. Pass `null`
+  /// to fall back to all-time `stats.transactionCount`.
+  final int? thisMonthTxnCount;
+
+  /// Parent group name. Shown inline in the row's meta line so the user can
+  /// see which group a category belongs to without scrolling up to the
+  /// header — important when search flattens the grouped layout. Pass null
+  /// for ungrouped categories.
+  final String? groupName;
+
   const CategoryListItem({
     super.key,
     required this.category,
     required this.onTap,
+    this.thisMonthSpent,
+    this.thisMonthTxnCount,
+    this.groupName,
   });
 
   @override
@@ -361,7 +380,15 @@ class CategoryListItem extends ConsumerWidget {
     final hasActiveBudget = budget != null && budget.isActive;
 
     final isIncome = category.effectiveType == 'income';
-    final amountSpent = stats.totalSpent;
+    // Expense rows prefer this-month aggregates (consistent with the hero);
+    // income rows still surface all-time stats since there's no monthly
+    // income hero to align with.
+    final amountSpent = isIncome
+        ? stats.totalSpent
+        : (thisMonthSpent ?? stats.totalSpent);
+    final txnCount = isIncome
+        ? stats.transactionCount
+        : (thisMonthTxnCount ?? stats.transactionCount);
     final color = Color(category.colorValue);
 
     return Material(
@@ -404,8 +431,15 @@ class CategoryListItem extends ConsumerWidget {
                         const SizedBox(height: 2),
                         _MetaRow(
                           type: category.effectiveType,
-                          txnCount: stats.transactionCount,
+                          txnCount: txnCount,
                         ),
+                        if (groupName != null && groupName!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: _GroupTag(name: groupName!),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -449,7 +483,7 @@ class CategoryListItem extends ConsumerWidget {
                 ),
               ] else if (!isIncome) ...[
                 const SizedBox(height: 10),
-                _NoBudgetChip(),
+                const _NoBudgetChip(),
               ],
             ],
           ),
@@ -497,6 +531,50 @@ class _MetaRow extends StatelessWidget {
   }
 }
 
+/// Folder-icon chip below the meta row that surfaces the parent group of a
+/// category. Lives on its own line so a long group name doesn't have to
+/// compete with TYPE / txn count / the amount column for width.
+class _GroupTag extends StatelessWidget {
+  final String name;
+  const _GroupTag({required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.folder_outlined,
+            size: 10,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.8),
+          ),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _BudgetUtilization extends StatelessWidget {
   final double spent;
   final double budget;
@@ -527,12 +605,12 @@ class _BudgetUtilization extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(4),
           child: SizedBox(
-            height: 4,
+            height: 8,
             child: Stack(
               children: [
-                Container(color: cs.surfaceContainerHigh),
+                Container(color: cs.outline.withValues(alpha: 0.55)),
                 FractionallySizedBox(
                   widthFactor: clampedPct,
                   child: Container(color: fillColor),
@@ -541,7 +619,7 @@ class _BudgetUtilization extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Row(
           children: [
             Expanded(
@@ -582,6 +660,8 @@ class _BudgetUtilization extends StatelessWidget {
 }
 
 class _NoBudgetChip extends StatelessWidget {
+  const _NoBudgetChip();
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;

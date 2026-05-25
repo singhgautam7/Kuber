@@ -58,16 +58,6 @@ class AboutWhatIsKuberSection extends StatelessWidget {
                     color: cs.primary,
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  '/02',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 0.5,
-                  ),
-                ),
               ],
             ),
           ),
@@ -108,7 +98,7 @@ class AboutWhatIsKuberSection extends StatelessWidget {
                 const SizedBox(height: KuberSpacing.md),
                 Text(
                   "Kuber is a fast, no-fuss expense tracker. Built for consistency, "
-                  "not complexity — open it, log what you spent, move on.",
+                  "not complexity. Open it, log what you spent, move on.",
                   style: GoogleFonts.inter(
                     fontSize: 13.5,
                     color: cs.onSurfaceVariant,
@@ -287,17 +277,21 @@ class _MeaningVerse extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Roman numeral
+          // Roman numeral — FittedBox so "III" doesn't wrap to a second line.
           SizedBox(
-            width: 32,
-            child: Text(
-              numeral,
-              style: GoogleFonts.playfairDisplay(
-                fontSize: 28,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w700,
-                color: cs.primary.withValues(alpha: 0.6),
-                height: 1.0,
+            width: 44,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.topLeft,
+              child: Text(
+                numeral,
+                style: GoogleFonts.playfairDisplay(
+                  fontSize: 28,
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary.withValues(alpha: 0.6),
+                  height: 1.0,
+                ),
               ),
             ),
           ),

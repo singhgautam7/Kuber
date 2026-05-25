@@ -56,7 +56,7 @@ class BudgetsScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: KuberPageHeader(
               title: 'Track\nBudgets',
-              description: 'Monitor and control your monthly spending limits per category.',
+              description: '',
               actionTooltip: 'Create Budget',
               onAction: () => context.push('/budgets/add'),
             ),
@@ -118,8 +118,8 @@ class BudgetCard extends ConsumerWidget {
     final categories = categoriesAsync.valueOrNull ?? [];
     final cs = Theme.of(context).colorScheme;
 
-    final category = categories.isEmpty 
-        ? null 
+    final category = categories.isEmpty
+        ? null
         : categories.firstWhere(
             (c) => c.id.toString() == budget.categoryId,
             orElse: () => categories.first,
@@ -156,7 +156,7 @@ class BudgetCard extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(KuberSpacing.sm),
                   decoration: BoxDecoration(
-                    color: isInactive 
+                    color: isInactive
                         ? cs.onSurfaceVariant.withValues(alpha: 0.1)
                         : Color(category?.colorValue ?? 0).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(KuberRadius.sm),
@@ -193,7 +193,7 @@ class BudgetCard extends ConsumerWidget {
                       ),
                       progressAsync.when(
                         data: (p) => Text(
-                          isExpired 
+                          isExpired
                             ? 'BUDGET PERIOD ENDED'
                             : isDisabled
                               ? 'BUDGET IS CURRENTLY PAUSED'
@@ -203,8 +203,8 @@ class BudgetCard extends ConsumerWidget {
                           style: GoogleFonts.inter(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: isInactive 
-                                ? cs.onSurfaceVariant 
+                            color: isInactive
+                                ? cs.onSurfaceVariant
                                 : p.percentage >= 100 ? cs.error : cs.onSurfaceVariant,
                             letterSpacing: 0.5,
                           ),
@@ -325,11 +325,11 @@ class _AlertChips extends ConsumerWidget {
         final percentage = a.type == BudgetAlertType.percentage
             ? a.value
             : (a.value / budgetAmount) * 100;
-        
+
         final label = a.type == BudgetAlertType.percentage
             ? ref.watch(formatterProvider).formatPercentage(a.value)
             : maskAmount(ref.watch(formatterProvider).formatCurrency(a.value), ref.watch(privacyModeProvider));
-        
+
         Color badgeColor;
         if (percentage >= 66) {
           badgeColor = Colors.orangeAccent;

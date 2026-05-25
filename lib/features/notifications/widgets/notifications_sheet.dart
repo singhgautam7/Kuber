@@ -9,20 +9,20 @@ import '../data/app_notification.dart';
 /// the data layer stays free of Flutter dependencies.
 extension NotificationTypeMeta on NotificationType {
   String get groupTitle => switch (this) {
-        NotificationType.general => 'General',
-        NotificationType.budgetAlert => 'Budget Alerts',
-        NotificationType.recurringTransaction => 'Recurring Transactions',
-        NotificationType.loanEmi => 'Loan EMI',
-        NotificationType.ledgerReminder => 'Ledger Reminders',
-      };
+    NotificationType.general => 'General',
+    NotificationType.budgetAlert => 'Budget Alerts',
+    NotificationType.recurringTransaction => 'Recurring Transactions',
+    NotificationType.loanEmi => 'Loan EMI',
+    NotificationType.ledgerReminder => 'Ledger Reminders',
+  };
 
   IconData get icon => switch (this) {
-        NotificationType.general => Icons.notifications_none_rounded,
-        NotificationType.budgetAlert => Icons.pie_chart_outline_rounded,
-        NotificationType.recurringTransaction => Icons.sync_rounded,
-        NotificationType.loanEmi => Icons.account_balance_outlined,
-        NotificationType.ledgerReminder => Icons.handshake_outlined,
-      };
+    NotificationType.general => Icons.notifications_none_rounded,
+    NotificationType.budgetAlert => Icons.pie_chart_outline_rounded,
+    NotificationType.recurringTransaction => Icons.sync_rounded,
+    NotificationType.loanEmi => Icons.account_balance_outlined,
+    NotificationType.ledgerReminder => Icons.handshake_outlined,
+  };
 }
 
 const _kGroupOrder = [
@@ -82,8 +82,10 @@ class NotificationsSheet extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -120,12 +122,14 @@ class NotificationsSheet extends StatelessWidget {
     final unreadCount = notifications.where((n) => n.readAt == null).length;
 
     return Container(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
         border: Border(
           top: BorderSide(color: cs.outline),
           left: BorderSide(color: cs.outline),
@@ -168,11 +172,12 @@ class NotificationsSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: cs.primary.withValues(alpha: 0.14),
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.full),
+                        borderRadius: BorderRadius.circular(KuberRadius.full),
                       ),
                       child: Text(
                         '$unreadCount new',
@@ -185,23 +190,6 @@ class NotificationsSheet extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
-                  if (hasAny)
-                    TextButton(
-                      onPressed: () => _confirmClearAll(context),
-                      style: TextButton.styleFrom(
-                        foregroundColor: cs.error,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 8),
-                      ),
-                      child: Text(
-                        'Clear all',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: cs.error,
-                        ),
-                      ),
-                    ),
                   IconButton(
                     onPressed: () =>
                         Navigator.of(context, rootNavigator: true).pop(),
@@ -219,17 +207,67 @@ class NotificationsSheet extends StatelessWidget {
               child: hasAny
                   ? ListView(
                       shrinkWrap: true,
-                      padding:
-                          const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                       children: [
+                        // Body header — recent-summary on the left,
+                        // Clear all on the right (matches Gmail / Slack /
+                        // most messaging apps).
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  unreadCount > 0
+                                      ? '$unreadCount unread · ${notifications.length} total'
+                                      : '${notifications.length} ${notifications.length == 1 ? 'notification' : 'notifications'}',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: cs.onSurfaceVariant,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: () => _confirmClearAll(context),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: cs.error,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                icon: Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 16,
+                                  color: cs.error,
+                                ),
+                                label: Text(
+                                  'Clear all',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: cs.error,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         for (final t in _kGroupOrder)
                           if ((byType[t] ?? const []).isNotEmpty)
                             _Group(
                               type: t,
                               items: byType[t]!,
                               onTap: (n) {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pop();
+                                Navigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).pop();
                                 onTapNotification(n);
                               },
                             ),
@@ -257,8 +295,7 @@ class _Group extends StatelessWidget {
   final List<AppNotification> items;
   final void Function(AppNotification) onTap;
 
-  const _Group(
-      {required this.type, required this.items, required this.onTap});
+  const _Group({required this.type, required this.items, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -269,8 +306,7 @@ class _Group extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding:
-                const EdgeInsets.fromLTRB(4, 0, 4, KuberSpacing.sm),
+            padding: const EdgeInsets.fromLTRB(4, 0, 4, KuberSpacing.sm),
             child: Text(
               type.groupTitle.toUpperCase(),
               style: GoogleFonts.inter(
@@ -317,8 +353,9 @@ class _Row extends StatelessWidget {
       borderRadius: BorderRadius.circular(KuberRadius.md),
       child: Container(
         decoration: BoxDecoration(
-          color:
-              unread ? cs.primary.withValues(alpha: 0.06) : Colors.transparent,
+          color: unread
+              ? cs.primary.withValues(alpha: 0.06)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: IntrinsicHeight(
@@ -366,8 +403,9 @@ class _Row extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          fontWeight:
-                              unread ? FontWeight.w700 : FontWeight.w600,
+                          fontWeight: unread
+                              ? FontWeight.w700
+                              : FontWeight.w600,
                           color: cs.onSurface,
                           height: 1.2,
                         ),

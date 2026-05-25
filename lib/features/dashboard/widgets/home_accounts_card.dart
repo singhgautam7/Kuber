@@ -65,7 +65,7 @@ class HomeAccountsCard extends ConsumerWidget {
               ),
             ),
             SizedBox(
-              height: 140,
+              height: 152,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 physics: const ClampingScrollPhysics(),
@@ -275,12 +275,13 @@ class _MiniUtilization extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final pct = limit <= 0 ? 0.0 : (outstanding / limit).clamp(0.0, 1.0);
-    final fillColor = pct < 0.30
+    final rawPct = limit <= 0 ? 0.0 : outstanding / limit;
+    final pct = rawPct.clamp(0.0, 1.0);
+    final fillColor = rawPct >= 1.0
+        ? cs.error
+        : rawPct < 0.30
         ? cs.tertiary
-        : pct < 0.70
-        ? const Color(0xFFF59E0B)
-        : cs.error;
+        : const Color(0xFFF59E0B);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

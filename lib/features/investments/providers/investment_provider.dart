@@ -30,8 +30,6 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
   Future<int> addInvestment({
     required String name,
     required String investmentType,
-    String? icon,
-    int? colorValue,
     double? currentValue,
     bool autoDebit = false,
     double? sipAmount,
@@ -48,8 +46,6 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
       ..uid = uid
       ..name = name.trim()
       ..investmentType = investmentType
-      ..icon = icon
-      ..colorValue = colorValue
       ..currentValue = currentValue
       ..autoDebit = autoDebit
       ..sipAmount = sipAmount

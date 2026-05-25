@@ -33,77 +33,71 @@ const LoanSchema = CollectionSchema(
       name: r'categoryId',
       type: IsarType.string,
     ),
-    r'colorValue': PropertySchema(
-      id: 4,
-      name: r'colorValue',
-      type: IsarType.long,
-    ),
     r'createdAt': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'emiAmount': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'emiAmount',
       type: IsarType.double,
     ),
     r'endDate': PropertySchema(
-      id: 7,
+      id: 6,
       name: r'endDate',
       type: IsarType.dateTime,
     ),
-    r'icon': PropertySchema(id: 8, name: r'icon', type: IsarType.string),
     r'interestRate': PropertySchema(
-      id: 9,
+      id: 7,
       name: r'interestRate',
       type: IsarType.double,
     ),
     r'isCompleted': PropertySchema(
-      id: 10,
+      id: 8,
       name: r'isCompleted',
       type: IsarType.bool,
     ),
     r'lenderName': PropertySchema(
-      id: 11,
+      id: 9,
       name: r'lenderName',
       type: IsarType.string,
     ),
     r'loanStartDate': PropertySchema(
-      id: 12,
+      id: 10,
       name: r'loanStartDate',
       type: IsarType.dateTime,
     ),
     r'loanType': PropertySchema(
-      id: 13,
+      id: 11,
       name: r'loanType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 14, name: r'name', type: IsarType.string),
-    r'notes': PropertySchema(id: 15, name: r'notes', type: IsarType.string),
+    r'name': PropertySchema(id: 12, name: r'name', type: IsarType.string),
+    r'notes': PropertySchema(id: 13, name: r'notes', type: IsarType.string),
     r'principalAmount': PropertySchema(
-      id: 16,
+      id: 14,
       name: r'principalAmount',
       type: IsarType.double,
     ),
     r'rateType': PropertySchema(
-      id: 17,
+      id: 15,
       name: r'rateType',
       type: IsarType.string,
     ),
     r'referenceNumber': PropertySchema(
-      id: 18,
+      id: 16,
       name: r'referenceNumber',
       type: IsarType.string,
     ),
     r'startDate': PropertySchema(
-      id: 19,
+      id: 17,
       name: r'startDate',
       type: IsarType.dateTime,
     ),
-    r'uid': PropertySchema(id: 20, name: r'uid', type: IsarType.string),
+    r'uid': PropertySchema(id: 18, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 21,
+      id: 19,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -132,12 +126,6 @@ int _loanEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.accountId.length * 3;
   bytesCount += 3 + object.categoryId.length * 3;
-  {
-    final value = object.icon;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   bytesCount += 3 + object.lenderName.length * 3;
   bytesCount += 3 + object.loanType.length * 3;
   bytesCount += 3 + object.name.length * 3;
@@ -173,24 +161,22 @@ void _loanSerialize(
   writer.writeBool(offsets[1], object.autoAddTransaction);
   writer.writeLong(offsets[2], object.billDate);
   writer.writeString(offsets[3], object.categoryId);
-  writer.writeLong(offsets[4], object.colorValue);
-  writer.writeDateTime(offsets[5], object.createdAt);
-  writer.writeDouble(offsets[6], object.emiAmount);
-  writer.writeDateTime(offsets[7], object.endDate);
-  writer.writeString(offsets[8], object.icon);
-  writer.writeDouble(offsets[9], object.interestRate);
-  writer.writeBool(offsets[10], object.isCompleted);
-  writer.writeString(offsets[11], object.lenderName);
-  writer.writeDateTime(offsets[12], object.loanStartDate);
-  writer.writeString(offsets[13], object.loanType);
-  writer.writeString(offsets[14], object.name);
-  writer.writeString(offsets[15], object.notes);
-  writer.writeDouble(offsets[16], object.principalAmount);
-  writer.writeString(offsets[17], object.rateType);
-  writer.writeString(offsets[18], object.referenceNumber);
-  writer.writeDateTime(offsets[19], object.startDate);
-  writer.writeString(offsets[20], object.uid);
-  writer.writeDateTime(offsets[21], object.updatedAt);
+  writer.writeDateTime(offsets[4], object.createdAt);
+  writer.writeDouble(offsets[5], object.emiAmount);
+  writer.writeDateTime(offsets[6], object.endDate);
+  writer.writeDouble(offsets[7], object.interestRate);
+  writer.writeBool(offsets[8], object.isCompleted);
+  writer.writeString(offsets[9], object.lenderName);
+  writer.writeDateTime(offsets[10], object.loanStartDate);
+  writer.writeString(offsets[11], object.loanType);
+  writer.writeString(offsets[12], object.name);
+  writer.writeString(offsets[13], object.notes);
+  writer.writeDouble(offsets[14], object.principalAmount);
+  writer.writeString(offsets[15], object.rateType);
+  writer.writeString(offsets[16], object.referenceNumber);
+  writer.writeDateTime(offsets[17], object.startDate);
+  writer.writeString(offsets[18], object.uid);
+  writer.writeDateTime(offsets[19], object.updatedAt);
 }
 
 Loan _loanDeserialize(
@@ -204,25 +190,23 @@ Loan _loanDeserialize(
   object.autoAddTransaction = reader.readBool(offsets[1]);
   object.billDate = reader.readLong(offsets[2]);
   object.categoryId = reader.readString(offsets[3]);
-  object.colorValue = reader.readLongOrNull(offsets[4]);
-  object.createdAt = reader.readDateTime(offsets[5]);
-  object.emiAmount = reader.readDouble(offsets[6]);
-  object.endDate = reader.readDateTimeOrNull(offsets[7]);
-  object.icon = reader.readStringOrNull(offsets[8]);
+  object.createdAt = reader.readDateTime(offsets[4]);
+  object.emiAmount = reader.readDouble(offsets[5]);
+  object.endDate = reader.readDateTimeOrNull(offsets[6]);
   object.id = id;
-  object.interestRate = reader.readDoubleOrNull(offsets[9]);
-  object.isCompleted = reader.readBool(offsets[10]);
-  object.lenderName = reader.readString(offsets[11]);
-  object.loanStartDate = reader.readDateTimeOrNull(offsets[12]);
-  object.loanType = reader.readString(offsets[13]);
-  object.name = reader.readString(offsets[14]);
-  object.notes = reader.readStringOrNull(offsets[15]);
-  object.principalAmount = reader.readDouble(offsets[16]);
-  object.rateType = reader.readStringOrNull(offsets[17]);
-  object.referenceNumber = reader.readStringOrNull(offsets[18]);
-  object.startDate = reader.readDateTime(offsets[19]);
-  object.uid = reader.readString(offsets[20]);
-  object.updatedAt = reader.readDateTime(offsets[21]);
+  object.interestRate = reader.readDoubleOrNull(offsets[7]);
+  object.isCompleted = reader.readBool(offsets[8]);
+  object.lenderName = reader.readString(offsets[9]);
+  object.loanStartDate = reader.readDateTimeOrNull(offsets[10]);
+  object.loanType = reader.readString(offsets[11]);
+  object.name = reader.readString(offsets[12]);
+  object.notes = reader.readStringOrNull(offsets[13]);
+  object.principalAmount = reader.readDouble(offsets[14]);
+  object.rateType = reader.readStringOrNull(offsets[15]);
+  object.referenceNumber = reader.readStringOrNull(offsets[16]);
+  object.startDate = reader.readDateTime(offsets[17]);
+  object.uid = reader.readString(offsets[18]);
+  object.updatedAt = reader.readDateTime(offsets[19]);
   return object;
 }
 
@@ -242,40 +226,36 @@ P _loanDeserializeProp<P>(
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset)) as P;
-    case 5:
       return (reader.readDateTime(offset)) as P;
-    case 6:
+    case 5:
       return (reader.readDouble(offset)) as P;
-    case 7:
+    case 6:
       return (reader.readDateTimeOrNull(offset)) as P;
-    case 8:
-      return (reader.readStringOrNull(offset)) as P;
-    case 9:
+    case 7:
       return (reader.readDoubleOrNull(offset)) as P;
-    case 10:
+    case 8:
       return (reader.readBool(offset)) as P;
+    case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 11:
       return (reader.readString(offset)) as P;
     case 12:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 13:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 14:
-      return (reader.readString(offset)) as P;
+      return (reader.readDouble(offset)) as P;
     case 15:
       return (reader.readStringOrNull(offset)) as P;
     case 16:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 17:
-      return (reader.readStringOrNull(offset)) as P;
-    case 18:
-      return (reader.readStringOrNull(offset)) as P;
-    case 19:
       return (reader.readDateTime(offset)) as P;
-    case 20:
+    case 18:
       return (reader.readString(offset)) as P;
-    case 21:
+    case 19:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -732,81 +712,6 @@ extension LoanQueryFilter on QueryBuilder<Loan, Loan, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> colorValueIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'colorValue'),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> colorValueIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'colorValue'),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> colorValueEqualTo(
-    int? value,
-  ) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'colorValue', value: value),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> colorValueGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'colorValue',
-          value: value,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> colorValueLessThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'colorValue',
-          value: value,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> colorValueBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'colorValue',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-        ),
-      );
-    });
-  }
-
   QueryBuilder<Loan, Loan, QAfterFilterCondition> createdAtEqualTo(
     DateTime value,
   ) {
@@ -1011,168 +916,6 @@ extension LoanQueryFilter on QueryBuilder<Loan, Loan, QFilterCondition> {
           upper: upper,
           includeUpper: includeUpper,
         ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'icon'),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'icon'),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'icon',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconContains(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'icon',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconMatches(
-    String pattern, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'icon',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'icon', value: ''),
-      );
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterFilterCondition> iconIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'icon', value: ''),
       );
     });
   }
@@ -2725,18 +2468,6 @@ extension LoanQuerySortBy on QueryBuilder<Loan, Loan, QSortBy> {
     });
   }
 
-  QueryBuilder<Loan, Loan, QAfterSortBy> sortByColorValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterSortBy> sortByColorValueDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.desc);
-    });
-  }
-
   QueryBuilder<Loan, Loan, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -2770,18 +2501,6 @@ extension LoanQuerySortBy on QueryBuilder<Loan, Loan, QSortBy> {
   QueryBuilder<Loan, Loan, QAfterSortBy> sortByEndDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endDate', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterSortBy> sortByIcon() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterSortBy> sortByIconDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.desc);
     });
   }
 
@@ -2991,18 +2710,6 @@ extension LoanQuerySortThenBy on QueryBuilder<Loan, Loan, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Loan, Loan, QAfterSortBy> thenByColorValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterSortBy> thenByColorValueDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'colorValue', Sort.desc);
-    });
-  }
-
   QueryBuilder<Loan, Loan, QAfterSortBy> thenByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -3036,18 +2743,6 @@ extension LoanQuerySortThenBy on QueryBuilder<Loan, Loan, QSortThenBy> {
   QueryBuilder<Loan, Loan, QAfterSortBy> thenByEndDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endDate', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterSortBy> thenByIcon() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QAfterSortBy> thenByIconDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'icon', Sort.desc);
     });
   }
 
@@ -3249,12 +2944,6 @@ extension LoanQueryWhereDistinct on QueryBuilder<Loan, Loan, QDistinct> {
     });
   }
 
-  QueryBuilder<Loan, Loan, QDistinct> distinctByColorValue() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'colorValue');
-    });
-  }
-
   QueryBuilder<Loan, Loan, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -3270,14 +2959,6 @@ extension LoanQueryWhereDistinct on QueryBuilder<Loan, Loan, QDistinct> {
   QueryBuilder<Loan, Loan, QDistinct> distinctByEndDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'endDate');
-    });
-  }
-
-  QueryBuilder<Loan, Loan, QDistinct> distinctByIcon({
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'icon', caseSensitive: caseSensitive);
     });
   }
 
@@ -3408,12 +3089,6 @@ extension LoanQueryProperty on QueryBuilder<Loan, Loan, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Loan, int?, QQueryOperations> colorValueProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'colorValue');
-    });
-  }
-
   QueryBuilder<Loan, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
@@ -3429,12 +3104,6 @@ extension LoanQueryProperty on QueryBuilder<Loan, Loan, QQueryProperty> {
   QueryBuilder<Loan, DateTime?, QQueryOperations> endDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'endDate');
-    });
-  }
-
-  QueryBuilder<Loan, String?, QQueryOperations> iconProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'icon');
     });
   }
 

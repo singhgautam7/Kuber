@@ -75,81 +75,77 @@ class RecurringHero extends ConsumerWidget {
         color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(KuberRadius.xl),
         border: Border.all(color: cs.outline),
+        gradient: LinearGradient(
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+          colors: [
+            Color.alphaBlend(
+              const Color(0xFFF59E0B).withValues(alpha: 0.16),
+              cs.surfaceContainer,
+            ),
+            cs.surfaceContainer,
+          ],
+          stops: const [0.0, 0.75],
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned(
-            top: -60,
-            right: -50,
-            child: IgnorePointer(
-              child: Container(
-                width: 220,
-                height: 220,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFF59E0B).withValues(alpha: 0.10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'MONTHLY AUTOMATION COST',
+              style: GoogleFonts.inter(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 1.4,
+              ),
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                maskAmount(fmt.formatCurrency(monthlyCost), masked),
+                style: GoogleFonts.inter(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                  letterSpacing: -0.7,
+                  height: 1.1,
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'MONTHLY AUTOMATION COST',
-                  style: GoogleFonts.inter(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.4,
-                  ),
+            const SizedBox(height: 4),
+            Text.rich(
+              TextSpan(
+                style: GoogleFonts.inter(
+                  fontSize: 11.5,
+                  color: cs.onSurfaceVariant,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  maskAmount(fmt.formatCurrency(monthlyCost), masked),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                    letterSpacing: -0.7,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text.rich(
+                children: [
                   TextSpan(
+                    text:
+                        '$activeCount active rule${activeCount == 1 ? '' : 's'}',
                     style: GoogleFonts.inter(
                       fontSize: 11.5,
-                      color: cs.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
                     ),
-                    children: [
-                      TextSpan(
-                        text:
-                            '$activeCount active rule${activeCount == 1 ? '' : 's'}',
-                        style: GoogleFonts.inter(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      if (nextLabel != null)
-                        TextSpan(text: ' · next charge $nextLabel'),
-                    ],
                   ),
-                ),
-                if (next.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  _UpcomingStrip(items: next),
+                  if (nextLabel != null)
+                    TextSpan(text: ' · next charge $nextLabel'),
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+            if (next.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              _UpcomingStrip(items: next),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -496,6 +492,7 @@ class RecurringProcessedRow extends ConsumerWidget {
   final IconData icon;
   final Color iconColor;
   final double amount; // signed: negative = expense
+  final VoidCallback? onTap;
   const RecurringProcessedRow({
     super.key,
     required this.ruleName,
@@ -504,6 +501,7 @@ class RecurringProcessedRow extends ConsumerWidget {
     required this.iconColor,
     required this.amount,
     this.accountName,
+    this.onTap,
   });
 
   @override
@@ -513,63 +511,66 @@ class RecurringProcessedRow extends ConsumerWidget {
     final masked = ref.watch(privacyModeProvider);
 
     final isExpense = amount < 0;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: cs.outline)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              border: Border.all(color: iconColor.withValues(alpha: 0.30)),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: cs.outline)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                border: Border.all(color: iconColor.withValues(alpha: 0.30)),
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+              ),
+              alignment: Alignment.center,
+              child: Icon(icon, size: 16, color: iconColor),
             ),
-            alignment: Alignment.center,
-            child: Icon(icon, size: 16, color: iconColor),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ruleName,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ruleName,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  [
-                    ?accountName,
-                    DateFormat('MMM d').format(processedAt),
-                  ].join(' · '),
-                  style: GoogleFonts.inter(
-                    fontSize: 10.5,
-                    color: cs.onSurfaceVariant,
+                  const SizedBox(height: 1),
+                  Text(
+                    [
+                      ?accountName,
+                      DateFormat('MMM d').format(processedAt),
+                    ].join(' · '),
+                    style: GoogleFonts.inter(
+                      fontSize: 10.5,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Text(
-            '${isExpense ? '−' : '+'}'
-            '${maskAmount(fmt.formatCurrency(amount.abs()), masked)}',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isExpense ? cs.error : cs.tertiary,
-              fontFeatures: const [FontFeature.tabularFigures()],
+            Text(
+              '${isExpense ? '−' : '+'}'
+              '${maskAmount(fmt.formatCurrency(amount.abs()), masked)}',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isExpense ? cs.error : cs.tertiary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

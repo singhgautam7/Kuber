@@ -46,7 +46,7 @@ final navBarStyleProvider = Provider<NavBarStyle>((ref) {
 
 final moreTabLayoutProvider = Provider<MoreTabLayout>((ref) {
   return ref.watch(settingsProvider).valueOrNull?.moreTabLayout ??
-      MoreTabLayout.simple;
+      MoreTabLayout.modern;
 });
 
 final thresholdFloorProvider = Provider<double>((ref) {
@@ -93,7 +93,7 @@ class SettingsState {
     this.thresholdFloor = 500,
     this.thresholdCeiling = 2000,
     this.navBarStyle = NavBarStyle.classic,
-    this.moreTabLayout = MoreTabLayout.simple,
+    this.moreTabLayout = MoreTabLayout.modern,
   });
 
   SettingsState copyWith({
@@ -149,7 +149,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final navBarStyleIndex =
         prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
     final moreTabLayoutIndex =
-        prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.simple.index;
+        prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.modern.index;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
