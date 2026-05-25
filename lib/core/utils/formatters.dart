@@ -102,14 +102,25 @@ class CurrencyInputFormatter extends TextInputFormatter {
       return newValue.copyWith(text: '');
     }
 
-    // 1. Remove commas and leading zeros
+    // 1. Remove commas and detect/preserve negative sign
     String text = newValue.text.replaceAll(',', '');
+    final isNegative = text.startsWith('-');
+    if (isNegative) text = text.substring(1);
+
+    // Allow just a minus sign
+    if (newValue.text == '-') {
+      return newValue.copyWith(
+        text: '-',
+        selection: const TextSelection.collapsed(offset: 1),
+      );
+    }
     
     // Allow partial decimals like "." or "0."
     if (text == '.') {
+      final result = '${isNegative ? '-' : ''}0.';
       return newValue.copyWith(
-        text: '0.',
-        selection: const TextSelection.collapsed(offset: 2),
+        text: result,
+        selection: TextSelection.collapsed(offset: result.length),
       );
     }
 
@@ -138,6 +149,9 @@ class CurrencyInputFormatter extends TextInputFormatter {
     } else {
       formatted = formatter.format(value);
     }
+
+    // Re-prepend minus sign if negative
+    if (isNegative) formatted = '-$formatted';
 
     // 4. Cursor position preservation
     final selectionIndex = newValue.selection.baseOffset;

@@ -319,9 +319,14 @@ class _InvestmentDetailSheetState
 
   void _showUpdateValueDialog(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final controller = TextEditingController(
-      text: widget.investment.currentValue?.toStringAsFixed(0) ?? '',
-    );
+    final fmt = ref.read(formatterProvider);
+    // Pre-format the current value with commas so it matches the formatter
+    final initialText = widget.investment.currentValue != null
+        ? fmt.formatNumber(widget.investment.currentValue!)
+        : '';
+    final controller = TextEditingController(text: initialText);
+    // Place cursor at end
+    controller.selection = TextSelection.collapsed(offset: initialText.length);
     final symbol = ref.read(currencyProvider).symbol;
 
     showDialog(
@@ -332,10 +337,11 @@ class _InvestmentDetailSheetState
             style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: controller,
-          keyboardType: TextInputType.number,
+          keyboardType:
+              const TextInputType.numberWithOptions(signed: true, decimal: true),
           autofocus: true,
           inputFormatters: [
-            CurrencyInputFormatter(isIndian: ref.read(formatterProvider).system == NumberSystem.indian),
+            CurrencyInputFormatter(isIndian: fmt.system == NumberSystem.indian),
           ],
           style: GoogleFonts.inter(fontSize: 18, color: cs.onSurface),
           decoration: InputDecoration(
