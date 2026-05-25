@@ -13,8 +13,7 @@ import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/info_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
-import '../../transactions/data/transaction.dart';
-import '../../transactions/providers/transaction_provider.dart';
+
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
 import '../utils/investment_calculations.dart' as calc;
@@ -43,7 +42,7 @@ class InvestmentsScreen extends ConsumerWidget {
 
     final cs = Theme.of(context).colorScheme;
     final investmentsAsync = ref.watch(investmentListProvider);
-    final txnsAsync = ref.watch(transactionListProvider);
+
 
     return Scaffold(
       body: investmentsAsync.when(
@@ -55,8 +54,7 @@ class InvestmentsScreen extends ConsumerWidget {
           ),
         ),
         data: (investments) {
-          final allTxns = txnsAsync.valueOrNull ?? [];
-          final invested = calc.totalInvestedAll(investments, allTxns);
+          final invested = calc.totalInvestedAll(investments);
           final currentValue = calc.totalCurrentValueAll(investments);
           final gainLoss = currentValue - invested;
           final gainLossPercent = invested > 0
@@ -138,7 +136,6 @@ class InvestmentsScreen extends ConsumerWidget {
                         const SizedBox(height: KuberSpacing.sm),
                     itemBuilder: (_, i) => _InvestmentRow(
                       investment: investments[i],
-                      allTxns: allTxns,
                     ),
                   ),
                 ),
@@ -181,9 +178,8 @@ class InvestmentsScreen extends ConsumerWidget {
 
 class _InvestmentRow extends ConsumerWidget {
   final Investment investment;
-  final List<Transaction> allTxns;
 
-  const _InvestmentRow({required this.investment, required this.allTxns});
+  const _InvestmentRow({required this.investment});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -198,7 +194,7 @@ class _InvestmentRow extends ConsumerWidget {
           ? 'SIP ${fmt.formatCurrency(investment.sipAmount!)}'
           : null,
       currentValue: investment.currentValue ?? 0,
-      gainLossPercent: calc.computeGainLossPercent(investment, allTxns),
+      gainLossPercent: calc.computeGainLossPercent(investment),
       onTap: () {
         showModalBottomSheet(
           context: context,

@@ -5,12 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider;
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/data/transaction.dart';
-import '../../transactions/providers/transaction_provider.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
 import '../utils/investment_calculations.dart' as calc;
@@ -32,7 +32,7 @@ class _InvestmentDetailSheetState
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
-    final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
+
 
     // Watch the live list so the sheet updates when currentValue changes
     final liveList = ref.watch(investmentListProvider).valueOrNull ?? [];
@@ -44,11 +44,9 @@ class _InvestmentDetailSheetState
     final contributionsAsync =
         ref.watch(investmentTransactionsProvider(investment.uid));
 
-    final totalInvested =
-        calc.computeTotalInvested(investment.uid, allTxns);
-    final gainLoss = calc.computeGainLoss(investment, allTxns);
-    final gainLossPercent =
-        calc.computeGainLossPercent(investment, allTxns);
+    final totalInvested = calc.computeTotalInvested(investment);
+    final gainLoss = calc.computeGainLoss(investment);
+    final gainLossPercent = calc.computeGainLossPercent(investment);
     final isGain = gainLoss >= 0;
     final hasCurrentValue = investment.currentValue != null;
 
@@ -336,6 +334,9 @@ class _InvestmentDetailSheetState
           controller: controller,
           keyboardType: TextInputType.number,
           autofocus: true,
+          inputFormatters: [
+            CurrencyInputFormatter(isIndian: ref.read(formatterProvider).system == NumberSystem.indian),
+          ],
           style: GoogleFonts.inter(fontSize: 18, color: cs.onSurface),
           decoration: InputDecoration(
             prefixText: '$symbol ',
