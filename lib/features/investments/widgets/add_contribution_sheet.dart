@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider;
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
@@ -85,8 +85,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                  RegExp(r'^\d*\.?\d{0,2}')),
+              CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
             ],
             style: GoogleFonts.inter(
               fontSize: 20,

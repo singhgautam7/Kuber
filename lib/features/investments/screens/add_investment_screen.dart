@@ -48,6 +48,9 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       if (e.currentValue != null) {
         _currentValueController.text = e.currentValue!.toStringAsFixed(0);
       }
+      if (e.investedAmount != null) {
+        _investedController.text = e.investedAmount!.toStringAsFixed(0);
+      }
       _autoDebit = e.autoDebit;
       if (e.sipAmount != null) {
         _sipAmountController.text = e.sipAmount!.toStringAsFixed(0);
@@ -77,17 +80,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
         .where((a) => a.id.toString() == _selectedAccountId)
         .firstOrNull;
 
-    // Pre-fill invested amount from provider when editing
-    if (_isEditing) {
-      ref.listen(totalInvestedForProvider(widget.existing!.uid), (prev, next) {
-        final sum = next.valueOrNull ?? 0.0;
-        if (sum > 0 && _investedController.text.isEmpty) {
-          _investedController.text = sum == sum.truncateToDouble()
-              ? sum.toInt().toString()
-              : sum.toStringAsFixed(2);
-        }
-      });
-    }
+
 
     return Scaffold(
       appBar: AppBar(
@@ -282,8 +275,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                 prefix: symbol,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d+\.?\d{0,2}')),
+                                  CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
                                 ],
                                 suffixIcon:
                                     _calcButton(_sipAmountController),
@@ -583,24 +575,18 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     if (_isEditing) {
       final existing = widget.existing!;
 
-      // Read cached total from the dedicated provider
-      final currentTotalInvested =
-          ref.read(totalInvestedForProvider(existing.uid)).valueOrNull ?? 0.0;
+      final desiredInvested =
+          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? existing.investedAmount ?? 0;
 
-      // The field now shows the total desired invested; compute delta
-      final desiredTotal =
-          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? currentTotalInvested;
-      final additionalAmount = (desiredTotal - currentTotalInvested)
-          .clamp(0.0, double.infinity);
-
-      // If currentValue field is empty, auto-fill with desiredTotal
+      // If currentValue field is empty, auto-fill with investedAmount
       double? currentValue =
           double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
-      currentValue ??= desiredTotal > 0 ? desiredTotal : existing.currentValue;
+      currentValue ??= desiredInvested > 0 ? desiredInvested : existing.currentValue;
 
       final inv = existing
         ..name = _nameController.text.trim()
         ..investmentType = _investmentType
+        ..investedAmount = desiredInvested
         ..currentValue = currentValue
         ..autoDebit = _autoDebit
         ..sipAmount = _autoDebit ? sipAmount : null
@@ -612,16 +598,6 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             : null;
 
       await ref.read(investmentListProvider.notifier).updateInvestment(inv);
-
-      // Create a contribution only for the delta
-      if (additionalAmount > 0 && _selectedAccountId != null) {
-        await ref.read(investmentListProvider.notifier).addContribution(
-              investment: inv,
-              amount: additionalAmount,
-              date: DateTime.now(),
-              accountId: _selectedAccountId!,
-            );
-      }
     } else {
       final initialAmount =
           double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? 0;

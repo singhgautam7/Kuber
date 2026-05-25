@@ -16,6 +16,7 @@ import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/settings_choice_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
+import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/services/biometric_service.dart';
@@ -39,6 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   SwipeMode? _tempSwipeMode;
   NumberSystem? _tempNumberSystem;
   NavBarStyle? _tempNavBarStyle;
+  MoreTabLayout? _tempMoreTabLayout;
   bool? _tempBiometricsEnabled;
 
   @override
@@ -51,6 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _tempSwipeMode = settings?.swipeMode;
     _tempNumberSystem = settings?.numberSystem;
     _tempNavBarStyle = settings?.navBarStyle;
+    _tempMoreTabLayout = settings?.moreTabLayout;
     _tempBiometricsEnabled = settings?.biometricsEnabled;
   }
 
@@ -139,6 +142,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  void _showMoreTabLayoutSheet(BuildContext context, MoreTabLayout current) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SettingsChoiceSheet<MoreTabLayout>(
+        title: 'More Tab Layout',
+        subtitle: 'Appearance',
+        selectedValue: current,
+        choices: moreTabLayoutChoices,
+        onSelected: (val) {
+          setState(() => _tempMoreTabLayout = val);
+          ref.read(settingsProvider.notifier).setMoreTabLayout(val);
+        },
+      ),
+    );
+  }
+
   void _showNumberFormatSheet(BuildContext context, NumberSystem current) {
     showModalBottomSheet(
       context: context,
@@ -187,13 +210,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           SettingsChoice(
             value: SwipeMode.changeTabs,
             label: 'Change tabs',
-            subtitle: 'Quickly switch between main app sections by swiping across the screen',
+            subtitle:
+                'Quickly switch between main app sections by swiping across the screen',
             icon: Icons.swap_horiz_rounded,
           ),
           SettingsChoice(
             value: SwipeMode.performActions,
             label: 'Row actions',
-            subtitle: 'Perform quick actions like edit or delete by swiping on individual history items',
+            subtitle:
+                'Perform quick actions like edit or delete by swiping on individual history items',
             icon: Icons.swipe_rounded,
           ),
         ],
@@ -213,10 +238,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (text != null && text.isNotEmpty) ...[
           Text(
             text,
-            style: GoogleFonts.inter(
-              fontSize: 14,
-              color: cs.onSurfaceVariant,
-            ),
+            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
           ),
           const SizedBox(width: KuberSpacing.sm),
         ],
@@ -235,36 +257,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settings = ref.watch(settingsProvider).valueOrNull;
     final accounts = ref.watch(accountListProvider).valueOrNull ?? <Account>[];
     final defaultAccId = settings?.defaultAccountId;
-    final defaultAccName = accounts
+    final defaultAccName =
+        accounts
             .where((a) => a.id.toString() == defaultAccId)
             .firstOrNull
             ?.name ??
         'Not set';
 
     // Fallbacks if data isn't ready
-    final currentTheme = _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
+    final currentTheme =
+        _tempThemeMode ?? settings?.themeMode ?? ThemeMode.system;
     final currencyCode = _tempCurrencyCode ?? settings?.currency ?? 'INR';
-    final currentSwipeMode = _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
-    final currentNumberSystem = _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
-    final currentNavBarStyle = _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
-    final currentBiometricsEnabled = _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
+    final currentSwipeMode =
+        _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
+    final currentNumberSystem =
+        _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
+    final currentNavBarStyle =
+        _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
+    final currentMoreTabLayout =
+        _tempMoreTabLayout ?? settings?.moreTabLayout ?? MoreTabLayout.simple;
+    final currentBiometricsEnabled =
+        _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
     final currency = currencyFromCode(currencyCode);
 
     final themeStr = currentTheme == ThemeMode.light
         ? 'Light'
         : currentTheme == ThemeMode.dark
-            ? 'Dark'
-            : 'System';
-    final navStr = currentNavBarStyle == NavBarStyle.classic ? 'Classic' : 'Modern';
-    final numberStr = currentNumberSystem == NumberSystem.indian ? 'Indian' : 'International';
-    final swipeStr = currentSwipeMode == SwipeMode.changeTabs ? 'Change tabs' : 'Row actions';
+        ? 'Dark'
+        : 'System';
+    final navStr = currentNavBarStyle == NavBarStyle.classic
+        ? 'Classic'
+        : 'Modern';
+    final moreLayoutStr = currentMoreTabLayout == MoreTabLayout.simple
+        ? 'Simple'
+        : 'Modern';
+    final numberStr = currentNumberSystem == NumberSystem.indian
+        ? 'Indian'
+        : 'International';
+    final swipeStr = currentSwipeMode == SwipeMode.changeTabs
+        ? 'Change tabs'
+        : 'Row actions';
 
     // Widget configurations and counts
-    final homeWidgets = ref.watch(homeWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
+    final homeWidgets =
+        ref.watch(homeWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
     final enabledHomeCount = homeWidgets.where((w) => w.enabled).length;
 
-    final analyticsWidgets = ref.watch(analyticsWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
-    final enabledAnalyticsCount = analyticsWidgets.where((w) => w.enabled).length;
+    final analyticsWidgets =
+        ref.watch(analyticsWidgetsProvider).valueOrNull ?? <HomeWidgetConfig>[];
+    final enabledAnalyticsCount = analyticsWidgets
+        .where((w) => w.enabled)
+        .length;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -346,8 +389,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.space_dashboard_rounded,
                       label: 'Bottom Navigation',
                       subtitle: 'Standard bar or floating pill',
-                      onTap: () => _showBottomNavSheet(context, currentNavBarStyle),
+                      onTap: () =>
+                          _showBottomNavSheet(context, currentNavBarStyle),
                       trailing: _trailingWidget(context, text: navStr),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.grid_view_rounded,
+                      label: 'More Tab Layout',
+                      subtitle: 'Simple list or Modern hero layout',
+                      onTap: () => _showMoreTabLayoutSheet(
+                        context,
+                        currentMoreTabLayout,
+                      ),
+                      trailing: _trailingWidget(context, text: moreLayoutStr),
                     ),
                   ],
                 ),
@@ -355,7 +410,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 // WIDGETS
                 const _SectionLabel(label: 'WIDGETS'),
-                const _SectionDescription('Choose what shows on Home and Analytics.'),
+                const _SectionDescription(
+                  'Choose what shows on Home and Analytics.',
+                ),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
@@ -370,7 +427,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _SettingsTile(
                       icon: Icons.insert_chart_outlined_rounded,
                       label: 'Analytics Widgets',
-                      subtitle: '$enabledAnalyticsCount enabled · drag to reorder',
+                      subtitle:
+                          '$enabledAnalyticsCount enabled · drag to reorder',
                       onTap: () => context.push('/widget-editor/analytics'),
                       trailing: _trailingWidget(context),
                     ),
@@ -380,7 +438,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 // MONEY DISPLAY
                 const _SectionLabel(label: 'MONEY DISPLAY'),
-                const _SectionDescription('How currency and amounts are shown across the app.'),
+                const _SectionDescription(
+                  'How currency and amounts are shown across the app.',
+                ),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
@@ -399,7 +459,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.money_rounded,
                       label: 'Number Format',
                       subtitle: 'Indian (1,23,000) or International (123,000)',
-                      onTap: () => _showNumberFormatSheet(context, currentNumberSystem),
+                      onTap: () =>
+                          _showNumberFormatSheet(context, currentNumberSystem),
                       trailing: _trailingWidget(context, text: numberStr),
                     ),
                   ],
@@ -408,7 +469,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 // TRANSACTIONS
                 const _SectionLabel(label: 'TRANSACTIONS'),
-                const _SectionDescription('Your defaults when adding new entries.'),
+                const _SectionDescription(
+                  'Your defaults when adding new entries.',
+                ),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
@@ -416,7 +479,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Default Account',
                       subtitle: 'Pre-selected when you Quick Add',
-                      onTap: () => _showDefaultAccountPicker(context, accounts, defaultAccId),
+                      onTap: () => _showDefaultAccountPicker(
+                        context,
+                        accounts,
+                        defaultAccId,
+                      ),
                       trailing: _trailingWidget(context, text: defaultAccName),
                     ),
                     Divider(height: 1, color: cs.outline),
@@ -424,7 +491,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.swap_horiz_rounded,
                       label: 'Horizontal Swipe',
                       subtitle: 'What swiping left or right does',
-                      onTap: () => _showHorizontalSwipeSheet(context, currentSwipeMode),
+                      onTap: () =>
+                          _showHorizontalSwipeSheet(context, currentSwipeMode),
                       trailing: _trailingWidget(context, text: swipeStr),
                     ),
                   ],
@@ -433,7 +501,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 // PRIVACY & SECURITY
                 const _SectionLabel(label: 'PRIVACY & SECURITY'),
-                const _SectionDescription('Keep your numbers private and your app locked.'),
+                const _SectionDescription(
+                  'Keep your numbers private and your app locked.',
+                ),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
@@ -443,7 +513,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       subtitle: 'Hide all balances and amounts',
                       trailing: Switch(
                         value: ref.watch(privacyModeProvider),
-                        onChanged: (_) => ref.read(settingsProvider.notifier).togglePrivacyMode(),
+                        onChanged: (_) => ref
+                            .read(settingsProvider.notifier)
+                            .togglePrivacyMode(),
                         activeTrackColor: cs.primary,
                       ),
                     ),
@@ -457,7 +529,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         onChanged: (val) async {
                           if (val) {
                             // Only authenticate if turning ON
-                            final canAuth = await _biometricService.canAuthenticate();
+                            final canAuth = await _biometricService
+                                .canAuthenticate();
                             if (!context.mounted) return;
 
                             if (!canAuth) {
@@ -469,25 +542,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               return;
                             }
 
-                            final success = await _biometricService.authenticate();
+                            final success = await _biometricService
+                                .authenticate();
                             if (!context.mounted) return;
 
                             if (success) {
                               setState(() => _tempBiometricsEnabled = true);
-                              await ref.read(settingsProvider.notifier).setBiometricsEnabled(true);
+                              await ref
+                                  .read(settingsProvider.notifier)
+                                  .setBiometricsEnabled(true);
                               if (!context.mounted) return;
-                              showKuberSnackBar(context, 'Biometric lock enabled');
+                              showKuberSnackBar(
+                                context,
+                                'Biometric lock enabled',
+                              );
                             }
                           } else {
                             // Require authentication before disabling biometric lock
-                            final success = await _biometricService.authenticate();
+                            final success = await _biometricService
+                                .authenticate();
                             if (!context.mounted) return;
                             if (!success) return;
 
                             setState(() => _tempBiometricsEnabled = false);
-                            await ref.read(settingsProvider.notifier).setBiometricsEnabled(false);
+                            await ref
+                                .read(settingsProvider.notifier)
+                                .setBiometricsEnabled(false);
                             if (!context.mounted) return;
-                            showKuberSnackBar(context, 'Biometric lock disabled');
+                            showKuberSnackBar(
+                              context,
+                              'Biometric lock disabled',
+                            );
                           }
                         },
                         activeTrackColor: cs.primary,
@@ -499,14 +584,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
                 // ABOUT
                 const _SectionLabel(label: 'ABOUT'),
-                const _SectionDescription('Learn about Kuber and the person behind it.'),
+                const _SectionDescription(
+                  'Learn about Kuber and the person behind it.',
+                ),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.info_outline_rounded,
                       label: 'About Kuber',
-                      subtitle: 'Vision, origin, and a letter from the developer',
+                      subtitle:
+                          'Vision, origin, and a letter from the developer',
                       onTap: () => context.push('/more/about'),
                       trailing: _trailingWidget(context),
                     ),
@@ -522,7 +610,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showDefaultAccountPicker(
-      BuildContext context, List<Account> accounts, String? currentId) {
+    BuildContext context,
+    List<Account> accounts,
+    String? currentId,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -592,7 +683,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             a.name,
                             style: GoogleFonts.inter(
                               fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
                               color: cs.onSurface,
                             ),
                           ),
@@ -604,14 +697,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           ),
                           trailing: isSelected
-                              ? Icon(Icons.check_rounded, color: cs.primary, size: 20)
+                              ? Icon(
+                                  Icons.check_rounded,
+                                  color: cs.primary,
+                                  size: 20,
+                                )
                               : null,
                           onTap: () {
                             ref
                                 .read(settingsProvider.notifier)
                                 .setDefaultAccountId(a.id.toString());
                             Navigator.pop(ctx);
-                            showKuberSnackBar(context, '${a.name} set as default');
+                            showKuberSnackBar(
+                              context,
+                              '${a.name} set as default',
+                            );
                           },
                         );
                       },
@@ -637,7 +737,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: cs.error,
-                          side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
+                          side: BorderSide(
+                            color: cs.error.withValues(alpha: 0.5),
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -718,7 +820,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const Spacer(),
                     IconButton(
                       onPressed: () => Navigator.pop(ctx),
-                      icon: Icon(Icons.close_rounded, color: cs.onSurfaceVariant),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -736,7 +841,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     inputFormatters: [TitleCaseInputFormatter()],
                     onChanged: (_) => setSheetState(() {}),
                     style: GoogleFonts.inter(fontSize: 16, color: cs.onSurface),
-                    validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter your name' : null,
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? 'Please enter your name'
+                        : null,
                     decoration: InputDecoration(
                       hintText: 'e.g. Gautam',
                       counterText: '${controller.text.length}/15',
@@ -752,7 +859,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
+                        borderSide: BorderSide(
+                          color: cs.outline.withValues(alpha: 0.5),
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -780,7 +889,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       }
                     },
                     style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     child: Text(
                       'Done',
@@ -831,7 +942,10 @@ class _SectionDescription extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.xs, 4, KuberSpacing.xs, KuberSpacing.sm,
+        KuberSpacing.xs,
+        4,
+        KuberSpacing.xs,
+        KuberSpacing.sm,
       ),
       child: Text(
         text,
@@ -859,9 +973,7 @@ class _SettingsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(KuberRadius.md),
         border: Border.all(color: cs.outline),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -13,15 +12,13 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/info_provider.dart';
-import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart'
-    show formatterProvider, privacyModeProvider;
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/loan.dart';
 import '../providers/loan_provider.dart';
 import '../utils/loan_calculations.dart' as calc;
 import '../widgets/loan_detail_sheet.dart';
+import '../widgets/loan_widgets.dart';
 
 class LoansScreen extends ConsumerStatefulWidget {
   const LoansScreen({super.key});
@@ -34,16 +31,18 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
   bool _showCompleted = false;
 
   @override
-
-
-  @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoLoans), (prev, next) {
+    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoLoans), (
+      prev,
+      next,
+    ) {
       if (next.hasValue && next.value == false) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
           KuberInfoBottomSheet.show(context, InfoConstants.loans);
-          ref.read(infoSeenProvider(PrefsKeys.seenInfoLoans).notifier).markSeen();
+          ref
+              .read(infoSeenProvider(PrefsKeys.seenInfoLoans).notifier)
+              .markSeen();
         });
       }
     });
@@ -56,13 +55,28 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
       body: loansAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text('Error: $e',
-              style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+          child: Text(
+            'Error: $e',
+            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+          ),
         ),
         data: (loans) {
           final allTxns = txnsAsync.valueOrNull ?? [];
           final active = loans.where((l) => !l.isCompleted).toList();
           final completed = loans.where((l) => l.isCompleted).toList();
+          final totalPrincipal = loans.fold<double>(
+            0,
+            (sum, l) => sum + l.principalAmount,
+          );
+          final totalPaid = calc.totalPaidAllLoans(loans, allTxns);
+          final totalOutstanding = calc.totalOutstanding(loans, allTxns);
+          final nextDue = active
+              .map(calc.computeNextDueDate)
+              .whereType<DateTime>()
+              .fold<DateTime?>(
+                null,
+                (a, b) => a == null || b.isBefore(a) ? b : a,
+              );
 
           return CustomScrollView(
             slivers: [
@@ -77,20 +91,29 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
               SliverToBoxAdapter(
                 child: KuberPageHeader(
                   title: 'Loans',
-                  description:
-                      'Track your EMIs, outstanding balances and repayment progress.',
+                  description:'',
                   actionTooltip: 'Add Loan',
                   onAction: () => context.push('/loans/add'),
                 ),
               ),
-
-              // Summary cards
               if (loans.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: _SummaryRow(loans: loans, allTxns: allTxns),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    KuberSpacing.lg,
+                    0,
+                    KuberSpacing.lg,
+                    KuberSpacing.lg,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: LoansHero(
+                      totalPrincipal: totalPrincipal,
+                      totalPaid: totalPaid,
+                      totalOutstanding: totalOutstanding,
+                      activeCount: active.length,
+                      nextDue: nextDue,
+                    ),
+                  ),
                 ),
-
-              // Empty state
               if (loans.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -102,45 +125,51 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
                     onAction: () => context.push('/loans/add'),
                   ),
                 ),
-
-              // Active loans
               if (active.isNotEmpty) ...[
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: _SectionHeader(label: 'ACTIVE LOANS'),
                 ),
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpacing.lg,
+                  ),
                   sliver: SliverList.separated(
                     itemCount: active.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: KuberSpacing.sm),
                     itemBuilder: (_, i) =>
-                        _LoanCard(loan: active[i], allTxns: allTxns),
+                        _LoanRow(loan: active[i], allTxns: allTxns),
                   ),
                 ),
               ],
-
-              // Completed loans (collapsible)
               if (completed.isNotEmpty) ...[
-                SliverToBoxAdapter(
-                  child: _CompletedHeader(
-                    count: completed.length,
-                    isExpanded: _showCompleted,
-                    onToggle: () =>
-                        setState(() => _showCompleted = !_showCompleted),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpacing.lg,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: LoansCompletedToggle(
+                      count: completed.length,
+                      expanded: _showCompleted,
+                      onToggle: () =>
+                          setState(() => _showCompleted = !_showCompleted),
+                    ),
                   ),
                 ),
                 if (_showCompleted)
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KuberSpacing.lg,
+                    ),
                     sliver: SliverList.separated(
                       itemCount: completed.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: KuberSpacing.sm),
                       itemBuilder: (_, i) =>
-                          _LoanCard(loan: completed[i], allTxns: allTxns),
+                          _LoanRow(loan: completed[i], allTxns: allTxns),
                     ),
                   ),
               ],
-
               SliverToBoxAdapter(
                 child: SizedBox(height: navBarBottomPadding(context)),
               ),
@@ -152,103 +181,61 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
   }
 }
 
-class _SummaryRow extends ConsumerWidget {
-  final List<Loan> loans;
+class _LoanRow extends StatelessWidget {
+  final Loan loan;
   final List<Transaction> allTxns;
 
-  const _SummaryRow({required this.loans, required this.allTxns});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final fmt = ref.watch(formatterProvider);
-    final isPrivate = ref.watch(privacyModeProvider);
-    final outstanding = calc.totalOutstanding(loans, allTxns);
-    final totalPaid = calc.totalPaidAllLoans(loans, allTxns);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SummaryCard(
-              label: 'TOTAL OUTSTANDING',
-              amount: maskAmount(fmt.formatCurrency(outstanding), isPrivate),
-              color: cs.error,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _SummaryCard(
-              label: 'TOTAL PAID',
-              amount: maskAmount(fmt.formatCurrency(totalPaid), isPrivate),
-              color: cs.tertiary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  final String label;
-  final String amount;
-  final Color color;
-
-  const _SummaryCard({
-    required this.label,
-    required this.amount,
-    required this.color,
-  });
+  const _LoanRow({required this.loan, required this.allTxns});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            amount,
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: color,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ],
-      ),
+    return LoanCard(
+      name: loan.name,
+      lenderLabel: [
+        loan.lenderName,
+        if (loan.referenceNumber?.isNotEmpty ?? false) loan.referenceNumber,
+      ].whereType<String>().join(' · '),
+      icon: _loanTypeIcon(loan.loanType),
+      iconColor: _loanTypeColor(context, loan.loanType),
+      principal: loan.principalAmount,
+      paid: calc.computeTotalPaid(loan.uid, allTxns),
+      outstanding: calc
+          .computeRemaining(loan, allTxns)
+          .clamp(0, double.infinity)
+          .toDouble(),
+      progress: calc.computeProgress(loan, allTxns),
+      emi: loan.emiAmount,
+      interestRate: loan.interestRate,
+      nextDue: calc.computeNextDueDate(loan),
+      isCompleted: loan.isCompleted,
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          useRootNavigator: true,
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => LoanDetailSheet(loan: loan),
+        );
+      },
     );
   }
 }
 
 class _SectionHeader extends StatelessWidget {
   final String label;
-
   const _SectionHeader({required this.label});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpacing.lg,
+        KuberSpacing.sm,
+        KuberSpacing.lg,
+        KuberSpacing.md,
+      ),
       child: Text(
         label,
         style: GoogleFonts.inter(
@@ -262,330 +249,25 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _CompletedHeader extends StatelessWidget {
-  final int count;
-  final bool isExpanded;
-  final VoidCallback onToggle;
-
-  const _CompletedHeader({
-    required this.count,
-    required this.isExpanded,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onToggle,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-        child: Row(
-          children: [
-            Text(
-              'COMPLETED LOANS',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: cs.tertiary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '$count',
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: cs.tertiary,
-                ),
-              ),
-            ),
-            const Spacer(),
-            Icon(
-              isExpanded
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
-              size: 20,
-              color: cs.onSurfaceVariant,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+IconData _loanTypeIcon(String type) {
+  return switch (type) {
+    'home' => Icons.home_work_outlined,
+    'vehicle' => Icons.directions_car_filled_outlined,
+    'education' => Icons.school_outlined,
+    'personal' => Icons.person_outline_rounded,
+    _ => Icons.account_balance_outlined,
+  };
 }
 
-class _LoanCard extends ConsumerWidget {
-  final Loan loan;
-  final List<Transaction> allTxns;
-
-  const _LoanCard({required this.loan, required this.allTxns});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final fmt = ref.watch(formatterProvider);
-    final isPrivate = ref.watch(privacyModeProvider);
-
-    final totalPaid = calc.computeTotalPaid(loan.uid, allTxns);
-    final remaining = calc.computeRemaining(loan, allTxns);
-    final progress = calc.computeProgress(loan, allTxns);
-    final nextDue = calc.computeNextDueDate(loan);
-    final isOverdue =
-        nextDue != null && nextDue.isBefore(DateTime.now());
-
-    return GestureDetector(
-      onTap: () => _openDetailSheet(context, loan),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top section: icon + name + principal
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    _loanTypeIcon(loan.loanType),
-                    size: 20,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loan.name,
-                        style: GoogleFonts.inter(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        [
-                          loan.lenderName,
-                          if (loan.referenceNumber != null &&
-                              loan.referenceNumber!.isNotEmpty)
-                            loan.referenceNumber,
-                        ].join(' · '),
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'PRINCIPAL',
-                      style: GoogleFonts.inter(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      maskAmount(fmt.formatCurrency(loan.principalAmount), isPrivate),
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Progress section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${(progress * 100).toInt()}% Completed',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  '${maskAmount(fmt.formatCurrency(totalPaid), isPrivate)} / ${maskAmount(fmt.formatCurrency(loan.principalAmount), isPrivate)}',
-                  style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 4,
-                backgroundColor: cs.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation(
-                  loan.isCompleted ? cs.tertiary : cs.primary,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // Stats row
-            Row(
-              children: [
-                Expanded(
-                  child: _StatItem(
-                    label: 'REMAINING',
-                    value: maskAmount(fmt.formatCurrency(remaining.clamp(0, double.infinity)), isPrivate),
-                  ),
-                ),
-                Expanded(
-                  child: _StatItem(
-                    label: 'MONTHLY EMI',
-                    value: maskAmount(fmt.formatCurrency(loan.emiAmount), isPrivate),
-                  ),
-                ),
-                if (loan.interestRate != null)
-                  Expanded(
-                    child: _StatItem(
-                      label: 'INTEREST',
-                      value: '${loan.interestRate!.toStringAsFixed(2)}%',
-                    ),
-                  ),
-                Expanded(
-                  child: loan.isCompleted
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: cs.tertiary.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'COMPLETED',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: cs.tertiary,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                        )
-                      : _StatItem(
-                          label: 'NEXT DUE',
-                          value: nextDue != null
-                              ? DateFormat('MMM d').format(nextDue)
-                              : '—',
-                          valueColor:
-                              isOverdue ? cs.error : cs.primary,
-                        ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _openDetailSheet(BuildContext context, Loan loan) {
-    showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => LoanDetailSheet(loan: loan),
-    );
-  }
-
-  static IconData _loanTypeIcon(String type) {
-    switch (type) {
-      case 'home':
-        return Icons.home_outlined;
-      case 'vehicle':
-        return Icons.directions_car_outlined;
-      case 'personal':
-        return Icons.work_outline;
-      case 'education':
-        return Icons.school_outlined;
-      default:
-        return Icons.description_outlined;
-    }
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: valueColor ?? cs.onSurface,
-          ),
-        ),
-      ],
-    );
-  }
+// Brand-stable loan-type accents. cs.error / cs.tertiary clash with the
+// semantic meaning those colors carry elsewhere (overdue / income), so we
+// pin per-type accents that read as identity instead of state.
+Color _loanTypeColor(BuildContext context, String type) {
+  return switch (type) {
+    'home' => Theme.of(context).colorScheme.primary,
+    'vehicle' => const Color(0xFF14B8A6),
+    'personal' => const Color(0xFFA855F7),
+    'education' => const Color(0xFFF59E0B),
+    _ => Theme.of(context).colorScheme.primary,
+  };
 }

@@ -14,6 +14,8 @@ class Investment {
 
   double? currentValue; // User-updated manually, for P&L display
 
+  double? investedAmount; // Total amount invested (initial + contributions)
+
   bool autoDebit = false; // Enable auto-debit for SIP
 
   double? sipAmount; // Monthly SIP amount (if autoDebit = true)
@@ -36,6 +38,7 @@ class Investment {
     'name': name,
     'investmentType': investmentType,
     'currentValue': currentValue,
+    'investedAmount': investedAmount,
     'autoDebit': autoDebit,
     'sipAmount': sipAmount,
     'sipDate': sipDate,

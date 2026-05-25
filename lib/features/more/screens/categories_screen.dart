@@ -26,98 +26,466 @@ import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../settings/providers/info_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
+import '../../transactions/helpers/transaction_filters.dart';
+import '../../transactions/providers/transaction_provider.dart';
+import '../../categories/widgets/category_widgets.dart';
 
-class CategoriesScreen extends ConsumerWidget {
+final categorySpendBreakdownProvider =
+    FutureProvider<
+      ({
+        double total,
+        double? trendPct,
+        int categoryCount,
+        List<CategorySpendSlice> topSlices,
+        Map<String, double> perCategoryTotals,
+        Map<String, int> perCategoryTxnCounts,
+      })
+    >((ref) async {
+      final categories = await ref.watch(categoryListProvider.future);
+      final txns = await ref.watch(transactionListProvider.future);
+      final categoryById = {for (final c in categories) c.id: c};
+      final now = DateTime.now();
+
+      // Three windows via the shared `aggregate(filter)` helper:
+      //   1. Full current month → drives hero total, slices, category count.
+      //   2. Current month to date (1..today, same-day cutoff).
+      //   3. Last month, same 1..today cutoff.
+      // The trend % compares #2 vs #3 — apples-to-apples — while #1 keeps
+      // the headline number consistent with Home's monthlySummaryProvider
+      // (no linkedRuleType exclusion; EMI / SIP / recurring count as spend).
+      final monthStart = DateTime(now.year, now.month);
+      final nextMonth = DateTime(now.year, now.month + 1);
+      final todayExclusive = DateTime(now.year, now.month, now.day + 1);
+      final lastMonthStart = DateTime(now.year, now.month - 1);
+      final lastMonthSameDayExclusive = DateTime(
+        now.year,
+        now.month - 1,
+        now.day + 1,
+      );
+
+      final fullMonth = txns.aggregate(
+        TxnPeriodFilter(from: monthStart, to: nextMonth),
+      );
+      final currentToDate = txns.aggregate(
+        TxnPeriodFilter(from: monthStart, to: todayExclusive),
+      );
+      final lastMonthSameWindow = txns.aggregate(
+        TxnPeriodFilter(from: lastMonthStart, to: lastMonthSameDayExclusive),
+      );
+
+      final slices = <CategorySpendSlice>[];
+      fullMonth.spendingByCategory.forEach((catIdStr, amount) {
+        final catId = int.tryParse(catIdStr);
+        if (catId == null) return;
+        final category = categoryById[catId];
+        if (category == null) return;
+        slices.add(
+          CategorySpendSlice(
+            categoryId: catId,
+            name: category.name,
+            color: Color(category.colorValue),
+            amount: amount,
+          ),
+        );
+      });
+      slices.sort((a, b) => b.amount.compareTo(a.amount));
+
+      final trendPct = lastMonthSameWindow.expense > 0
+          ? ((currentToDate.expense - lastMonthSameWindow.expense) /
+                    lastMonthSameWindow.expense) *
+                100
+          : null;
+
+      return (
+        total: fullMonth.expense,
+        trendPct: trendPct,
+        categoryCount: slices.length,
+        topSlices: slices.take(5).toList(),
+        perCategoryTotals: fullMonth.spendingByCategory,
+        perCategoryTxnCounts: fullMonth.txnCountByCategory,
+      );
+    });
+
+class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
+  /// Search query — when non-empty the list flips from grouped → flat
+  /// matches. A match is "name contains query OR the parent group's name
+  /// contains query" (case-insensitive).
+  String _query = '';
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final categoriesAsync = ref.watch(categoryListProvider);
     final groupsAsync = ref.watch(categoryGroupListProvider);
 
     // Auto-trigger info sheet
-    ref.listen<AsyncValue<bool>>(infoSeenProvider(PrefsKeys.seenInfoCategories), (prev, next) {
-      if (next.hasValue && next.value == false) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          KuberInfoBottomSheet.show(context, InfoConstants.categories);
-          ref.read(infoSeenProvider(PrefsKeys.seenInfoCategories).notifier).markSeen();
-        });
-      }
-    });
+    ref.listen<AsyncValue<bool>>(
+      infoSeenProvider(PrefsKeys.seenInfoCategories),
+      (prev, next) {
+        if (next.hasValue && next.value == false) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            KuberInfoBottomSheet.show(context, InfoConstants.categories);
+            ref
+                .read(infoSeenProvider(PrefsKeys.seenInfoCategories).notifier)
+                .markSeen();
+          });
+        }
+      },
+    );
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: categoriesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
-        data: (categories) {
-          final groups = groupsAsync.valueOrNull ?? [];
+      // Tap anywhere outside the search field to dismiss the keyboard.
+      // `behavior: opaque` so the detector also catches taps on empty
+      // space inside the scroll view, not just on widgets that themselves
+      // absorb hits.
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: categoriesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(child: Text('Error: $e')),
+          data: (categories) {
+            final groups = groupsAsync.valueOrNull ?? [];
 
-          return CustomScrollView(
-            slivers: [
-              // App bar
-              const SliverToBoxAdapter(
-                child: KuberAppBar(
-                  showBack: true,
-                  showHome: true,
-                  title: '',
-                  infoConfig: InfoConstants.categories,
+            return CustomScrollView(
+              slivers: [
+                // App bar
+                const SliverToBoxAdapter(
+                  child: KuberAppBar(
+                    showBack: true,
+                    showHome: true,
+                    title: '',
+                    infoConfig: InfoConstants.categories,
+                  ),
                 ),
-              ),
 
-              // Page header
-              SliverToBoxAdapter(
-                child: KuberPageHeader(
-                  title: 'Manage\nCategories',
-                  description:
-                      'Organize your transactions with custom categories and group those categories.',
-                  actionTooltip: 'Add Category/Group',
-                  onAction: () => _showAddSelectionSheet(context),
-                ),
-              ),
-
-              // KPI Grid
-              const SliverToBoxAdapter(child: _CategoryKpisGrid()),
-
-              if (categories.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: KuberEmptyState(
-                    icon: Icons.category_outlined,
-                    title: 'No categories yet',
-                    description: 'Create categories to organize your expenses',
-                    actionLabel: 'Add Category',
+                // Page header
+                SliverToBoxAdapter(
+                  child: KuberPageHeader(
+                    title: 'Manage\nCategories',
+                    description: '',
+                    actionTooltip: 'Add Category/Group',
                     onAction: () => _showAddSelectionSheet(context),
                   ),
-                )
-              else ...[
-                ...() {
-                  final Map<int?, List<Category>> grouped = {};
-                  for (final cat in categories) {
-                    grouped.putIfAbsent(cat.groupId, () => []).add(cat);
-                  }
+                ),
 
-                  // Sort groups alphabetically
-                  final sortedGroups = groups.toList()
-                    ..sort((a, b) => a.name.compareTo(b.name));
+                // Spend hero — hidden when there is no expense activity this
+                // month so we don't render an empty ₹0 / 0 categories card.
+                SliverToBoxAdapter(
+                  child: ref
+                      .watch(categorySpendBreakdownProvider)
+                      .when(
+                        data: (breakdown) {
+                          if (breakdown.total <= 0 ||
+                              breakdown.topSlices.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              KuberSpacing.lg,
+                              0,
+                              KuberSpacing.lg,
+                              KuberSpacing.lg,
+                            ),
+                            child: CategorySpendHero(
+                              total: breakdown.total,
+                              trendPct: breakdown.trendPct,
+                              categoryCount: breakdown.categoryCount,
+                              topSlices: breakdown.topSlices,
+                            ),
+                          );
+                        },
+                        loading: () => const Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            KuberSpacing.lg,
+                            0,
+                            KuberSpacing.lg,
+                            KuberSpacing.lg,
+                          ),
+                          child: SizedBox(
+                            height: 180,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                ),
 
-                  final List<Widget> slivers = [];
+                if (categories.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: KuberEmptyState(
+                      icon: Icons.category_outlined,
+                      title: 'No categories yet',
+                      description:
+                          'Create categories to organize your expenses',
+                      actionLabel: 'Add Category',
+                      onAction: () => _showAddSelectionSheet(context),
+                    ),
+                  )
+                else ...[
+                  // Search field — matches the tools_hub_screen treatment.
+                  // Filters by category name OR parent group name (case-
+                  // insensitive); when matches occur, the list flips from
+                  // grouped to a flat sorted result list.
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        KuberSpacing.lg,
+                        0,
+                        KuberSpacing.lg,
+                        KuberSpacing.md,
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (v) => setState(() => _query = v),
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: cs.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Search categories and groups...',
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: cs.onSurfaceVariant,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: cs.onSurfaceVariant,
+                            size: 20,
+                          ),
+                          suffixIcon: _query.isEmpty
+                              ? null
+                              : IconButton(
+                                  icon: Icon(
+                                    Icons.close_rounded,
+                                    color: cs.onSurfaceVariant,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _query = '');
+                                  },
+                                ),
+                          filled: true,
+                          fillColor: cs.surfaceContainer,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: KuberSpacing.md,
+                            horizontal: KuberSpacing.lg,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                            borderSide: BorderSide(color: cs.outline),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                            borderSide: BorderSide(color: cs.outline),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                            borderSide: BorderSide(color: cs.primary),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
 
-                  // Render each group
-                  for (final group in sortedGroups) {
-                    final groupCategories = grouped[group.id] ?? [];
-                    if (groupCategories.isNotEmpty) {
-                      groupCategories.sort((a, b) => a.name.compareTo(b.name));
+                  ...() {
+                    // Per-category this-month aggregates — same source the
+                    // hero uses, so per-row amount + txn count stay in
+                    // lockstep with the hero total.
+                    final breakdownValue = ref
+                        .watch(categorySpendBreakdownProvider)
+                        .valueOrNull;
+                    final perCategoryThisMonth =
+                        breakdownValue?.perCategoryTotals ??
+                        const <String, double>{};
+                    final perCategoryThisMonthCount =
+                        breakdownValue?.perCategoryTxnCounts ??
+                        const <String, int>{};
+
+                    // Group lookups (id -> name) so search can match by
+                    // parent group name.
+                    final groupNameById = <int, String>{
+                      for (final g in groups) g.id: g.name,
+                    };
+
+                    final q = _query.trim().toLowerCase();
+                    final isSearching = q.isNotEmpty;
+
+                    // ── Searching: flat list of matches ───────────────────
+                    if (isSearching) {
+                      bool matches(Category c) {
+                        if (c.name.toLowerCase().contains(q)) return true;
+                        final gid = c.groupId;
+                        if (gid != null) {
+                          final gname = groupNameById[gid];
+                          if (gname != null &&
+                              gname.toLowerCase().contains(q)) {
+                            return true;
+                          }
+                        }
+                        return false;
+                      }
+
+                      final matched = categories.where(matches).toList()
+                        ..sort((a, b) => a.name.compareTo(b.name));
+
+                      if (matched.isEmpty) {
+                        return <Widget>[
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: KuberSpacing.lg,
+                              vertical: KuberSpacing.xl,
+                            ),
+                            sliver: SliverToBoxAdapter(
+                              child: KuberEmptyState(
+                                icon: Icons.search_off_rounded,
+                                title: 'No matches',
+                                description:
+                                    'No categories or groups match "${_query.trim()}".',
+                              ),
+                            ),
+                          ),
+                        ];
+                      }
+
+                      return <Widget>[
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final cat = matched[index];
+                              final catIdStr = cat.id.toString();
+                              final realGname = cat.groupId != null
+                                  ? groupNameById[cat.groupId!]
+                                  : null;
+                              // Always surface a group tag in search
+                              // results: real group name if set, else
+                              // "Ungrouped". Otherwise an orphan category
+                              // looks identical to a grouped one and the
+                              // user can't tell why it matched.
+                              final searchTag = realGname ?? 'Ungrouped';
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: CategoryListItem(
+                                  category: cat,
+                                  thisMonthSpent:
+                                      perCategoryThisMonth[catIdStr] ?? 0,
+                                  thisMonthTxnCount:
+                                      perCategoryThisMonthCount[catIdStr] ?? 0,
+                                  groupName: searchTag,
+                                  onTap: () => _showCategoryDetails(
+                                    context,
+                                    ref,
+                                    cat,
+                                    realGname,
+                                  ),
+                                ),
+                              );
+                            }, childCount: matched.length),
+                          ),
+                        ),
+                      ];
+                    }
+
+                    // ── Not searching: existing grouped view ──────────────
+                    final Map<int?, List<Category>> grouped = {};
+                    for (final cat in categories) {
+                      grouped.putIfAbsent(cat.groupId, () => []).add(cat);
+                    }
+
+                    // Sort groups alphabetically
+                    final sortedGroups = groups.toList()
+                      ..sort((a, b) => a.name.compareTo(b.name));
+
+                    final List<Widget> slivers = [];
+                    int groupSerial = 0;
+
+                    // Render each group
+                    for (final group in sortedGroups) {
+                      final groupCategories = grouped[group.id] ?? [];
+                      if (groupCategories.isNotEmpty) {
+                        groupCategories.sort(
+                          (a, b) => a.name.compareTo(b.name),
+                        );
+                        groupSerial += 1;
+                        slivers.add(
+                          SliverToBoxAdapter(
+                            child: _GroupHeader(
+                              name: group.name,
+                              serial: groupSerial.toString().padLeft(2, '0'),
+                              count: groupCategories.length,
+                              onTap: () =>
+                                  _showGroupActionsSheet(context, ref, group),
+                            ),
+                          ),
+                        );
+                        slivers.add(
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate((
+                                context,
+                                index,
+                              ) {
+                                final cat = groupCategories[index];
+                                final catIdStr = cat.id.toString();
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: CategoryListItem(
+                                    category: cat,
+                                    thisMonthSpent:
+                                        perCategoryThisMonth[catIdStr] ?? 0,
+                                    thisMonthTxnCount:
+                                        perCategoryThisMonthCount[catIdStr] ??
+                                        0,
+                                    groupName: group.name,
+                                    onTap: () => _showCategoryDetails(
+                                      context,
+                                      ref,
+                                      cat,
+                                      group.name,
+                                    ),
+                                  ),
+                                );
+                              }, childCount: groupCategories.length),
+                            ),
+                          ),
+                        );
+                      }
+                    }
+
+                    // Render Ungrouped
+                    final ungrouped = grouped[null] ?? [];
+                    if (ungrouped.isNotEmpty) {
+                      ungrouped.sort((a, b) => a.name.compareTo(b.name));
+                      groupSerial += 1;
                       slivers.add(
                         SliverToBoxAdapter(
                           child: _GroupHeader(
-                            name: group.name,
-                            onEdit: () =>
-                                _showEditGroupDialog(context, ref, group),
-                            onDelete: () =>
-                                _confirmDeleteGroup(context, ref, group),
+                            name: 'Ungrouped',
+                            serial: groupSerial.toString().padLeft(2, '0'),
+                            count: ungrouped.length,
                           ),
                         ),
                       );
@@ -125,71 +493,46 @@ class CategoriesScreen extends ConsumerWidget {
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) => Padding(
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final cat = ungrouped[index];
+                              final catIdStr = cat.id.toString();
+                              return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: _CategoryListItem(
-                                  category: groupCategories[index],
+                                child: CategoryListItem(
+                                  category: cat,
+                                  thisMonthSpent:
+                                      perCategoryThisMonth[catIdStr] ?? 0,
+                                  thisMonthTxnCount:
+                                      perCategoryThisMonthCount[catIdStr] ?? 0,
                                   onTap: () => _showCategoryDetails(
                                     context,
                                     ref,
-                                    groupCategories[index],
-                                    group.name,
+                                    cat,
+                                    null,
                                   ),
                                 ),
-                              ),
-                              childCount: groupCategories.length,
-                            ),
+                              );
+                            }, childCount: ungrouped.length),
                           ),
                         ),
                       );
                     }
-                  }
 
-                  // Render Ungrouped
-                  final ungrouped = grouped[null] ?? [];
-                  if (ungrouped.isNotEmpty) {
-                    ungrouped.sort((a, b) => a.name.compareTo(b.name));
-                    slivers.add(
-                      const SliverToBoxAdapter(
-                        child: _GroupHeader(name: 'Ungrouped'),
-                      ),
-                    );
-                    slivers.add(
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _CategoryListItem(
-                                category: ungrouped[index],
-                                onTap: () => _showCategoryDetails(
-                                  context,
-                                  ref,
-                                  ungrouped[index],
-                                  null,
-                                ),
-                              ),
-                            ),
-                            childCount: ungrouped.length,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
+                    return slivers;
+                  }(),
+                ],
 
-                  return slivers;
-                }(),
+                // Bottom padding
+                SliverToBoxAdapter(
+                  child: SizedBox(height: navBarBottomPadding(context) + 40),
+                ),
               ],
-
-              // Bottom padding
-              SliverToBoxAdapter(
-                child: SizedBox(height: navBarBottomPadding(context) + 40),
-              ),
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -203,94 +546,93 @@ class CategoriesScreen extends ConsumerWidget {
       useRootNavigator: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
       ),
       builder: (context) => Padding(
-          padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.xl,
-            0,
-            KuberSpacing.xl,
-            KuberSpacing.xl,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.xl,
+          0,
+          KuberSpacing.xl,
+          KuberSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 8),
+            ),
+            const SizedBox(height: 8),
 
-              // Header with Title + Close
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Add New',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
+            // Header with Title + Close
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Add New',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () =>
-                        Navigator.of(context, rootNavigator: true).pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        size: 18,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _buildAddOption(
-                context,
-                icon: Icons.category_rounded,
-                title: 'Add Category',
-                description: 'Classify your transactions for better tracking',
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push(
-                    '/category/add',
-                    extra: const CategoryRouteArgs(
-                      returnToCategoryPicker: false,
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              _buildAddOption(
-                context,
-                icon: Icons.grid_view_rounded,
-                title: 'Add Group',
-                description:
-                    'Organize categories into sections for better clarity',
-                onTap: () {
-                  Navigator.pop(context);
-                  _showAddGroupDialog(context);
-                },
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildAddOption(
+              context,
+              icon: Icons.category_rounded,
+              title: 'Add Category',
+              description: 'Classify your transactions for better tracking',
+              onTap: () {
+                Navigator.pop(context);
+                context.push(
+                  '/category/add',
+                  extra: const CategoryRouteArgs(returnToCategoryPicker: false),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildAddOption(
+              context,
+              icon: Icons.grid_view_rounded,
+              title: 'Add Group',
+              description:
+                  'Organize categories into sections for better clarity',
+              onTap: () {
+                Navigator.pop(context);
+                _showAddGroupDialog(context);
+              },
+            ),
+          ],
         ),
+      ),
     );
   }
 
@@ -370,6 +712,54 @@ class CategoriesScreen extends ConsumerWidget {
       ref.read(categoryGroupRepositoryProvider).save(group);
       ref.invalidate(categoryGroupListProvider);
     }, group.id);
+  }
+
+  /// Bottom sheet shown on tap of a group row in the Categories list.
+  /// Contains Edit and Delete actions. Dismisses before delegating so the
+  /// downstream dialog has a clean stack.
+  void _showGroupActionsSheet(
+    BuildContext context,
+    WidgetRef ref,
+    CategoryGroup group,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => KuberBottomSheet(
+        title: group.name,
+        subtitle: 'Category group',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppButton(
+              label: 'Edit group',
+              icon: Icons.edit_outlined,
+              type: AppButtonType.normal,
+              fullWidth: true,
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                _showEditGroupDialog(context, ref, group);
+              },
+            ),
+            const SizedBox(height: KuberSpacing.sm),
+            AppButton(
+              label: 'Delete group',
+              icon: Icons.delete_outline_rounded,
+              type: AppButtonType.danger,
+              fullWidth: true,
+              onPressed: () {
+                Navigator.of(sheetContext).pop();
+                _confirmDeleteGroup(context, ref, group);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showGroupDialog(
@@ -525,9 +915,9 @@ class CategoriesScreen extends ConsumerWidget {
           fullWidth: true,
           onPressed: () {
             ref.read(historyFilterProvider.notifier).clearAll();
-            ref.read(historyFilterProvider.notifier).setFilters(
-                  categoryIds: {cat.id.toString()},
-                );
+            ref
+                .read(historyFilterProvider.notifier)
+                .setFilters(categoryIds: {cat.id.toString()});
             context.go('/history');
           },
         ),
@@ -736,55 +1126,64 @@ class CategoriesScreen extends ConsumerWidget {
 
 class _GroupHeader extends StatelessWidget {
   final String name;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
+  final String? serial;
+  final int? count;
 
-  const _GroupHeader({required this.name, this.onEdit, this.onDelete});
+  /// When non-null, the entire header row is tappable. Use to open a
+  /// bottom sheet with group actions (edit / delete). Pass null for
+  /// non-actionable groups (e.g. "Ungrouped").
+  final VoidCallback? onTap;
+
+  const _GroupHeader({required this.name, this.serial, this.count, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: Text(
-              name.toUpperCase(),
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+          if (serial != null) ...[
+            Text(
+              serial!,
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
-                letterSpacing: 1.2,
+                letterSpacing: 0.4,
               ),
+            ),
+            const SizedBox(width: KuberSpacing.sm),
+          ],
+          Text(
+            name.toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: cs.primary,
+              letterSpacing: 1.2,
             ),
           ),
-          if (onEdit != null) ...[
-            IconButton(
-              icon: Icon(
-                Icons.edit_outlined,
-                size: 16,
+          const Spacer(),
+          if (count != null)
+            Text(
+              count == 1 ? '1 category' : '$count categories',
+              style: GoogleFonts.inter(
+                fontSize: 11,
                 color: cs.onSurfaceVariant,
               ),
-              onPressed: onEdit,
-              visualDensity: VisualDensity.compact,
             ),
-            IconButton(
-              icon: Icon(
-                Icons.delete_outline_rounded,
-                size: 16,
-                color: cs.onSurfaceVariant,
-              ),
-              onPressed: onDelete,
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
         ],
       ),
     );
+
+    if (onTap == null) return row;
+    return InkWell(onTap: onTap, child: row);
   }
 }
 
+// ignore: unused_element
 class _CategoryKpisGrid extends ConsumerWidget {
   const _CategoryKpisGrid();
 
@@ -884,6 +1283,7 @@ class _CategoryKpisGrid extends ConsumerWidget {
   }
 }
 
+// ignore: unused_element
 class _CategoryListItem extends ConsumerWidget {
   final Category category;
   final VoidCallback onTap;

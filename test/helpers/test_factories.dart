@@ -223,6 +223,7 @@ Investment makeInvestment({
   String name = 'Test Investment',
   String investmentType = 'stocks',
   double? currentValue,
+  double? investedAmount,
   bool autoDebit = false,
   double? sipAmount,
   int? sipDate,
@@ -238,6 +239,7 @@ Investment makeInvestment({
     ..name = name
     ..investmentType = investmentType
     ..currentValue = currentValue
+    ..investedAmount = investedAmount
     ..autoDebit = autoDebit
     ..sipAmount = sipAmount
     ..sipDate = sipDate

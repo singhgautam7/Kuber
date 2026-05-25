@@ -42,22 +42,27 @@ const InvestmentSchema = CollectionSchema(
       name: r'currentValue',
       type: IsarType.double,
     ),
-    r'investmentType': PropertySchema(
+    r'investedAmount': PropertySchema(
       id: 5,
+      name: r'investedAmount',
+      type: IsarType.double,
+    ),
+    r'investmentType': PropertySchema(
+      id: 6,
       name: r'investmentType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 6, name: r'name', type: IsarType.string),
-    r'notes': PropertySchema(id: 7, name: r'notes', type: IsarType.string),
+    r'name': PropertySchema(id: 7, name: r'name', type: IsarType.string),
+    r'notes': PropertySchema(id: 8, name: r'notes', type: IsarType.string),
     r'sipAmount': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'sipAmount',
       type: IsarType.double,
     ),
-    r'sipDate': PropertySchema(id: 9, name: r'sipDate', type: IsarType.long),
-    r'uid': PropertySchema(id: 10, name: r'uid', type: IsarType.string),
+    r'sipDate': PropertySchema(id: 10, name: r'sipDate', type: IsarType.long),
+    r'uid': PropertySchema(id: 11, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -114,13 +119,14 @@ void _investmentSerialize(
   writer.writeString(offsets[2], object.categoryId);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeDouble(offsets[4], object.currentValue);
-  writer.writeString(offsets[5], object.investmentType);
-  writer.writeString(offsets[6], object.name);
-  writer.writeString(offsets[7], object.notes);
-  writer.writeDouble(offsets[8], object.sipAmount);
-  writer.writeLong(offsets[9], object.sipDate);
-  writer.writeString(offsets[10], object.uid);
-  writer.writeDateTime(offsets[11], object.updatedAt);
+  writer.writeDouble(offsets[5], object.investedAmount);
+  writer.writeString(offsets[6], object.investmentType);
+  writer.writeString(offsets[7], object.name);
+  writer.writeString(offsets[8], object.notes);
+  writer.writeDouble(offsets[9], object.sipAmount);
+  writer.writeLong(offsets[10], object.sipDate);
+  writer.writeString(offsets[11], object.uid);
+  writer.writeDateTime(offsets[12], object.updatedAt);
 }
 
 Investment _investmentDeserialize(
@@ -136,13 +142,14 @@ Investment _investmentDeserialize(
   object.createdAt = reader.readDateTime(offsets[3]);
   object.currentValue = reader.readDoubleOrNull(offsets[4]);
   object.id = id;
-  object.investmentType = reader.readString(offsets[5]);
-  object.name = reader.readString(offsets[6]);
-  object.notes = reader.readStringOrNull(offsets[7]);
-  object.sipAmount = reader.readDoubleOrNull(offsets[8]);
-  object.sipDate = reader.readLongOrNull(offsets[9]);
-  object.uid = reader.readString(offsets[10]);
-  object.updatedAt = reader.readDateTime(offsets[11]);
+  object.investedAmount = reader.readDoubleOrNull(offsets[5]);
+  object.investmentType = reader.readString(offsets[6]);
+  object.name = reader.readString(offsets[7]);
+  object.notes = reader.readStringOrNull(offsets[8]);
+  object.sipAmount = reader.readDoubleOrNull(offsets[9]);
+  object.sipDate = reader.readLongOrNull(offsets[10]);
+  object.uid = reader.readString(offsets[11]);
+  object.updatedAt = reader.readDateTime(offsets[12]);
   return object;
 }
 
@@ -164,18 +171,20 @@ P _investmentDeserializeProp<P>(
     case 4:
       return (reader.readDoubleOrNull(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset)) as P;
-    case 8:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 9:
-      return (reader.readLongOrNull(offset)) as P;
-    case 10:
       return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 10:
+      return (reader.readLongOrNull(offset)) as P;
     case 11:
+      return (reader.readString(offset)) as P;
+    case 12:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -799,6 +808,99 @@ extension InvestmentQueryFilter
           includeLower: includeLower,
           upper: upper,
           includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  investedAmountIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'investedAmount'),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  investedAmountIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'investedAmount'),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  investedAmountEqualTo(double? value, {double epsilon = Query.epsilon}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'investedAmount',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  investedAmountGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'investedAmount',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  investedAmountLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'investedAmount',
+          value: value,
+
+          epsilon: epsilon,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  investedAmountBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'investedAmount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+
+          epsilon: epsilon,
         ),
       );
     });
@@ -1693,6 +1795,19 @@ extension InvestmentQuerySortBy
     });
   }
 
+  QueryBuilder<Investment, Investment, QAfterSortBy> sortByInvestedAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'investedAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterSortBy>
+  sortByInvestedAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'investedAmount', Sort.desc);
+    });
+  }
+
   QueryBuilder<Investment, Investment, QAfterSortBy> sortByInvestmentType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'investmentType', Sort.asc);
@@ -1853,6 +1968,19 @@ extension InvestmentQuerySortThenBy
     });
   }
 
+  QueryBuilder<Investment, Investment, QAfterSortBy> thenByInvestedAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'investedAmount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterSortBy>
+  thenByInvestedAmountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'investedAmount', Sort.desc);
+    });
+  }
+
   QueryBuilder<Investment, Investment, QAfterSortBy> thenByInvestmentType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'investmentType', Sort.asc);
@@ -1975,6 +2103,12 @@ extension InvestmentQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Investment, Investment, QDistinct> distinctByInvestedAmount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'investedAmount');
+    });
+  }
+
   QueryBuilder<Investment, Investment, QDistinct> distinctByInvestmentType({
     bool caseSensitive = true,
   }) {
@@ -2064,6 +2198,12 @@ extension InvestmentQueryProperty
   QueryBuilder<Investment, double?, QQueryOperations> currentValueProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentValue');
+    });
+  }
+
+  QueryBuilder<Investment, double?, QQueryOperations> investedAmountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'investedAmount');
     });
   }
 

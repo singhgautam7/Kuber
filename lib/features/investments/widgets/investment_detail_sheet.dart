@@ -5,12 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, formatterProvider;
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/data/transaction.dart';
-import '../../transactions/providers/transaction_provider.dart';
 import '../data/investment.dart';
 import '../providers/investment_provider.dart';
 import '../utils/investment_calculations.dart' as calc;
@@ -32,7 +32,7 @@ class _InvestmentDetailSheetState
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
-    final allTxns = ref.watch(transactionListProvider).valueOrNull ?? [];
+
 
     // Watch the live list so the sheet updates when currentValue changes
     final liveList = ref.watch(investmentListProvider).valueOrNull ?? [];
@@ -44,11 +44,9 @@ class _InvestmentDetailSheetState
     final contributionsAsync =
         ref.watch(investmentTransactionsProvider(investment.uid));
 
-    final totalInvested =
-        calc.computeTotalInvested(investment.uid, allTxns);
-    final gainLoss = calc.computeGainLoss(investment, allTxns);
-    final gainLossPercent =
-        calc.computeGainLossPercent(investment, allTxns);
+    final totalInvested = calc.computeTotalInvested(investment);
+    final gainLoss = calc.computeGainLoss(investment);
+    final gainLossPercent = calc.computeGainLossPercent(investment);
     final isGain = gainLoss >= 0;
     final hasCurrentValue = investment.currentValue != null;
 
@@ -321,9 +319,14 @@ class _InvestmentDetailSheetState
 
   void _showUpdateValueDialog(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final controller = TextEditingController(
-      text: widget.investment.currentValue?.toStringAsFixed(0) ?? '',
-    );
+    final fmt = ref.read(formatterProvider);
+    // Pre-format the current value with commas so it matches the formatter
+    final initialText = widget.investment.currentValue != null
+        ? fmt.formatNumber(widget.investment.currentValue!)
+        : '';
+    final controller = TextEditingController(text: initialText);
+    // Place cursor at end
+    controller.selection = TextSelection.collapsed(offset: initialText.length);
     final symbol = ref.read(currencyProvider).symbol;
 
     showDialog(
@@ -334,8 +337,12 @@ class _InvestmentDetailSheetState
             style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: controller,
-          keyboardType: TextInputType.number,
+          keyboardType:
+              const TextInputType.numberWithOptions(signed: true, decimal: true),
           autofocus: true,
+          inputFormatters: [
+            CurrencyInputFormatter(isIndian: fmt.system == NumberSystem.indian),
+          ],
           style: GoogleFonts.inter(fontSize: 18, color: cs.onSurface),
           decoration: InputDecoration(
             prefixText: '$symbol ',

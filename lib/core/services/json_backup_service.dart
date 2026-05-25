@@ -277,6 +277,7 @@ class JsonBackupService {
         'name': i.name,
         'investmentType': i.investmentType,
         'currentValue': i.currentValue,
+        'investedAmount': i.investedAmount,
         'autoDebit': i.autoDebit,
         'sipAmount': i.sipAmount,
         'sipDate': i.sipDate,
@@ -452,6 +453,7 @@ class JsonBackupService {
     ..name = m['name'] as String
     ..investmentType = m['investmentType'] as String
     ..currentValue = (m['currentValue'] as num?)?.toDouble()
+    ..investedAmount = (m['investedAmount'] as num?)?.toDouble()
     ..autoDebit = (m['autoDebit'] as bool?) ?? false
     ..sipAmount = (m['sipAmount'] as num?)?.toDouble()
     ..sipDate = m['sipDate'] as int?

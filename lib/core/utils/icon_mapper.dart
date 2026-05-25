@@ -29,7 +29,12 @@ class IconMapper {
     'celebration': Icons.celebration,
     'savings': Icons.savings,
     'trending_up': Icons.trending_up,
+    'show_chart': Icons.show_chart,
+    'pie_chart': Icons.pie_chart,
+    'currency_bitcoin': Icons.currency_bitcoin,
+    'apartment': Icons.apartment,
     'receipt_long': Icons.receipt_long,
+    'subscriptions': Icons.subscriptions,
     'account_balance': Icons.account_balance,
     'currency_rupee': Icons.currency_rupee,
     'school': Icons.school,
@@ -55,6 +60,15 @@ class IconMapper {
 
   static IconData fromString(String name) {
     return _iconMap[name] ?? Icons.category;
+  }
+
+  static String toStringName(IconData icon) {
+    return _iconMap.entries
+        .firstWhere(
+          (entry) => entry.value == icon,
+          orElse: () => const MapEntry('category', Icons.category),
+        )
+        .key;
   }
 
   static IconData fromCurrencyCode(String code) {

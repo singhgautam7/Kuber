@@ -26,40 +26,27 @@ final currentMonthProvider = StateProvider<({int year, int month})>((ref) {
 final monthlySummaryProvider = FutureProvider<MonthlySummary>((ref) async {
   final month = ref.watch(currentMonthProvider);
   final transactions = await ref.watch(transactionListProvider.future);
-  
+
   final start = DateTime(month.year, month.month);
   final nextMonth = month.month == 12 ? 1 : month.month + 1;
   final nextYear = month.month == 12 ? month.year + 1 : month.year;
   final end = DateTime(nextYear, nextMonth);
 
-  double income = 0;
-  double expense = 0;
-  final categorySpending = <String, double>{};
-
-  for (final t in transactions.validForCalculations) {
-    
-    // Monthly range check (consistent with History)
-    if (t.createdAt.isBefore(start) || !t.createdAt.isBefore(end)) continue;
-
-    if (t.type == 'income') {
-      income += t.amount;
-    } else {
-      expense += t.amount;
-      categorySpending[t.categoryId] =
-          (categorySpending[t.categoryId] ?? 0) + t.amount;
-    }
-  }
+  // Delegates to the shared `aggregate(filter)` helper so this hero, the
+  // Categories hero, and any future month-scoped totals stay in lockstep.
+  final agg = transactions.aggregate(TxnPeriodFilter(from: start, to: end));
 
   return MonthlySummary(
-    totalIncome: income,
-    totalExpense: expense,
-    net: income - expense,
-    categorySpending: categorySpending,
+    totalIncome: agg.income,
+    totalExpense: agg.expense,
+    net: agg.net,
+    categorySpending: agg.spendingByCategory,
   );
 });
 
-final recentTransactionsProvider =
-    FutureProvider<List<Transaction>>((ref) async {
+final recentTransactionsProvider = FutureProvider<List<Transaction>>((
+  ref,
+) async {
   final all = await ref.watch(transactionListProvider.future);
   final filtered = all.validForFeed.toList();
   return filtered.take(10).toList();
@@ -77,8 +64,7 @@ class DaySummary {
   });
 }
 
-final last7DaysSummaryProvider =
-    FutureProvider<List<DaySummary>>((ref) async {
+final last7DaysSummaryProvider = FutureProvider<List<DaySummary>>((ref) async {
   final all = await ref.watch(transactionListProvider.future);
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);

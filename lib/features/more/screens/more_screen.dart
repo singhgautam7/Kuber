@@ -10,14 +10,29 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_loader.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/widgets/settings_widgets.dart';
+import '../../settings/providers/settings_provider.dart';
 import '../../dev/providers/dev_mode_provider.dart';
 import '../../tutorial/providers/tutorial_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
+import 'more_screen_modern.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final layout = ref.watch(moreTabLayoutProvider);
+    return switch (layout) {
+      MoreTabLayout.simple => const MoreScreenSimple(),
+      MoreTabLayout.modern => const MoreScreenModern(),
+    };
+  }
+}
+
+class MoreScreenSimple extends ConsumerWidget {
+  const MoreScreenSimple({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -271,7 +286,6 @@ class MoreScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-
               ]),
             ),
           ),
