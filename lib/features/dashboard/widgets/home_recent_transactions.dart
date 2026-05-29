@@ -10,6 +10,7 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../history/utils/history_utils.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tags/providers/tag_providers.dart';
+import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/transaction_row.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
@@ -68,6 +69,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
             final accountMap = accountMapAsync.valueOrNull ?? {};
             final categoryMap = categoryMapAsync.valueOrNull ?? {};
             final allTransactions = allTransactionsAsync.valueOrNull ?? [];
+            final transferPairs = buildTransferPairAccountIds(allTransactions);
 
             // Build tag names map for indicator line
             final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
@@ -99,7 +101,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                       formatter: fmt,
                       categoryMap: categoryMap,
                       accountMap: accountMap,
-                      transactionList: allTransactions,
+                      transferPairAccountId: transferPairs,
                       tagNamesMap: tagNamesMap,
                     ),
                   ],

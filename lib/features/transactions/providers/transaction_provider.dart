@@ -81,6 +81,45 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     }
   }
 
+  /// Deletes many transactions at once. Expands transfer pairs, clears
+  /// attachments, deletes everything in a single transaction, and invalidates
+  /// dependent providers exactly once — instead of N reloads for N rows.
+  Future<void> deleteMany(Iterable<int> ids) async {
+    final repo = ref.read(transactionRepositoryProvider);
+    final attachments = ref.read(attachmentServiceProvider);
+
+    final toDelete = <int>{};
+    final affectedExpenseCategories = <String>{};
+
+    for (final id in ids) {
+      final t = await repo.getById(id);
+      if (t == null) continue;
+      toDelete.add(t.id);
+      if (t.type == 'expense' && !t.isTransfer) {
+        affectedExpenseCategories.add(t.categoryId);
+      }
+      if (t.isTransfer && t.transferId != null) {
+        final pair = await repo.findTransferPair(t.transferId!, t.id);
+        if (pair != null) toDelete.add(pair.id);
+      }
+    }
+
+    if (toDelete.isEmpty) return;
+
+    for (final id in toDelete) {
+      await attachments.deleteAllForTransaction(id);
+    }
+    await repo.deleteByIds(toDelete.toList());
+
+    ref.invalidateSelf();
+    _invalidateDependencies();
+
+    final budgetService = ref.read(budgetServiceProvider);
+    for (final cat in affectedExpenseCategories) {
+      budgetService.checkAlerts(cat).catchError((_) {});
+    }
+  }
+
   Future<void> restore(Transaction t) async {
     await ref.read(transactionRepositoryProvider).restore(t);
     ref.invalidateSelf();
@@ -182,22 +221,4 @@ final spendingStatsProvider =
         projected: avgDaily * daysInMonth,
         daysElapsed: now.day,
       );
-    });
-
-final monthlyTransactionsProvider =
-    FutureProvider.family<List<Transaction>, ({int year, int month})>((
-      ref,
-      params,
-    ) async {
-      final all = await ref.watch(transactionListProvider.future);
-      final start = DateTime(params.year, params.month);
-      final nextMonth = params.month == 12 ? 1 : params.month + 1;
-      final nextYear = params.month == 12 ? params.year + 1 : params.year;
-      final end = DateTime(nextYear, nextMonth);
-
-      return all
-          .where(
-            (t) => !t.createdAt.isBefore(start) && t.createdAt.isBefore(end),
-          )
-          .toList();
     });

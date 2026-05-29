@@ -24,6 +24,12 @@ class TransactionRepository extends BaseRepository<Transaction> {
     await isar.writeTxn(() => isar.transactions.delete(id));
   }
 
+  /// Deletes many transactions in a single write transaction.
+  Future<void> deleteByIds(List<Id> ids) async {
+    if (ids.isEmpty) return;
+    await isar.writeTxn(() => isar.transactions.deleteAll(ids));
+  }
+
   Future<void> restore(Transaction t) async {
     t.nameLower = t.name.toLowerCase();
     await isar.writeTxn(() => isar.transactions.put(t));

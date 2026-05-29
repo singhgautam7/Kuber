@@ -17,15 +17,11 @@ import '../../settings/providers/settings_provider.dart'
         navBarStyleProvider,
         NavBarStyle;
 import '../data/transaction.dart';
-import '../helpers/transaction_filters.dart';
 import '../providers/transaction_provider.dart';
-import '../../tags/providers/tag_providers.dart';
 import '../../export/widgets/export_bottom_sheet.dart';
 import '../../history/providers/history_filter_provider.dart';
-import '../../history/models/history_filter.dart';
-import '../../history/utils/filter_utils.dart';
+import '../../history/providers/history_view_provider.dart';
 import '../../history/widgets/history_filter_widget.dart';
-import '../../history/utils/history_utils.dart';
 import '../../history/providers/selection_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../widgets/transaction_row.dart';
@@ -60,14 +56,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     setState(() => _displayedGroupCount += _groupsPerPage);
   }
 
-  List<Transaction> _applyFilters(
-    List<Transaction> transactions,
-    HistoryFilter filter,
-  ) {
-    final txnTagsMap = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
-    return applyHistoryFilters(transactions, filter, txnTagsMap: txnTagsMap);
-  }
-
   void _showTransactionDetail(Transaction t) {
     showTransactionDetailSheet(context, ref, t);
   }
@@ -90,8 +78,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     });
 
     final cs = Theme.of(context).colorScheme;
-    final transactionsAsync = ref.watch(transactionListProvider);
-    final filter = ref.watch(historyFilterProvider);
+    final viewAsync = ref.watch(historyViewProvider);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -103,10 +90,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               key: TutorialStepKeys.historyList,
               controller: _scrollController,
               slivers: [
-                // App bar
-                // const SliverToBoxAdapter(
-                //   child: KuberAppBar(title: 'History'),
-                // ),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: KuberSpacing.xl),
                 ),
@@ -137,7 +120,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 ),
 
                 // Transaction list
-                ...transactionsAsync.when(
+                ...viewAsync.when(
                   loading: () => [
                     const SliverFillRemaining(
                       child: Center(child: CircularProgressIndicator()),
@@ -148,38 +131,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                       child: Center(child: Text('Error: $e')),
                     ),
                   ],
-                  data: (transactions) {
-                    final filtered = _applyFilters(transactions, filter);
-
-                    // Compute EXP / INC / NET from filtered list
-                    double totalExp = 0;
-                    double totalInc = 0;
-                    for (final t in filtered.validForCalculations) {
-                      if (t.type == 'income') {
-                        totalInc += t.amount;
-                      } else {
-                        totalExp += t.amount;
-                      }
-                    }
-                    final totalNet = totalInc - totalExp;
+                  data: (view) {
+                    // All heavy derivation (filter → group → tag map → totals)
+                    // lives in `historyViewProvider`, memoized so this rebuilds
+                    // cheaply and the tab no longer stutters on entry.
                     final fmt = ref.watch(formatterProvider);
                     final isPrivate = ref.watch(privacyModeProvider);
-                    final groups = groupTransactionsByDate(filtered);
-
-                    // Build tag names map for indicator line
-                    final allTags =
-                        ref.watch(tagListProvider).valueOrNull ?? [];
-                    final tagNameById = {for (final t in allTags) t.id: t.name};
-                    final txnTagsMapData =
-                        ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
-                    final tagNamesMap = <int, List<String>>{};
-                    for (final entry in txnTagsMapData.entries) {
-                      final names = entry.value
-                          .map((tagId) => tagNameById[tagId])
-                          .whereType<String>()
-                          .toList();
-                      if (names.isNotEmpty) tagNamesMap[entry.key] = names;
-                    }
+                    final totalExp = view.totalExpense;
+                    final totalInc = view.totalIncome;
+                    final totalNet = view.totalNet;
+                    final groups = view.groups;
+                    final transferPairs = view.transferPairAccountId;
+                    final tagNamesMap = view.tagNamesMap;
+                    final filteredCount = view.filteredCount;
+                    final sourceEmpty = view.sourceEmpty;
 
                     return [
                       // EXP / INC / NET summary
@@ -296,7 +261,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               children: [
                                 const TextSpan(text: 'SHOWING '),
                                 TextSpan(
-                                  text: '${filtered.length} ',
+                                  text: '$filteredCount ',
                                   style: TextStyle(color: cs.primary),
                                 ),
                                 const TextSpan(text: 'TRANSACTIONS'),
@@ -306,21 +271,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         ),
                       ),
 
-                      if (filtered.isEmpty)
+                      if (filteredCount == 0)
                         SliverFillRemaining(
                           hasScrollBody: false,
                           child: KuberEmptyState(
                             icon: Icons.receipt_long_outlined,
-                            title: transactions.isEmpty
+                            title: sourceEmpty
                                 ? 'No transactions yet'
                                 : 'No transactions found',
-                            description: transactions.isEmpty
+                            description: sourceEmpty
                                 ? 'Start tracking your expenses'
                                 : 'Try adjusting your search or filters',
-                            actionLabel: transactions.isEmpty
+                            actionLabel: sourceEmpty
                                 ? 'Add Transaction'
                                 : null,
-                            onAction: transactions.isEmpty
+                            onAction: sourceEmpty
                                 ? () => context.push('/add-transaction')
                                 : null,
                           ),
@@ -375,8 +340,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                             .watch(accountMapProvider)
                                             .valueOrNull ??
                                         {},
-                                    transactionList:
-                                        transactions, // For transfer lookup
+                                    transferPairAccountId: transferPairs,
                                     tagNamesMap: tagNamesMap,
                                   );
                                 }
@@ -599,9 +563,7 @@ class _SelectionActionBar extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(dialogContext);
               final notifier = ref.read(transactionListProvider.notifier);
-              for (final id in selectedIds) {
-                await notifier.delete(id);
-              }
+              await notifier.deleteMany(selectedIds);
               ref.read(transactionSelectionProvider.notifier).clear();
               if (context.mounted) {
                 showKuberSnackBar(

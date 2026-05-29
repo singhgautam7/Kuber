@@ -124,5 +124,42 @@ void main() {
       await container.read(transactionListProvider.notifier).delete(5);
       verify(() => mockRepo.delete(5)).called(1);
     });
+
+    test('deleteMany deletes all ids in a single batched call', () async {
+      final a = makeTransaction(id: 1, isTransfer: false);
+      final b = makeTransaction(id: 2, isTransfer: false);
+      when(() => mockRepo.getById(1)).thenAnswer((_) async => a);
+      when(() => mockRepo.getById(2)).thenAnswer((_) async => b);
+      when(() => mockRepo.deleteByIds(any())).thenAnswer((_) async {});
+      when(() => mockBudgetRepo.getByCategory(any()))
+          .thenAnswer((_) async => null);
+
+      await container.read(transactionListProvider.future);
+      await container.read(transactionListProvider.notifier).deleteMany([1, 2]);
+
+      // One batched delete, never the per-row delete().
+      final captured =
+          verify(() => mockRepo.deleteByIds(captureAny())).captured.single
+              as List<int>;
+      expect(captured.toSet(), {1, 2});
+      verifyNever(() => mockRepo.delete(any()));
+    });
+
+    test('deleteMany expands transfer pairs', () async {
+      final leg = makeTransaction(id: 5, isTransfer: true, transferId: 'tf123');
+      final pair = makeTransaction(id: 6, isTransfer: true, transferId: 'tf123');
+      when(() => mockRepo.getById(5)).thenAnswer((_) async => leg);
+      when(() => mockRepo.findTransferPair('tf123', 5))
+          .thenAnswer((_) async => pair);
+      when(() => mockRepo.deleteByIds(any())).thenAnswer((_) async {});
+
+      await container.read(transactionListProvider.future);
+      await container.read(transactionListProvider.notifier).deleteMany([5]);
+
+      final captured =
+          verify(() => mockRepo.deleteByIds(captureAny())).captured.single
+              as List<int>;
+      expect(captured.toSet(), {5, 6}, reason: 'both transfer legs deleted');
+    });
   });
 }
