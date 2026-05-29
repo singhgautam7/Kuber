@@ -13,6 +13,9 @@ import 'package:kuber/features/loans/data/loan.dart';
 import 'package:kuber/features/investments/data/investment.dart';
 import 'package:kuber/features/notifications/data/app_notification.dart';
 import 'package:kuber/features/widget_editor/data/widget_preference.dart';
+import 'package:kuber/features/transactions/data/transaction_suggestion.dart';
+import 'package:kuber/features/tools/bill_splitter/data/person.dart';
+import 'package:kuber/features/tools/bill_splitter/data/bill.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -28,6 +31,9 @@ const _allSchemas = [
   InvestmentSchema,
   AppNotificationSchema,
   WidgetPreferenceSchema,
+  TransactionSuggestionSchema,
+  PersonSchema,
+  BillSchema,
 ];
 
 bool _isarInitialized = false;

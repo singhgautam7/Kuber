@@ -17,7 +17,10 @@ class SuggestionService {
         .nameLowerEqualTo(key)
         .findFirst();
     await isar.writeTxn(() async {
-      isar.transactionSuggestions.put(
+      // Must be awaited: without it the put can flush after the txn commits, so
+      // back-to-back upserts of the same name both observe `existing == null`
+      // and insert duplicate rows — violating the unique `nameLower` index.
+      await isar.transactionSuggestions.put(
         TransactionSuggestion()
           ..id = existing?.id ?? Isar.autoIncrement
           ..nameLower = key
@@ -30,6 +33,20 @@ class SuggestionService {
           ..updatedAt = DateTime.now(),
       );
     });
+  }
+
+  /// Rebuilds the suggestion table from every transaction. Batched with
+  /// event-loop yields so a large dataset (migration backfill, JSON restore,
+  /// mock-data generation) doesn't block the UI isolate. Transfers and empty
+  /// names are skipped inside [upsertSuggestion].
+  Future<void> rebuildAll({int batchSize = 50}) async {
+    final all = await isar.transactions.where().findAll();
+    for (int i = 0; i < all.length; i += batchSize) {
+      for (final txn in all.skip(i).take(batchSize)) {
+        await upsertSuggestion(txn);
+      }
+      await Future<void>.delayed(Duration.zero);
+    }
   }
 
   Future<List<TransactionSuggestion>> search(String query) async {

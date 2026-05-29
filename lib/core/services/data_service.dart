@@ -97,10 +97,10 @@ class DataService {
     } else {
       directory = await getDownloadsDirectory();
     }
-    
+
     directory ??= await getExternalStorageDirectory();
     directory ??= await getApplicationDocumentsDirectory();
-    
+
     final file = File('${directory.path}/$fileName');
     await file.writeAsString(content);
     debugPrint('DataService: File saved to ${file.path}');
@@ -110,9 +110,9 @@ class DataService {
   /// Parses CSV content into a list of maps.
   List<Map<String, String>> parseCsv(String csvContent) {
     if (csvContent.isEmpty) return [];
-    
+
     final List<List<dynamic>> rows = Csv(dynamicTyping: false).decode(csvContent);
-    
+
     if (rows.isEmpty) return [];
 
     final List<String> headers = rows.first.map((e) => e.toString().trim()).toList();
@@ -133,16 +133,19 @@ class DataService {
   }
 
   /// Imports data from a CSV file. If [override] is true, clears all data first.
+  ///
+  /// The clear and all inserts run inside a single transaction (see
+  /// [_importTransactions]), so a failure during an override import rolls the
+  /// wipe back too — the user can never be left with erased or partially
+  /// imported data.
   Future<ImportResult> importData(String csvContent, {bool override = false}) async {
     try {
       final rows = parseCsv(csvContent);
-      if (rows.isEmpty) return ImportResult(successCount: 0, failureCount: 0, error: 'Empty file');
-
-      if (override) {
-        await isar.writeTxn(() => isar.clear());
+      if (rows.isEmpty) {
+        return ImportResult(successCount: 0, failureCount: 0, error: 'Empty file');
       }
 
-      return await _importTransactions(rows);
+      return await _importTransactions(rows, clearFirst: override);
     } catch (e) {
       return ImportResult(successCount: 0, failureCount: 0, error: e.toString());
     }
@@ -157,238 +160,265 @@ class DataService {
   Future<ImportResult> importJson(String jsonContent) async {
     final result = await JsonBackupService().importJson(isar, jsonContent);
     // Rebuild suggestions from the restored transactions
-    final txns = await isar.transactions.where().findAll();
-    final suggestionService = SuggestionService(isar);
-    for (final tx in txns) {
-      if (!tx.isTransfer) {
-        await suggestionService.upsertSuggestion(tx);
-      }
-    }
+    await _rebuildSuggestions();
     return result;
   }
 
-
-  Future<ImportResult> _importTransactions(List<Map<String, String>> rows) async {
+  Future<ImportResult> _importTransactions(
+    List<Map<String, String>> rows, {
+    bool clearFirst = false,
+  }) async {
     int success = 0;
     int failure = 0;
 
-    // 1. Preload categories and accounts for name-to-id mapping
-    final existingCategories = await isar.categorys.where().findAll();
-    final existingAccounts = await isar.accounts.where().findAll();
-    final existingGroups = await isar.categoryGroups.where().findAll();
-
-    final categoryMap = {for (var c in existingCategories) c.name.toLowerCase(): c};
-    final accountMap = {for (var a in existingAccounts) a.name.toLowerCase(): a};
-    final groupMap = {for (var g in existingGroups) g.name.toLowerCase(): g};
-
     final List<Transaction> toInsert = [];
 
-    // Preload tags to minimize queries (optional, but keep it simple for now)
+    // Every database mutation — including the override clear — happens inside
+    // this single transaction. If anything throws, Isar rolls the whole thing
+    // back, so an override import can never leave the user with erased or
+    // partially imported data.
+    await isar.writeTxn(() async {
+      if (clearFirst) {
+        await isar.clear();
+      }
 
-    for (final row in rows) {
-      try {
-        final dateStr = row['date'] ?? '';
-        final name = row['name'] ?? 'Imported Transaction';
-        final amount = double.tryParse(row['amount'] ?? '0') ?? 0.0;
-        final type = (row['type']?.toLowerCase() ?? 'expense');
-        final categoryName = row['category'] ?? 'Other';
-        final groupNameRaw = row['group'] ?? '';
-        final groupNameNormalized = groupNameRaw.trim().replaceAll(RegExp(r'\s+'), ' ');
-        // Enforce 15 char limit during import as well
-        final groupName = groupNameNormalized.length > 15 
-            ? groupNameNormalized.substring(0, 15).trim() 
-            : groupNameNormalized;
+      // Preload categories/accounts/groups for name-to-id mapping. Read after
+      // the optional clear so override imports resolve against a clean slate.
+      final existingCategories = await isar.categorys.where().findAll();
+      final existingAccounts = await isar.accounts.where().findAll();
+      final existingGroups = await isar.categoryGroups.where().findAll();
 
-        final accountName = row['account'] ?? 'Cash';
-        final notes = row['notes'];
-        final fromAccName = row['from_account'];
-        final toAccName = row['to_account'];
+      final categoryMap = {
+        for (var c in existingCategories) c.name.toLowerCase(): c,
+      };
+      final accountMap = {
+        for (var a in existingAccounts) a.name.toLowerCase(): a,
+      };
+      final groupMap = {for (var g in existingGroups) g.name.toLowerCase(): g};
 
-        if (amount <= 0 && type != 'transfer') {
-           failure++;
-           continue;
-        }
+      for (final row in rows) {
+        try {
+          final dateStr = row['date'] ?? '';
+          final name = row['name'] ?? 'Imported Transaction';
+          final amount = double.tryParse(row['amount'] ?? '0') ?? 0.0;
+          final type = (row['type']?.toLowerCase() ?? 'expense');
+          final categoryName = row['category'] ?? 'Other';
+          final groupNameRaw = row['group'] ?? '';
+          final groupNameNormalized = groupNameRaw.trim().replaceAll(
+            RegExp(r'\s+'),
+            ' ',
+          );
+          // Enforce 15 char limit during import as well
+          final groupName = groupNameNormalized.length > 15
+              ? groupNameNormalized.substring(0, 15).trim()
+              : groupNameNormalized;
 
-        // Resolve Group
-        CategoryGroup? group;
-        if (groupName.isNotEmpty) {
-           group = groupMap[groupName.toLowerCase()];
-           if (group == null) {
+          final accountName = row['account'] ?? 'Cash';
+          final notes = row['notes'];
+          final fromAccName = row['from_account'];
+          final toAccName = row['to_account'];
+
+          if (amount <= 0 && type != 'transfer') {
+            failure++;
+            continue;
+          }
+
+          // Resolve Group
+          CategoryGroup? group;
+          if (groupName.isNotEmpty) {
+            group = groupMap[groupName.toLowerCase()];
+            if (group == null) {
               group = CategoryGroup()..name = groupName;
-              await isar.writeTxn(() => isar.categoryGroups.put(group!));
+              await isar.categoryGroups.put(group);
               groupMap[groupName.toLowerCase()] = group;
-           }
-        }
+            }
+          }
 
-        // Resolve Category
-        Category? category = categoryMap[categoryName.toLowerCase()];
-        if (category == null && type != 'transfer') {
-          category = Category()
-            ..name = categoryName
-            ..icon = 'category'
-            ..colorValue = AppColorPalette.getRandomColor()
-            ..type = type
-            ..groupId = group?.id;
-          await isar.writeTxn(() => isar.categorys.put(category!));
-          categoryMap[categoryName.toLowerCase()] = category;
-        } else if (category != null) {
-           bool updated = false;
-           if (category.colorValue == 0xFF90A4AE) {
+          // Resolve Category
+          Category? category = categoryMap[categoryName.toLowerCase()];
+          if (category == null && type != 'transfer') {
+            category = Category()
+              ..name = categoryName
+              ..icon = 'category'
+              ..colorValue = AppColorPalette.getRandomColor()
+              ..type = type
+              ..groupId = group?.id;
+            await isar.categorys.put(category);
+            categoryMap[categoryName.toLowerCase()] = category;
+          } else if (category != null) {
+            bool updated = false;
+            if (category.colorValue == 0xFF90A4AE) {
               category.colorValue = AppColorPalette.getRandomColor();
               updated = true;
-           }
-           if (group != null && category.groupId == null) {
+            }
+            if (group != null && category.groupId == null) {
               category.groupId = group.id;
               updated = true;
-           }
-           if (updated) {
-              await isar.writeTxn(() => isar.categorys.put(category!));
-           }
-        }
-
-        // Resolve Account
-        Account? account = accountMap[accountName.toLowerCase()];
-        if (account == null) {
-          final isCC = accountName.toLowerCase().contains('credit');
-          account = Account()
-            ..name = accountName
-            ..type = 'bank' // default type
-            ..isCreditCard = isCC
-            ..icon = isCC ? 'credit_card' : 'account_balance'
-            ..colorValue = AppColorPalette.getRandomColor();
-          await isar.writeTxn(() => isar.accounts.put(account!));
-          accountMap[accountName.toLowerCase()] = account;
-        } else if (account.colorValue == null) {
-           account.colorValue = AppColorPalette.getRandomColor();
-           await isar.writeTxn(() => isar.accounts.put(account!));
-        }
-
-        final tx = Transaction()
-          ..id = int.tryParse(row['id'] ?? '') ?? Isar.autoIncrement
-          ..name = name
-          ..nameLower = name.toLowerCase()
-          ..amount = amount
-          ..type = type
-          ..categoryId = category?.id.toString() ?? ''
-          ..accountId = account.id.toString()
-          ..notes = notes
-
-          ..createdAt = DateTime.tryParse(dateStr) ?? DateTime.now()
-          ..updatedAt = DateTime.now();
-        
-        // Temporarily store tags for post-save mapping
-        tx.tempTags = row['tags'];
-
-        // Handle Transfer — create two linked legs
-        if (type == 'transfer' || (fromAccName != null && toAccName != null && fromAccName.isNotEmpty && toAccName.isNotEmpty)) {
-          Account? fromAcc = accountMap[fromAccName?.toLowerCase()];
-          if (fromAcc == null && fromAccName != null && fromAccName.isNotEmpty) {
-             fromAcc = Account()
-               ..name = fromAccName
-               ..type = 'bank'
-               ..isCreditCard = fromAccName.toLowerCase().contains('credit')
-               ..icon = 'account_balance'
-               ..colorValue = AppColorPalette.getRandomColor();
-             await isar.writeTxn(() => isar.accounts.put(fromAcc!));
-             accountMap[fromAccName.toLowerCase()] = fromAcc;
-          } else if (fromAcc != null && fromAcc.colorValue == null) {
-             fromAcc.colorValue = AppColorPalette.getRandomColor();
-             await isar.writeTxn(() => isar.accounts.put(fromAcc!));
+            }
+            if (updated) {
+              await isar.categorys.put(category);
+            }
           }
 
-          Account? toAcc = accountMap[toAccName?.toLowerCase()];
-          if (toAcc == null && toAccName != null && toAccName.isNotEmpty) {
-             toAcc = Account()
-               ..name = toAccName
-               ..type = 'bank'
-               ..isCreditCard = toAccName.toLowerCase().contains('credit')
-               ..icon = 'account_balance'
-               ..colorValue = AppColorPalette.getRandomColor();
-             await isar.writeTxn(() => isar.accounts.put(toAcc!));
-             accountMap[toAccName.toLowerCase()] = toAcc;
-          } else if (toAcc != null && toAcc.colorValue == null) {
-             toAcc.colorValue = AppColorPalette.getRandomColor();
-             await isar.writeTxn(() => isar.accounts.put(toAcc!));
+          // Resolve Account
+          Account? account = accountMap[accountName.toLowerCase()];
+          if (account == null) {
+            final isCC = accountName.toLowerCase().contains('credit');
+            account = Account()
+              ..name = accountName
+              ..type = 'bank' // default type
+              ..isCreditCard = isCC
+              ..icon = isCC ? 'credit_card' : 'account_balance'
+              ..colorValue = AppColorPalette.getRandomColor();
+            await isar.accounts.put(account);
+            accountMap[accountName.toLowerCase()] = account;
+          } else if (account.colorValue == null) {
+            account.colorValue = AppColorPalette.getRandomColor();
+            await isar.accounts.put(account);
           }
 
-          final transferId = DateTime.now().millisecondsSinceEpoch.toString();
-          final createdAt = DateTime.tryParse(dateStr) ?? DateTime.now();
-
-          // Expense leg (FROM)
-          tx.type = 'expense';
-          tx.accountId = fromAcc?.id.toString() ?? account.id.toString();
-          tx.categoryId = '';
-          tx.isTransfer = true;
-          tx.transferId = transferId;
-          toInsert.add(tx);
-
-          // Income leg (TO)
-          final toTx = Transaction()
+          // Imported transactions always get a fresh id. Preserving the CSV's
+          // `id` column would let a merge import silently overwrite an existing
+          // transaction that happens to share that autoincrement id.
+          final tx = Transaction()
             ..id = Isar.autoIncrement
             ..name = name
             ..nameLower = name.toLowerCase()
             ..amount = amount
-            ..type = 'income'
-            ..categoryId = ''
-            ..accountId = toAcc?.id.toString() ?? account.id.toString()
-            ..isTransfer = true
-            ..transferId = transferId
+            ..type = type
+            ..categoryId = category?.id.toString() ?? ''
+            ..accountId = account.id.toString()
             ..notes = notes
-  
-            ..createdAt = createdAt
+            ..createdAt = DateTime.tryParse(dateStr) ?? DateTime.now()
             ..updatedAt = DateTime.now();
-          toInsert.add(toTx);
-        } else {
-          toInsert.add(tx);
-        }
-        success++;
-      } catch (e) {
-        debugPrint('Row import failed: $e');
-        failure++;
-      }
-    }
 
-    if (toInsert.isNotEmpty) {
-      await isar.writeTxn(() async {
-        for (final tx in toInsert) {
-          await isar.transactions.put(tx);
-          
-          // Process Tags
-          final tagsStr = tx.tempTags; // I'll add a temp field or use row mapping
-          if (tagsStr != null && tagsStr.isNotEmpty) {
-             final tagNames = tagsStr.split('|').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
-             for (final rawName in tagNames) {
-                final normalized = Tag.normalize(rawName);
-                if (normalized.isEmpty) continue;
-                
-                // Find or create tag
-                var tag = await isar.tags.filter().nameEqualTo(normalized).findFirst();
-                if (tag == null) {
-                  tag = Tag()
-                    ..name = normalized
-                    ..createdAt = DateTime.now();
-                  await isar.tags.put(tag);
-                }
-                
-                // Link
-                final existingMapping = await isar.transactionTags
-                  .filter()
-                  .transactionIdEqualTo(tx.id)
-                  .tagIdEqualTo(tag.id)
-                  .findFirst();
-                  
-                if (existingMapping == null) {
-                  await isar.transactionTags.put(TransactionTag()
-                    ..transactionId = tx.id
-                    ..tagId = tag.id);
-                }
-             }
+          // Temporarily store tags for post-save mapping
+          tx.tempTags = row['tags'];
+
+          // Handle Transfer — create two linked legs
+          if (type == 'transfer' ||
+              (fromAccName != null &&
+                  toAccName != null &&
+                  fromAccName.isNotEmpty &&
+                  toAccName.isNotEmpty)) {
+            Account? fromAcc = accountMap[fromAccName?.toLowerCase()];
+            if (fromAcc == null &&
+                fromAccName != null &&
+                fromAccName.isNotEmpty) {
+              fromAcc = Account()
+                ..name = fromAccName
+                ..type = 'bank'
+                ..isCreditCard = fromAccName.toLowerCase().contains('credit')
+                ..icon = 'account_balance'
+                ..colorValue = AppColorPalette.getRandomColor();
+              await isar.accounts.put(fromAcc);
+              accountMap[fromAccName.toLowerCase()] = fromAcc;
+            } else if (fromAcc != null && fromAcc.colorValue == null) {
+              fromAcc.colorValue = AppColorPalette.getRandomColor();
+              await isar.accounts.put(fromAcc);
+            }
+
+            Account? toAcc = accountMap[toAccName?.toLowerCase()];
+            if (toAcc == null && toAccName != null && toAccName.isNotEmpty) {
+              toAcc = Account()
+                ..name = toAccName
+                ..type = 'bank'
+                ..isCreditCard = toAccName.toLowerCase().contains('credit')
+                ..icon = 'account_balance'
+                ..colorValue = AppColorPalette.getRandomColor();
+              await isar.accounts.put(toAcc);
+              accountMap[toAccName.toLowerCase()] = toAcc;
+            } else if (toAcc != null && toAcc.colorValue == null) {
+              toAcc.colorValue = AppColorPalette.getRandomColor();
+              await isar.accounts.put(toAcc);
+            }
+
+            final transferId = DateTime.now().millisecondsSinceEpoch.toString();
+            final createdAt = DateTime.tryParse(dateStr) ?? DateTime.now();
+
+            // Expense leg (FROM)
+            tx.type = 'expense';
+            tx.accountId = fromAcc?.id.toString() ?? account.id.toString();
+            tx.categoryId = '';
+            tx.isTransfer = true;
+            tx.transferId = transferId;
+            toInsert.add(tx);
+
+            // Income leg (TO)
+            final toTx = Transaction()
+              ..id = Isar.autoIncrement
+              ..name = name
+              ..nameLower = name.toLowerCase()
+              ..amount = amount
+              ..type = 'income'
+              ..categoryId = ''
+              ..accountId = toAcc?.id.toString() ?? account.id.toString()
+              ..isTransfer = true
+              ..transferId = transferId
+              ..notes = notes
+              ..createdAt = createdAt
+              ..updatedAt = DateTime.now();
+            toInsert.add(toTx);
+          } else {
+            toInsert.add(tx);
+          }
+          success++;
+        } catch (e) {
+          debugPrint('Row import failed: $e');
+          failure++;
+        }
+      }
+
+      // Insert all transactions and link their tags inside the same
+      // transaction so the whole import commits (or rolls back) atomically.
+      for (final tx in toInsert) {
+        await isar.transactions.put(tx);
+
+        final tagsStr = tx.tempTags;
+        if (tagsStr != null && tagsStr.isNotEmpty) {
+          final tagNames = tagsStr
+              .split('|')
+              .map((s) => s.trim())
+              .where((s) => s.isNotEmpty)
+              .toList();
+          for (final rawName in tagNames) {
+            final normalized = Tag.normalize(rawName);
+            if (normalized.isEmpty) continue;
+
+            // Find or create tag
+            var tag = await isar.tags
+                .filter()
+                .nameEqualTo(normalized)
+                .findFirst();
+            if (tag == null) {
+              tag = Tag()
+                ..name = normalized
+                ..createdAt = DateTime.now();
+              await isar.tags.put(tag);
+            }
+
+            // Link
+            final existingMapping = await isar.transactionTags
+                .filter()
+                .transactionIdEqualTo(tx.id)
+                .tagIdEqualTo(tag.id)
+                .findFirst();
+
+            if (existingMapping == null) {
+              await isar.transactionTags.put(
+                TransactionTag()
+                  ..transactionId = tx.id
+                  ..tagId = tag.id,
+              );
+            }
           }
         }
-      });
-    }
+      }
+    });
 
-    // Upsert suggestions for all imported non-transfer transactions
+    // Upsert suggestions for all imported non-transfer transactions. Done
+    // outside the import transaction since the suggestion service manages its
+    // own writes and suggestions are derived, non-critical data.
     final suggestionService = SuggestionService(isar);
     for (final tx in toInsert) {
       if (!tx.isTransfer) {
@@ -403,13 +433,13 @@ class DataService {
   Future<void> generateMockData() async {
     await MockDataService.generate(isar);
     // Upsert suggestions for all generated transactions
-    final txns = await isar.transactions.where().findAll();
-    final suggestionService = SuggestionService(isar);
-    for (final tx in txns) {
-      if (!tx.isTransfer) {
-        await suggestionService.upsertSuggestion(tx);
-      }
-    }
+    await _rebuildSuggestions();
+  }
+
+  /// Rebuilds the suggestion table from every transaction.
+  /// Shared by JSON import and mock-data generation.
+  Future<void> _rebuildSuggestions() async {
+    await SuggestionService(isar).rebuildAll();
   }
 
   /// Clears all data.
