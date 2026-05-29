@@ -365,8 +365,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       bgColor = cs.error.withValues(alpha: 0.15);
       txtColor = cs.error;
     } else if (subtype == TransferSubtype.creditCardTransfer) {
-      bgColor = const Color(0xFFF59E0B).withValues(alpha: 0.15);
-      txtColor = const Color(0xFFF59E0B);
+      bgColor = context.kuberColors.warning.withValues(alpha: 0.15);
+      txtColor = context.kuberColors.warning;
     } else {
       bgColor = cs.primaryContainer;
       txtColor = cs.onPrimaryContainer;

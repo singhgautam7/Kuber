@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import '../providers/dashboard_provider.dart';
 
 class MonthlySummaryCard extends ConsumerWidget {
@@ -16,14 +17,17 @@ class MonthlySummaryCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isPrivate = ref.watch(privacyModeProvider);
+    final fmt = ref.watch(formatterProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
       child: Column(
         children: [
-          // Net total
-          Text(
-            maskAmount(CurrencyFormatter.format(summary.net), isPrivate),
+          // Net total — counts up on first appearance, tweens on change.
+          AnimatedAmount(
+            value: summary.net,
+            isPrivate: isPrivate,
+            format: fmt.formatCurrency,
             style: textTheme.displaySmall?.copyWith(
               color: summary.net >= 0
                   ? colorScheme.tertiary
@@ -55,7 +59,7 @@ class MonthlySummaryCard extends ConsumerWidget {
                       const SizedBox(height: KuberSpacing.xs),
                       Text('Income', style: textTheme.labelMedium),
                       Text(
-                        maskAmount(CurrencyFormatter.format(summary.totalIncome), isPrivate),
+                        maskAmount(fmt.formatCurrency(summary.totalIncome), isPrivate),
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.tertiary,
                           fontWeight: FontWeight.w600,
@@ -80,7 +84,7 @@ class MonthlySummaryCard extends ConsumerWidget {
                       const SizedBox(height: KuberSpacing.xs),
                       Text('Expenses', style: textTheme.labelMedium),
                       Text(
-                        maskAmount(CurrencyFormatter.format(summary.totalExpense), isPrivate),
+                        maskAmount(fmt.formatCurrency(summary.totalExpense), isPrivate),
                         style: textTheme.titleMedium?.copyWith(
                           color: colorScheme.error,
                           fontWeight: FontWeight.w600,

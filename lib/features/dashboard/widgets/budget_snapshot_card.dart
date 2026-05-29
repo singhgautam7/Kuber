@@ -88,6 +88,7 @@ class _BudgetRow extends ConsumerWidget {
     final budget = snapshot.budget;
     final progress = snapshot.progress;
     final isPrivate = ref.watch(privacyModeProvider);
+    final fmt = ref.watch(formatterProvider);
 
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
     final category = categoryMap[int.tryParse(budget.categoryId)];
@@ -166,7 +167,7 @@ class _BudgetRow extends ConsumerWidget {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: '${maskAmount(CurrencyFormatter.format(progress.spent), isPrivate)} ',
+                            text: '${maskAmount(fmt.formatCurrency(progress.spent), isPrivate)} ',
                             style: textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: cs.onSurface,
@@ -174,7 +175,7 @@ class _BudgetRow extends ConsumerWidget {
                             ),
                           ),
                           TextSpan(
-                            text: '/ ${maskAmount(CurrencyFormatter.format(progress.limit), isPrivate)}',
+                            text: '/ ${maskAmount(fmt.formatCurrency(progress.limit), isPrivate)}',
                             style: textTheme.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                               fontSize: 11,
@@ -184,7 +185,7 @@ class _BudgetRow extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${maskAmount(CurrencyFormatter.format(remaining), isPrivate)} remaining',
+                      '${maskAmount(fmt.formatCurrency(remaining), isPrivate)} remaining',
                       style: textTheme.labelSmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         fontSize: 10,

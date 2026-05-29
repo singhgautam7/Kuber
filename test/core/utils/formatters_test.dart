@@ -136,5 +136,39 @@ void main() {
       );
       expect(result.text, '123');
     });
+
+    test('keeps a lone minus sign', () {
+      final f = CurrencyInputFormatter();
+      expect(format(f, '-').text, '-');
+    });
+
+    test('preserves negative sign on whole numbers (Indian)', () {
+      final f = CurrencyInputFormatter(isIndian: true);
+      expect(format(f, '-1234567').text, '-12,34,567');
+    });
+
+    test('preserves negative sign with decimals', () {
+      final f = CurrencyInputFormatter(isIndian: false);
+      expect(format(f, '-1234.5').text, '-1,234.5');
+    });
+
+    test('lone minus-dot becomes -0.', () {
+      final f = CurrencyInputFormatter();
+      expect(format(f, '-.').text, '-0.');
+    });
+
+    test('rejects multiple decimal points (keeps old value)', () {
+      final f = CurrencyInputFormatter();
+      final result = f.formatEditUpdate(
+        const TextEditingValue(text: '1.2'),
+        const TextEditingValue(text: '1.2.3'),
+      );
+      expect(result.text, '1.2');
+    });
+
+    test('preserves trailing decimal point while typing', () {
+      final f = CurrencyInputFormatter(isIndian: true);
+      expect(format(f, '1234.').text, '1,234.');
+    });
   });
 }

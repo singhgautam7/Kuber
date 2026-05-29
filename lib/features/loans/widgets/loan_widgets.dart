@@ -399,7 +399,7 @@ class LoanCard extends ConsumerWidget {
     final dueColor = overdue
         ? cs.error
         : dueSoon
-        ? const Color(0xFFF59E0B)
+        ? context.kuberColors.warning
         : cs.onSurface;
 
     final progressColor = isCompleted ? cs.tertiary : iconColor;

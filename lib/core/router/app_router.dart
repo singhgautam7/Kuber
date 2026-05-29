@@ -12,6 +12,7 @@ import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
+import '../../shared/widgets/screen_entrance.dart';
 import '../../features/accounts/data/account.dart';
 import '../../features/accounts/screens/accounts_screen.dart';
 import '../../features/accounts/screens/add_edit_account_screen.dart';
@@ -265,7 +266,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) => const DashboardScreen(),
+                builder: (context, state) =>
+                    const ScreenEntrance(id: 'home', child: DashboardScreen()),
               ),
             ],
           ),
@@ -274,7 +276,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/history',
-                builder: (context, state) => const HistoryScreen(),
+                builder: (context, state) => const ScreenEntrance(
+                  id: 'history',
+                  child: HistoryScreen(),
+                ),
               ),
             ],
           ),
@@ -283,7 +288,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/analytics',
-                builder: (context, state) => const AnalyticsScreen(),
+                builder: (context, state) => const ScreenEntrance(
+                  id: 'analytics',
+                  child: AnalyticsScreen(),
+                ),
               ),
             ],
           ),
@@ -292,7 +300,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/more',
-                builder: (context, state) => const MoreScreen(),
+                builder: (context, state) =>
+                    const ScreenEntrance(id: 'more', child: MoreScreen()),
                 routes: [
                   GoRoute(
                     path: 'accounts',

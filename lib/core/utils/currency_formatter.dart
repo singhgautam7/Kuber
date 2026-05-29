@@ -1,15 +1,8 @@
-import 'package:intl/intl.dart';
-
-import 'currency_data.dart';
-
-class CurrencyFormatter {
-  static String format(double amount, {String currency = 'INR'}) {
-    final symbol = currencyFromCode(currency).symbol;
-    final formatter = NumberFormat('#,##0.00');
-    return '$symbol${formatter.format(amount.abs())}';
-  }
-}
-
+/// Masks a pre-formatted amount string when privacy mode is on.
+///
+/// Currency formatting itself lives in [AppFormatter] (`formatterProvider`),
+/// which honours the user's number-system setting (Indian vs Western grouping).
+/// Use that everywhere; this file only keeps the privacy mask helper.
 String maskAmount(String formattedAmount, bool isPrivate) {
   return isPrivate ? '****' : formattedAmount;
 }

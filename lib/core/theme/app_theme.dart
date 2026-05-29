@@ -79,6 +79,59 @@ class KuberLightColors {
   static const white = Color(0xFFFFFFFF);
 }
 
+/// Semantic colors that have no slot in Material's [ColorScheme] — currently
+/// just the warning/over-budget amber. Registered as a [ThemeExtension] so it
+/// adapts to light/dark like the rest of the theme. Access via
+/// `context.kuberColors.warning` instead of hardcoding the hex.
+@immutable
+class KuberSemanticColors extends ThemeExtension<KuberSemanticColors> {
+  final Color warning;
+  final Color warningSubtle;
+
+  const KuberSemanticColors({
+    required this.warning,
+    required this.warningSubtle,
+  });
+
+  static const dark = KuberSemanticColors(
+    warning: KuberColors.warning,
+    warningSubtle: KuberColors.warningSubtle,
+  );
+
+  static const light = KuberSemanticColors(
+    warning: KuberLightColors.warning,
+    warningSubtle: KuberLightColors.warningSubtle,
+  );
+
+  @override
+  KuberSemanticColors copyWith({Color? warning, Color? warningSubtle}) {
+    return KuberSemanticColors(
+      warning: warning ?? this.warning,
+      warningSubtle: warningSubtle ?? this.warningSubtle,
+    );
+  }
+
+  @override
+  KuberSemanticColors lerp(
+    ThemeExtension<KuberSemanticColors>? other,
+    double t,
+  ) {
+    if (other is! KuberSemanticColors) return this;
+    return KuberSemanticColors(
+      warning: Color.lerp(warning, other.warning, t)!,
+      warningSubtle: Color.lerp(warningSubtle, other.warningSubtle, t)!,
+    );
+  }
+}
+
+/// Convenience accessor for [KuberSemanticColors]. Falls back to the dark
+/// palette if the extension is somehow missing (e.g. a bare test theme).
+extension KuberThemeX on BuildContext {
+  KuberSemanticColors get kuberColors =>
+      Theme.of(this).extension<KuberSemanticColors>() ??
+      KuberSemanticColors.dark;
+}
+
 class AppTheme {
   static ThemeData dark() {
     final textTheme = AppTextStyles.getTextTheme(ThemeData.dark().textTheme);
@@ -109,6 +162,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: colorScheme,
+      extensions: const [KuberSemanticColors.dark],
       textTheme: textTheme,
       splashFactory: NoSplash.splashFactory,
       scaffoldBackgroundColor: KuberColors.background,
@@ -325,6 +379,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: colorScheme,
+      extensions: const [KuberSemanticColors.light],
       textTheme: textTheme,
       splashFactory: NoSplash.splashFactory,
       scaffoldBackgroundColor: KuberLightColors.background,

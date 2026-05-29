@@ -80,7 +80,7 @@ class RecurringHero extends ConsumerWidget {
           end: Alignment.bottomLeft,
           colors: [
             Color.alphaBlend(
-              const Color(0xFFF59E0B).withValues(alpha: 0.16),
+              context.kuberColors.warning.withValues(alpha: 0.16),
               cs.surfaceContainer,
             ),
             cs.surfaceContainer,
@@ -204,7 +204,7 @@ class _UpcomingTile extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
-    const warning = Color(0xFFF59E0B);
+    final warning = context.kuberColors.warning;
 
     final daysAway = charge.daysAway;
     final whenText = daysAway <= 0
@@ -293,7 +293,7 @@ class RecurringRuleCard extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
-    const warning = Color(0xFFF59E0B);
+    final warning = context.kuberColors.warning;
 
     final daysAway = nextChargeOn?.difference(DateTime.now()).inDays;
     final soon = daysAway != null && daysAway >= 0 && daysAway <= 3;
