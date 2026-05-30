@@ -24,6 +24,14 @@ class KuberApp extends ConsumerStatefulWidget {
 
 class _KuberAppState extends ConsumerState<KuberApp>
     with WidgetsBindingObserver {
+  // Built once. AppTheme.light()/dark() construct a fresh ThemeData each call;
+  // passing new instances on every KuberApp rebuild makes MaterialApp's internal
+  // AnimatedTheme animate a (visually identical) theme transition over ~200ms,
+  // rebuilding every Theme.of dependent (the whole tab tree) once per frame —
+  // the tab-switch jank. Stable instances make that a no-op.
+  final ThemeData _lightTheme = AppTheme.light();
+  final ThemeData _darkTheme = AppTheme.dark();
+
   @override
   void initState() {
     super.initState();
@@ -135,8 +143,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
     return MaterialApp.router(
       title: 'Kuber',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {

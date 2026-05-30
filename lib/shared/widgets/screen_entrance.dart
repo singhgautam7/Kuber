@@ -34,7 +34,6 @@ class ScreenEntrance extends StatefulWidget {
 class _ScreenEntranceState extends State<ScreenEntrance>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
-  Animation<double>? _fade;
   Animation<Offset>? _slide;
 
   @override
@@ -47,7 +46,6 @@ class _ScreenEntranceState extends State<ScreenEntrance>
         vsync: this,
         duration: widget.duration,
       );
-      _fade = CurvedAnimation(parent: controller, curve: Curves.easeOut);
       _slide =
           Tween<Offset>(
             begin: const Offset(0, 0.015),
@@ -71,9 +69,11 @@ class _ScreenEntranceState extends State<ScreenEntrance>
     final controller = _controller;
     if (controller == null) return widget.child;
 
-    return FadeTransition(
-      opacity: _fade!,
-      child: SlideTransition(position: _slide!, child: widget.child),
-    );
+    // Slide-only (no FadeTransition). A fade forces a saveLayer that composites
+    // the whole screen at <1 opacity every frame of the entrance — measured to
+    // add ~15ms raster while a heavy screen (e.g. the Analytics chart) does its
+    // first cold build, turning a ~25ms frame into ~45ms. SlideTransition is a
+    // cheap transform layer, so the premium rise stays without the jank.
+    return SlideTransition(position: _slide!, child: widget.child);
   }
 }
