@@ -150,12 +150,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
         return NotificationListener<NavigationNotification>(
           onNotification: _handleNavigationNotification,
           child: AnnotatedRegion<SystemUiOverlayStyle>(
+            // Edge-to-edge: set only icon brightness (applied via the modern
+            // WindowInsetsController path). Do NOT set bar colors — those route
+            // through the deprecated Window.setStatusBarColor /
+            // setNavigationBarColor APIs and are no-ops on Android 15. The bars
+            // are transparent for free in edge-to-edge mode.
             value: SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
               statusBarIconBrightness:
                   isDark ? Brightness.light : Brightness.dark,
               statusBarBrightness:
                   isDark ? Brightness.dark : Brightness.light,
+              systemNavigationBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
             ),
             child: ColoredBox(
               color: Theme.of(context).colorScheme.surface,

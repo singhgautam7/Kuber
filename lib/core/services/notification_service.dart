@@ -90,7 +90,7 @@ class NotificationService {
       );
 
       await _notificationsPlugin.initialize(
-        initializationSettings,
+        settings: initializationSettings,
         onDidReceiveNotificationResponse: (response) {
           final payload = response.payload;
           if (payload != null && payload.isNotEmpty) {
@@ -206,10 +206,10 @@ class NotificationService {
 
     try {
       await _notificationsPlugin.show(
-        id,
-        title,
-        body,
-        notificationDetails,
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
         payload: payload,
       );
     } catch (e) {
@@ -250,10 +250,10 @@ class NotificationService {
 
     try {
       await _notificationsPlugin.show(
-        id,
-        title,
-        body,
-        notificationDetails,
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
         payload: payload,
       );
     } catch (e) {
@@ -289,13 +289,18 @@ class NotificationService {
     );
 
     try {
-      await _notificationsPlugin.show(id, title, body, notificationDetails);
+      await _notificationsPlugin.show(
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: notificationDetails,
+      );
     } catch (e) {
       // Silently fail
     }
   }
 
   Future<void> cancel(int id) async {
-    await _notificationsPlugin.cancel(id);
+    await _notificationsPlugin.cancel(id: id);
   }
 }

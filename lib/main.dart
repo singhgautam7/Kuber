@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 
@@ -48,6 +49,12 @@ class _RestartWidgetState extends State<RestartWidget> {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Android 15 (SDK 35) enforces edge-to-edge. Opt in explicitly so Flutter
+  // draws behind the system bars and drives bar appearance via the modern
+  // WindowInsetsController path (not the deprecated Window.setStatusBarColor /
+  // setNavigationBarColor APIs). Inset-aware layouts (SafeArea /
+  // MediaQuery.viewPadding) keep content clear of the bars.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await _bootstrap();
 }
 
