@@ -17,6 +17,7 @@ import '../../notifications/providers/notification_provider.dart';
 import '../../notifications/utils/deep_link_handler.dart';
 import '../../notifications/widgets/notifications_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../stories/widgets/story_ring.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
@@ -117,6 +118,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return const RepaintBoundary(child: HomeAccountsCard());
       case 'seven_day_chart':
         return const RepaintBoundary(child: _SevenDayChartSection());
+      case 'insight_stories':
+        return const RepaintBoundary(child: StoryRingSection());
       case 'smart_insights':
         return const RepaintBoundary(child: HomeSmartInsights());
       case 'budget_snapshot':

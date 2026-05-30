@@ -10,11 +10,18 @@ import 'core/database/seed_service.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/notifications/providers/notification_provider.dart';
+import 'features/backups/data/backup_config.dart';
 import 'features/recurring/data/recurring_processor.dart';
+
 
 final recurringProcessResultProvider = StateProvider<int>((ref) {
   return 0;
 });
+
+final automaticBackupDueProvider = StateProvider<bool>((ref) {
+  return false;
+});
+
 
 class RestartWidget extends StatefulWidget {
   const RestartWidget({super.key, required this.child});
@@ -40,10 +47,7 @@ class _RestartWidgetState extends State<RestartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: key,
-      child: widget.child,
-    );
+    return KeyedSubtree(key: key, child: widget.child);
   }
 }
 
@@ -80,6 +84,7 @@ Future<void> _bootstrap() async {
   // Best-effort on-open processing. A failure here must not prevent launch.
   String? coldStartPayload;
   int missedCount = 0;
+  bool backupDue = false;
   try {
     // NotificationService captures a cold-start payload internally; the
     // foreground-tap callback is wired below. Both eventually land in
@@ -95,6 +100,7 @@ Future<void> _bootstrap() async {
     // Recurring must run before the first frame: its result decides whether
     // the splash routes to the recurring-loader screen.
     missedCount = await RecurringProcessor(isar).processAll();
+    backupDue = await _isAutomaticBackupDue(isar);
     // The on-open ledger reminder pass is deferred to after the first frame
     // (see KuberApp) so it never delays cold start.
   } catch (e, stack) {
@@ -107,6 +113,7 @@ Future<void> _bootstrap() async {
         overrides: [
           isarProvider.overrideWithValue(isar),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
+          automaticBackupDueProvider.overrideWith((ref) => backupDue),
           if (coldStartPayload != null)
             pendingDeeplinkProvider.overrideWith((ref) => coldStartPayload),
         ],
@@ -114,6 +121,21 @@ Future<void> _bootstrap() async {
       ),
     ),
   );
+}
+
+Future<bool> _isAutomaticBackupDue(Isar isar) async {
+  final config = await isar.collection<BackupConfig>().where().findFirst();
+  if (config == null || !config.enabled || config.folderUri == null) {
+    return false;
+  }
+  final last = config.lastBackupAt;
+  if (last == null) return true;
+  final days = switch (config.frequency) {
+    'daily' => 1,
+    'monthly' => 30,
+    _ => 7,
+  };
+  return DateTime.now().difference(last).inDays >= days;
 }
 
 /// Shown when the database cannot be opened/migrated. Offers a retry that

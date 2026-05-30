@@ -525,4 +525,56 @@ class InfoConstants {
       ),
     ],
   );
+
+  static const automaticBackups = KuberInfoConfig(
+    title: 'Automatic Backups',
+    description:
+        'Kuber can save a complete copy of your data on a schedule you choose, so you always have a safety net.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.folder_outlined,
+        title: 'Saved locally',
+        description:
+            'Backups are written to a folder on your device that you pick. Nothing is uploaded or sent anywhere.',
+      ),
+      KuberInfoItem(
+        icon: Icons.auto_delete_outlined,
+        title: 'Old copies cleaned up',
+        description:
+            'Kuber keeps only the number of backups you choose in your retention setting and deletes older ones automatically.',
+      ),
+      KuberInfoItem(
+        icon: Icons.login_rounded,
+        title: 'Runs on app open',
+        description:
+            'When a backup is due, Kuber creates one during the app loading screen. You do not need to do anything manually.',
+      ),
+    ],
+  );
+
+  static const storiesArchive = KuberInfoConfig(
+    title: 'Money Stories Archive',
+    description:
+        'This is your complete collection of recaps and highlights that Kuber has generated over time.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.schedule_rounded,
+        title: 'How long stories are kept',
+        description:
+            'Daily recaps are kept for 48 hours, weekly for 7 days, monthly for 30 days, and yearly for 90 days. After that, they expire and are removed.',
+      ),
+      KuberInfoItem(
+        icon: Icons.circle,
+        title: 'Seen and unseen',
+        description:
+            'Stories you have not viewed yet show a filled dot. Once you open a story, the dot disappears.',
+      ),
+      KuberInfoItem(
+        icon: Icons.touch_app_rounded,
+        title: 'Opening a story',
+        description:
+            'Tap any card to open that story in the full viewer. Swipe through slides, tap to advance, and swipe down to close.',
+      ),
+    ],
+  );
 }

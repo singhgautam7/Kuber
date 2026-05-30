@@ -156,8 +156,14 @@ class MoreScreenSimple extends ConsumerWidget {
                       key: TutorialStepKeys.moreDataItem,
                       icon: Icons.storage_rounded,
                       label: 'Data',
-                      subtitle: 'Export and clear your data',
+                      subtitle: 'Export, import, automatic backups',
                       onTap: () => context.push('/more/data'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.auto_stories_rounded,
+                      label: 'Money Stories Archive',
+                      subtitle: 'Every recap, newest first',
+                      onTap: () => context.push('/more/stories-archive'),
                     ),
                     _MenuItem(
                       icon: Icons.build,

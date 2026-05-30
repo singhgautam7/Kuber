@@ -24,6 +24,8 @@ import '../../tools/bill_splitter/data/person.dart';
 import '../../tools/bill_splitter/data/bill.dart';
 import '../../notifications/data/app_notification.dart';
 import '../../widget_editor/data/widget_preference.dart';
+import '../../stories/data/insight_story.dart';
+import '../../backups/data/backup_config.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -81,7 +83,10 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           records = list.map((e) => e.toMap()).toList();
           break;
         case 'TransactionTag':
-          final list = await isar.collection<TransactionTag>().where().findAll();
+          final list = await isar
+              .collection<TransactionTag>()
+              .where()
+              .findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
         case 'Budget':
@@ -101,7 +106,10 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           records = list.map((e) => e.toMap()).toList();
           break;
         case 'TransactionSuggestion':
-          final list = await isar.collection<TransactionSuggestion>().where().findAll();
+          final list = await isar
+              .collection<TransactionSuggestion>()
+              .where()
+              .findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
         case 'Person':
@@ -113,11 +121,25 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           records = list.map((e) => e.toMap()).toList();
           break;
         case 'AppNotification':
-          final list = await isar.collection<AppNotification>().where().findAll();
+          final list = await isar
+              .collection<AppNotification>()
+              .where()
+              .findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
         case 'WidgetPreference':
-          final list = await isar.collection<WidgetPreference>().where().findAll();
+          final list = await isar
+              .collection<WidgetPreference>()
+              .where()
+              .findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'InsightStory':
+          final list = await isar.collection<InsightStory>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'BackupConfig':
+          final list = await isar.collection<BackupConfig>().where().findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }
@@ -137,18 +159,24 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
     }
   }
 
-  int get _totalPages => (_allRecords.length / _pageSize).ceil() == 0 ? 1 : (_allRecords.length / _pageSize).ceil();
+  int get _totalPages => (_allRecords.length / _pageSize).ceil() == 0
+      ? 1
+      : (_allRecords.length / _pageSize).ceil();
 
   List<Map<String, dynamic>> get _currentPageRecords {
     if (_allRecords.isEmpty) return [];
     final start = (_currentPage - 1) * _pageSize;
-    final end = (start + _pageSize > _allRecords.length) ? _allRecords.length : start + _pageSize;
+    final end = (start + _pageSize > _allRecords.length)
+        ? _allRecords.length
+        : start + _pageSize;
     return _allRecords.sublist(start, end);
   }
 
   Future<void> _setPage(int newPage) async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 100)); // Artificial delay for smooth loader
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Artificial delay for smooth loader
     if (mounted) {
       setState(() {
         _currentPage = newPage;
@@ -159,7 +187,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
 
   Future<void> _setPageSize(int newSize) async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 100)); // Artificial delay for smooth loader
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Artificial delay for smooth loader
     if (mounted) {
       setState(() {
         _pageSize = newSize;
@@ -171,7 +201,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
 
   Future<void> _onSort(int columnIndex, bool ascending) async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 100)); // Delay for smooth UI response during sorting
+    await Future.delayed(
+      const Duration(milliseconds: 100),
+    ); // Delay for smooth UI response during sorting
 
     if (!mounted) return;
 
@@ -237,16 +269,16 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        showBack: true, 
-        title: widget.collectionName,
-      ),
+      appBar: KuberAppBar(showBack: true, title: widget.collectionName),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Subtitle and Pagination Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpacing.lg,
+              vertical: KuberSpacing.md,
+            ),
             decoration: BoxDecoration(
               color: cs.surface,
               border: Border(bottom: BorderSide(color: cs.outline)),
@@ -291,43 +323,49 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
             child: _isLoading
                 ? Center(child: CircularProgressIndicator(color: cs.primary))
                 : _allRecords.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.inbox_outlined, size: 64, color: cs.onSurfaceVariant.withValues(alpha: 0.3)),
-                            const SizedBox(height: KuberSpacing.lg),
-                            Text(
-                              'Collection is empty',
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 64,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.3),
                         ),
-                      )
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.vertical,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Theme(
-                            data: Theme.of(context).copyWith(
-                              dividerColor: cs.outline,
-                            ),
-                            child: DataTable(
-                              headingRowColor: WidgetStateProperty.all(cs.surfaceContainerHigh),
-                              showCheckboxColumn: false,
-                              columnSpacing: 24,
-                              sortColumnIndex: _sortColumnIndex,
-                              sortAscending: _sortAscending,
-                              columns: _buildColumns(cs),
-                              rows: _buildRows(cs),
-                            ),
+                        const SizedBox(height: KuberSpacing.lg),
+                        Text(
+                          'Collection is empty',
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
+                      ],
+                    ),
+                  )
+                : SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Theme(
+                        data: Theme.of(
+                          context,
+                        ).copyWith(dividerColor: cs.outline),
+                        child: DataTable(
+                          headingRowColor: WidgetStateProperty.all(
+                            cs.surfaceContainerHigh,
+                          ),
+                          showCheckboxColumn: false,
+                          columnSpacing: 24,
+                          sortColumnIndex: _sortColumnIndex,
+                          sortAscending: _sortAscending,
+                          columns: _buildColumns(cs),
+                          rows: _buildRows(cs),
+                        ),
                       ),
+                    ),
+                  ),
           ),
 
           // Footer Pagination Controls
@@ -353,7 +391,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                   label: const Text('Prev'),
                   style: TextButton.styleFrom(
                     foregroundColor: cs.primary,
-                    disabledForegroundColor: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                    disabledForegroundColor: cs.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                 ),
                 Text(
@@ -372,7 +412,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                   label: const Text('Next'),
                   style: TextButton.styleFrom(
                     foregroundColor: cs.primary,
-                    disabledForegroundColor: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                    disabledForegroundColor: cs.onSurfaceVariant.withValues(
+                      alpha: 0.5,
+                    ),
                   ),
                 ),
               ],
@@ -385,7 +427,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
 
   List<DataColumn> _buildColumns(ColorScheme cs) {
     if (_allRecords.isEmpty) return [];
-    
+
     // We assume all records have the same keys, so we take the first record's keys
     final keys = _allRecords.first.keys.toList();
 
@@ -417,9 +459,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
     return records.asMap().entries.map((entry) {
       final index = entry.key;
       final record = entry.value;
-      
-      final bgColor = index % 2 == 0 
-          ? cs.surfaceContainer 
+
+      final bgColor = index % 2 == 0
+          ? cs.surfaceContainer
           : cs.surfaceContainerHigh.withValues(alpha: 0.5);
 
       return DataRow(
@@ -428,7 +470,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
         cells: keys.map((key) {
           final val = record[key];
           String displayVal = val?.toString() ?? 'null';
-          
+
           if (displayVal.length > 20) {
             displayVal = '${displayVal.substring(0, 20)}...';
           }
@@ -439,7 +481,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontStyle: val == null ? FontStyle.italic : FontStyle.normal,
-                color: val == null ? cs.onSurfaceVariant.withValues(alpha: 0.6) : cs.onSurface,
+                color: val == null
+                    ? cs.onSurfaceVariant.withValues(alpha: 0.6)
+                    : cs.onSurface,
               ),
             ),
           );

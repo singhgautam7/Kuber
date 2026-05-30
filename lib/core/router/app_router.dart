@@ -32,6 +32,8 @@ import '../../features/recurring/screens/recurring_loader_screen.dart';
 import '../../features/recurring/screens/recurring_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
 import '../../features/settings/screens/data_management_screen.dart';
+import '../../features/backups/screens/automatic_backups_screen.dart';
+import '../../features/stories/screens/story_archive_screen.dart';
 import '../../features/ledger/data/ledger.dart';
 import '../../features/ledger/data/ledger_prefill.dart';
 import '../../features/ledger/screens/ledger_screen.dart';
@@ -133,7 +135,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       // If onboarded and trying to go to root, check for recurring transactions
       if (onboarded && state.matchedLocation == '/') {
         final missedCount = ref.read(recurringProcessResultProvider);
-        if (missedCount > 0) return '/recurring-loader';
+        final backupDue = ref.read(automaticBackupDueProvider);
+        if (missedCount > 0 || backupDue) {
+          return '/recurring-loader';
+        }
       }
 
       return null;
@@ -276,10 +281,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/history',
-                builder: (context, state) => const ScreenEntrance(
-                  id: 'history',
-                  child: HistoryScreen(),
-                ),
+                builder: (context, state) =>
+                    const ScreenEntrance(id: 'history', child: HistoryScreen()),
               ),
             ],
           ),
@@ -332,6 +335,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'data',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const DataManagementScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'automatic-backups',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, _) => const AutomaticBackupsScreen(),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'recurring',
@@ -372,6 +382,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'troubleshoot',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const TroubleshootScreen(),
+                  ),
+                  GoRoute(
+                    path: 'stories-archive',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, _) => const StoryArchiveScreen(),
                   ),
                   GoRoute(
                     path: 'tools',
@@ -553,4 +568,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-

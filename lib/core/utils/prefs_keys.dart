@@ -19,6 +19,8 @@ class PrefsKeys {
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
   static const migratedSuggestionBackfillV1 =
       'kuber_migrated_suggestion_backfill_v1';
+  static const migratedStoriesPositionV2 =
+      'kuber_migrated_stories_position_v2';
 
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';
@@ -53,4 +55,7 @@ class PrefsKeys {
   // Notifications
   static const notificationPermissionAsked =
       'kuber_notification_permission_asked';
+  
+  // Stories
+  static const lastStoryGenerationDate = 'kuber_last_story_generation_date';
 }

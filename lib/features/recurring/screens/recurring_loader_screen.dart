@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+
 import '../../../core/theme/app_theme.dart';
 import '../../../main.dart';
 import '../../../shared/widgets/loading_widgets.dart';
+import '../../backups/providers/backup_provider.dart';
 import '../../budgets/services/budget_service.dart';
+enum _LoaderPhase { recurring, backup }
 
 class RecurringLoaderScreen extends ConsumerStatefulWidget {
   const RecurringLoaderScreen({super.key});
@@ -21,6 +24,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
   late final AnimationController _controller;
   late final Animation<double> _fadeIn;
   bool _navigating = false;
+  late _LoaderPhase _phase;
 
   @override
   void initState() {
@@ -30,21 +34,29 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
       vsync: this,
     );
 
-    _fadeIn = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    );
+    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _phase = ref.read(recurringProcessResultProvider) > 0
+        ? _LoaderPhase.recurring
+        : _LoaderPhase.backup;
 
     _controller.forward();
 
     // Initialize budgets
     ref.read(budgetServiceProvider).init();
 
-    Future.delayed(const Duration(milliseconds: 2000), () {
+    Future.delayed(const Duration(milliseconds: 2000), () async {
+      final backupDue = ref.read(automaticBackupDueProvider);
+      if (mounted && backupDue) {
+        setState(() => _phase = _LoaderPhase.backup);
+        await ref.read(backupSettingsProvider.notifier).runDueBackup();
+        await Future.delayed(const Duration(milliseconds: 1400));
+      }
       if (mounted && !_navigating) {
         _navigating = true;
         // Reset the state so the router doesn't redirect us back here
         ref.read(recurringProcessResultProvider.notifier).state = 0;
+
+        ref.read(automaticBackupDueProvider.notifier).state = false;
         context.go('/');
       }
     });
@@ -61,6 +73,22 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
     final cs = Theme.of(context).colorScheme;
     final count = ref.watch(recurringProcessResultProvider);
     final textTheme = Theme.of(context).textTheme;
+    final title = switch (_phase) {
+      _LoaderPhase.backup => 'Backing up automatically',
+      _LoaderPhase.recurring => 'Processing Recurring',
+    };
+    final subtitle = switch (_phase) {
+      _LoaderPhase.backup => 'Saving a copy to your chosen folder.',
+      _LoaderPhase.recurring => 'Creating missed transactions.',
+    };
+    final statusLabel = switch (_phase) {
+      _LoaderPhase.backup => 'FOLDER',
+      _LoaderPhase.recurring => 'PROCESSED',
+    };
+    final statusValue = switch (_phase) {
+      _LoaderPhase.backup => 'Selected',
+      _LoaderPhase.recurring => '$count transaction${count == 1 ? '' : 's'}',
+    };
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -74,7 +102,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
               const SizedBox(height: KuberSpacing.xl),
 
               Text(
-                'Processing Recurring',
+                title,
                 style: GoogleFonts.inter(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -83,7 +111,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
               ),
               const SizedBox(height: KuberSpacing.sm),
               Text(
-                'Creating missed transactions...',
+                subtitle,
                 style: textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -96,10 +124,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
                 children: [
                   const StatusPill(label: 'NETWORK', value: 'Local Only'),
                   const SizedBox(width: KuberSpacing.md),
-                  StatusPill(
-                    label: 'PROCESSED',
-                    value: '$count transaction${count == 1 ? '' : 's'}',
-                  ),
+                  StatusPill(label: statusLabel, value: statusValue),
                 ],
               ),
             ],

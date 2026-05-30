@@ -58,15 +58,10 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
     txnTagsMap: txnTagsMap,
   );
 
-  double totalIncome = 0;
-  double totalExpense = 0;
-  for (final t in filtered.validForCalculations) {
-    if (t.type == 'income') {
-      totalIncome += t.amount;
-    } else {
-      totalExpense += t.amount;
-    }
-  }
+  final summary = filtered.computeSummary(
+    start: DateTime.fromMillisecondsSinceEpoch(0),
+    end: DateTime(9999),
+  );
 
   final groups = groupTransactionsByDate(filtered);
 
@@ -83,8 +78,8 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
   return HistoryView(
     groups: groups,
     filteredCount: filtered.length,
-    totalIncome: totalIncome,
-    totalExpense: totalExpense,
+    totalIncome: summary.income,
+    totalExpense: summary.expense,
     tagNamesMap: tagNamesMap,
     transferPairAccountId: buildTransferPairAccountIds(transactions),
     sourceEmpty: transactions.isEmpty,

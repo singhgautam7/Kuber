@@ -1,4 +1,5 @@
 import '../../features/transactions/data/transaction.dart';
+import '../../features/transactions/helpers/transaction_filters.dart';
 
 /// Returns the median of a list of doubles. Returns 0 if empty.
 double median(List<double> values) {
@@ -36,8 +37,14 @@ List<Transaction> window(
 }) {
   final cutoff = DateTime.now().subtract(Duration(days: days));
   return all.where((t) {
-    if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) return false;
     if (expenseOnly && t.type != 'expense') return false;
-    return t.createdAt.isAfter(cutoff);
+    final summary = [t].computeSummary(
+      start: cutoff,
+      end: DateTime.now().add(const Duration(days: 1)),
+      excludeLinkedRules: true,
+    );
+    return expenseOnly
+        ? summary.expense > 0
+        : summary.income > 0 || summary.expense > 0;
   }).toList();
 }

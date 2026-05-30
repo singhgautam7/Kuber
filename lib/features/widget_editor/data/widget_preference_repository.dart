@@ -33,20 +33,31 @@ class WidgetPreferenceRepository {
 
     // 1. Keep stored rows in stored order, but drop orphans not in the catalog.
     for (final row in stored) {
-      final catalog = catalogById[row.widgetKey];
+      final widgetKey = row.widgetKey == 'smart_insights'
+          ? 'insight_stories'
+          : row.widgetKey;
+      final catalog = catalogById[widgetKey];
       if (catalog == null) continue; // orphan: removed from catalog
-      seen.add(row.widgetKey);
-      result.add(HomeWidgetConfig(
-        id: catalog.id,
-        name: catalog.name,
-        description: catalog.description,
-        enabled: row.enabled,
-      ));
+      seen.add(widgetKey);
+      result.add(
+        HomeWidgetConfig(
+          id: catalog.id,
+          name: catalog.name,
+          description: catalog.description,
+          enabled: row.enabled,
+        ),
+      );
     }
 
     // 2. Append any catalog widgets that weren't stored (newly added).
     for (final c in defaults) {
-      if (!seen.contains(c.id)) result.add(c);
+      if (seen.contains(c.id)) continue;
+      if (scope == WidgetEditorScope.home && c.id == 'insight_stories') {
+        final insertAt = result.isNotEmpty ? 1 : 0;
+        result.insert(insertAt, c);
+      } else {
+        result.add(c);
+      }
     }
 
     // If we mutated the shape (added/removed), persist the reconciled order
@@ -58,14 +69,18 @@ class WidgetPreferenceRepository {
   }
 
   Future<void> _seed(
-      WidgetEditorScope scope, List<HomeWidgetConfig> defaults) async {
+    WidgetEditorScope scope,
+    List<HomeWidgetConfig> defaults,
+  ) async {
     await save(scope, defaults);
   }
 
   /// Persist the new configuration atomically. Replaces all rows for the
   /// scope so the in-memory order matches stored order exactly.
   Future<void> save(
-      WidgetEditorScope scope, List<HomeWidgetConfig> configs) async {
+    WidgetEditorScope scope,
+    List<HomeWidgetConfig> configs,
+  ) async {
     final key = scope.key;
     await isar.writeTxn(() async {
       await isar.widgetPreferences.filter().scopeEqualTo(key).deleteAll();

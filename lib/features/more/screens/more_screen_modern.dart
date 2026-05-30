@@ -183,7 +183,7 @@ class MoreScreenModern extends ConsumerWidget {
                       key: TutorialStepKeys.moreDataItem,
                       icon: Icons.storage_rounded,
                       label: 'Data',
-                      sub: 'Export and clear',
+                      sub: 'Export, import, automatic backups',
                       onTap: () => context.push('/more/data'),
                     ),
                     _CompactRowData(
@@ -191,6 +191,12 @@ class MoreScreenModern extends ConsumerWidget {
                       label: 'Notifications',
                       sub: 'Recent alerts and reminders',
                       onTap: () => _openNotificationsSheet(context, ref),
+                    ),
+                    _CompactRowData(
+                      icon: Icons.auto_stories_rounded,
+                      label: 'Money Stories Archive',
+                      sub: 'Every recap, newest first',
+                      onTap: () => context.push('/more/stories-archive'),
                     ),
                     _CompactRowData(
                       icon: Icons.build,

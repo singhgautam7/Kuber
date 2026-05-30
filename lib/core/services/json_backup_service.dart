@@ -9,14 +9,58 @@ import '../../features/categories/data/category_group.dart';
 import '../../features/investments/data/investment.dart';
 import '../../features/ledger/data/ledger.dart';
 import '../../features/loans/data/loan.dart';
+import '../../features/notifications/data/app_notification.dart';
 import '../../features/recurring/data/recurring_rule.dart';
+import '../../features/stories/data/insight_story.dart';
 import '../../features/tags/data/tag.dart';
 import '../../features/tags/data/transaction_tag.dart';
+import '../../features/tools/bill_splitter/data/bill.dart';
+import '../../features/tools/bill_splitter/data/person.dart';
 import '../../features/transactions/data/transaction.dart';
+import '../../features/transactions/data/transaction_suggestion.dart';
+import '../../features/widget_editor/data/widget_preference.dart';
+import '../../features/backups/services/backup_rotation.dart';
+import '../../features/backups/services/saf_backup_store.dart';
+import '../../features/backups/data/backup_config.dart';
 import 'data_service.dart';
 
 class JsonBackupService {
   static const _version = 1;
+
+  Future<String> writeScheduledBackup({
+    required Isar isar,
+    required String folderUri,
+    required int retention,
+    DateTime? now,
+    SafBackupStore? store,
+  }) async {
+    final at = now ?? DateTime.now();
+    final targetStore = store ?? SafBackupStore();
+    final json = await exportJson(isar);
+    final fileName = _backupFileName(at);
+    await targetStore.writeText(
+      folderUri: folderUri,
+      fileName: fileName,
+      contents: json,
+    );
+    final names = await targetStore.listFileNames(folderUri);
+    final toDelete = pruneBackupFileNames(names, retention: retention);
+    for (final name in toDelete) {
+      try {
+        await targetStore.deleteFile(folderUri: folderUri, fileName: name);
+      } catch (_) {
+        // Rotation cleanup is best-effort. A failed delete must not mark the
+        // backup write itself as failed.
+      }
+    }
+    return fileName;
+  }
+
+  String _backupFileName(DateTime at) {
+    String two(int value) => value.toString().padLeft(2, '0');
+    return 'kuber_backup_${at.year}-${two(at.month)}-${two(at.day)}_'
+        '${two(at.hour)}${two(at.minute)}.json';
+  }
 
   Future<String> exportJson(Isar isar) async {
     final transactions = await isar.transactions.where().findAll();
@@ -30,6 +74,13 @@ class JsonBackupService {
     final ledgers = await isar.ledgers.where().findAll();
     final loans = await isar.loans.where().findAll();
     final investments = await isar.investments.where().findAll();
+    final suggestions = await isar.transactionSuggestions.where().findAll();
+    final people = await isar.persons.where().findAll();
+    final bills = await isar.bills.where().findAll();
+    final notifications = await isar.appNotifications.where().findAll();
+    final widgetPreferences = await isar.widgetPreferences.where().findAll();
+    final stories = await isar.insightStorys.where().findAll();
+    final backupConfigs = await isar.backupConfigs.where().findAll();
 
     final data = {
       'version': _version,
@@ -45,6 +96,13 @@ class JsonBackupService {
       'ledgers': ledgers.map(_ledgerToMap).toList(),
       'loans': loans.map(_loanToMap).toList(),
       'investments': investments.map(_investmentToMap).toList(),
+      'transactionSuggestions': suggestions.map((s) => s.toMap()).toList(),
+      'people': people.map((p) => p.toMap()).toList(),
+      'bills': bills.map((b) => b.toMap()).toList(),
+      'appNotifications': notifications.map((n) => n.toMap()).toList(),
+      'widgetPreferences': widgetPreferences.map((w) => w.toMap()).toList(),
+      'insightStories': stories.map((s) => s.toMap()).toList(),
+      'backupConfigs': backupConfigs.map((b) => b.toMap()).toList(),
     };
 
     return jsonEncode(data);
@@ -107,7 +165,11 @@ class JsonBackupService {
 
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {
-      return ImportResult(successCount: 0, failureCount: 0, error: e.toString());
+      return ImportResult(
+        successCount: 0,
+        failureCount: 0,
+        error: e.toString(),
+      );
     }
   }
 
@@ -126,167 +188,169 @@ class JsonBackupService {
   // ---------------------------------------------------------------------------
 
   Map<String, dynamic> _txToMap(Transaction t) => {
-        'id': t.id,
-        'name': t.name,
-        'amount': t.amount,
-        'type': t.type,
-        'categoryId': t.categoryId,
-        'accountId': t.accountId,
-        'notes': t.notes,
-        'quickAddNote': t.quickAddNote,
-        'linkedRuleId': t.linkedRuleId,
-        'linkedRuleType': t.linkedRuleType,
-        'isBalanceAdjustment': t.isBalanceAdjustment,
-        'isTransfer': t.isTransfer,
-        'transferId': t.transferId,
-        'createdAt': t.createdAt.toIso8601String(),
-        'updatedAt': t.updatedAt.toIso8601String(),
-        'nameLower': t.nameLower,
-        'attachmentPaths': t.attachmentPaths,
-      };
+    'id': t.id,
+    'name': t.name,
+    'amount': t.amount,
+    'type': t.type,
+    'categoryId': t.categoryId,
+    'accountId': t.accountId,
+    'notes': t.notes,
+    'quickAddNote': t.quickAddNote,
+    'linkedRuleId': t.linkedRuleId,
+    'linkedRuleType': t.linkedRuleType,
+    'isBalanceAdjustment': t.isBalanceAdjustment,
+    'isTransfer': t.isTransfer,
+    'transferId': t.transferId,
+    'createdAt': t.createdAt.toIso8601String(),
+    'updatedAt': t.updatedAt.toIso8601String(),
+    'nameLower': t.nameLower,
+    'attachmentPaths': t.attachmentPaths,
+  };
 
   Map<String, dynamic> _catToMap(Category c) => {
-        'id': c.id,
-        'name': c.name,
-        'icon': c.icon,
-        'colorValue': c.colorValue,
-        'isDefault': c.isDefault,
-        'type': c.type,
-        'groupId': c.groupId,
-      };
+    'id': c.id,
+    'name': c.name,
+    'icon': c.icon,
+    'colorValue': c.colorValue,
+    'isDefault': c.isDefault,
+    'type': c.type,
+    'groupId': c.groupId,
+  };
 
   Map<String, dynamic> _groupToMap(CategoryGroup g) => {
-        'id': g.id,
-        'name': g.name,
-      };
+    'id': g.id,
+    'name': g.name,
+  };
 
   Map<String, dynamic> _accountToMap(Account a) => {
-        'id': a.id,
-        'name': a.name,
-        'type': a.type,
-        'initialBalance': a.initialBalance,
-        'creditLimit': a.creditLimit,
-        'isCreditCard': a.isCreditCard,
-        'icon': a.icon,
-        'colorValue': a.colorValue,
-        'last4Digits': a.last4Digits,
-      };
+    'id': a.id,
+    'name': a.name,
+    'type': a.type,
+    'initialBalance': a.initialBalance,
+    'creditLimit': a.creditLimit,
+    'isCreditCard': a.isCreditCard,
+    'icon': a.icon,
+    'colorValue': a.colorValue,
+    'last4Digits': a.last4Digits,
+  };
 
   Map<String, dynamic> _tagToMap(Tag t) => {
-        'id': t.id,
-        'name': t.name,
-        'isEnabled': t.isEnabled,
-        'createdAt': t.createdAt.toIso8601String(),
-      };
+    'id': t.id,
+    'name': t.name,
+    'isEnabled': t.isEnabled,
+    'createdAt': t.createdAt.toIso8601String(),
+  };
 
   Map<String, dynamic> _txTagToMap(TransactionTag tt) => {
-        'id': tt.id,
-        'transactionId': tt.transactionId,
-        'tagId': tt.tagId,
-      };
+    'id': tt.id,
+    'transactionId': tt.transactionId,
+    'tagId': tt.tagId,
+  };
 
   Map<String, dynamic> _recurringToMap(RecurringRule r) => {
-        'id': r.id,
-        'name': r.name,
-        'amount': r.amount,
-        'type': r.type,
-        'categoryId': r.categoryId,
-        'accountId': r.accountId,
-        'notes': r.notes,
-        'frequency': r.frequency,
-        'customDays': r.customDays,
-        'startDate': r.startDate.toIso8601String(),
-        'nextDueAt': r.nextDueAt.toIso8601String(),
-        'executionCount': r.executionCount,
-        'endType': r.endType,
-        'endAfter': r.endAfter,
-        'endDate': r.endDate?.toIso8601String(),
-        'isPaused': r.isPaused,
-        'createdAt': r.createdAt.toIso8601String(),
-        'updatedAt': r.updatedAt.toIso8601String(),
-      };
+    'id': r.id,
+    'name': r.name,
+    'amount': r.amount,
+    'type': r.type,
+    'categoryId': r.categoryId,
+    'accountId': r.accountId,
+    'notes': r.notes,
+    'frequency': r.frequency,
+    'customDays': r.customDays,
+    'startDate': r.startDate.toIso8601String(),
+    'nextDueAt': r.nextDueAt.toIso8601String(),
+    'executionCount': r.executionCount,
+    'endType': r.endType,
+    'endAfter': r.endAfter,
+    'endDate': r.endDate?.toIso8601String(),
+    'isPaused': r.isPaused,
+    'createdAt': r.createdAt.toIso8601String(),
+    'updatedAt': r.updatedAt.toIso8601String(),
+  };
 
   Map<String, dynamic> _budgetToMap(Budget b) => {
-        'id': b.id,
-        'categoryId': b.categoryId,
-        'amount': b.amount,
-        'periodType': b.periodType.name,
-        'startDate': b.startDate.toIso8601String(),
-        'endDate': b.endDate?.toIso8601String(),
-        'isRecurring': b.isRecurring,
-        'anchorDay': b.anchorDay,
-        'durationDays': b.durationDays,
-        'isActive': b.isActive,
-        'lastEvaluatedAt': b.lastEvaluatedAt?.toIso8601String(),
-        'createdAt': b.createdAt.toIso8601String(),
-        'updatedAt': b.updatedAt.toIso8601String(),
-        'alerts': b.alerts
-            .map((a) => {
-                  'type': a.type.name,
-                  'value': a.value,
-                  'isTriggered': a.isTriggered,
-                  'enableNotification': a.enableNotification,
-                  'createdAt': a.createdAt.toIso8601String(),
-                })
-            .toList(),
-      };
+    'id': b.id,
+    'categoryId': b.categoryId,
+    'amount': b.amount,
+    'periodType': b.periodType.name,
+    'startDate': b.startDate.toIso8601String(),
+    'endDate': b.endDate?.toIso8601String(),
+    'isRecurring': b.isRecurring,
+    'anchorDay': b.anchorDay,
+    'durationDays': b.durationDays,
+    'isActive': b.isActive,
+    'lastEvaluatedAt': b.lastEvaluatedAt?.toIso8601String(),
+    'createdAt': b.createdAt.toIso8601String(),
+    'updatedAt': b.updatedAt.toIso8601String(),
+    'alerts': b.alerts
+        .map(
+          (a) => {
+            'type': a.type.name,
+            'value': a.value,
+            'isTriggered': a.isTriggered,
+            'enableNotification': a.enableNotification,
+            'createdAt': a.createdAt.toIso8601String(),
+          },
+        )
+        .toList(),
+  };
 
   Map<String, dynamic> _ledgerToMap(Ledger l) => {
-        'id': l.id,
-        'uid': l.uid,
-        'personName': l.personName,
-        'personNameLower': l.personNameLower,
-        'type': l.type,
-        'originalAmount': l.originalAmount,
-        'accountId': l.accountId,
-        'categoryId': l.categoryId,
-        'notes': l.notes,
-        'expectedDate': l.expectedDate?.toIso8601String(),
-        'isSettled': l.isSettled,
-        'createdAt': l.createdAt.toIso8601String(),
-        'updatedAt': l.updatedAt.toIso8601String(),
-      };
+    'id': l.id,
+    'uid': l.uid,
+    'personName': l.personName,
+    'personNameLower': l.personNameLower,
+    'type': l.type,
+    'originalAmount': l.originalAmount,
+    'accountId': l.accountId,
+    'categoryId': l.categoryId,
+    'notes': l.notes,
+    'expectedDate': l.expectedDate?.toIso8601String(),
+    'isSettled': l.isSettled,
+    'createdAt': l.createdAt.toIso8601String(),
+    'updatedAt': l.updatedAt.toIso8601String(),
+  };
 
   Map<String, dynamic> _loanToMap(Loan l) => {
-        'id': l.id,
-        'uid': l.uid,
-        'name': l.name,
-        'loanType': l.loanType,
-        'lenderName': l.lenderName,
-        'referenceNumber': l.referenceNumber,
-        'principalAmount': l.principalAmount,
-        'emiAmount': l.emiAmount,
-        'rateType': l.rateType,
-        'interestRate': l.interestRate,
-        'loanStartDate': l.loanStartDate?.toIso8601String(),
-        'billDate': l.billDate,
-        'startDate': l.startDate.toIso8601String(),
-        'endDate': l.endDate?.toIso8601String(),
-        'autoAddTransaction': l.autoAddTransaction,
-        'accountId': l.accountId,
-        'categoryId': l.categoryId,
-        'notes': l.notes,
-        'isCompleted': l.isCompleted,
-        'createdAt': l.createdAt.toIso8601String(),
-        'updatedAt': l.updatedAt.toIso8601String(),
-      };
+    'id': l.id,
+    'uid': l.uid,
+    'name': l.name,
+    'loanType': l.loanType,
+    'lenderName': l.lenderName,
+    'referenceNumber': l.referenceNumber,
+    'principalAmount': l.principalAmount,
+    'emiAmount': l.emiAmount,
+    'rateType': l.rateType,
+    'interestRate': l.interestRate,
+    'loanStartDate': l.loanStartDate?.toIso8601String(),
+    'billDate': l.billDate,
+    'startDate': l.startDate.toIso8601String(),
+    'endDate': l.endDate?.toIso8601String(),
+    'autoAddTransaction': l.autoAddTransaction,
+    'accountId': l.accountId,
+    'categoryId': l.categoryId,
+    'notes': l.notes,
+    'isCompleted': l.isCompleted,
+    'createdAt': l.createdAt.toIso8601String(),
+    'updatedAt': l.updatedAt.toIso8601String(),
+  };
 
   Map<String, dynamic> _investmentToMap(Investment i) => {
-        'id': i.id,
-        'uid': i.uid,
-        'name': i.name,
-        'investmentType': i.investmentType,
-        'currentValue': i.currentValue,
-        'investedAmount': i.investedAmount,
-        'autoDebit': i.autoDebit,
-        'sipAmount': i.sipAmount,
-        'sipDate': i.sipDate,
-        'accountId': i.accountId,
-        'categoryId': i.categoryId,
-        'notes': i.notes,
-        'createdAt': i.createdAt.toIso8601String(),
-        'updatedAt': i.updatedAt.toIso8601String(),
-      };
+    'id': i.id,
+    'uid': i.uid,
+    'name': i.name,
+    'investmentType': i.investmentType,
+    'currentValue': i.currentValue,
+    'investedAmount': i.investedAmount,
+    'autoDebit': i.autoDebit,
+    'sipAmount': i.sipAmount,
+    'sipDate': i.sipDate,
+    'accountId': i.accountId,
+    'categoryId': i.categoryId,
+    'notes': i.notes,
+    'createdAt': i.createdAt.toIso8601String(),
+    'updatedAt': i.updatedAt.toIso8601String(),
+  };
 
   // ---------------------------------------------------------------------------
   // Deserializers
@@ -361,7 +425,9 @@ class JsonBackupService {
     ..executionCount = (m['executionCount'] as int?) ?? 0
     ..endType = m['endType'] as String
     ..endAfter = m['endAfter'] as int?
-    ..endDate = m['endDate'] != null ? DateTime.parse(m['endDate'] as String) : null
+    ..endDate = m['endDate'] != null
+        ? DateTime.parse(m['endDate'] as String)
+        : null
     ..isPaused = (m['isPaused'] as bool?) ?? false
     ..createdAt = DateTime.parse(m['createdAt'] as String)
     ..updatedAt = DateTime.parse(m['updatedAt'] as String);
@@ -376,7 +442,9 @@ class JsonBackupService {
         orElse: () => BudgetPeriodType.monthly,
       )
       ..startDate = DateTime.parse(m['startDate'] as String)
-      ..endDate = m['endDate'] != null ? DateTime.parse(m['endDate'] as String) : null
+      ..endDate = m['endDate'] != null
+          ? DateTime.parse(m['endDate'] as String)
+          : null
       ..isRecurring = (m['isRecurring'] as bool?) ?? true
       ..anchorDay = m['anchorDay'] as int?
       ..durationDays = m['durationDays'] as int?
@@ -416,8 +484,9 @@ class JsonBackupService {
     ..accountId = m['accountId'] as String
     ..categoryId = m['categoryId'] as String
     ..notes = m['notes'] as String?
-    ..expectedDate =
-        m['expectedDate'] != null ? DateTime.parse(m['expectedDate'] as String) : null
+    ..expectedDate = m['expectedDate'] != null
+        ? DateTime.parse(m['expectedDate'] as String)
+        : null
     ..isSettled = (m['isSettled'] as bool?) ?? false
     ..createdAt = DateTime.parse(m['createdAt'] as String)
     ..updatedAt = DateTime.parse(m['updatedAt'] as String);
@@ -438,7 +507,9 @@ class JsonBackupService {
         : null
     ..billDate = m['billDate'] as int
     ..startDate = DateTime.parse(m['startDate'] as String)
-    ..endDate = m['endDate'] != null ? DateTime.parse(m['endDate'] as String) : null
+    ..endDate = m['endDate'] != null
+        ? DateTime.parse(m['endDate'] as String)
+        : null
     ..autoAddTransaction = (m['autoAddTransaction'] as bool?) ?? false
     ..accountId = m['accountId'] as String
     ..categoryId = m['categoryId'] as String

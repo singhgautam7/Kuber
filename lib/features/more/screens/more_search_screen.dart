@@ -250,10 +250,17 @@ List<_SearchableItem> _buildItems(bool isDevMode) => [
   ),
   _SearchableItem(
     label: 'Data',
-    subtitle: 'Export and clear your data',
+    subtitle: 'Export, import, automatic backups',
     icon: Icons.storage_rounded,
     section: 'App',
     route: '/more/data',
+  ),
+  _SearchableItem(
+    label: 'Money Stories Archive',
+    subtitle: 'Every recap, newest first',
+    icon: Icons.auto_stories_rounded,
+    section: 'App',
+    route: '/more/stories-archive',
   ),
   _SearchableItem(
     label: 'Troubleshoot',
