@@ -377,7 +377,7 @@ class _Utilization extends StatelessWidget {
         ? cs.error
         : rawPct < 0.30
         ? cs.tertiary
-        : const Color(0xFFF59E0B); // warning — no slot on ColorScheme
+        : context.kuberColors.warning;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

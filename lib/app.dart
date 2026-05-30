@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
 import 'features/budgets/services/budget_service.dart';
 import 'features/history/providers/selection_provider.dart';
+import 'features/ledger/data/ledger_reminder_processor.dart';
+import 'features/notifications/data/notification_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/tutorial/widgets/tutorial_overlay.dart';
 import 'shared/widgets/app_scaffold.dart';
@@ -20,15 +24,41 @@ class KuberApp extends ConsumerStatefulWidget {
 
 class _KuberAppState extends ConsumerState<KuberApp>
     with WidgetsBindingObserver {
+  // Built once. AppTheme.light()/dark() construct a fresh ThemeData each call;
+  // passing new instances on every KuberApp rebuild makes MaterialApp's internal
+  // AnimatedTheme animate a (visually identical) theme transition over ~200ms,
+  // rebuilding every Theme.of dependent (the whole tab tree) once per frame —
+  // the tab-switch jank. Stable instances make that a no-op.
+  final ThemeData _lightTheme = AppTheme.light();
+  final ThemeData _darkTheme = AppTheme.dark();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Run on-open budget alert check once. Uses ProviderScope's overrides
-    // (Isar etc), so must be deferred until after the scope is in place.
+    // On-open processing deferred to after the first frame so it never delays
+    // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
+    // after the scope is in place.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(budgetServiceProvider).checkAllOnAppOpen();
+      _runOnOpenLedgerReminders();
     });
+  }
+
+  /// On-open ledger reminder pass (in-app records + dedupe-gated OS
+  /// notifications). Best-effort and post-first-frame — a failure here must
+  /// never affect launch or block the UI.
+  Future<void> _runOnOpenLedgerReminders() async {
+    try {
+      final isar = ref.read(isarProvider);
+      await LedgerReminderProcessor(
+        isar: isar,
+        notificationRepo: NotificationRepository(isar),
+        showOs: NotificationService().showAppNotification,
+      ).checkAll();
+    } catch (e, stack) {
+      debugPrint('Kuber: on-open ledger reminders failed (non-fatal): $e\n$stack');
+    }
   }
 
   @override
@@ -113,8 +143,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
     return MaterialApp.router(
       title: 'Kuber',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
@@ -128,12 +158,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
         return NotificationListener<NavigationNotification>(
           onNotification: _handleNavigationNotification,
           child: AnnotatedRegion<SystemUiOverlayStyle>(
+            // Edge-to-edge: set only icon brightness (applied via the modern
+            // WindowInsetsController path). Do NOT set bar colors — those route
+            // through the deprecated Window.setStatusBarColor /
+            // setNavigationBarColor APIs and are no-ops on Android 15. The bars
+            // are transparent for free in edge-to-edge mode.
             value: SystemUiOverlayStyle(
-              statusBarColor: Colors.transparent,
               statusBarIconBrightness:
                   isDark ? Brightness.light : Brightness.dark,
               statusBarBrightness:
                   isDark ? Brightness.dark : Brightness.light,
+              systemNavigationBarIconBrightness:
+                  isDark ? Brightness.light : Brightness.dark,
             ),
             child: ColoredBox(
               color: Theme.of(context).colorScheme.surface,

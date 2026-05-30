@@ -1,10 +1,11 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../accounts/data/account.dart';
@@ -81,10 +82,13 @@ class TransactionDayCard extends StatelessWidget {
   final void Function(Transaction) onTap;
   final void Function(Transaction) onEdit;
 
-  final dynamic formatter;
+  final AppFormatter formatter;
   final Map<int, Category> categoryMap;
   final Map<int, Account> accountMap;
-  final List<Transaction> transactionList;
+
+  /// Transaction id → the paired transfer leg's accountId. Built once by the
+  /// caller (see `buildTransferPairAccountIds`) so rows don't scan the list.
+  final Map<int, String> transferPairAccountId;
   final Map<int, List<String>> tagNamesMap;
 
   const TransactionDayCard({
@@ -96,7 +100,7 @@ class TransactionDayCard extends StatelessWidget {
     required this.formatter,
     required this.categoryMap,
     required this.accountMap,
-    required this.transactionList,
+    this.transferPairAccountId = const {},
     this.tagNamesMap = const {},
   });
 
@@ -115,7 +119,7 @@ class TransactionDayCard extends StatelessWidget {
             category: categoryMap[int.tryParse(transactions[i].categoryId)],
             account: accountMap[int.tryParse(transactions[i].accountId)],
             accountMap: accountMap,
-            transactionList: transactionList,
+            transferPairAccountId: transferPairAccountId,
             tagNames: tagNamesMap[transactions[i].id] ?? const [],
           ),
         ],
@@ -129,11 +133,13 @@ class TransactionRow extends ConsumerWidget {
   final VoidCallback onDelete;
   final VoidCallback onTap;
   final VoidCallback onEdit;
-  final dynamic formatter;
+  final AppFormatter formatter;
   final Category? category;
   final Account? account;
   final Map<int, Account> accountMap;
-  final List<Transaction> transactionList;
+
+  /// Transaction id → the paired transfer leg's accountId (O(1) lookup).
+  final Map<int, String> transferPairAccountId;
   final List<String> tagNames;
 
   const TransactionRow({
@@ -146,7 +152,7 @@ class TransactionRow extends ConsumerWidget {
     this.category,
     this.account,
     required this.accountMap,
-    required this.transactionList,
+    this.transferPairAccountId = const {},
     this.tagNames = const [],
   });
 
@@ -257,19 +263,20 @@ class TransactionRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final isSelectionMode = ref.watch(isSelectionModeProvider);
-    final isSelected = ref.watch(transactionSelectionProvider).contains(transaction.id);
+    // Watch only this row's membership so toggling one selection rebuilds only
+    // the affected row, not every visible row.
+    final isSelected = ref.watch(
+      transactionSelectionProvider.select((s) => s.contains(transaction.id)),
+    );
     final isTransfer = transaction.isTransfer;
     final isAdjustment = transaction.isBalanceAdjustment;
 
-    // Transfer-specific: look up FROM and TO accounts
+    // Transfer-specific: look up FROM and TO accounts via the precomputed map.
     String? fromName;
     String? toName;
     if (isTransfer) {
-      // This is the expense (FROM) leg. Find the income (TO) leg by transferId.
-      final pairAccountId = transactionList
-          .firstWhereOrNull((t) =>
-              t.transferId == transaction.transferId && t.id != transaction.id)
-          ?.accountId;
+      // This is the expense (FROM) leg; the map gives the income (TO) leg's id.
+      final pairAccountId = transferPairAccountId[transaction.id];
 
       fromName = accountMap[int.tryParse(transaction.accountId)]?.name;
       toName = pairAccountId != null
@@ -305,7 +312,9 @@ class TransactionRow extends ConsumerWidget {
       iconData = category != null
           ? IconMapper.fromString(category!.icon)
           : Icons.category;
-      iconColor = category != null ? Color(category!.colorValue) : cs.primary;
+      iconColor = category != null
+          ? harmonizeCategory(context, Color(category!.colorValue))
+          : cs.primary;
       displayName = transaction.name;
       subtitle =
           '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';

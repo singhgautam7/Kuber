@@ -21,6 +21,7 @@ class HomeRecurringCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final upcomingAsync = ref.watch(upcomingRecurringProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
+    final fmt = ref.watch(formatterProvider);
     final textTheme = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
 
@@ -133,7 +134,7 @@ class HomeRecurringCard extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  maskAmount(CurrencyFormatter.format(rule.amount), ref.watch(privacyModeProvider)),
+                                  maskAmount(fmt.formatCurrency(rule.amount), ref.watch(privacyModeProvider)),
                                   style: textTheme.bodyMedium?.copyWith(
                                     color: rule.type == 'income'
                                         ? cs.tertiary

@@ -62,13 +62,14 @@ class _ToolGroup {
   const _ToolGroup({required this.title, required this.tools});
 }
 
-const _kBlue = Color(0xFF3B82F6);
-const _kGreen = Color(0xFF22C55E);
-const _kAmber = Color(0xFFF59E0B);
+// Aliased to the Vault tokens where one exists, so the palette stays in sync.
+const _kBlue = KuberColors.primary;
+const _kGreen = KuberColors.income;
+const _kAmber = KuberColors.warning;
 const _kPurple = Color(0xFFA855F7);
 const _kEmerald = Color(0xFF10B981);
 const _kPink = Color(0xFFEC4899);
-const _kRed = Color(0xFFEF4444);
+const _kRed = KuberColors.expense;
 
 const _kGroups = [
   _ToolGroup(title: 'Finance Calculators', tools: [

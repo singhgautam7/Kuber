@@ -598,7 +598,7 @@ class _BudgetUtilization extends StatelessWidget {
         : pct < 0.70
         ? cs.tertiary
         : pct < 0.95
-        ? const Color(0xFFF59E0B)
+        ? context.kuberColors.warning
         : cs.error;
 
     return Column(

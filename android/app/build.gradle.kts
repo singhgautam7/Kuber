@@ -79,5 +79,12 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    // flutter_local_notifications 21.x requires desugar_jdk_libs >= 2.1.4.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // flutter_local_notifications transitively pulls com.google.android.material
+    // 1.7.0, whose date picker calls the deprecated Window.setStatusBarColor /
+    // setNavigationBarColor (Android 15 edge-to-edge flag). Pin a current
+    // Material that migrated its date picker to the inset-compat APIs.
+    implementation("com.google.android.material:material:1.13.0")
 }

@@ -723,28 +723,6 @@ class _SpeedDialMenu extends AnimatedWidget {
             context.push('/ledger/add');
           },
         ),
-        // const SizedBox(height: KuberSpacing.md),
-        // _buildOption(
-        //   context,
-        //   index: 1,
-        //   icon: Icons.swap_horiz_rounded,
-        //   label: 'Add Transfer',
-        //   onTap: () {
-        //     onClose();
-        //     context.push('/add-transaction?type=transfer');
-        //   },
-        // ),
-        // const SizedBox(height: KuberSpacing.md),
-        // _buildOption(
-        //   context,
-        //   index: 0,
-        //   icon: Icons.arrow_downward_rounded,
-        //   label: 'Add Income',
-        //   onTap: () {
-        //     onClose();
-        //     context.push('/add-transaction?type=income');
-        //   },
-        // ),
       ],
     );
   }

@@ -13,6 +13,7 @@ class BurnRateCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final burnRateAsync = ref.watch(burnRateProvider);
     final isPrivate = ref.watch(privacyModeProvider);
+    final fmt = ref.watch(formatterProvider);
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -59,7 +60,7 @@ class BurnRateCard extends ConsumerWidget {
                           ),
                           const SizedBox(height: KuberSpacing.xs),
                           Text(
-                            '${maskAmount(CurrencyFormatter.format(data.avgDaily), isPrivate)}/day',
+                            '${maskAmount(fmt.formatCurrency(data.avgDaily), isPrivate)}/day',
                             style: textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: cs.onSurface,
@@ -97,7 +98,7 @@ class BurnRateCard extends ConsumerWidget {
                           ),
                         ),
                         Text(
-                          maskAmount(CurrencyFormatter.format(data.projected), isPrivate),
+                          maskAmount(fmt.formatCurrency(data.projected), isPrivate),
                           style: textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: cs.onSurface,

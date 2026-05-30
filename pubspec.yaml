@@ -32,13 +32,12 @@ dependencies:
   # Utilities
   intl: ^0.20.2
   shared_preferences: ^2.5.3
-  another_flushbar: ^1.12.30
   permission_handler: ^12.0.1
   csv: ^8.0.0
   file_picker: ^11.0.1
   share_plus: ^12.0.1
   device_info_plus: ^12.3.0
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^21.0.0
   pdf: ^3.11.0
 
   uuid: ^4.5.1
@@ -69,3 +68,8 @@ flutter:
 
   assets:
     - android/play_store_512.png
+    # Pre-bundled Inter weights (subset to Latin + punctuation + currency/
+    # arrow/symbol ranges). google_fonts loads these from assets before any
+    # network fetch, so the primary UI font is available instantly and offline.
+    # Secondary fonts (Playfair Display, JetBrains Mono) still lazy-fetch.
+    - assets/google_fonts/

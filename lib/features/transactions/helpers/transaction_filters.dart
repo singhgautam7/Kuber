@@ -26,6 +26,29 @@ extension TransactionFilterX on Iterable<Transaction> {
   }
 }
 
+/// Maps each transfer leg's transaction id to the *other* leg's `accountId`.
+///
+/// Built once per list so a transfer row can render "FROM → TO" with an O(1)
+/// lookup instead of scanning the whole transaction list on every build.
+Map<int, String> buildTransferPairAccountIds(Iterable<Transaction> txns) {
+  final byTransferId = <String, List<Transaction>>{};
+  for (final t in txns) {
+    if (t.isTransfer && t.transferId != null) {
+      byTransferId.putIfAbsent(t.transferId!, () => []).add(t);
+    }
+  }
+
+  final result = <int, String>{};
+  for (final legs in byTransferId.values) {
+    if (legs.length < 2) continue;
+    for (final leg in legs) {
+      final other = legs.firstWhere((l) => l.id != leg.id, orElse: () => leg);
+      if (other.id != leg.id) result[leg.id] = other.accountId;
+    }
+  }
+  return result;
+}
+
 /// Shared filter shape for aggregating transactions into a period summary.
 /// Used by Home's monthly hero, the Categories hero, and any future screen
 /// that needs income/expense/net for a date window — pass the same filter

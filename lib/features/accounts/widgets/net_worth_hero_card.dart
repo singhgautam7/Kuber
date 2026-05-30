@@ -18,6 +18,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../shared/widgets/animated_amount.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
 
@@ -134,11 +135,11 @@ class NetWorthHeroCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Text(
-                        maskAmount(
-                          '${netWorth < 0 ? '−' : ''}${fmt.formatCurrency(netWorth.abs())}',
-                          masked,
-                        ),
+                      child: AnimatedAmount(
+                        value: netWorth,
+                        isPrivate: masked,
+                        format: (v) =>
+                            '${v < 0 ? '−' : ''}${fmt.formatCurrency(v.abs())}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
