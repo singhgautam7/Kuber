@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/categories/data/category_group.dart';
 import '../../features/transactions/services/suggestion_service.dart';
+import '../../features/widget_editor/data/widget_preference.dart';
 import '../utils/prefs_keys.dart';
 
 class MigrationService {
@@ -37,6 +38,12 @@ class MigrationService {
     if (!(prefs.getBool(PrefsKeys.migratedSuggestionBackfillV1) ?? false)) {
       await _backfillSuggestions(isar);
       await prefs.setBool(PrefsKeys.migratedSuggestionBackfillV1, true);
+    }
+
+    // Migration 6: Move insight_stories widget to position 1 (second from top)
+    if (!(prefs.getBool(PrefsKeys.migratedStoriesPositionV2) ?? false)) {
+      await _migrateStoriesPosition(isar);
+      await prefs.setBool(PrefsKeys.migratedStoriesPositionV2, true);
     }
   }
 
@@ -113,6 +120,26 @@ class MigrationService {
         ..isDefault = true
         ..groupId = otherGroup?.id;
       await isar.categorys.put(cat);
+    });
+  }
+
+  static Future<void> _migrateStoriesPosition(Isar isar) async {
+    final rows = await isar.widgetPreferences
+        .filter()
+        .scopeEqualTo('home')
+        .sortByOrder()
+        .findAll();
+    if (rows.isEmpty) return;
+    final storyIndex = rows.indexWhere((w) => w.widgetKey == 'insight_stories');
+    if (storyIndex == -1 || storyIndex == 1) return; // not found or already at 1
+    final story = rows.removeAt(storyIndex);
+    final insertAt = rows.isNotEmpty ? 1 : 0;
+    rows.insert(insertAt, story);
+    await isar.writeTxn(() async {
+      for (int i = 0; i < rows.length; i++) {
+        rows[i].order = i;
+        await isar.widgetPreferences.put(rows[i]);
+      }
     });
   }
 }

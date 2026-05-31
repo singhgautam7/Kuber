@@ -131,17 +131,47 @@ void main() {
       );
       expect(dupe, isFalse);
     });
+
+    test('backup failures deduplicate by payload on same day', () async {
+      final at = DateTime(2026, 5, 17, 9, 0);
+      await repo.add(
+        type: NotificationType.backup,
+        title: 'Automatic backup failed',
+        body: 'Folder revoked',
+        payload: 'backup:folder_revoked',
+        createdAt: at,
+      );
+
+      final dupe = await repo.add(
+        type: NotificationType.backup,
+        title: 'Automatic backup failed',
+        body: 'Folder revoked again',
+        payload: 'backup:folder_revoked',
+        createdAt: at.add(const Duration(hours: 2)),
+      );
+      final differentReason = await repo.add(
+        type: NotificationType.backup,
+        title: 'Automatic backup failed',
+        body: 'Disk full',
+        payload: 'backup:disk_full',
+        createdAt: at.add(const Duration(hours: 3)),
+      );
+
+      expect(dupe, isFalse);
+      expect(differentReason, isTrue);
+      expect(await isar.appNotifications.count(), 2);
+    });
   });
 
   group('NotificationRepository — read/write helpers', () {
     test('unreadCount + markAllRead', () async {
+      await repo.add(type: NotificationType.general, title: 'A', body: 'B');
       await repo.add(
-          type: NotificationType.general, title: 'A', body: 'B');
-      await repo.add(
-          type: NotificationType.budgetAlert,
-          title: 'C',
-          body: 'D',
-          payload: 'budget:1');
+        type: NotificationType.budgetAlert,
+        title: 'C',
+        body: 'D',
+        payload: 'budget:1',
+      );
       expect(await repo.unreadCount(), 2);
 
       await repo.markAllRead();
@@ -149,8 +179,7 @@ void main() {
     });
 
     test('clearAll empties the collection', () async {
-      await repo.add(
-          type: NotificationType.general, title: 'A', body: 'B');
+      await repo.add(type: NotificationType.general, title: 'A', body: 'B');
       await repo.clearAll();
       expect(await isar.appNotifications.count(), 0);
     });
@@ -159,16 +188,18 @@ void main() {
       final older = DateTime(2026, 5, 16, 9);
       final newer = DateTime(2026, 5, 17, 9);
       await repo.add(
-          type: NotificationType.general,
-          title: 'old',
-          body: 'b',
-          createdAt: older);
+        type: NotificationType.general,
+        title: 'old',
+        body: 'b',
+        createdAt: older,
+      );
       await repo.add(
-          type: NotificationType.general,
-          title: 'new',
-          body: 'b',
-          payload: 'x:1',
-          createdAt: newer);
+        type: NotificationType.general,
+        title: 'new',
+        body: 'b',
+        payload: 'x:1',
+        createdAt: newer,
+      );
       final list = await repo.list();
       expect(list.first.title, 'new');
       expect(list.last.title, 'old');

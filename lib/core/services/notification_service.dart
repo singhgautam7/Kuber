@@ -10,7 +10,7 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
 });
 
-/// Channel ids/names for the five notification types. These also drive the
+/// Channel ids/names for notification types. These also drive the
 /// Android-side channel registration in [NotificationService.init].
 class _Channel {
   final String id;
@@ -51,6 +51,12 @@ const Map<NotificationType, _Channel> _typeChannels = {
     'Lend/borrow reminders',
     Importance.high,
   ),
+  NotificationType.backup: _Channel(
+    'kuber_backup',
+    'Backup Failures',
+    'Automatic backup failure notifications',
+    Importance.high,
+  ),
 };
 
 class NotificationService {
@@ -84,10 +90,10 @@ class NotificationService {
 
       const InitializationSettings initializationSettings =
           InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: initializationSettingsDarwin,
-        macOS: initializationSettingsDarwin,
-      );
+            android: initializationSettingsAndroid,
+            iOS: initializationSettingsDarwin,
+            macOS: initializationSettingsDarwin,
+          );
 
       await _notificationsPlugin.initialize(
         settings: initializationSettings,
@@ -103,7 +109,8 @@ class NotificationService {
       if (Platform.isAndroid) {
         final androidPlugin = _notificationsPlugin
             .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin>();
+              AndroidFlutterLocalNotificationsPlugin
+            >();
         for (final c in _typeChannels.values) {
           await androidPlugin?.createNotificationChannel(
             AndroidNotificationChannel(
@@ -117,11 +124,10 @@ class NotificationService {
       }
 
       // Detect cold-start launch from a notification tap.
-      final launchDetails =
-          await _notificationsPlugin.getNotificationAppLaunchDetails();
+      final launchDetails = await _notificationsPlugin
+          .getNotificationAppLaunchDetails();
       if (launchDetails?.didNotificationLaunchApp ?? false) {
-        _coldStartPayload =
-            launchDetails?.notificationResponse?.payload;
+        _coldStartPayload = launchDetails?.notificationResponse?.payload;
       }
 
       _isInitialized = true;
@@ -134,14 +140,16 @@ class NotificationService {
     if (Platform.isIOS) {
       final bool? granted = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
+            IOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
       return granted ?? false;
     }
     if (Platform.isMacOS) {
       final bool? granted = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              MacOSFlutterLocalNotificationsPlugin>()
+            MacOSFlutterLocalNotificationsPlugin
+          >()
           ?.requestPermissions(alert: true, badge: true, sound: true);
       return granted ?? false;
     }
@@ -149,7 +157,8 @@ class NotificationService {
     if (Platform.isAndroid) {
       final bool? granted = await _notificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.requestNotificationsPermission();
       return granted ?? false;
     }
@@ -227,20 +236,19 @@ class NotificationService {
   }) async {
     final AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'export_channel',
-      'Data Export',
-      channelDescription: 'Notifications for data export status',
-      importance: isSuccess ? Importance.high : Importance.low,
-      priority: isSuccess ? Priority.high : Priority.low,
-      showProgress: isProgress,
-      indeterminate: isProgress,
-      ongoing: isProgress,
-      autoCancel: true,
-      ticker: title,
-    );
+          'export_channel',
+          'Data Export',
+          channelDescription: 'Notifications for data export status',
+          importance: isSuccess ? Importance.high : Importance.low,
+          priority: isSuccess ? Priority.high : Priority.low,
+          showProgress: isProgress,
+          indeterminate: isProgress,
+          ongoing: isProgress,
+          autoCancel: true,
+          ticker: title,
+        );
 
-    const DarwinNotificationDetails darwinDetails =
-        DarwinNotificationDetails();
+    const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails();
 
     final NotificationDetails notificationDetails = NotificationDetails(
       android: androidDetails,
@@ -268,13 +276,13 @@ class NotificationService {
   }) async {
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
-      'budget_alerts',
-      'Budget Alerts',
-      channelDescription: 'Notifications for budget spending limits',
-      importance: Importance.high,
-      priority: Priority.high,
-      autoCancel: true,
-    );
+          'budget_alerts',
+          'Budget Alerts',
+          channelDescription: 'Notifications for budget spending limits',
+          importance: Importance.high,
+          priority: Priority.high,
+          autoCancel: true,
+        );
 
     const DarwinNotificationDetails darwinDetails = DarwinNotificationDetails(
       presentAlert: true,

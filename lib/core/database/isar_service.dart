@@ -18,6 +18,8 @@ import '../../features/tools/bill_splitter/data/person.dart';
 import '../../features/tools/bill_splitter/data/bill.dart';
 import '../../features/notifications/data/app_notification.dart';
 import '../../features/widget_editor/data/widget_preference.dart';
+import '../../features/stories/data/insight_story.dart';
+import '../../features/backups/data/backup_config.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -26,26 +28,25 @@ final isarProvider = Provider<Isar>((ref) {
 class IsarService {
   static Future<Isar> open() async {
     final dir = await getApplicationDocumentsDirectory();
-    return Isar.open(
-      [
-        TransactionSchema,
-        CategorySchema,
-        CategoryGroupSchema,
-        AccountSchema,
-        RecurringRuleSchema,
-        TagSchema,
-        TransactionTagSchema,
-        BudgetSchema,
-        LedgerSchema,
-        LoanSchema,
-        InvestmentSchema,
-        TransactionSuggestionSchema,
-        PersonSchema,
-        BillSchema,
-        AppNotificationSchema,
-        WidgetPreferenceSchema,
-      ],
-      directory: dir.path,
-    );
+    return Isar.open([
+      TransactionSchema,
+      CategorySchema,
+      CategoryGroupSchema,
+      AccountSchema,
+      RecurringRuleSchema,
+      TagSchema,
+      TransactionTagSchema,
+      BudgetSchema,
+      LedgerSchema,
+      LoanSchema,
+      InvestmentSchema,
+      TransactionSuggestionSchema,
+      PersonSchema,
+      BillSchema,
+      AppNotificationSchema,
+      WidgetPreferenceSchema,
+      InsightStorySchema,
+      BackupConfigSchema,
+    ], directory: dir.path);
   }
 }

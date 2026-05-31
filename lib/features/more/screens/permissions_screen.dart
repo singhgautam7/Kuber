@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../providers/permission_provider.dart';
+import '../../backups/providers/backup_provider.dart';
 
 class PermissionsScreen extends ConsumerWidget {
   const PermissionsScreen({super.key});
@@ -14,6 +15,7 @@ class PermissionsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final permissionState = ref.watch(permissionProvider);
+    final backupSettings = ref.watch(backupSettingsProvider).valueOrNull;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -65,6 +67,22 @@ class PermissionsScreen extends ConsumerWidget {
                         .read(permissionProvider.notifier)
                         .requestNotification(),
                   ),
+                  const SizedBox(height: KuberSpacing.lg),
+                  _PermissionCard(
+                    icon: Icons.folder_special_outlined,
+                    title: 'Files',
+                    description: backupSettings?.folderPath == null
+                        ? 'Used only for the backup folder you choose. Automatic backups stay paused until a folder is set.'
+                        : 'Lets Kuber write backup copies to the one folder you picked, and nothing else on your device.',
+                    status: backupSettings?.folderPath == null
+                        ? AppPermissionStatus.denied
+                        : AppPermissionStatus.granted,
+                    statusTextOverride: backupSettings?.folderPath == null
+                        ? 'NOT SET'
+                        : 'GRANTED',
+                    onTap: () =>
+                        ref.read(backupSettingsProvider.notifier).pickFolder(),
+                  ),
                   // const SizedBox(height: KuberSpacing.lg),
                   // _PermissionCard(
                   //   icon: Icons.folder_open_rounded,
@@ -80,19 +98,23 @@ class PermissionsScreen extends ConsumerWidget {
                   _PermissionCard(
                     icon: Icons.fingerprint_rounded,
                     title: 'Biometric Authentication',
-                    description: 'Used to secure access to your financial data.',
+                    description:
+                        'Used to secure access to your financial data.',
                     status: state.isBiometricAvailable
                         ? (state.isBiometricEnabled
-                            ? AppPermissionStatus.granted
-                            : AppPermissionStatus.denied)
+                              ? AppPermissionStatus.granted
+                              : AppPermissionStatus.denied)
                         : AppPermissionStatus.notRequired,
-                    statusTextOverride: !state.isBiometricAvailable ? 'NOT AVAILABLE' : null,
+                    statusTextOverride: !state.isBiometricAvailable
+                        ? 'NOT AVAILABLE'
+                        : null,
                   ),
                   const SizedBox(height: KuberSpacing.lg),
                   _PermissionCard(
                     icon: Icons.wifi_rounded,
                     title: 'Internet Access',
-                    description: 'Required to fetch live exchange rates for the currency converter.',
+                    description:
+                        'Required to fetch live exchange rates for the currency converter.',
                     status: AppPermissionStatus.granted,
                     statusTextOverride: 'ALWAYS GRANTED',
                   ),

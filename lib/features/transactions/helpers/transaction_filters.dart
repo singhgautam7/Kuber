@@ -64,6 +64,14 @@ class TxnPeriodFilter {
   /// stringified category id (transactions store categoryId as a String).
   final String? categoryId;
 
+  final Set<String>? accountIds;
+
+  final Set<String>? categoryIds;
+
+  final bool excludeTransfers;
+
+  final bool excludeBalanceAdjustments;
+
   /// When `true`, drop transactions linked to a recurring / loan / lend /
   /// borrow / investment rule. Defaults to `false` so behaviour matches the
   /// Home monthly summary — EMI, SIP, and recurring charges count as real
@@ -74,13 +82,17 @@ class TxnPeriodFilter {
     this.from,
     this.to,
     this.categoryId,
+    this.accountIds,
+    this.categoryIds,
+    this.excludeTransfers = true,
+    this.excludeBalanceAdjustments = true,
     this.excludeLinkedRule = false,
   });
 }
 
-/// Aggregate of a transaction set over a period — what Home's balance hero
-/// and the Categories hero both render.
-class TxnPeriodAggregate {
+/// Aggregate of a transaction set over a period. This is the single shared
+/// summary shape for Home, History, stories, and insight generation.
+class SummaryResult {
   /// Sum of `type == 'income'` amounts.
   final double income;
 
@@ -96,13 +108,15 @@ class TxnPeriodAggregate {
   /// `income - expense`.
   double get net => income - expense;
 
-  const TxnPeriodAggregate({
+  const SummaryResult({
     required this.income,
     required this.expense,
     required this.spendingByCategory,
     required this.txnCountByCategory,
   });
 }
+
+typedef TxnPeriodAggregate = SummaryResult;
 
 extension TransactionAggregateX on Iterable<Transaction> {
   /// Sum income, expense, and per-category spend for a given period/filter.
@@ -112,20 +126,42 @@ extension TransactionAggregateX on Iterable<Transaction> {
   ///
   /// Single pass over the source iterable.
   TxnPeriodAggregate aggregate(TxnPeriodFilter filter) {
+    return computeSummary(
+      start: filter.from ?? DateTime.fromMillisecondsSinceEpoch(0),
+      end: filter.to ?? DateTime(9999),
+      excludeTransfers: filter.excludeTransfers,
+      excludeBalanceAdjustments: filter.excludeBalanceAdjustments,
+      excludeLinkedRules: filter.excludeLinkedRule,
+      accountIds: filter.accountIds,
+      categoryIds:
+          filter.categoryIds ??
+          (filter.categoryId == null ? null : {filter.categoryId!}),
+    );
+  }
+
+  SummaryResult computeSummary({
+    required DateTime start,
+    required DateTime end,
+    bool excludeTransfers = true,
+    bool excludeBalanceAdjustments = true,
+    bool excludeLinkedRules = false,
+    Set<String>? accountIds,
+    Set<String>? categoryIds,
+  }) {
     double income = 0;
     double expense = 0;
     final spendingByCategory = <String, double>{};
     final txnCountByCategory = <String, int>{};
 
     for (final t in this) {
-      if (t.isTransfer || t.isBalanceAdjustment) continue;
-      if (filter.excludeLinkedRule && t.linkedRuleType != null) continue;
-      if (filter.categoryId != null && t.categoryId != filter.categoryId) {
-        continue;
-      }
+      if (excludeTransfers && t.isTransfer) continue;
+      if (excludeBalanceAdjustments && t.isBalanceAdjustment) continue;
+      if (excludeLinkedRules && t.linkedRuleType != null) continue;
+      if (accountIds != null && !accountIds.contains(t.accountId)) continue;
+      if (categoryIds != null && !categoryIds.contains(t.categoryId)) continue;
       final date = t.createdAt;
-      if (filter.from != null && date.isBefore(filter.from!)) continue;
-      if (filter.to != null && !date.isBefore(filter.to!)) continue;
+      if (date.isBefore(start)) continue;
+      if (!date.isBefore(end)) continue;
 
       txnCountByCategory[t.categoryId] =
           (txnCountByCategory[t.categoryId] ?? 0) + 1;
@@ -139,7 +175,7 @@ extension TransactionAggregateX on Iterable<Transaction> {
       }
     }
 
-    return TxnPeriodAggregate(
+    return SummaryResult(
       income: income,
       expense: expense,
       spendingByCategory: spendingByCategory,

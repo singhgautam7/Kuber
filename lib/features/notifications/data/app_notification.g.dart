@@ -186,6 +186,7 @@ const _AppNotificationtypeEnumValueMap = {
   'recurringTransaction': 2,
   'loanEmi': 3,
   'ledgerReminder': 4,
+  'backup': 5,
 };
 const _AppNotificationtypeValueEnumMap = {
   0: NotificationType.general,
@@ -193,6 +194,7 @@ const _AppNotificationtypeValueEnumMap = {
   2: NotificationType.recurringTransaction,
   3: NotificationType.loanEmi,
   4: NotificationType.ledgerReminder,
+  5: NotificationType.backup,
 };
 
 Id _appNotificationGetId(AppNotification object) {

@@ -14,6 +14,7 @@ extension NotificationTypeMeta on NotificationType {
     NotificationType.recurringTransaction => 'Recurring Transactions',
     NotificationType.loanEmi => 'Loan EMI',
     NotificationType.ledgerReminder => 'Ledger Reminders',
+    NotificationType.backup => 'Backup',
   };
 
   IconData get icon => switch (this) {
@@ -22,6 +23,7 @@ extension NotificationTypeMeta on NotificationType {
     NotificationType.recurringTransaction => Icons.sync_rounded,
     NotificationType.loanEmi => Icons.account_balance_outlined,
     NotificationType.ledgerReminder => Icons.handshake_outlined,
+    NotificationType.backup => Icons.backup_outlined,
   };
 }
 
@@ -31,6 +33,7 @@ const _kGroupOrder = [
   NotificationType.recurringTransaction,
   NotificationType.loanEmi,
   NotificationType.ledgerReminder,
+  NotificationType.backup,
 ];
 
 class NotificationsSheet extends StatelessWidget {

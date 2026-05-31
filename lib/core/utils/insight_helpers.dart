@@ -34,10 +34,24 @@ List<Transaction> window(
   required int days,
   bool expenseOnly = true,
 }) {
-  final cutoff = DateTime.now().subtract(Duration(days: days));
+  final now = DateTime.now();
+  final cutoff = now.subtract(Duration(days: days));
+  final end = now.add(const Duration(days: 1));
+  // Equivalent to filtering with computeSummary(excludeLinkedRules: true) but
+  // without allocating a single-element list + two maps + a SummaryResult per
+  // transaction. window() runs eight times per insight generation, so the
+  // per-element allocation cost is paid O(8 * txns) times.
   return all.where((t) {
-    if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) return false;
-    if (expenseOnly && t.type != 'expense') return false;
-    return t.createdAt.isAfter(cutoff);
+    if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) {
+      return false;
+    }
+    if (t.amount <= 0) return false;
+    if (expenseOnly) {
+      if (t.type != 'expense') return false;
+    } else if (t.type != 'expense' && t.type != 'income') {
+      return false;
+    }
+    final date = t.createdAt;
+    return !date.isBefore(cutoff) && date.isBefore(end);
   }).toList();
 }

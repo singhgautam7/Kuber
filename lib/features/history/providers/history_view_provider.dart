@@ -58,12 +58,17 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
     txnTagsMap: txnTagsMap,
   );
 
+  // History only needs income/expense totals here, so sum them directly rather
+  // than computeSummary, which also builds per-category maps this view discards.
+  // Mirrors computeSummary's defaults: skip transfers and balance adjustments;
+  // linked-rule transactions still count.
   double totalIncome = 0;
   double totalExpense = 0;
-  for (final t in filtered.validForCalculations) {
+  for (final t in filtered) {
+    if (t.isTransfer || t.isBalanceAdjustment) continue;
     if (t.type == 'income') {
       totalIncome += t.amount;
-    } else {
+    } else if (t.type == 'expense') {
       totalExpense += t.amount;
     }
   }

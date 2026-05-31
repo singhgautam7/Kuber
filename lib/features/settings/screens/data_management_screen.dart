@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
+import '../../backups/providers/backup_provider.dart';
 import '../widgets/data_action_widgets.dart';
 import '../widgets/data_export_bottom_sheet.dart';
 import '../widgets/data_import_bottom_sheet.dart';
@@ -17,6 +19,8 @@ class DataManagementScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final state = ref.watch(dataControllerProvider);
+    final backupSettings = ref.watch(backupSettingsProvider).valueOrNull;
+    final backupFailed = backupSettings?.status == BackupStatus.failed;
 
     ref.listen(dataControllerProvider, (previous, next) {
       if (next.status == DataOpStatus.success && next.message != null) {
@@ -67,7 +71,9 @@ class DataManagementScreen extends ConsumerWidget {
               ),
 
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpacing.lg,
+                ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     DataActionRow(
@@ -84,6 +90,18 @@ class DataManagementScreen extends ConsumerWidget {
                       description:
                           'Restore data from a CSV file or a JSON backup.',
                       onPressed: () => showDataImportBottomSheet(context),
+                    ),
+                    const SizedBox(height: KuberSpacing.md),
+                    DataActionRow(
+                      icon: backupFailed
+                          ? Icons.warning_amber_rounded
+                          : Icons.backup_outlined,
+                      title: 'Automatic Backups',
+                      description: backupFailed
+                          ? 'Last backup failed'
+                          : 'Saved copies on a schedule.',
+                      onPressed: () =>
+                          context.push('/more/data/automatic-backups'),
                     ),
                     const SizedBox(height: KuberSpacing.md),
                     DataActionRow(
@@ -128,7 +146,8 @@ class DataManagementScreen extends ConsumerWidget {
             'This will permanently delete ALL data, including transactions, accounts, categories, tags, budgets, recurring rules, and suggestions. This action cannot be undone.',
         confirmLabel: 'Clear All Data',
         destructive: true,
-        onConfirm: () => ref.read(dataControllerProvider.notifier).clearAllData(),
+        onConfirm: () =>
+            ref.read(dataControllerProvider.notifier).clearAllData(),
       ),
     );
   }
@@ -146,9 +165,9 @@ class DataManagementScreen extends ConsumerWidget {
             'All existing data will be permanently deleted and replaced with sample data.',
         confirmLabel: 'Generate',
         warnDescription: true,
-        onConfirm: () => ref.read(dataControllerProvider.notifier).generateMockData(),
+        onConfirm: () =>
+            ref.read(dataControllerProvider.notifier).generateMockData(),
       ),
     );
   }
 }
-

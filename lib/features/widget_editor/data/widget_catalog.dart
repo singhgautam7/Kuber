@@ -12,6 +12,12 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     enabled: true,
   ),
   HomeWidgetConfig(
+    id: 'insight_stories',
+    name: 'Money Stories',
+    description: 'Recaps and highlights about your money',
+    enabled: true,
+  ),
+  HomeWidgetConfig(
     id: 'quick_add',
     name: 'Quick Add',
     description: 'One-tap expense / income / transfer entry',
@@ -33,12 +39,6 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     id: 'seven_day_chart',
     name: 'Last 7 Days Chart',
     description: 'Daily income vs expense for the past week',
-    enabled: true,
-  ),
-  HomeWidgetConfig(
-    id: 'smart_insights',
-    name: 'Smart Insights',
-    description: 'Personalised tips based on your spending',
     enabled: true,
   ),
   HomeWidgetConfig(

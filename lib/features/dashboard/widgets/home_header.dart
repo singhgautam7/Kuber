@@ -67,6 +67,22 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
           padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Row(
             children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  _HeaderIconButton(
+                    icon: Icons.notifications_none_rounded,
+                    tooltip: 'Notifications',
+                    onTap: widget.onTapNotifications,
+                  ),
+                  if (widget.unreadCount > 0)
+                    Positioned(
+                      top: -5,
+                      right: -5,
+                      child: _UnreadBadge(count: widget.unreadCount),
+                    ),
+                ],
+              ),
               const Spacer(),
               AnimatedBuilder(
                 animation: _shimmerAnim,
@@ -134,23 +150,6 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
                     isPrivate ? 'Privacy mode: On' : 'Privacy mode: Off',
                 onTap: () =>
                     ref.read(settingsProvider.notifier).togglePrivacyMode(),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _HeaderIconButton(
-                    icon: Icons.notifications_none_rounded,
-                    tooltip: 'Notifications',
-                    onTap: widget.onTapNotifications,
-                  ),
-                  if (widget.unreadCount > 0)
-                    Positioned(
-                      top: -5,
-                      right: -5,
-                      child: _UnreadBadge(count: widget.unreadCount),
-                    ),
-                ],
               ),
             ],
           ),

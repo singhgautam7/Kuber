@@ -24,6 +24,8 @@ import '../../tools/bill_splitter/data/person.dart';
 import '../../tools/bill_splitter/data/bill.dart';
 import '../../notifications/data/app_notification.dart';
 import '../../widget_editor/data/widget_preference.dart';
+import '../../stories/data/insight_story.dart';
+import '../../backups/data/backup_config.dart';
 
 class CollectionMeta {
   final String name;
@@ -44,21 +46,45 @@ class DbExplorerScreen extends ConsumerWidget {
       CollectionMeta('Transaction', (i) => i.collection<Transaction>().count()),
       CollectionMeta('Account', (i) => i.collection<Account>().count()),
       CollectionMeta('Category', (i) => i.collection<Category>().count()),
-      CollectionMeta('CategoryGroup', (i) => i.collection<CategoryGroup>().count()),
-      CollectionMeta('RecurringRule', (i) => i.collection<RecurringRule>().count()),
+      CollectionMeta(
+        'CategoryGroup',
+        (i) => i.collection<CategoryGroup>().count(),
+      ),
+      CollectionMeta(
+        'RecurringRule',
+        (i) => i.collection<RecurringRule>().count(),
+      ),
       CollectionMeta('Tag', (i) => i.collection<Tag>().count()),
-      CollectionMeta('TransactionTag', (i) => i.collection<TransactionTag>().count()),
+      CollectionMeta(
+        'TransactionTag',
+        (i) => i.collection<TransactionTag>().count(),
+      ),
       CollectionMeta('Budget', (i) => i.collection<Budget>().count()),
       CollectionMeta('Ledger', (i) => i.collection<Ledger>().count()),
       CollectionMeta('Loan', (i) => i.collection<Loan>().count()),
       CollectionMeta('Investment', (i) => i.collection<Investment>().count()),
-      CollectionMeta('TransactionSuggestion', (i) => i.collection<TransactionSuggestion>().count()),
+      CollectionMeta(
+        'TransactionSuggestion',
+        (i) => i.collection<TransactionSuggestion>().count(),
+      ),
       CollectionMeta('Person', (i) => i.collection<Person>().count()),
       CollectionMeta('Bill', (i) => i.collection<Bill>().count()),
-      CollectionMeta('AppNotification',
-          (i) => i.collection<AppNotification>().count()),
-      CollectionMeta('WidgetPreference',
-          (i) => i.collection<WidgetPreference>().count()),
+      CollectionMeta(
+        'AppNotification',
+        (i) => i.collection<AppNotification>().count(),
+      ),
+      CollectionMeta(
+        'WidgetPreference',
+        (i) => i.collection<WidgetPreference>().count(),
+      ),
+      CollectionMeta(
+        'InsightStory',
+        (i) => i.collection<InsightStory>().count(),
+      ),
+      CollectionMeta(
+        'BackupConfig',
+        (i) => i.collection<BackupConfig>().count(),
+      ),
     ]..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(
@@ -72,7 +98,8 @@ class DbExplorerScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(KuberSpacing.lg),
             sliver: SliverList.separated(
               itemCount: collections.length,
-              separatorBuilder: (context, index) => const SizedBox(height: KuberSpacing.sm),
+              separatorBuilder: (context, index) =>
+                  const SizedBox(height: KuberSpacing.sm),
               itemBuilder: (context, index) {
                 return _CollectionCard(meta: collections[index], isar: isar);
               },
@@ -146,7 +173,11 @@ class _CollectionCardState extends State<_CollectionCard> {
                 color: cs.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.table_rows_outlined, color: cs.primary, size: 20),
+              child: Icon(
+                Icons.table_rows_outlined,
+                color: cs.primary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
@@ -166,7 +197,10 @@ class _CollectionCardState extends State<_CollectionCard> {
                     SizedBox(
                       height: 14,
                       width: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: cs.onSurfaceVariant),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: cs.onSurfaceVariant,
+                      ),
                     )
                   else
                     Text(
@@ -179,7 +213,11 @@ class _CollectionCardState extends State<_CollectionCard> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 20,
+            ),
           ],
         ),
       ),

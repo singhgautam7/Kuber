@@ -10,6 +10,7 @@ enum NotificationType {
   recurringTransaction,
   loanEmi,
   ledgerReminder,
+  backup,
 }
 
 @collection
