@@ -257,7 +257,7 @@ class _TopChrome extends StatelessWidget {
     return Positioned(
       top: MediaQuery.of(context).padding.top + 22,
       left: 18,
-      right: 4,
+      right: 18,
       child: Row(
         children: [
           Container(

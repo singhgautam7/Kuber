@@ -245,7 +245,7 @@ class _StoryCandidateBuilder {
     final summary = txns.computeSummary(
       start: start,
       end: end,
-      excludeLinkedRules: true,
+      excludeLinkedRules: false,
     );
     if (summary.expense == 0 && summary.income == 0) return null;
     final topCategories = summary.spendingByCategory.entries.toList()
