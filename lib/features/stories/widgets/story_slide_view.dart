@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/story_icons.dart';
@@ -45,7 +45,7 @@ class StorySlideView extends StatelessWidget {
                 if (slide.header != null) ...[
                   Text(
                     slide.header!.toUpperCase(),
-                    style: GoogleFonts.inter(
+                    style: AppTextStyles.inter.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 2,
@@ -59,7 +59,7 @@ class StorySlideView extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text(
                     slide.footer!,
-                    style: GoogleFonts.inter(
+                    style: AppTextStyles.inter.copyWith(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: _muted,
@@ -101,7 +101,7 @@ class StorySlideView extends StatelessWidget {
       if (slide.hero != null)
         Text(
           slide.hero!,
-          style: GoogleFonts.inter(
+          style: AppTextStyles.inter.copyWith(
             fontSize: 62,
             fontWeight: FontWeight.w800,
             height: 1,
@@ -111,7 +111,7 @@ class StorySlideView extends StatelessWidget {
       const SizedBox(height: 10),
       _emphasised(
         slide.title,
-        base: GoogleFonts.inter(
+        base: AppTextStyles.inter.copyWith(
           fontSize: 26,
           fontWeight: FontWeight.w800,
           height: 1.1,
@@ -122,7 +122,7 @@ class StorySlideView extends StatelessWidget {
         const SizedBox(height: 16),
         _emphasised(
           slide.subtitle!,
-          base: GoogleFonts.inter(
+          base: AppTextStyles.inter.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w500,
             height: 1.45,
@@ -139,7 +139,7 @@ class StorySlideView extends StatelessWidget {
     children: [
       _emphasised(
         slide.title,
-        base: GoogleFonts.inter(
+        base: AppTextStyles.inter.copyWith(
           fontSize: 27,
           fontWeight: FontWeight.w800,
           height: 1.1,
@@ -157,7 +157,7 @@ class StorySlideView extends StatelessWidget {
               Expanded(
                 child: Text(
                   slide.stats[i].label,
-                  style: GoogleFonts.inter(
+                  style: AppTextStyles.inter.copyWith(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     color: _subtle,
@@ -166,7 +166,7 @@ class StorySlideView extends StatelessWidget {
               ),
               Text(
                 slide.stats[i].value,
-                style: GoogleFonts.inter(
+                style: AppTextStyles.inter.copyWith(
                   fontSize: 23,
                   fontWeight: FontWeight.w800,
                   color: _fg,
@@ -195,7 +195,7 @@ class StorySlideView extends StatelessWidget {
         children: [
           Text(
             period.toUpperCase(),
-            style: GoogleFonts.inter(
+            style: AppTextStyles.inter.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1,
@@ -205,7 +205,7 @@ class StorySlideView extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             amt,
-            style: GoogleFonts.inter(
+            style: AppTextStyles.inter.copyWith(
               fontSize: 30,
               fontWeight: FontWeight.w800,
               color: _fg,
@@ -221,7 +221,7 @@ class StorySlideView extends StatelessWidget {
       children: [
         _emphasised(
           slide.title,
-          base: GoogleFonts.inter(
+          base: AppTextStyles.inter.copyWith(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             height: 1.1,
@@ -246,7 +246,7 @@ class StorySlideView extends StatelessWidget {
               const SizedBox(width: 5),
               Text(
                 c.delta,
-                style: GoogleFonts.inter(
+                style: AppTextStyles.inter.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: _fg,
@@ -265,7 +265,7 @@ class StorySlideView extends StatelessWidget {
     children: [
       _emphasised(
         slide.title,
-        base: GoogleFonts.inter(
+        base: AppTextStyles.inter.copyWith(
           fontSize: 30,
           fontWeight: FontWeight.w800,
           height: 1.12,
@@ -276,7 +276,7 @@ class StorySlideView extends StatelessWidget {
         const SizedBox(height: 16),
         _emphasised(
           slide.subtitle!,
-          base: GoogleFonts.inter(
+          base: AppTextStyles.inter.copyWith(
             fontSize: 17,
             fontWeight: FontWeight.w500,
             height: 1.45,

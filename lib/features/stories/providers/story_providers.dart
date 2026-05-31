@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,41 +19,79 @@ final storyRepositoryProvider = Provider<StoryRepository>((ref) {
 
 class StoriesNotifier extends AsyncNotifier<List<StoryViewData>> {
   StreamSubscription<void>? _sub;
+  Timer? _debounce;
 
   @override
   Future<List<StoryViewData>> build() async {
     final repo = ref.watch(storyRepositoryProvider);
     _sub?.cancel();
-    _sub = repo.watchLazy().listen((_) => ref.invalidateSelf());
-    ref.onDispose(() => _sub?.cancel());
+    // Coalesce bursts of collection writes (a generation pass writes several
+    // rows; marking slides seen writes one per slide) into a single rebuild,
+    // so we don't re-query and re-decode every active payload on each write.
+    _sub = repo.watchLazy().listen((_) {
+      _debounce?.cancel();
+      _debounce = Timer(
+        const Duration(milliseconds: 300),
+        ref.invalidateSelf,
+      );
+    });
+    ref.onDispose(() {
+      _sub?.cancel();
+      _debounce?.cancel();
+    });
 
-    _generateStoriesInBackground();
+    final existing = await repo.listActive(DateTime.now());
+    if (existing.isNotEmpty) {
+      // Stories already exist: show them immediately and refresh in the
+      // background. Deterministic keys mean nothing is duplicated.
+      unawaited(_generateIfNeeded());
+      return _mapAndSort(existing);
+    }
 
+    // Nothing to show yet (first-ever generation, or every story expired).
+    // Await generation so the ring keeps its skeleton instead of flashing the
+    // empty-state and then popping to content once generation finishes. If the
+    // user genuinely has nothing to recap, this still resolves to an empty list
+    // and the ring shows its empty-state.
+    await _generateIfNeeded();
     final stories = await repo.listActive(DateTime.now());
     return _mapAndSort(stories);
   }
 
-  void _generateStoriesInBackground() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastGen = prefs.getString(PrefsKeys.lastStoryGenerationDate);
-    final today = DateTime.now().toIso8601String().split('T').first;
-    
-    if (lastGen != today) {
-      final isar = ref.read(isarProvider);
-      final service = StoryGenerationService(isar);
+  Future<void> _generateIfNeeded() async {
+    // Best-effort: a generation failure (including an error on the background
+    // isolate) must never break the ring or the home. On failure we simply
+    // fall back to whatever stories already exist.
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastGen = prefs.getString(PrefsKeys.lastStoryGenerationDate);
+      final today = DateTime.now().toIso8601String().split('T').first;
+      if (lastGen == today) return;
+
+      final service = StoryGenerationService(ref.read(isarProvider));
       await service.generateMissingNow();
-      
-      final repo = ref.read(storyRepositoryProvider);
-      final allStories = await repo.listActive(DateTime.now());
+
+      final allStories = await ref
+          .read(storyRepositoryProvider)
+          .listActive(DateTime.now());
       if (allStories.isNotEmpty) {
         await prefs.setString(PrefsKeys.lastStoryGenerationDate, today);
       }
+    } catch (e, st) {
+      debugPrint('Kuber: story generation failed (non-fatal): $e\n$st');
     }
   }
 
   Future<void> markSeen(int id, int slideIndex) async {
     await ref.read(storyRepositoryProvider).markSeen(id, slideIndex);
-    ref.invalidateSelf();
+    // Reflect the change in place instead of invalidating (which would re-query
+    // and re-decode every active payload). The debounced watchLazy listener
+    // still reconciles against the database shortly after.
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData([
+      for (final s in current) s.id == id ? _markSlideSeen(s, slideIndex) : s,
+    ]);
   }
 }
 
@@ -116,7 +155,18 @@ class ArchiveStoriesNotifier extends AsyncNotifier<ArchiveStoriesState> {
 
   Future<void> markSeen(int id, int slideIndex) async {
     await ref.read(storyRepositoryProvider).markSeen(id, slideIndex);
-    ref.invalidateSelf();
+    // Update in place so already-loaded pages are not dropped and we avoid
+    // re-decoding the whole list.
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(
+      current.copyWith(
+        stories: [
+          for (final s in current.stories)
+            s.id == id ? _markSlideSeen(s, slideIndex) : s,
+        ],
+      ),
+    );
   }
 }
 
@@ -144,6 +194,24 @@ List<StoryViewData> _mapAndSort(List<InsightStory> rows) {
     return b.generatedAt.compareTo(a.generatedAt);
   });
   return stories;
+}
+
+StoryViewData _markSlideSeen(StoryViewData s, int slideIndex) {
+  if (s.seenSlides.contains(slideIndex)) return s;
+  return StoryViewData(
+    id: s.id,
+    storyKey: s.storyKey,
+    type: s.type,
+    label: s.label,
+    icon: s.icon,
+    color: s.color,
+    timeLabel: s.timeLabel,
+    generatedAt: s.generatedAt,
+    expiresAt: s.expiresAt,
+    seenAt: DateTime.now(),
+    seenSlides: [...s.seenSlides, slideIndex],
+    slides: s.slides,
+  );
 }
 
 StoryViewData _toViewData(InsightStory story) {

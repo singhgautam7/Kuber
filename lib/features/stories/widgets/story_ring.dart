@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
@@ -79,7 +79,7 @@ class StoryRing extends StatelessWidget {
             child: Text(
               'Keep spending to see your money stories soon.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: AppTextStyles.inter.copyWith(
                 fontSize: 12,
                 color: cs.onSurfaceVariant,
               ),
@@ -167,7 +167,7 @@ class _StoryAvatar extends StatelessWidget {
               story.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
+              style: AppTextStyles.inter.copyWith(
                 fontSize: 11,
                 fontWeight: story.seen ? FontWeight.w500 : FontWeight.w600,
                 color: story.seen ? cs.onSurfaceVariant : cs.onSurface,

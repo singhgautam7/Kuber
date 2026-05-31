@@ -58,10 +58,20 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
     txnTagsMap: txnTagsMap,
   );
 
-  final summary = filtered.computeSummary(
-    start: DateTime.fromMillisecondsSinceEpoch(0),
-    end: DateTime(9999),
-  );
+  // History only needs income/expense totals here, so sum them directly rather
+  // than computeSummary, which also builds per-category maps this view discards.
+  // Mirrors computeSummary's defaults: skip transfers and balance adjustments;
+  // linked-rule transactions still count.
+  double totalIncome = 0;
+  double totalExpense = 0;
+  for (final t in filtered) {
+    if (t.isTransfer || t.isBalanceAdjustment) continue;
+    if (t.type == 'income') {
+      totalIncome += t.amount;
+    } else if (t.type == 'expense') {
+      totalExpense += t.amount;
+    }
+  }
 
   final groups = groupTransactionsByDate(filtered);
 
@@ -78,8 +88,8 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
   return HistoryView(
     groups: groups,
     filteredCount: filtered.length,
-    totalIncome: summary.income,
-    totalExpense: summary.expense,
+    totalIncome: totalIncome,
+    totalExpense: totalExpense,
     tagNamesMap: tagNamesMap,
     transferPairAccountId: buildTransferPairAccountIds(transactions),
     sourceEmpty: transactions.isEmpty,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/story_icons.dart';
@@ -279,7 +279,7 @@ class _TopChrome extends StatelessWidget {
                     story.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: AppTextStyles.inter.copyWith(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -289,7 +289,7 @@ class _TopChrome extends StatelessWidget {
                 const SizedBox(width: 7),
                 Text(
                   story.timeLabel,
-                  style: GoogleFonts.inter(
+                  style: AppTextStyles.inter.copyWith(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withValues(alpha: 0.6),

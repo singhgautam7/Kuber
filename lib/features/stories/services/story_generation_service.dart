@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show compute;
 import 'package:isar_community/isar.dart';
 
 import '../../../core/utils/formatters.dart';
@@ -19,15 +20,27 @@ import 'story_keys.dart';
 
 class StoryGenerationService {
   final Isar isar;
-  final AppFormatter formatter;
 
-  StoryGenerationService(this.isar)
-    : formatter = AppFormatter(system: NumberSystem.indian);
+  StoryGenerationService(this.isar);
 
   Future<void> generateMissingNow({DateTime? now}) async {
     final at = now ?? DateTime.now();
     final repo = StoryRepository(isar);
-    final candidates = await _candidates(at);
+
+    // Load the raw data on the main isolate (an Isar instance cannot cross an
+    // isolate boundary), then build the candidate payloads on a background
+    // isolate. The heavy work — the InsightEngine, the recap summaries, and
+    // JSON-encoding every slide — therefore never runs on the UI thread.
+    final input = _StoryGenInput(
+      txns: await isar.transactions.where().findAll(),
+      categories: await isar.categorys.where().findAll(),
+      loans: await isar.collection<Loan>().where().findAll(),
+      ledgers: await isar.collection<Ledger>().where().findAll(),
+      investments: await isar.collection<Investment>().where().findAll(),
+      now: at,
+    );
+    final candidates = await compute(_buildStoryCandidates, input);
+
     final existing = await repo.byKeys(
       candidates.map((s) => s.storyKey).toSet(),
     );
@@ -38,13 +51,50 @@ class StoryGenerationService {
     await repo.putAll(missing);
     await repo.deleteExpired(at);
   }
+}
 
-  Future<List<InsightStory>> _candidates(DateTime now) async {
-    final txns = await isar.transactions.where().findAll();
-    final categories = await isar.categorys.where().findAll();
-    final loans = await isar.collection<Loan>().where().findAll();
-    final ledgers = await isar.collection<Ledger>().where().findAll();
-    final investments = await isar.collection<Investment>().where().findAll();
+/// Plain, isolate-sendable bundle of the data the candidate builder needs.
+/// None of these entities carry `IsarLink`s, so they copy across the isolate
+/// boundary cleanly.
+class _StoryGenInput {
+  final List<Transaction> txns;
+  final List<Category> categories;
+  final List<Loan> loans;
+  final List<Ledger> ledgers;
+  final List<Investment> investments;
+  final DateTime now;
+
+  const _StoryGenInput({
+    required this.txns,
+    required this.categories,
+    required this.loans,
+    required this.ledgers,
+    required this.investments,
+    required this.now,
+  });
+}
+
+/// Isolate entry point invoked via [compute]. Builds its own formatter
+/// (formatters are cheap and isolate-local) and produces the candidate stories
+/// off the UI thread.
+List<InsightStory> _buildStoryCandidates(_StoryGenInput input) {
+  return _StoryCandidateBuilder(
+    AppFormatter(system: NumberSystem.indian),
+  ).build(input);
+}
+
+class _StoryCandidateBuilder {
+  final AppFormatter formatter;
+
+  _StoryCandidateBuilder(this.formatter);
+
+  List<InsightStory> build(_StoryGenInput input) {
+    final now = input.now;
+    final txns = input.txns;
+    final categories = input.categories;
+    final loans = input.loans;
+    final ledgers = input.ledgers;
+    final investments = input.investments;
 
     final out = <InsightStory>[];
     final yesterday = DateTime(

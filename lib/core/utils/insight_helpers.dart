@@ -1,5 +1,4 @@
 import '../../features/transactions/data/transaction.dart';
-import '../../features/transactions/helpers/transaction_filters.dart';
 
 /// Returns the median of a list of doubles. Returns 0 if empty.
 double median(List<double> values) {
@@ -35,16 +34,24 @@ List<Transaction> window(
   required int days,
   bool expenseOnly = true,
 }) {
-  final cutoff = DateTime.now().subtract(Duration(days: days));
+  final now = DateTime.now();
+  final cutoff = now.subtract(Duration(days: days));
+  final end = now.add(const Duration(days: 1));
+  // Equivalent to filtering with computeSummary(excludeLinkedRules: true) but
+  // without allocating a single-element list + two maps + a SummaryResult per
+  // transaction. window() runs eight times per insight generation, so the
+  // per-element allocation cost is paid O(8 * txns) times.
   return all.where((t) {
-    if (expenseOnly && t.type != 'expense') return false;
-    final summary = [t].computeSummary(
-      start: cutoff,
-      end: DateTime.now().add(const Duration(days: 1)),
-      excludeLinkedRules: true,
-    );
-    return expenseOnly
-        ? summary.expense > 0
-        : summary.income > 0 || summary.expense > 0;
+    if (t.isTransfer || t.isBalanceAdjustment || t.linkedRuleType != null) {
+      return false;
+    }
+    if (t.amount <= 0) return false;
+    if (expenseOnly) {
+      if (t.type != 'expense') return false;
+    } else if (t.type != 'expense' && t.type != 'income') {
+      return false;
+    }
+    final date = t.createdAt;
+    return !date.isBefore(cutoff) && date.isBefore(end);
   }).toList();
 }

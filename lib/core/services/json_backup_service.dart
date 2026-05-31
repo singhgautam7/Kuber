@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show compute;
 import 'package:isar_community/isar.dart';
 
 import '../../features/accounts/data/account.dart';
@@ -23,6 +24,9 @@ import '../../features/backups/services/backup_rotation.dart';
 import '../../features/backups/services/saf_backup_store.dart';
 import '../../features/backups/data/backup_config.dart';
 import 'data_service.dart';
+
+/// Top-level so it can run on a background isolate via [compute].
+String _encodeBackupData(Map<String, dynamic> data) => jsonEncode(data);
 
 class JsonBackupService {
   static const _version = 1;
@@ -105,7 +109,12 @@ class JsonBackupService {
       'backupConfigs': backupConfigs.map((b) => b.toMap()).toList(),
     };
 
-    return jsonEncode(data);
+    // Encoding the whole database into one string is the heaviest part of a
+    // backup. Run it on a background isolate so a multi-MB export never stalls
+    // the UI thread (the data map is plain primitives, so it copies cleanly).
+    // On web, where there are no isolates, compute runs inline and this is a
+    // no-op — still correct, just not offloaded.
+    return compute(_encodeBackupData, data);
   }
 
   Future<ImportResult> importJson(Isar isar, String jsonContent) async {

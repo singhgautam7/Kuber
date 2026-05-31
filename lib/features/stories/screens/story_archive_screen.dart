@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
@@ -96,7 +96,7 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                     children: [
                       Text(
                         'Stories\nArchive',
-                        style: GoogleFonts.inter(
+                        style: AppTextStyles.inter.copyWith(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -106,7 +106,7 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                       const SizedBox(height: 6),
                       Text(
                         'Every recap Kuber has made for you, newest first.',
-                        style: GoogleFonts.inter(
+                        style: AppTextStyles.inter.copyWith(
                           fontSize: 13,
                           color: cs.onSurfaceVariant,
                         ),
@@ -204,7 +204,7 @@ class _DateHeader extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.inter(
+            style: AppTextStyles.inter.copyWith(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
@@ -281,7 +281,7 @@ class _ArchiveCard extends StatelessWidget {
                             story.label,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
+                            style: AppTextStyles.inter.copyWith(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
                               color: Colors.white,
@@ -290,7 +290,7 @@ class _ArchiveCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             story.timeLabel,
-                            style: GoogleFonts.inter(
+                            style: AppTextStyles.inter.copyWith(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w600,
                               color: Colors.white.withValues(alpha: 0.75),
@@ -333,7 +333,7 @@ class _ArchiveCard extends StatelessWidget {
                     ),
                     child: Text(
                       '${story.slides.length}',
-                      style: GoogleFonts.inter(
+                      style: AppTextStyles.inter.copyWith(
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
@@ -367,7 +367,7 @@ class _LoadingFooter extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           'Loading older stories',
-          style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+          style: AppTextStyles.inter.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
         ),
       ],
     );
