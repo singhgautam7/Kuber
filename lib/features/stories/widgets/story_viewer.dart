@@ -53,8 +53,18 @@ class _StoryViewerState extends State<StoryViewer>
     super.dispose();
   }
 
-  void _startStory() {
-    _slideIndex = 0;
+  void _startStory({bool fromPrevious = false}) {
+    if (fromPrevious) {
+      _slideIndex = _story.slides.length - 1;
+    } else {
+      _slideIndex = 0;
+      for (int i = 0; i < _story.slides.length; i++) {
+        if (!_story.seenSlides.contains(i)) {
+          _slideIndex = i;
+          break;
+        }
+      }
+    }
     widget.onSeen?.call(_story.id.toString(), _slideIndex);
     _progress
       ..reset()
@@ -110,8 +120,9 @@ class _StoryViewerState extends State<StoryViewer>
   }
 
   void _onPageChanged(int index) {
+    final backward = index < _storyIndex;
     _storyIndex = index;
-    _startStory();
+    _startStory(fromPrevious: backward);
   }
 
   void _onTapUp(TapUpDetails details, BoxConstraints constraints) {

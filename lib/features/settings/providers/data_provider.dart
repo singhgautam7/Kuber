@@ -13,6 +13,9 @@ import '../../transactions/providers/transaction_provider.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../recurring/providers/recurring_provider.dart';
+import '../../stories/providers/story_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/prefs_keys.dart';
 
 enum DataOpStatus { initial, loading, success, error }
 
@@ -229,7 +232,7 @@ class DataController extends StateNotifier<DataState> {
         }
       }
 
-      _refreshData();
+      await _refreshData();
       final msg = totalFailure > 0
           ? 'Imported $totalSuccess records, $totalFailure failed'
           : 'Imported $totalSuccess records successfully';
@@ -255,7 +258,7 @@ class DataController extends StateNotifier<DataState> {
     );
     try {
       await _service.generateMockData();
-      _refreshData();
+      await _refreshData();
       state = state.copyWith(
         status: DataOpStatus.success,
         message: 'Mock data generated successfully',
@@ -275,7 +278,7 @@ class DataController extends StateNotifier<DataState> {
     );
     try {
       await _service.clearAllData();
-      _refreshData();
+      await _refreshData();
       state = state.copyWith(
         status: DataOpStatus.success,
         message: 'All data cleared successfully',
@@ -305,7 +308,7 @@ class DataController extends StateNotifier<DataState> {
         result = await _service.importData(content, override: override);
       }
       if (result.error != null) throw Exception(result.error);
-      _refreshData();
+      await _refreshData();
       final msg = result.failureCount > 0
           ? 'Imported ${result.successCount} records, ${result.failureCount} failed'
           : 'Imported ${result.successCount} records successfully';
@@ -344,11 +347,16 @@ class DataController extends StateNotifier<DataState> {
     }
   }
 
-  void _refreshData() {
+  Future<void> _refreshData() async {
+    // Clear generation date so mock data triggers a fresh generation
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(PrefsKeys.lastStoryGenerationDate);
+
     _ref.invalidate(transactionListProvider);
     _ref.invalidate(accountListProvider);
     _ref.invalidate(categoryListProvider);
     _ref.invalidate(recurringListProvider);
+    _ref.invalidate(storiesProvider);
     // These derived providers will automatically update because they watch transactionListProvider
   }
 
