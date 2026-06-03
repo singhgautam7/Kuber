@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show compute;
+import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 
 import '../../../core/utils/formatters.dart';
@@ -148,22 +149,16 @@ class _StoryCandidateBuilder {
     final txns = input.txns;
     final categories = input.categories;
     final startOfToday = DateTime(now.year, now.month, now.day);
-    final startOfTomorrow = startOfToday.add(const Duration(days: 1));
     final yesterday = startOfToday.subtract(const Duration(days: 1));
 
-    // ── Recaps ─────────────────────────────────────────────────────────
-    // Daily is about the just-completed day (a fresh row each day). Weekly,
-    // monthly, and yearly are period-to-date and refresh in place once per day
-    // (stable key, so they are always present without duplicating).
+    // ── Recaps: highlights of the just-completed period ───────────────
+    // Each is generated ONCE per period (keyed by that period), so it appears
+    // when the period completes and then expires 48h later (no daily refresh).
+    // Key-based dedup also means it catches up if the user opens a few days late.
     _dailyRecap(txns, categories, now, yesterday, startOfToday);
-    _weeklyRecap(txns, categories, now, startOfToday, startOfTomorrow);
-    _monthlyRecap(txns, categories, now, startOfToday, startOfTomorrow);
-    _yearlyRecap(txns, categories, now, startOfToday, startOfTomorrow);
-
-    // ── Pace comparisons (once per day, update-in-place) ───────────────
-    _dailyPace(txns, now, startOfToday, startOfTomorrow);
-    _weeklyPace(txns, now, startOfToday, startOfTomorrow);
-    _monthlyPace(txns, now, startOfToday, startOfTomorrow);
+    _weeklyRecap(txns, categories, now, startOfToday);
+    _monthlyRecap(txns, categories, now);
+    _yearlyRecap(txns, categories, now);
 
     // ── Entity bubbles (cadence-gated) ─────────────────────────────────
     _loanStories(input.loans, now);
@@ -181,26 +176,6 @@ class _StoryCandidateBuilder {
     if (_meta.containsKey(key)) return;
     final story = build()..storyKey = key;
     if (story.payloadJson == '[]') return;
-    _out.add(story);
-  }
-
-  /// Once-per-day upsert for period-to-date recaps and pace comparisons: insert,
-  /// or update in place if a row from a previous day exists. Preserves seenAt +
-  /// seenSlides; refreshes payload/generatedAt/expiry so the bubble stays present
-  /// for the whole period without duplicating.
-  void _upsertDaily(String key, DateTime startOfToday, InsightStory? Function() build) {
-    final existing = _meta[key];
-    if (existing != null && existing.generatedAt.isAfter(startOfToday)) {
-      return; // already refreshed today
-    }
-    final story = build();
-    if (story == null || story.payloadJson == '[]') return;
-    story.storyKey = key;
-    if (existing != null) {
-      story.id = existing.id;
-      story.seenAt = existing.seenAt;
-      story.seenSlides = existing.seenSlides;
-    }
     _out.add(story);
   }
 
@@ -293,57 +268,69 @@ class _StoryCandidateBuilder {
     List<Category> categories,
     DateTime now,
     DateTime startOfToday,
-    DateTime startOfTomorrow,
   ) {
-    final start = startOfToday.subtract(Duration(days: now.weekday - 1)); // Mon
-    final end = startOfTomorrow; // this week through today
-    final daysElapsed = now.weekday;
-    _upsertDaily(StoryKeys.weeklyRecap(now), startOfToday, () {
-      final summary = _summary(txns, start, end);
-      if (summary.expense == 0 && summary.income == 0) return null;
-      // Pace-matched comparison to the same point last week.
-      final prior = _summary(
-        txns,
-        start.subtract(const Duration(days: 7)),
-        end.subtract(const Duration(days: 7)),
-      );
+    // The just-completed week (last Mon..Sun) and the week before it.
+    final thisWeekStart = startOfToday.subtract(Duration(days: now.weekday - 1));
+    final lastStart = thisWeekStart.subtract(const Duration(days: 7));
+    final lastEnd = thisWeekStart; // exclusive
+    final lastSun = lastEnd.subtract(const Duration(days: 1));
+    final beforeStart = lastStart.subtract(const Duration(days: 7));
+    final beforeSun = lastStart.subtract(const Duration(days: 1));
+
+    _insertIfNew(StoryKeys.weeklyRecap(lastStart), () {
+      final summary = _summary(txns, lastStart, lastEnd);
+      if (summary.expense == 0 && summary.income == 0) {
+        return _story('recap_week', now, const []);
+      }
+      final before = _summary(txns, beforeStart, lastStart);
       final label = formatBubblePeriod(
         BubblePeriodKind.weekly,
-        start: start,
-        end: startOfToday,
+        start: lastStart,
+        end: lastSun,
       );
       final slides = <StorySlide>[
         StorySlide(
           variant: SlideVariant.hero,
           background: StoryColorKey.violet,
           icon: 'chart',
-          header: 'Weekly',
+          header: 'Weekly recap',
           dateLabel: label,
           hero: _money(summary.expense),
-          title: 'spent this week',
+          title: 'spent last week',
           emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
-          footer: _deltaFooter('last week', summary.expense, prior.expense),
+          footer: _deltaFooter('the week before', summary.expense, before.expense),
         ),
+      ];
+      if (before.expense > 0) {
+        slides.add(
+          _comparisonSlide(
+            color: StoryColorKey.violet,
+            nowLabel: 'This Week (${_shortRange(lastStart, lastSun)})',
+            nowAmount: summary.expense,
+            priorLabel: 'Previous Week (${_shortRange(beforeStart, beforeSun)})',
+            priorAmount: before.expense,
+          ),
+        );
+      }
+      slides.add(
         StorySlide(
           variant: SlideVariant.statement,
           background: StoryColorKey.violet,
           icon: 'calendar',
-          header: 'Weekly',
+          header: 'Weekly recap',
           dateLabel: label,
-          title: 'About ${_money(summary.expense / daysElapsed)} a day on average',
-          emphasis: [
-            Emphasis(_money(summary.expense / daysElapsed), EmphasisStyle.primary),
-          ],
+          title: 'About ${_money(summary.expense / 7)} a day on average',
+          emphasis: [Emphasis(_money(summary.expense / 7), EmphasisStyle.primary)],
         ),
-      ];
-      final biggest = _biggestDay(txns, start, end);
+      );
+      final biggest = _biggestDay(txns, lastStart, lastEnd);
       if (biggest != null) {
         slides.add(
           StorySlide(
             variant: SlideVariant.statement,
             background: StoryColorKey.violet,
             icon: 'trending_up',
-            header: 'Weekly',
+            header: 'Weekly recap',
             dateLabel: label,
             title: '${biggest.$1} was your biggest day at ${biggest.$2}',
             emphasis: [Emphasis(biggest.$2, EmphasisStyle.primary)],
@@ -356,35 +343,20 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.stats,
             background: StoryColorKey.violet,
             icon: 'category',
-            header: 'Weekly',
+            header: 'Weekly recap',
             dateLabel: label,
             title: 'Top categories',
             stats: _categoryStats(summary, categories),
           ),
         );
       }
-      if (summary.income > 0) {
-        slides.add(
-          StorySlide(
-            variant: SlideVariant.compare,
-            background: StoryColorKey.violet,
-            icon: 'savings',
-            header: 'Weekly',
-            dateLabel: label,
-            title: 'Income and expenses compared',
-            compare: CompareData(
-              priorLabel: 'Income',
-              prior: _money(summary.income),
-              nowLabel: 'Expenses',
-              now: _money(summary.expense),
-              deltaIcon: summary.net >= 0 ? 'trending_up' : 'trending_down',
-              delta:
-                  'NET: ${summary.net >= 0 ? '+' : '-'}${_money(summary.net.abs())}',
-            ),
-          ),
-        );
-      }
-      return _story('recap_week', now, slides, periodStart: start, periodEnd: end);
+      return _story(
+        'recap_week',
+        now,
+        slides,
+        periodStart: lastStart,
+        periodEnd: lastEnd,
+      );
     });
   }
 
@@ -392,67 +364,80 @@ class _StoryCandidateBuilder {
     List<Transaction> txns,
     List<Category> categories,
     DateTime now,
-    DateTime startOfToday,
-    DateTime startOfTomorrow,
   ) {
-    final start = DateTime(now.year, now.month, 1);
-    final end = startOfTomorrow; // this month through today
-    final daysElapsed = now.day;
-    _upsertDaily(StoryKeys.monthlyRecap(now), startOfToday, () {
-      final summary = _summary(txns, start, end);
-      if (summary.expense == 0 && summary.income == 0) return null;
-      // Pace-matched comparison to the same day last month.
-      final prior = _summary(
-        txns,
-        DateTime(now.year, now.month - 1, 1),
-        DateTime(now.year, now.month - 1, now.day).add(const Duration(days: 1)),
-      );
-      final label = formatBubblePeriod(BubblePeriodKind.monthly, start: start);
+    // The just-completed month and the month before it.
+    final lastStart = DateTime(now.year, now.month - 1, 1);
+    final lastEnd = DateTime(now.year, now.month, 1); // exclusive
+    final beforeStart = DateTime(now.year, now.month - 2, 1);
+    final daysInLast = lastEnd.difference(lastStart).inDays;
+    final lastName = DateFormat('MMMM').format(lastStart);
+    final beforeName = DateFormat('MMMM').format(beforeStart);
+
+    _insertIfNew(StoryKeys.monthlyRecap(lastStart), () {
+      final summary = _summary(txns, lastStart, lastEnd);
+      if (summary.expense == 0 && summary.income == 0) {
+        return _story('recap_month', now, const []);
+      }
+      final before = _summary(txns, beforeStart, lastStart);
+      final label = formatBubblePeriod(BubblePeriodKind.monthly, start: lastStart);
       final slides = <StorySlide>[
         StorySlide(
           variant: SlideVariant.hero,
           background: StoryColorKey.amber,
           icon: 'calendar',
-          header: 'Monthly',
+          header: 'Monthly recap',
           dateLabel: label,
           hero: _money(summary.expense),
-          title: 'spent this month',
+          title: 'spent in $lastName',
           emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
-          footer: _deltaFooter('last month', summary.expense, prior.expense),
+          footer: _deltaFooter(beforeName, summary.expense, before.expense),
         ),
+      ];
+      if (before.expense > 0) {
+        slides.add(
+          _comparisonSlide(
+            color: StoryColorKey.amber,
+            nowLabel: 'This Month ($lastName)',
+            nowAmount: summary.expense,
+            priorLabel: 'Previous Month ($beforeName)',
+            priorAmount: before.expense,
+          ),
+        );
+      }
+      slides.add(
         StorySlide(
           variant: SlideVariant.statement,
           background: StoryColorKey.amber,
           icon: 'calendar',
-          header: 'Monthly',
+          header: 'Monthly recap',
           dateLabel: label,
-          title: 'About ${_money(summary.expense / daysElapsed)} a day on average',
+          title: 'About ${_money(summary.expense / daysInLast)} a day on average',
           emphasis: [
-            Emphasis(_money(summary.expense / daysElapsed), EmphasisStyle.primary),
+            Emphasis(_money(summary.expense / daysInLast), EmphasisStyle.primary),
           ],
         ),
-      ];
+      );
       if (_topCategory(summary, categories) != null) {
         slides.add(
           StorySlide(
             variant: SlideVariant.stats,
             background: StoryColorKey.amber,
             icon: 'category',
-            header: 'Monthly',
+            header: 'Monthly recap',
             dateLabel: label,
             title: 'Top categories',
             stats: _categoryStats(summary, categories),
           ),
         );
       }
-      final top = _topTransaction(txns, start, end, categories);
+      final top = _topTransaction(txns, lastStart, lastEnd, categories);
       if (top != null) {
         slides.add(
           StorySlide(
             variant: SlideVariant.statement,
             background: StoryColorKey.amber,
             icon: 'wallet',
-            header: 'Monthly',
+            header: 'Monthly recap',
             dateLabel: label,
             title: 'Biggest single spend was ${top.$2} on ${top.$1}',
             emphasis: [Emphasis(top.$2, EmphasisStyle.primary)],
@@ -467,14 +452,20 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.amber,
             icon: 'savings',
-            header: 'Monthly',
+            header: 'Monthly recap',
             dateLabel: label,
             title: 'You saved $rate% of what you earned',
             emphasis: [Emphasis('$rate%', EmphasisStyle.primary)],
           ),
         );
       }
-      return _story('recap_month', now, slides, periodStart: start, periodEnd: end);
+      return _story(
+        'recap_month',
+        now,
+        slides,
+        periodStart: lastStart,
+        periodEnd: lastEnd,
+      );
     });
   }
 
@@ -482,49 +473,65 @@ class _StoryCandidateBuilder {
     List<Transaction> txns,
     List<Category> categories,
     DateTime now,
-    DateTime startOfToday,
-    DateTime startOfTomorrow,
   ) {
-    final start = DateTime(now.year, 1, 1);
-    final end = startOfTomorrow; // year through today
-    final monthsElapsed = now.month;
-    _upsertDaily(StoryKeys.yearlyRecap(now), startOfToday, () {
+    // The just-completed year and the year before it.
+    final lastYear = now.year - 1;
+    final start = DateTime(lastYear, 1, 1);
+    final end = DateTime(now.year, 1, 1); // exclusive
+    final beforeStart = DateTime(lastYear - 1, 1, 1);
+
+    _insertIfNew(StoryKeys.yearlyRecap(start), () {
       final summary = _summary(txns, start, end);
-      if (summary.expense == 0 && summary.income == 0) return null;
-      final label = formatBubblePeriod(BubblePeriodKind.yearlyYtd, start: now);
+      if (summary.expense == 0 && summary.income == 0) {
+        return _story('recap_year', now, const []);
+      }
+      final before = _summary(txns, beforeStart, start);
+      final label = formatBubblePeriod(BubblePeriodKind.yearlyFull, start: start);
       final slides = <StorySlide>[
         StorySlide(
           variant: SlideVariant.hero,
           background: StoryColorKey.gold,
           icon: 'trophy',
-          header: 'Yearly',
+          header: 'Year in review',
           dateLabel: label,
           hero: _money(summary.expense),
-          title: 'spent this year',
+          title: 'spent in $lastYear',
           emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
+          footer: _deltaFooter('${lastYear - 1}', summary.expense, before.expense),
         ),
+      ];
+      if (before.expense > 0) {
+        slides.add(
+          _comparisonSlide(
+            color: StoryColorKey.gold,
+            nowLabel: 'This Year ($lastYear)',
+            nowAmount: summary.expense,
+            priorLabel: 'Previous Year (${lastYear - 1})',
+            priorAmount: before.expense,
+          ),
+        );
+      }
+      slides.add(
         StorySlide(
           variant: SlideVariant.statement,
           background: StoryColorKey.gold,
           icon: 'calendar',
-          header: 'Yearly',
+          header: 'Year in review',
           dateLabel: label,
-          title: 'About ${_money(summary.expense / monthsElapsed)} a month on average',
-          emphasis: [
-            Emphasis(_money(summary.expense / monthsElapsed), EmphasisStyle.primary),
-          ],
+          title: 'About ${_money(summary.expense / 12)} a month on average',
+          emphasis: [Emphasis(_money(summary.expense / 12), EmphasisStyle.primary)],
         ),
-      ];
-      final highest = _highestMonth(txns, now.year, monthsElapsed);
+      );
+      final highest = _highestMonth(txns, lastYear, 12);
       if (highest != null) {
         slides.add(
           StorySlide(
             variant: SlideVariant.statement,
             background: StoryColorKey.gold,
             icon: 'trending_up',
-            header: 'Yearly',
+            header: 'Year in review',
             dateLabel: label,
-            title: '${highest.$1} was your highest month at ${highest.$2}',
+            title: '${highest.$1} was your biggest month at ${highest.$2}',
             emphasis: [Emphasis(highest.$2, EmphasisStyle.primary)],
           ),
         );
@@ -535,158 +542,71 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.stats,
             background: StoryColorKey.gold,
             icon: 'category',
-            header: 'Yearly',
+            header: 'Year in review',
             dateLabel: label,
             title: 'Top categories',
             stats: _categoryStats(summary, categories),
           ),
         );
       }
-      final projection = summary.expense / monthsElapsed * 12;
-      slides.add(
-        StorySlide(
-          variant: SlideVariant.statement,
-          background: StoryColorKey.gold,
-          icon: 'target',
-          header: 'Yearly',
-          dateLabel: label,
-          title: 'At this pace you will spend about ${_money(projection)} this year',
-          emphasis: [Emphasis(_money(projection), EmphasisStyle.primary)],
-        ),
-      );
+      if (summary.income > 0) {
+        final rate = ((summary.income - summary.expense) / summary.income * 100)
+            .round();
+        slides.add(
+          StorySlide(
+            variant: SlideVariant.statement,
+            background: StoryColorKey.gold,
+            icon: 'savings',
+            header: 'Year in review',
+            dateLabel: label,
+            title: 'You saved $rate% of what you earned',
+            emphasis: [Emphasis('$rate%', EmphasisStyle.primary)],
+          ),
+        );
+      }
       return _story('recap_year', now, slides, periodStart: start, periodEnd: end);
     });
   }
 
-  // ── Pace comparison builders ─────────────────────────────────────────
-
-  void _dailyPace(
-    List<Transaction> txns,
-    DateTime now,
-    DateTime startOfToday,
-    DateTime startOfTomorrow,
-  ) {
-    _upsertDaily(StoryKeys.compareDay(now), startOfToday, () {
-      final today = _spend(txns, startOfToday, startOfTomorrow);
-      // 30-day daily average (trailing, excluding today).
-      final trailing = _spend(
-        txns,
-        startOfToday.subtract(const Duration(days: 30)),
-        startOfToday,
-      );
-      final avg = trailing / 30;
-      if (today == 0 || avg == 0) return null;
-      return _paceStory(
-        type: 'recap_day',
-        now: now,
-        color: StoryColorKey.blue,
-        icon: 'calendar',
-        header: 'TODAY VS AVG',
-        priorLabel: '30 day avg',
-        prior: avg,
-        nowLabel: 'Today',
-        current: today,
-      );
-    });
-  }
-
-  void _weeklyPace(
-    List<Transaction> txns,
-    DateTime now,
-    DateTime startOfToday,
-    DateTime startOfTomorrow,
-  ) {
-    final thisWeekStart = startOfToday.subtract(Duration(days: now.weekday - 1));
-    _upsertDaily(StoryKeys.compareWeek(now), startOfToday, () {
-      final current = _spend(txns, thisWeekStart, startOfTomorrow);
-      final prior = _spend(
-        txns,
-        thisWeekStart.subtract(const Duration(days: 7)),
-        startOfTomorrow.subtract(const Duration(days: 7)),
-      );
-      if (current == 0 || prior == 0) return null;
-      return _paceStory(
-        type: 'recap_week',
-        now: now,
-        color: StoryColorKey.violet,
-        icon: 'chart',
-        header: 'THIS WEEK VS LAST',
-        priorLabel: 'Last week',
-        prior: prior,
-        nowLabel: 'This week',
-        current: current,
-      );
-    });
-  }
-
-  void _monthlyPace(
-    List<Transaction> txns,
-    DateTime now,
-    DateTime startOfToday,
-    DateTime startOfTomorrow,
-  ) {
-    final thisMonthStart = DateTime(now.year, now.month, 1);
-    _upsertDaily(StoryKeys.compareMonth(now), startOfToday, () {
-      final current = _spend(txns, thisMonthStart, startOfTomorrow);
-      // Prior month through the same day-of-month (pace-matched).
-      final priorStart = DateTime(now.year, now.month - 1, 1);
-      final priorEndExcl =
-          DateTime(now.year, now.month - 1, now.day).add(const Duration(days: 1));
-      final prior = _spend(txns, priorStart, priorEndExcl);
-      if (current == 0 || prior == 0) return null;
-      return _paceStory(
-        type: 'recap_month',
-        now: now,
-        color: StoryColorKey.amber,
-        icon: 'calendar',
-        header: 'THIS MONTH VS LAST',
-        priorLabel: 'Last month',
-        prior: prior,
-        nowLabel: 'This month',
-        current: current,
-      );
-    });
-  }
-
-  InsightStory _paceStory({
-    required String type,
-    required DateTime now,
+  /// A two-cell comparison slide (prior vs now) with a delta chip. Used by the
+  /// weekly/monthly/yearly recaps to compare the period with the one before it.
+  StorySlide _comparisonSlide({
     required StoryColorKey color,
-    required String icon,
-    required String header,
-    required String priorLabel,
-    required double prior,
     required String nowLabel,
-    required double current,
+    required double nowAmount,
+    required String priorLabel,
+    required double priorAmount,
   }) {
-    final pct = (current - prior) / prior * 100;
-    final String title;
-    if (pct < -5) {
-      title = 'You slowed down';
-    } else if (pct > 5) {
-      title = 'You sped up';
-    } else {
-      title = 'Roughly on the same pace';
-    }
-    final diff = current - prior;
-    final less = diff < 0;
-    final delta = '${_money(diff.abs())} ${less ? 'less' : 'more'}';
-    final slide = StorySlide(
+    final less = nowAmount < priorAmount;
+    final diff = (nowAmount - priorAmount).abs();
+    return StorySlide(
       variant: SlideVariant.compare,
       background: color,
-      icon: icon,
-      header: header,
-      title: title,
+      icon: less ? 'trending_down' : 'trending_up',
+      header: 'Compared',
+      title: less ? 'You spent less than before' : 'You spent more than before',
       compare: CompareData(
         priorLabel: priorLabel,
-        prior: _money(prior),
+        prior: _money(priorAmount),
         nowLabel: nowLabel,
-        now: _money(current),
+        now: _money(nowAmount),
         deltaIcon: less ? 'trending_down' : 'trending_up',
-        delta: delta,
+        delta: '${_money(diff)} ${less ? 'less' : 'more'}',
       ),
     );
-    return _story(type, now, [slide]);
+  }
+
+  /// Compact single-line date range: "25 to 31 May" (same month) or
+  /// "28 Apr to 4 May" (spanning months). ASCII, uses "to".
+  String _shortRange(DateTime start, DateTime endInclusive) {
+    final sameMonth =
+        start.month == endInclusive.month && start.year == endInclusive.year;
+    if (sameMonth) {
+      return '${start.day} to ${endInclusive.day} '
+          '${DateFormat('MMM').format(endInclusive)}';
+    }
+    return '${DateFormat('d MMM').format(start)} to '
+        '${DateFormat('d MMM').format(endInclusive)}';
   }
 
   // ── Entity builders ──────────────────────────────────────────────────

@@ -16,18 +16,8 @@ class StoryKeys {
   static String monthlyRecap(DateTime date) =>
       'recap_month_${_yyyy(date)}_${_mm(date)}';
 
-  /// Year-to-date recap, one stable key per year (refreshed in place daily).
+  /// Recap of a completed year, one key per year.
   static String yearlyRecap(DateTime date) => 'recap_year_${_yyyy(date)}';
-
-  // ── Pace comparisons ─────────────────────────────────────────────────
-  static String compareDay(DateTime date) =>
-      'compare_day_${_yyyy(date)}_${_mm(date)}_${_dd(date)}';
-
-  static String compareWeek(DateTime date) =>
-      'compare_week_${_yyyy(date)}_W${_isoWeek(date).toString().padLeft(2, '0')}';
-
-  static String compareMonth(DateTime date) =>
-      'compare_month_${_yyyy(date)}_${_mm(date)}';
 
   // ── Entity bubbles (cadence-gated, stable per-entity keys) ────────────
   static String loanEntity(String loanId) => 'loans_$loanId';

@@ -11,14 +11,6 @@ void main() {
       expect(StoryKeys.yearlyRecap(date), 'recap_year_2026');
     });
 
-    test('generates deterministic pace comparison keys', () {
-      final date = DateTime(2026, 5, 28);
-
-      expect(StoryKeys.compareDay(date), 'compare_day_2026_05_28');
-      expect(StoryKeys.compareWeek(date), 'compare_week_2026_W22');
-      expect(StoryKeys.compareMonth(date), 'compare_month_2026_05');
-    });
-
     test('generates stable per-entity keys', () {
       expect(StoryKeys.loanEntity('abc-123'), 'loans_abc-123');
       expect(StoryKeys.ledger('uid-9'), 'ledger_uid-9');

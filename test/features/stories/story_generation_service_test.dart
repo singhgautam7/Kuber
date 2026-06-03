@@ -40,22 +40,32 @@ void main() {
     makeCategory(id: 2, name: 'Transport'),
   ];
 
-  group('unified TTL + always-present recaps', () {
-    test('daily, weekly, monthly and yearly recaps are all present; 48h TTL',
+  group('rollover recap highlights', () {
+    test('recaps cover the last completed period; all use the 48h TTL',
         () async {
-      final now = DateTime(2026, 6, 3, 10, 30); // any day
+      final now = DateTime(2026, 6, 3, 10, 30); // Wed
       await seed(
         categories: defaultCategories,
         txns: [
           makeTransaction(
             amount: 300,
             categoryId: '1',
-            createdAt: DateTime(2026, 6, 2, 12), // yesterday + this week/month/year
+            createdAt: DateTime(2026, 6, 2, 12), // yesterday
           ),
           makeTransaction(
-            amount: 200,
+            amount: 1000,
+            categoryId: '1',
+            createdAt: DateTime(2026, 5, 28, 12), // last week + last month
+          ),
+          makeTransaction(
+            amount: 500,
             categoryId: '2',
-            createdAt: DateTime(2026, 6, 2, 13),
+            createdAt: DateTime(2026, 5, 15, 12), // last month
+          ),
+          makeTransaction(
+            amount: 2000,
+            categoryId: '1',
+            createdAt: DateTime(2025, 7, 10, 12), // last year (2025)
           ),
         ],
       );
@@ -64,9 +74,9 @@ void main() {
       final rows = await StoryRepository(isar).all();
 
       expect(rows.any((r) => r.storyKey == 'recap_day_2026_06_02'), isTrue);
-      expect(rows.any((r) => r.storyKey == 'recap_week_2026_W23'), isTrue);
-      expect(rows.any((r) => r.storyKey == 'recap_month_2026_06'), isTrue);
-      expect(rows.any((r) => r.storyKey == 'recap_year_2026'), isTrue);
+      expect(rows.any((r) => r.storyKey == 'recap_week_2026_W22'), isTrue);
+      expect(rows.any((r) => r.storyKey == 'recap_month_2026_05'), isTrue);
+      expect(rows.any((r) => r.storyKey == 'recap_year_2025'), isTrue);
 
       for (final r in rows) {
         expect(
@@ -77,107 +87,84 @@ void main() {
       }
     });
 
-    test('current-period recaps refresh in place (no duplicates)', () async {
+    test('a recap is generated once and not refreshed (so it expires)',
+        () async {
       await seed(
         categories: defaultCategories,
         txns: [
           makeTransaction(
-            amount: 300,
+            amount: 800,
             categoryId: '1',
-            createdAt: DateTime(2026, 6, 2, 12),
+            createdAt: DateTime(2026, 5, 28, 12), // last week
           ),
         ],
       );
 
       final service = StoryGenerationService(isar);
-      await service.generateDue(now: DateTime(2026, 6, 3, 12));
-      await service.generateDue(now: DateTime(2026, 6, 4, 12)); // next day, same period
+      await service.generateDue(now: DateTime(2026, 6, 3, 12)); // Wed
+      await service.generateDue(now: DateTime(2026, 6, 4, 12)); // Thu, same week
 
-      final rows = await StoryRepository(isar).all();
-      expect(rows.where((r) => r.storyKey == 'recap_week_2026_W23').length, 1);
-      expect(rows.where((r) => r.storyKey == 'recap_month_2026_06').length, 1);
-      expect(rows.where((r) => r.storyKey == 'recap_year_2026').length, 1);
+      final weekly = (await StoryRepository(isar).all())
+          .where((r) => r.storyKey == 'recap_week_2026_W22')
+          .toList();
+      expect(weekly.length, 1);
+      // Not refreshed on the second run, so it still expires 48h after the first.
+      expect(weekly.single.generatedAt, DateTime(2026, 6, 3, 12));
     });
   });
 
-  group('pace comparisons', () {
-    test('daily pace reports "You slowed down" below the average', () async {
-      final now = DateTime(2026, 6, 3, 18); // Wed
+  group('recap comparisons', () {
+    test('weekly compares last week vs the week before, with named ranges',
+        () async {
+      final now = DateTime(2026, 6, 3, 10); // Wed
       await seed(
         categories: defaultCategories,
         txns: [
-          // Today: a small spend.
           makeTransaction(
-            amount: 50,
+            amount: 800,
             categoryId: '1',
-            createdAt: DateTime(2026, 6, 3, 9),
+            createdAt: DateTime(2026, 5, 28, 12), // last week (25 to 31 May)
           ),
-          // Trailing 30 days: one big spend so the daily average is ~100.
+          makeTransaction(
+            amount: 400,
+            categoryId: '1',
+            createdAt: DateTime(2026, 5, 20, 12), // week before (18 to 24 May)
+          ),
+        ],
+      );
+
+      await StoryGenerationService(isar).generateDue(now: now);
+      final weekly = (await StoryRepository(isar).all())
+          .firstWhere((r) => r.storyKey == 'recap_week_2026_W22');
+
+      expect(weekly.payloadJson.contains('This Week (25 to 31 May)'), isTrue);
+      expect(weekly.payloadJson.contains('Previous Week (18 to 24 May)'), isTrue);
+    });
+
+    test('monthly shows This Month and Previous Month names', () async {
+      final now = DateTime(2026, 6, 3, 10); // Wed
+      await seed(
+        categories: defaultCategories,
+        txns: [
+          makeTransaction(
+            amount: 5000,
+            categoryId: '1',
+            createdAt: DateTime(2026, 5, 15, 12), // last month (May)
+          ),
           makeTransaction(
             amount: 3000,
             categoryId: '1',
-            createdAt: DateTime(2026, 5, 20, 12),
+            createdAt: DateTime(2026, 4, 15, 12), // month before (April)
           ),
         ],
       );
 
       await StoryGenerationService(isar).generateDue(now: now);
-      final rows = await StoryRepository(isar).all();
+      final monthly = (await StoryRepository(isar).all())
+          .firstWhere((r) => r.storyKey == 'recap_month_2026_05');
 
-      final pace = rows.firstWhere(
-        (r) => r.storyKey == 'compare_day_2026_06_03',
-      );
-      expect(pace.type, 'recap_day');
-      expect(pace.payloadJson.contains('You slowed down'), isTrue);
-      expect(pace.payloadJson.contains('less'), isTrue);
-    });
-
-    test('weekly pace updates in place across days in the same week', () async {
-      final txns = [
-        makeTransaction(
-          amount: 500,
-          categoryId: '1',
-          createdAt: DateTime(2026, 6, 8, 10), // this week
-        ),
-        makeTransaction(
-          amount: 400,
-          categoryId: '1',
-          createdAt: DateTime(2026, 6, 1, 10), // last week, same DOW
-        ),
-      ];
-      await seed(categories: defaultCategories, txns: txns);
-
-      final service = StoryGenerationService(isar);
-      await service.generateDue(now: DateTime(2026, 6, 8, 12)); // Mon
-      await service.generateDue(now: DateTime(2026, 6, 9, 12)); // Tue, same week
-
-      final rows = await StoryRepository(isar).all();
-      final weekly = rows
-          .where((r) => r.storyKey.startsWith('compare_week_'))
-          .toList();
-      expect(weekly.length, 1, reason: 'one pace story per week, refreshed');
-      expect(weekly.single.generatedAt, DateTime(2026, 6, 9, 12));
-    });
-
-    test('pace skips generation when the prior period had no spend', () async {
-      final now = DateTime(2026, 6, 3, 18); // Wed
-      await seed(
-        categories: defaultCategories,
-        txns: [
-          // This week only — no prior-week or prior-month data.
-          makeTransaction(
-            amount: 500,
-            categoryId: '1',
-            createdAt: DateTime(2026, 6, 2, 10),
-          ),
-        ],
-      );
-
-      await StoryGenerationService(isar).generateDue(now: now);
-      final rows = await StoryRepository(isar).all();
-
-      expect(rows.where((r) => r.storyKey.startsWith('compare_week_')), isEmpty);
-      expect(rows.where((r) => r.storyKey.startsWith('compare_month_')), isEmpty);
+      expect(monthly.payloadJson.contains('This Month (May)'), isTrue);
+      expect(monthly.payloadJson.contains('Previous Month (April)'), isTrue);
     });
   });
 

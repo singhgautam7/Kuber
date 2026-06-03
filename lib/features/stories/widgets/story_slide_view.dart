@@ -207,10 +207,12 @@ class StorySlideView extends StatelessWidget {
         children: [
           Text(
             period.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: AppTextStyles.inter.copyWith(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
-              letterSpacing: 1,
+              letterSpacing: 0.3,
               color: _muted,
             ),
           ),

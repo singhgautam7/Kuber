@@ -7,6 +7,7 @@ import '../models/story_models.dart';
 import 'story_slide_view.dart';
 
 const _slideDuration = Duration(seconds: 5);
+const _bubbleTransition = Duration(milliseconds: 300);
 
 /// A single slide within a bubble's flattened sequence, paired with the story
 /// it belongs to (so we can mark the right story's slide as seen).
@@ -17,16 +18,21 @@ class _FlatSlide {
   const _FlatSlide(this.story, this.localIndex, this.slide);
 }
 
-/// Full-screen viewer over a list of [bubbles]. It plays the bubble at
-/// [initialBubbleIndex] from its first unread slide, and on reaching the end of
-/// a bubble auto-advances to the next one (WhatsApp-style) instead of closing.
+/// Full-screen viewer over [bubbles].
+///
+/// Gestures (kept deliberately simple):
+///  - tap right third  -> next slide  (crosses into the next bubble at the end)
+///  - tap left third   -> previous slide / previous bubble
+///  - swipe left/right  -> next / previous bubble (animated)
+///  - long-press        -> pause; release resumes
+///  - swipe down        -> dismiss
+///
+/// Forward (auto-advance, tap-at-end, swipe-left) moves to the next bubble that
+/// still has an unread story and closes when none remain ahead — unless
+/// [advanceUnreadOnly] is false (archive), where it walks every bubble in order.
 class StoryViewer extends StatefulWidget {
   final List<StoryBubble> bubbles;
   final int initialBubbleIndex;
-
-  /// Home ring: `true` — advancing skips fully-read bubbles and closes once no
-  /// unread bubble remains ahead. Archive: `false` — advance through every
-  /// bubble in order.
   final bool advanceUnreadOnly;
   final void Function(String storyId, int slideIndex)? onSeen;
 
@@ -44,6 +50,7 @@ class StoryViewer extends StatefulWidget {
 
 class _StoryViewerState extends State<StoryViewer>
     with SingleTickerProviderStateMixin {
+  late final PageController _pageController;
   late final AnimationController _progress;
   late int _bubbleIndex;
   List<_FlatSlide> _slides = const [];
@@ -57,10 +64,11 @@ class _StoryViewerState extends State<StoryViewer>
     _bubbleIndex = widget.bubbles.isEmpty
         ? 0
         : widget.initialBubbleIndex.clamp(0, widget.bubbles.length - 1);
-    _loadBubble();
+    _pageController = PageController(initialPage: _bubbleIndex);
+    _loadActiveBubble();
     _progress = AnimationController(vsync: this, duration: _slideDuration)
       ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) _next();
+        if (status == AnimationStatus.completed) _nextSlide();
       });
     WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
@@ -68,35 +76,28 @@ class _StoryViewerState extends State<StoryViewer>
   @override
   void dispose() {
     _markSeen();
+    _pageController.dispose();
     _progress.dispose();
     super.dispose();
   }
 
-  /// Flattens the current bubble's stories into one slide sequence and positions
-  /// at the first unread slide (or the last, when arriving from a "previous").
-  void _loadBubble({bool fromEnd = false}) {
+  List<_FlatSlide> _flatten(StoryBubble bubble) => [
+    for (final s in bubble.stories)
+      for (var i = 0; i < s.slides.length; i++) _FlatSlide(s, i, s.slides[i]),
+  ];
+
+  /// Loads the active bubble's slides and positions at its first unread slide.
+  void _loadActiveBubble() {
     if (widget.bubbles.isEmpty) {
       _slides = const [];
       _slideIndex = 0;
       return;
     }
-    final bubble = widget.bubbles[_bubbleIndex];
-    _slides = [
-      for (final s in bubble.stories)
-        for (var i = 0; i < s.slides.length; i++) _FlatSlide(s, i, s.slides[i]),
-    ];
-    if (_slides.isEmpty) {
-      _slideIndex = 0;
-      return;
-    }
-    if (fromEnd) {
-      _slideIndex = _slides.length - 1;
-    } else {
-      final firstUnseen = _slides.indexWhere(
-        (f) => !f.story.seenSlides.contains(f.localIndex),
-      );
-      _slideIndex = firstUnseen >= 0 ? firstUnseen : 0;
-    }
+    _slides = _flatten(widget.bubbles[_bubbleIndex]);
+    final firstUnseen = _slides.indexWhere(
+      (f) => !f.story.seenSlides.contains(f.localIndex),
+    );
+    _slideIndex = firstUnseen >= 0 ? firstUnseen : 0;
   }
 
   void _markSeen() {
@@ -104,76 +105,94 @@ class _StoryViewerState extends State<StoryViewer>
     widget.onSeen?.call(_current.story.id.toString(), _current.localIndex);
   }
 
+  void _restartProgress() => _progress
+    ..reset()
+    ..forward();
+
   void _start() {
     if (_slides.isEmpty) {
       Navigator.of(context).maybePop();
       return;
     }
     _markSeen();
-    _progress
-      ..reset()
-      ..forward();
+    _restartProgress();
     if (mounted) setState(() {});
   }
 
-  void _next() {
+  // ── Slide navigation ─────────────────────────────────────────────────
+  void _nextSlide() {
     if (_slideIndex < _slides.length - 1) {
       setState(() => _slideIndex++);
       _markSeen();
-      _progress
-        ..reset()
-        ..forward();
+      _restartProgress();
     } else {
-      _nextBubble();
+      _forwardBubble();
     }
   }
 
-  /// Advance to the next bubble. On the home ring, skip fully-read bubbles and
-  /// close when none with unread remain; in the archive, just go to the next.
-  void _nextBubble() {
-    for (var i = _bubbleIndex + 1; i < widget.bubbles.length; i++) {
-      final hasUnread = widget.bubbles[i].stories.any((s) => !s.seen);
-      if (!widget.advanceUnreadOnly || hasUnread) {
-        setState(() {
-          _bubbleIndex = i;
-          _loadBubble();
-        });
-        _markSeen();
-        _progress
-          ..reset()
-          ..forward();
-        return;
-      }
-    }
-    Navigator.of(context).maybePop();
-  }
-
-  void _prev() {
+  void _prevSlide() {
     if (_slideIndex > 0) {
       setState(() => _slideIndex--);
-      _progress
-        ..reset()
-        ..forward();
-    } else if (_bubbleIndex > 0) {
-      setState(() {
-        _bubbleIndex--;
-        _loadBubble(fromEnd: true);
-      });
-      _progress
-        ..reset()
-        ..forward();
+      _restartProgress();
     } else {
-      _progress
-        ..reset()
-        ..forward();
+      _backwardBubble();
     }
+  }
+
+  // ── Bubble navigation ────────────────────────────────────────────────
+  void _forwardBubble() {
+    if (_bubbleIndex >= widget.bubbles.length - 1) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    final currentUnread = widget.bubbles[_bubbleIndex].stories.any((s) => !s.seen);
+    final nextUnread = widget.bubbles[_bubbleIndex + 1].stories.any((s) => !s.seen);
+    // From an unread bubble we only continue into more unread bubbles; once
+    // there is nothing unread ahead, close. From a read bubble (or archive),
+    // walk to the next bubble regardless.
+    if (widget.advanceUnreadOnly && currentUnread && !nextUnread) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _pageController.nextPage(duration: _bubbleTransition, curve: Curves.easeOutCubic);
+  }
+
+  void _backwardBubble({bool closeAtStart = false}) {
+    if (_bubbleIndex > 0) {
+      _pageController.previousPage(
+        duration: _bubbleTransition,
+        curve: Curves.easeOutCubic,
+      );
+    } else if (closeAtStart) {
+      Navigator.of(context).maybePop(); // swiped back past the first bubble
+    } else {
+      _restartProgress(); // tapped back at the very start
+    }
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _bubbleIndex = index;
+      _loadActiveBubble();
+    });
+    _markSeen();
+    _restartProgress();
   }
 
   void _onTapUp(TapUpDetails details, BoxConstraints constraints) {
     if (details.localPosition.dx < constraints.maxWidth * 0.32) {
-      _prev();
+      _prevSlide();
     } else {
-      _next();
+      _nextSlide();
+    }
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    final v = details.primaryVelocity ?? 0;
+    if (v < -100) {
+      _forwardBubble(); // swipe right-to-left (closes past the last bubble)
+    } else if (v > 100) {
+      _backwardBubble(closeAtStart: true); // swipe left-to-right (closes before the first)
     }
   }
 
@@ -194,14 +213,29 @@ class _StoryViewerState extends State<StoryViewer>
               onTapUp: (details) => _onTapUp(details, constraints),
               onLongPressStart: (_) => _progress.stop(),
               onLongPressEnd: (_) => _progress.forward(),
+              onHorizontalDragEnd: _onHorizontalDragEnd,
               child: Stack(
                 children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    child: StorySlideView(
-                      key: ValueKey('${_bubbleIndex}_$_slideIndex'),
-                      slide: _current.slide,
-                    ),
+                  PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: _onPageChanged,
+                    itemCount: widget.bubbles.length,
+                    itemBuilder: (context, i) {
+                      final isActive = i == _bubbleIndex;
+                      final flat = isActive
+                          ? _slides
+                          : _flatten(widget.bubbles[i]);
+                      if (flat.isEmpty) return const ColoredBox(color: Colors.black);
+                      final slideIndex = isActive ? _slideIndex : 0;
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: StorySlideView(
+                          key: ValueKey('${i}_$slideIndex'),
+                          slide: flat[slideIndex].slide,
+                        ),
+                      );
+                    },
                   ),
                   _ProgressBars(
                     count: _slides.length,
