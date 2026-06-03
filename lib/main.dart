@@ -12,6 +12,7 @@ import 'core/theme/app_theme.dart';
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/backups/data/backup_config.dart';
 import 'features/recurring/data/recurring_processor.dart';
+import 'features/stories/services/welcome_story.dart';
 
 
 final recurringProcessResultProvider = StateProvider<int>((ref) {
@@ -101,6 +102,10 @@ Future<void> _bootstrap() async {
     // the splash routes to the recurring-loader screen.
     missedCount = await RecurringProcessor(isar).processAll();
     backupDue = await _isAutomaticBackupDue(isar);
+    // First-launch Welcome story: a single pre-built Isar write (no aggregation)
+    // so a fresh install shows a bubble immediately. All other stories generate
+    // post-first-frame. Existing users just get the flag set, no Welcome.
+    await maybeSeedWelcomeStory(isar);
     // The on-open ledger reminder pass is deferred to after the first frame
     // (see KuberApp) so it never delays cold start.
   } catch (e, stack) {

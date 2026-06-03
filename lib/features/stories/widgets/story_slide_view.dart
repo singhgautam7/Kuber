@@ -52,6 +52,18 @@ class StorySlideView extends StatelessWidget {
                       color: _muted,
                     ),
                   ),
+                  if (slide.dateLabel != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      slide.dateLabel!,
+                      style: AppTextStyles.inter.copyWith(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                 ],
                 Expanded(child: _body()),

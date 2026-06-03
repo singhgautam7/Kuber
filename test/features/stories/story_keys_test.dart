@@ -3,17 +3,27 @@ import 'package:kuber/features/stories/services/story_keys.dart';
 
 void main() {
   group('StoryKeys', () {
-    test('generates deterministic day month and year keys', () {
+    test('generates deterministic recap keys', () {
       final date = DateTime(2026, 5, 28);
 
       expect(StoryKeys.dailyRecap(date), 'recap_day_2026_05_28');
       expect(StoryKeys.monthlyRecap(date), 'recap_month_2026_05');
       expect(StoryKeys.yearlyRecap(date), 'recap_year_2026');
-      expect(
-        StoryKeys.insight('topCategory', date),
-        'insight_topCategory_2026_05_28',
-      );
-      expect(StoryKeys.loans(date), 'loans_2026_05_28');
+    });
+
+    test('generates deterministic pace comparison keys', () {
+      final date = DateTime(2026, 5, 28);
+
+      expect(StoryKeys.compareDay(date), 'compare_day_2026_05_28');
+      expect(StoryKeys.compareWeek(date), 'compare_week_2026_W22');
+      expect(StoryKeys.compareMonth(date), 'compare_month_2026_05');
+    });
+
+    test('generates stable per-entity keys', () {
+      expect(StoryKeys.loanEntity('abc-123'), 'loans_abc-123');
+      expect(StoryKeys.ledger('uid-9'), 'ledger_uid-9');
+      expect(StoryKeys.insightSubtype('topCategory'), 'insight_topCategory');
+      expect(StoryKeys.welcome, 'welcome_v1');
     });
 
     test('uses ISO week numbering', () {

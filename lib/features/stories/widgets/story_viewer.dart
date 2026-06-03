@@ -8,15 +8,33 @@ import 'story_slide_view.dart';
 
 const _slideDuration = Duration(seconds: 5);
 
+/// A single slide within a bubble's flattened sequence, paired with the story
+/// it belongs to (so we can mark the right story's slide as seen).
+class _FlatSlide {
+  final StoryViewData story;
+  final int localIndex;
+  final StorySlide slide;
+  const _FlatSlide(this.story, this.localIndex, this.slide);
+}
+
+/// Full-screen viewer over a list of [bubbles]. It plays the bubble at
+/// [initialBubbleIndex] from its first unread slide, and on reaching the end of
+/// a bubble auto-advances to the next one (WhatsApp-style) instead of closing.
 class StoryViewer extends StatefulWidget {
-  final List<StoryViewData> stories;
-  final int initialIndex;
+  final List<StoryBubble> bubbles;
+  final int initialBubbleIndex;
+
+  /// Home ring: `true` — advancing skips fully-read bubbles and closes once no
+  /// unread bubble remains ahead. Archive: `false` — advance through every
+  /// bubble in order.
+  final bool advanceUnreadOnly;
   final void Function(String storyId, int slideIndex)? onSeen;
 
   const StoryViewer({
     super.key,
-    required this.stories,
-    this.initialIndex = 0,
+    required this.bubbles,
+    this.initialBubbleIndex = 0,
+    this.advanceUnreadOnly = false,
     this.onSeen,
   });
 
@@ -26,92 +44,124 @@ class StoryViewer extends StatefulWidget {
 
 class _StoryViewerState extends State<StoryViewer>
     with SingleTickerProviderStateMixin {
-  late final PageController _pageController;
   late final AnimationController _progress;
-  int _storyIndex = 0;
+  late int _bubbleIndex;
+  List<_FlatSlide> _slides = const [];
   int _slideIndex = 0;
 
-  StoryViewData get _story => widget.stories[_storyIndex];
+  _FlatSlide get _current => _slides[_slideIndex];
 
   @override
   void initState() {
     super.initState();
-    _storyIndex = widget.initialIndex.clamp(0, widget.stories.length - 1);
-    _pageController = PageController(initialPage: _storyIndex);
+    _bubbleIndex = widget.bubbles.isEmpty
+        ? 0
+        : widget.initialBubbleIndex.clamp(0, widget.bubbles.length - 1);
+    _loadBubble();
     _progress = AnimationController(vsync: this, duration: _slideDuration)
       ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) _nextSlide();
+        if (status == AnimationStatus.completed) _next();
       });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startStory());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
 
   @override
   void dispose() {
-    widget.onSeen?.call(_story.id.toString(), _slideIndex);
-    _pageController.dispose();
+    _markSeen();
     _progress.dispose();
     super.dispose();
   }
 
-  void _startStory({bool fromPrevious = false}) {
-    if (fromPrevious) {
-      _slideIndex = _story.slides.length - 1;
-    } else {
+  /// Flattens the current bubble's stories into one slide sequence and positions
+  /// at the first unread slide (or the last, when arriving from a "previous").
+  void _loadBubble({bool fromEnd = false}) {
+    if (widget.bubbles.isEmpty) {
+      _slides = const [];
       _slideIndex = 0;
-      for (int i = 0; i < _story.slides.length; i++) {
-        if (!_story.seenSlides.contains(i)) {
-          _slideIndex = i;
-          break;
-        }
-      }
+      return;
     }
-    widget.onSeen?.call(_story.id.toString(), _slideIndex);
+    final bubble = widget.bubbles[_bubbleIndex];
+    _slides = [
+      for (final s in bubble.stories)
+        for (var i = 0; i < s.slides.length; i++) _FlatSlide(s, i, s.slides[i]),
+    ];
+    if (_slides.isEmpty) {
+      _slideIndex = 0;
+      return;
+    }
+    if (fromEnd) {
+      _slideIndex = _slides.length - 1;
+    } else {
+      final firstUnseen = _slides.indexWhere(
+        (f) => !f.story.seenSlides.contains(f.localIndex),
+      );
+      _slideIndex = firstUnseen >= 0 ? firstUnseen : 0;
+    }
+  }
+
+  void _markSeen() {
+    if (_slides.isEmpty) return;
+    widget.onSeen?.call(_current.story.id.toString(), _current.localIndex);
+  }
+
+  void _start() {
+    if (_slides.isEmpty) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _markSeen();
     _progress
       ..reset()
       ..forward();
     if (mounted) setState(() {});
   }
 
-  void _nextSlide() {
-    if (_slideIndex < _story.slides.length - 1) {
+  void _next() {
+    if (_slideIndex < _slides.length - 1) {
       setState(() => _slideIndex++);
-      widget.onSeen?.call(_story.id.toString(), _slideIndex);
+      _markSeen();
       _progress
         ..reset()
         ..forward();
-      return;
+    } else {
+      _nextBubble();
     }
-    _nextStory();
   }
 
-  void _prevSlide() {
+  /// Advance to the next bubble. On the home ring, skip fully-read bubbles and
+  /// close when none with unread remain; in the archive, just go to the next.
+  void _nextBubble() {
+    for (var i = _bubbleIndex + 1; i < widget.bubbles.length; i++) {
+      final hasUnread = widget.bubbles[i].stories.any((s) => !s.seen);
+      if (!widget.advanceUnreadOnly || hasUnread) {
+        setState(() {
+          _bubbleIndex = i;
+          _loadBubble();
+        });
+        _markSeen();
+        _progress
+          ..reset()
+          ..forward();
+        return;
+      }
+    }
+    Navigator.of(context).maybePop();
+  }
+
+  void _prev() {
     if (_slideIndex > 0) {
       setState(() => _slideIndex--);
       _progress
         ..reset()
         ..forward();
-      return;
-    }
-    _prevStory();
-  }
-
-  void _nextStory() {
-    if (_storyIndex < widget.stories.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
-      Navigator.of(context).maybePop();
-    }
-  }
-
-  void _prevStory() {
-    if (_storyIndex > 0) {
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
+    } else if (_bubbleIndex > 0) {
+      setState(() {
+        _bubbleIndex--;
+        _loadBubble(fromEnd: true);
+      });
+      _progress
+        ..reset()
+        ..forward();
     } else {
       _progress
         ..reset()
@@ -119,22 +169,17 @@ class _StoryViewerState extends State<StoryViewer>
     }
   }
 
-  void _onPageChanged(int index) {
-    final backward = index < _storyIndex;
-    _storyIndex = index;
-    _startStory(fromPrevious: backward);
-  }
-
   void _onTapUp(TapUpDetails details, BoxConstraints constraints) {
     if (details.localPosition.dx < constraints.maxWidth * 0.32) {
-      _prevSlide();
+      _prev();
     } else {
-      _nextSlide();
+      _next();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_slides.isEmpty) return const SizedBox.shrink();
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Dismissible(
@@ -150,43 +195,30 @@ class _StoryViewerState extends State<StoryViewer>
               onLongPressStart: (_) => _progress.stop(),
               onLongPressEnd: (_) => _progress.forward(),
               child: Stack(
-            children: [
-              PageView.builder(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                itemCount: widget.stories.length,
-                itemBuilder: (context, storyIndex) {
-                  final isActive = storyIndex == _storyIndex;
-                  final slide = widget
-                      .stories[storyIndex]
-                      .slides[isActive ? _slideIndex : 0];
-                  return AnimatedSwitcher(
+                children: [
+                  AnimatedSwitcher(
                     duration: const Duration(milliseconds: 220),
                     child: StorySlideView(
-                      key: ValueKey(
-                        '$storyIndex-${isActive ? _slideIndex : 0}',
-                      ),
-                      slide: slide,
+                      key: ValueKey('${_bubbleIndex}_$_slideIndex'),
+                      slide: _current.slide,
                     ),
-                  );
-                },
+                  ),
+                  _ProgressBars(
+                    count: _slides.length,
+                    currentIndex: _slideIndex,
+                    controller: _progress,
+                  ),
+                  _TopChrome(
+                    story: _current.story,
+                    onClose: () => Navigator.of(context).maybePop(),
+                  ),
+                ],
               ),
-              _ProgressBars(
-                count: _story.slides.length,
-                currentIndex: _slideIndex,
-                controller: _progress,
-              ),
-              _TopChrome(
-                story: _story,
-                onClose: () => Navigator.of(context).maybePop(),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
 

@@ -58,4 +58,5 @@ class PrefsKeys {
   
   // Stories
   static const lastStoryGenerationDate = 'kuber_last_story_generation_date';
+  static const welcomeStoryGenerated = 'kuber_welcome_story_generated';
 }

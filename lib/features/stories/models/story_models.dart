@@ -4,7 +4,9 @@ enum SlideVariant { hero, stats, compare, statement }
 
 enum EmphasisStyle { bold, primary, warning }
 
-enum StoryColorKey { violet, amber, rose, emerald, cyan, blue, gold, slate }
+// `plum` is reserved for the first-launch Welcome story only — deliberately
+// outside the eight type colours so it reads as an intro, not a category.
+enum StoryColorKey { violet, amber, rose, emerald, cyan, blue, gold, slate, plum }
 
 class StoryPalette {
   static const Map<StoryColorKey, Color> background = {
@@ -16,6 +18,7 @@ class StoryPalette {
     StoryColorKey.blue: Color(0xFF2563EB),
     StoryColorKey.gold: Color(0xFFB07A12),
     StoryColorKey.slate: Color(0xFF3F4654),
+    StoryColorKey.plum: Color(0xFF6B2774),
   };
 
   static const Map<StoryColorKey, Color> ring = {
@@ -27,6 +30,7 @@ class StoryPalette {
     StoryColorKey.blue: Color(0xFF3B82F6),
     StoryColorKey.gold: Color(0xFFEAB308),
     StoryColorKey.slate: Color(0xFF64748B),
+    StoryColorKey.plum: Color(0xFFC026D3),
   };
 
   static StoryColorKey keyFromString(String s) => StoryColorKey.values
@@ -104,6 +108,10 @@ class StorySlide {
   final StoryColorKey background;
   final String icon;
   final String? header;
+
+  /// Low-emphasis period label rendered under the header (e.g. "May 2026",
+  /// "18 May to 24 May 2026"). Omitted for pace comparisons, insights, welcome.
+  final String? dateLabel;
   final String title;
   final String? subtitle;
   final String? footer;
@@ -118,6 +126,7 @@ class StorySlide {
     required this.icon,
     required this.title,
     this.header,
+    this.dateLabel,
     this.subtitle,
     this.footer,
     this.emphasis = const [],
@@ -134,6 +143,7 @@ class StorySlide {
     background: StoryPalette.keyFromString(json['background'] as String),
     icon: json['icon'] as String,
     header: json['header'] as String?,
+    dateLabel: json['dateLabel'] as String?,
     title: json['title'] as String? ?? '',
     subtitle: json['subtitle'] as String?,
     footer: json['footer'] as String?,
@@ -154,6 +164,7 @@ class StorySlide {
     'background': background.name,
     'icon': icon,
     if (header != null) 'header': header,
+    if (dateLabel != null) 'dateLabel': dateLabel,
     'title': title,
     if (subtitle != null) 'subtitle': subtitle,
     if (footer != null) 'footer': footer,
@@ -195,4 +206,25 @@ class StoryViewData {
   });
 
   bool get seen => seenSlides.length == slides.length;
+}
+
+/// One ring bubble = all currently active stories of a single [type], in the
+/// order the viewer should play them (unseen first, newest first).
+class StoryBubble {
+  final String type;
+  final String label;
+  final String icon;
+  final StoryColorKey color;
+  final List<StoryViewData> stories;
+
+  const StoryBubble({
+    required this.type,
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.stories,
+  });
+
+  /// The bubble reads as "seen" only when every story in it is fully seen.
+  bool get seen => stories.every((s) => s.seen);
 }
