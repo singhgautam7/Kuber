@@ -21,6 +21,7 @@ class PrefsKeys {
       'kuber_migrated_suggestion_backfill_v1';
   static const migratedStoriesPositionV2 =
       'kuber_migrated_stories_position_v2';
+  static const migratedStoryResetV1 = 'kuber_migrated_story_reset_v1';
 
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';

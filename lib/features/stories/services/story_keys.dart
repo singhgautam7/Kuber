@@ -27,7 +27,8 @@ class StoryKeys {
   static String investments(DateTime date) =>
       'investments_${_yyyy(date)}_W${_isoWeek(date).toString().padLeft(2, '0')}';
 
-  static String insightSubtype(String subtype) => 'insight_$subtype';
+  /// Single consolidated Insights story (multiple slides), cadence-gated.
+  static const insights = 'insights';
 
   static int _isoWeek(DateTime date) {
     final normalized = DateTime.utc(date.year, date.month, date.day);

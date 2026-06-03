@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/categories/data/category.dart';
 import '../../features/categories/data/category_group.dart';
+import '../../features/stories/data/insight_story.dart';
 import '../../features/transactions/services/suggestion_service.dart';
 import '../../features/widget_editor/data/widget_preference.dart';
 import '../utils/prefs_keys.dart';
@@ -45,6 +46,22 @@ class MigrationService {
       await _migrateStoriesPosition(isar);
       await prefs.setBool(PrefsKeys.migratedStoriesPositionV2, true);
     }
+
+    // Migration 7: Wipe stories created by the older build. They used
+    // non-uniform TTLs and had layout/grouping bugs; with a tiny user base the
+    // cleanest path is to clear them so everyone regenerates fresh stories under
+    // the new model (correct 48h TTL, grouping, comparisons).
+    if (!(prefs.getBool(PrefsKeys.migratedStoryResetV1) ?? false)) {
+      await _clearLegacyStories(isar);
+      // Clear the once-per-day gate so fresh stories regenerate on this launch
+      // even if the user already opened the app today before updating.
+      await prefs.remove(PrefsKeys.lastStoryGenerationDate);
+      await prefs.setBool(PrefsKeys.migratedStoryResetV1, true);
+    }
+  }
+
+  static Future<void> _clearLegacyStories(Isar isar) async {
+    await isar.writeTxn(() => isar.insightStorys.clear());
   }
 
   static Future<void> _backfillSuggestions(Isar isar) async {

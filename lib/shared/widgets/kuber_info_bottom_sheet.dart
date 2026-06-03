@@ -15,7 +15,6 @@ class KuberInfoBottomSheet extends StatelessWidget {
 
     return KuberBottomSheet(
       title: config.title,
-      subtitle: "LEARN MORE",
       actions: AppButton(
         label: 'Got it',
         type: AppButtonType.primary,

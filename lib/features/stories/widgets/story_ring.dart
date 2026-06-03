@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 import '../models/story_icons.dart';
@@ -97,7 +98,10 @@ class StoryRing extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(title: 'MONEY STORIES'),
+        const KuberHomeWidgetTitle(
+          title: 'MONEY STORIES',
+          infoConfig: InfoConstants.moneyStories,
+        ),
         SizedBox(
           height: 84,
           child: ListView.separated(
@@ -273,7 +277,10 @@ class _StoryRingEmpty extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(title: 'MONEY STORIES'),
+        const KuberHomeWidgetTitle(
+          title: 'MONEY STORIES',
+          infoConfig: InfoConstants.moneyStories,
+        ),
         Container(
           height: 84,
           width: double.infinity,
@@ -307,7 +314,10 @@ class _StoryRingSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(title: 'MONEY STORIES'),
+        const KuberHomeWidgetTitle(
+          title: 'MONEY STORIES',
+          infoConfig: InfoConstants.moneyStories,
+        ),
         SizedBox(
           height: 84,
           child: ListView.separated(

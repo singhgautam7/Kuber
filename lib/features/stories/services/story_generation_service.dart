@@ -713,33 +713,41 @@ class _StoryCandidateBuilder {
   }
 
   void _insightStories(_StoryGenInput input, DateTime now) {
-    final engine = InsightEngine(
-      allTransactions: input.txns,
-      categories: input.categories,
-      loans: input.loans,
-      ledgers: input.ledgers,
-      investments: input.investments,
-      currencySymbol: '₹',
-      formatter: formatter,
-    );
-    final insights = engine.generate().where(
-      (i) =>
-          i.type != InsightType.fallbackTip &&
-          i.type != InsightType.fallbackTotal,
-    );
-    for (final insight in insights) {
-      _upsertEntity(
-        StoryKeys.insightSubtype(insight.type.name),
-        now,
-        _insightCadence,
-        () {
-          final (color, icon) = _styleForInsight(insight.type);
-          return _story('insights', now, [
-            StorySlide(
+    // One consolidated Insights story with a slide per insight, cadence-gated as
+    // a whole — so the ring shows a single Insights bubble and the archive a
+    // single Insights card (not one card per insight).
+    _upsertEntity(StoryKeys.insights, now, _insightCadence, () {
+      final engine = InsightEngine(
+        allTransactions: input.txns,
+        categories: input.categories,
+        loans: input.loans,
+        ledgers: input.ledgers,
+        investments: input.investments,
+        currencySymbol: '₹',
+        formatter: formatter,
+      );
+      final insights = engine
+          .generate()
+          .where(
+            (i) =>
+                i.type != InsightType.fallbackTip &&
+                i.type != InsightType.fallbackTotal,
+          )
+          .take(6)
+          .toList();
+      if (insights.isEmpty) return null;
+
+      final slides = [
+        for (final insight in insights)
+          () {
+            final (color, icon) = _styleForInsight(insight.type);
+            return StorySlide(
               variant: SlideVariant.statement,
               background: color,
               icon: icon,
-              header: insight.typeLabel.isEmpty ? 'Highlight' : insight.typeLabel,
+              header: insight.typeLabel.isEmpty
+                  ? 'Highlight'
+                  : insight.typeLabel,
               title: _stripEmDash(insight.message),
               emphasis: [
                 for (final h in insight.highlights)
@@ -750,11 +758,11 @@ class _StoryCandidateBuilder {
                         : EmphasisStyle.primary,
                   ),
               ],
-            ),
-          ]);
-        },
-      );
-    }
+            );
+          }(),
+      ];
+      return _story('insights', now, slides);
+    });
   }
 
   // ── Aggregation helpers (reuse computeSummary) ───────────────────────

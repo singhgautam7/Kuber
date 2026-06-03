@@ -189,6 +189,28 @@ void main() {
       expect(rows.where((r) => r.storyKey == 'ledger_G1').length, 1);
       expect(rows.where((r) => r.storyKey.startsWith('investments_')).length, 1);
     });
+
+    test('insights are consolidated into a single story (not one per insight)',
+        () async {
+      // Enough varied spending to trigger insight(s).
+      await seed(
+        categories: defaultCategories,
+        txns: [
+          for (var i = 1; i <= 15; i++)
+            makeTransaction(
+              amount: 100.0 + i * 10,
+              categoryId: i.isEven ? '1' : '2',
+              createdAt: DateTime(2026, 5, i, 10),
+            ),
+        ],
+      );
+
+      await StoryGenerationService(isar).generateDue(now: DateTime(2026, 6, 3, 10));
+      final insightRows = (await StoryRepository(isar).all())
+          .where((r) => r.type == 'insights')
+          .toList();
+      expect(insightRows.length, lessThanOrEqualTo(1));
+    });
   });
 
   group('cleanup', () {

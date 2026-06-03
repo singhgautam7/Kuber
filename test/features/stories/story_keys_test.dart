@@ -14,7 +14,7 @@ void main() {
     test('generates stable per-entity keys', () {
       expect(StoryKeys.loanEntity('abc-123'), 'loans_abc-123');
       expect(StoryKeys.ledger('uid-9'), 'ledger_uid-9');
-      expect(StoryKeys.insightSubtype('topCategory'), 'insight_topCategory');
+      expect(StoryKeys.insights, 'insights');
       expect(StoryKeys.welcome, 'welcome_v1');
     });
 
