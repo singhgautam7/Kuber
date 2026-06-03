@@ -52,6 +52,18 @@ class StorySlideView extends StatelessWidget {
                       color: _muted,
                     ),
                   ),
+                  if (slide.dateLabel != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      slide.dateLabel!,
+                      style: AppTextStyles.inter.copyWith(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.55),
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 14),
                 ],
                 Expanded(child: _body()),
@@ -195,10 +207,12 @@ class StorySlideView extends StatelessWidget {
         children: [
           Text(
             period.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: AppTextStyles.inter.copyWith(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
-              letterSpacing: 1,
+              letterSpacing: 0.3,
               color: _muted,
             ),
           ),

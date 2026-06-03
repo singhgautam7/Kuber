@@ -7,16 +7,40 @@ import '../models/story_models.dart';
 import 'story_slide_view.dart';
 
 const _slideDuration = Duration(seconds: 5);
+const _bubbleTransition = Duration(milliseconds: 300);
 
+/// A single slide within a bubble's flattened sequence, paired with the story
+/// it belongs to (so we can mark the right story's slide as seen).
+class _FlatSlide {
+  final StoryViewData story;
+  final int localIndex;
+  final StorySlide slide;
+  const _FlatSlide(this.story, this.localIndex, this.slide);
+}
+
+/// Full-screen viewer over [bubbles].
+///
+/// Gestures (kept deliberately simple):
+///  - tap right third  -> next slide  (crosses into the next bubble at the end)
+///  - tap left third   -> previous slide / previous bubble
+///  - swipe left/right  -> next / previous bubble (animated)
+///  - long-press        -> pause; release resumes
+///  - swipe down        -> dismiss
+///
+/// Forward (auto-advance, tap-at-end, swipe-left) moves to the next bubble that
+/// still has an unread story and closes when none remain ahead — unless
+/// [advanceUnreadOnly] is false (archive), where it walks every bubble in order.
 class StoryViewer extends StatefulWidget {
-  final List<StoryViewData> stories;
-  final int initialIndex;
+  final List<StoryBubble> bubbles;
+  final int initialBubbleIndex;
+  final bool advanceUnreadOnly;
   final void Function(String storyId, int slideIndex)? onSeen;
 
   const StoryViewer({
     super.key,
-    required this.stories,
-    this.initialIndex = 0,
+    required this.bubbles,
+    this.initialBubbleIndex = 0,
+    this.advanceUnreadOnly = false,
     this.onSeen,
   });
 
@@ -28,101 +52,131 @@ class _StoryViewerState extends State<StoryViewer>
     with SingleTickerProviderStateMixin {
   late final PageController _pageController;
   late final AnimationController _progress;
-  int _storyIndex = 0;
+  late int _bubbleIndex;
+  List<_FlatSlide> _slides = const [];
   int _slideIndex = 0;
 
-  StoryViewData get _story => widget.stories[_storyIndex];
+  _FlatSlide get _current => _slides[_slideIndex];
 
   @override
   void initState() {
     super.initState();
-    _storyIndex = widget.initialIndex.clamp(0, widget.stories.length - 1);
-    _pageController = PageController(initialPage: _storyIndex);
+    _bubbleIndex = widget.bubbles.isEmpty
+        ? 0
+        : widget.initialBubbleIndex.clamp(0, widget.bubbles.length - 1);
+    _pageController = PageController(initialPage: _bubbleIndex);
+    _loadActiveBubble();
     _progress = AnimationController(vsync: this, duration: _slideDuration)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) _nextSlide();
       });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _startStory());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
   }
 
   @override
   void dispose() {
-    widget.onSeen?.call(_story.id.toString(), _slideIndex);
+    _markSeen();
     _pageController.dispose();
     _progress.dispose();
     super.dispose();
   }
 
-  void _startStory({bool fromPrevious = false}) {
-    if (fromPrevious) {
-      _slideIndex = _story.slides.length - 1;
-    } else {
+  List<_FlatSlide> _flatten(StoryBubble bubble) => [
+    for (final s in bubble.stories)
+      for (var i = 0; i < s.slides.length; i++) _FlatSlide(s, i, s.slides[i]),
+  ];
+
+  /// Loads the active bubble's slides and positions at its first unread slide.
+  void _loadActiveBubble() {
+    if (widget.bubbles.isEmpty) {
+      _slides = const [];
       _slideIndex = 0;
-      for (int i = 0; i < _story.slides.length; i++) {
-        if (!_story.seenSlides.contains(i)) {
-          _slideIndex = i;
-          break;
-        }
-      }
+      return;
     }
-    widget.onSeen?.call(_story.id.toString(), _slideIndex);
-    _progress
-      ..reset()
-      ..forward();
+    _slides = _flatten(widget.bubbles[_bubbleIndex]);
+    final firstUnseen = _slides.indexWhere(
+      (f) => !f.story.seenSlides.contains(f.localIndex),
+    );
+    _slideIndex = firstUnseen >= 0 ? firstUnseen : 0;
+  }
+
+  void _markSeen() {
+    if (_slides.isEmpty) return;
+    widget.onSeen?.call(_current.story.id.toString(), _current.localIndex);
+  }
+
+  void _restartProgress() => _progress
+    ..reset()
+    ..forward();
+
+  void _start() {
+    if (_slides.isEmpty) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _markSeen();
+    _restartProgress();
     if (mounted) setState(() {});
   }
 
+  // ── Slide navigation ─────────────────────────────────────────────────
   void _nextSlide() {
-    if (_slideIndex < _story.slides.length - 1) {
+    if (_slideIndex < _slides.length - 1) {
       setState(() => _slideIndex++);
-      widget.onSeen?.call(_story.id.toString(), _slideIndex);
-      _progress
-        ..reset()
-        ..forward();
-      return;
+      _markSeen();
+      _restartProgress();
+    } else {
+      _forwardBubble();
     }
-    _nextStory();
   }
 
   void _prevSlide() {
     if (_slideIndex > 0) {
       setState(() => _slideIndex--);
-      _progress
-        ..reset()
-        ..forward();
+      _restartProgress();
+    } else {
+      _backwardBubble();
+    }
+  }
+
+  // ── Bubble navigation ────────────────────────────────────────────────
+  void _forwardBubble() {
+    if (_bubbleIndex >= widget.bubbles.length - 1) {
+      Navigator.of(context).maybePop();
       return;
     }
-    _prevStory();
-  }
-
-  void _nextStory() {
-    if (_storyIndex < widget.stories.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
+    final currentUnread = widget.bubbles[_bubbleIndex].stories.any((s) => !s.seen);
+    final nextUnread = widget.bubbles[_bubbleIndex + 1].stories.any((s) => !s.seen);
+    // From an unread bubble we only continue into more unread bubbles; once
+    // there is nothing unread ahead, close. From a read bubble (or archive),
+    // walk to the next bubble regardless.
+    if (widget.advanceUnreadOnly && currentUnread && !nextUnread) {
       Navigator.of(context).maybePop();
+      return;
     }
+    _pageController.nextPage(duration: _bubbleTransition, curve: Curves.easeOutCubic);
   }
 
-  void _prevStory() {
-    if (_storyIndex > 0) {
+  void _backwardBubble({bool closeAtStart = false}) {
+    if (_bubbleIndex > 0) {
       _pageController.previousPage(
-        duration: const Duration(milliseconds: 320),
+        duration: _bubbleTransition,
         curve: Curves.easeOutCubic,
       );
+    } else if (closeAtStart) {
+      Navigator.of(context).maybePop(); // swiped back past the first bubble
     } else {
-      _progress
-        ..reset()
-        ..forward();
+      _restartProgress(); // tapped back at the very start
     }
   }
 
   void _onPageChanged(int index) {
-    final backward = index < _storyIndex;
-    _storyIndex = index;
-    _startStory(fromPrevious: backward);
+    setState(() {
+      _bubbleIndex = index;
+      _loadActiveBubble();
+    });
+    _markSeen();
+    _restartProgress();
   }
 
   void _onTapUp(TapUpDetails details, BoxConstraints constraints) {
@@ -133,8 +187,18 @@ class _StoryViewerState extends State<StoryViewer>
     }
   }
 
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    final v = details.primaryVelocity ?? 0;
+    if (v < -100) {
+      _forwardBubble(); // swipe right-to-left (closes past the last bubble)
+    } else if (v > 100) {
+      _backwardBubble(closeAtStart: true); // swipe left-to-right (closes before the first)
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_slides.isEmpty) return const SizedBox.shrink();
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Dismissible(
@@ -149,44 +213,46 @@ class _StoryViewerState extends State<StoryViewer>
               onTapUp: (details) => _onTapUp(details, constraints),
               onLongPressStart: (_) => _progress.stop(),
               onLongPressEnd: (_) => _progress.forward(),
+              onHorizontalDragEnd: _onHorizontalDragEnd,
               child: Stack(
-            children: [
-              PageView.builder(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                itemCount: widget.stories.length,
-                itemBuilder: (context, storyIndex) {
-                  final isActive = storyIndex == _storyIndex;
-                  final slide = widget
-                      .stories[storyIndex]
-                      .slides[isActive ? _slideIndex : 0];
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    child: StorySlideView(
-                      key: ValueKey(
-                        '$storyIndex-${isActive ? _slideIndex : 0}',
-                      ),
-                      slide: slide,
-                    ),
-                  );
-                },
+                children: [
+                  PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    onPageChanged: _onPageChanged,
+                    itemCount: widget.bubbles.length,
+                    itemBuilder: (context, i) {
+                      final isActive = i == _bubbleIndex;
+                      final flat = isActive
+                          ? _slides
+                          : _flatten(widget.bubbles[i]);
+                      if (flat.isEmpty) return const ColoredBox(color: Colors.black);
+                      final slideIndex = isActive ? _slideIndex : 0;
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        child: StorySlideView(
+                          key: ValueKey('${i}_$slideIndex'),
+                          slide: flat[slideIndex].slide,
+                        ),
+                      );
+                    },
+                  ),
+                  _ProgressBars(
+                    count: _slides.length,
+                    currentIndex: _slideIndex,
+                    controller: _progress,
+                  ),
+                  _TopChrome(
+                    story: _current.story,
+                    onClose: () => Navigator.of(context).maybePop(),
+                  ),
+                ],
               ),
-              _ProgressBars(
-                count: _story.slides.length,
-                currentIndex: _slideIndex,
-                controller: _progress,
-              ),
-              _TopChrome(
-                story: _story,
-                onClose: () => Navigator.of(context).maybePop(),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 }
 

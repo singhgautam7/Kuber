@@ -14,6 +14,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../recurring/providers/recurring_provider.dart';
 import '../../stories/providers/story_providers.dart';
+import '../../stories/services/welcome_story.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/prefs_keys.dart';
 
@@ -278,7 +279,9 @@ class DataController extends StateNotifier<DataState> {
     );
     try {
       await _service.clearAllData();
-      await _refreshData();
+      // A full wipe resets the user to a fresh state, so the Welcome bubble
+      // should appear again.
+      await _refreshData(freshStart: true);
       state = state.copyWith(
         status: DataOpStatus.success,
         message: 'All data cleared successfully',
@@ -347,17 +350,33 @@ class DataController extends StateNotifier<DataState> {
     }
   }
 
-  Future<void> _refreshData() async {
-    // Clear generation date so mock data triggers a fresh generation
+  Future<void> _refreshData({bool freshStart = false}) async {
     final prefs = await SharedPreferences.getInstance();
+    // Clear the once-per-day gate so a forced regeneration below actually runs.
     await prefs.remove(PrefsKeys.lastStoryGenerationDate);
+    // On a full wipe, treat the user as fresh so Welcome can be re-seeded.
+    if (freshStart) {
+      await prefs.remove(PrefsKeys.welcomeStoryGenerated);
+    }
 
     _ref.invalidate(transactionListProvider);
     _ref.invalidate(accountListProvider);
     _ref.invalidate(categoryListProvider);
     _ref.invalidate(recurringListProvider);
-    _ref.invalidate(storiesProvider);
     // These derived providers will automatically update because they watch transactionListProvider
+
+    // Refresh stories now so the ring reflects the new data without an app
+    // restart. A full wipe is a fresh start, so force the Welcome bubble back.
+    // Best-effort — failures must not break the data operation.
+    try {
+      if (freshStart) {
+        await reseedWelcomeStory(_service.isar);
+      }
+      await _ref.read(storyGenerationProvider.notifier).regenerate();
+    } catch (_) {
+      // Swallowed: stories are non-critical to the data operation result.
+    }
+    _ref.invalidate(storiesProvider);
   }
 
   void refreshAfterImport() {

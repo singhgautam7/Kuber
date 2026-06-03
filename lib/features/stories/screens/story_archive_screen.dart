@@ -41,12 +41,24 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
 
   void _open(List<StoryViewData> stories, StoryViewData story) {
     final index = stories.indexOf(story);
+    // The archive is a flat history, so each story is its own single-story
+    // bubble; the viewer then advances sequentially through them.
+    final bubbles = [
+      for (final s in stories)
+        StoryBubble(
+          type: s.type,
+          label: s.label,
+          icon: s.icon,
+          color: s.color,
+          stories: [s],
+        ),
+    ];
     Navigator.of(context, rootNavigator: true).push(
       PageRouteBuilder(
         opaque: false,
         pageBuilder: (_, __, ___) => StoryViewer(
-          stories: stories,
-          initialIndex: index < 0 ? 0 : index,
+          bubbles: bubbles,
+          initialBubbleIndex: index < 0 ? 0 : index,
           onSeen: (id, slideIndex) {
             ref.read(archiveStoriesProvider.notifier).markSeen(int.parse(id), slideIndex);
           },

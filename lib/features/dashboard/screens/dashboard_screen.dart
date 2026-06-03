@@ -66,6 +66,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Trace marker: story generation must start strictly after this point.
+      debugPrint('Kuber stories: home first frame painted');
       final payload = ref.read(pendingDeeplinkProvider);
       if (payload == null || payload.isEmpty) return;
       ref.read(pendingDeeplinkProvider.notifier).state = null;

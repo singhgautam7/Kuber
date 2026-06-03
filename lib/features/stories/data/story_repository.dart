@@ -34,6 +34,13 @@ class StoryRepository {
         .findAll();
   }
 
+  Future<InsightStory?> byKey(String key) =>
+      isar.insightStorys.filter().storyKeyEqualTo(key).findFirst();
+
+  /// All rows, including expired tombstones — used by generation to gate cadence
+  /// and to update pace stories in place.
+  Future<List<InsightStory>> all() => isar.insightStorys.where().findAll();
+
   Future<int> count() => isar.insightStorys.count();
 
   Future<void> putAll(List<InsightStory> stories) async {
@@ -51,9 +58,12 @@ class StoryRepository {
     await isar.writeTxn(() => isar.insightStorys.put(story));
   }
 
-  Future<void> deleteExpired(DateTime now) async {
+  /// Hard-delete sweep: removes stories whose `expiresAt` is older than the
+  /// retention cutoff. Tombstones (expired but within the cutoff) are kept so
+  /// the cadence dedup queries still suppress regeneration inside their window.
+  Future<void> deleteOlderThan(DateTime cutoff) async {
     await isar.writeTxn(() {
-      return isar.insightStorys.filter().expiresAtLessThan(now).deleteAll();
+      return isar.insightStorys.filter().expiresAtLessThan(cutoff).deleteAll();
     });
   }
 

@@ -17,6 +17,11 @@ final storyRepositoryProvider = Provider<StoryRepository>((ref) {
   return StoryRepository(ref.watch(isarProvider));
 });
 
+/// Read-only view of the active stories for the ring/viewer. Generation is NOT
+/// triggered here — it runs post-paint via [storyGenerationProvider] so the
+/// home first frame is never blocked by it. As generation persists rows, the
+/// debounced `watchLazy` listener invalidates this and bubbles appear
+/// progressively.
 class StoriesNotifier extends AsyncNotifier<List<StoryViewData>> {
   StreamSubscription<void>? _sub;
   Timer? _debounce;
@@ -40,46 +45,7 @@ class StoriesNotifier extends AsyncNotifier<List<StoryViewData>> {
       _debounce?.cancel();
     });
 
-    final existing = await repo.listActive(DateTime.now());
-    if (existing.isNotEmpty) {
-      // Stories already exist: show them immediately and refresh in the
-      // background. Deterministic keys mean nothing is duplicated.
-      unawaited(_generateIfNeeded());
-      return _mapAndSort(existing);
-    }
-
-    // Nothing to show yet (first-ever generation, or every story expired).
-    // Await generation so the ring keeps its skeleton instead of flashing the
-    // empty-state and then popping to content once generation finishes. If the
-    // user genuinely has nothing to recap, this still resolves to an empty list
-    // and the ring shows its empty-state.
-    await _generateIfNeeded();
-    final stories = await repo.listActive(DateTime.now());
-    return _mapAndSort(stories);
-  }
-
-  Future<void> _generateIfNeeded() async {
-    // Best-effort: a generation failure (including an error on the background
-    // isolate) must never break the ring or the home. On failure we simply
-    // fall back to whatever stories already exist.
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastGen = prefs.getString(PrefsKeys.lastStoryGenerationDate);
-      final today = DateTime.now().toIso8601String().split('T').first;
-      if (lastGen == today) return;
-
-      final service = StoryGenerationService(ref.read(isarProvider));
-      await service.generateMissingNow();
-
-      final allStories = await ref
-          .read(storyRepositoryProvider)
-          .listActive(DateTime.now());
-      if (allStories.isNotEmpty) {
-        await prefs.setString(PrefsKeys.lastStoryGenerationDate, today);
-      }
-    } catch (e, st) {
-      debugPrint('Kuber: story generation failed (non-fatal): $e\n$st');
-    }
+    return _mapAndSort(await repo.listActive(DateTime.now()));
   }
 
   Future<void> markSeen(int id, int slideIndex) async {
@@ -99,6 +65,127 @@ final storiesProvider =
     AsyncNotifierProvider<StoriesNotifier, List<StoryViewData>>(
       StoriesNotifier.new,
     );
+
+/// Drives story generation off the main thread, after the home first frame.
+/// State is `true` while a generation pass is running so the ring can show a
+/// skeleton instead of a blocking spinner. Failures are swallowed (logged) so
+/// they never throw into the UI.
+class StoryGenerationController extends Notifier<bool> {
+  bool _ranThisSession = false;
+
+  @override
+  bool build() => false;
+
+  /// Idempotent within a session and gated to once per calendar day. Called from
+  /// the story ring's post-first-frame callback (the Welcome bubble is the only
+  /// story inserted synchronously, in bootstrap).
+  Future<void> ensureGenerated() async {
+    if (_ranThisSession) return;
+    _ranThisSession = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now().toIso8601String().split('T').first;
+      if (prefs.getString(PrefsKeys.lastStoryGenerationDate) == today) return;
+
+      debugPrint('Kuber stories: generation start (post home first frame)');
+      state = true;
+      await StoryGenerationService(ref.read(isarProvider)).generateDue();
+      await prefs.setString(PrefsKeys.lastStoryGenerationDate, today);
+    } catch (e, st) {
+      // Best-effort: the ring keeps whatever stories already exist.
+      debugPrint('Kuber: story generation failed (non-fatal): $e\n$st');
+    } finally {
+      if (state) state = false;
+    }
+  }
+
+  /// Forces a fresh generation pass now, bypassing the once-per-session and
+  /// once-per-day gates. Used after data changes (mock data, clear, import) so
+  /// stories reflect the new data without waiting for an app restart.
+  Future<void> regenerate() async {
+    try {
+      state = true;
+      await StoryGenerationService(ref.read(isarProvider)).generateDue();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        PrefsKeys.lastStoryGenerationDate,
+        DateTime.now().toIso8601String().split('T').first,
+      );
+      _ranThisSession = true;
+    } catch (e, st) {
+      debugPrint('Kuber: story regeneration failed (non-fatal): $e\n$st');
+    } finally {
+      if (state) state = false;
+    }
+  }
+}
+
+final storyGenerationProvider =
+    NotifierProvider<StoryGenerationController, bool>(
+      StoryGenerationController.new,
+    );
+
+/// The active stories grouped into one bubble per type, in fixed ring order.
+final storyBubblesProvider = Provider<AsyncValue<List<StoryBubble>>>((ref) {
+  return ref.watch(storiesProvider).whenData(groupIntoBubbles);
+});
+
+/// Stable tiebreak order when two bubbles have the same read state and recency.
+const _bubbleOrder = <String>[
+  'welcome',
+  'recap_day',
+  'recap_week',
+  'recap_month',
+  'recap_year',
+  'loans',
+  'investments',
+  'ledger',
+  'insights',
+];
+
+/// Groups active stories by type into ring bubbles. Bubbles with any unread
+/// story come first; within that, most recently generated first.
+///
+/// Within a bubble, stories stay in a STABLE chronological order (oldest first)
+/// so positions don't shuffle as stories get read — the viewer opens the first
+/// unread one (WhatsApp-style), then plays forward.
+List<StoryBubble> groupIntoBubbles(List<StoryViewData> stories) {
+  final byType = <String, List<StoryViewData>>{};
+  for (final s in stories) {
+    (byType[s.type] ??= []).add(s);
+  }
+
+  StoryBubble toBubble(String type, List<StoryViewData> group) {
+    group.sort((a, b) {
+      final byTime = a.generatedAt.compareTo(b.generatedAt); // oldest first
+      return byTime != 0 ? byTime : a.id.compareTo(b.id);
+    });
+    final first = group.first;
+    return StoryBubble(
+      type: type,
+      label: first.label,
+      icon: first.icon,
+      color: first.color,
+      stories: group,
+    );
+  }
+
+  DateTime latest(StoryBubble b) => b.stories
+      .map((s) => s.generatedAt)
+      .reduce((x, y) => x.isAfter(y) ? x : y);
+
+  final bubbles = [for (final e in byType.entries) toBubble(e.key, e.value)];
+  bubbles.sort((a, b) {
+    // 1. Bubbles with any unread story first.
+    if (a.seen != b.seen) return a.seen ? 1 : -1;
+    // 2. Then most recently generated first.
+    final byTime = latest(b).compareTo(latest(a));
+    if (byTime != 0) return byTime;
+    // 3. Deterministic tiebreak.
+    return _bubbleOrder.indexOf(a.type).compareTo(_bubbleOrder.indexOf(b.type));
+  });
+  return bubbles;
+}
 
 class ArchiveStoriesState {
   final List<StoryViewData> stories;
@@ -218,7 +305,7 @@ StoryViewData _toViewData(InsightStory story) {
   final slides = ((jsonDecode(story.payloadJson) as List?) ?? [])
       .map((e) => StorySlide.fromJson(e as Map<String, dynamic>))
       .toList();
-  final meta = _metaForType(story.type, slides);
+  final meta = _metaForType(story.type);
   return StoryViewData(
     id: story.id,
     storyKey: story.storyKey,
@@ -235,41 +322,31 @@ StoryViewData _toViewData(InsightStory story) {
   );
 }
 
-({String label, String icon, StoryColorKey color}) _metaForType(
-  String type,
-  List<StorySlide> slides,
-) {
-  if (type == 'recap_day') {
-    return (label: 'Yesterday', icon: 'calendar', color: StoryColorKey.blue);
+/// Stable bubble meta per type. Labels are cadence-based (Daily/Weekly/...).
+/// The bubble colour/icon is fixed per type so a bubble holding several stories
+/// (e.g. several insights) reads consistently — individual slides keep their own
+/// colours via their `background`.
+({String label, String icon, StoryColorKey color}) _metaForType(String type) {
+  switch (type) {
+    case 'welcome':
+      return (label: 'Welcome', icon: 'sparkle', color: StoryColorKey.plum);
+    case 'recap_day':
+      return (label: 'Daily', icon: 'calendar', color: StoryColorKey.blue);
+    case 'recap_week':
+      return (label: 'Weekly', icon: 'chart', color: StoryColorKey.violet);
+    case 'recap_month':
+      return (label: 'Monthly', icon: 'calendar', color: StoryColorKey.amber);
+    case 'recap_year':
+      return (label: 'Yearly', icon: 'trophy', color: StoryColorKey.gold);
+    case 'loans':
+      return (label: 'Loans', icon: 'loan', color: StoryColorKey.cyan);
+    case 'investments':
+      return (label: 'Investments', icon: 'investment', color: StoryColorKey.blue);
+    case 'ledger':
+      return (label: 'Ledger', icon: 'ledger', color: StoryColorKey.slate);
+    default:
+      return (label: 'Insights', icon: 'sparkle', color: StoryColorKey.violet);
   }
-  if (type == 'recap_week') {
-    return (label: 'This Week', icon: 'chart', color: StoryColorKey.violet);
-  }
-  if (type == 'recap_month') {
-    return (label: 'This Month', icon: 'calendar', color: StoryColorKey.amber);
-  }
-  if (type == 'recap_year') {
-    return (label: 'This Year', icon: 'trophy', color: StoryColorKey.gold);
-  }
-  if (type == 'loans') {
-    return (label: 'Loans', icon: 'loan', color: StoryColorKey.cyan);
-  }
-  if (type == 'investments') {
-    return (
-      label: 'Investments',
-      icon: 'investment',
-      color: StoryColorKey.blue,
-    );
-  }
-  if (type == 'ledger') {
-    return (label: 'Ledger', icon: 'ledger', color: StoryColorKey.slate);
-  }
-  final slide = slides.isEmpty ? null : slides.first;
-  return (
-    label: 'Insights',
-    icon: slide?.icon ?? 'sparkle',
-    color: slide?.background ?? StoryColorKey.violet,
-  );
 }
 
 String _timeAgo(DateTime date) {

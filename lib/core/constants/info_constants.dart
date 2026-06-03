@@ -561,7 +561,7 @@ class InfoConstants {
         icon: Icons.schedule_rounded,
         title: 'How long stories are kept',
         description:
-            'Daily recaps are kept for 48 hours, weekly for 7 days, monthly for 30 days, and yearly for 90 days. After that, they expire and are removed.',
+            'Every story is kept for 48 hours after it is created. After that it expires and is removed automatically.',
       ),
       KuberInfoItem(
         icon: Icons.circle,
@@ -574,6 +574,32 @@ class InfoConstants {
         title: 'Opening a story',
         description:
             'Tap any card to open that story in the full viewer. Swipe through slides, tap to advance, and swipe down to close.',
+      ),
+    ],
+  );
+
+  static const moneyStories = KuberInfoConfig(
+    title: 'Money Stories',
+    description:
+        'Quick, visual recaps and highlights about your money. Tap a bubble to open it, then tap or swipe to move through the slides.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.calendar_month_rounded,
+        title: 'Daily, weekly, monthly, yearly',
+        description:
+            'Recaps of your spending for each period, each compared with the period before it.',
+      ),
+      KuberInfoItem(
+        icon: Icons.schedule_rounded,
+        title: 'They expire in 48 hours',
+        description:
+            'Every story stays for 48 hours after it appears, then makes way for fresh ones. Catch them while they are here.',
+      ),
+      KuberInfoItem(
+        icon: Icons.auto_stories_rounded,
+        title: 'Find older stories',
+        description:
+            'Open the More tab and tap Money Stories Archive to revisit recaps you have already seen.',
       ),
     ],
   );

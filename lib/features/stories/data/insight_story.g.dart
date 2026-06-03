@@ -17,33 +17,48 @@ const InsightStorySchema = CollectionSchema(
   name: r'InsightStory',
   id: -2195786010203318811,
   properties: {
-    r'expiresAt': PropertySchema(
+    r'contentHash': PropertySchema(
       id: 0,
+      name: r'contentHash',
+      type: IsarType.string,
+    ),
+    r'expiresAt': PropertySchema(
+      id: 1,
       name: r'expiresAt',
       type: IsarType.dateTime,
     ),
     r'generatedAt': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'generatedAt',
       type: IsarType.dateTime,
     ),
     r'payloadJson': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'payloadJson',
       type: IsarType.string,
     ),
-    r'seenAt': PropertySchema(id: 3, name: r'seenAt', type: IsarType.dateTime),
-    r'seenSlides': PropertySchema(
+    r'periodEnd': PropertySchema(
       id: 4,
+      name: r'periodEnd',
+      type: IsarType.dateTime,
+    ),
+    r'periodStart': PropertySchema(
+      id: 5,
+      name: r'periodStart',
+      type: IsarType.dateTime,
+    ),
+    r'seenAt': PropertySchema(id: 6, name: r'seenAt', type: IsarType.dateTime),
+    r'seenSlides': PropertySchema(
+      id: 7,
       name: r'seenSlides',
       type: IsarType.longList,
     ),
     r'storyKey': PropertySchema(
-      id: 5,
+      id: 8,
       name: r'storyKey',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 6, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 9, name: r'type', type: IsarType.string),
   },
 
   estimateSize: _insightStoryEstimateSize,
@@ -62,6 +77,24 @@ const InsightStorySchema = CollectionSchema(
           name: r'storyKey',
           type: IndexType.hash,
           caseSensitive: true,
+        ),
+      ],
+    ),
+    r'type_generatedAt': IndexSchema(
+      id: 3321690703236641525,
+      name: r'type_generatedAt',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'type',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+        IndexPropertySchema(
+          name: r'generatedAt',
+          type: IndexType.value,
+          caseSensitive: false,
         ),
       ],
     ),
@@ -107,6 +140,12 @@ int _insightStoryEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.contentHash;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.payloadJson.length * 3;
   bytesCount += 3 + object.seenSlides.length * 8;
   bytesCount += 3 + object.storyKey.length * 3;
@@ -120,13 +159,16 @@ void _insightStorySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.expiresAt);
-  writer.writeDateTime(offsets[1], object.generatedAt);
-  writer.writeString(offsets[2], object.payloadJson);
-  writer.writeDateTime(offsets[3], object.seenAt);
-  writer.writeLongList(offsets[4], object.seenSlides);
-  writer.writeString(offsets[5], object.storyKey);
-  writer.writeString(offsets[6], object.type);
+  writer.writeString(offsets[0], object.contentHash);
+  writer.writeDateTime(offsets[1], object.expiresAt);
+  writer.writeDateTime(offsets[2], object.generatedAt);
+  writer.writeString(offsets[3], object.payloadJson);
+  writer.writeDateTime(offsets[4], object.periodEnd);
+  writer.writeDateTime(offsets[5], object.periodStart);
+  writer.writeDateTime(offsets[6], object.seenAt);
+  writer.writeLongList(offsets[7], object.seenSlides);
+  writer.writeString(offsets[8], object.storyKey);
+  writer.writeString(offsets[9], object.type);
 }
 
 InsightStory _insightStoryDeserialize(
@@ -136,14 +178,17 @@ InsightStory _insightStoryDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = InsightStory();
-  object.expiresAt = reader.readDateTime(offsets[0]);
-  object.generatedAt = reader.readDateTime(offsets[1]);
+  object.contentHash = reader.readStringOrNull(offsets[0]);
+  object.expiresAt = reader.readDateTime(offsets[1]);
+  object.generatedAt = reader.readDateTime(offsets[2]);
   object.id = id;
-  object.payloadJson = reader.readString(offsets[2]);
-  object.seenAt = reader.readDateTimeOrNull(offsets[3]);
-  object.seenSlides = reader.readLongList(offsets[4]) ?? [];
-  object.storyKey = reader.readString(offsets[5]);
-  object.type = reader.readString(offsets[6]);
+  object.payloadJson = reader.readString(offsets[3]);
+  object.periodEnd = reader.readDateTimeOrNull(offsets[4]);
+  object.periodStart = reader.readDateTimeOrNull(offsets[5]);
+  object.seenAt = reader.readDateTimeOrNull(offsets[6]);
+  object.seenSlides = reader.readLongList(offsets[7]) ?? [];
+  object.storyKey = reader.readString(offsets[8]);
+  object.type = reader.readString(offsets[9]);
   return object;
 }
 
@@ -155,18 +200,24 @@ P _insightStoryDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readDateTimeOrNull(offset)) as P;
-    case 4:
-      return (reader.readLongList(offset) ?? []) as P;
-    case 5:
       return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 5:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
+      return (reader.readLongList(offset) ?? []) as P;
+    case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -397,6 +448,170 @@ extension InsightStoryQueryWhere
   }
 
   QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeEqualToAnyGeneratedAt(String type) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'type_generatedAt', value: [type]),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeNotEqualToAnyGeneratedAt(String type) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [],
+                upper: [type],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [type],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [type],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [],
+                upper: [type],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeGeneratedAtEqualTo(String type, DateTime generatedAt) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'type_generatedAt',
+          value: [type, generatedAt],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeEqualToGeneratedAtNotEqualTo(String type, DateTime generatedAt) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [type],
+                upper: [type, generatedAt],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [type, generatedAt],
+                includeLower: false,
+                upper: [type],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [type, generatedAt],
+                includeLower: false,
+                upper: [type],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'type_generatedAt',
+                lower: [type],
+                upper: [type, generatedAt],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeEqualToGeneratedAtGreaterThan(
+    String type,
+    DateTime generatedAt, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'type_generatedAt',
+          lower: [type, generatedAt],
+          includeLower: include,
+          upper: [type],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeEqualToGeneratedAtLessThan(
+    String type,
+    DateTime generatedAt, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'type_generatedAt',
+          lower: [type],
+          upper: [type, generatedAt],
+          includeUpper: include,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
+  typeEqualToGeneratedAtBetween(
+    String type,
+    DateTime lowerGeneratedAt,
+    DateTime upperGeneratedAt, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'type_generatedAt',
+          lower: [type, lowerGeneratedAt],
+          includeLower: includeLower,
+          upper: [type, upperGeneratedAt],
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterWhereClause>
   generatedAtEqualTo(DateTime generatedAt) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -604,6 +819,165 @@ extension InsightStoryQueryWhere
 
 extension InsightStoryQueryFilter
     on QueryBuilder<InsightStory, InsightStory, QFilterCondition> {
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'contentHash'),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'contentHash'),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'contentHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'contentHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'contentHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'contentHash',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'contentHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'contentHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'contentHash',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'contentHash',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'contentHash', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  contentHashIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'contentHash', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
   expiresAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -910,6 +1284,152 @@ extension InsightStoryQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'payloadJson', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodEndIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'periodEnd'),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodEndIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'periodEnd'),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodEndEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'periodEnd', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodEndGreaterThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'periodEnd',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodEndLessThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'periodEnd',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodEndBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'periodEnd',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodStartIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'periodStart'),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodStartIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'periodStart'),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodStartEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'periodStart', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodStartGreaterThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'periodStart',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodStartLessThan(DateTime? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'periodStart',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterFilterCondition>
+  periodStartBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'periodStart',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
       );
     });
   }
@@ -1392,6 +1912,19 @@ extension InsightStoryQueryLinks
 
 extension InsightStoryQuerySortBy
     on QueryBuilder<InsightStory, InsightStory, QSortBy> {
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> sortByContentHash() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentHash', Sort.asc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy>
+  sortByContentHashDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentHash', Sort.desc);
+    });
+  }
+
   QueryBuilder<InsightStory, InsightStory, QAfterSortBy> sortByExpiresAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'expiresAt', Sort.asc);
@@ -1427,6 +1960,31 @@ extension InsightStoryQuerySortBy
   sortByPayloadJsonDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payloadJson', Sort.desc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> sortByPeriodEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodEnd', Sort.asc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> sortByPeriodEndDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodEnd', Sort.desc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> sortByPeriodStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodStart', Sort.asc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy>
+  sortByPeriodStartDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodStart', Sort.desc);
     });
   }
 
@@ -1469,6 +2027,19 @@ extension InsightStoryQuerySortBy
 
 extension InsightStoryQuerySortThenBy
     on QueryBuilder<InsightStory, InsightStory, QSortThenBy> {
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> thenByContentHash() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentHash', Sort.asc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy>
+  thenByContentHashDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'contentHash', Sort.desc);
+    });
+  }
+
   QueryBuilder<InsightStory, InsightStory, QAfterSortBy> thenByExpiresAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'expiresAt', Sort.asc);
@@ -1519,6 +2090,31 @@ extension InsightStoryQuerySortThenBy
     });
   }
 
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> thenByPeriodEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodEnd', Sort.asc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> thenByPeriodEndDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodEnd', Sort.desc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy> thenByPeriodStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodStart', Sort.asc);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QAfterSortBy>
+  thenByPeriodStartDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'periodStart', Sort.desc);
+    });
+  }
+
   QueryBuilder<InsightStory, InsightStory, QAfterSortBy> thenBySeenAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'seenAt', Sort.asc);
@@ -1558,6 +2154,14 @@ extension InsightStoryQuerySortThenBy
 
 extension InsightStoryQueryWhereDistinct
     on QueryBuilder<InsightStory, InsightStory, QDistinct> {
+  QueryBuilder<InsightStory, InsightStory, QDistinct> distinctByContentHash({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'contentHash', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<InsightStory, InsightStory, QDistinct> distinctByExpiresAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'expiresAt');
@@ -1575,6 +2179,18 @@ extension InsightStoryQueryWhereDistinct
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'payloadJson', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QDistinct> distinctByPeriodEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'periodEnd');
+    });
+  }
+
+  QueryBuilder<InsightStory, InsightStory, QDistinct> distinctByPeriodStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'periodStart');
     });
   }
 
@@ -1615,6 +2231,12 @@ extension InsightStoryQueryProperty
     });
   }
 
+  QueryBuilder<InsightStory, String?, QQueryOperations> contentHashProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'contentHash');
+    });
+  }
+
   QueryBuilder<InsightStory, DateTime, QQueryOperations> expiresAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'expiresAt');
@@ -1630,6 +2252,19 @@ extension InsightStoryQueryProperty
   QueryBuilder<InsightStory, String, QQueryOperations> payloadJsonProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'payloadJson');
+    });
+  }
+
+  QueryBuilder<InsightStory, DateTime?, QQueryOperations> periodEndProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'periodEnd');
+    });
+  }
+
+  QueryBuilder<InsightStory, DateTime?, QQueryOperations>
+  periodStartProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'periodStart');
     });
   }
 
