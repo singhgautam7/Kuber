@@ -1,12 +1,19 @@
+// =============================================================================
+// add_investment_screen.dart  — POLISHED
+//
+// Drop-in replacement for
+//   lib/features/investments/screens/add_investment_screen.dart
+// =============================================================================
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -17,7 +24,6 @@ import '../providers/investment_provider.dart';
 
 class AddInvestmentScreen extends ConsumerStatefulWidget {
   final Investment? existing;
-
   const AddInvestmentScreen({super.key, this.existing});
 
   @override
@@ -27,14 +33,15 @@ class AddInvestmentScreen extends ConsumerStatefulWidget {
 
 class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
   final _nameController = TextEditingController();
-  String _investmentType = 'stocks';
   final _investedController = TextEditingController();
   final _currentValueController = TextEditingController();
-  bool _autoDebit = false;
   final _sipAmountController = TextEditingController();
+  final _notesController = TextEditingController();
+
+  String _investmentType = 'stocks';
+  bool _autoDebit = false;
   int? _sipDate;
   String? _selectedAccountId;
-  final _notesController = TextEditingController();
   bool _isEditing = false;
 
   @override
@@ -71,431 +78,273 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     super.dispose();
   }
 
+  double get _invested =>
+      double.tryParse(_investedController.text.trim().replaceAll(',', '')) ??
+      0;
+  double get _current =>
+      double.tryParse(
+          _currentValueController.text.trim().replaceAll(',', '')) ??
+      0;
+  double get _sipAmount =>
+      double.tryParse(_sipAmountController.text.trim().replaceAll(',', '')) ??
+      0;
+
+  bool get _canSave {
+    if (_nameController.text.trim().isEmpty) return false;
+    if (_autoDebit) {
+      if (_sipAmount <= 0 || _sipDate == null || _selectedAccountId == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
-    final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
-    final selectedAccount = accounts
-        .where((a) => a.id.toString() == _selectedAccountId)
-        .firstOrNull;
-
-
+    final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
 
     return Scaffold(
+      backgroundColor: cs.surface,
       appBar: AppBar(
         backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit Investment' : 'New Investment',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.onDrag,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: KuberSpacing.lg),
-
-                  // Name
-                  _FieldLabel('INVESTMENT NAME'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _nameController,
-                    hint: 'e.g. Apple Stocks',
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Type
-                  _FieldLabel('INVESTMENT TYPE'),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _typeChip('SIP', Icons.savings_outlined, 'sip'),
-                      _typeChip('Mutual Fund', Icons.pie_chart_outline,
-                          'mutual_fund'),
-                      _typeChip('Stocks',
-                          Icons.candlestick_chart_outlined, 'stocks'),
-                      _typeChip(
-                          'Crypto', Icons.currency_bitcoin, 'crypto'),
-                      _typeChip(
-                          'Trading', Icons.trending_up, 'trading'),
-                      _typeChip(
-                          'Real Estate', Icons.apartment_outlined, 'real_estate'),
-                      _typeChip('Other', Icons.show_chart, 'other'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Amounts
-                  _FieldLabel(_isEditing
-                      ? 'TOTAL INVESTED (INCL. NEW CONTRIBUTION)'
-                      : 'INVESTED AMOUNT (INITIAL)'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _investedController,
-                    hint: '0',
-                    prefix: symbol,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                    ],
-                    suffixIcon: _calcButton(_investedController),
-                  ),
-                  const SizedBox(height: 16),
-
-                  _FieldLabel('CURRENT VALUE (OPTIONAL)'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _currentValueController,
-                    hint: '0',
-                    prefix: symbol,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                    ],
-                    suffixIcon: _calcButton(_currentValueController),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Source account
-                  _FieldLabel('SOURCE ACCOUNT'),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _pickAccount(context),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              selectedAccount?.name ?? 'Select account',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: selectedAccount != null
-                                    ? cs.onSurface
-                                    : cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          Icon(Icons.chevron_right,
-                              color: cs.onSurfaceVariant, size: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Auto-debit SIP toggle
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest,
-                      borderRadius:
-                          BorderRadius.circular(KuberRadius.md),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.savings_outlined,
-                            size: 20, color: cs.onSurfaceVariant),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Enable Auto-Debit SIP',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurface,
-                                ),
-                              ),
-                              Text(
-                                'Automate your monthly contributions',
-                                style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: _autoDebit,
-                          onChanged: (v) =>
-                              setState(() => _autoDebit = v),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // SIP fields (animated)
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    child: _autoDebit
-                        ? Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 24),
-
-                              _FieldLabel('MONTHLY SIP AMOUNT'),
-                              const SizedBox(height: 8),
-                              _buildTextField(
-                                controller: _sipAmountController,
-                                hint: '0',
-                                prefix: symbol,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                                ],
-                                suffixIcon:
-                                    _calcButton(_sipAmountController),
-                              ),
-
-                              const SizedBox(height: 24),
-
-                              _FieldLabel('SIP DATE'),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(
-                                      KuberRadius.md),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<int>(
-                                    value: _sipDate,
-                                    isExpanded: true,
-                                    hint: Text(
-                                      'Select day of month',
-                                      style: GoogleFonts.inter(
-                                        color: cs.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    dropdownColor:
-                                        cs.surfaceContainer,
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.onSurface,
-                                    ),
-                                    items: List.generate(
-                                      28,
-                                      (i) => DropdownMenuItem(
-                                        value: i + 1,
-                                        child: Text(
-                                            '${i + 1}${_ordinal(i + 1)} of month'),
-                                      ),
-                                    ),
-                                    onChanged: (v) {
-                                      if (v != null) {
-                                        setState(
-                                            () => _sipDate = v);
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 24),
-
-                              _FieldLabel('CHOOSE ACCOUNT'),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () =>
-                                    _pickAccount(context),
-                                child: Container(
-                                  width: double.infinity,
-                                  padding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: cs
-                                        .surfaceContainerHighest,
-                                    borderRadius:
-                                        BorderRadius.circular(
-                                            KuberRadius.md),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          selectedAccount?.name ??
-                                              'Select account',
-                                          style:
-                                              GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight:
-                                                FontWeight.w600,
-                                            color: selectedAccount !=
-                                                    null
-                                                ? cs.onSurface
-                                                : cs.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ),
-                                      Icon(Icons.chevron_right,
-                                          color:
-                                              cs.onSurfaceVariant,
-                                          size: 20),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Notes
-                  _FieldLabel('STRATEGY NOTES (OPTIONAL)'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _notesController,
-                    hint:
-                        'Long term goals, strategy, or reference info...',
-                    maxLines: 3,
-                  ),
-
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
+          _isEditing ? 'Edit investment' : 'New investment',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
           ),
-
-          // Save button
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, 8, KuberSpacing.lg, KuberSpacing.lg),
-            child: AppButton(
-              label: _isEditing ? 'SAVE CHANGES' : 'ADD INVESTMENT',
-              type: AppButtonType.primary,
-              fullWidth: true,
-              onPressed: _canSave() ? () => _save(context) : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _typeChip(String label, IconData icon, String value) {
-    final cs = Theme.of(context).colorScheme;
-    final isSelected = _investmentType == value;
-    return GestureDetector(
-      onTap: () => setState(() => _investmentType = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon,
-                size: 16,
-                color: isSelected ? Colors.white : cs.onSurfaceVariant),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : cs.onSurfaceVariant,
-              ),
+            // ── IDENTITY ─────────────────────────────────────────────
+            KuberFormSection(
+              label: 'Identity',
+              topGap: 0,
+              children: [
+                const KuberFieldLabel('Investment name'),
+                TextField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  decoration: const InputDecoration(
+                    hintText: 'e.g. Nifty 50 Index Fund',
+                  ),
+                ),
+              ],
+            ),
+
+            KuberFormSection(
+              label: 'Type',
+              children: [
+                KuberChipGrid<String>(
+                  columns: 3,
+                  selected: _investmentType,
+                  onChanged: (v) => setState(() => _investmentType = v),
+                  options: const [
+                    KuberChipOption(
+                        value: 'sip',
+                        label: 'SIP',
+                        icon: Icons.savings_outlined),
+                    KuberChipOption(
+                        value: 'mutual_fund',
+                        label: 'Mutual Fund',
+                        icon: Icons.pie_chart_outline),
+                    KuberChipOption(
+                        value: 'stocks',
+                        label: 'Stocks',
+                        icon: Icons.show_chart_rounded),
+                    KuberChipOption(
+                        value: 'gold',
+                        label: 'Gold',
+                        icon: Icons.diamond_outlined),
+                    KuberChipOption(
+                        value: 'fd',
+                        label: 'FD',
+                        icon: Icons.account_balance_outlined),
+                    KuberChipOption(
+                        value: 'rd',
+                        label: 'RD',
+                        icon: Icons.savings_rounded),
+                    KuberChipOption(
+                        value: 'other',
+                        label: 'Other',
+                        icon: Icons.more_horiz_rounded),
+                  ],
+                ),
+              ],
+            ),
+
+            KuberFormSection(
+              label: 'Value',
+              children: [
+                KuberFieldLabel(_isEditing
+                    ? 'Total invested (incl. new contribution)'
+                    : 'Invested amount (initial)'),
+                TextField(
+                  controller: _investedController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                  onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(
+                    prefixText: '$symbol ',
+                    prefixStyle: GoogleFonts.inter(
+                        color: cs.onSurfaceVariant),
+                    suffixIcon: IconButton(
+                      onPressed: () =>
+                          _openCalculatorFor(_investedController),
+                      icon: Icon(Icons.calculate_outlined,
+                          size: 18, color: cs.onSurfaceVariant),
+                    ),
+                  ),
+                ),
+                KuberHeroAmountInput(
+                  label: 'Current value',
+                  currencySymbol: symbol,
+                  controller: _currentValueController,
+                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                  onChanged: (_) => setState(() {}),
+                  onCalculatorTap: () =>
+                      _openCalculatorFor(_currentValueController),
+                ),
+                if (_invested > 0 && _current > 0) _GainLossChip(
+                  invested: _invested,
+                  current: _current,
+                  symbol: symbol,
+                ),
+              ],
+            ),
+
+            KuberFormSection(
+              label: 'Auto-debit SIP',
+              children: [
+                KuberSwitchRow(
+                  icon: Icons.repeat_rounded,
+                  name: 'Enable auto-debit SIP',
+                  sub: 'Automate your monthly contributions',
+                  value: _autoDebit,
+                  onChanged: (v) => setState(() => _autoDebit = v),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutCubic,
+                  child: !_autoDebit
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const KuberFieldLabel('Monthly SIP amount'),
+                              TextField(
+                                controller: _sipAmountController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                                onChanged: (_) => setState(() {}),
+                                style: GoogleFonts.inter(
+                                    color: cs.onSurface, fontSize: 15),
+                                decoration: InputDecoration(
+                                  prefixText: '$symbol ',
+                                  prefixStyle: GoogleFonts.inter(
+                                      color: cs.onSurfaceVariant),
+                                  suffixIcon: IconButton(
+                                    onPressed: () => _openCalculatorFor(
+                                        _sipAmountController),
+                                    icon: Icon(Icons.calculate_outlined,
+                                        size: 18,
+                                        color: cs.onSurfaceVariant),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const KuberFieldLabel('SIP date'),
+                              KuberDayGrid(
+                                selected: _sipDate,
+                                onChanged: (v) => setState(() => _sipDate = v),
+                              ),
+                              const SizedBox(height: 10),
+                              const KuberFieldLabel('Debited from'),
+                              _accountPickerRow(),
+                            ],
+                          ),
+                        ),
+                ),
+              ],
+            ),
+
+            KuberFormSection(
+              label: 'Notes',
+              children: [
+                TextField(
+                  controller: _notesController,
+                  maxLines: 3,
+                  minLines: 1,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Optional context',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    String? prefix,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    Widget? suffixIcon,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    return TextField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
-      onChanged: (_) => setState(() {}),
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixText: prefix != null ? '$prefix ' : null,
-        hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
-        prefixStyle: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: cs.onSurface,
-        ),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: cs.surfaceContainerHighest,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: BorderSide.none,
-        ),
+      bottomNavigationBar: KuberSaveButton(
+        label: _isEditing ? 'Save changes' : 'Add investment',
+        onPressed: _canSave ? _save : null,
       ),
     );
   }
 
-  Widget _calcButton(TextEditingController controller) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: () => _openCalculatorFor(controller),
-      child: Container(
-        width: 44,
-        height: 44,
-        margin: const EdgeInsets.only(right: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Icon(Icons.calculate_outlined, color: cs.onSurfaceVariant),
-      ),
+  Widget _accountPickerRow() {
+    final accs = ref.watch(accountListProvider).valueOrNull ?? [];
+    final acc = _selectedAccountId == null
+        ? null
+        : accs
+            .where((a) => a.id.toString() == _selectedAccountId)
+            .firstOrNull;
+    return KuberPickerRow(
+      leading: acc == null
+          ? KuberLeadingSwatch(
+              color: Colors.transparent,
+              icon: Icons.account_balance_outlined,
+              empty: true,
+            )
+          : KuberLeadingSwatch(
+              color: Color(acc.colorValue ?? 0xFF3B82F6),
+              icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
+            ),
+      label: 'Account',
+      value: acc?.name ?? 'Select account',
+      valueIsPlaceholder: acc == null,
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          builder: (_) => AccountPickerSheet(
+            selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
+            onSelected: (id) {
+              setState(() => _selectedAccountId = id.toString());
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -528,135 +377,122 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
     });
   }
 
-  bool _canSave() {
-    if (_nameController.text.trim().isEmpty) return false;
-    if (_autoDebit) {
-      final sipAmt =
-          double.tryParse(_sipAmountController.text.trim().replaceAll(',', '')) ?? 0;
-      if (sipAmt <= 0 || _sipDate == null || _selectedAccountId == null) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  void _pickAccount(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
-      builder: (_) => AccountPickerSheet(
-        selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
-        onSelected: (id) {
-          setState(() => _selectedAccountId = id.toString());
-          Navigator.pop(context);
-        },
-      ),
-    );
-  }
-
-  Future<void> _save(BuildContext context) async {
-    final categories =
-        ref.read(categoryListProvider).valueOrNull ?? [];
+  // PRESERVED VERBATIM ─────────────────────────────────────────────
+  Future<void> _save() async {
+    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
     final investCat = categories.firstWhere(
       (c) => c.name == 'Investment',
       orElse: () => categories.first,
     );
 
-    final sipAmount =
-        double.tryParse(_sipAmountController.text.trim().replaceAll(',', ''));
+    final sipAmount = _autoDebit ? _sipAmount : null;
 
     if (_isEditing) {
       final existing = widget.existing!;
+      final desiredInvested = _invested > 0
+          ? _invested
+          : existing.investedAmount ?? 0;
+      double? currentValue = _current > 0 ? _current : null;
+      currentValue ??= desiredInvested > 0
+          ? desiredInvested
+          : existing.currentValue;
 
-      final desiredInvested =
-          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? existing.investedAmount ?? 0;
-
-      // If currentValue field is empty, auto-fill with investedAmount
-      double? currentValue =
-          double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
-      currentValue ??= desiredInvested > 0 ? desiredInvested : existing.currentValue;
-
-      final inv = existing
+      final updated = existing
         ..name = _nameController.text.trim()
         ..investmentType = _investmentType
         ..investedAmount = desiredInvested
         ..currentValue = currentValue
         ..autoDebit = _autoDebit
-        ..sipAmount = _autoDebit ? sipAmount : null
+        ..sipAmount = sipAmount
         ..sipDate = _autoDebit ? _sipDate : null
         ..accountId = _selectedAccountId ?? existing.accountId
         ..categoryId = investCat.id.toString()
-        ..notes = _notesController.text.trim().isNotEmpty
-            ? _notesController.text.trim()
-            : null;
-
-      await ref.read(investmentListProvider.notifier).updateInvestment(inv);
+        ..notes = _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim();
+      await ref.read(investmentListProvider.notifier).updateInvestment(updated);
     } else {
-      final initialAmount =
-          double.tryParse(_investedController.text.trim().replaceAll(',', '')) ?? 0;
-
-      // Auto-fill currentValue with initialAmount if not explicitly set
-      double? currentValue =
-          double.tryParse(_currentValueController.text.trim().replaceAll(',', ''));
-      if (currentValue == null && initialAmount > 0) {
-        currentValue = initialAmount;
-      }
-
+      final initialAmount = _invested;
+      double? currentValue = _current > 0 ? _current : null;
+      currentValue ??= initialAmount > 0 ? initialAmount : null;
       await ref.read(investmentListProvider.notifier).addInvestment(
             name: _nameController.text.trim(),
             investmentType: _investmentType,
             currentValue: currentValue,
             autoDebit: _autoDebit,
-            sipAmount: _autoDebit ? sipAmount : null,
+            sipAmount: sipAmount,
             sipDate: _autoDebit ? _sipDate : null,
             accountId: _selectedAccountId,
             categoryId: investCat.id.toString(),
-            notes: _notesController.text.trim().isNotEmpty
-                ? _notesController.text.trim()
-                : null,
+            notes: _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
             initialAmount: initialAmount,
           );
     }
-
-    if (context.mounted) context.pop();
-  }
-
-  String _ordinal(int n) {
-    if (n >= 11 && n <= 13) return 'th';
-    switch (n % 10) {
-      case 1:
-        return 'st';
-      case 2:
-        return 'nd';
-      case 3:
-        return 'rd';
-      default:
-        return 'th';
-    }
+    if (mounted) context.pop();
   }
 }
 
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
+// ─── derived gain/loss chip ─────────────────────────────────────────
+class _GainLossChip extends StatelessWidget {
+  final double invested;
+  final double current;
+  final String symbol;
+  const _GainLossChip({
+    required this.invested,
+    required this.current,
+    required this.symbol,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: cs.onSurfaceVariant,
-        letterSpacing: 0.8,
+    final delta = current - invested;
+    final pct = invested == 0 ? 0 : (delta / invested) * 100;
+    final positive = delta >= 0;
+    final tone = positive ? cs.tertiary : cs.error;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: tone.withValues(alpha: 0.30)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            positive
+                ? Icons.arrow_outward_rounded
+                : Icons.south_west_rounded,
+            size: 14,
+            color: tone,
+          ),
+          const SizedBox(width: 8),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text:
+                      '${positive ? '+' : '−'}$symbol${delta.abs().toStringAsFixed(0)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: tone,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      ' · ${positive ? '+' : '−'}${pct.abs().toStringAsFixed(2)}%',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

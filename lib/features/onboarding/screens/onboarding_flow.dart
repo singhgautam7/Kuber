@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/database/isar_service.dart';
+import '../../../core/database/seed_service.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
@@ -72,6 +74,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(PrefsKeys.onboarded, true);
+    await SeedService().seedInitialData(ref.read(isarProvider));
     if (mounted) context.go('/');
   }
 
@@ -90,6 +93,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final prefs = await SharedPreferences.getInstance();
     final wasOnboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
     await prefs.setBool(PrefsKeys.onboarded, true);
+    await SeedService().seedInitialData(ref.read(isarProvider));
     final showNudge = !wasOnboarded && !widget.isReplay;
 
     if (!mounted) return;
@@ -124,7 +128,9 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
               child: PageView(
                 controller: _pageController,
                 physics: const BouncingScrollPhysics(),
-                onPageChanged: (page) => setState(() => _currentPage = page),
+                onPageChanged: (page) {
+                  if (mounted) setState(() => _currentPage = page);
+                },
                 children: [
                   OnboardingPageOne(version: _version, onSkip: _skip),
                   OnboardingPageTwo(onSkip: _skip),

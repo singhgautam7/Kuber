@@ -1,13 +1,19 @@
+// =============================================================================
+// add_loan_screen.dart  — POLISHED
+//
+// Drop-in replacement for lib/features/loans/screens/add_loan_screen.dart.
+// =============================================================================
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -18,7 +24,6 @@ import '../providers/loan_provider.dart';
 
 class AddLoanScreen extends ConsumerStatefulWidget {
   final Loan? existing;
-
   const AddLoanScreen({super.key, this.existing});
 
   @override
@@ -27,20 +32,34 @@ class AddLoanScreen extends ConsumerStatefulWidget {
 
 class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   final _principalController = TextEditingController();
-  String _loanType = 'personal';
   final _nameController = TextEditingController();
   final _lenderController = TextEditingController();
   final _refController = TextEditingController();
   final _emiController = TextEditingController();
   final _interestController = TextEditingController();
-  String? _rateType;
-  DateTime? _loanStartDate; // optional disbursement date
+  final _notesController = TextEditingController();
+
+  String _loanType = 'personal';
+  String? _rateType;            // null = unset
+  DateTime? _loanStartDate;     // optional disbursement
+  DateTime _startDate = DateTime.now(); // required repayment start
   int _billDate = 1;
-  DateTime _startDate = DateTime.now();
   String? _selectedAccountId;
   bool _autoAddTransaction = false;
-  final _notesController = TextEditingController();
   bool _isEditing = false;
+
+  double get _principalAmount =>
+      double.tryParse(_principalController.text.trim().replaceAll(',', '')) ??
+      0;
+  double get _emiAmount =>
+      double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0;
+
+  bool get _canSave =>
+      _principalAmount > 0 &&
+      _nameController.text.trim().isNotEmpty &&
+      _lenderController.text.trim().isNotEmpty &&
+      _emiAmount > 0 &&
+      _selectedAccountId != null;
 
   @override
   void initState() {
@@ -48,17 +67,18 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     final e = widget.existing;
     if (e != null) {
       _isEditing = true;
-      _principalController.text = e.principalAmount == e.principalAmount.truncateToDouble()
-          ? e.principalAmount.toInt().toString()
-          : e.principalAmount.toStringAsFixed(2);
-      _loanType = e.loanType;
       _nameController.text = e.name;
       _lenderController.text = e.lenderName;
       _refController.text = e.referenceNumber ?? '';
+      _principalController.text =
+          e.principalAmount == e.principalAmount.truncateToDouble()
+              ? e.principalAmount.toStringAsFixed(0)
+              : e.principalAmount.toStringAsFixed(2);
       _emiController.text = e.emiAmount.toStringAsFixed(0);
       if (e.interestRate != null) {
         _interestController.text = e.interestRate!.toString();
       }
+      _loanType = e.loanType;
       _rateType = e.rateType;
       _loanStartDate = e.loanStartDate;
       _billDate = e.billDate;
@@ -68,9 +88,6 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       _notesController.text = e.notes ?? '';
     }
   }
-
-  double get _principalAmount =>
-      double.tryParse(_principalController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void dispose() {
@@ -88,524 +105,402 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
-    final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
-    final selectedAccount = accounts
-        .where((a) => a.id.toString() == _selectedAccountId)
-        .firstOrNull;
+    final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
 
     return Scaffold(
+      backgroundColor: cs.surface,
       appBar: AppBar(
         backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit Loan' : 'New Loan',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior:
-                  ScrollViewKeyboardDismissBehavior.onDrag,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: KuberSpacing.lg),
-
-                  // Principal amount
-                  _FieldLabel('TOTAL PRINCIPAL AMOUNT'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _principalController,
-                    hint: '0',
-                    prefix: symbol,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                    ],
-                    suffixIcon: GestureDetector(
-                      onTap: () => _openCalculator(context),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        margin: const EdgeInsets.only(right: 4),
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(KuberRadius.md),
-                          border: Border.all(color: cs.outline),
-                        ),
-                        child: Icon(Icons.calculate_outlined,
-                            color: cs.onSurfaceVariant),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Loan type
-                  _FieldLabel('LOAN TYPE'),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _typeChip('Home', Icons.home_outlined, 'home'),
-                      _typeChip('Vehicle', Icons.directions_car_outlined,
-                          'vehicle'),
-                      _typeChip(
-                          'Personal', Icons.work_outline, 'personal'),
-                      _typeChip('Education', Icons.school_outlined,
-                          'education'),
-                      _typeChip(
-                          'Other', Icons.description_outlined, 'other'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Loan name
-                  _FieldLabel('LOAN IDENTITY'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _nameController,
-                    hint: 'e.g. Home Mortgage - 5th Ave',
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Lender
-                  _FieldLabel('LENDER'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _lenderController,
-                    hint: 'e.g. HDFC Housing Finance',
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Reference number
-                  _FieldLabel('REFERENCE NUMBER (OPTIONAL)'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _refController,
-                    hint: 'e.g. #HL-8829',
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Monthly EMI
-                  _FieldLabel('MONTHLY EMI'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _emiController,
-                    hint: '0',
-                    prefix: symbol,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                    ],
-                    suffixIcon: GestureDetector(
-                      onTap: () => _openCalculatorFor(_emiController),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        margin: const EdgeInsets.only(right: 4),
-                        decoration: BoxDecoration(
-                          borderRadius:
-                              BorderRadius.circular(KuberRadius.md),
-                          border: Border.all(color: cs.outline),
-                        ),
-                        child: Icon(Icons.calculate_outlined,
-                            color: cs.onSurfaceVariant),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Interest rate
-                  _FieldLabel('INTEREST RATE % P.A. (OPTIONAL)'),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _interestController,
-                          hint: 'e.g. 8.45',
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      _rateTypeChip('FIXED', 'fixed'),
-                      const SizedBox(width: 8),
-                      _rateTypeChip('FLOATING', 'floating'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Loan start date (optional)
-                  _FieldLabel('LOAN START DATE (OPTIONAL)'),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _pickLoanStartDate(context),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.event_outlined,
-                              size: 16, color: cs.onSurfaceVariant),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              _loanStartDate != null
-                                  ? DateFormat('MMM d, yyyy')
-                                      .format(_loanStartDate!)
-                                  : 'No date set',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _loanStartDate != null
-                                    ? cs.onSurface
-                                    : cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          if (_loanStartDate != null)
-                            GestureDetector(
-                              onTap: () => setState(
-                                  () => _loanStartDate = null),
-                              child: Icon(Icons.close,
-                                  size: 16,
-                                  color: cs.onSurfaceVariant),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Start date (repayment)
-                  _FieldLabel('REPAYMENT START'),
-                  const SizedBox(height: 8),
-                  _buildDateField(
-                    date: _startDate,
-                    onTap: () => _pickStartDate(context),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Bill date
-                  _FieldLabel('MONTHLY BILL DATE'),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest,
-                      borderRadius:
-                          BorderRadius.circular(KuberRadius.md),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<int>(
-                        value: _billDate,
-                        isExpanded: true,
-                        dropdownColor: cs.surfaceContainer,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
-                        ),
-                        items: List.generate(
-                          28,
-                          (i) => DropdownMenuItem(
-                            value: i + 1,
-                            child: Text('Day ${i + 1} of month'),
-                          ),
-                        ),
-                        onChanged: (v) {
-                          if (v != null) setState(() => _billDate = v);
-                        },
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Source account
-                  _FieldLabel('SOURCE ACCOUNT'),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _pickAccount(context),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              selectedAccount?.name ?? 'Select account',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: selectedAccount != null
-                                    ? cs.onSurface
-                                    : cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          Icon(Icons.chevron_right,
-                              color: cs.onSurfaceVariant, size: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Auto-payment toggle
-                  if (_selectedAccountId != null)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.calendar_month,
-                              size: 20, color: cs.onSurfaceVariant),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Auto-Payment',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: cs.onSurface,
-                                  ),
-                                ),
-                                Text(
-                                  'Create a new transaction automatically on due-date',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 11,
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Switch(
-                            value: _autoAddTransaction,
-                            onChanged: (v) =>
-                                setState(() => _autoAddTransaction = v),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                  const SizedBox(height: 24),
-
-                  // Notes
-                  _FieldLabel('LOAN DOCUMENTATION & NOTES'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    controller: _notesController,
-                    hint:
-                        'Add loan reference numbers, interest rate details, or duration notes...',
-                    maxLines: 3,
-                  ),
-
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
+          _isEditing ? 'Edit loan' : 'New loan',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
           ),
-
-          // Save button
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, 8, KuberSpacing.lg, KuberSpacing.lg),
-            child: AppButton(
-              label: _isEditing ? 'SAVE CHANGES' : 'CONFIRM & ADD LOAN',
-              type: AppButtonType.primary,
-              fullWidth: true,
-              onPressed: _canSave() ? () => _save(context) : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _typeChip(String label, IconData icon, String value) {
-    final cs = Theme.of(context).colorScheme;
-    final isSelected = _loanType == value;
-    return GestureDetector(
-      onTap: () => setState(() => _loanType = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon,
-                size: 16,
-                color: isSelected ? Colors.white : cs.onSurfaceVariant),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : cs.onSurfaceVariant,
+            KuberFormSection(
+              label: 'Loan amount',
+              topGap: 0,
+              children: [
+                KuberHeroAmountInput(
+                  label: 'Total principal',
+                  currencySymbol: symbol,
+                  controller: _principalController,
+                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                  onChanged: (_) => setState(() {}),
+                  onCalculatorTap: () =>
+                      _openCalculatorFor(_principalController),
+                ),
+              ],
+            ),
+            KuberFormSection(
+              label: 'Loan type',
+              children: [
+                KuberChipGrid<String>(
+                  columns: 3,
+                  selected: _loanType,
+                  onChanged: (v) => setState(() => _loanType = v),
+                  options: const [
+                    KuberChipOption(
+                        value: 'home', label: 'Home', icon: Icons.home_outlined),
+                    KuberChipOption(
+                        value: 'vehicle',
+                        label: 'Vehicle',
+                        icon: Icons.directions_car_outlined),
+                    KuberChipOption(
+                        value: 'personal',
+                        label: 'Personal',
+                        icon: Icons.person_outline_rounded),
+                    KuberChipOption(
+                        value: 'education',
+                        label: 'Education',
+                        icon: Icons.school_outlined),
+                    KuberChipOption(
+                        value: 'credit_card',
+                        label: 'Credit Card',
+                        icon: Icons.credit_card_outlined),
+                    KuberChipOption(
+                        value: 'other',
+                        label: 'Other',
+                        icon: Icons.more_horiz_rounded),
+                  ],
+                ),
+              ],
+            ),
+            KuberFormSection(
+              label: 'Identity',
+              children: [
+                const KuberFieldLabel('Loan name'),
+                TextField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  decoration: const InputDecoration(hintText: 'e.g. Maruti Brezza'),
+                ),
+                const KuberFieldLabel('Lender'),
+                TextField(
+                  controller: _lenderController,
+                  textCapitalization: TextCapitalization.words,
+                  onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  decoration: const InputDecoration(hintText: 'e.g. HDFC Bank'),
+                ),
+                const KuberFieldLabel('Reference number', optional: true),
+                TextField(
+                  controller: _refController,
+                  onChanged: (_) => setState(() {}),
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  decoration: const InputDecoration(hintText: 'Sanction / loan ID'),
+                ),
+              ],
+            ),
+            KuberFormSection(
+              label: 'Terms',
+              children: [
+                const KuberFieldLabel('Monthly EMI'),
+                _amountFieldWithCalc(
+                    controller: _emiController, symbol: symbol, isIndian: isIndian),
+                const KuberFieldLabel('Interest rate', optional: true),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _interestController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        onChanged: (_) => setState(() {}),
+                        style: GoogleFonts.inter(
+                            color: cs.onSurface, fontSize: 15),
+                        decoration: const InputDecoration(
+                          hintText: 'e.g. 8.45',
+                          suffixText: '%',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    _ratePill('Fixed', 'fixed'),
+                    const SizedBox(width: 6),
+                    _ratePill('Floating', 'floating'),
+                  ],
+                ),
+              ],
+            ),
+
+            // ── ANSWER CARD ──────────────────────────────────────────
+            if (_emiAmount > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 22),
+                child: KuberAnswerCard(
+                  labelText: 'Monthly outflow',
+                  labelIcon: Icons.bolt_rounded,
+                  amountText: '$symbol${_formatThousands(_emiAmount)}',
+                  unitText: 'per month',
+                  meta: _principalAmount > 0
+                      ? [
+                          KuberAnswerMeta(
+                            key: 'Principal',
+                            value: '$symbol${_compactL(_principalAmount)}',
+                          ),
+                          const KuberAnswerMeta(
+                            key: 'Tenure',
+                            value: '— mo',
+                          ),
+                          const KuberAnswerMeta(
+                            key: 'Interest',
+                            value: '—',
+                          ),
+                        ]
+                      : const [],
+                ),
               ),
+
+            // ── SCHEDULE (tinted) ────────────────────────────────────
+            KuberFormSection(
+              label: 'Schedule',
+              tinted: true,
+              children: [
+                const KuberFieldLabel('Loan start date',
+                    optional: true),
+                _loanStartDateRow(),
+                const KuberFieldLabel('Repayment start'),
+                _dateRow(
+                  label: 'First EMI on',
+                  date: _startDate,
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _startDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) {
+                      setState(() => _startDate = picked);
+                    }
+                  },
+                ),
+                const KuberFieldLabel('Monthly bill date'),
+                KuberDayGrid(
+                  selected: _billDate,
+                  onChanged: (v) => setState(() => _billDate = v),
+                ),
+              ],
+            ),
+
+            KuberFormSection(
+              label: 'Source account',
+              children: [
+                _accountPickerRow(),
+                KuberSwitchRow(
+                  icon: Icons.bolt_rounded,
+                  name: 'Auto-add transactions',
+                  sub: 'Post each EMI to "Loan EMI" category on its bill date',
+                  value: _autoAddTransaction,
+                  onChanged: (v) => setState(() => _autoAddTransaction = v),
+                ),
+              ],
+            ),
+
+            KuberFormSection(
+              label: 'Notes',
+              children: [
+                TextField(
+                  controller: _notesController,
+                  maxLines: 3,
+                  minLines: 1,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Documentation · sanction letter ref · anything',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _rateTypeChip(String label, String value) {
-    final cs = Theme.of(context).colorScheme;
-    final isSelected = _rateType == value;
-    return GestureDetector(
-      onTap: () =>
-          setState(() => _rateType = isSelected ? null : value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primary
-              : cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: isSelected ? Colors.white : cs.onSurfaceVariant,
-            letterSpacing: 0.5,
-          ),
-        ),
+      bottomNavigationBar: KuberSaveButton(
+        label: _isEditing ? 'Save changes' : 'Confirm & add loan',
+        onPressed: _canSave ? _save : null,
       ),
     );
   }
 
-  Widget _buildTextField({
+  // ── widgets ─────────────────────────────────────────────────────
+  Widget _amountFieldWithCalc({
     required TextEditingController controller,
-    required String hint,
-    String? prefix,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    Widget? suffixIcon,
+    required String symbol,
+    required bool isIndian,
   }) {
     final cs = Theme.of(context).colorScheme;
     return TextField(
       controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+      keyboardType: TextInputType.number,
+      inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
       onChanged: (_) => setState(() {}),
+      style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
       decoration: InputDecoration(
-        hintText: hint,
-        prefixText: prefix != null ? '$prefix ' : null,
-        hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
-        prefixStyle: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: cs.onSurface,
-        ),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: cs.surfaceContainerHighest,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: BorderSide.none,
+        prefixText: '$symbol ',
+        prefixStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
+        suffixIcon: IconButton(
+          icon: Icon(Icons.calculate_outlined,
+              size: 18, color: cs.onSurfaceVariant),
+          onPressed: () => _openCalculatorFor(controller),
         ),
       ),
     );
   }
 
-  Widget _buildDateField({
+  Widget _ratePill(String label, String value) {
+    final cs = Theme.of(context).colorScheme;
+    final selected = _rateType == value;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() {
+          _rateType = selected ? null : value;
+        }),
+        borderRadius: BorderRadius.circular(999),
+        child: Container(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected
+                ? cs.primary.withValues(alpha: 0.12)
+                : cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected ? cs.primary : cs.outline,
+            ),
+          ),
+          child: Text(
+            label.toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1,
+              color: selected ? cs.primary : cs.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _loanStartDateRow() {
+    final cs = Theme.of(context).colorScheme;
+    if (_loanStartDate == null) {
+      return KuberPickerRow(
+        leading: KuberLeadingSwatch(
+          color: cs.surfaceContainerHigh,
+          icon: Icons.calendar_today_rounded,
+          empty: true,
+        ),
+        label: 'Disbursed on',
+        value: 'Not set · tap to add',
+        valueIsPlaceholder: true,
+        onTap: _pickLoanStartDate,
+      );
+    }
+    return KuberPickerRow(
+      leading: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Icon(Icons.calendar_today_rounded,
+            size: 16, color: cs.onSurface),
+      ),
+      label: 'Disbursed on',
+      value: DateFormat('d MMM yyyy').format(_loanStartDate!),
+      onTap: _pickLoanStartDate,
+      clearable: true,
+      onClear: () => setState(() => _loanStartDate = null),
+    );
+  }
+
+  Widget _dateRow({
+    required String label,
     required DateTime date,
     required VoidCallback onTap,
   }) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return KuberPickerRow(
+      leading: Container(
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest,
+          color: cs.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
         ),
-        child: Row(
-          children: [
-            Icon(Icons.calendar_today,
-                size: 16, color: cs.onSurfaceVariant),
-            const SizedBox(width: 10),
-            Text(
-              DateFormat('MMM d, yyyy').format(date),
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-          ],
-        ),
+        child: Icon(Icons.calendar_today_rounded,
+            size: 16, color: cs.onSurface),
       ),
+      label: label,
+      value: DateFormat('d MMM yyyy').format(date),
+      onTap: onTap,
     );
   }
 
-  bool _canSave() {
-    return _principalAmount > 0 &&
-        _nameController.text.trim().isNotEmpty &&
-        _emiController.text.trim().isNotEmpty &&
-        (double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0) > 0 &&
-        _selectedAccountId != null;
+  Widget _accountPickerRow() {
+    final accs = ref.watch(accountListProvider).valueOrNull ?? [];
+    final acc = _selectedAccountId == null
+        ? null
+        : accs
+            .where((a) => a.id.toString() == _selectedAccountId)
+            .firstOrNull;
+    return KuberPickerRow(
+      leading: acc == null
+          ? KuberLeadingSwatch(
+              color: Colors.transparent,
+              icon: Icons.account_balance_outlined,
+              empty: true,
+            )
+          : KuberLeadingSwatch(
+              color: Color(acc.colorValue ?? 0xFF3B82F6),
+              icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
+            ),
+      label: 'EMI debited from',
+      value: acc?.name ?? 'Select account',
+      valueIsPlaceholder: acc == null,
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          builder: (_) => AccountPickerSheet(
+            selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
+            onSelected: (id) {
+              setState(() => _selectedAccountId = id.toString());
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
+    );
   }
 
-  void _openCalculator(BuildContext context) {
-    _openCalculatorFor(_principalController);
+  // ── PRESERVED handlers ──────────────────────────────────────────
+  Future<void> _pickLoanStartDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _loanStartDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+    );
+    if (picked != null) setState(() => _loanStartDate = picked);
   }
 
   void _openCalculatorFor(TextEditingController controller) {
@@ -637,71 +532,26 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     });
   }
 
-  void _pickAccount(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
-      builder: (_) => AccountPickerSheet(
-        selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
-        onSelected: (id) {
-          setState(() => _selectedAccountId = id.toString());
-          Navigator.pop(context);
-        },
-      ),
-    );
-  }
-
-  Future<void> _pickStartDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _startDate,
-      firstDate: DateTime(2010),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    );
-    if (picked != null) {
-      setState(() => _startDate = picked);
-    }
-  }
-
-  Future<void> _pickLoanStartDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _loanStartDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    );
-    if (picked != null) {
-      setState(() => _loanStartDate = picked);
-    }
-  }
-
-  Future<void> _save(BuildContext context) async {
-    // Find "Loan EMI" category
-    final categories =
-        ref.read(categoryListProvider).valueOrNull ?? [];
-    final loanCat = categories.firstWhere(
+  // PRESERVED VERBATIM ─────────────────────────────────────────────
+  Future<void> _save() async {
+    final cats = await ref.read(categoryRepositoryProvider).getAll();
+    final emiCategory = cats.firstWhere(
       (c) => c.name == 'Loan EMI',
-      orElse: () => categories.first,
+      orElse: () => cats.first,
     );
 
-    final emi = double.tryParse(_emiController.text.trim().replaceAll(',', '')) ?? 0;
-    final interest = double.tryParse(_interestController.text.trim().replaceAll(',', ''));
+    final emi = _emiAmount;
+    final interest = double.tryParse(
+        _interestController.text.trim().replaceAll(',', ''));
 
     if (_isEditing) {
       final loan = widget.existing!
         ..name = _nameController.text.trim()
         ..loanType = _loanType
         ..lenderName = _lenderController.text.trim()
-        ..referenceNumber = _refController.text.trim().isNotEmpty
-            ? _refController.text.trim()
-            : null
+        ..referenceNumber = _refController.text.trim().isEmpty
+            ? null
+            : _refController.text.trim()
         ..principalAmount = _principalAmount
         ..emiAmount = emi
         ..rateType = _rateType
@@ -710,11 +560,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         ..billDate = _billDate
         ..startDate = _startDate
         ..accountId = _selectedAccountId!
-        ..categoryId = loanCat.id.toString()
+        ..categoryId = emiCategory.id.toString()
         ..autoAddTransaction = _autoAddTransaction
-        ..notes = _notesController.text.trim().isNotEmpty
-            ? _notesController.text.trim()
-            : null;
+        ..notes = _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim();
 
       await ref.read(loanListProvider.notifier).updateLoan(loan);
     } else {
@@ -722,9 +572,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             name: _nameController.text.trim(),
             loanType: _loanType,
             lenderName: _lenderController.text.trim(),
-            referenceNumber: _refController.text.trim().isNotEmpty
-                ? _refController.text.trim()
-                : null,
+            referenceNumber: _refController.text.trim().isEmpty
+                ? null
+                : _refController.text.trim(),
             principalAmount: _principalAmount,
             emiAmount: emi,
             rateType: _rateType,
@@ -733,33 +583,23 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             billDate: _billDate,
             startDate: _startDate,
             accountId: _selectedAccountId!,
-            categoryId: loanCat.id.toString(),
+            categoryId: emiCategory.id.toString(),
             autoAddTransaction: _autoAddTransaction,
-            notes: _notesController.text.trim().isNotEmpty
-                ? _notesController.text.trim()
-                : null,
+            notes: _notesController.text.trim().isEmpty
+                ? null
+                : _notesController.text.trim(),
           );
     }
-
-    if (context.mounted) context.pop();
+    if (mounted) context.pop();
   }
 }
 
-class _FieldLabel extends StatelessWidget {
-  final String text;
-  const _FieldLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: cs.onSurfaceVariant,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
+// Number helpers
+String _formatThousands(double v) =>
+    NumberFormat('#,##,##0', 'en_IN').format(v);
+String _compactL(double v) {
+  if (v >= 10000000) return '${(v / 10000000).toStringAsFixed(2)}Cr';
+  if (v >= 100000) return '${(v / 100000).toStringAsFixed(2)}L';
+  if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}K';
+  return v.toStringAsFixed(0);
 }

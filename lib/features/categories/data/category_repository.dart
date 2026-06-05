@@ -19,6 +19,10 @@ class CategoryRepository extends BaseRepository<Category> {
     await isar.writeTxn(() => isar.categorys.put(c));
   }
 
+  Future<List<Id>> putAll(List<Category> categories) async {
+    return isar.categorys.putAll(categories);
+  }
+
   Future<void> delete(Id id) async {
     await isar.writeTxn(() => isar.categorys.delete(id));
   }

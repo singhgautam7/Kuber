@@ -1,3 +1,9 @@
+// =============================================================================
+// add_ledger_screen.dart  — POLISHED
+//
+// Drop-in replacement for lib/features/ledger/screens/add_ledger_screen.dart.
+// =============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,8 +11,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
@@ -33,12 +40,21 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   late String _type; // 'lent' | 'borrowed'
   final _amountController = TextEditingController();
   final _nameController = TextEditingController();
-  final _nameFocusNode = FocusNode();
-  String? _selectedAccountId;
-  DateTime _entryDate = DateTime.now();
-  DateTime? _expectedDate;
   final _notesController = TextEditingController();
+  final _nameFocusNode = FocusNode();
+  
+  DateTime _date = DateTime.now();
+  DateTime? _expectedDate;
+  String? _selectedAccountId;
   bool _isEditing = false;
+
+  double get _amount =>
+      double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
+
+  bool get _canSave =>
+      _nameController.text.trim().isNotEmpty &&
+      _amount > 0 &&
+      _selectedAccountId != null;
 
   @override
   void initState() {
@@ -47,31 +63,27 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     if (e != null) {
       _isEditing = true;
       _type = e.type;
-      _amountController.text =
-          e.originalAmount == e.originalAmount.truncateToDouble()
+      _amountController.text = e.originalAmount == e.originalAmount.truncateToDouble()
           ? e.originalAmount.toInt().toString()
           : e.originalAmount.toStringAsFixed(2);
       _nameController.text = e.personName;
-      _selectedAccountId = e.accountId;
-      _entryDate = e.createdAt;
+      _date = e.createdAt;
       _expectedDate = e.expectedDate;
       _notesController.text = e.notes ?? '';
+      _selectedAccountId = e.accountId;
     } else {
       final prefill = widget.prefill;
       _type = prefill?.type ?? 'lent';
       if (prefill != null) {
-        _amountController.text =
-            prefill.amount == prefill.amount.truncateToDouble()
+        _amountController.text = prefill.amount == prefill.amount.truncateToDouble()
             ? prefill.amount.toInt().toString()
             : prefill.amount.toStringAsFixed(2);
         _nameController.text = prefill.personName;
         _notesController.text = prefill.notes ?? '';
-        _entryDate = prefill.entryDate ?? DateTime.now();
+        _date = prefill.entryDate ?? DateTime.now();
       }
     }
   }
-
-  double get _amount => double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void dispose() {
@@ -86,410 +98,337 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
-    final accounts = ref.watch(accountListProvider).valueOrNull ?? [];
+    final tone = _type == 'lent' ? HeroAmountTone.expense : HeroAmountTone.income;
+    final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
     final people = ref.watch(peopleListProvider).valueOrNull ?? [];
-    final selectedAccount = accounts
-        .where((a) => a.id.toString() == _selectedAccountId)
-        .firstOrNull;
 
     return Scaffold(
+      backgroundColor: cs.surface,
       appBar: AppBar(
         backgroundColor: cs.surface,
-        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit Entry' : 'New Entry',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+          _isEditing ? 'Edit entry' : 'New entry',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
+          ),
         ),
-        centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: KuberSpacing.lg),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── TYPE ─────────────────────────────────────────────────
+            KuberFormSection(
+              label: 'Type',
+              topGap: 0,
+              children: [
+                KuberSegmented<String>(
+                  groupValue: _type,
+                  enabled: !_isEditing, // PRESERVED — locked while editing
+                  onChanged: (v) => setState(() => _type = v),
+                  segments: const [
+                    KuberSegment(
+                      value: 'lent',
+                      label: 'Lent',
+                      icon: Icons.arrow_outward_rounded,
+                      tone: SegmentTone.expense,
+                    ),
+                    KuberSegment(
+                      value: 'borrowed',
+                      label: 'Borrowed',
+                      icon: Icons.south_west_rounded,
+                      tone: SegmentTone.income,
+                    ),
+                  ],
+                ),
+              ],
+            ),
 
-                  // Type toggle
-                  IgnorePointer(
-                    ignoring: _isEditing,
-                    child: Opacity(
-                      opacity: _isEditing ? 0.5 : 1.0,
-                      child: _TypeToggle(
-                        selected: _type,
-                        onSelected: (v) => setState(() => _type = v),
+            // ── IDENTITY ─────────────────────────────────────────────
+            KuberFormSection(
+              label: 'Identity',
+              children: [
+                KuberHeroAmountInput(
+                  label: _type == 'lent' ? 'Amount lent' : 'Amount borrowed',
+                  currencySymbol: symbol,
+                  controller: _amountController,
+                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                  tone: tone,
+                  onChanged: (_) => setState(() {}),
+                  onCalculatorTap: () => _openCalculatorFor(_amountController),
+                ),
+                const KuberFieldLabel('Person'),
+                RawAutocomplete<String>(
+                  textEditingController: _nameController,
+                  focusNode: _nameFocusNode,
+                  optionsBuilder: (textEditingValue) {
+                    final query = textEditingValue.text.trim().toLowerCase();
+                    if (query.isEmpty) {
+                      return people.map((p) => p.name).toList();
+                    }
+                    return people
+                        .where((p) => p.name.toLowerCase().contains(query))
+                        .map((p) => p.name)
+                        .toList();
+                  },
+                  fieldViewBuilder:
+                      (context, controller, focusNode, onFieldSubmitted) {
+                    return TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      textCapitalization: TextCapitalization.words,
+                      onChanged: (_) => setState(() {}),
+                      style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                      decoration: const InputDecoration(
+                        hintText: 'Who?',
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: KuberSpacing.xl),
-
-                  // Amount
-                  _SectionLabel('AMOUNT TO RECORD'),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _amountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
-                    ],
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                    ),
-                    onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      hintText: '0',
-                      hintStyle: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      prefixText: '$symbol ',
-                      prefixStyle: GoogleFonts.inter(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w300,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      suffixIcon: GestureDetector(
-                        onTap: () => _openCalculator(context),
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          margin: const EdgeInsets.only(right: 4),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
-                            border: Border.all(color: cs.outline),
-                          ),
-                          child: Icon(
-                            Icons.calculate_outlined,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: cs.surfaceContainerHighest,
-                      border: OutlineInputBorder(
+                    );
+                  },
+                  optionsViewBuilder: (context, onSelected, options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 8,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: KuberSpacing.xl),
-
-                  // Person name
-                  _SectionLabel('PERSON NAME'),
-                  const SizedBox(height: 8),
-                  RawAutocomplete<String>(
-                    textEditingController: _nameController,
-                    focusNode: _nameFocusNode,
-                    optionsBuilder: (textEditingValue) {
-                      final query = textEditingValue.text.trim().toLowerCase();
-                      if (query.isEmpty) {
-                        // Show all people when field is focused and empty
-                        return people.map((p) => p.name).toList();
-                      }
-                      return people
-                          .where((p) => p.name.toLowerCase().contains(query))
-                          .map((p) => p.name)
-                          .toList();
-                    },
-                    fieldViewBuilder:
-                        (context, controller, focusNode, onFieldSubmitted) {
-                          return TextField(
-                            controller: controller,
-                            focusNode: focusNode,
-                            style: GoogleFonts.inter(color: cs.onSurface),
-                            decoration: InputDecoration(
-                              hintText: 'Who are you dealing with?',
-                              hintStyle: GoogleFonts.inter(
-                                color: cs.onSurfaceVariant,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.person_outline,
-                                color: cs.onSurfaceVariant,
-                              ),
-                              filled: true,
-                              fillColor: cs.surfaceContainerHighest,
-                              border: OutlineInputBorder(
+                        color: cs.surfaceContainer,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 240),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            itemCount: options.length,
+                            separatorBuilder: (_, __) => Divider(
+                              height: 1,
+                              indent: 56,
+                              color: cs.outline,
+                            ),
+                            itemBuilder: (ctx, i) {
+                              final name = options.elementAt(i);
+                              return InkWell(
+                                onTap: () => onSelected(name),
                                 borderRadius: BorderRadius.circular(
                                   KuberRadius.md,
                                 ),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          );
-                        },
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 8,
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
-                          color: cs.surfaceContainer,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxHeight: 240),
-                            child: ListView.separated(
-                              shrinkWrap: true,
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              itemCount: options.length,
-                              separatorBuilder: (_, __) => Divider(
-                                height: 1,
-                                indent: 56,
-                                color: cs.outline,
-                              ),
-                              itemBuilder: (ctx, i) {
-                                final name = options.elementAt(i);
-                                return InkWell(
-                                  onTap: () => onSelected(name),
-                                  borderRadius: BorderRadius.circular(
-                                    KuberRadius.md,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        BsAvatar(name: name, size: 32),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          name,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: cs.onSurface,
-                                          ),
+                                  child: Row(
+                                    children: [
+                                      BsAvatar(name: name, size: 32),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        name,
+                                        style: GoogleFonts.inter(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: cs.onSurface,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      );
-                    },
-                  ),
-
-                  // Duplicate warning (only for new entries)
-                  if (!_isEditing)
-                    _DuplicateWarning(
-                      personName: _nameController.text,
-                      type: _type,
-                    ),
-
-                  const SizedBox(height: KuberSpacing.xl),
-
-                  // Account picker
-                  _SectionLabel('ACCOUNT'),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _pickAccount(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
                       ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.account_balance_outlined,
-                            size: 20,
-                            color: cs.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              selectedAccount?.name ?? 'Select account',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: selectedAccount != null
-                                    ? cs.onSurface
-                                    : cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: cs.onSurfaceVariant,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: KuberSpacing.xl),
-
-                  // Entry date
-                  _SectionLabel('ENTRY DATE & TIME'),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _pickEntryDate(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.schedule,
-                            size: 18,
-                            color: cs.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            DateFormat(
-                              'MMM d, yyyy  h:mm a',
-                            ).format(_entryDate),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                          const Spacer(),
-                          Icon(
-                            Icons.calendar_today,
-                            size: 16,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: KuberSpacing.xl),
-
-                  // Expected due date
-                  _SectionLabel('EXPECTED DUE DATE'),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => _pickExpectedDate(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 18,
-                            color: cs.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _expectedDate != null
-                                  ? DateFormat(
-                                      'MMM d, yyyy',
-                                    ).format(_expectedDate!)
-                                  : 'No due date set',
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: _expectedDate != null
-                                    ? cs.onSurface
-                                    : cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          if (_expectedDate != null)
-                            GestureDetector(
-                              onTap: () => setState(() => _expectedDate = null),
-                              child: Icon(
-                                Icons.close,
-                                size: 18,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: KuberSpacing.xl),
-
-                  // Notes
-                  _SectionLabel('NOTES (OPTIONAL)'),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 2,
-                    style: GoogleFonts.inter(color: cs.onSurface),
-                    decoration: InputDecoration(
-                      hintText: 'Add a note...',
-                      hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
-                      filled: true,
-                      fillColor: cs.surfaceContainerHighest,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: KuberSpacing.xl),
-                ],
-              ),
+                    );
+                  },
+                ),
+                _DuplicatePersonWarning(
+                  personName: _nameController.text,
+                  type: _type,
+                  isEditing: _isEditing,
+                ),
+                KuberFieldLabel(_type == 'lent' ? 'From account' : 'To account'),
+                _accountPickerRow(),
+              ],
             ),
-          ),
 
-          // Pinned save button
-          Container(
-            padding: EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              KuberSpacing.md,
-              KuberSpacing.lg,
-              MediaQuery.of(context).viewPadding.bottom + KuberSpacing.lg,
+            // ── SCHEDULE ─────────────────────────────────────────────
+            KuberFormSection(
+              label: 'Schedule',
+              tinted: true,
+              children: [
+                const KuberFieldLabel('Date'),
+                _dateRow(
+                  label: _type == 'lent' ? 'Lent on' : 'Borrowed on',
+                  date: _date,
+                  onTap: _pickDate,
+                ),
+                const KuberFieldLabel('Expected return', optional: true),
+                _expectedReturnRow(),
+              ],
             ),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              border: Border(top: BorderSide(color: cs.outline)),
+
+            KuberFormSection(
+              label: 'Notes',
+              children: [
+                TextField(
+                  controller: _notesController,
+                  maxLines: 3,
+                  minLines: 1,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
+                  decoration: const InputDecoration(
+                    hintText: 'Context, IOU ref, anything',
+                  ),
+                ),
+              ],
             ),
-            child: AppButton(
-              label: _isEditing
-                  ? 'UPDATE ${_type.toUpperCase()} ENTRY'
-                  : 'SAVE ${_type.toUpperCase()} ENTRY',
-              type: AppButtonType.primary,
-              fullWidth: true,
-              onPressed: _canSave ? _save : null,
-            ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      bottomNavigationBar: KuberSaveButton(
+        label: _isEditing
+            ? 'Update $_type entry'
+            : 'Save $_type entry',
+        onPressed: _canSave ? _save : null,
       ),
     );
   }
 
-  bool get _canSave =>
-      _amount > 0 &&
-      _nameController.text.trim().isNotEmpty &&
-      _selectedAccountId != null;
+  Widget _accountPickerRow() {
+    final accs = ref.watch(accountListProvider).valueOrNull ?? [];
+    final acc = _selectedAccountId == null
+        ? null
+        : accs
+            .where((a) => a.id.toString() == _selectedAccountId)
+            .firstOrNull;
+    return KuberPickerRow(
+      leading: acc == null
+          ? KuberLeadingSwatch(
+              color: Colors.transparent,
+              icon: Icons.account_balance_outlined,
+              empty: true,
+            )
+          : KuberLeadingSwatch(
+              color: Color(acc.colorValue ?? 0xFF3B82F6),
+              icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
+            ),
+      label: 'Account',
+      value: acc?.name ?? 'Select account',
+      valueIsPlaceholder: acc == null,
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          builder: (_) => AccountPickerSheet(
+            selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
+            onSelected: (id) {
+              setState(() => _selectedAccountId = id.toString());
+              Navigator.pop(context);
+            },
+          ),
+        );
+      },
+    );
+  }
 
-  void _openCalculator(BuildContext context) {
+  Widget _dateRow({
+    required String label,
+    required DateTime date,
+    required VoidCallback onTap,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    return KuberPickerRow(
+      leading: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Icon(Icons.calendar_today_rounded,
+            size: 16, color: cs.onSurface),
+      ),
+      label: label,
+      value: DateFormat('d MMM yyyy').format(date),
+      onTap: onTap,
+    );
+  }
+
+  Widget _expectedReturnRow() {
+    final cs = Theme.of(context).colorScheme;
+    if (_expectedDate == null) {
+      return KuberPickerRow(
+        leading: KuberLeadingSwatch(
+          color: cs.surfaceContainerHigh,
+          icon: Icons.event_outlined,
+          empty: true,
+        ),
+        label: 'Expected on',
+        value: 'Not set · tap to add',
+        valueIsPlaceholder: true,
+        onTap: _pickExpectedDate,
+      );
+    }
+    final daysOut = _expectedDate!.difference(DateTime.now()).inDays;
+    final suffix = daysOut > 0 ? ' · in $daysOut days' : '';
+    return KuberPickerRow(
+      leading: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Icon(Icons.event_outlined, size: 16, color: cs.onSurface),
+      ),
+      label: 'Expected on',
+      value: '${DateFormat('d MMM yyyy').format(_expectedDate!)}$suffix',
+      onTap: _pickExpectedDate,
+      clearable: true,
+      onClear: () => setState(() => _expectedDate = null),
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (date == null || !mounted) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_date),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _date = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time?.hour ?? _date.hour,
+        time?.minute ?? _date.minute,
+      );
+    });
+  }
+
+  Future<void> _pickExpectedDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _expectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) setState(() => _expectedDate = picked);
+  }
+
+  void _openCalculatorFor(TextEditingController controller) {
     FocusScope.of(context).unfocus();
     showModalBottomSheet(
       context: context,
@@ -498,15 +437,14 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
       ),
       builder: (_) => KuberCalculator(
         initialValue: _amount,
         onConfirm: (result) {
           setState(() {
-            _amountController.text = result == result.truncateToDouble()
+            controller.text = result == result.truncateToDouble()
                 ? result.toInt().toString()
                 : result.toStringAsFixed(2);
           });
@@ -514,70 +452,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       ),
     ).then((_) {
       Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) FocusScope.of(this.context).unfocus();
+        if (mounted) FocusScope.of(context).unfocus();
       });
     });
-  }
-
-  void _pickAccount(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
-      builder: (_) => AccountPickerSheet(
-        selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
-        onSelected: (id) {
-          setState(() => _selectedAccountId = id.toString());
-          Navigator.pop(context);
-        },
-      ),
-    );
-  }
-
-  Future<void> _pickEntryDate(BuildContext context) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _entryDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (date == null || !mounted) return;
-
-    final time = await showTimePicker(
-      // ignore: use_build_context_synchronously
-      context: this.context,
-      initialTime: TimeOfDay.fromDateTime(_entryDate),
-    );
-
-    if (!mounted) return;
-    setState(() {
-      _entryDate = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time?.hour ?? _entryDate.hour,
-        time?.minute ?? _entryDate.minute,
-      );
-    });
-  }
-
-  Future<void> _pickExpectedDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _expectedDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 3650)),
-    );
-    if (picked != null) {
-      setState(() => _expectedDate = picked);
-    }
   }
 
   String _toTitleCase(String input) {
@@ -591,6 +468,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
         .join(' ');
   }
 
+  // PRESERVED VERBATIM ─────────────────────────────────────────────
   Future<void> _save() async {
     final personName = _toTitleCase(_nameController.text);
 
@@ -638,133 +516,65 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                 ? _notesController.text
                 : null,
             expectedDate: _expectedDate,
-            createdAt: _entryDate,
+            createdAt: _date,
           );
     }
-
     if (mounted) context.pop();
   }
 }
 
-class _TypeToggle extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onSelected;
-
-  const _TypeToggle({required this.selected, required this.onSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final types = ['lent', 'borrowed'];
-    final labels = ['Lent', 'Borrowed'];
-
-    return Container(
-      height: 48,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
-        children: List.generate(types.length, (i) {
-          final isSelected = types[i] == selected;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onSelected(types[i]),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                decoration: BoxDecoration(
-                  color: isSelected ? cs.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  labels[i],
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: cs.onSurfaceVariant,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-}
-
-class _DuplicateWarning extends ConsumerWidget {
+// ─── duplicate-person warning ──────────────────────────────────────
+class _DuplicatePersonWarning extends ConsumerWidget {
   final String personName;
   final String type;
-
-  const _DuplicateWarning({required this.personName, required this.type});
+  final bool isEditing;
+  const _DuplicatePersonWarning({
+    required this.personName,
+    required this.type,
+    required this.isEditing,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (personName.trim().isEmpty) return const SizedBox.shrink();
-
-    final ledgers = ref.watch(ledgerListProvider).valueOrNull ?? [];
-    final query = personName.trim().toLowerCase();
-    final hasDuplicate = ledgers.any(
-      (l) => l.personNameLower == query && l.type == type && !l.isSettled,
-    );
-
-    if (!hasDuplicate) return const SizedBox.shrink();
-
     final cs = Theme.of(context).colorScheme;
+    if (isEditing) return const SizedBox.shrink();
+    if (personName.trim().isEmpty) return const SizedBox.shrink();
+    final query = personName.trim().toLowerCase();
+    final ledgers = ref.watch(ledgerListProvider).valueOrNull ?? [];
+    final hasDuplicate = ledgers.any(
+      (l) =>
+          l.personNameLower == query &&
+          l.type == type &&
+          !l.isSettled,
+    );
+    if (!hasDuplicate) return const SizedBox.shrink();
     return Padding(
-      padding: const EdgeInsets.only(top: KuberSpacing.sm),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: KuberColors.warningSubtle,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: KuberColors.warning.withValues(alpha: 0.4)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(
-              Icons.warning_amber_rounded,
-              size: 17,
-              color: KuberColors.warning,
+      padding: const EdgeInsets.only(top: 10),
+      child: KuberCallout(
+        child: Text.rich(
+          TextSpan(
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              color: cs.onSurface,
+              height: 1.5,
             ),
-            const SizedBox(width: KuberSpacing.sm),
-            Expanded(
-              child: Text(
-                'Note: an active ${type == 'lent' ? 'lent' : 'borrow'} entry for ${personName.trim()} already exists. Are you sure you want to create a new entry?',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  height: 1.35,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
-                ),
+            children: [
+              const TextSpan(text: 'An active '),
+              TextSpan(
+                text: type == 'lent' ? 'lent' : 'borrow',
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-            ),
-          ],
+              const TextSpan(text: ' entry for '),
+              TextSpan(
+                text: personName.trim(),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const TextSpan(
+                text:
+                    ' already exists. Are you sure you want to create a new one?',
+              ),
+            ],
+          ),
         ),
       ),
     );
