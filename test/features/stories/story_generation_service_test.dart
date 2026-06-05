@@ -141,6 +141,28 @@ void main() {
       expect(weekly.payloadJson.contains('Previous Week (18 to 24 May)'), isTrue);
     });
 
+    test('daily top-spend slide uses the transaction name, not the category',
+        () async {
+      await seed(
+        categories: defaultCategories,
+        txns: [
+          makeTransaction(
+            name: 'Dinner at Olive',
+            amount: 1200,
+            categoryId: '1',
+            createdAt: DateTime(2026, 6, 2, 20), // yesterday
+          ),
+        ],
+      );
+
+      await StoryGenerationService(isar).generateDue(now: DateTime(2026, 6, 3, 10));
+      final daily = (await StoryRepository(isar).all())
+          .firstWhere((r) => r.storyKey == 'recap_day_2026_06_02');
+
+      expect(daily.payloadJson.contains('Top spend'), isTrue);
+      expect(daily.payloadJson.contains('on Dinner at Olive'), isTrue);
+    });
+
     test('monthly shows This Month and Previous Month names', () async {
       final now = DateTime(2026, 6, 3, 10); // Wed
       await seed(
@@ -185,9 +207,37 @@ void main() {
       await service.generateDue(now: now); // second pass, same day
 
       final rows = await StoryRepository(isar).all();
-      expect(rows.where((r) => r.storyKey == 'loans_L1').length, 1);
-      expect(rows.where((r) => r.storyKey == 'ledger_G1').length, 1);
+      // Each entity type is a single consolidated story (not one per entity).
+      expect(rows.where((r) => r.storyKey == 'loans').length, 1);
+      expect(rows.where((r) => r.storyKey == 'ledger').length, 1);
       expect(rows.where((r) => r.storyKey.startsWith('investments_')).length, 1);
+    });
+
+    test('multiple loans and ledgers each consolidate into one story', () async {
+      await seed(
+        categories: defaultCategories,
+        loans: [
+          makeLoan(uid: 'L1', name: 'Bike Loan'),
+          makeLoan(uid: 'L2', name: 'Home Loan'),
+        ],
+        ledgers: [
+          makeLedger(uid: 'G1', personName: 'Rahul'),
+          makeLedger(uid: 'G2', personName: 'Sara'),
+        ],
+      );
+
+      await StoryGenerationService(isar).generateDue(now: DateTime(2026, 6, 3, 10));
+      final rows = await StoryRepository(isar).all();
+
+      expect(rows.where((r) => r.storyKey == 'loans').length, 1);
+      expect(rows.where((r) => r.storyKey == 'ledger').length, 1);
+      // Both entities live as slides inside the single consolidated story.
+      final loans = rows.firstWhere((r) => r.storyKey == 'loans');
+      expect(loans.payloadJson.contains('Bike Loan'), isTrue);
+      expect(loans.payloadJson.contains('Home Loan'), isTrue);
+      final ledger = rows.firstWhere((r) => r.storyKey == 'ledger');
+      expect(ledger.payloadJson.contains('Rahul'), isTrue);
+      expect(ledger.payloadJson.contains('Sara'), isTrue);
     });
 
     test('insights are consolidated into a single story (not one per insight)',

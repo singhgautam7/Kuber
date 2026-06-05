@@ -19,6 +19,10 @@ class AccountRepository extends BaseRepository<Account> {
     return await isar.writeTxn(() => isar.accounts.put(a));
   }
 
+  Future<List<Id>> putAll(List<Account> accounts) async {
+    return isar.accounts.putAll(accounts);
+  }
+
   Future<void> delete(Id id) async {
     await isar.writeTxn(() => isar.accounts.delete(id));
   }

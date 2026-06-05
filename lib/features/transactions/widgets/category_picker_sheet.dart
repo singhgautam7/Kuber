@@ -100,6 +100,8 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                 // Search field
                 TextField(
                   controller: _searchController,
+                  autofocus: false,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   style: textTheme.bodyMedium?.copyWith(
                     color: cs.onSurface,
                   ),

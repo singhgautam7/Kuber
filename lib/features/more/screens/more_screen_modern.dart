@@ -387,10 +387,12 @@ class _HeroTile extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
+      borderRadius: BorderRadius.circular(KuberRadius.lg),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
+        child: Ink(
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(KuberRadius.lg),
@@ -408,7 +410,6 @@ class _HeroTile extends StatelessWidget {
               stops: const [0.0, 0.75],
             ),
           ),
-          clipBehavior: Clip.antiAlias,
           padding: const EdgeInsets.all(KuberSpacing.lg),
           child: Row(
             children: [
@@ -544,10 +545,14 @@ class _ManageTile extends StatelessWidget {
     return Material(
       key: data.key,
       color: Colors.transparent,
+      borderRadius: BorderRadius.circular(KuberRadius.lg),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: data.onTap,
+        splashColor: cs.onSurface.withValues(alpha: 0.08),
+        highlightColor: cs.onSurface.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
+        child: Ink(
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(KuberRadius.lg),
@@ -660,10 +665,12 @@ class _ToolCard extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
+      borderRadius: BorderRadius.circular(KuberRadius.lg),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
+        child: Ink(
           height: 156,
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
@@ -676,7 +683,6 @@ class _ToolCard extends StatelessWidget {
               stops: const [0.0, 0.7],
             ),
           ),
-          clipBehavior: Clip.antiAlias,
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
           child: Stack(
             children: [
@@ -785,11 +791,11 @@ class _CompactList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
+    return Material(
+      color: cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(KuberRadius.lg),
-        border: Border.all(color: cs.outline),
+        side: BorderSide(color: cs.outline),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -814,6 +820,8 @@ class _CompactRow extends StatelessWidget {
     return InkWell(
       key: data.key,
       onTap: data.onTap,
+      splashColor: cs.onSurface.withValues(alpha: 0.08),
+      highlightColor: cs.onSurface.withValues(alpha: 0.04),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
         child: Row(
@@ -1013,10 +1021,12 @@ class _HelpTile extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
+      borderRadius: BorderRadius.circular(KuberRadius.lg),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: action.onTap,
         borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
+        child: Ink(
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
             border: Border.all(color: cs.outline),

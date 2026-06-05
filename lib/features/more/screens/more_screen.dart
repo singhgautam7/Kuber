@@ -350,12 +350,13 @@ class _MenuSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: KuberSpacing.sm),
-        Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
+        Material(
+          color: cs.surfaceContainer,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            side: BorderSide(color: cs.outline),
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             children: [
               for (int i = 0; i < items.length; i++) ...[
@@ -391,8 +392,7 @@ class _MenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(

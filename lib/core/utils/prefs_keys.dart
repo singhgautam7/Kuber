@@ -3,6 +3,7 @@ class PrefsKeys {
   static const tutorialComplete = 'tutorial_complete';
   static const onboardingTutorialNudgePending =
       'kuber_onboarding_tutorial_nudge_pending';
+  static const advancedSetupCompleted = 'kuber_advanced_setup_completed';
   static const userName = 'kuber_user_name';
   static const currency = 'currency';
   static const themeMode = 'theme_mode';
@@ -19,8 +20,7 @@ class PrefsKeys {
   static const migratedAttachmentsV1 = 'kuber_migrated_attachments_tags_v1';
   static const migratedSuggestionBackfillV1 =
       'kuber_migrated_suggestion_backfill_v1';
-  static const migratedStoriesPositionV2 =
-      'kuber_migrated_stories_position_v2';
+  static const migratedStoriesPositionV2 = 'kuber_migrated_stories_position_v2';
   static const migratedStoryResetV1 = 'kuber_migrated_story_reset_v1';
 
   // Info Seen Keys
@@ -56,7 +56,7 @@ class PrefsKeys {
   // Notifications
   static const notificationPermissionAsked =
       'kuber_notification_permission_asked';
-  
+
   // Stories
   static const lastStoryGenerationDate = 'kuber_last_story_generation_date';
   static const welcomeStoryGenerated = 'kuber_welcome_story_generated';
