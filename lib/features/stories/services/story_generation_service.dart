@@ -612,20 +612,18 @@ class _StoryCandidateBuilder {
   // ── Entity builders ──────────────────────────────────────────────────
 
   void _loanStories(List<Loan> loans, DateTime now) {
-    for (final loan in loans.where((l) => !l.isCompleted)) {
-      _upsertEntity(StoryKeys.loanEntity(loan.uid), now, _loanCadence, () {
-        final label = formatBubblePeriod(
-          BubblePeriodKind.loan,
-          start: now,
-          entityName: loan.name,
-        );
-        return _story('loans', now, [
+    // One consolidated Loans story with a slide per active loan (so the ring/
+    // archive show a single Loans bubble, not one per loan).
+    final active = loans.where((l) => !l.isCompleted).take(6).toList();
+    if (active.isEmpty) return;
+    _upsertEntity(StoryKeys.loans, now, _loanCadence, () {
+      final slides = [
+        for (final loan in active)
           StorySlide(
             variant: SlideVariant.stats,
             background: StoryColorKey.cyan,
             icon: 'loan',
             header: 'Loans',
-            dateLabel: label,
             title: loan.name,
             stats: [
               StatItem('Monthly EMI', _money(loan.emiAmount)),
@@ -634,37 +632,36 @@ class _StoryCandidateBuilder {
                 StatItem('Lender', loan.lenderName),
             ],
           ),
-        ]);
-      });
-    }
+      ];
+      return _story('loans', now, slides);
+    });
   }
 
   void _ledgerStories(List<Ledger> ledgers, DateTime now) {
-    for (final ledger in ledgers.where((l) => !l.isSettled)) {
-      _upsertEntity(StoryKeys.ledger(ledger.uid), now, _ledgerCadence, () {
-        final amount = _money(ledger.originalAmount);
-        final isLent = ledger.type == 'lent';
-        final label = formatBubblePeriod(
-          BubblePeriodKind.ledger,
-          start: now,
-          entityName: ledger.personName,
-        );
-        return _story('ledger', now, [
-          StorySlide(
-            variant: SlideVariant.statement,
-            background: StoryColorKey.slate,
-            icon: 'ledger',
-            header: 'Lend / Borrow',
-            dateLabel: label,
-            title: isLent
-                ? '${ledger.personName} owes you $amount'
-                : 'You owe ${ledger.personName} $amount',
-            subtitle: 'This entry is still open.',
-            emphasis: [Emphasis(amount, EmphasisStyle.primary)],
-          ),
-        ]);
-      });
-    }
+    // One consolidated Lend / Borrow story with a slide per open entry.
+    final open = ledgers.where((l) => !l.isSettled).take(6).toList();
+    if (open.isEmpty) return;
+    _upsertEntity(StoryKeys.ledger, now, _ledgerCadence, () {
+      final slides = [
+        for (final ledger in open)
+          () {
+            final amount = _money(ledger.originalAmount);
+            final isLent = ledger.type == 'lent';
+            return StorySlide(
+              variant: SlideVariant.statement,
+              background: StoryColorKey.slate,
+              icon: 'ledger',
+              header: 'Lend / Borrow',
+              title: isLent
+                  ? '${ledger.personName} owes you $amount'
+                  : 'You owe ${ledger.personName} $amount',
+              subtitle: 'This entry is still open.',
+              emphasis: [Emphasis(amount, EmphasisStyle.primary)],
+            );
+          }(),
+      ];
+      return _story('ledger', now, slides);
+    });
   }
 
   void _investmentStory(
@@ -803,7 +800,8 @@ class _StoryCandidateBuilder {
         : '${_money(diff)} more than $label';
   }
 
-  /// (categoryName, amountString) of the biggest single expense in range.
+  /// (transactionName, amountString) of the biggest single expense in range.
+  /// Falls back to the category name when the transaction has no name.
   (String, String)? _topTransaction(
     List<Transaction> txns,
     DateTime start,
@@ -819,7 +817,10 @@ class _StoryCandidateBuilder {
     }
     if (top == null) return null;
     final catById = {for (final c in categories) c.id.toString(): c.name};
-    return (catById[top.categoryId] ?? 'Uncategorized', _money(top.amount));
+    final name = top.name.trim().isNotEmpty
+        ? top.name.trim()
+        : (catById[top.categoryId] ?? 'Uncategorized');
+    return (name, _money(top.amount));
   }
 
   /// (categoryName, percentOfSpend) of the top spending category.

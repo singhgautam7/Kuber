@@ -19,16 +19,16 @@ class StoryKeys {
   /// Recap of a completed year, one key per year.
   static String yearlyRecap(DateTime date) => 'recap_year_${_yyyy(date)}';
 
-  // ── Entity bubbles (cadence-gated, stable per-entity keys) ────────────
-  static String loanEntity(String loanId) => 'loans_$loanId';
+  // ── Entity bubbles (cadence-gated). Each type is a single consolidated
+  // story with one slide per entity, so the ring/archive show one bubble/card.
+  static const loans = 'loans';
 
-  static String ledger(String eventId) => 'ledger_$eventId';
+  static const ledger = 'ledger';
+
+  static const insights = 'insights';
 
   static String investments(DateTime date) =>
       'investments_${_yyyy(date)}_W${_isoWeek(date).toString().padLeft(2, '0')}';
-
-  /// Single consolidated Insights story (multiple slides), cadence-gated.
-  static const insights = 'insights';
 
   static int _isoWeek(DateTime date) {
     final normalized = DateTime.utc(date.year, date.month, date.day);
