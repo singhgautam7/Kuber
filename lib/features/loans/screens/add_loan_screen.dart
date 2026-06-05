@@ -125,7 +125,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -186,6 +189,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
                   decoration: const InputDecoration(hintText: 'e.g. Maruti Brezza'),
@@ -194,6 +198,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                 TextField(
                   controller: _lenderController,
                   textCapitalization: TextCapitalization.words,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
                   decoration: const InputDecoration(hintText: 'e.g. HDFC Bank'),
@@ -221,6 +226,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                         controller: _interestController,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
+                        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                         onChanged: (_) => setState(() {}),
                         style: GoogleFonts.inter(
                             color: cs.onSurface, fontSize: 15),
@@ -321,6 +327,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                   maxLines: 3,
                   minLines: 1,
                   textCapitalization: TextCapitalization.sentences,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
                   decoration: const InputDecoration(
                     hintText: 'Documentation · sanction letter ref · anything',
@@ -331,6 +338,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           ],
         ),
       ),
+    ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEditing ? 'Save changes' : 'Confirm & add loan',
         onPressed: _canSave ? _save : null,
@@ -348,6 +356,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
       onChanged: (_) => setState(() {}),
       style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
@@ -487,7 +496,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
               Navigator.pop(context);
             },
           ),
-        );
+        ).unfocusOnComplete(context);
       },
     );
   }
@@ -499,7 +508,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       initialDate: _loanStartDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    );
+    ).unfocusOnComplete(context);
     if (picked != null) setState(() => _loanStartDate = picked);
   }
 

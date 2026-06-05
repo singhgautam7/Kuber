@@ -115,7 +115,10 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         ),
         centerTitle: false,
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -128,6 +131,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
                   decoration: const InputDecoration(
@@ -193,7 +197,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                     selected: _selectedIcon,
                     onSelected: (key) =>
                         setState(() => _selectedIcon = key),
-                  ),
+                  ).unfocusOnComplete(context),
                 ),
                 KuberPickerRow(
                   leading: Container(
@@ -209,7 +213,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                     selected: _selectedColor.toARGB32(),
                     onSelected: (value) =>
                         setState(() => _selectedColor = Color(value)),
-                  ),
+                  ).unfocusOnComplete(context),
                 ),
               ],
             ),
@@ -246,6 +250,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
           ],
         ),
       ),
+    ),
       bottomNavigationBar: KuberSaveButton(
         label: widget.existingCategory != null
             ? widget.saveLabel ?? 'Save changes'
@@ -264,7 +269,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
         selectedGroupId: _selectedGroupId,
         onSelected: (id) => setState(() => _selectedGroupId = id),
       ),
-    );
+    ).unfocusOnComplete(context);
   }
 
   Future<void> _save() async {

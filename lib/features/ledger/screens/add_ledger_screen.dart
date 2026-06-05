@@ -120,7 +120,10 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -185,6 +188,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                       controller: controller,
                       focusNode: focusNode,
                       textCapitalization: TextCapitalization.words,
+                      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                       onChanged: (_) => setState(() {}),
                       style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
                       decoration: const InputDecoration(
@@ -279,6 +283,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   maxLines: 3,
                   minLines: 1,
                   textCapitalization: TextCapitalization.sentences,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
                   decoration: const InputDecoration(
                     hintText: 'Context, IOU ref, anything',
@@ -286,13 +291,13 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                 ),
               ],
             ),
+
           ],
         ),
       ),
+    ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEditing
-            ? 'Update $_type entry'
-            : 'Save $_type entry',
+        label: _isEditing ? 'Save changes' : 'Add to ledger',
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -331,7 +336,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
               Navigator.pop(context);
             },
           ),
-        );
+        ).unfocusOnComplete(context);
       },
     );
   }
@@ -398,13 +403,13 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       initialDate: _date,
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
+    ).unfocusOnComplete(context);
     if (date == null || !mounted) return;
 
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(_date),
-    );
+    ).unfocusOnComplete(context);
 
     if (!mounted) return;
     setState(() {
@@ -424,7 +429,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       initialDate: _expectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-    );
+    ).unfocusOnComplete(context);
     if (picked != null) setState(() => _expectedDate = picked);
   }
 

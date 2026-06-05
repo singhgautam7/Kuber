@@ -123,7 +123,10 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -137,6 +140,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
                   decoration: const InputDecoration(
@@ -253,6 +257,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                 controller: _sipAmountController,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                                onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                                 onChanged: (_) => setState(() {}),
                                 style: GoogleFonts.inter(
                                     color: cs.onSurface, fontSize: 15),
@@ -292,17 +297,30 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   controller: _notesController,
                   maxLines: 3,
                   minLines: 1,
-                  textCapitalization: TextCapitalization.sentences,
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
-                  decoration: const InputDecoration(
-                    hintText: 'Optional context',
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+
+              KuberFormSection(
+                label: 'Notes',
+                children: [
+                  TextField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    minLines: 1,
+                    textCapitalization: TextCapitalization.sentences,
+                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                    style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
+                    decoration: const InputDecoration(
+                      hintText: 'Optional context',
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
+    ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEditing ? 'Save changes' : 'Add investment',
         onPressed: _canSave ? _save : null,
@@ -343,7 +361,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
               Navigator.pop(context);
             },
           ),
-        );
+        ).unfocusOnComplete(context);
       },
     );
   }

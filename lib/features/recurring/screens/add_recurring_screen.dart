@@ -127,7 +127,10 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -170,7 +173,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                 ),
                 TextField(
                   controller: _nameController,
-                  textCapitalization: TextCapitalization.sentences,
+                  textCapitalization: TextCapitalization.words,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
                   style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
                   decoration: const InputDecoration(
@@ -224,6 +228,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                                 child: TextField(
                                   controller: _customDaysController,
                                   keyboardType: TextInputType.number,
+                                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                                   inputFormatters: [
                                     FilteringTextInputFormatter.digitsOnly,
                                   ],
@@ -276,6 +281,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                               child: TextField(
                                 controller: _endAfterController,
                                 keyboardType: TextInputType.number,
+                                onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                                 inputFormatters: [
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
@@ -322,6 +328,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                   maxLines: 3,
                   minLines: 1,
                   textCapitalization: TextCapitalization.sentences,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   style:
                       GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
                   decoration: const InputDecoration(
@@ -333,6 +340,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           ],
         ),
       ),
+    ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEdit ? 'Save changes' : 'Save recurring',
         onPressed: _canSave ? _save : null,
@@ -424,7 +432,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
         },
         defaultType: _type,
       ),
-    );
+    ).unfocusOnComplete(context);
   }
 
   void _openAccountPicker() {
@@ -439,7 +447,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           Navigator.pop(context);
         },
       ),
-    );
+    ).unfocusOnComplete(context);
   }
 
   Future<void> _pickStartDate() async {
@@ -449,7 +457,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       initialDate: _startDate.isBefore(now) ? now : _startDate,
       firstDate: now,
       lastDate: DateTime(2100),
-    );
+    ).unfocusOnComplete(context);
     if (picked != null) setState(() => _startDate = picked);
   }
 
@@ -463,7 +471,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           : earliest,
       firstDate: earliest,
       lastDate: DateTime(2100),
-    );
+    ).unfocusOnComplete(context);
     if (picked != null) setState(() => _endDate = picked);
   }
 

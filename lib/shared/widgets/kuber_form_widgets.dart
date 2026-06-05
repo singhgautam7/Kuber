@@ -233,6 +233,7 @@ class KuberHeroAmountInput extends StatelessWidget {
                   controller: controller,
                   focusNode: focusNode,
                   onChanged: onChanged,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   inputFormatters: inputFormatters,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -313,7 +314,10 @@ class KuberPickerRow extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(KuberRadius.md),
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -539,26 +543,22 @@ class _SegmentButton extends StatelessWidget {
     final activeColor = switch (segment.tone) {
       SegmentTone.income => cs.tertiary,
       SegmentTone.expense => cs.error,
-      SegmentTone.neutral => cs.onSurface,
+      SegmentTone.neutral => cs.primary,
     };
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? cs.surfaceContainer : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
+            color: selected ? activeColor.withValues(alpha: 0.12) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
             border: selected
-                ? Border.all(
-                    color: segment.tone == SegmentTone.neutral
-                        ? cs.outline
-                        : activeColor.withValues(alpha: 0.30),
-                  )
-                : null,
+                ? Border.all(color: activeColor.withValues(alpha: 0.30))
+                : Border.all(color: Colors.transparent),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -614,7 +614,7 @@ class KuberChipGrid<T> extends StatelessWidget {
         crossAxisCount: columns,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        childAspectRatio: 1.6,
+        childAspectRatio: 1.4,
       ),
       itemCount: options.length,
       itemBuilder: (_, i) {
@@ -1007,3 +1007,17 @@ class KuberCallout extends StatelessWidget {
     );
   }
 }
+
+extension FocusDismissibleFuture<T> on Future<T> {
+  Future<T> unfocusOnComplete(BuildContext context) {
+    return then((value) {
+      Future.delayed(const Duration(milliseconds: 120), () {
+        if (context.mounted) {
+          FocusScope.of(context).unfocus();
+        }
+      });
+      return value;
+    });
+  }
+}
+

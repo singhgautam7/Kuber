@@ -16,11 +16,15 @@ class AddEditAccountScreen extends ConsumerWidget {
         showBack: true,
         title: account == null ? 'Add Account' : 'Edit Account',
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: AccountForm(
-          account: account,
-          onSave: () => Navigator.pop(context),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: AccountForm(
+            account: account,
+            onSave: () => Navigator.pop(context),
+          ),
         ),
       ),
     );

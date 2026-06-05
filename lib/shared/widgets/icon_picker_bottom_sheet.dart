@@ -92,6 +92,8 @@ class _IconPickerSheetState extends State<_IconPickerSheet> {
           TextField(
             controller: _searchCtrl,
             focusNode: _searchFocus,
+            autofocus: false,
+            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             onChanged: _onSearch,
             style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
             decoration: InputDecoration(

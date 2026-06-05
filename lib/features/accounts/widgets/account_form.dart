@@ -154,6 +154,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
+              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
               style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
               decoration: InputDecoration(
                 hintText: _isCreditCard
@@ -185,7 +186,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 tags: IconMapper.kIconTags,
                 selected: _selectedIcon,
                 onSelected: (key) => setState(() => _selectedIcon = key),
-              ),
+              ).unfocusOnComplete(context),
             ),
             KuberPickerRow(
               leading: Container(
@@ -201,7 +202,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 context: context,
                 selected: _selectedColor,
                 onSelected: (value) => setState(() => _selectedColor = value),
-              ),
+              ).unfocusOnComplete(context),
             ),
           ],
         ),
@@ -244,6 +245,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                             controller: _last4Controller,
                             maxLength: 4,
                             keyboardType: TextInputType.number,
+                            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
