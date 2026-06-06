@@ -145,9 +145,29 @@ English (a placeholder). As of this writing there are none (verified: the only
 
 ## 4. Status (as of this handoff)
 
-`app_en.arb` ≈ 1108 keys. `flutter analyze` clean except 7 known pre-existing
-`about_screen`/`about_l10n` infos. A full debug APK builds green. Every key in
-`app_hi.arb` is fully translated (only `sipAmountPrefix` is intentionally `hi==en`).
+`app_en.arb` = **1227 keys, ALL translated in all 8 non-English languages**
+(`gen_translations_json.py` → `TRANSLATIONS_TODO.json` is currently **empty/0**).
+`flutter analyze` clean except 7 known pre-existing `about_screen`/`about_l10n`
+infos. Full debug APK builds green. Only `sipAmountPrefix` is intentionally
+`hi==en` ("SIP {amount}").
+
+What remains is **wiring** (extracting hardcoded English from the screens below
+into the ARB), not translating — after wiring a batch, run
+`gen_translations_json.py`, hand the user the new `TRANSLATIONS_TODO.json` +
+`TRANSLATION_PROMPT.md`, and `apply_translations.py` what they return.
+
+REMAINING UNWIRED UI (genuinely hardcoded English, in priority order):
+- `notifications` in-app sheet + `core/services/notification_service.dart` OS
+  bodies + reminder processors (`recurring/data/recurring_processor.dart`,
+  `ledger/data/ledger_reminder_processor.dart`, budget service) — [no-context →
+  `lookupAppLocalizations(AppLocale.current)`].
+- `widget_editor/data/widget_catalog.dart` (~16 widget names incl. "Money
+  Stories", "Balance Card") shown in the widget-editor screen + widget_editor UI.
+- `tutorial` (`models/tutorial_chapter.dart` ~38, `widgets/tutorial_overlay.dart` ~6).
+- `shared/widgets/kuber_bar_chart.dart` (~5), `auth`, `splash`.
+DEFERRED by product owner: `ask_kuber_screen.dart` (chat); tool calculator
+internals + their 14 info-sheet map entries; the 2 ledger/bill-splitter "About"
+info-map entries.
 
 Each item below is tagged with what it needs:
 - **[REBUILD-ONLY]** = already wired AND translated in source/ARB/generated. If it

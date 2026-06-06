@@ -3566,524 +3566,523 @@ class AppLocalizationsPa extends AppLocalizations {
   String get tomorrowLower => 'ਕੱਲ੍ਹ';
 
   @override
-  String get betaBadge => 'BETA';
+  String get betaBadge => 'ਬੀਟਾ';
 
   @override
-  String get noCategories => 'No categories yet';
+  String get noCategories => 'ਅਜੇ ਕੋਈ ਸ਼੍ਰੇਣੀ ਨਹੀਂ';
 
   @override
   String get categoriesEmptyDesc =>
-      'Create categories to organize your expenses';
+      'ਆਪਣੇ ਖਰਚਿਆਂ ਨੂੰ ਤਰਤੀਬ ਦੇਣ ਲਈ ਸ਼੍ਰੇਣੀਆਂ ਬਣਾਓ';
 
   @override
-  String get addCategory => 'Add Category';
+  String get addCategory => 'ਸ਼੍ਰੇਣੀ ਸ਼ਾਮਲ ਕਰੋ';
 
   @override
-  String get searchCategoriesHint => 'Search categories and groups...';
+  String get searchCategoriesHint => 'ਸ਼੍ਰੇਣੀਆਂ ਅਤੇ ਗਰੁੱਪ ਖੋਜੋ...';
 
   @override
-  String get addNew => 'Add New';
+  String get addNew => 'ਨਵਾਂ ਸ਼ਾਮਲ ਕਰੋ';
 
   @override
-  String get addCategoryDesc =>
-      'Classify your transactions for better tracking';
+  String get addCategoryDesc => 'ਬਿਹਤਰ ਟ੍ਰੈਕਿੰਗ ਲਈ ਆਪਣੇ ਲੈਣ-ਦੇਣ ਦਾ ਵਰਗੀਕਰਨ ਕਰੋ';
 
   @override
-  String get addGroup => 'Add Group';
+  String get addGroup => 'ਗਰੁੱਪ ਸ਼ਾਮਲ ਕਰੋ';
 
   @override
-  String get editGroup => 'Edit Group';
+  String get editGroup => 'ਗਰੁੱਪ ਸੋਧੋ';
 
   @override
-  String get categoryGroupSubtitle => 'Category group';
+  String get categoryGroupSubtitle => 'ਸ਼੍ਰੇਣੀ ਗਰੁੱਪ';
 
   @override
-  String get groupNameHint => 'Group name (e.g. Food, Transport)';
+  String get groupNameHint => 'ਗਰੁੱਪ ਦਾ ਨਾਮ (ਜਿਵੇਂ ਭੋਜਨ, ਆਵਾਜਾਈ)';
 
   @override
-  String get deleteGroupConfirm => 'Delete Group?';
+  String get deleteGroupConfirm => 'ਗਰੁੱਪ ਮਿਟਾਉਣਾ ਹੈ?';
 
   @override
   String deleteGroupBody(String name) {
-    return 'Categories in \"$name\" will be moved to \"Ungrouped\".';
+    return '\"$name\" ਵਿੱਚ ਸ਼੍ਰੇਣੀਆਂ ਨੂੰ \"ਬਿਨਾਂ ਗਰੁੱਪ\" ਵਿੱਚ ਲਿਜਾਇਆ ਜਾਵੇਗਾ।';
   }
 
   @override
-  String get categoryDetail => 'Category Detail';
+  String get categoryDetail => 'ਸ਼੍ਰੇਣੀ ਵੇਰਵਾ';
 
   @override
-  String get groupUpper => 'GROUP';
+  String get groupUpper => 'ਗਰੁੱਪ';
 
   @override
-  String get typeUpper => 'TYPE';
+  String get typeUpper => 'ਕਿਸਮ';
 
   @override
-  String get incomeAndExpense => 'Income & Expense';
+  String get incomeAndExpense => 'ਆਮਦਨ ਅਤੇ ਖਰਚਾ';
 
   @override
-  String get cannotDeleteCategory => 'Cannot delete category';
+  String get cannotDeleteCategory => 'ਸ਼੍ਰੇਣੀ ਮਿਟਾਈ ਨਹੀਂ ਜਾ ਸਕਦੀ';
 
   @override
   String get cannotDeleteCategoryBody =>
-      'This category has transactions linked to it. To delete this category, delete the linked transactions first.';
+      'ਇਸ ਸ਼੍ਰੇਣੀ ਨਾਲ ਲੈਣ-ਦੇਣ ਜੁੜੇ ਹੋਏ ਹਨ। ਇਸ ਸ਼੍ਰੇਣੀ ਨੂੰ ਮਿਟਾਉਣ ਲਈ, ਪਹਿਲਾਂ ਜੁੜੇ ਲੈਣ-ਦੇਣ ਮਿਟਾਓ।';
 
   @override
-  String get editCategory => 'Edit category';
+  String get editCategory => 'ਸ਼੍ਰੇਣੀ ਸੋਧੋ';
 
   @override
-  String get newCategory => 'New category';
+  String get newCategory => 'ਨਵੀਂ ਸ਼੍ਰੇਣੀ';
 
   @override
-  String get optionalLabel => 'Optional';
+  String get optionalLabel => 'ਵਿਕਲਪਿਕ';
 
   @override
-  String get appearance => 'Appearance';
+  String get appearance => 'ਦਿੱਖ';
 
   @override
-  String get bothLabel => 'Both';
+  String get bothLabel => 'ਦੋਵੇਂ';
 
   @override
-  String get saveCategory => 'Save category';
+  String get saveCategory => 'ਸ਼੍ਰੇਣੀ ਸੇਵ ਕਰੋ';
 
   @override
-  String get categoryUpdated => 'Category updated';
+  String get categoryUpdated => 'ਸ਼੍ਰੇਣੀ ਅੱਪਡੇਟ ਕੀਤੀ ਗਈ';
 
   @override
-  String get categoryAdded => 'Category added';
+  String get categoryAdded => 'ਸ਼੍ਰੇਣੀ ਸ਼ਾਮਲ ਕੀਤੀ ਗਈ';
 
   @override
-  String get categoryNameLabel => 'Category name';
+  String get categoryNameLabel => 'ਸ਼੍ਰੇਣੀ ਦਾ ਨਾਮ';
 
   @override
-  String get livePreview => 'LIVE PREVIEW';
+  String get livePreview => 'ਲਾਈਵ ਝਲਕ';
 
   @override
-  String get selectGroup => 'Select Group';
+  String get selectGroup => 'ਗਰੁੱਪ ਚੁਣੋ';
 
   @override
-  String get groupNameShortHint => 'Group name...';
+  String get groupNameShortHint => 'ਗਰੁੱਪ ਦਾ ਨਾਮ...';
 
   @override
-  String get addNewGroup => 'Add New Group';
+  String get addNewGroup => 'ਨਵਾਂ ਗਰੁੱਪ ਸ਼ਾਮਲ ਕਰੋ';
 
   @override
-  String get noBudgetSet => 'No budget set';
+  String get noBudgetSet => 'ਕੋਈ ਬਜਟ ਸੈੱਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ';
 
   @override
-  String get categoriesTitle => 'Manage\nCategories';
+  String get categoriesTitle => 'ਸ਼੍ਰੇਣੀਆਂ\nਪ੍ਰਬੰਧਿਤ ਕਰੋ';
 
   @override
   String noCategoryMatches(String query) {
-    return 'No categories or groups match \"$query\".';
+    return '\"$query\" ਨਾਲ ਕੋਈ ਸ਼੍ਰੇਣੀਆਂ ਜਾਂ ਗਰੁੱਪ ਮੇਲ ਨਹੀਂ ਖਾਂਦੇ।';
   }
 
   @override
-  String get deleteCategoryConfirm => 'Delete category?';
+  String get deleteCategoryConfirm => 'ਸ਼੍ਰੇਣੀ ਮਿਟਾਉਣੀ ਹੈ?';
 
   @override
   String deleteCategoryBody(String name) {
-    return '\"$name\" will be permanently deleted.';
+    return '\"$name\" ਪੱਕੇ ਤੌਰ \'ਤੇ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।';
   }
 
   @override
-  String get categoryNameHint => 'e.g. Groceries, Rent, Salary';
+  String get categoryNameHint => 'ਜਿਵੇਂ ਕਰਿਆਨਾ, ਕਿਰਾਇਆ, ਤਨਖਾਹ';
 
   @override
-  String get tagsTitle => 'Manage\nTags';
+  String get tagsTitle => 'ਟੈਗ\nਪ੍ਰਬੰਧਿਤ ਕਰੋ';
 
   @override
-  String get tagsHeaderDesc => 'Organize transactions with custom labels.';
+  String get tagsHeaderDesc => 'ਕਸਟਮ ਲੇਬਲਾਂ ਨਾਲ ਲੈਣ-ਦੇਣ ਤਰਤੀਬ ਦਿਓ।';
 
   @override
-  String get addTag => 'Add Tag';
+  String get addTag => 'ਟੈਗ ਸ਼ਾਮਲ ਕਰੋ';
 
   @override
-  String get noTags => 'No tags yet';
+  String get noTags => 'ਅਜੇ ਕੋਈ ਟੈਗ ਨਹੀਂ';
 
   @override
-  String get tagsEmptyDesc => 'Create hashtags to track specific expenses.';
+  String get tagsEmptyDesc => 'ਖਾਸ ਖਰਚਿਆਂ ਨੂੰ ਟਰੈਕ ਕਰਨ ਲਈ ਹੈਸ਼ਟੈਗ ਬਣਾਓ।';
 
   @override
-  String get disabledLabel => 'Disabled';
+  String get disabledLabel => 'ਅਯੋਗ';
 
   @override
-  String get noTransactions => 'No transactions';
+  String get noTransactions => 'ਕੋਈ ਲੈਣ-ਦੇਣ ਨਹੀਂ';
 
   @override
-  String get newTag => 'New Tag';
+  String get newTag => 'ਨਵਾਂ ਟੈਗ';
 
   @override
-  String get updateTag => 'Update Tag';
+  String get updateTag => 'ਟੈਗ ਅੱਪਡੇਟ ਕਰੋ';
 
   @override
-  String get createTag => 'Create Tag';
+  String get createTag => 'ਟੈਗ ਬਣਾਓ';
 
   @override
-  String get enableLabel => 'Enable';
+  String get enableLabel => 'ਸਮਰੱਥ ਕਰੋ';
 
   @override
-  String get disableLabel => 'Disable';
+  String get disableLabel => 'ਅਯੋਗ ਕਰੋ';
 
   @override
-  String get deleteTagConfirm => 'Delete tag?';
+  String get deleteTagConfirm => 'ਟੈਗ ਮਿਟਾਉਣਾ ਹੈ?';
 
   @override
   String deleteTagBody(String name) {
-    return 'The tag \"#$name\" will be permanently deleted.';
+    return 'ਟੈਗ \"#$name\" ਪੱਕੇ ਤੌਰ \'ਤੇ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।';
   }
 
   @override
-  String get selectTags => 'Select Tags';
+  String get selectTags => 'ਟੈਗ ਚੁਣੋ';
 
   @override
-  String get tagNameHint => 'Example: weekend, trip-to-goa';
+  String get tagNameHint => 'ਉਦਾਹਰਣ: ਵੀਕੈਂਡ, ਟ੍ਰਿਪ-ਟੂ-ਗੋਆ';
 
   @override
-  String get searchOrCreateTagHint => 'Search or create tag...';
+  String get searchOrCreateTagHint => 'ਖੋਜੋ ਜਾਂ ਟੈਗ ਬਣਾਓ...';
 
   @override
   String get tagDisabledMessage =>
-      'Tag is disabled. Enable it from More → Tags.';
+      'ਟੈਗ ਅਯੋਗ ਹੈ। ਇਸਨੂੰ ਹੋਰ → ਟੈਗਾਂ ਤੋਂ ਸਮਰੱਥ ਕਰੋ।';
 
   @override
-  String get exportHistory => 'Export History';
+  String get exportHistory => 'ਅਤੀਤ ਨਿਰਯਾਤ ਕਰੋ';
 
   @override
-  String get exportAnalytics => 'Export Analytics';
+  String get exportAnalytics => 'ਐਨਾਲਿਟਿਕਸ ਨਿਰਯਾਤ ਕਰੋ';
 
   @override
-  String get selectFormat => 'SELECT FORMAT';
+  String get selectFormat => 'ਫਾਰਮੈਟ ਚੁਣੋ';
 
   @override
-  String get formatUpper => 'FORMAT';
+  String get formatUpper => 'ਫਾਰਮੈਟ';
 
   @override
-  String get spreadsheetLabel => 'SPREADSHEET';
+  String get spreadsheetLabel => 'ਸਪ੍ਰੈਡਸ਼ੀਟ';
 
   @override
-  String get documentLabel => 'DOCUMENT';
+  String get documentLabel => 'ਦਸਤਾਵੇਜ਼';
 
   @override
-  String get pdfDocument => 'PDF Document';
+  String get pdfDocument => 'PDF ਦਸਤਾਵੇਜ਼';
 
   @override
-  String get pdfDocumentDesc => 'Universal format for high-fidelity printing.';
+  String get pdfDocumentDesc => 'ਉੱਚ-ਗੁਣਵੱਤਾ ਪ੍ਰਿੰਟਿੰਗ ਲਈ ਯੂਨੀਵਰਸਲ ਫਾਰਮੈਟ।';
 
   @override
-  String get generateReport => 'Generate Report';
+  String get generateReport => 'ਰਿਪੋਰਟ ਬਣਾਓ';
 
   @override
-  String get applyCurrentFilters => 'Apply current filters';
+  String get applyCurrentFilters => 'ਮੌਜੂਦਾ ਫਿਲਟਰ ਲਾਗੂ ਕਰੋ';
 
   @override
   String get applyFiltersDesc =>
-      'Generate report using the active filters from the history page.';
+      'ਅਤੀਤ ਪੰਨੇ ਤੋਂ ਸਰਗਰਮ ਫਿਲਟਰਾਂ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਰਿਪੋਰਟ ਬਣਾਓ।';
 
   @override
-  String get periodAllTime => 'All Time';
+  String get periodAllTime => 'ਸਾਰਾ ਸਮਾਂ';
 
   @override
-  String get selectedPeriod => 'SELECTED PERIOD';
+  String get selectedPeriod => 'ਚੁਣੀ ਹੋਈ ਮਿਆਦ';
 
   @override
   String get analyticsDateFilterInfo =>
-      'Date filters from your current analytics view are automatically applied to this report.';
+      'ਤੁਹਾਡੇ ਮੌਜੂਦਾ ਐਨਾਲਿਟਿਕਸ ਦ੍ਰਿਸ਼ ਤੋਂ ਮਿਤੀ ਫਿਲਟਰ ਆਪਣੇ ਆਪ ਇਸ ਰਿਪੋਰਟ \'ਤੇ ਲਾਗੂ ਹੋ ਜਾਂਦੇ ਹਨ।';
 
   @override
-  String get exportSuccessful => 'Export Successful';
+  String get exportSuccessful => 'ਨਿਰਯਾਤ ਸਫਲ ਰਿਹਾ';
 
   @override
-  String get reportReady => 'Your report is ready.';
+  String get reportReady => 'ਤੁਹਾਡੀ ਰਿਪੋਰਟ ਤਿਆਰ ਹੈ।';
 
   @override
-  String get openFile => 'Open File';
+  String get openFile => 'ਫਾਈਲ ਖੋਲ੍ਹੋ';
 
   @override
-  String get savingEllipsis => 'Saving…';
+  String get savingEllipsis => 'ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ...';
 
   @override
-  String get saveToFolder => 'Save to Folder';
+  String get saveToFolder => 'ਫੋਲਡਰ ਵਿੱਚ ਸੇਵ ਕਰੋ';
 
   @override
-  String get shareLabel => 'Share';
+  String get shareLabel => 'ਸਾਂਝਾ ਕਰੋ';
 
   @override
-  String get noAppToOpen => 'No app found to open this file type.';
+  String get noAppToOpen => 'ਇਸ ਫਾਈਲ ਕਿਸਮ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਕੋਈ ਐਪ ਨਹੀਂ ਮਿਲੀ।';
 
   @override
-  String get fileSaved => 'File saved successfully.';
+  String get fileSaved => 'ਫਾਈਲ ਸਫਲਤਾਪੂਰਵਕ ਸੇਵ ਹੋ ਗਈ।';
 
   @override
   String couldNotShareFile(String details) {
-    return 'Could not share file: $details';
+    return 'ਫਾਈਲ ਸਾਂਝੀ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ: $details';
   }
 
   @override
-  String get exportFailed => 'Export Failed';
+  String get exportFailed => 'ਨਿਰਯਾਤ ਅਸਫਲ ਰਿਹਾ';
 
   @override
-  String get tryAgain => 'Try Again';
+  String get tryAgain => 'ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ';
 
   @override
   String get exportGenerateFailed =>
-      'Unable to generate file. Please try again.';
+      'ਫਾਈਲ ਬਣਾਉਣ ਵਿੱਚ ਅਸਮਰੱਥ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।';
 
   @override
-  String get failedToSaveFile => 'Failed to save file.';
+  String get failedToSaveFile => 'ਫਾਈਲ ਸੇਵ ਕਰਨ ਵਿੱਚ ਅਸਫਲ।';
 
   @override
-  String get chartsTitle => 'Charts';
+  String get chartsTitle => 'ਚਾਰਟ';
 
   @override
-  String get chartsSubtitle => 'Visualise your spending patterns over time.';
+  String get chartsSubtitle => 'ਸਮੇਂ ਦੇ ਨਾਲ ਆਪਣੇ ਖਰਚਿਆਂ ਦੇ ਪੈਟਰਨ ਦੀ ਕਲਪना ਕਰੋ।';
 
   @override
   String get wipBadge => 'WIP';
 
   @override
-  String get failedToLoadData => 'Failed to load data';
+  String get failedToLoadData => 'ਡਾਟਾ ਲੋਡ ਕਰਨ ਵਿੱਚ ਅਸਫਲ';
 
   @override
-  String get noDataForPeriod => 'No data for this period';
+  String get noDataForPeriod => 'ਇਸ ਮਿਆਦ ਲਈ ਕੋਈ ਡਾਟਾ ਨਹੀਂ';
 
   @override
-  String get tapBarForDetails => 'Tap a bar to see details';
+  String get tapBarForDetails => 'ਵੇਰਵੇ ਦੇਖਣ ਲਈ ਇੱਕ ਬਾਰ \'ਤੇ ਟੈਪ ਕਰੋ';
 
   @override
-  String get incomeUpper => 'INCOME';
+  String get incomeUpper => 'ਆਮਦਨ';
 
   @override
-  String get expenseUpper => 'EXPENSE';
+  String get expenseUpper => 'ਖਰਚਾ';
 
   @override
-  String get netUpper => 'NET';
+  String get netUpper => 'ਕੁੱਲ';
 
   @override
-  String get noExpenseBreakdown => 'No expense breakdown available.';
+  String get noExpenseBreakdown => 'ਕੋਈ ਖਰਚਾ ਵੇਰਵਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।';
 
   @override
-  String get byCategoryUpper => 'BY CATEGORY';
+  String get byCategoryUpper => 'ਸ਼੍ਰੇਣੀ ਅਨੁਸਾਰ';
 
   @override
-  String get faqTitle => 'Frequently Asked Questions';
+  String get faqTitle => 'ਅਕਸਰ ਪੁੱਛੇ ਜਾਂਦੇ ਸਵਾਲ';
 
   @override
-  String get faqAddTxnQ => 'How do I add a transaction?';
+  String get faqAddTxnQ => 'ਮੈਂ ਲੈਣ-ਦੇਣ ਕਿਵੇਂ ਸ਼ਾਮਲ ਕਰਾਂ?';
 
   @override
   String get faqAddTxnA =>
-      'Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.';
+      'ਨਵਾਂ ਲੈਣ-ਦੇਣ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਹੇਠਾਂ ਸੱਜੇ ਪਾਸੇ + ਬਟਨ \'ਤੇ ਟੈਪ ਕਰੋ। ਰਕਮ ਭਰੋ, ਸ਼੍ਰੇਣੀ ਅਤੇ ਖਾਤਾ ਚੁਣੋ, ਫਿਰ ਸੇਵ ਕਰੋ।';
 
   @override
-  String get faqAccountsQ => 'How do I manage accounts?';
+  String get faqAccountsQ => 'ਮੈਂ ਖਾਤਿਆਂ ਦਾ ਪ੍ਰਬੰਧ ਕਿਵੇਂ ਕਰਾਂ?';
 
   @override
   String get faqAccountsA =>
-      'Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.';
+      'ਆਪਣੇ ਸਾਰੇ ਵਾਲਿਟ ਅਤੇ ਬੈਂਕ ਖਾਤੇ ਦੇਖਣ ਲਈ ਹੋਰ → ਖਾਤੇ \'ਤੇ ਜਾਓ। ਤੁਸੀਂ ਉੱਥੋਂ ਨਵੇਂ ਖਾਤੇ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ ਜਾਂ ਮੌਜੂਦਾ ਖਾਤਿਆਂ ਨੂੰ ਸੋਧ ਸਕਦੇ ਹੋ।';
 
   @override
-  String get faqTransfersQ => 'How do transfers work?';
+  String get faqTransfersQ => 'ਟ੍ਰਾਂਸਫਰ ਕਿਵੇਂ ਕੰਮ ਕਰਦੇ ਹਨ?';
 
   @override
   String get faqTransfersA =>
-      'When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.';
+      'ਲੈਣ-ਦੇਣ ਸ਼ਾਮਲ ਕਰਦੇ ਸਮੇਂ, ਕਿਸਮ ਵਜੋਂ \"ਟ੍ਰਾਂਸਫਰ\" ਚੁਣੋ। ਸਰੋਤ ਅਤੇ ਮੰਜ਼ਿਲ ਖਾਤੇ ਚੁਣੋ ਅਤੇ ਰਕਮ ਉਹਨਾਂ ਵਿਚਕਾਰ ਟ੍ਰਾਂਸਫਰ ਹੋ ਜਾਵੇਗੀ।';
 
   @override
-  String get faqCategoriesQ => 'Can I customize categories?';
+  String get faqCategoriesQ => 'ਕੀ ਮੈਂ ਸ਼੍ਰੇਣੀਆਂ ਨੂੰ ਕਸਟਮਾਈਜ਼ ਕਰ ਸਕਦਾ ਹਾਂ?';
 
   @override
   String get faqCategoriesA =>
-      'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.';
+      'ਹਾਂ! ਸਾਰੀਆਂ ਸ਼੍ਰੇਣੀਆਂ ਦੇਖਣ ਲਈ ਹੋਰ → ਸ਼੍ਰੇਣੀਆਂ \'ਤੇ ਜਾਓ। ਡਿਫੌਲਟ ਸ਼੍ਰੇਣੀਆਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਦਾ, ਪਰ ਤੁਸੀਂ ਆਪਣੀਆਂ ਖੁਦ ਦੀਆਂ ਕਸਟਮ ਸ਼੍ਰੇਣੀਆਂ ਸ਼ਾਮਲ ਕਰ ਸਕਦੇ ਹੋ।';
 
   @override
-  String get dataExportTitle => 'Export Data';
+  String get dataExportTitle => 'ਡਾਟਾ ਨਿਰਯਾਤ ਕਰੋ';
 
   @override
-  String get backupUpper => 'BACKUP';
+  String get backupUpper => 'ਬੈਕਅੱਪ';
 
   @override
   String get exportCsvDesc =>
-      'Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.';
+      'ਲੈਣ-ਦੇਣ, ਸ਼੍ਰੇਣੀਆਂ, ਖਾਤਿਆਂ ਅਤੇ ਟੈਗਾਂ ਨੂੰ ਨਿਰਯਾਤ ਕਰਦਾ ਹੈ। ਆਵਰਤੀ ਆਟੋਮੇਸ਼ਨ, ਬਜਟ, ਕਰਜ਼ੇ, ਨਿਵੇਸ਼, ਜਾਂ ਅਟੈਚਮੈਂਟ ਸ਼ਾਮਲ ਨਹੀਂ ਹਨ।';
 
   @override
   String get exportJsonDesc =>
-      'Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.';
+      'ਸੰਪੂਰਨ ਐਪ ਬੈਕਅੱਪ (ਅਟੈਚਮੈਂਟਾਂ ਨੂੰ ਛੱਡ ਕੇ)। ਨਵੇਂ ਡੀਵਾਈਸ \'ਤੇ ਜਾਂ ਦੁਬਾਰਾ ਇੰਸਟਾਲ ਕਰਨ ਤੋਂ ਬਾਅਦ ਤੁਹਾਡੇ ਸਾਰੇ ਡਾਟੇ ਨੂੰ ਰੀਸਟੋਰ ਕਰਨ ਲਈ ਵਰਤਿਆ ਜਾ ਸਕਦਾ ਹੈ।';
 
   @override
-  String get fileReady => 'Your file is ready.';
+  String get fileReady => 'ਤੁਹਾਡੀ ਫਾਈਲ ਤਿਆਰ ਹੈ।';
 
   @override
-  String get saveACopy => 'Save a copy';
+  String get saveACopy => 'ਇੱਕ ਕਾਪੀ ਸੇਵ ਕਰੋ';
 
   @override
-  String get dataImportTitle => 'Import Data';
+  String get dataImportTitle => 'ਡਾਟਾ ਆਯਾਤ ਕਰੋ';
 
   @override
-  String get selectFileImport => 'Select File & Import';
+  String get selectFileImport => 'ਫਾਈਲ ਚੁਣੋ ਅਤੇ ਆਯਾਤ ਕਰੋ';
 
   @override
-  String get overrideExistingData => 'Override existing data';
+  String get overrideExistingData => 'ਮੌਜੂਦਾ ਡਾਟੇ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰੋ';
 
   @override
-  String get importWipeDesc => 'All existing data will be wiped before import.';
+  String get importWipeDesc =>
+      'ਆਯਾਤ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਸਾਰਾ ਮੌਜੂਦਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।';
 
   @override
-  String get importMergeDesc =>
-      'New records will be merged with existing data.';
+  String get importMergeDesc => 'ਨਵੇਂ ਰਿਕਾਰਡ ਮੌਜੂਦਾ ਡਾਟੇ ਨਾਲ ਮਿਲਾ ਦਿੱਤੇ ਜਾਣਗੇ।';
 
   @override
   String get importWipeWarning =>
-      'All existing data will be permanently deleted before import.';
+      'ਆਯਾਤ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਸਾਰਾ ਮੌਜੂਦਾ ਡਾਟਾ ਪੱਕੇ ਤੌਰ \'ਤੇ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।';
 
   @override
   String get importMergeChip =>
-      'New records will be merged with your existing data.';
+      'ਨਵੇਂ ਰਿਕਾਰਡ ਤੁਹਾਡੇ ਮੌਜੂਦਾ ਡਾਟੇ ਨਾਲ ਮਿਲਾ ਦਿੱਤੇ ਜਾਣਗੇ।';
 
   @override
   String get importReplaceWarning =>
-      'All existing data will be permanently deleted and replaced with the backup.';
+      'ਸਾਰਾ ਮੌਜੂਦਾ ਡਾਟਾ ਪੱਕੇ ਤੌਰ \'ਤੇ ਮਿਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ ਅਤੇ ਬੈਕਅੱਪ ਨਾਲ ਬਦਲ ਦਿੱਤਾ ਜਾਵੇਗਾ।';
 
   @override
-  String get downloadTemplate => 'Download Template';
+  String get downloadTemplate => 'ਟੈਂਪਲੇਟ ਡਾਊਨਲੋਡ ਕਰੋ';
 
   @override
   String get downloadTemplateDesc =>
-      'Get a CSV with the correct column headers to format your data.';
+      'ਆਪਣੇ ਡਾਟੇ ਨੂੰ ਫਾਰਮੈਟ ਕਰਨ ਲਈ ਸਹੀ ਕਾਲਮ ਹੈਡਰਾਂ ਵਾਲੀ ਇੱਕ CSV ਪ੍ਰਾਪਤ ਕਰੋ।';
 
   @override
-  String get backupsTitle => 'Automatic\nBackups';
+  String get backupsTitle => 'ਆਟੋਮੈਟਿਕ\nਬੈਕਅੱਪ';
 
   @override
   String get backupsSubtitle =>
-      'Keep a fresh copy of your data saved to your device, on a schedule.';
+      'ਇੱਕ ਅਨੁਸੂਚੀ \'ਤੇ, ਆਪਣੇ ਡੀਵਾਈਸ ਵਿੱਚ ਸੇਵ ਕੀਤੇ ਡਾਟੇ ਦੀ ਇੱਕ ਤਾਜ਼ਾ ਕਾਪੀ ਰੱਖੋ।';
 
   @override
-  String get statusSectionLabel => 'Status';
+  String get statusSectionLabel => 'ਸਥਿਤੀ';
 
   @override
-  String get configurationLabel => 'Configuration';
+  String get configurationLabel => 'ਸੰਰਚਨਾ';
 
   @override
-  String get actionsLabel => 'Actions';
+  String get actionsLabel => 'ਕਾਰਵਾਈਆਂ';
 
   @override
-  String get backupNow => 'Backup now';
+  String get backupNow => 'ਹੁਣੇ ਬੈਕਅੱਪ ਲਓ';
 
   @override
-  String get alreadyBackedUpToday => 'Already backed up today';
+  String get alreadyBackedUpToday => 'ਅੱਜ ਪਹਿਲਾਂ ਹੀ ਬੈਕਅੱਪ ਲਿਆ ਗਿਆ ਹੈ';
 
   @override
-  String get lastBackupFailed => 'Last backup failed';
+  String get lastBackupFailed => 'ਆਖਰੀ ਬੈਕਅੱਪ ਅਸਫਲ ਰਿਹਾ';
 
   @override
   String get backupFolderErrorDesc =>
-      'We couldn\'t access your backup folder. It may have moved or permission may have been revoked.';
+      'ਅਸੀਂ ਤੁਹਾਡੇ ਬੈਕਅੱਪ ਫੋਲਡਰ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕਰ ਸਕੇ। ਇਹ ਸ਼ਾਇਦ ਲਿਜਾਇਆ ਗਿਆ ਹੋਵੇ ਜਾਂ ਇਜਾਜ਼ਤ ਰੱਦ ਕਰ ਦਿੱਤੀ ਗਈ ਹੋਵੇ।';
 
   @override
   String attemptedOn(String label) {
-    return 'Attempted $label';
+    return '$label ਨੂੰ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਗਈ';
   }
 
   @override
-  String get chooseNewFolder => 'Choose new folder';
+  String get chooseNewFolder => 'ਨਵਾਂ ਫੋਲਡਰ ਚੁਣੋ';
 
   @override
-  String get backedUp => 'Backed up';
+  String get backedUp => 'ਬੈਕਅੱਪ ਲਿਆ ਗਿਆ';
 
   @override
   String backedUpOn(String label) {
-    return 'Backed up $label';
+    return '$label ਨੂੰ ਬੈਕਅੱਪ ਲਿਆ ਗਿਆ';
   }
 
   @override
   String lastCopySaved(String count) {
-    return 'Last copy saved successfully. Keeping your most recent $count backups.';
+    return 'ਆਖਰੀ ਕਾਪੀ ਸਫਲਤਾਪੂਰਵਕ ਸੇਵ ਕੀਤੀ ਗਈ। ਤੁਹਾਡੇ ਸਭ ਤੋਂ ਤਾਜ਼ਾ $count ਬੈਕਅੱਪ ਰੱਖੇ ਜਾ ਰਹੇ ਹਨ।';
   }
 
   @override
-  String get neverLoseData => 'Never lose your data';
+  String get neverLoseData => 'ਆਪਣਾ ਡਾਟਾ ਕਦੇ ਨਾ ਗੁਆਓ';
 
   @override
   String get neverLoseDataDesc =>
-      'Turn on automatic backups and Kuber will save a copy to a folder you choose when an app open is due.';
+      'ਆਟੋਮੈਟਿਕ ਬੈਕਅੱਪ ਚਾਲੂ ਕਰੋ ਅਤੇ Kuber ਤੁਹਾਡੇ ਵੱਲੋਂ ਚੁਣੇ ਗਏ ਫੋਲਡਰ ਵਿੱਚ ਇੱਕ ਕਾਪੀ ਸੇਵ ਕਰੇਗਾ।';
 
   @override
-  String get automaticBackups => 'Automatic Backups';
+  String get automaticBackups => 'ਆਟੋਮੈਟਿਕ ਬੈਕਅੱਪ';
 
   @override
-  String get saveCopyOnSchedule => 'Save a copy on a schedule';
+  String get saveCopyOnSchedule => 'ਅਨੁਸੂਚੀ \'ਤੇ ਇੱਕ ਕਾਪੀ ਸੇਵ ਕਰੋ';
 
   @override
-  String get keepLast => 'Keep last';
+  String get keepLast => 'ਆਖਰੀ ਰੱਖੋ';
 
   @override
-  String get backupFolder => 'Backup folder';
+  String get backupFolder => 'ਬੈਕਅੱਪ ਫੋਲਡਰ';
 
   @override
-  String get exportingData => 'Exporting data...';
+  String get exportingData => 'ਡਾਟਾ ਨਿਰਯਾਤ ਹੋ ਰਿਹਾ ਹੈ...';
 
   @override
-  String get preparingFile => 'Preparing your file';
+  String get preparingFile => 'ਤੁਹਾਡੀ ਫਾਈਲ ਤਿਆਰ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ';
 
   @override
-  String get dataExportedSuccess => 'Data exported successfully';
+  String get dataExportedSuccess => 'ਡਾਟਾ ਸਫਲਤਾਪੂਰਵਕ ਨਿਰਯਾਤ ਕੀਤਾ ਗਿਆ';
 
   @override
-  String get exportComplete => 'Export Complete';
+  String get exportComplete => 'ਨਿਰਯਾਤ ਪੂਰਾ ਹੋਇਆ';
 
   @override
   String savedToDownloads(String fileName) {
-    return 'Saved to Downloads/$fileName';
+    return 'Downloads/$fileName ਵਿੱਚ ਸੇਵ ਕੀਤਾ ਗਿਆ';
   }
 
   @override
   String exportFailedMsg(String error) {
-    return 'Export failed: $error';
+    return 'ਨਿਰਯਾਤ ਅਸਫਲ ਰਿਹਾ: $error';
   }
 
   @override
-  String get downloadingTemplate => 'Downloading template...';
+  String get downloadingTemplate => 'ਟੈਂਪਲੇਟ ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...';
 
   @override
-  String get preparingCsvTemplate => 'Preparing CSV template';
+  String get preparingCsvTemplate => 'CSV ਟੈਂਪਲੇਟ ਤਿਆਰ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ';
 
   @override
-  String get templateDownloadedSuccess => 'Template downloaded successfully';
+  String get templateDownloadedSuccess => 'ਟੈਂਪਲੇਟ ਸਫਲਤਾਪੂਰਵਕ ਡਾਊਨਲੋਡ ਕੀਤਾ ਗਿਆ';
 
   @override
-  String get downloadComplete => 'Download Complete';
+  String get downloadComplete => 'ਡਾਊਨਲੋਡ ਪੂਰਾ ਹੋਇਆ';
 
   @override
   String downloadFailedMsg(String error) {
-    return 'Download failed: $error';
+    return 'ਡਾਊਨਲੋਡ ਅਸਫਲ ਰਿਹਾ: $error';
   }
 
   @override
-  String get downloadFailedTitle => 'Download Failed';
+  String get downloadFailedTitle => 'ਡਾਊਨਲੋਡ ਅਸਫਲ ਰਿਹਾ';
 
   @override
   String importFailedMsg(String error) {
-    return 'Import failed: $error';
+    return 'ਆਯਾਤ ਅਸਫਲ ਰਿਹਾ: $error';
   }
 
   @override
-  String get mockDataGenerated => 'Mock data generated successfully';
+  String get mockDataGenerated => 'ਮੌਕ ਡਾਟਾ ਸਫਲਤਾਪੂਰਵਕ ਬਣਾਇਆ ਗਿਆ';
 
   @override
   String generationFailedMsg(String error) {
-    return 'Generation failed: $error';
+    return 'ਬਣਾਉਣਾ ਅਸਫਲ ਰਿਹਾ: $error';
   }
 
   @override
-  String get allDataCleared => 'All data cleared successfully';
+  String get allDataCleared => 'ਸਾਰਾ ਡਾਟਾ ਸਫਲਤਾਪੂਰਵਕ ਸਾਫ਼ ਕੀਤਾ ਗਿਆ';
 
   @override
   String clearFailedMsg(String error) {
-    return 'Clear failed: $error';
+    return 'ਸਾਫ਼ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ: $error';
   }
 
   @override
   String rebuildFailedMsg(String error) {
-    return 'Rebuild failed: $error';
+    return 'ਮੁੜ-ਬਣਾਉਣਾ ਅਸਫਲ ਰਿਹਾ: $error';
   }
 }

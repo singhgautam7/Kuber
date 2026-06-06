@@ -3590,524 +3590,529 @@ class AppLocalizationsTe extends AppLocalizations {
   String get tomorrowLower => 'రేపు';
 
   @override
-  String get betaBadge => 'BETA';
+  String get betaBadge => 'బీటా';
 
   @override
-  String get noCategories => 'No categories yet';
+  String get noCategories => 'ఇంకా కేటగిరీలు లేవు';
 
   @override
   String get categoriesEmptyDesc =>
-      'Create categories to organize your expenses';
+      'మీ ఖర్చులను నిర్వహించడానికి కేటగిరీలను సృష్టించండి';
 
   @override
-  String get addCategory => 'Add Category';
+  String get addCategory => 'కేటగిరీని జోడించండి';
 
   @override
-  String get searchCategoriesHint => 'Search categories and groups...';
+  String get searchCategoriesHint => 'కేటగిరీలు మరియు గ్రూప్‌లను వెతకండి...';
 
   @override
-  String get addNew => 'Add New';
+  String get addNew => 'కొత్తది జోడించండి';
 
   @override
   String get addCategoryDesc =>
-      'Classify your transactions for better tracking';
+      'మెరుగైన ట్రాకింగ్ కోసం మీ లావాదేవీలను వర్గీకరించండి';
 
   @override
-  String get addGroup => 'Add Group';
+  String get addGroup => 'గ్రూప్‌ని జోడించండి';
 
   @override
-  String get editGroup => 'Edit Group';
+  String get editGroup => 'గ్రూప్‌ని ఎడిట్ చేయండి';
 
   @override
-  String get categoryGroupSubtitle => 'Category group';
+  String get categoryGroupSubtitle => 'కేటగిరీ గ్రూప్';
 
   @override
-  String get groupNameHint => 'Group name (e.g. Food, Transport)';
+  String get groupNameHint => 'గ్రూప్ పేరు (ఉదా. ఆహారం, రవాణా)';
 
   @override
-  String get deleteGroupConfirm => 'Delete Group?';
+  String get deleteGroupConfirm => 'గ్రూప్‌ని తొలగించాలా?';
 
   @override
   String deleteGroupBody(String name) {
-    return 'Categories in \"$name\" will be moved to \"Ungrouped\".';
+    return '\"$name\" లోని కేటగిరీలు \"అన్‌గ్రూప్ చేయబడినవి\"కి తరలించబడతాయి.';
   }
 
   @override
-  String get categoryDetail => 'Category Detail';
+  String get categoryDetail => 'కేటగిరీ వివరాలు';
 
   @override
-  String get groupUpper => 'GROUP';
+  String get groupUpper => 'గ్రూప్';
 
   @override
-  String get typeUpper => 'TYPE';
+  String get typeUpper => 'రకం';
 
   @override
-  String get incomeAndExpense => 'Income & Expense';
+  String get incomeAndExpense => 'ఆదాయం & ఖర్చు';
 
   @override
-  String get cannotDeleteCategory => 'Cannot delete category';
+  String get cannotDeleteCategory => 'కేటగిరీని తొలగించలేరు';
 
   @override
   String get cannotDeleteCategoryBody =>
-      'This category has transactions linked to it. To delete this category, delete the linked transactions first.';
+      'ఈ కేటగిరీకి లావాదేవీలు లింక్ చేయబడ్డాయి. దీన్ని తొలగించడానికి, ముందుగా లింక్ చేసిన లావాదేవీలను తొలగించండి.';
 
   @override
-  String get editCategory => 'Edit category';
+  String get editCategory => 'కేటగిరీని ఎడిట్ చేయండి';
 
   @override
-  String get newCategory => 'New category';
+  String get newCategory => 'కొత్త కేటగిరీ';
 
   @override
-  String get optionalLabel => 'Optional';
+  String get optionalLabel => 'ఐచ్ఛికం';
 
   @override
-  String get appearance => 'Appearance';
+  String get appearance => 'స్వరూపం';
 
   @override
-  String get bothLabel => 'Both';
+  String get bothLabel => 'రెండూ';
 
   @override
-  String get saveCategory => 'Save category';
+  String get saveCategory => 'కేటగిరీని సేవ్ చేయండి';
 
   @override
-  String get categoryUpdated => 'Category updated';
+  String get categoryUpdated => 'కేటగిరీ అప్‌డేట్ చేయబడింది';
 
   @override
-  String get categoryAdded => 'Category added';
+  String get categoryAdded => 'కేటగిరీ జోడించబడింది';
 
   @override
-  String get categoryNameLabel => 'Category name';
+  String get categoryNameLabel => 'కేటగిరీ పేరు';
 
   @override
-  String get livePreview => 'LIVE PREVIEW';
+  String get livePreview => 'లైవ్ ప్రివ్యూ';
 
   @override
-  String get selectGroup => 'Select Group';
+  String get selectGroup => 'గ్రూప్‌ని ఎంచుకోండి';
 
   @override
-  String get groupNameShortHint => 'Group name...';
+  String get groupNameShortHint => 'గ్రూప్ పేరు...';
 
   @override
-  String get addNewGroup => 'Add New Group';
+  String get addNewGroup => 'కొత్త గ్రూప్‌ని జోడించండి';
 
   @override
-  String get noBudgetSet => 'No budget set';
+  String get noBudgetSet => 'బడ్జెట్ సెట్ చేయబడలేదు';
 
   @override
-  String get categoriesTitle => 'Manage\nCategories';
+  String get categoriesTitle => 'కేటగిరీలను\nనిర్వహించండి';
 
   @override
   String noCategoryMatches(String query) {
-    return 'No categories or groups match \"$query\".';
+    return '\"$query\"కు ఏ కేటగిరీలు లేదా గ్రూప్‌లు సరిపోలలేదు.';
   }
 
   @override
-  String get deleteCategoryConfirm => 'Delete category?';
+  String get deleteCategoryConfirm => 'కేటగిరీని తొలగించాలా?';
 
   @override
   String deleteCategoryBody(String name) {
-    return '\"$name\" will be permanently deleted.';
+    return '\"$name\" శాశ్వతంగా తొలగించబడుతుంది.';
   }
 
   @override
-  String get categoryNameHint => 'e.g. Groceries, Rent, Salary';
+  String get categoryNameHint => 'ఉదా. కిరాణా, అద్దె, జీతం';
 
   @override
-  String get tagsTitle => 'Manage\nTags';
+  String get tagsTitle => 'ట్యాగ్‌లను\nనిర్వహించండి';
 
   @override
-  String get tagsHeaderDesc => 'Organize transactions with custom labels.';
+  String get tagsHeaderDesc => 'కస్టమ్ లేబుల్‌లతో లావాదేవీలను నిర్వహించండి.';
 
   @override
-  String get addTag => 'Add Tag';
+  String get addTag => 'ట్యాగ్ జోడించండి';
 
   @override
-  String get noTags => 'No tags yet';
+  String get noTags => 'ఇంకా ట్యాగ్‌లు లేవు';
 
   @override
-  String get tagsEmptyDesc => 'Create hashtags to track specific expenses.';
+  String get tagsEmptyDesc =>
+      'నిర్దిష్ట ఖర్చులను ట్రాక్ చేయడానికి హ్యాష్‌ట్యాగ్‌లను సృష్టించండి.';
 
   @override
-  String get disabledLabel => 'Disabled';
+  String get disabledLabel => 'డిజేబుల్ చేయబడింది';
 
   @override
-  String get noTransactions => 'No transactions';
+  String get noTransactions => 'లావాదేవీలు లేవు';
 
   @override
-  String get newTag => 'New Tag';
+  String get newTag => 'కొత్త ట్యాగ్';
 
   @override
-  String get updateTag => 'Update Tag';
+  String get updateTag => 'ట్యాగ్ అప్‌డేట్ చేయండి';
 
   @override
-  String get createTag => 'Create Tag';
+  String get createTag => 'ట్యాగ్ సృష్టించండి';
 
   @override
-  String get enableLabel => 'Enable';
+  String get enableLabel => 'ఎనేబుల్ చేయండి';
 
   @override
-  String get disableLabel => 'Disable';
+  String get disableLabel => 'డిజేబుల్ చేయండి';
 
   @override
-  String get deleteTagConfirm => 'Delete tag?';
+  String get deleteTagConfirm => 'ట్యాగ్ తొలగించాలా?';
 
   @override
   String deleteTagBody(String name) {
-    return 'The tag \"#$name\" will be permanently deleted.';
+    return '\"#$name\" ట్యాగ్ శాశ్వతంగా తొలగించబడుతుంది.';
   }
 
   @override
-  String get selectTags => 'Select Tags';
+  String get selectTags => 'ట్యాగ్‌లను ఎంచుకోండి';
 
   @override
-  String get tagNameHint => 'Example: weekend, trip-to-goa';
+  String get tagNameHint => 'ఉదాహరణ: వీకెండ్, ట్రిప్-టు-గోవా';
 
   @override
-  String get searchOrCreateTagHint => 'Search or create tag...';
+  String get searchOrCreateTagHint => 'వెతకండి లేదా ట్యాగ్ సృష్టించండి...';
 
   @override
   String get tagDisabledMessage =>
-      'Tag is disabled. Enable it from More → Tags.';
+      'ట్యాగ్ డిజేబుల్ చేయబడింది. మరింత → ట్యాగ్‌ల నుండి దాన్ని ఎనేబుల్ చేయండి.';
 
   @override
-  String get exportHistory => 'Export History';
+  String get exportHistory => 'చరిత్రను ఎగుమతి చేయండి';
 
   @override
-  String get exportAnalytics => 'Export Analytics';
+  String get exportAnalytics => 'అనలిటిక్స్‌ను ఎగుమతి చేయండి';
 
   @override
-  String get selectFormat => 'SELECT FORMAT';
+  String get selectFormat => 'ఫార్మాట్‌ను ఎంచుకోండి';
 
   @override
-  String get formatUpper => 'FORMAT';
+  String get formatUpper => 'ఫార్మాట్';
 
   @override
-  String get spreadsheetLabel => 'SPREADSHEET';
+  String get spreadsheetLabel => 'స్ప్రెడ్‌షీట్';
 
   @override
-  String get documentLabel => 'DOCUMENT';
+  String get documentLabel => 'డాక్యుమెంట్';
 
   @override
-  String get pdfDocument => 'PDF Document';
+  String get pdfDocument => 'PDF డాక్యుమెంట్';
 
   @override
-  String get pdfDocumentDesc => 'Universal format for high-fidelity printing.';
+  String get pdfDocumentDesc =>
+      'అధిక-నాణ్యత ప్రింటింగ్ కోసం యూనివర్సల్ ఫార్మాట్.';
 
   @override
-  String get generateReport => 'Generate Report';
+  String get generateReport => 'రిపోర్ట్ రూపొందించండి';
 
   @override
-  String get applyCurrentFilters => 'Apply current filters';
+  String get applyCurrentFilters => 'ప్రస్తుత ఫిల్టర్‌లను వర్తింపజేయండి';
 
   @override
   String get applyFiltersDesc =>
-      'Generate report using the active filters from the history page.';
+      'చరిత్ర పేజీ నుండి యాక్టివ్ ఫిల్టర్‌లను ఉపయోగించి రిపోర్ట్ రూపొందించండి.';
 
   @override
-  String get periodAllTime => 'All Time';
+  String get periodAllTime => 'అన్ని వేళలా';
 
   @override
-  String get selectedPeriod => 'SELECTED PERIOD';
+  String get selectedPeriod => 'ఎంచుకున్న సమయం';
 
   @override
   String get analyticsDateFilterInfo =>
-      'Date filters from your current analytics view are automatically applied to this report.';
+      'మీ ప్రస్తుత అనలిటిక్స్ వీక్షణ నుండి తేదీ ఫిల్టర్‌లు ఆటోమేటిక్‌గా ఈ రిపోర్ట్‌కు వర్తింపజేయబడతాయి.';
 
   @override
-  String get exportSuccessful => 'Export Successful';
+  String get exportSuccessful => 'ఎగుమతి విజయవంతమైంది';
 
   @override
-  String get reportReady => 'Your report is ready.';
+  String get reportReady => 'మీ రిపోర్ట్ సిద్ధంగా ఉంది.';
 
   @override
-  String get openFile => 'Open File';
+  String get openFile => 'ఫైల్‌ని తెరవండి';
 
   @override
-  String get savingEllipsis => 'Saving…';
+  String get savingEllipsis => 'సేవ్ చేయబడుతోంది...';
 
   @override
-  String get saveToFolder => 'Save to Folder';
+  String get saveToFolder => 'ఫోల్డర్‌లో సేవ్ చేయండి';
 
   @override
-  String get shareLabel => 'Share';
+  String get shareLabel => 'షేర్ చేయండి';
 
   @override
-  String get noAppToOpen => 'No app found to open this file type.';
+  String get noAppToOpen => 'ఈ ఫైల్ రకాన్ని తెరవడానికి ఏ యాప్ కనుగొనబడలేదు.';
 
   @override
-  String get fileSaved => 'File saved successfully.';
+  String get fileSaved => 'ఫైల్ విజయవంతంగా సేవ్ చేయబడింది.';
 
   @override
   String couldNotShareFile(String details) {
-    return 'Could not share file: $details';
+    return 'ఫైల్‌ని షేర్ చేయలేకపోయాము: $details';
   }
 
   @override
-  String get exportFailed => 'Export Failed';
+  String get exportFailed => 'ఎగుమతి విఫలమైంది';
 
   @override
-  String get tryAgain => 'Try Again';
+  String get tryAgain => 'మళ్లీ ప్రయత్నించండి';
 
   @override
   String get exportGenerateFailed =>
-      'Unable to generate file. Please try again.';
+      'ఫైల్‌ని రూపొందించలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.';
 
   @override
-  String get failedToSaveFile => 'Failed to save file.';
+  String get failedToSaveFile => 'ఫైల్ సేవ్ చేయడం విఫలమైంది.';
 
   @override
-  String get chartsTitle => 'Charts';
+  String get chartsTitle => 'చార్ట్‌లు';
 
   @override
-  String get chartsSubtitle => 'Visualise your spending patterns over time.';
+  String get chartsSubtitle =>
+      'కాలానుగుణంగా మీ ఖర్చు విధానాలను విజువలైజ్ చేయండి.';
 
   @override
   String get wipBadge => 'WIP';
 
   @override
-  String get failedToLoadData => 'Failed to load data';
+  String get failedToLoadData => 'డేటా లోడ్ చేయడం విఫలమైంది';
 
   @override
-  String get noDataForPeriod => 'No data for this period';
+  String get noDataForPeriod => 'ఈ కాలానికి డేటా లేదు';
 
   @override
-  String get tapBarForDetails => 'Tap a bar to see details';
+  String get tapBarForDetails => 'వివరాలను చూడటానికి ఒక బార్‌పై నొక్కండి';
 
   @override
-  String get incomeUpper => 'INCOME';
+  String get incomeUpper => 'ఆదాయం';
 
   @override
-  String get expenseUpper => 'EXPENSE';
+  String get expenseUpper => 'ఖర్చు';
 
   @override
-  String get netUpper => 'NET';
+  String get netUpper => 'నికర';
 
   @override
-  String get noExpenseBreakdown => 'No expense breakdown available.';
+  String get noExpenseBreakdown => 'ఖర్చుల వివరాలు అందుబాటులో లేవు.';
 
   @override
-  String get byCategoryUpper => 'BY CATEGORY';
+  String get byCategoryUpper => 'కేటగిరీ వారీగా';
 
   @override
-  String get faqTitle => 'Frequently Asked Questions';
+  String get faqTitle => 'తరచుగా అడిగే ప్రశ్నలు';
 
   @override
-  String get faqAddTxnQ => 'How do I add a transaction?';
+  String get faqAddTxnQ => 'నేను లావాదేవీని ఎలా జోడించాలి?';
 
   @override
   String get faqAddTxnA =>
-      'Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.';
+      'కొత్త లావాదేవీని జోడించడానికి కుడి దిగువన ఉన్న + బటన్‌ను నొక్కండి. మొత్తాన్ని పూరించండి, కేటగిరీ మరియు ఖాతాను ఎంచుకుని, ఆపై సేవ్ చేయండి.';
 
   @override
-  String get faqAccountsQ => 'How do I manage accounts?';
+  String get faqAccountsQ => 'నేను ఖాతాలను ఎలా నిర్వహించాలి?';
 
   @override
   String get faqAccountsA =>
-      'Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.';
+      'మీ అన్ని వాలెట్‌లు మరియు బ్యాంక్ ఖాతాలను చూడటానికి మరింత → ఖాతాలకు వెళ్లండి. మీరు అక్కడి నుండి కొత్త ఖాతాలను జోడించవచ్చు లేదా ఇప్పటికే ఉన్నవాటిని ఎడిట్ చేయవచ్చు.';
 
   @override
-  String get faqTransfersQ => 'How do transfers work?';
+  String get faqTransfersQ => 'బదిలీలు ఎలా పని చేస్తాయి?';
 
   @override
   String get faqTransfersA =>
-      'When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.';
+      'లావాదేవీని జోడించేటప్పుడు, రకంగా \"బదిలీ\"ని ఎంచుకోండి. మూల మరియు గమ్య ఖాతాలను ఎంచుకోండి మరియు వాటి మధ్య మొత్తం తరలించబడుతుంది.';
 
   @override
-  String get faqCategoriesQ => 'Can I customize categories?';
+  String get faqCategoriesQ => 'నేను కేటగిరీలను కస్టమైజ్ చేయవచ్చా?';
 
   @override
   String get faqCategoriesA =>
-      'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.';
+      'అవును! అన్ని కేటగిరీలను చూడటానికి మరింత → కేటగిరీలకు వెళ్లండి. డిఫాల్ట్ కేటగిరీలను తొలగించలేరు, కానీ మీరు మీ స్వంత కస్టమ్ కేటగిరీలను జోడించవచ్చు.';
 
   @override
-  String get dataExportTitle => 'Export Data';
+  String get dataExportTitle => 'డేటాను ఎగుమతి చేయండి';
 
   @override
-  String get backupUpper => 'BACKUP';
+  String get backupUpper => 'బ్యాకప్';
 
   @override
   String get exportCsvDesc =>
-      'Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.';
+      'లావాదేవీలు, కేటగిరీలు, ఖాతాలు మరియు ట్యాగ్‌లను ఎగుమతి చేస్తుంది. పునరావృత ఆటోమేషన్‌లు, బడ్జెట్‌లు, రుణాలు, పెట్టుబడులు లేదా అటాచ్‌మెంట్‌లను చేర్చదు.';
 
   @override
   String get exportJsonDesc =>
-      'Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.';
+      'పూర్తి యాప్ బ్యాకప్ (అటాచ్‌మెంట్‌లు మినహా). కొత్త పరికరంలో లేదా మళ్లీ ఇన్‌స్టాల్ చేసిన తర్వాత మీ మొత్తం డేటాను రీస్టోర్ చేయడానికి ఉపయోగించవచ్చు.';
 
   @override
-  String get fileReady => 'Your file is ready.';
+  String get fileReady => 'మీ ఫైల్ సిద్ధంగా ఉంది.';
 
   @override
-  String get saveACopy => 'Save a copy';
+  String get saveACopy => 'ఒక కాపీని సేవ్ చేయండి';
 
   @override
-  String get dataImportTitle => 'Import Data';
+  String get dataImportTitle => 'డేటాను దిగుమతి చేయండి';
 
   @override
-  String get selectFileImport => 'Select File & Import';
+  String get selectFileImport => 'ఫైల్‌ని ఎంచుకుని దిగుమతి చేయండి';
 
   @override
-  String get overrideExistingData => 'Override existing data';
+  String get overrideExistingData => 'ఇప్పటికే ఉన్న డేటాను భర్తీ చేయండి';
 
   @override
-  String get importWipeDesc => 'All existing data will be wiped before import.';
+  String get importWipeDesc =>
+      'దిగుమతి చేయడానికి ముందు ఇప్పటికే ఉన్న మొత్తం డేటా తుడిచివేయబడుతుంది.';
 
   @override
   String get importMergeDesc =>
-      'New records will be merged with existing data.';
+      'కొత్త రికార్డ్‌లు ఇప్పటికే ఉన్న డేటాతో విలీనం చేయబడతాయి.';
 
   @override
   String get importWipeWarning =>
-      'All existing data will be permanently deleted before import.';
+      'దిగుమతికి ముందు ఇప్పటికే ఉన్న డేటా అంతా శాశ్వతంగా తొలగించబడుతుంది.';
 
   @override
   String get importMergeChip =>
-      'New records will be merged with your existing data.';
+      'కొత్త రికార్డ్‌లు మీ ప్రస్తుత డేటాతో విలీనం చేయబడతాయి.';
 
   @override
   String get importReplaceWarning =>
-      'All existing data will be permanently deleted and replaced with the backup.';
+      'ఇప్పటికే ఉన్న డేటా అంతా శాశ్వతంగా తొలగించబడుతుంది మరియు బ్యాకప్‌తో భర్తీ చేయబడుతుంది.';
 
   @override
-  String get downloadTemplate => 'Download Template';
+  String get downloadTemplate => 'టెంప్లేట్ డౌన్‌లోడ్ చేయండి';
 
   @override
   String get downloadTemplateDesc =>
-      'Get a CSV with the correct column headers to format your data.';
+      'మీ డేటాను ఫార్మాట్ చేయడానికి సరైన కాలమ్ హెడర్‌లతో కూడిన CSVని పొందండి.';
 
   @override
-  String get backupsTitle => 'Automatic\nBackups';
+  String get backupsTitle => 'ఆటోమేటిక్\nబ్యాకప్‌లు';
 
   @override
   String get backupsSubtitle =>
-      'Keep a fresh copy of your data saved to your device, on a schedule.';
+      'ఒక షెడ్యూల్ ప్రకారం, మీ పరికరంలో సేవ్ చేయబడిన మీ డేటా యొక్క తాజా కాపీని ఉంచండి.';
 
   @override
-  String get statusSectionLabel => 'Status';
+  String get statusSectionLabel => 'స్థితి';
 
   @override
-  String get configurationLabel => 'Configuration';
+  String get configurationLabel => 'కాన్ఫిగరేషన్';
 
   @override
-  String get actionsLabel => 'Actions';
+  String get actionsLabel => 'చర్యలు';
 
   @override
-  String get backupNow => 'Backup now';
+  String get backupNow => 'ఇప్పుడే బ్యాకప్ చేయండి';
 
   @override
-  String get alreadyBackedUpToday => 'Already backed up today';
+  String get alreadyBackedUpToday => 'ఈ రోజు ఇప్పటికే బ్యాకప్ చేయబడింది';
 
   @override
-  String get lastBackupFailed => 'Last backup failed';
+  String get lastBackupFailed => 'చివరి బ్యాకప్ విఫలమైంది';
 
   @override
   String get backupFolderErrorDesc =>
-      'We couldn\'t access your backup folder. It may have moved or permission may have been revoked.';
+      'మేము మీ బ్యాకప్ ఫోల్డర్‌ను యాక్సెస్ చేయలేకపోయాము. ఇది తరలించబడి ఉండవచ్చు లేదా అనుమతి ఉపసంహరించబడి ఉండవచ్చు.';
 
   @override
   String attemptedOn(String label) {
-    return 'Attempted $label';
+    return '$label న ప్రయత్నించబడింది';
   }
 
   @override
-  String get chooseNewFolder => 'Choose new folder';
+  String get chooseNewFolder => 'కొత్త ఫోల్డర్‌ని ఎంచుకోండి';
 
   @override
-  String get backedUp => 'Backed up';
+  String get backedUp => 'బ్యాకప్ చేయబడింది';
 
   @override
   String backedUpOn(String label) {
-    return 'Backed up $label';
+    return '$label న బ్యాకప్ చేయబడింది';
   }
 
   @override
   String lastCopySaved(String count) {
-    return 'Last copy saved successfully. Keeping your most recent $count backups.';
+    return 'చివరి కాపీ విజయవంతంగా సేవ్ చేయబడింది. మీ అత్యంత ఇటీవలి $count బ్యాకప్‌లను ఉంచుతున్నాము.';
   }
 
   @override
-  String get neverLoseData => 'Never lose your data';
+  String get neverLoseData => 'మీ డేటాను ఎప్పటికీ కోల్పోకండి';
 
   @override
   String get neverLoseDataDesc =>
-      'Turn on automatic backups and Kuber will save a copy to a folder you choose when an app open is due.';
+      'ఆటోమేటిక్ బ్యాకప్‌లను ఆన్ చేయండి మరియు మీరు ఎంచుకున్న ఫోల్డర్‌లో Kuber ఒక కాపీని సేవ్ చేస్తుంది.';
 
   @override
-  String get automaticBackups => 'Automatic Backups';
+  String get automaticBackups => 'ఆటోమేటిక్ బ్యాకప్‌లు';
 
   @override
-  String get saveCopyOnSchedule => 'Save a copy on a schedule';
+  String get saveCopyOnSchedule => 'షెడ్యూల్ ప్రకారం ఒక కాపీని సేవ్ చేయండి';
 
   @override
-  String get keepLast => 'Keep last';
+  String get keepLast => 'చివరిది ఉంచండి';
 
   @override
-  String get backupFolder => 'Backup folder';
+  String get backupFolder => 'బ్యాకప్ ఫోల్డర్';
 
   @override
-  String get exportingData => 'Exporting data...';
+  String get exportingData => 'డేటా ఎగుమతి చేయబడుతోంది...';
 
   @override
-  String get preparingFile => 'Preparing your file';
+  String get preparingFile => 'మీ ఫైల్ సిద్ధమవుతోంది';
 
   @override
-  String get dataExportedSuccess => 'Data exported successfully';
+  String get dataExportedSuccess => 'డేటా విజయవంతంగా ఎగుమతి చేయబడింది';
 
   @override
-  String get exportComplete => 'Export Complete';
+  String get exportComplete => 'ఎగుమతి పూర్తయింది';
 
   @override
   String savedToDownloads(String fileName) {
-    return 'Saved to Downloads/$fileName';
+    return 'Downloads/$fileName కు సేవ్ చేయబడింది';
   }
 
   @override
   String exportFailedMsg(String error) {
-    return 'Export failed: $error';
+    return 'ఎగుమతి విఫలమైంది: $error';
   }
 
   @override
-  String get downloadingTemplate => 'Downloading template...';
+  String get downloadingTemplate => 'టెంప్లేట్ డౌన్‌లోడ్ చేయబడుతోంది...';
 
   @override
-  String get preparingCsvTemplate => 'Preparing CSV template';
+  String get preparingCsvTemplate => 'CSV టెంప్లేట్ సిద్ధమవుతోంది';
 
   @override
-  String get templateDownloadedSuccess => 'Template downloaded successfully';
+  String get templateDownloadedSuccess =>
+      'టెంప్లేట్ విజయవంతంగా డౌన్‌లోడ్ చేయబడింది';
 
   @override
-  String get downloadComplete => 'Download Complete';
+  String get downloadComplete => 'డౌన్‌లోడ్ పూర్తయింది';
 
   @override
   String downloadFailedMsg(String error) {
-    return 'Download failed: $error';
+    return 'డౌన్‌లోడ్ విఫలమైంది: $error';
   }
 
   @override
-  String get downloadFailedTitle => 'Download Failed';
+  String get downloadFailedTitle => 'డౌన్‌లోడ్ విఫలమైంది';
 
   @override
   String importFailedMsg(String error) {
-    return 'Import failed: $error';
+    return 'దిగుమతి విఫలమైంది: $error';
   }
 
   @override
-  String get mockDataGenerated => 'Mock data generated successfully';
+  String get mockDataGenerated => 'మాక్ డేటా విజయవంతంగా సృష్టించబడింది';
 
   @override
   String generationFailedMsg(String error) {
-    return 'Generation failed: $error';
+    return 'జనరేషన్ విఫలమైంది: $error';
   }
 
   @override
-  String get allDataCleared => 'All data cleared successfully';
+  String get allDataCleared => 'మొత్తం డేటా విజయవంతంగా క్లియర్ చేయబడింది';
 
   @override
   String clearFailedMsg(String error) {
-    return 'Clear failed: $error';
+    return 'క్లియర్ చేయడం విఫలమైంది: $error';
   }
 
   @override
   String rebuildFailedMsg(String error) {
-    return 'Rebuild failed: $error';
+    return 'పునర్నిర్మాణం విఫలమైంది: $error';
   }
 }
