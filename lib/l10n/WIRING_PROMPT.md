@@ -200,9 +200,18 @@ Each item below is tagged with what it needs:
   (all 9 langs), not the ARB.
 Precise leftover-literal counts (from a fresh scan, biggest first; excludes
 already-localized files):
-- `core/constants/info_constants.dart` (~177) — ALL info/help bottom-sheet
-  content (title + body + sections per feature). Big but static. Consider a
-  parallel manual map like `about_l10n.dart`/`tools_l10n.dart`, OR ARB keys.
+- INFO/HELP SHEETS — **mostly DONE, do NOT refactor.** `info_constants.dart`
+  stays English (it's the key source + fallback). The bottom sheet
+  (`kuber_info_bottom_sheet.dart`) localizes via the
+  `localizedInfoConfigs` MAP in `lib/core/constants/info_l10n.dart` (config-title
+  → lang → {title, description, items[by index]}). All 10 core feature configs are
+  translated there (Accounts, Categories, Tags, Budgets, Loans, Investments,
+  Recurring, Automatic Backups, Money Stories, Money Stories Archive). Missing
+  config-title keys fall back to English gracefully. The 16 not-yet-in-map: 14
+  calculator info sheets (DEPRIORITIZED with tools) + `About Lent / Borrow` +
+  `About Bill Splitter`. To translate any of these, ADD an entry to the
+  `info_l10n.dart` map (mirror the nested structure, all 8 non-en langs) — this is
+  a manual map, NOT the ARB.
 - `features/tutorial/models/tutorial_chapter.dart` (~38) + `tutorial_overlay.dart`
   (~6) — tutorial content.
 - `features/settings/providers/data_provider.dart` (~22) — [no-context] user-facing
