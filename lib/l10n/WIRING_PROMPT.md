@@ -176,15 +176,19 @@ Each item below is tagged with what it needs:
 - Already fully done in earlier batches: accounts, budgets, loans, ledger,
   investments, recurring, dashboard/home (core), history (core), analytics+charts,
   transactions/add-transaction (core), onboarding (core), settings (core screen),
-  insights, stories (generation), **categories** (categories_screen +
-  add_edit_category_screen + category_widgets — done this batch).
+  insights, **categories**, **tags**, **export** (UI), and **stories** —
+  bubbles (`story_ring._localizeBubbleLabel` → `bubble*` keys), archive screen,
+  and generation are all done.
+  NOTE: the "Money Stories" / "Balance Card" / etc. titles are **widget-catalog
+  names** in `lib/features/widget_editor/data/widget_catalog.dart` (a `const`
+  list). They render in the widget-editor screen. Localize the whole catalog in
+  the `widget_editor` batch (resolve `name` via l10n at the display sites; keep a
+  stable `id`). `export_provider.dart` (CSV/PDF file content + native save dialog)
+  is intentionally English for document portability.
 
 ### Remaining work — [WIRE] / [BOTH]  (counts are wired/total; all are [BOTH] unless noted)
 - `tags` — `more/screens/tags_screen.dart` + `features/tags/*` widgets (NOT tag
   names typed by the user).
-- `export` 0/2 — export bottom sheet(s).
-- `stories` 5/14 — `stories/widgets/*`: bubble names (Daily/Weekly/Monthly/Yearly/
-  Insights/Ledger), the "Money Stories" widget title, the archive screen.
 - `more` leftovers — `how_to_use_screen.dart`, `ask_kuber_screen.dart`,
   `charts_screen.dart`, and leftover literals in `feedback_screen.dart`
   (Bug / New Feature Request / General Feedback chips), `permissions_screen.dart`.
