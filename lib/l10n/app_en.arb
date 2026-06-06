@@ -2192,5 +2192,30 @@
       }
     }
   },
-  "categoryNameHint": "e.g. Groceries, Rent, Salary"
+  "categoryNameHint": "e.g. Groceries, Rent, Salary",
+  "tagsTitle": "Manage\nTags",
+  "tagsHeaderDesc": "Organize transactions with custom labels.",
+  "addTag": "Add Tag",
+  "noTags": "No tags yet",
+  "tagsEmptyDesc": "Create hashtags to track specific expenses.",
+  "disabledLabel": "Disabled",
+  "noTransactions": "No transactions",
+  "newTag": "New Tag",
+  "updateTag": "Update Tag",
+  "createTag": "Create Tag",
+  "enableLabel": "Enable",
+  "disableLabel": "Disable",
+  "deleteTagConfirm": "Delete tag?",
+  "deleteTagBody": "The tag \"#{name}\" will be permanently deleted.",
+  "@deleteTagBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "selectTags": "Select Tags",
+  "tagNameHint": "Example: weekend, trip-to-goa",
+  "searchOrCreateTagHint": "Search or create tag...",
+  "tagDisabledMessage": "Tag is disabled. Enable it from More → Tags."
 }

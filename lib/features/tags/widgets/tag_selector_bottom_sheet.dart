@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -92,7 +93,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Select Tags",
+                    context.l10n.selectTags,
                     style: localeFont(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -110,7 +111,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                         borderRadius: BorderRadius.circular(KuberRadius.sm),
                       ),
                     ),
-                    child: const Text("Done"),
+                    child: Text(context.l10n.doneLabel),
                   ),
                 ],
               ),
@@ -123,7 +124,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                 controller: _searchController,
                 onChanged: (val) => setState(() => _searchQuery = val),
                 decoration: InputDecoration(
-                  hintText: "Search or create tag...",
+                  hintText: context.l10n.searchOrCreateTagHint,
                   prefixIcon: Icon(Icons.search_rounded, color: cs.primary),
                   filled: true,
                   fillColor: cs.surfaceContainerHigh,
@@ -140,7 +141,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
             Expanded(
               child: tagsAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text("Error: $e")),
+                error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
                 data: (tags) {
                   final filteredTags = tags.where((t) => 
                     t.name.contains(_searchQuery.toLowerCase().trim())).toList();
@@ -176,9 +177,9 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                                 _toggleTag(tag);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Tag is disabled. Enable it from More → Tags."),
-                                    duration: Duration(seconds: 2),
+                                  SnackBar(
+                                    content: Text(context.l10n.tagDisabledMessage),
+                                    duration: const Duration(seconds: 2),
                                   ),
                                 );
                               }

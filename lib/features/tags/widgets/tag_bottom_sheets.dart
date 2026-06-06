@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -37,6 +38,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
   }
 
   Future<void> _save() async {
+    final tagExistsMsg = context.l10n.tagAlreadyExists;
     final name = _controller.text.trim();
     if (name.isEmpty) return;
 
@@ -47,7 +49,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
     if (widget.tag == null || normalized != widget.tag!.name) {
       final existing = await repo.findByName(normalized);
       if (existing != null) {
-        setState(() => _errorText = 'Tag already exists');
+        setState(() => _errorText = tagExistsMsg);
         return;
       }
     }
@@ -99,7 +101,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isEdit ? "Edit Tag" : "New Tag",
+                isEdit ? context.l10n.editTag : context.l10n.newTag,
                 style: localeFont(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -128,7 +130,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
               color: cs.onSurface,
             ),
             decoration: InputDecoration(
-              hintText: "Example: weekend, trip-to-goa",
+              hintText: context.l10n.tagNameHint,
               hintStyle: localeFont(
                 fontSize: 14,
                 color: cs.onSurfaceVariant.withValues(alpha: 0.5),
@@ -165,7 +167,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
           ),
           const SizedBox(height: 24),
           AppButton(
-            label: isEdit ? "Update Tag" : "Create Tag",
+            label: isEdit ? context.l10n.updateTag : context.l10n.createTag,
             type: AppButtonType.primary,
             fullWidth: true,
             onPressed: _save,
@@ -204,7 +206,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: tag.name,
-      subtitle: "CREATED ON ${dateStr.toUpperCase()}",
+      subtitle: context.l10n.createdOnUpper(dateStr.toUpperCase()),
       leadingIcon: Container(
         width: 48,
         height: 48,
@@ -223,7 +225,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
         ),
       ),
       actions: AppButton(
-        label: 'View Transactions',
+        label: context.l10n.viewTransactions,
         icon: Icons.receipt_long_rounded,
         type: AppButtonType.primary,
         fullWidth: true,
@@ -249,8 +251,8 @@ class ViewTagBottomSheet extends ConsumerWidget {
                     const SizedBox(width: 6),
                     Text(
                       txn != null
-                          ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
-                          : 'No transactions yet',
+                          ? context.l10n.lastTransaction(DateFormatter.timeAgo(txn.createdAt))
+                          : context.l10n.noTransactionsYet,
                       style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
@@ -269,7 +271,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: "Edit",
+                  label: context.l10n.editLabel,
                   icon: Icons.edit_outlined,
                   type: AppButtonType.normal,
                   onPressed: () => _edit(context),
@@ -278,7 +280,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: tag.isEnabled ? "Disable" : "Enable",
+                  label: tag.isEnabled ? context.l10n.disableLabel : context.l10n.enableLabel,
                   icon: tag.isEnabled ? Icons.block_flipped : Icons.check_circle_outline_rounded,
                   type: tag.isEnabled ? AppButtonType.danger : AppButtonType.normal,
                   onPressed: () => _toggleEnabled(context, ref),
@@ -288,7 +290,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           AppButton(
-            label: "Delete Tag",
+            label: context.l10n.deleteTag,
             icon: Icons.delete_outline_rounded,
             type: AppButtonType.danger,
             fullWidth: true,
@@ -310,20 +312,20 @@ class ViewTagBottomSheet extends ConsumerWidget {
           side: BorderSide(color: cs.outline, width: 1),
         ),
         title: Text(
-          'Delete tag?',
+          context.l10n.deleteTagConfirm,
           style: localeFont(
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
         ),
         content: Text(
-          'The tag "#${tag.name}" will be permanently deleted.',
+          context.l10n.deleteTagBody(tag.name),
           style: localeFont(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: localeFont()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -338,7 +340,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
               if (ctx.mounted) Navigator.of(ctx).pop();
               if (context.mounted) Navigator.of(context).pop();
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.deleteLabel),
           ),
         ],
       ),

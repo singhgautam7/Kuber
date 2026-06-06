@@ -3736,4 +3736,61 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get categoryNameHint => 'e.g. Groceries, Rent, Salary';
+
+  @override
+  String get tagsTitle => 'Manage\nTags';
+
+  @override
+  String get tagsHeaderDesc => 'Organize transactions with custom labels.';
+
+  @override
+  String get addTag => 'Add Tag';
+
+  @override
+  String get noTags => 'No tags yet';
+
+  @override
+  String get tagsEmptyDesc => 'Create hashtags to track specific expenses.';
+
+  @override
+  String get disabledLabel => 'Disabled';
+
+  @override
+  String get noTransactions => 'No transactions';
+
+  @override
+  String get newTag => 'New Tag';
+
+  @override
+  String get updateTag => 'Update Tag';
+
+  @override
+  String get createTag => 'Create Tag';
+
+  @override
+  String get enableLabel => 'Enable';
+
+  @override
+  String get disableLabel => 'Disable';
+
+  @override
+  String get deleteTagConfirm => 'Delete tag?';
+
+  @override
+  String deleteTagBody(String name) {
+    return 'The tag \"#$name\" will be permanently deleted.';
+  }
+
+  @override
+  String get selectTags => 'Select Tags';
+
+  @override
+  String get tagNameHint => 'Example: weekend, trip-to-goa';
+
+  @override
+  String get searchOrCreateTagHint => 'Search or create tag...';
+
+  @override
+  String get tagDisabledMessage =>
+      'Tag is disabled. Enable it from More → Tags.';
 }

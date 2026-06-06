@@ -6763,6 +6763,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. Groceries, Rent, Salary'**
   String get categoryNameHint;
+
+  /// No description provided for @tagsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage\nTags'**
+  String get tagsTitle;
+
+  /// No description provided for @tagsHeaderDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize transactions with custom labels.'**
+  String get tagsHeaderDesc;
+
+  /// No description provided for @addTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Tag'**
+  String get addTag;
+
+  /// No description provided for @noTags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags yet'**
+  String get noTags;
+
+  /// No description provided for @tagsEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Create hashtags to track specific expenses.'**
+  String get tagsEmptyDesc;
+
+  /// No description provided for @disabledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabledLabel;
+
+  /// No description provided for @noTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions'**
+  String get noTransactions;
+
+  /// No description provided for @newTag.
+  ///
+  /// In en, this message translates to:
+  /// **'New Tag'**
+  String get newTag;
+
+  /// No description provided for @updateTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Tag'**
+  String get updateTag;
+
+  /// No description provided for @createTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Tag'**
+  String get createTag;
+
+  /// No description provided for @enableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enableLabel;
+
+  /// No description provided for @disableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get disableLabel;
+
+  /// No description provided for @deleteTagConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete tag?'**
+  String get deleteTagConfirm;
+
+  /// No description provided for @deleteTagBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The tag \"#{name}\" will be permanently deleted.'**
+  String deleteTagBody(String name);
+
+  /// No description provided for @selectTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Tags'**
+  String get selectTags;
+
+  /// No description provided for @tagNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: weekend, trip-to-goa'**
+  String get tagNameHint;
+
+  /// No description provided for @searchOrCreateTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search or create tag...'**
+  String get searchOrCreateTagHint;
+
+  /// No description provided for @tagDisabledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag is disabled. Enable it from More → Tags.'**
+  String get tagDisabledMessage;
 }
 
 class _AppLocalizationsDelegate
