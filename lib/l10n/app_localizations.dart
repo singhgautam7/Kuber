@@ -6871,6 +6871,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tag is disabled. Enable it from More → Tags.'**
   String get tagDisabledMessage;
+
+  /// No description provided for @exportHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Export History'**
+  String get exportHistory;
+
+  /// No description provided for @exportAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Analytics'**
+  String get exportAnalytics;
+
+  /// No description provided for @selectFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECT FORMAT'**
+  String get selectFormat;
+
+  /// No description provided for @formatUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'FORMAT'**
+  String get formatUpper;
+
+  /// No description provided for @spreadsheetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SPREADSHEET'**
+  String get spreadsheetLabel;
+
+  /// No description provided for @documentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'DOCUMENT'**
+  String get documentLabel;
+
+  /// No description provided for @pdfDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF Document'**
+  String get pdfDocument;
+
+  /// No description provided for @pdfDocumentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Universal format for high-fidelity printing.'**
+  String get pdfDocumentDesc;
+
+  /// No description provided for @generateReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Report'**
+  String get generateReport;
+
+  /// No description provided for @applyCurrentFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply current filters'**
+  String get applyCurrentFilters;
+
+  /// No description provided for @applyFiltersDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate report using the active filters from the history page.'**
+  String get applyFiltersDesc;
+
+  /// No description provided for @periodAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All Time'**
+  String get periodAllTime;
+
+  /// No description provided for @selectedPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECTED PERIOD'**
+  String get selectedPeriod;
+
+  /// No description provided for @analyticsDateFilterInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Date filters from your current analytics view are automatically applied to this report.'**
+  String get analyticsDateFilterInfo;
+
+  /// No description provided for @exportSuccessful.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Successful'**
+  String get exportSuccessful;
+
+  /// No description provided for @reportReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your report is ready.'**
+  String get reportReady;
+
+  /// No description provided for @openFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Open File'**
+  String get openFile;
+
+  /// No description provided for @savingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingEllipsis;
+
+  /// No description provided for @saveToFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Folder'**
+  String get saveToFolder;
+
+  /// No description provided for @shareLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareLabel;
+
+  /// No description provided for @noAppToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No app found to open this file type.'**
+  String get noAppToOpen;
+
+  /// No description provided for @fileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'File saved successfully.'**
+  String get fileSaved;
+
+  /// No description provided for @couldNotShareFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not share file: {details}'**
+  String couldNotShareFile(String details);
+
+  /// No description provided for @exportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Failed'**
+  String get exportFailed;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @exportGenerateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to generate file. Please try again.'**
+  String get exportGenerateFailed;
+
+  /// No description provided for @failedToSaveFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save file.'**
+  String get failedToSaveFile;
 }
 
 class _AppLocalizationsDelegate

@@ -3768,4 +3768,90 @@ class AppLocalizationsTe extends AppLocalizations {
   @override
   String get tagDisabledMessage =>
       'Tag is disabled. Enable it from More → Tags.';
+
+  @override
+  String get exportHistory => 'Export History';
+
+  @override
+  String get exportAnalytics => 'Export Analytics';
+
+  @override
+  String get selectFormat => 'SELECT FORMAT';
+
+  @override
+  String get formatUpper => 'FORMAT';
+
+  @override
+  String get spreadsheetLabel => 'SPREADSHEET';
+
+  @override
+  String get documentLabel => 'DOCUMENT';
+
+  @override
+  String get pdfDocument => 'PDF Document';
+
+  @override
+  String get pdfDocumentDesc => 'Universal format for high-fidelity printing.';
+
+  @override
+  String get generateReport => 'Generate Report';
+
+  @override
+  String get applyCurrentFilters => 'Apply current filters';
+
+  @override
+  String get applyFiltersDesc =>
+      'Generate report using the active filters from the history page.';
+
+  @override
+  String get periodAllTime => 'All Time';
+
+  @override
+  String get selectedPeriod => 'SELECTED PERIOD';
+
+  @override
+  String get analyticsDateFilterInfo =>
+      'Date filters from your current analytics view are automatically applied to this report.';
+
+  @override
+  String get exportSuccessful => 'Export Successful';
+
+  @override
+  String get reportReady => 'Your report is ready.';
+
+  @override
+  String get openFile => 'Open File';
+
+  @override
+  String get savingEllipsis => 'Saving…';
+
+  @override
+  String get saveToFolder => 'Save to Folder';
+
+  @override
+  String get shareLabel => 'Share';
+
+  @override
+  String get noAppToOpen => 'No app found to open this file type.';
+
+  @override
+  String get fileSaved => 'File saved successfully.';
+
+  @override
+  String couldNotShareFile(String details) {
+    return 'Could not share file: $details';
+  }
+
+  @override
+  String get exportFailed => 'Export Failed';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get exportGenerateFailed =>
+      'Unable to generate file. Please try again.';
+
+  @override
+  String get failedToSaveFile => 'Failed to save file.';
 }

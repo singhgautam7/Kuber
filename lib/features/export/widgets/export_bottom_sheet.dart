@@ -1,5 +1,6 @@
 
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -142,7 +143,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   // ---- Options state -------------------------------------------------------
 
   Widget _buildOptions(ColorScheme cs) {
-    final title = _isTransactions ? 'Export History' : 'Export Analytics';
+    final title = _isTransactions ? context.l10n.exportHistory : context.l10n.exportAnalytics;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -164,7 +165,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
         // FORMAT Section
         Text(
-          _isTransactions ? 'SELECT FORMAT' : 'FORMAT',
+          _isTransactions ? context.l10n.selectFormat : context.l10n.formatUpper,
           style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -175,17 +176,17 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         const SizedBox(height: KuberSpacing.md),
         if (_isTransactions)
           SettingsCardSelector<ExportFormat>(
-            options: const [
+            options: [
               SelectorOption(
                 value: ExportFormat.csv,
                 label: 'CSV',
-                subtitle: 'SPREADSHEET',
+                subtitle: context.l10n.spreadsheetLabel,
                 icon: Icons.description_outlined,
               ),
               SelectorOption(
                 value: ExportFormat.pdf,
                 label: 'PDF',
-                subtitle: 'DOCUMENT',
+                subtitle: context.l10n.documentLabel,
                 icon: Icons.picture_as_pdf_outlined,
               ),
             ],
@@ -195,11 +196,11 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         else
           // Analytics is PDF only
           SettingsCardSelector<ExportFormat>(
-            options: const [
+            options: [
               SelectorOption(
                 value: ExportFormat.pdf,
-                label: 'PDF Document',
-                subtitle: 'Universal format for high-fidelity printing.',
+                label: context.l10n.pdfDocument,
+                subtitle: context.l10n.pdfDocumentDesc,
                 icon: Icons.picture_as_pdf_outlined,
               ),
             ],
@@ -223,7 +224,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
         // CTA
         AppButton(
-          label: 'Generate Report',
+          label: context.l10n.generateReport,
           icon: _isTransactions ? null : Icons.arrow_forward_rounded,
           iconAfterLabel: !_isTransactions,
           type: AppButtonType.primary,
@@ -249,7 +250,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Apply current filters',
+                  context.l10n.applyCurrentFilters,
                   style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -258,7 +259,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Generate report using the active filters from the history page.',
+                  context.l10n.applyFiltersDesc,
                   style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant.withValues(alpha: 0.8),
@@ -282,14 +283,14 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   Widget _buildPeriodCard(ColorScheme cs) {
     final filter = ref.read(analyticsFilterProvider);
     final rangeText = filter.type == FilterType.all
-        ? 'All Time'
+        ? context.l10n.periodAllTime
         : '${DateFormat('MMM d, yyyy').format(filter.from)} \u2013 ${DateFormat('MMM d, yyyy').format(filter.to)}';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'SELECTED PERIOD',
+          context.l10n.selectedPeriod,
           style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -340,7 +341,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
           const SizedBox(width: KuberSpacing.md),
           Expanded(
             child: Text(
-              'Date filters from your current analytics view are automatically applied to this report.',
+              context.l10n.analyticsDateFilterInfo,
               style: localeFont(
                 fontSize: 12,
                 color: cs.onSurfaceVariant,
@@ -414,7 +415,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
-          'Export Successful',
+          context.l10n.exportSuccessful,
           style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -423,7 +424,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Your report is ready.',
+          context.l10n.reportReady,
           style: localeFont(
             fontSize: 13,
             color: cs.onSurfaceVariant,
@@ -488,7 +489,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
         // Action buttons
         AppButton(
-          label: 'Open File',
+          label: context.l10n.openFile,
           icon: Icons.open_in_new_rounded,
           type: AppButtonType.primary,
           fullWidth: true,
@@ -496,7 +497,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         AppButton(
-          label: _isSaving ? 'Saving…' : 'Save to Folder',
+          label: _isSaving ? context.l10n.savingEllipsis : context.l10n.saveToFolder,
           icon: Icons.save_alt_rounded,
           type: AppButtonType.normal,
           fullWidth: true,
@@ -504,7 +505,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         AppButton(
-          label: 'Share',
+          label: context.l10n.shareLabel,
           icon: Icons.share_outlined,
           type: AppButtonType.normal,
           fullWidth: true,
@@ -526,7 +527,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         : 'application/pdf';
     final openResult = await OpenFilex.open(result.tempFile.path, type: mimeType);
     if (openResult.type != ResultType.done && mounted) {
-      showKuberSnackBar(context, 'No app found to open this file type.');
+      showKuberSnackBar(context, context.l10n.noAppToOpen);
     }
   }
 
@@ -538,10 +539,10 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       final saved = await saveToFolder(result: result, format: _format);
       if (!mounted) return;
       if (saved) {
-        showKuberSnackBar(context, 'File saved successfully.');
+        showKuberSnackBar(context, context.l10n.fileSaved);
       }
     } catch (_) {
-      if (mounted) showKuberSnackBar(context, 'Failed to save file.');
+      if (mounted) showKuberSnackBar(context, context.l10n.failedToSaveFile);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -569,7 +570,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       );
     } catch (e) {
       if (mounted) {
-        showKuberSnackBar(context, 'Could not share file: $e');
+        showKuberSnackBar(context, context.l10n.couldNotShareFile(e.toString()));
       }
     }
   }
@@ -590,7 +591,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
-          'Export Failed',
+          context.l10n.exportFailed,
           style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
@@ -608,7 +609,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.xl),
         AppButton(
-          label: 'Try Again',
+          label: context.l10n.tryAgain,
           type: AppButtonType.primary,
           fullWidth: true,
           onPressed: () {
@@ -617,7 +618,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         AppButton(
-          label: 'Cancel',
+          label: context.l10n.cancelLabel,
           type: AppButtonType.normal,
           fullWidth: true,
           onPressed: () => Navigator.pop(context),
@@ -655,7 +656,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Unable to generate file. Please try again.';
+        _errorMessage = context.l10n.exportGenerateFailed;
         _stage = _ExportStage.error;
       });
     }

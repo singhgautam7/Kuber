@@ -2217,5 +2217,39 @@
   "selectTags": "Select Tags",
   "tagNameHint": "Example: weekend, trip-to-goa",
   "searchOrCreateTagHint": "Search or create tag...",
-  "tagDisabledMessage": "Tag is disabled. Enable it from More → Tags."
+  "tagDisabledMessage": "Tag is disabled. Enable it from More → Tags.",
+  "exportHistory": "Export History",
+  "exportAnalytics": "Export Analytics",
+  "selectFormat": "SELECT FORMAT",
+  "formatUpper": "FORMAT",
+  "spreadsheetLabel": "SPREADSHEET",
+  "documentLabel": "DOCUMENT",
+  "pdfDocument": "PDF Document",
+  "pdfDocumentDesc": "Universal format for high-fidelity printing.",
+  "generateReport": "Generate Report",
+  "applyCurrentFilters": "Apply current filters",
+  "applyFiltersDesc": "Generate report using the active filters from the history page.",
+  "periodAllTime": "All Time",
+  "selectedPeriod": "SELECTED PERIOD",
+  "analyticsDateFilterInfo": "Date filters from your current analytics view are automatically applied to this report.",
+  "exportSuccessful": "Export Successful",
+  "reportReady": "Your report is ready.",
+  "openFile": "Open File",
+  "savingEllipsis": "Saving…",
+  "saveToFolder": "Save to Folder",
+  "shareLabel": "Share",
+  "noAppToOpen": "No app found to open this file type.",
+  "fileSaved": "File saved successfully.",
+  "couldNotShareFile": "Could not share file: {details}",
+  "@couldNotShareFile": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFailed": "Export Failed",
+  "tryAgain": "Try Again",
+  "exportGenerateFailed": "Unable to generate file. Please try again.",
+  "failedToSaveFile": "Failed to save file."
 }
