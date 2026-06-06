@@ -3895,4 +3895,59 @@ class AppLocalizationsMr extends AppLocalizations {
   @override
   String get faqCategoriesA =>
       'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.';
+
+  @override
+  String get dataExportTitle => 'Export Data';
+
+  @override
+  String get backupUpper => 'BACKUP';
+
+  @override
+  String get exportCsvDesc =>
+      'Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.';
+
+  @override
+  String get exportJsonDesc =>
+      'Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.';
+
+  @override
+  String get fileReady => 'Your file is ready.';
+
+  @override
+  String get saveACopy => 'Save a copy';
+
+  @override
+  String get dataImportTitle => 'Import Data';
+
+  @override
+  String get selectFileImport => 'Select File & Import';
+
+  @override
+  String get overrideExistingData => 'Override existing data';
+
+  @override
+  String get importWipeDesc => 'All existing data will be wiped before import.';
+
+  @override
+  String get importMergeDesc =>
+      'New records will be merged with existing data.';
+
+  @override
+  String get importWipeWarning =>
+      'All existing data will be permanently deleted before import.';
+
+  @override
+  String get importMergeChip =>
+      'New records will be merged with your existing data.';
+
+  @override
+  String get importReplaceWarning =>
+      'All existing data will be permanently deleted and replaced with the backup.';
+
+  @override
+  String get downloadTemplate => 'Download Template';
+
+  @override
+  String get downloadTemplateDesc =>
+      'Get a CSV with the correct column headers to format your data.';
 }

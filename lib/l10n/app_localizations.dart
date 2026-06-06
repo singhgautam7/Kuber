@@ -7153,6 +7153,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.'**
   String get faqCategoriesA;
+
+  /// No description provided for @dataExportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get dataExportTitle;
+
+  /// No description provided for @backupUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'BACKUP'**
+  String get backupUpper;
+
+  /// No description provided for @exportCsvDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.'**
+  String get exportCsvDesc;
+
+  /// No description provided for @exportJsonDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.'**
+  String get exportJsonDesc;
+
+  /// No description provided for @fileReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your file is ready.'**
+  String get fileReady;
+
+  /// No description provided for @saveACopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a copy'**
+  String get saveACopy;
+
+  /// No description provided for @dataImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Data'**
+  String get dataImportTitle;
+
+  /// No description provided for @selectFileImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File & Import'**
+  String get selectFileImport;
+
+  /// No description provided for @overrideExistingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Override existing data'**
+  String get overrideExistingData;
+
+  /// No description provided for @importWipeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All existing data will be wiped before import.'**
+  String get importWipeDesc;
+
+  /// No description provided for @importMergeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'New records will be merged with existing data.'**
+  String get importMergeDesc;
+
+  /// No description provided for @importWipeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'All existing data will be permanently deleted before import.'**
+  String get importWipeWarning;
+
+  /// No description provided for @importMergeChip.
+  ///
+  /// In en, this message translates to:
+  /// **'New records will be merged with your existing data.'**
+  String get importMergeChip;
+
+  /// No description provided for @importReplaceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'All existing data will be permanently deleted and replaced with the backup.'**
+  String get importReplaceWarning;
+
+  /// No description provided for @downloadTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Template'**
+  String get downloadTemplate;
+
+  /// No description provided for @downloadTemplateDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a CSV with the correct column headers to format your data.'**
+  String get downloadTemplateDesc;
 }
 
 class _AppLocalizationsDelegate

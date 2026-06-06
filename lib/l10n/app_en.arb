@@ -2271,5 +2271,21 @@
   "faqTransfersQ": "How do transfers work?",
   "faqTransfersA": "When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.",
   "faqCategoriesQ": "Can I customize categories?",
-  "faqCategoriesA": "Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories."
+  "faqCategoriesA": "Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.",
+  "dataExportTitle": "Export Data",
+  "backupUpper": "BACKUP",
+  "exportCsvDesc": "Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.",
+  "exportJsonDesc": "Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.",
+  "fileReady": "Your file is ready.",
+  "saveACopy": "Save a copy",
+  "dataImportTitle": "Import Data",
+  "selectFileImport": "Select File & Import",
+  "overrideExistingData": "Override existing data",
+  "importWipeDesc": "All existing data will be wiped before import.",
+  "importMergeDesc": "New records will be merged with existing data.",
+  "importWipeWarning": "All existing data will be permanently deleted before import.",
+  "importMergeChip": "New records will be merged with your existing data.",
+  "importReplaceWarning": "All existing data will be permanently deleted and replaced with the backup.",
+  "downloadTemplate": "Download Template",
+  "downloadTemplateDesc": "Get a CSV with the correct column headers to format your data."
 }

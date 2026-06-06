@@ -189,26 +189,39 @@ Each item below is tagged with what it needs:
 ### Remaining work — [WIRE] / [BOTH]  (counts are wired/total; all are [BOTH] unless noted)
 - `tags` — `more/screens/tags_screen.dart` + `features/tags/*` widgets (NOT tag
   names typed by the user).
-- `more` leftovers — `how_to_use_screen.dart`, `ask_kuber_screen.dart`,
-  `charts_screen.dart`, and leftover literals in `feedback_screen.dart`
-  (Bug / New Feature Request / General Feedback chips), `permissions_screen.dart`.
-- `tools` 1/28 — calculators hub + ~12 calculators + calculator widgets + bill
-  splitter (4 files) + split calculator. Large but mechanical. NOTE: tool *names*
-  may already be in `tools_l10n.dart` (`tL10n`); the per-calculator field labels /
-  results are the hardcoded part to WIRE into the ARB.
-- `transactions` 12/23 — remaining info/help sheets, view sheets, and the
-  account-type label shown in the transaction row.
-- `shared` 5/31 — empty state, form widgets, date range, info/WIP sheets, app
-  scaffold extras, pickers, preview row, `kuber_info_bottom_sheet` content.
-- `settings` 6/13 — data management screen + data action/export/import widgets,
-  remaining choice sheets.
-- `backups` 0/7 — automatic backups screen + widgets.
-- `notifications` 1/5 — [BOTH, no-context] notifications sheet + `notification_service.dart`
-  OS bodies + per-type processors (ledger/budget/recurring reminders). These run
-  without a BuildContext → use `lookupAppLocalizations(AppLocale.current).key`,
-  NOT `context.l10n`. Same for `recurring/data/recurring_processor.dart`,
-  `ledger/data/ledger_reminder_processor.dart`, and the budget service reminders.
-- `tutorial` 0/9, `auth` 0/2, `splash` 0/1, `widget_editor` 0/6.
+- `ask_kuber_screen.dart` — DEFERRED by product owner (it's a chat assistant;
+  ~35 grammatical/plural answer sentences). Revisit later.
+- `tools` — the **hub** (`tools_hub_screen.dart`) tile names, descriptions, group
+  titles, and chrome are ALREADY localized via `tL10n` → `tools_l10n.dart` (a
+  manual 9-language map, NOT the ARB; 38 entries). [REBUILD-ONLY]. The
+  **per-calculator internals** (input field labels / results inside each
+  `*_calculator_screen.dart` + bill splitter) are DEPRIORITIZED for now — wire
+  later into the ARB. To add a new tool-hub label, edit `tools_l10n.dart`
+  (all 9 langs), not the ARB.
+Precise leftover-literal counts (from a fresh scan, biggest first; excludes
+already-localized files):
+- `core/constants/info_constants.dart` (~177) — ALL info/help bottom-sheet
+  content (title + body + sections per feature). Big but static. Consider a
+  parallel manual map like `about_l10n.dart`/`tools_l10n.dart`, OR ARB keys.
+- `features/tutorial/models/tutorial_chapter.dart` (~38) + `tutorial_overlay.dart`
+  (~6) — tutorial content.
+- `features/settings/providers/data_provider.dart` (~22) — [no-context] user-facing
+  snackbar/notification toasts for export/template/mock/clear (e.g. "Export
+  Complete"). Use `lookupAppLocalizations(AppLocale.current)`.
+- `features/widget_editor/data/widget_catalog.dart` (~16) — the 14 widget names
+  ("Money Stories", "Balance Card", …) shown in the widget-editor screen.
+- `features/settings/widgets/data_export_bottom_sheet.dart` (~9) +
+  `data_import_bottom_sheet.dart` (~5) — heavily reuse export keys.
+- `features/backups/screens/automatic_backups_screen.dart` (~8 + more) — backups UI.
+- `shared/widgets/kuber_bar_chart.dart` (~5).
+- `features/transactions` — account-type label in the transaction row was NOT
+  found as a hardcoded literal (likely already localized or derived); verify on
+  device after rebuild.
+- `notifications` — [no-context] notifications sheet + `notification_service.dart`
+  OS bodies + per-type processors (`recurring/data/recurring_processor.dart`,
+  `ledger/data/ledger_reminder_processor.dart`, budget service). Use
+  `lookupAppLocalizations(AppLocale.current).key`, NOT `context.l10n`.
+- `auth`, `splash`.
 
 **INTENTIONALLY ENGLISH (do not touch):** `lib/features/dev/*` (developer-only
 screens); the feedback email body template (sent to the developer); ledger
