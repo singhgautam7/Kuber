@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -78,7 +79,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Charts',
+                          context.l10n.chartsTitle,
                           style: localeFont(
                             fontSize: 32,
                             fontWeight: FontWeight.w800,
@@ -89,7 +90,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Visualise your spending patterns over time.',
+                          context.l10n.chartsSubtitle,
                           style: localeFont(
                               fontSize: 13, color: cs.onSurfaceVariant),
                         ),
@@ -115,7 +116,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                           Icon(Icons.construction_rounded,
                               size: 14, color: cs.onSurfaceVariant),
                           const SizedBox(width: 6),
-                          Text('WIP',
+                          Text(context.l10n.wipBadge,
                               style: localeFont(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -139,7 +140,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
           child: dataAsync.when(
             loading: () => _ChartSkeleton(),
             error: (e, _) => Center(
-              child: Text('Failed to load data',
+              child: Text(context.l10n.failedToLoadData,
                   style: localeFont(color: cs.error)),
             ),
             data: (buckets) => _ScrollableBarChart(buckets: buckets),
@@ -268,7 +269,7 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
 
     if (buckets.isEmpty) {
       return Center(
-        child: Text('No data for this period',
+        child: Text(context.l10n.noDataForPeriod,
             style: localeFont(color: cs.onSurfaceVariant)),
       );
     }
@@ -466,7 +467,7 @@ class _DetailsPanel extends ConsumerWidget {
       data: (buckets) {
         if (buckets.isEmpty || selectedIdx == null) {
           return Center(
-            child: Text('Tap a bar to see details',
+            child: Text(context.l10n.tapBarForDetails,
                 style: localeFont(color: cs.onSurfaceVariant)),
           );
         }
@@ -495,19 +496,19 @@ class _DetailsPanel extends ConsumerWidget {
               Row(
                 children: [
                   _SummaryTile(
-                    label: 'INCOME',
+                    label: context.l10n.incomeUpper,
                     value: formatter.formatCurrency(bucket.income),
                     color: cs.tertiary,
                   ),
                   const SizedBox(width: KuberSpacing.sm),
                   _SummaryTile(
-                    label: 'EXPENSE',
+                    label: context.l10n.expenseUpper,
                     value: formatter.formatCurrency(bucket.expense),
                     color: cs.error,
                   ),
                   const SizedBox(width: KuberSpacing.sm),
                   _SummaryTile(
-                    label: 'NET',
+                    label: context.l10n.netUpper,
                     value: formatter.formatCurrency(net.abs()),
                     color: net >= 0 ? cs.tertiary : cs.error,
                     prefix: net < 0 ? '−' : '+',
@@ -521,7 +522,7 @@ class _DetailsPanel extends ConsumerWidget {
                 error: (_, __) => const SizedBox.shrink(),
                 data: (stats) {
                   if (stats.isEmpty) {
-                    return Text('No expense breakdown available.',
+                    return Text(context.l10n.noExpenseBreakdown,
                         style: localeFont(
                             fontSize: 13, color: cs.onSurfaceVariant));
                   }
@@ -529,7 +530,7 @@ class _DetailsPanel extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'BY CATEGORY',
+                        context.l10n.byCategoryUpper,
                         style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

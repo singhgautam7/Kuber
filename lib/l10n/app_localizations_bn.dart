@@ -3836,4 +3836,37 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get failedToSaveFile => 'Failed to save file.';
+
+  @override
+  String get chartsTitle => 'Charts';
+
+  @override
+  String get chartsSubtitle => 'Visualise your spending patterns over time.';
+
+  @override
+  String get wipBadge => 'WIP';
+
+  @override
+  String get failedToLoadData => 'Failed to load data';
+
+  @override
+  String get noDataForPeriod => 'No data for this period';
+
+  @override
+  String get tapBarForDetails => 'Tap a bar to see details';
+
+  @override
+  String get incomeUpper => 'INCOME';
+
+  @override
+  String get expenseUpper => 'EXPENSE';
+
+  @override
+  String get netUpper => 'NET';
+
+  @override
+  String get noExpenseBreakdown => 'No expense breakdown available.';
+
+  @override
+  String get byCategoryUpper => 'BY CATEGORY';
 }

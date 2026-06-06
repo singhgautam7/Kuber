@@ -7033,6 +7033,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to save file.'**
   String get failedToSaveFile;
+
+  /// No description provided for @chartsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Charts'**
+  String get chartsTitle;
+
+  /// No description provided for @chartsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Visualise your spending patterns over time.'**
+  String get chartsSubtitle;
+
+  /// No description provided for @wipBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'WIP'**
+  String get wipBadge;
+
+  /// No description provided for @failedToLoadData.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load data'**
+  String get failedToLoadData;
+
+  /// No description provided for @noDataForPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No data for this period'**
+  String get noDataForPeriod;
+
+  /// No description provided for @tapBarForDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a bar to see details'**
+  String get tapBarForDetails;
+
+  /// No description provided for @incomeUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'INCOME'**
+  String get incomeUpper;
+
+  /// No description provided for @expenseUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'EXPENSE'**
+  String get expenseUpper;
+
+  /// No description provided for @netUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'NET'**
+  String get netUpper;
+
+  /// No description provided for @noExpenseBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'No expense breakdown available.'**
+  String get noExpenseBreakdown;
+
+  /// No description provided for @byCategoryUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'BY CATEGORY'**
+  String get byCategoryUpper;
 }
 
 class _AppLocalizationsDelegate

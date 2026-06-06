@@ -2251,5 +2251,16 @@
   "exportFailed": "Export Failed",
   "tryAgain": "Try Again",
   "exportGenerateFailed": "Unable to generate file. Please try again.",
-  "failedToSaveFile": "Failed to save file."
+  "failedToSaveFile": "Failed to save file.",
+  "chartsTitle": "Charts",
+  "chartsSubtitle": "Visualise your spending patterns over time.",
+  "wipBadge": "WIP",
+  "failedToLoadData": "Failed to load data",
+  "noDataForPeriod": "No data for this period",
+  "tapBarForDetails": "Tap a bar to see details",
+  "incomeUpper": "INCOME",
+  "expenseUpper": "EXPENSE",
+  "netUpper": "NET",
+  "noExpenseBreakdown": "No expense breakdown available.",
+  "byCategoryUpper": "BY CATEGORY"
 }
