@@ -7771,6 +7771,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard'**
   String get discardLabel;
+
+  /// No description provided for @unlockToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock to continue'**
+  String get unlockToContinue;
+
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal money diary'**
+  String get splashTagline;
 }
 
 class _AppLocalizationsDelegate

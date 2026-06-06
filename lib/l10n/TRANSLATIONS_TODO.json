@@ -586,5 +586,29 @@
     "telgu": "",
     "malyalam": "",
     "kannada": ""
+  },
+  {
+    "key": "unlockToContinue",
+    "english": "Unlock to continue",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "splashTagline",
+    "english": "Your personal money diary",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
   }
 ]

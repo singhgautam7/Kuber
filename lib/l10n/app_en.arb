@@ -2502,5 +2502,7 @@
   "discardChangesConfirm": "Discard changes?",
   "discardChangesBody": "You have unsaved changes to your widgets. Leaving now will discard them.",
   "keepEditing": "Keep editing",
-  "discardLabel": "Discard"
+  "discardLabel": "Discard",
+  "unlockToContinue": "Unlock to continue",
+  "splashTagline": "Your personal money diary"
 }

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
@@ -102,7 +103,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                 onPressed: () => ref.read(authProvider.notifier).authenticate(),
                 icon: const Icon(Icons.lock_open_rounded),
                 label: Text(
-                  'Unlock to continue',
+                  context.l10n.unlockToContinue,
                   style: localeFont(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

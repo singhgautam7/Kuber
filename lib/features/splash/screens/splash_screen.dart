@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -98,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
                 const SizedBox(height: KuberSpacing.sm),
                 Text(
-                  'Your personal money diary',
+                  context.l10n.splashTagline,
                   style: localeFont(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,

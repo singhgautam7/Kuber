@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -980,14 +981,14 @@ class _TooltipOverlay extends ConsumerWidget {
                       ),
                       const SizedBox(height: KuberSpacing.sm),
                       _TooltipRow(
-                        label: 'Income',
+                        label: context.l10n.incomeLabel,
                         amount: maskAmount('+${whole(bucket.income)}', isPrivate),
                         color: cs.tertiary,
                         labelColor: cs.onSurfaceVariant,
                       ),
                       const SizedBox(height: 4),
                       _TooltipRow(
-                        label: 'Expense',
+                        label: context.l10n.expenseLabel,
                         amount: maskAmount('-${whole(bucket.expense)}', isPrivate),
                         color: cs.error,
                         labelColor: cs.onSurfaceVariant,
@@ -1033,7 +1034,7 @@ class _TooltipOverlay extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'View Transactions',
+                                context.l10n.viewTransactions,
                                 style: tt.labelSmall?.copyWith(
                                   color: cs.primary,
                                   fontWeight: FontWeight.w700,

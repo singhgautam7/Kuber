@@ -4296,4 +4296,10 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get discardLabel => 'Discard';
+
+  @override
+  String get unlockToContinue => 'Unlock to continue';
+
+  @override
+  String get splashTagline => 'Your personal money diary';
 }
