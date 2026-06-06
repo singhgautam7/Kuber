@@ -7477,6 +7477,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rebuild failed: {error}'**
   String rebuildFailedMsg(String error);
+
+  /// No description provided for @notifNewRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{New recurring transaction} other{{count} recurring transactions added}}'**
+  String notifNewRecurring(int count);
+
+  /// No description provided for @notifRecurringBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} - added while you were away'**
+  String notifRecurringBody(String name);
+
+  /// No description provided for @notifLoanEmiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan EMI deducted'**
+  String get notifLoanEmiTitle;
+
+  /// No description provided for @notifLoanEmiBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} - EMI added to your transactions'**
+  String notifLoanEmiBody(String name);
+
+  /// No description provided for @notifInvestmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment contribution added'**
+  String get notifInvestmentTitle;
+
+  /// No description provided for @notifInvestmentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} - SIP contribution recorded'**
+  String notifInvestmentBody(String name);
+
+  /// No description provided for @notifMoneyToCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Money to collect'**
+  String get notifMoneyToCollect;
+
+  /// No description provided for @notifMoneyToRepay.
+  ///
+  /// In en, this message translates to:
+  /// **'Money to repay'**
+  String get notifMoneyToRepay;
+
+  /// No description provided for @notifLedgerReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{{person} - due today} =1{{person} - 1 day overdue} other{{person} - {count} days overdue}}'**
+  String notifLedgerReminderBody(String person, int count);
+
+  /// No description provided for @notifBudgetAlertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Alert'**
+  String get notifBudgetAlertTitle;
+
+  /// No description provided for @notifBudgetReachedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached {pct}% of your {category} budget'**
+  String notifBudgetReachedBody(String pct, String category);
+
+  /// No description provided for @notifBudgetSpentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve spent {amount} in {category} category'**
+  String notifBudgetSpentBody(String amount, String category);
 }
 
 class _AppLocalizationsDelegate

@@ -2395,5 +2395,75 @@
         "type": "String"
       }
     }
+  },
+  "notifNewRecurring": "{count, plural, =1{New recurring transaction} other{{count} recurring transactions added}}",
+  "@notifNewRecurring": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifRecurringBody": "{name} - added while you were away",
+  "@notifRecurringBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifLoanEmiTitle": "Loan EMI deducted",
+  "notifLoanEmiBody": "{name} - EMI added to your transactions",
+  "@notifLoanEmiBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifInvestmentTitle": "Investment contribution added",
+  "notifInvestmentBody": "{name} - SIP contribution recorded",
+  "@notifInvestmentBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notifMoneyToCollect": "Money to collect",
+  "notifMoneyToRepay": "Money to repay",
+  "notifLedgerReminderBody": "{count, plural, =0{{person} - due today} =1{{person} - 1 day overdue} other{{person} - {count} days overdue}}",
+  "@notifLedgerReminderBody": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notifBudgetAlertTitle": "Budget Alert",
+  "notifBudgetReachedBody": "You've reached {pct}% of your {category} budget",
+  "@notifBudgetReachedBody": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notifBudgetSpentBody": "You've spent {amount} in {category} category",
+  "@notifBudgetSpentBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
   }
 }

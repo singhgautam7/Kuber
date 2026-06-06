@@ -1,1 +1,146 @@
-[]
+[
+  {
+    "key": "notifNewRecurring",
+    "english": "{count, plural, =1{New recurring transaction} other{{count} recurring transactions added}}",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifRecurringBody",
+    "english": "{name} - added while you were away",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifLoanEmiTitle",
+    "english": "Loan EMI deducted",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifLoanEmiBody",
+    "english": "{name} - EMI added to your transactions",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifInvestmentTitle",
+    "english": "Investment contribution added",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifInvestmentBody",
+    "english": "{name} - SIP contribution recorded",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifMoneyToCollect",
+    "english": "Money to collect",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifMoneyToRepay",
+    "english": "Money to repay",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifLedgerReminderBody",
+    "english": "{count, plural, =0{{person} - due today} =1{{person} - 1 day overdue} other{{person} - {count} days overdue}}",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifBudgetAlertTitle",
+    "english": "Budget Alert",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifBudgetReachedBody",
+    "english": "You've reached {pct}% of your {category} budget",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "notifBudgetSpentBody",
+    "english": "You've spent {amount} in {category} category",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  }
+]

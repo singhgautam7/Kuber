@@ -4087,4 +4087,67 @@ class AppLocalizationsHi extends AppLocalizations {
   String rebuildFailedMsg(String error) {
     return 'पुनर्निर्माण विफल: $error';
   }
+
+  @override
+  String notifNewRecurring(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count recurring transactions added',
+      one: 'New recurring transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String notifRecurringBody(String name) {
+    return '$name - added while you were away';
+  }
+
+  @override
+  String get notifLoanEmiTitle => 'Loan EMI deducted';
+
+  @override
+  String notifLoanEmiBody(String name) {
+    return '$name - EMI added to your transactions';
+  }
+
+  @override
+  String get notifInvestmentTitle => 'Investment contribution added';
+
+  @override
+  String notifInvestmentBody(String name) {
+    return '$name - SIP contribution recorded';
+  }
+
+  @override
+  String get notifMoneyToCollect => 'Money to collect';
+
+  @override
+  String get notifMoneyToRepay => 'Money to repay';
+
+  @override
+  String notifLedgerReminderBody(String person, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$person - $count days overdue',
+      one: '$person - 1 day overdue',
+      zero: '$person - due today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notifBudgetAlertTitle => 'Budget Alert';
+
+  @override
+  String notifBudgetReachedBody(String pct, String category) {
+    return 'You\'ve reached $pct% of your $category budget';
+  }
+
+  @override
+  String notifBudgetSpentBody(String amount, String category) {
+    return 'You\'ve spent $amount in $category category';
+  }
 }
