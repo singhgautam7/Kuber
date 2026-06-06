@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kuber/core/utils/locale_font.dart' show AppLocale;
+import 'package:kuber/l10n/app_localizations.dart' show lookupAppLocalizations;
 import 'package:isar_community/isar.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/data_service.dart';
@@ -94,10 +96,11 @@ class DataController extends StateNotifier<DataState> {
       await _notificationService.requestPermission();
 
       // Non-awaited to avoid blocking the main flow
+      final l = lookupAppLocalizations(AppLocale.current);
       _notificationService.showExportNotification(
         id: notificationId,
-        title: 'Exporting data...',
-        body: 'Preparing your file',
+        title: l.exportingData,
+        body: l.preparingFile,
         isProgress: true,
       );
 
@@ -111,28 +114,29 @@ class DataController extends StateNotifier<DataState> {
       if (path != null) {
         state = state.copyWith(
           status: DataOpStatus.success,
-          message: 'Data exported successfully',
+          message: l.dataExportedSuccess,
           filePath: path,
           filePaths: [path],
         );
 
         _notificationService.showExportNotification(
           id: notificationId,
-          title: 'Export Complete',
-          body: 'Saved to Downloads/$fileName',
+          title: l.exportComplete,
+          body: l.savedToDownloads(fileName),
           isSuccess: true,
           payload: path,
         );
       }
     } catch (e) {
+      final l = lookupAppLocalizations(AppLocale.current);
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Export failed: $e',
+        message: l.exportFailedMsg(e.toString()),
       );
 
       _notificationService.showExportNotification(
         id: notificationId,
-        title: 'Export Failed',
+        title: l.exportFailed,
         body: e.toString(),
       );
     }
@@ -166,10 +170,11 @@ class DataController extends StateNotifier<DataState> {
     await _notificationService.requestPermission();
 
     const notificationId = 1002;
+    final l = lookupAppLocalizations(AppLocale.current);
     await _notificationService.showExportNotification(
       id: notificationId,
-      title: 'Downloading template...',
-      body: 'Preparing CSV template',
+      title: l.downloadingTemplate,
+      body: l.preparingCsvTemplate,
       isProgress: true,
     );
 
@@ -177,26 +182,26 @@ class DataController extends StateNotifier<DataState> {
       final path = await _service.downloadTemplate();
       state = state.copyWith(
         status: DataOpStatus.success,
-        message: 'Template downloaded successfully',
+        message: l.templateDownloadedSuccess,
         filePath: path,
       );
 
       final fileName = path?.split('/').last ?? 'template.csv';
       await _notificationService.showExportNotification(
         id: notificationId,
-        title: 'Download Complete',
-        body: 'Saved to Downloads/$fileName',
+        title: l.downloadComplete,
+        body: l.savedToDownloads(fileName),
         isSuccess: true,
         payload: path,
       );
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Download failed: $e',
+        message: l.downloadFailedMsg(e.toString()),
       );
       await _notificationService.showExportNotification(
         id: notificationId,
-        title: 'Download Failed',
+        title: l.downloadFailedTitle,
         body: e.toString(),
       );
     }
@@ -247,7 +252,7 @@ class DataController extends StateNotifier<DataState> {
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Import failed: $e',
+        message: lookupAppLocalizations(AppLocale.current).importFailedMsg(e.toString()),
       );
     }
   }
@@ -262,12 +267,12 @@ class DataController extends StateNotifier<DataState> {
       await _refreshData();
       state = state.copyWith(
         status: DataOpStatus.success,
-        message: 'Mock data generated successfully',
+        message: lookupAppLocalizations(AppLocale.current).mockDataGenerated,
       );
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Generation failed: $e',
+        message: lookupAppLocalizations(AppLocale.current).generationFailedMsg(e.toString()),
       );
     }
   }
@@ -284,12 +289,12 @@ class DataController extends StateNotifier<DataState> {
       await _refreshData(freshStart: true);
       state = state.copyWith(
         status: DataOpStatus.success,
-        message: 'All data cleared successfully',
+        message: lookupAppLocalizations(AppLocale.current).allDataCleared,
       );
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Clear failed: $e',
+        message: lookupAppLocalizations(AppLocale.current).clearFailedMsg(e.toString()),
       );
     }
   }
@@ -319,7 +324,7 @@ class DataController extends StateNotifier<DataState> {
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Import failed: $e',
+        message: lookupAppLocalizations(AppLocale.current).importFailedMsg(e.toString()),
       );
     }
   }
@@ -340,12 +345,12 @@ class DataController extends StateNotifier<DataState> {
       }
       state = state.copyWith(
         status: DataOpStatus.success,
-        message: 'Suggestions rebuilt successfully',
+        message: lookupAppLocalizations(AppLocale.current).suggestionsRebuilt,
       );
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,
-        message: 'Rebuild failed: $e',
+        message: lookupAppLocalizations(AppLocale.current).rebuildFailedMsg(e.toString()),
       );
     }
   }

@@ -4016,4 +4016,72 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get backupFolder => 'Backup folder';
+
+  @override
+  String get exportingData => 'Exporting data...';
+
+  @override
+  String get preparingFile => 'Preparing your file';
+
+  @override
+  String get dataExportedSuccess => 'Data exported successfully';
+
+  @override
+  String get exportComplete => 'Export Complete';
+
+  @override
+  String savedToDownloads(String fileName) {
+    return 'Saved to Downloads/$fileName';
+  }
+
+  @override
+  String exportFailedMsg(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String get downloadingTemplate => 'Downloading template...';
+
+  @override
+  String get preparingCsvTemplate => 'Preparing CSV template';
+
+  @override
+  String get templateDownloadedSuccess => 'Template downloaded successfully';
+
+  @override
+  String get downloadComplete => 'Download Complete';
+
+  @override
+  String downloadFailedMsg(String error) {
+    return 'Download failed: $error';
+  }
+
+  @override
+  String get downloadFailedTitle => 'Download Failed';
+
+  @override
+  String importFailedMsg(String error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String get mockDataGenerated => 'Mock data generated successfully';
+
+  @override
+  String generationFailedMsg(String error) {
+    return 'Generation failed: $error';
+  }
+
+  @override
+  String get allDataCleared => 'All data cleared successfully';
+
+  @override
+  String clearFailedMsg(String error) {
+    return 'Clear failed: $error';
+  }
+
+  @override
+  String rebuildFailedMsg(String error) {
+    return 'Rebuild failed: $error';
+  }
 }

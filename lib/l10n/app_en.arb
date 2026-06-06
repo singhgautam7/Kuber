@@ -2328,5 +2328,72 @@
   "automaticBackups": "Automatic Backups",
   "saveCopyOnSchedule": "Save a copy on a schedule",
   "keepLast": "Keep last",
-  "backupFolder": "Backup folder"
+  "backupFolder": "Backup folder",
+  "exportingData": "Exporting data...",
+  "preparingFile": "Preparing your file",
+  "dataExportedSuccess": "Data exported successfully",
+  "exportComplete": "Export Complete",
+  "savedToDownloads": "Saved to Downloads/{fileName}",
+  "@savedToDownloads": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "exportFailedMsg": "Export failed: {error}",
+  "@exportFailedMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadingTemplate": "Downloading template...",
+  "preparingCsvTemplate": "Preparing CSV template",
+  "templateDownloadedSuccess": "Template downloaded successfully",
+  "downloadComplete": "Download Complete",
+  "downloadFailedMsg": "Download failed: {error}",
+  "@downloadFailedMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadFailedTitle": "Download Failed",
+  "importFailedMsg": "Import failed: {error}",
+  "@importFailedMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mockDataGenerated": "Mock data generated successfully",
+  "generationFailedMsg": "Generation failed: {error}",
+  "@generationFailedMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "allDataCleared": "All data cleared successfully",
+  "clearFailedMsg": "Clear failed: {error}",
+  "@clearFailedMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebuildFailedMsg": "Rebuild failed: {error}",
+  "@rebuildFailedMsg": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

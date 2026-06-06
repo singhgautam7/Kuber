@@ -7369,6 +7369,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Backup folder'**
   String get backupFolder;
+
+  /// No description provided for @exportingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting data...'**
+  String get exportingData;
+
+  /// No description provided for @preparingFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your file'**
+  String get preparingFile;
+
+  /// No description provided for @dataExportedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data exported successfully'**
+  String get dataExportedSuccess;
+
+  /// No description provided for @exportComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Complete'**
+  String get exportComplete;
+
+  /// No description provided for @savedToDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Downloads/{fileName}'**
+  String savedToDownloads(String fileName);
+
+  /// No description provided for @exportFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String exportFailedMsg(String error);
+
+  /// No description provided for @downloadingTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading template...'**
+  String get downloadingTemplate;
+
+  /// No description provided for @preparingCsvTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing CSV template'**
+  String get preparingCsvTemplate;
+
+  /// No description provided for @templateDownloadedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Template downloaded successfully'**
+  String get templateDownloadedSuccess;
+
+  /// No description provided for @downloadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Complete'**
+  String get downloadComplete;
+
+  /// No description provided for @downloadFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String downloadFailedMsg(String error);
+
+  /// No description provided for @downloadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Failed'**
+  String get downloadFailedTitle;
+
+  /// No description provided for @importFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String importFailedMsg(String error);
+
+  /// No description provided for @mockDataGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock data generated successfully'**
+  String get mockDataGenerated;
+
+  /// No description provided for @generationFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation failed: {error}'**
+  String generationFailedMsg(String error);
+
+  /// No description provided for @allDataCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'All data cleared successfully'**
+  String get allDataCleared;
+
+  /// No description provided for @clearFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear failed: {error}'**
+  String clearFailedMsg(String error);
+
+  /// No description provided for @rebuildFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild failed: {error}'**
+  String rebuildFailedMsg(String error);
 }
 
 class _AppLocalizationsDelegate
