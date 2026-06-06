@@ -7099,6 +7099,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'BY CATEGORY'**
   String get byCategoryUpper;
+
+  /// No description provided for @faqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get faqTitle;
+
+  /// No description provided for @faqAddTxnQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I add a transaction?'**
+  String get faqAddTxnQ;
+
+  /// No description provided for @faqAddTxnA.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.'**
+  String get faqAddTxnA;
+
+  /// No description provided for @faqAccountsQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I manage accounts?'**
+  String get faqAccountsQ;
+
+  /// No description provided for @faqAccountsA.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.'**
+  String get faqAccountsA;
+
+  /// No description provided for @faqTransfersQ.
+  ///
+  /// In en, this message translates to:
+  /// **'How do transfers work?'**
+  String get faqTransfersQ;
+
+  /// No description provided for @faqTransfersA.
+  ///
+  /// In en, this message translates to:
+  /// **'When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.'**
+  String get faqTransfersA;
+
+  /// No description provided for @faqCategoriesQ.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I customize categories?'**
+  String get faqCategoriesQ;
+
+  /// No description provided for @faqCategoriesA.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.'**
+  String get faqCategoriesA;
 }
 
 class _AppLocalizationsDelegate

@@ -1126,5 +1126,113 @@
     "telgu": "",
     "malyalam": "",
     "kannada": ""
+  },
+  {
+    "key": "faqTitle",
+    "english": "Frequently Asked Questions",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqAddTxnQ",
+    "english": "How do I add a transaction?",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqAddTxnA",
+    "english": "Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqAccountsQ",
+    "english": "How do I manage accounts?",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqAccountsA",
+    "english": "Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqTransfersQ",
+    "english": "How do transfers work?",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqTransfersA",
+    "english": "When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqCategoriesQ",
+    "english": "Can I customize categories?",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "faqCategoriesA",
+    "english": "Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
   }
 ]

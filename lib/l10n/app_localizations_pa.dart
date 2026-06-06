@@ -3863,4 +3863,35 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get byCategoryUpper => 'BY CATEGORY';
+
+  @override
+  String get faqTitle => 'Frequently Asked Questions';
+
+  @override
+  String get faqAddTxnQ => 'How do I add a transaction?';
+
+  @override
+  String get faqAddTxnA =>
+      'Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.';
+
+  @override
+  String get faqAccountsQ => 'How do I manage accounts?';
+
+  @override
+  String get faqAccountsA =>
+      'Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.';
+
+  @override
+  String get faqTransfersQ => 'How do transfers work?';
+
+  @override
+  String get faqTransfersA =>
+      'When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.';
+
+  @override
+  String get faqCategoriesQ => 'Can I customize categories?';
+
+  @override
+  String get faqCategoriesA =>
+      'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.';
 }

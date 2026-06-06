@@ -2262,5 +2262,14 @@
   "expenseUpper": "EXPENSE",
   "netUpper": "NET",
   "noExpenseBreakdown": "No expense breakdown available.",
-  "byCategoryUpper": "BY CATEGORY"
+  "byCategoryUpper": "BY CATEGORY",
+  "faqTitle": "Frequently Asked Questions",
+  "faqAddTxnQ": "How do I add a transaction?",
+  "faqAddTxnA": "Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.",
+  "faqAccountsQ": "How do I manage accounts?",
+  "faqAccountsA": "Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.",
+  "faqTransfersQ": "How do transfers work?",
+  "faqTransfersA": "When adding a transaction, select \"Transfer\" as the type. Pick the source and destination accounts and the amount will be moved between them.",
+  "faqCategoriesQ": "Can I customize categories?",
+  "faqCategoriesA": "Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories."
 }
