@@ -7549,6 +7549,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve spent {amount} in {category} category'**
   String notifBudgetSpentBody(String amount, String category);
+
+  /// No description provided for @wgtBalanceHeroName.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Card'**
+  String get wgtBalanceHeroName;
+
+  /// No description provided for @wgtBalanceHeroDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Current-month net with income / expense split'**
+  String get wgtBalanceHeroDesc;
+
+  /// No description provided for @wgtInsightStoriesName.
+  ///
+  /// In en, this message translates to:
+  /// **'Money Stories'**
+  String get wgtInsightStoriesName;
+
+  /// No description provided for @wgtInsightStoriesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Recaps and highlights about your money'**
+  String get wgtInsightStoriesDesc;
+
+  /// No description provided for @wgtQuickAddName.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get wgtQuickAddName;
+
+  /// No description provided for @wgtQuickAddDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'One-tap expense / income / transfer entry'**
+  String get wgtQuickAddDesc;
+
+  /// No description provided for @wgtSpendingStatsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Stats'**
+  String get wgtSpendingStatsName;
+
+  /// No description provided for @wgtSpendingStatsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Spent vs received this month'**
+  String get wgtSpendingStatsDesc;
+
+  /// No description provided for @wgtHomeAccountsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Accounts'**
+  String get wgtHomeAccountsName;
+
+  /// No description provided for @wgtHomeAccountsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All accounts and balances'**
+  String get wgtHomeAccountsDesc;
+
+  /// No description provided for @wgtSevenDayChartName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 Days Chart'**
+  String get wgtSevenDayChartName;
+
+  /// No description provided for @wgtSevenDayChartDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily income vs expense for the past week'**
+  String get wgtSevenDayChartDesc;
+
+  /// No description provided for @wgtBudgetSnapshotName.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Snapshot'**
+  String get wgtBudgetSnapshotName;
+
+  /// No description provided for @wgtBudgetSnapshotDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress against active budgets'**
+  String get wgtBudgetSnapshotDesc;
+
+  /// No description provided for @wgtUpcomingRecurringName.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Recurring'**
+  String get wgtUpcomingRecurringName;
+
+  /// No description provided for @wgtUpcomingRecurringDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Next recurring transactions due'**
+  String get wgtUpcomingRecurringDesc;
+
+  /// No description provided for @wgtRecentTransactionsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get wgtRecentTransactionsName;
+
+  /// No description provided for @wgtRecentTransactionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest activity at a glance'**
+  String get wgtRecentTransactionsDesc;
+
+  /// No description provided for @wgtSummaryCardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary Card'**
+  String get wgtSummaryCardName;
+
+  /// No description provided for @wgtSummaryCardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Income, expense and net for the period'**
+  String get wgtSummaryCardDesc;
+
+  /// No description provided for @wgtSpendingTrendName.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending Trend'**
+  String get wgtSpendingTrendName;
+
+  /// No description provided for @wgtSpendingTrendDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bar / line chart with bucket dropdown'**
+  String get wgtSpendingTrendDesc;
+
+  /// No description provided for @wgtWeeklyHeatmapName.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Heatmap'**
+  String get wgtWeeklyHeatmapName;
+
+  /// No description provided for @wgtWeeklyHeatmapDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Average expense by day of week'**
+  String get wgtWeeklyHeatmapDesc;
+
+  /// No description provided for @wgtSizeDistributionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Sizes'**
+  String get wgtSizeDistributionName;
+
+  /// No description provided for @wgtSizeDistributionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Small / medium / large breakdown'**
+  String get wgtSizeDistributionDesc;
+
+  /// No description provided for @wgtCategoryBreakdownName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Breakdown'**
+  String get wgtCategoryBreakdownName;
+
+  /// No description provided for @wgtCategoryBreakdownDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending grouped by category'**
+  String get wgtCategoryBreakdownDesc;
+
+  /// No description provided for @wgtTagAnalyticsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag Analytics'**
+  String get wgtTagAnalyticsName;
+
+  /// No description provided for @wgtTagAnalyticsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Totals grouped by tag'**
+  String get wgtTagAnalyticsDesc;
+
+  /// No description provided for @wgtBiggestTransactionsName.
+  ///
+  /// In en, this message translates to:
+  /// **'Biggest Transactions'**
+  String get wgtBiggestTransactionsName;
+
+  /// No description provided for @wgtBiggestTransactionsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Top 5 by amount, expense or income'**
+  String get wgtBiggestTransactionsDesc;
+
+  /// No description provided for @atLeastOneWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one widget must be enabled'**
+  String get atLeastOneWidget;
+
+  /// No description provided for @discardChangesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChangesConfirm;
+
+  /// No description provided for @discardChangesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes to your widgets. Leaving now will discard them.'**
+  String get discardChangesBody;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @discardLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardLabel;
 }
 
 class _AppLocalizationsDelegate

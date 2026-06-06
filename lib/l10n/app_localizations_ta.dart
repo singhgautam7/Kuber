@@ -4206,4 +4206,118 @@ class AppLocalizationsTa extends AppLocalizations {
   String notifBudgetSpentBody(String amount, String category) {
     return 'You\'ve spent $amount in $category category';
   }
+
+  @override
+  String get wgtBalanceHeroName => 'Balance Card';
+
+  @override
+  String get wgtBalanceHeroDesc =>
+      'Current-month net with income / expense split';
+
+  @override
+  String get wgtInsightStoriesName => 'Money Stories';
+
+  @override
+  String get wgtInsightStoriesDesc => 'Recaps and highlights about your money';
+
+  @override
+  String get wgtQuickAddName => 'Quick Add';
+
+  @override
+  String get wgtQuickAddDesc => 'One-tap expense / income / transfer entry';
+
+  @override
+  String get wgtSpendingStatsName => 'Spending Stats';
+
+  @override
+  String get wgtSpendingStatsDesc => 'Spent vs received this month';
+
+  @override
+  String get wgtHomeAccountsName => 'Bank Accounts';
+
+  @override
+  String get wgtHomeAccountsDesc => 'All accounts and balances';
+
+  @override
+  String get wgtSevenDayChartName => 'Last 7 Days Chart';
+
+  @override
+  String get wgtSevenDayChartDesc =>
+      'Daily income vs expense for the past week';
+
+  @override
+  String get wgtBudgetSnapshotName => 'Budget Snapshot';
+
+  @override
+  String get wgtBudgetSnapshotDesc => 'Progress against active budgets';
+
+  @override
+  String get wgtUpcomingRecurringName => 'Upcoming Recurring';
+
+  @override
+  String get wgtUpcomingRecurringDesc => 'Next recurring transactions due';
+
+  @override
+  String get wgtRecentTransactionsName => 'Recent Transactions';
+
+  @override
+  String get wgtRecentTransactionsDesc => 'Latest activity at a glance';
+
+  @override
+  String get wgtSummaryCardName => 'Summary Card';
+
+  @override
+  String get wgtSummaryCardDesc => 'Income, expense and net for the period';
+
+  @override
+  String get wgtSpendingTrendName => 'Spending Trend';
+
+  @override
+  String get wgtSpendingTrendDesc => 'Bar / line chart with bucket dropdown';
+
+  @override
+  String get wgtWeeklyHeatmapName => 'Weekly Heatmap';
+
+  @override
+  String get wgtWeeklyHeatmapDesc => 'Average expense by day of week';
+
+  @override
+  String get wgtSizeDistributionName => 'Transaction Sizes';
+
+  @override
+  String get wgtSizeDistributionDesc => 'Small / medium / large breakdown';
+
+  @override
+  String get wgtCategoryBreakdownName => 'Category Breakdown';
+
+  @override
+  String get wgtCategoryBreakdownDesc => 'Spending grouped by category';
+
+  @override
+  String get wgtTagAnalyticsName => 'Tag Analytics';
+
+  @override
+  String get wgtTagAnalyticsDesc => 'Totals grouped by tag';
+
+  @override
+  String get wgtBiggestTransactionsName => 'Biggest Transactions';
+
+  @override
+  String get wgtBiggestTransactionsDesc => 'Top 5 by amount, expense or income';
+
+  @override
+  String get atLeastOneWidget => 'At least one widget must be enabled';
+
+  @override
+  String get discardChangesConfirm => 'Discard changes?';
+
+  @override
+  String get discardChangesBody =>
+      'You have unsaved changes to your widgets. Leaving now will discard them.';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get discardLabel => 'Discard';
 }

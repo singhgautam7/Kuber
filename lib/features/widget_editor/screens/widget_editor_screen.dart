@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import '../models/home_widget_config.dart';
+import '../data/widget_catalog.dart';
 import '../providers/widget_editor_provider.dart';
 
 /// Full-screen modal for re-ordering and enabling/disabling widgets on
@@ -59,7 +61,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       if (remaining <= 1) {
         showKuberSnackBar(
           context,
-          'At least one widget must be enabled',
+          context.l10n.atLeastOneWidget,
           isError: true,
         );
         return;
@@ -75,26 +77,25 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
-          'Discard changes?',
+          context.l10n.discardChangesConfirm,
           style: localeFont(fontWeight: FontWeight.w800),
         ),
         content: Text(
-          'You have unsaved changes to your widgets. '
-          'Leaving now will discard them.',
+          context.l10n.discardChangesBody,
           style: localeFont(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
-              'Keep editing',
+              context.l10n.keepEditing,
               style: localeFont(fontWeight: FontWeight.w700),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Discard',
+              context.l10n.discardLabel,
               style: localeFont(
                 fontWeight: FontWeight.w700,
                 color: cs.error,
@@ -250,7 +251,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                         ),
                       ),
                       child: Text(
-                        'Save Changes',
+                        context.l10n.saveChanges,
                         style: localeFont(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -314,7 +315,7 @@ class _WidgetRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.name,
+                    localizedWidgetName(context, widget.id),
                     style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -324,7 +325,7 @@ class _WidgetRow extends StatelessWidget {
                   if (widget.description != null) ...[
                     const SizedBox(height: 2),
                     Text(
-                      widget.description!,
+                      localizedWidgetDesc(context, widget.id) ?? widget.description!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: localeFont(
