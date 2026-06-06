@@ -156,18 +156,24 @@ into the ARB), not translating — after wiring a batch, run
 `gen_translations_json.py`, hand the user the new `TRANSLATIONS_TODO.json` +
 `TRANSLATION_PROMPT.md`, and `apply_translations.py` what they return.
 
-REMAINING UNWIRED UI (genuinely hardcoded English, in priority order):
-- `notifications` in-app sheet + `core/services/notification_service.dart` OS
-  bodies + reminder processors (`recurring/data/recurring_processor.dart`,
-  `ledger/data/ledger_reminder_processor.dart`, budget service) — [no-context →
-  `lookupAppLocalizations(AppLocale.current)`].
-- `widget_editor/data/widget_catalog.dart` (~16 widget names incl. "Money
-  Stories", "Balance Card") shown in the widget-editor screen + widget_editor UI.
-- `tutorial` (`models/tutorial_chapter.dart` ~38, `widgets/tutorial_overlay.dart` ~6).
-- `shared/widgets/kuber_bar_chart.dart` (~5), `auth`, `splash`.
+REMAINING UNWIRED UI:
+- `tutorial` — the ONLY non-deferred item left. `models/tutorial_chapter.dart`
+  defines a top-level `final tutorialChapters = [...]` (chapter/step title +
+  description, ~29 strings) + `widgets/tutorial_overlay.dart` (~6),
+  `tutorial_chapter_screen.dart` (~4), `tutorial_tooltip_card.dart` (~2).
+  GOTCHA: `tutorial_provider.dart` reads `tutorialChapters` WITHOUT a context, so
+  do NOT convert it to a context-function. Instead add a stable `id` to
+  TutorialChapter/TutorialStep and localize at the DISPLAY sites (overlay/screen/
+  tooltip) via an id→l10n helper (mirror `widget_catalog.dart`'s
+  `localizedWidgetName`). `tutorial_mock_data_service.dart` (~22) is sandbox demo
+  data — leave English.
+
+DONE since this list was written: notifications (content + in-app sheet),
+widget_editor + catalog names, lock screen, splash tagline, kuber_bar_chart.
 DEFERRED by product owner: `ask_kuber_screen.dart` (chat); tool calculator
 internals + their 14 info-sheet map entries; the 2 ledger/bill-splitter "About"
-info-map entries.
+info-map entries; `notification_service.dart` channel-registration names (Android
+system-settings metadata, registered once).
 
 Each item below is tagged with what it needs:
 - **[REBUILD-ONLY]** = already wired AND translated in source/ARB/generated. If it
