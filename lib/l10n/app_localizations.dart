@@ -7249,6 +7249,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get a CSV with the correct column headers to format your data.'**
   String get downloadTemplateDesc;
+
+  /// No description provided for @backupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic\nBackups'**
+  String get backupsTitle;
+
+  /// No description provided for @backupsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a fresh copy of your data saved to your device, on a schedule.'**
+  String get backupsSubtitle;
+
+  /// No description provided for @statusSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get statusSectionLabel;
+
+  /// No description provided for @configurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get configurationLabel;
+
+  /// No description provided for @actionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get actionsLabel;
+
+  /// No description provided for @backupNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup now'**
+  String get backupNow;
+
+  /// No description provided for @alreadyBackedUpToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Already backed up today'**
+  String get alreadyBackedUpToday;
+
+  /// No description provided for @lastBackupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup failed'**
+  String get lastBackupFailed;
+
+  /// No description provided for @backupFolderErrorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t access your backup folder. It may have moved or permission may have been revoked.'**
+  String get backupFolderErrorDesc;
+
+  /// No description provided for @attemptedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Attempted {label}'**
+  String attemptedOn(String label);
+
+  /// No description provided for @chooseNewFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose new folder'**
+  String get chooseNewFolder;
+
+  /// No description provided for @backedUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Backed up'**
+  String get backedUp;
+
+  /// No description provided for @backedUpOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Backed up {label}'**
+  String backedUpOn(String label);
+
+  /// No description provided for @lastCopySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Last copy saved successfully. Keeping your most recent {count} backups.'**
+  String lastCopySaved(String count);
+
+  /// No description provided for @neverLoseData.
+  ///
+  /// In en, this message translates to:
+  /// **'Never lose your data'**
+  String get neverLoseData;
+
+  /// No description provided for @neverLoseDataDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on automatic backups and Kuber will save a copy to a folder you choose when an app open is due.'**
+  String get neverLoseDataDesc;
+
+  /// No description provided for @automaticBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic Backups'**
+  String get automaticBackups;
+
+  /// No description provided for @saveCopyOnSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Save a copy on a schedule'**
+  String get saveCopyOnSchedule;
+
+  /// No description provided for @keepLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep last'**
+  String get keepLast;
+
+  /// No description provided for @backupFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup folder'**
+  String get backupFolder;
 }
 
 class _AppLocalizationsDelegate

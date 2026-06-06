@@ -3950,4 +3950,73 @@ class AppLocalizationsMr extends AppLocalizations {
   @override
   String get downloadTemplateDesc =>
       'Get a CSV with the correct column headers to format your data.';
+
+  @override
+  String get backupsTitle => 'Automatic\nBackups';
+
+  @override
+  String get backupsSubtitle =>
+      'Keep a fresh copy of your data saved to your device, on a schedule.';
+
+  @override
+  String get statusSectionLabel => 'Status';
+
+  @override
+  String get configurationLabel => 'Configuration';
+
+  @override
+  String get actionsLabel => 'Actions';
+
+  @override
+  String get backupNow => 'Backup now';
+
+  @override
+  String get alreadyBackedUpToday => 'Already backed up today';
+
+  @override
+  String get lastBackupFailed => 'Last backup failed';
+
+  @override
+  String get backupFolderErrorDesc =>
+      'We couldn\'t access your backup folder. It may have moved or permission may have been revoked.';
+
+  @override
+  String attemptedOn(String label) {
+    return 'Attempted $label';
+  }
+
+  @override
+  String get chooseNewFolder => 'Choose new folder';
+
+  @override
+  String get backedUp => 'Backed up';
+
+  @override
+  String backedUpOn(String label) {
+    return 'Backed up $label';
+  }
+
+  @override
+  String lastCopySaved(String count) {
+    return 'Last copy saved successfully. Keeping your most recent $count backups.';
+  }
+
+  @override
+  String get neverLoseData => 'Never lose your data';
+
+  @override
+  String get neverLoseDataDesc =>
+      'Turn on automatic backups and Kuber will save a copy to a folder you choose when an app open is due.';
+
+  @override
+  String get automaticBackups => 'Automatic Backups';
+
+  @override
+  String get saveCopyOnSchedule => 'Save a copy on a schedule';
+
+  @override
+  String get keepLast => 'Keep last';
+
+  @override
+  String get backupFolder => 'Backup folder';
 }

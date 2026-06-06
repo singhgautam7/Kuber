@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +23,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
       backgroundColor: cs.surface,
       body: settings.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error: $error')),
+        error: (error, _) => Center(child: Text(context.l10n.errorWithDetails(error.toString()))),
         data: (s) => CustomScrollView(
           slivers: [
             const SliverToBoxAdapter(
@@ -33,20 +34,19 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                 infoConfig: InfoConstants.automaticBackups,
               ),
             ),
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: KuberPageHeader(
-                title: 'Automatic\nBackups',
-                description:
-                    'Keep a fresh copy of your data saved to your device, on a schedule.',
+                title: context.l10n.backupsTitle,
+                description: context.l10n.backupsSubtitle,
               ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _sectionLabel(context, 'Status'),
+                  _sectionLabel(context, context.l10n.statusSectionLabel),
                   _StatusBlock(settings: s),
-                  _sectionLabel(context, 'Configuration'),
+                  _sectionLabel(context, context.l10n.configurationLabel),
                   _MasterToggle(
                     value: s.enabled,
                     onChanged: (value) => ref
@@ -61,9 +61,9 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                         ? _ConfigGroup(settings: s)
                         : const SizedBox(width: double.infinity),
                   ),
-                  _sectionLabel(context, 'Actions'),
+                  _sectionLabel(context, context.l10n.actionsLabel),
                   AppButton(
-                    label: 'Backup now',
+                    label: context.l10n.backupNow,
                     icon: Icons.cloud_upload_outlined,
                     type: AppButtonType.outline,
                     fullWidth: true,
@@ -85,7 +85,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: KuberSpacing.sm),
                       child: Text(
-                        'Already backed up today',
+                        context.l10n.alreadyBackedUpToday,
                         style: localeFont(
                           fontSize: 12,
                           color: cs.onSurfaceVariant,
@@ -133,16 +133,16 @@ class _StatusBlock extends ConsumerWidget {
           tint: cs.error,
           tintBg: cs.error.withValues(alpha: 0.10),
           border: cs.error.withValues(alpha: 0.32),
-          title: 'Last backup failed',
+          title: context.l10n.lastBackupFailed,
           titleColor: cs.error,
           description:
               settings.failureReason ??
-              "We couldn't access your backup folder. It may have moved or permission may have been revoked.",
+              context.l10n.backupFolderErrorDesc,
           timestamp: settings.lastAttemptLabel == null
               ? null
-              : 'Attempted ${settings.lastAttemptLabel}',
+              : context.l10n.attemptedOn(settings.lastAttemptLabel!),
           action: (
-            'Choose new folder',
+            context.l10n.chooseNewFolder,
             Icons.folder_open_rounded,
             () => ref.read(backupSettingsProvider.notifier).pickFolder(),
           ),
@@ -154,11 +154,11 @@ class _StatusBlock extends ConsumerWidget {
           tintBg: cs.tertiary.withValues(alpha: 0.10),
           border: cs.tertiary.withValues(alpha: 0.28),
           title: settings.lastAttemptLabel == null
-              ? 'Backed up'
-              : 'Backed up ${settings.lastAttemptLabel}',
+              ? context.l10n.backedUp
+              : context.l10n.backedUpOn(settings.lastAttemptLabel!),
           titleColor: cs.tertiary,
           description:
-              'Last copy saved successfully. Keeping your most recent ${settings.retention} backups.',
+              context.l10n.lastCopySaved('${settings.retention}'),
         );
       case BackupStatus.neverConfigured:
         return _StatusCard(
@@ -166,10 +166,10 @@ class _StatusBlock extends ConsumerWidget {
           tint: cs.primary,
           tintBg: cs.primary.withValues(alpha: 0.10),
           border: cs.outline,
-          title: 'Never lose your data',
+          title: context.l10n.neverLoseData,
           titleColor: cs.onSurface,
           description:
-              'Turn on automatic backups and Kuber will save a copy to a folder you choose when an app open is due.',
+              context.l10n.neverLoseDataDesc,
         );
     }
   }
@@ -315,7 +315,7 @@ class _MasterToggle extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Automatic Backups',
+                  context.l10n.automaticBackups,
                   style: localeFont(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -323,7 +323,7 @@ class _MasterToggle extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Save a copy on a schedule',
+                  context.l10n.saveCopyOnSchedule,
                   style: localeFont(
                     fontSize: 12.5,
                     color: cs.onSurfaceVariant,
@@ -349,14 +349,14 @@ class _ConfigGroup extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _label(cs, 'Frequency'),
+        _label(cs, context.l10n.frequencyLabel),
         SegmentedButton<BackupFrequency>(
-          segments: const [
-            ButtonSegment(value: BackupFrequency.daily, label: Text('Daily')),
-            ButtonSegment(value: BackupFrequency.weekly, label: Text('Weekly')),
+          segments: [
+            ButtonSegment(value: BackupFrequency.daily, label: Text(context.l10n.freqDaily)),
+            ButtonSegment(value: BackupFrequency.weekly, label: Text(context.l10n.freqWeekly)),
             ButtonSegment(
               value: BackupFrequency.monthly,
-              label: Text('Monthly'),
+              label: Text(context.l10n.freqMonthly),
             ),
           ],
           selected: {settings.frequency},
@@ -365,7 +365,7 @@ class _ConfigGroup extends ConsumerWidget {
               .read(backupSettingsProvider.notifier)
               .setFrequency(value.first),
         ),
-        _label(cs, 'Keep last'),
+        _label(cs, context.l10n.keepLast),
         Row(
           children: [
             for (final n in const [1, 5, 10]) ...[
@@ -381,7 +381,7 @@ class _ConfigGroup extends ConsumerWidget {
             ],
           ],
         ),
-        _label(cs, 'Backup folder'),
+        _label(cs, context.l10n.backupFolder),
         GestureDetector(
           onTap: () => ref.read(backupSettingsProvider.notifier).pickFolder(),
           child: Container(
