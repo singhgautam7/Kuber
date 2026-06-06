@@ -1,9 +1,9 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -114,7 +114,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
         Center(
           child: Text(
             'Import Data',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -126,7 +126,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
 
         Text(
           'SELECT FORMAT',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant,
@@ -191,7 +191,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                   children: [
                     Text(
                       'Override existing data',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -202,7 +202,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                       _override
                           ? 'All existing data will be wiped before import.'
                           : 'New records will be merged with existing data.',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.8),
                         height: 1.3,
@@ -259,7 +259,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 color: cs.error,
                 height: 1.45,
@@ -287,7 +287,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 color: cs.onSurfaceVariant,
                 height: 1.45,
@@ -325,7 +325,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                 const SizedBox(width: KuberSpacing.sm),
                 Text(
                   'MIGRATING FROM ANOTHER APP?',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: cs.secondary,
@@ -345,7 +345,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     children: [
                       Text(
                         'Download Template',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -354,7 +354,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                       const SizedBox(height: 3),
                       Text(
                         'Get a CSV with the correct column headers to format your data.',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11,
                           color: cs.onSurfaceVariant,
                           height: 1.35,

@@ -1,7 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/brand_icon.dart';
@@ -38,7 +38,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                   const SizedBox(width: KuberSpacing.md),
                   Text(
                     'TUTORIAL',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurfaceVariant,
@@ -68,7 +68,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                         children: [
                           Text(
                             'Pick a chapter.',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
                               color: cs.onSurface,
@@ -78,7 +78,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                           const SizedBox(height: KuberSpacing.sm),
                           Text(
                             'Five quick chapters, about 2 minutes each. Jump in anywhere.',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 14,
                               color: cs.onSurfaceVariant,
                             ),
@@ -164,7 +164,7 @@ class TutorialChapterScreen extends ConsumerWidget {
           ),
           child: Text(
             'You can always replay it from More → Tutorial.',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               height: 1.5,
               color: cs.onSurfaceVariant,
@@ -244,7 +244,7 @@ class _ChapterCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             chapter.title,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: cs.onSurface,
@@ -264,7 +264,7 @@ class _ChapterCard extends StatelessWidget {
                       chapter.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         height: 1.35,
                         color: cs.onSurfaceVariant,
@@ -273,7 +273,7 @@ class _ChapterCard extends StatelessWidget {
                     const SizedBox(height: KuberSpacing.xs),
                     Text(
                       '${chapter.steps.length} steps · ${chapter.estimate}',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurfaceVariant,

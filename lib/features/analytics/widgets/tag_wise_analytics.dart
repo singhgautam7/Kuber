@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../transactions/data/transaction.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/data/tag.dart';
@@ -29,7 +30,7 @@ class TagWiseAnalytics extends ConsumerWidget {
           data: (txTagsMap) {
             final tagStats = _calculateTagStats(allTags, txTagsMap);
             if (tagStats.isEmpty) {
-              return _buildEmptyState(cs, tt);
+              return _buildEmptyState(context, cs, tt);
             }
 
             final totalExpense = tagStats.values.fold<double>(0, (sum, val) => sum + val['amount']!);
@@ -55,7 +56,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Tag-wise Analytics',
+                              context.l10n.tagWiseAnalytics,
                               style: tt.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurface,
@@ -63,7 +64,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Spending by Tag',
+                              context.l10n.spendingByTag,
                               style: tt.bodySmall?.copyWith(
                                 color: cs.onSurfaceVariant,
                               ),
@@ -158,7 +159,7 @@ class TagWiseAnalytics extends ConsumerWidget {
                     const SizedBox(height: KuberSpacing.lg),
 
                     Text(
-                      'TOP TAGS CONTRIBUTION',
+                      context.l10n.topTagsContribution,
                       style: tt.labelSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
@@ -251,7 +252,7 @@ class TagWiseAnalytics extends ConsumerWidget {
     return tagStats;
   }
 
-  Widget _buildEmptyState(ColorScheme cs, TextTheme tt) {
+  Widget _buildEmptyState(BuildContext context, ColorScheme cs, TextTheme tt) {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -265,7 +266,7 @@ class TagWiseAnalytics extends ConsumerWidget {
             ),
             const SizedBox(height: KuberSpacing.lg),
             Text(
-              'There are no tags related transaction in in your selected date range',
+              context.l10n.noTagsInRange,
               textAlign: TextAlign.center,
               style: tt.bodyMedium?.copyWith(
                 color: cs.onSurfaceVariant,

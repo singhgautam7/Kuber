@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -86,7 +86,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                       padding: const EdgeInsets.only(top: KuberSpacing.sm),
                       child: Text(
                         'Already backed up today',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           color: cs.onSurfaceVariant,
                         ),
@@ -108,7 +108,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(4, 24, 4, 10),
       child: Text(
         text.toUpperCase(),
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
@@ -228,7 +228,7 @@ class _StatusCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: titleColor,
@@ -237,7 +237,7 @@ class _StatusCard extends StatelessWidget {
                 const SizedBox(height: 3),
                 Text(
                   description,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12.5,
                     height: 1.45,
                     color: cs.onSurfaceVariant,
@@ -261,7 +261,7 @@ class _StatusCard extends StatelessWidget {
                           const SizedBox(width: 7),
                           Text(
                             action!.$1,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
@@ -276,7 +276,7 @@ class _StatusCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     timestamp!.toUpperCase(),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.3,
@@ -316,7 +316,7 @@ class _MasterToggle extends StatelessWidget {
               children: [
                 Text(
                   'Automatic Backups',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -324,7 +324,7 @@ class _MasterToggle extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Save a copy on a schedule',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12.5,
                     color: cs.onSurfaceVariant,
                   ),
@@ -400,7 +400,7 @@ class _ConfigGroup extends ConsumerWidget {
                     formatBackupFolderUri(settings.folderPath),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14.5,
                       fontWeight: settings.folderPath == null
                           ? FontWeight.w500
@@ -428,7 +428,7 @@ class _ConfigGroup extends ConsumerWidget {
     padding: const EdgeInsets.fromLTRB(4, 24, 4, 10),
     child: Text(
       text.toUpperCase(),
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.2,
@@ -467,7 +467,7 @@ class _RetentionPill extends StatelessWidget {
         ),
         child: Text(
           '$count backup${count == 1 ? '' : 's'}',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: selected ? cs.primary : cs.onSurfaceVariant,

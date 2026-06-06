@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/tutorial_chapter.dart';
@@ -162,7 +162,7 @@ class _TooltipContent extends StatelessWidget {
             ),
             child: Text(
               '● Chapter ${state.chapterIndex + 1} of ${tutorialChapters.length} · ${chapter.title}',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: colorScheme.primary,
@@ -173,7 +173,7 @@ class _TooltipContent extends StatelessWidget {
           const SizedBox(height: KuberSpacing.md),
           Text(
             step.title,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: colorScheme.onSurface,
@@ -185,7 +185,7 @@ class _TooltipContent extends StatelessWidget {
             step.description,
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 13,
               height: 1.5,
               color: colorScheme.onSurfaceVariant,
@@ -221,7 +221,7 @@ class _TooltipContent extends StatelessWidget {
                 onPressed: onSkip,
                 child: Text(
                   'Skip tour',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w700,
                     decoration: TextDecoration.none,

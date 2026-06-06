@@ -1,7 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -242,7 +242,7 @@ class _SplitCalculatorScreenState
                       icon: Icon(Icons.add, size: 16, color: cs.primary),
                       label: Text(
                         'Add Person',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: cs.primary,
@@ -289,7 +289,7 @@ class _SplitCalculatorScreenState
                                       const SizedBox(width: KuberSpacing.sm),
                                       Text(
                                         error,
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 13,
                                           color: cs.error,
                                           fontWeight: FontWeight.w500,
@@ -316,7 +316,7 @@ class _SplitCalculatorScreenState
                                             person.name.isEmpty
                                                 ? 'Person ${i + 1}'
                                                 : person.name,
-                                            style: GoogleFonts.inter(
+                                            style: localeFont(
                                               fontSize: 14,
                                               color: cs.onSurface,
                                               fontWeight: FontWeight.w500,
@@ -326,7 +326,7 @@ class _SplitCalculatorScreenState
                                         Text(
                                           formatter.formatCurrency(shares[i],
                                               symbol: currency.symbol),
-                                          style: GoogleFonts.inter(
+                                          style: localeFont(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w700,
                                             color: cs.onSurface,
@@ -341,7 +341,7 @@ class _SplitCalculatorScreenState
                                                 SnackBar(
                                                   content: Text(
                                                     'Enter a name first',
-                                                    style: GoogleFonts.inter(),
+                                                    style: localeFont(),
                                                   ),
                                                 ),
                                               );
@@ -363,7 +363,7 @@ class _SplitCalculatorScreenState
                                             ),
                                             child: Text(
                                               'Lent/Borrow',
-                                              style: GoogleFonts.inter(
+                                              style: localeFont(
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w600,
                                                 color: cs.primary,
@@ -386,7 +386,7 @@ class _SplitCalculatorScreenState
                                   children: [
                                     Text(
                                       'Total',
-                                      style: GoogleFonts.inter(
+                                      style: localeFont(
                                         fontSize: 13,
                                         color: cs.onSurfaceVariant,
                                       ),
@@ -394,7 +394,7 @@ class _SplitCalculatorScreenState
                                     Text(
                                       formatter.formatCurrency(_total,
                                           symbol: currency.symbol),
-                                      style: GoogleFonts.inter(
+                                      style: localeFont(
                                         fontSize: 13,
                                         color: cs.onSurfaceVariant,
                                         fontWeight: FontWeight.w600,
@@ -451,7 +451,7 @@ class _SplitTypeChips extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? Colors.white : cs.onSurface,
@@ -528,10 +528,10 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
             controller: _nameCtrl,
             onChanged: widget.onNameChanged,
             focusNode: widget.person.nameFocus,
-            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+            style: localeFont(fontSize: 14, color: cs.onSurface),
             decoration: InputDecoration(
               hintText: 'Name',
-              hintStyle: GoogleFonts.inter(
+              hintStyle: localeFont(
                   fontSize: 14, color: cs.onSurfaceVariant),
               filled: true,
               fillColor: cs.surfaceContainerHigh,
@@ -563,13 +563,13 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
               onChanged: widget.onInputChanged,
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
-              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+              style: localeFont(fontSize: 14, color: cs.onSurface),
               decoration: InputDecoration(
                 prefixText: prefix != null ? '$prefix ' : null,
-                prefixStyle: GoogleFonts.inter(
+                prefixStyle: localeFont(
                     fontSize: 14, color: cs.onSurfaceVariant),
                 suffixText: suffix,
-                suffixStyle: GoogleFonts.inter(
+                suffixStyle: localeFont(
                     fontSize: 13, color: cs.onSurfaceVariant),
                 filled: true,
                 fillColor: cs.surfaceContainerHigh,
@@ -599,7 +599,7 @@ class _PersonRowState extends ConsumerState<_PersonRow> {
               widget.formatter.formatCurrency(widget.share,
                   symbol: widget.currency.symbol as String),
               textAlign: TextAlign.right,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
@@ -646,7 +646,7 @@ class _RemainingIndicator extends StatelessWidget {
 
     return Text(
       label,
-      style: GoogleFonts.inter(fontSize: 12, color: color),
+      style: localeFont(fontSize: 12, color: color),
     );
   }
 }
@@ -664,7 +664,7 @@ class _PercentageIndicator extends StatelessWidget {
     final ok = (total - 100).abs() < 0.01;
     return Text(
       '${total.toStringAsFixed(1)}% / 100%',
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 12,
         color: ok ? cs.tertiary : cs.error,
         fontWeight: FontWeight.w600,

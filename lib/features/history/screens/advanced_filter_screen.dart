@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../accounts/data/account.dart';
@@ -99,7 +100,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => KuberDateRangeSelector(
-          primaryButtonLabel: 'Select Range',
+          primaryButtonLabel: context.l10n.selectRange,
           initialType: FilterType.custom,
           initialFrom: initFrom,
           initialTo: initTo,
@@ -134,8 +135,8 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
           icon: const Icon(Icons.close_rounded),
         ),
         title: Text(
-          'Advanced Filters',
-          style: GoogleFonts.inter(
+          context.l10n.advancedFiltersTitle,
+          style: localeFont(
             fontWeight: FontWeight.w700,
             fontSize: 18,
           ),
@@ -144,8 +145,8 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
           TextButton(
             onPressed: _reset,
             child: Text(
-              'CLEAR ALL',
-              style: GoogleFonts.inter(
+              context.l10n.clearAll,
+              style: localeFont(
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
                 color: cs.primary,
@@ -163,7 +164,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
             children: [
               // 1. DATE RANGE
               _Section(
-                title: 'DATE RANGE',
+                title: context.l10n.dateRangeLabel,
                 child: InkWell(
                   onTap: _selectDateRange,
                   borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -183,8 +184,8 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                         Text(
                           _localFilter.from != null && _localFilter.to != null
                               ? '${DateFormat('MMM d, y').format(_localFilter.from!)} - ${DateFormat('MMM d, y').format(_localFilter.to!)}'
-                              : 'Select date range',
-                          style: GoogleFonts.inter(
+                              : context.l10n.selectDateRange,
+                          style: localeFont(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: _localFilter.from != null ? cs.onSurface : cs.onSurfaceVariant,
@@ -200,14 +201,14 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               const SizedBox(height: 32),
               // 2. TRANSACTION NAME
               _Section(
-                title: 'TRANSACTION NAME',
+                title: context.l10n.transactionNameLabel,
                 child: TextField(
                   controller: _searchCtrl,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: cs.onSurface,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Search via name.',
+                    hintText: context.l10n.searchViaName,
                     hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
@@ -217,28 +218,28 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               const SizedBox(height: 32),
               // 3. TYPE
               _Section(
-                title: 'TYPE',
+                title: context.l10n.typeFilterLabel,
                 child: Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
                     _TypePill(
-                      label: 'Expense',
+                      label: context.l10n.expenseLabel,
                       isSelected: _localFilter.types.contains('expense'),
                       onTap: () => _toggleType('expense'),
                     ),
                     _TypePill(
-                      label: 'Income',
+                      label: context.l10n.incomeLabel,
                       isSelected: _localFilter.types.contains('income'),
                       onTap: () => _toggleType('income'),
                     ),
                     _TypePill(
-                      label: 'Transfer',
+                      label: context.l10n.transferLabel,
                       isSelected: _localFilter.types.contains('transfer'),
                       onTap: () => _toggleType('transfer'),
                     ),
                     _TypePill(
-                      label: 'Recurring',
+                      label: context.l10n.recurringModule,
                       isSelected: _localFilter.isRecurring == true,
                       onTap: () => setState(() {
                         _localFilter = _localFilter.copyWith(
@@ -253,7 +254,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               const SizedBox(height: 32),
               // 4. AMOUNT RANGE
               _Section(
-                title: 'AMOUNT RANGE',
+                title: context.l10n.amountRangeLabel,
                 child: Row(
                   children: [
                     Expanded(
@@ -264,7 +265,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                           color: cs.onSurface,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'min',
+                          hintText: context.l10n.minLabel,
                           hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
@@ -280,7 +281,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                           color: cs.onSurface,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'max',
+                          hintText: context.l10n.maxLabel,
                           hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
@@ -293,7 +294,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               const SizedBox(height: 32),
               // 5. ACCOUNTS
               _Section(
-                title: 'ACCOUNTS',
+                title: context.l10n.accountsLabel,
                 child: accountsAsync.when(
                   data: (accounts) {
                     final sorted = [...accounts]..sort((a, b) {
@@ -317,13 +318,13 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                     );
                   },
                   loading: () => _SkeletonGrid(itemCount: 3),
-                  error: (_, __) => const Text('Error loading accounts'),
+                  error: (_, __) => Text(context.l10n.errorLoadingAccounts),
                 ),
               ),
               const SizedBox(height: 32),
               // 6. CATEGORIES
               _Section(
-                title: 'CATEGORIES',
+                title: context.l10n.categoriesLabel,
                 child: categoriesAsync.when(
                   data: (categories) {
                     final sorted = [...categories]..sort((a, b) => a.name.compareTo(b.name));
@@ -338,13 +339,13 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                     );
                   },
                   loading: () => _SkeletonGrid(itemCount: 6),
-                  error: (_, __) => const Text('Error loading categories'),
+                  error: (_, __) => Text(context.l10n.errorLoadingCategories),
                 ),
               ),
               const SizedBox(height: 32),
               // 7. TAGS
               _Section(
-                title: 'TAGS',
+                title: context.l10n.tagsUpper,
                 child: tagsAsync.when(
                   data: (tags) {
                     final sorted = [...tags]..sort((a, b) => a.name.compareTo(b.name));
@@ -367,7 +368,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                             ),
                             child: Text(
                               '#${t.name.toUpperCase()}',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                                 color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
@@ -379,7 +380,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                     );
                   },
                   loading: () => _SkeletonGrid(itemCount: 5, height: 32),
-                  error: (_, __) => const Text('Error loading tags'),
+                  error: (_, __) => Text(context.l10n.errorLoadingTags),
                 ),
               ),
               const SizedBox(height: 120),
@@ -409,8 +410,8 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
                   ),
                   child: Text(
-                    'APPLY FILTERS',
-                    style: GoogleFonts.inter(
+                    context.l10n.applyFilters,
+                    style: localeFont(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1,
@@ -480,7 +481,7 @@ class _Section extends StatelessWidget {
       children: [
         Text(
           title,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 12,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -518,7 +519,7 @@ class _TypePill extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 14,
             fontWeight: FontWeight.w700,
             color: isSelected ? cs.onPrimary : cs.onSurface,
@@ -545,7 +546,15 @@ class _AccountPill extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final iconData = resolveAccountIcon(account);
     final iconColor = resolveAccountColor(account);
-    final typeLabel = account.isCreditCard ? 'CREDIT' : account.type.toUpperCase();
+    final typeLabel = (account.isCreditCard
+            ? context.l10n.creditShort
+            : switch (account.type.toLowerCase()) {
+                'bank' => context.l10n.bankLabel,
+                'wallet' => context.l10n.walletLabel,
+                'cash' => context.l10n.cashLabel,
+                _ => account.type,
+              })
+        .toUpperCase();
 
     return GestureDetector(
       onTap: onTap,
@@ -579,7 +588,7 @@ class _AccountPill extends StatelessWidget {
               children: [
                 Text(
                   account.name,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: isSelected ? cs.primary : cs.onSurface,
@@ -587,7 +596,7 @@ class _AccountPill extends StatelessWidget {
                 ),
                 Text(
                   typeLabel,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: isSelected ? cs.primary : cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -648,7 +657,7 @@ class _CategoryPill extends StatelessWidget {
             const SizedBox(width: 10),
             Text(
               category.name,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: isSelected ? cs.primary : cs.onSurface,

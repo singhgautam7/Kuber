@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -56,14 +57,14 @@ class _ThresholdSettingsSheetState
     return Padding(
       padding: EdgeInsets.only(bottom: keyboardPadding),
       child: KuberBottomSheet(
-      title: 'Threshold Settings',
+      title: context.l10n.thresholdSettings,
       actions: Column(
         children: [
           Row(
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Reset to Defaults',
+                  label: context.l10n.resetToDefaults,
                   icon: Icons.refresh_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -77,7 +78,7 @@ class _ThresholdSettingsSheetState
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Save',
+                  label: context.l10n.saveLabel,
                   icon: Icons.check_rounded,
                   type: AppButtonType.primary,
                   onPressed: _save,
@@ -91,8 +92,8 @@ class _ThresholdSettingsSheetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ThresholdField(
-            heading: 'Small/Medium Boundary (Floor)',
-            description: 'Amount below which transactions are marked as Small.',
+            heading: context.l10n.thresholdFloorHeading,
+            description: context.l10n.thresholdSmallDesc,
             controller: _floorController,
             symbol: symbol,
             cs: cs,
@@ -100,9 +101,8 @@ class _ThresholdSettingsSheetState
           ),
           const SizedBox(height: 28),
           _ThresholdField(
-            heading: 'Medium/Large Boundary (Ceiling)',
-            description:
-                'Amount above which transactions are marked as Large.',
+            heading: context.l10n.thresholdCeilingHeading,
+            description: context.l10n.thresholdLargeDesc,
             controller: _ceilingController,
             symbol: symbol,
             cs: cs,
@@ -153,7 +153,7 @@ class _ThresholdField extends StatelessWidget {
       children: [
         Text(
           heading,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -162,7 +162,7 @@ class _ThresholdField extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           description,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 13,
             color: cs.onSurfaceVariant,
           ),
@@ -171,11 +171,11 @@ class _ThresholdField extends StatelessWidget {
         TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          style: GoogleFonts.inter(fontSize: 16, color: cs.onSurface),
+          style: localeFont(fontSize: 16, color: cs.onSurface),
           onChanged: (_) => onChanged(),
           decoration: InputDecoration(
             prefixText: '$symbol  ',
-            prefixStyle: GoogleFonts.inter(
+            prefixStyle: localeFont(
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: cs.onSurface,
@@ -227,8 +227,8 @@ class _PreviewLogic extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'PREVIEW LOGIC',
-            style: GoogleFonts.inter(
+            context.l10n.previewLogic,
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -236,14 +236,14 @@ class _PreviewLogic extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _PreviewRow(label: 'Small', value: '< ${_fmt(floor)}', cs: cs),
+          _PreviewRow(label: context.l10n.sizeSmall, value: '< ${_fmt(floor)}', cs: cs),
           const SizedBox(height: 8),
           _PreviewRow(
-              label: 'Medium',
+              label: context.l10n.sizeMedium,
               value: '${_fmt(floor)} - ${_fmt(ceiling)}',
               cs: cs),
           const SizedBox(height: 8),
-          _PreviewRow(label: 'Large', value: '> ${_fmt(ceiling)}', cs: cs),
+          _PreviewRow(label: context.l10n.sizeLarge, value: '> ${_fmt(ceiling)}', cs: cs),
         ],
       ),
     );
@@ -276,7 +276,7 @@ class _PreviewRow extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 14,
             color: cs.onSurface,
           ),
@@ -284,7 +284,7 @@ class _PreviewRow extends StatelessWidget {
         const Spacer(),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,

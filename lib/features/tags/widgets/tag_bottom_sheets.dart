@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
@@ -100,7 +100,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
             children: [
               Text(
                 isEdit ? "Edit Tag" : "New Tag",
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
@@ -122,14 +122,14 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
             onChanged: (val) {
               if (_errorText != null) setState(() => _errorText = null);
             },
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
             decoration: InputDecoration(
               hintText: "Example: weekend, trip-to-goa",
-              hintStyle: GoogleFonts.inter(
+              hintStyle: localeFont(
                 fontSize: 14,
                 color: cs.onSurfaceVariant.withValues(alpha: 0.5),
               ),
@@ -137,7 +137,7 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   "#",
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: cs.primary,
@@ -215,7 +215,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
         alignment: Alignment.center,
         child: Text(
           "#",
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 24,
             fontWeight: FontWeight.w800,
             color: cs.primary,
@@ -251,7 +251,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
                       txn != null
                           ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
                           : 'No transactions yet',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
@@ -311,19 +311,19 @@ class ViewTagBottomSheet extends ConsumerWidget {
         ),
         title: Text(
           'Delete tag?',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
         ),
         content: Text(
           'The tag "#${tag.name}" will be permanently deleted.',
-          style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+          style: localeFont(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text('Cancel', style: localeFont()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(

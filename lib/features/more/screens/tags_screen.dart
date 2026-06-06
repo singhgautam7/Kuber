@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
@@ -54,7 +54,7 @@ class TagsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Text('Error: $e',
-              style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+              style: localeFont(color: cs.onSurfaceVariant)),
         ),
         data: (tags) => _TagsBody(tags: tags, onAdd: () => _openAddTagSheet(context)),
       ),
@@ -157,7 +157,7 @@ class _TagListItem extends ConsumerWidget {
           children: [
             Text(
               "#",
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 color: tag.isEnabled ? cs.primary : cs.onSurfaceVariant.withValues(alpha: 0.5),
@@ -172,7 +172,7 @@ class _TagListItem extends ConsumerWidget {
                     tag.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: tag.isEnabled ? cs.onSurface : cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -181,7 +181,7 @@ class _TagListItem extends ConsumerWidget {
                   if (!tag.isEnabled)
                     Text(
                       "Disabled",
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         color: cs.error.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
@@ -197,7 +197,7 @@ class _TagListItem extends ConsumerWidget {
                 return countAsync.when(
                   data: (count) => Text(
                     count == 0 ? 'No transactions' : '$count transactions',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 12,
                       color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                       fontWeight: FontWeight.w500,
@@ -214,4 +214,3 @@ class _TagListItem extends ConsumerWidget {
     );
   }
 }
-

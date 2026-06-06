@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_text_styles.dart';
+import '../utils/locale_font.dart';
 
 class KuberSpacing {
   static const xs = 4.0;
@@ -133,8 +134,8 @@ extension KuberThemeX on BuildContext {
 }
 
 class AppTheme {
-  static ThemeData dark() {
-    final textTheme = AppTextStyles.getTextTheme(ThemeData.dark().textTheme);
+  static ThemeData dark(Locale locale) {
+    final textTheme = buildKuberTextTheme(locale, ThemeData.dark().textTheme);
 
     final colorScheme = ColorScheme.dark(
       surface: KuberColors.background,
@@ -350,8 +351,8 @@ class AppTheme {
     );
   }
 
-  static ThemeData light() {
-    final textTheme = AppTextStyles.getTextTheme(ThemeData.light().textTheme);
+  static ThemeData light(Locale locale) {
+    final textTheme = buildKuberTextTheme(locale, ThemeData.light().textTheme);
 
     final colorScheme = ColorScheme.light(
       surface: KuberLightColors.background,

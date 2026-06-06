@@ -1,7 +1,7 @@
 
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
@@ -152,7 +152,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         Center(
           child: Text(
             title,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -165,7 +165,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         // FORMAT Section
         Text(
           _isTransactions ? 'SELECT FORMAT' : 'FORMAT',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant,
@@ -250,7 +250,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
               children: [
                 Text(
                   'Apply current filters',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -259,7 +259,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
                 const SizedBox(height: 4),
                 Text(
                   'Generate report using the active filters from the history page.',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant.withValues(alpha: 0.8),
                     height: 1.3,
@@ -290,7 +290,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       children: [
         Text(
           'SELECTED PERIOD',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant,
@@ -312,7 +312,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
               const SizedBox(width: KuberSpacing.md),
               Text(
                 rangeText,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
@@ -341,7 +341,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
           Expanded(
             child: Text(
               'Date filters from your current analytics view are automatically applied to this report.',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 color: cs.onSurfaceVariant,
                 height: 1.4,
@@ -368,7 +368,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
           const SizedBox(height: KuberSpacing.xl),
           Text(
             'Generating your report\u2026',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
@@ -415,7 +415,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         const SizedBox(height: KuberSpacing.lg),
         Text(
           'Export Successful',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -424,7 +424,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         const SizedBox(height: 4),
         Text(
           'Your report is ready.',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 13,
             color: cs.onSurfaceVariant,
           ),
@@ -462,7 +462,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
                   children: [
                     Text(
                       fileName,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -473,7 +473,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
                     const SizedBox(height: 2),
                     Text(
                       sizeText,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),
@@ -591,7 +591,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         const SizedBox(height: KuberSpacing.lg),
         Text(
           'Export Failed',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -600,7 +600,7 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
         const SizedBox(height: KuberSpacing.sm),
         Text(
           _errorMessage,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 14,
             color: cs.onSurfaceVariant,
           ),

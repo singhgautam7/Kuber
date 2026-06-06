@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
@@ -78,7 +78,7 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
                         children: [
                           Text(
                             c.label,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 14,
                               fontWeight: isSel ? FontWeight.w700 : FontWeight.w600,
                               color: isSel ? cs.primary : cs.onSurface,
@@ -88,7 +88,7 @@ class SettingsChoiceSheet<T> extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               s,
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 12,
                                 color: cs.onSurfaceVariant,
                                 height: 1.35,

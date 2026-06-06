@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -39,6 +40,10 @@ class MoreScreenSimple extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
 
+    final footerHeartParts = context.l10n.madeInIndia('{heart}').split('{heart}');
+    final footerBefore = footerHeartParts.first;
+    final footerAfter = footerHeartParts.length > 1 ? footerHeartParts.last : '';
+
     return Scaffold(
       backgroundColor: cs.surface,
       body: CustomScrollView(
@@ -46,10 +51,10 @@ class MoreScreenSimple extends ConsumerWidget {
           const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.xl)),
           SliverToBoxAdapter(
             child: KuberPageHeader(
-              title: 'More',
-              description: 'Manage your settings, tools and data',
+              title: context.l10n.navMore,
+              description: context.l10n.moreManageSubtitle,
               actionIcon: Icons.search_rounded,
-              actionTooltip: 'Search',
+              actionTooltip: context.l10n.moreSearchTooltip,
               onAction: () => context.push('/more/search'),
             ),
           ),
@@ -63,55 +68,55 @@ class MoreScreenSimple extends ConsumerWidget {
               delegate: SliverChildListDelegate([
                 // Manage section
                 _MenuSection(
-                  title: 'Manage',
+                  title: context.l10n.moreManageTitle,
                   items: [
                     _MenuItem(
                       icon: Icons.account_balance_wallet,
-                      label: 'Accounts',
-                      subtitle: 'Your wallets and bank accounts',
+                      label: context.l10n.menuAccounts,
+                      subtitle: context.l10n.menuAccountsDesc,
                       onTap: () => context.push('/more/accounts'),
                     ),
                     _MenuItem(
                       icon: Icons.category,
-                      label: 'Categories',
-                      subtitle: 'Organize your transactions',
+                      label: context.l10n.menuCategories,
+                      subtitle: context.l10n.menuCategoriesDesc,
                       onTap: () => context.push('/more/categories'),
                     ),
                     _MenuItem(
                       icon: Icons.label_rounded,
-                      label: 'Tags',
-                      subtitle: 'Organize the labels for your transactions',
+                      label: context.l10n.menuTags,
+                      subtitle: context.l10n.menuTagsDesc,
                       onTap: () => context.push('/more/tags'),
                     ),
                     _MenuItem(
                       key: TutorialStepKeys.moreBudgetsItem,
                       icon: Icons.pie_chart_rounded,
-                      label: 'Budgets',
-                      subtitle: 'Track and control your monthly spending',
+                      label: context.l10n.menuBudgets,
+                      subtitle: context.l10n.menuBudgetsDesc,
                       onTap: () => context.push('/more/budgets'),
                     ),
                     _MenuItem(
                       icon: Icons.sync_rounded,
-                      label: 'Recurring Transactions',
-                      subtitle: 'Automated scheduled transactions',
+                      label: context.l10n.menuRecurring,
+                      subtitle: context.l10n.menuRecurringDesc,
                       onTap: () => context.push('/more/recurring'),
                     ),
                     _MenuItem(
                       icon: Icons.handshake,
-                      label: 'Lend / Borrow',
-                      subtitle: 'Track money you lent or borrowed',
+                      label: context.l10n.menuLedger,
+                      subtitle: context.l10n.menuLedgerDesc,
                       onTap: () => context.push('/more/ledger'),
                     ),
                     _MenuItem(
                       icon: Icons.account_balance_outlined,
-                      label: 'Loans',
-                      subtitle: 'Track EMIs and repayment progress',
+                      label: context.l10n.menuLoans,
+                      subtitle: context.l10n.menuLoansDesc,
                       onTap: () => context.push('/more/loans'),
                     ),
                     _MenuItem(
                       icon: Icons.show_chart,
-                      label: 'Investments',
-                      subtitle: 'Track portfolio value and growth',
+                      label: context.l10n.menuInvestments,
+                      subtitle: context.l10n.menuInvestmentsDesc,
                       onTap: () => context.push('/more/investments'),
                     ),
                   ],
@@ -121,20 +126,20 @@ class MoreScreenSimple extends ConsumerWidget {
 
                 // Tools section
                 _MenuSection(
-                  title: 'Tools',
+                  title: context.l10n.moreToolsTitle,
                   items: [
                     _MenuItem(
                       key: TutorialStepKeys.moreAskKuberItem,
                       icon: Icons.auto_awesome_rounded,
-                      label: 'Ask Kuber (Beta)',
-                      subtitle: 'On-device smart assistant',
+                      label: context.l10n.menuAskKuber,
+                      subtitle: context.l10n.menuAskKuberDesc,
                       color: const Color(0xFFFFB300),
                       onTap: () => context.push('/more/ask-kuber'),
                     ),
                     _MenuItem(
                       icon: Icons.calculate_rounded,
-                      label: 'Calculators & Tools',
-                      subtitle: 'EMI, SIP, salary, GST, split & more',
+                      label: context.l10n.menuCalculators,
+                      subtitle: context.l10n.menuCalculatorsDesc,
                       onTap: () => context.push('/more/tools'),
                     ),
                   ],
@@ -144,31 +149,31 @@ class MoreScreenSimple extends ConsumerWidget {
 
                 // App section
                 _MenuSection(
-                  title: 'App',
+                  title: context.l10n.moreAppTitle,
                   items: [
                     _MenuItem(
                       icon: Icons.settings,
-                      label: 'Settings',
-                      subtitle: 'Theme, currency, and profile',
+                      label: context.l10n.menuSettings,
+                      subtitle: context.l10n.menuSettingsDesc,
                       onTap: () => context.push('/more/settings'),
                     ),
                     _MenuItem(
                       key: TutorialStepKeys.moreDataItem,
                       icon: Icons.storage_rounded,
-                      label: 'Data',
-                      subtitle: 'Export, import, automatic backups',
+                      label: context.l10n.menuData,
+                      subtitle: context.l10n.menuDataDesc,
                       onTap: () => context.push('/more/data'),
                     ),
                     _MenuItem(
                       icon: Icons.auto_stories_rounded,
-                      label: 'Money Stories Archive',
-                      subtitle: 'Every recap, newest first',
+                      label: context.l10n.menuStoriesArchive,
+                      subtitle: context.l10n.menuStoriesArchiveDesc,
                       onTap: () => context.push('/more/stories-archive'),
                     ),
                     _MenuItem(
                       icon: Icons.build,
-                      label: 'Troubleshoot',
-                      subtitle: 'Fix data and suggestion issues',
+                      label: context.l10n.menuTroubleshoot,
+                      subtitle: context.l10n.menuTroubleshootDesc,
                       onTap: () => context.push('/more/troubleshoot'),
                     ),
                   ],
@@ -178,18 +183,18 @@ class MoreScreenSimple extends ConsumerWidget {
 
                 // Tutorial Section
                 _MenuSection(
-                  title: 'Tutorial',
+                  title: context.l10n.moreTutorialTitle,
                   items: [
                     _MenuItem(
                       icon: Icons.school_rounded,
-                      label: 'App Tutorial (Beta)',
-                      subtitle: 'Replay the feature walkthrough',
+                      label: context.l10n.menuTutorial,
+                      subtitle: context.l10n.menuTutorialDesc,
                       onTap: () => launchTutorialFromMore(context, ref),
                     ),
                     _MenuItem(
                       icon: Icons.auto_stories_rounded,
-                      label: 'Welcome Tour',
-                      subtitle: 'Replay the welcome and setup screens',
+                      label: context.l10n.menuWelcomeTour,
+                      subtitle: context.l10n.menuWelcomeTourDesc,
                       onTap: () => context.push('/onboarding?replay=true'),
                     ),
                   ],
@@ -199,12 +204,12 @@ class MoreScreenSimple extends ConsumerWidget {
 
                 // Contact Us section
                 _MenuSection(
-                  title: 'Help Us',
+                  title: context.l10n.moreHelpUsTitle,
                   items: [
                     _MenuItem(
                       icon: Icons.star_rate_rounded,
-                      label: 'Rate Us on Play Store',
-                      subtitle: 'Enjoying Kuber? Leave a review',
+                      label: context.l10n.menuRateUs,
+                      subtitle: context.l10n.menuRateUsDesc,
                       onTap: () {
                         launchUrl(
                           Uri.parse(
@@ -216,21 +221,20 @@ class MoreScreenSimple extends ConsumerWidget {
                     ),
                     _MenuItem(
                       icon: Icons.share_rounded,
-                      label: 'Share This App',
-                      subtitle: 'Recommend Kuber to friends and family',
+                      label: context.l10n.menuShareApp,
+                      subtitle: context.l10n.menuShareAppDesc,
                       onTap: () {
                         SharePlus.instance.share(
                           ShareParams(
-                            text:
-                                'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
+                            text: context.l10n.shareMessage,
                           ),
                         );
                       },
                     ),
                     _MenuItem(
                       icon: Icons.feedback,
-                      label: 'Submit a Feedback',
-                      subtitle: 'Report a bug or suggest a feature',
+                      label: context.l10n.menuFeedback,
+                      subtitle: context.l10n.menuFeedbackDesc,
                       onTap: () => context.push('/more/feedback'),
                     ),
                   ],
@@ -240,25 +244,25 @@ class MoreScreenSimple extends ConsumerWidget {
 
                 // About section
                 _MenuSection(
-                  title: 'About',
+                  title: context.l10n.moreAboutTitle,
                   items: [
                     _MenuItem(
                       icon: Icons.info_outline_rounded,
-                      label: 'About Kuber',
-                      subtitle: 'Vision, origin, and developer',
+                      label: context.l10n.menuAbout,
+                      subtitle: context.l10n.menuAboutDesc,
                       onTap: () => context.pushNamed('about'),
                     ),
                     _MenuItem(
                       icon: Icons.security_outlined,
-                      label: 'Permissions',
-                      subtitle: 'App limits and security',
+                      label: context.l10n.menuPermissions,
+                      subtitle: context.l10n.menuPermissionsDesc,
                       onTap: () => context.pushNamed('permissions'),
                     ),
                     if (isDevMode)
                       _MenuItem(
                         icon: Icons.bug_report,
-                        label: 'Dev Tools',
-                        subtitle: 'Developer-only tools',
+                        label: context.l10n.menuDevTools,
+                        subtitle: context.l10n.menuDevToolsDesc,
                         onTap: () => context.push('/more/dev-tools'),
                       ),
                   ],
@@ -271,13 +275,13 @@ class MoreScreenSimple extends ConsumerWidget {
                   children: [
                     RichText(
                       text: TextSpan(
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: cs.onSurfaceVariant,
                         ),
                         children: [
-                          const TextSpan(text: "Made with "),
+                          TextSpan(text: footerBefore),
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
                             child: Icon(
@@ -286,7 +290,7 @@ class MoreScreenSimple extends ConsumerWidget {
                               size: 14,
                             ),
                           ),
-                          const TextSpan(text: " in India"),
+                          TextSpan(text: footerAfter),
                         ],
                       ),
                     ),
@@ -342,7 +346,7 @@ class _MenuSection extends StatelessWidget {
       children: [
         Text(
           title.toUpperCase(),
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
@@ -409,7 +413,7 @@ class _MenuItem extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -418,7 +422,7 @@ class _MenuItem extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 12,
                       color: cs.onSurfaceVariant,
                     ),

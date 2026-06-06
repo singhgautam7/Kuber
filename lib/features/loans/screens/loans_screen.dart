@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -57,7 +58,7 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
         error: (e, _) => Center(
           child: Text(
             'Error: $e',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            style: localeFont(color: cs.onSurfaceVariant),
           ),
         ),
         data: (loans) {
@@ -90,9 +91,9 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
               ),
               SliverToBoxAdapter(
                 child: KuberPageHeader(
-                  title: 'Loans',
+                  title: context.l10n.loansTitle,
                   description:'',
-                  actionTooltip: 'Add Loan',
+                  actionTooltip: context.l10n.addLoan,
                   onAction: () => context.push('/loans/add'),
                 ),
               ),
@@ -119,15 +120,15 @@ class _LoansScreenState extends ConsumerState<LoansScreen> {
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.account_balance_outlined,
-                    title: 'No loans added',
-                    description: 'Tap + to track your first loan EMI',
-                    actionLabel: 'Add Loan',
+                    title: context.l10n.noLoansAdded,
+                    description: context.l10n.loansEmptyDesc,
+                    actionLabel: context.l10n.addLoan,
                     onAction: () => context.push('/loans/add'),
                   ),
                 ),
               if (active.isNotEmpty) ...[
-                const SliverToBoxAdapter(
-                  child: _SectionHeader(label: 'ACTIVE LOANS'),
+                SliverToBoxAdapter(
+                  child: _SectionHeader(label: context.l10n.activeLoans),
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
@@ -238,7 +239,7 @@ class _SectionHeader extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: cs.onSurfaceVariant,

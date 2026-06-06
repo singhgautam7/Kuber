@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
@@ -74,17 +75,17 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
     final cs = Theme.of(context).colorScheme;
 
     return KuberBottomSheet(
-      title: 'Select Currency',
+      title: context.l10n.selectCurrency,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextField(
             controller: _searchCtrl,
             onChanged: _onSearch,
-            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+            style: localeFont(fontSize: 14, color: cs.onSurface),
             decoration: InputDecoration(
-              hintText: 'Search by name, code or symbol…',
-              hintStyle: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+              hintText: context.l10n.searchCurrencyHint,
+              hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
               prefixIcon: Icon(Icons.search_rounded, size: 20, color: cs.onSurfaceVariant),
               suffixIcon: _searchCtrl.text.isNotEmpty
                   ? IconButton(
@@ -118,8 +119,8 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
               padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
               child: Center(
                 child: Text(
-                  'No currencies found',
-                  style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+                  context.l10n.noCurrenciesFound,
+                  style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                 ),
               ),
             )
@@ -143,7 +144,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                     ),
                     child: Text(
                       c.symbol,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: isSelected ? cs.primary : cs.onSurfaceVariant,
@@ -152,7 +153,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                   ),
                   title: Text(
                     c.name,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: cs.onSurface,
@@ -160,7 +161,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                   ),
                   subtitle: Text(
                     c.code,
-                    style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+                    style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
                   ),
                   trailing: isSelected
                       ? Icon(Icons.check_rounded, color: cs.primary, size: 20)

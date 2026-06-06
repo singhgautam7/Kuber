@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -76,26 +76,26 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           'Discard changes?',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w800),
+          style: localeFont(fontWeight: FontWeight.w800),
         ),
         content: Text(
           'You have unsaved changes to your widgets. '
           'Leaving now will discard them.',
-          style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+          style: localeFont(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               'Keep editing',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+              style: localeFont(fontWeight: FontWeight.w700),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Discard',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontWeight: FontWeight.w700,
                 color: cs.error,
               ),
@@ -166,7 +166,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                         Expanded(
                           child: Text(
                             'Drag the handle to reorder. Toggle to show/hide.',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 12,
                               color: cs.onSurfaceVariant,
                             ),
@@ -251,7 +251,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                       ),
                       child: Text(
                         'Save Changes',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -315,7 +315,7 @@ class _WidgetRow extends StatelessWidget {
                 children: [
                   Text(
                     widget.name,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -327,7 +327,7 @@ class _WidgetRow extends StatelessWidget {
                       widget.description!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),

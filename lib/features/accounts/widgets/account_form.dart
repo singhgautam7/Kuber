@@ -25,10 +25,11 @@
 //   • Type chips disabled while editing (existing behaviour)
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -104,7 +105,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   void _save() {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      showKuberSnackBar(context, 'Please enter an account name', isError: true);
+      showKuberSnackBar(context, context.l10n.enterAccountName, isError: true);
       return;
     }
     final account = widget.account ?? Account();
@@ -148,20 +149,20 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       children: [
         // ── IDENTITY ─────────────────────────────────────────────────
         KuberFormSection(
-          label: 'Identity',
+          label: context.l10n.identity,
           topGap: 0,
           children: [
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-              style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+              style: localeFont(color: cs.onSurface, fontSize: 15),
               decoration: InputDecoration(
                 hintText: _isCreditCard
-                    ? 'Credit card name'
+                    ? context.l10n.creditCardName
                     : _isCash
-                        ? 'Cash name'
-                        : 'Bank name',
+                        ? context.l10n.cashName
+                        : context.l10n.bankName,
               ),
             ),
           ],
@@ -169,7 +170,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
         // ── APPEARANCE ───────────────────────────────────────────────
         KuberFormSection(
-          label: 'Appearance',
+          label: context.l10n.appearanceCategory,
           children: [
             KuberPickerRow(
               leading: KuberLeadingSwatch(
@@ -177,7 +178,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 icon: IconMapper.fromString(
                     _selectedIcon ?? IconMapper.kAccountIconKeys.first),
               ),
-              label: 'Icon',
+              label: context.l10n.iconLabel,
               value: IconMapper.labelFor(
                   _selectedIcon ?? IconMapper.kAccountIconKeys.first),
               onTap: () => showIconPicker(
@@ -195,7 +196,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                   borderRadius: BorderRadius.circular(KuberRadius.md),
                 ),
               ),
-              label: 'Color',
+              label: context.l10n.colorLabel,
               value: AppColorPalette.nameFor(
                   _selectedColor ?? AppColorPalette.kVibrant.first),
               onTap: () => showColorPicker(
@@ -209,7 +210,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
         // ── TYPE ─────────────────────────────────────────────────────
         KuberFormSection(
-          label: 'Type',
+          label: context.l10n.typeLabel,
           children: [
             KuberChipGrid<String>(
               columns: 3,
@@ -217,16 +218,16 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               onChanged: _isEditing
                   ? (_) {} // disabled while editing (existing rule)
                   : (v) => setState(() => _selectedType = v),
-              options: const [
+              options: [
                 KuberChipOption(
-                    value: 'cash', label: 'Cash', icon: Icons.payments_rounded),
+                    value: 'cash', label: context.l10n.cashLabel, icon: Icons.payments_rounded),
                 KuberChipOption(
                     value: 'bank',
-                    label: 'Bank',
+                    label: context.l10n.bankLabel,
                     icon: Icons.account_balance_rounded),
                 KuberChipOption(
                     value: 'credit',
-                    label: 'Credit Card',
+                    label: context.l10n.creditCardLabel,
                     icon: Icons.credit_card_rounded),
               ],
             ),
@@ -249,17 +250,17 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                                 color: cs.onSurface, fontSize: 15),
-                            decoration: const InputDecoration(
-                              hintText: 'Last 4 digits (optional)',
+                            decoration: InputDecoration(
+                              hintText: context.l10n.last4DigitsHint,
                               counterText: '',
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "Card's last 4 digits · not shared anywhere",
-                            style: GoogleFonts.inter(
+                            context.l10n.cardLast4Note,
+                            style: localeFont(
                               fontSize: 11,
                               color: cs.onSurfaceVariant,
                             ),
@@ -273,26 +274,26 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
         // ── BALANCE ──────────────────────────────────────────────────
         KuberFormSection(
-          label: 'Balance',
+          label: context.l10n.balanceLabel,
           children: [
             // Initial balance — only when (!editing && !credit)
             if (!_isEditing && !_isCreditCard)
               KuberHeroAmountInput(
-                label: 'Initial balance',
+                label: context.l10n.initialBalance,
                 currencySymbol: symbol,
                 controller: _balanceController,
               ),
             // Limit spent — only when (!editing && credit)
             if (!_isEditing && _isCreditCard)
               KuberHeroAmountInput(
-                label: 'Limit spent',
+                label: context.l10n.limitSpentField,
                 currencySymbol: symbol,
                 controller: _balanceController,
               ),
             // Total limit — always when credit
             if (_isCreditCard)
               KuberHeroAmountInput(
-                label: 'Total limit',
+                label: context.l10n.totalLimitField,
                 currencySymbol: symbol,
                 controller: _limitController,
               ),
@@ -303,7 +304,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         // Save lives in the parent (bottom sheet or screen scaffold).
         // The widget below is a fallback for callers that embed AccountForm
         // directly without an outer bottom sheet button.
-        KuberSaveButton(label: 'Save account', onPressed: _save),
+        KuberSaveButton(label: context.l10n.saveAccount, onPressed: _save),
       ],
     );
   }

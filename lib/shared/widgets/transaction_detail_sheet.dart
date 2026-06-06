@@ -1,10 +1,11 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 
@@ -62,8 +63,8 @@ void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction 
   ref.read(transactionListProvider.notifier).delete(t.id);
   showKuberSnackBar(
     context,
-    t.isTransfer ? 'Transfer deleted' : 'Transaction deleted',
-    actionLabel: 'UNDO',
+    t.isTransfer ? context.l10n.transferDeleted : context.l10n.transactionDeleted,
+    actionLabel: context.l10n.undoLabel,
     onAction: () {
       ref.read(transactionListProvider.notifier).restore(t);
       if (pair != null) {
@@ -161,11 +162,11 @@ class TransactionDetailSheet extends ConsumerWidget {
         ? const Color(0xFF78909C)
         : (category != null ? Color(category.colorValue) : cs.primary);
     final displayName = isTransfer
-        ? '${fromAccountName ?? "Unknown"} → ${toAccountName ?? "Unknown"}'
+        ? '${fromAccountName ?? context.l10n.unknownLabel} → ${toAccountName ?? context.l10n.unknownLabel}'
         : transaction.name;
 
     // Account display
-    String accountDisplay = account?.name ?? 'Unknown';
+    String accountDisplay = account?.name ?? context.l10n.unknownLabel;
     if (account?.last4Digits != null && account!.last4Digits!.isNotEmpty) {
       accountDisplay += ' •••• ${account.last4Digits}';
     }
@@ -174,7 +175,12 @@ class TransactionDetailSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: displayName,
-      subtitle: (isTransfer ? 'TRANSFER' : transaction.type).toUpperCase(),
+      subtitle: (isTransfer
+              ? context.l10n.transferLabel
+              : (transaction.type == 'income'
+                    ? context.l10n.incomeLabel
+                    : context.l10n.expenseLabel))
+          .toUpperCase(),
       leadingIcon: isTransfer
           ? Container(
               width: 48,
@@ -195,8 +201,8 @@ class TransactionDetailSheet extends ConsumerWidget {
         children: [
           // ── Amount ────────────────────────────────────────────────────
           Text(
-            'TRANSACTION AMOUNT',
-            style: GoogleFonts.inter(
+            context.l10n.transactionAmount,
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -206,7 +212,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           const SizedBox(height: KuberSpacing.xs),
           Text(
             amountText,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: amountColor,
@@ -217,7 +223,7 @@ class TransactionDetailSheet extends ConsumerWidget {
 
           // ── Details Grid ─────────────────────────────────────────────
           _DetailCell(
-            label: 'DATE & TIME',
+            label: context.l10n.dateTimeLabel,
             value: dateLabel.toUpperCase(),
             fullWidth: true,
           ),
@@ -227,7 +233,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: _DetailCell(
-                  label: 'ACCOUNT',
+                  label: context.l10n.accountUpper,
                   value: accountDisplay.toUpperCase(),
                   icon: Icons.account_balance_wallet_rounded,
                   iconColor: cs.primary,
@@ -236,8 +242,10 @@ class TransactionDetailSheet extends ConsumerWidget {
               const SizedBox(width: KuberSpacing.sm),
               Expanded(
                 child: _DetailCell(
-                  label: 'CATEGORY',
-                  value: transaction.type == 'income' ? 'INCOME' : (category?.name.toUpperCase() ?? 'NONE'),
+                  label: context.l10n.categoryUpper,
+                  value: transaction.type == 'income'
+                      ? context.l10n.incomeLabel.toUpperCase()
+                      : (category?.name.toUpperCase() ?? context.l10n.noneLabel.toUpperCase()),
                   icon: isTransfer ? Icons.swap_horiz_rounded : (category != null ? IconMapper.fromString(category.icon) : Icons.category_rounded),
                   iconColor: iconColor,
                 ),
@@ -249,7 +257,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           if (transaction.notes != null && transaction.notes!.isNotEmpty) ...[
             const SizedBox(height: KuberSpacing.sm),
             _DetailCell(
-              label: 'NOTES',
+              label: context.l10n.notesUpper,
               value: transaction.notes!,
               fullWidth: true,
             ),
@@ -258,7 +266,7 @@ class TransactionDetailSheet extends ConsumerWidget {
           if (transaction.quickAddNote != null && transaction.quickAddNote!.isNotEmpty) ...[
             const SizedBox(height: KuberSpacing.sm),
             _DetailCell(
-              label: 'ADDED USING PROMPT',
+              label: context.l10n.addedUsingPrompt,
               value: transaction.quickAddNote!,
               fullWidth: true,
               icon: Icons.flash_on_rounded,
@@ -270,8 +278,8 @@ class TransactionDetailSheet extends ConsumerWidget {
           if (transaction.attachmentPaths.isNotEmpty) ...[
             const SizedBox(height: KuberSpacing.xl),
             Text(
-              'ATTACHMENTS',
-              style: GoogleFonts.inter(
+              context.l10n.attachmentsLabel,
+              style: localeFont(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
@@ -341,8 +349,8 @@ class TransactionDetailSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ATTACHED TAGS',
-                        style: GoogleFonts.inter(
+                        context.l10n.attachedTags,
+                        style: localeFont(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
@@ -362,7 +370,7 @@ class TransactionDetailSheet extends ConsumerWidget {
                           ),
                           child: Text(
                             '#${tag.name}',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: cs.primary,
@@ -385,7 +393,7 @@ class TransactionDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Edit',
+                  label: context.l10n.editLabel,
                   icon: Icons.edit_outlined,
                   type: AppButtonType.normal,
                   onPressed: onEdit,
@@ -394,7 +402,7 @@ class TransactionDetailSheet extends ConsumerWidget {
               const SizedBox(width: KuberSpacing.md),
               Expanded(
                 child: AppButton(
-                  label: 'Delete',
+                  label: context.l10n.deleteLabel,
                   icon: Icons.delete_outline_rounded,
                   type: AppButtonType.danger,
                   onPressed: onDelete,
@@ -444,7 +452,7 @@ class _DetailCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -461,7 +469,7 @@ class _DetailCell extends StatelessWidget {
               Expanded(
                 child: Text(
                   value,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,

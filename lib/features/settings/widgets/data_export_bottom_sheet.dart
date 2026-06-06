@@ -1,3 +1,4 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -5,7 +6,6 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -142,7 +142,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         Center(
           child: Text(
             'Export Data',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -154,7 +154,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
 
         Text(
           'SELECT FORMAT',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant,
@@ -200,7 +200,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                   isCsv
                       ? 'Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.'
                       : 'Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12,
                     color: cs.onSurfaceVariant,
                     height: 1.45,
@@ -234,7 +234,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
           const SizedBox(height: KuberSpacing.xl),
           Text(
             'Preparing your export…',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
@@ -279,7 +279,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: KuberSpacing.lg),
         Text(
           'Export Successful',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -288,7 +288,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: 4),
         Text(
           'Your file is ready.',
-          style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: KuberSpacing.xl),
@@ -323,7 +323,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                   children: [
                     Text(
                       fileName,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -334,7 +334,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                     const SizedBox(height: 2),
                     Text(
                       sizeText,
-                      style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+                      style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -388,7 +388,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: KuberSpacing.lg),
         Text(
           'Export Failed',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -397,7 +397,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: KuberSpacing.sm),
         Text(
           _errorMessage,
-          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: KuberSpacing.xl),

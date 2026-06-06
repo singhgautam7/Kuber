@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -48,7 +49,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Transaction Size Distribution',
+                        context.l10n.transactionSizeDistribution,
                         style: tt.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -56,7 +57,7 @@ class TransactionSizeDistribution extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Frequency by ticket size',
+                        context.l10n.frequencyByTicketSize,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),

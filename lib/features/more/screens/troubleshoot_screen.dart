@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
@@ -42,8 +43,8 @@ class TroubleshootScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Trouble\nshoot',
-                        style: GoogleFonts.inter(
+                        context.l10n.troubleshootTitle,
+                        style: localeFont(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -53,8 +54,8 @@ class TroubleshootScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Fix data issues and repair app state.',
-                        style: GoogleFonts.inter(
+                        context.l10n.troubleshootDesc,
+                        style: localeFont(
                           fontSize: 13,
                           color: cs.onSurfaceVariant,
                         ),
@@ -69,9 +70,8 @@ class TroubleshootScreen extends ConsumerWidget {
                   delegate: SliverChildListDelegate([
                     DataActionRow(
                       icon: Icons.manage_search_rounded,
-                      title: 'Suggestions not working?',
-                      description:
-                          'Clears and rebuilds the autocomplete suggestion index from your existing transactions. Your transaction data will not be affected.',
+                      title: context.l10n.rebuildSuggestions,
+                      description: context.l10n.rebuildSuggestionsDesc,
                       onPressed: () => _confirmRebuild(context, ref),
                     ),
                     const SizedBox(height: KuberSpacing.xxl),
@@ -95,10 +95,9 @@ class TroubleshootScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => ConfirmActionSheet(
         icon: Icons.manage_search_rounded,
-        title: 'Rebuild Suggestions?',
-        description:
-            'This will clear all saved suggestions and rebuild them from your transactions. Your transaction data will not be affected.',
-        confirmLabel: 'Rebuild',
+        title: '${context.l10n.rebuildSuggestions}?',
+        description: context.l10n.rebuildSuggestionsDesc,
+        confirmLabel: context.l10n.rebuildSuggestions,
         onConfirm: () => ref.read(dataControllerProvider.notifier).rebuildSuggestions(),
       ),
     );

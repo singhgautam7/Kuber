@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
@@ -45,7 +45,7 @@ class HowToUseScreen extends StatelessWidget {
         children: [
           Text(
             'Frequently Asked Questions',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,
@@ -74,7 +74,7 @@ class HowToUseScreen extends StatelessWidget {
                 ),
                 title: Text(
                   faq.title,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -85,7 +85,7 @@ class HowToUseScreen extends StatelessWidget {
                 children: [
                   Text(
                     faq.body,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13,
                       color: cs.onSurfaceVariant,
                       height: 1.5,

@@ -1,8 +1,9 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -31,21 +32,21 @@ import '../widgets/home_recent_transactions.dart';
 import '../widgets/quick_add_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 
-const _subtitles = [
-  'Let\'s manage your money wisely',
-  'Track every rupee, every day',
-  'Stay on top of your finances',
-  'Your wallet will thank you later',
-  'Small savings, big results',
-  'Every transaction counts',
-  'Building smart money habits',
+List<String> _homeSubtitles(AppLocalizations l10n) => [
+  l10n.homeSubtitle1,
+  l10n.homeSubtitle2,
+  l10n.homeSubtitle3,
+  l10n.homeSubtitle4,
+  l10n.homeSubtitle5,
+  l10n.homeSubtitle6,
+  l10n.homeSubtitle7,
 ];
 
-String _timeGreeting() {
+String _timeGreeting(AppLocalizations l10n) {
   final hour = DateTime.now().hour;
-  if (hour < 12) return 'Morning';
-  if (hour < 17) return 'Afternoon';
-  return 'Evening';
+  if (hour < 12) return l10n.greetingMorning;
+  if (hour < 17) return l10n.greetingAfternoon;
+  return l10n.greetingEvening;
 }
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -56,12 +57,12 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  late final String _subtitle;
+  late final int _subtitleIndex;
 
   @override
   void initState() {
     super.initState();
-    _subtitle = _subtitles[Random().nextInt(_subtitles.length)];
+    _subtitleIndex = Random().nextInt(7);
 
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.
@@ -142,6 +143,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
     final widgetsAsync = ref.watch(homeWidgetsProvider);
 
     return Scaffold(
@@ -164,8 +166,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             children: [
               Text(
                 userName.isNotEmpty
-                    ? '${_timeGreeting()}, ${userName.toTitleCase()}'
-                    : _timeGreeting(),
+                    ? '${_timeGreeting(l10n)}, ${userName.toTitleCase()}'
+                    : _timeGreeting(l10n),
                 style: textTheme.displaySmall?.copyWith(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
@@ -176,7 +178,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
               const SizedBox(height: KuberSpacing.xs),
               Text(
-                _subtitle,
+                _homeSubtitles(l10n)[_subtitleIndex],
                 style: textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
@@ -221,7 +223,7 @@ class _BalanceHeroSection extends ConsumerWidget {
         height: 180,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) => Center(child: Text('Error: $e')),
+      error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
       data: (summary) => _BalanceHeroCard(summary: summary),
     );
   }
@@ -244,7 +246,7 @@ class _SevenDayChartSection extends ConsumerWidget {
           return const _SpendingAnalysisEmpty();
         }
         return KuberBarChart(
-          title: 'LAST 7 DAYS',
+          title: context.l10n.last7Days,
           buckets: _last7DaysBuckets(days),
           height: 200,
         );
@@ -317,8 +319,8 @@ class _BalanceHeroCard extends ConsumerWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                '$monthLabel · NET',
-                style: GoogleFonts.inter(
+                '$monthLabel · ${context.l10n.netLabel}',
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant,
@@ -329,7 +331,7 @@ class _BalanceHeroCard extends ConsumerWidget {
               isPrivate
                   ? Text(
                       '****',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -338,7 +340,7 @@ class _BalanceHeroCard extends ConsumerWidget {
                     )
                   : Text(
                       '$prefix$formattedNet',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
                         color: netColor,
@@ -403,7 +405,7 @@ class _BalanceHeroCard extends ConsumerWidget {
               const SizedBox(width: KuberSpacing.sm),
               Text(
                 formattedIncome,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
@@ -414,7 +416,7 @@ class _BalanceHeroCard extends ConsumerWidget {
               // Expense: amount + dot
               Text(
                 formattedExpense,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
@@ -456,15 +458,13 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const KuberHomeWidgetTitle(title: 'LAST 7 DAYS'),
+          KuberHomeWidgetTitle(title: context.l10n.last7Days),
           const SizedBox(height: 24),
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               child: Text(
-                'No income or expense transactions in the last 7 days. '
-                'Add a transaction to see your spending analysis here.'
-                '\n\nNote: Transfers are not included.',
+                context.l10n.spendingAnalysisEmpty,
                 style: textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
                 ),

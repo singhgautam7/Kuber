@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
@@ -16,6 +17,7 @@ import '../providers/settings_provider.dart';
 import '../widgets/settings_widgets.dart';
 import '../widgets/settings_choice_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
+import '../widgets/settings_language_row.dart';
 import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -66,7 +68,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _updateName(String name) async {
     await ref.read(settingsProvider.notifier).setUserName(name);
     if (mounted) {
-      showKuberSnackBar(context, 'Name updated');
+      showKuberSnackBar(context, context.l10n.userNameUpdated);
     }
   }
 
@@ -78,26 +80,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SettingsChoiceSheet<ThemeMode>(
-        title: 'Theme',
-        subtitle: 'Appearance',
+        title: context.l10n.themeLabel,
+        subtitle: context.l10n.appearanceCategory,
         selectedValue: current,
-        choices: const [
+        choices: [
           SettingsChoice(
             value: ThemeMode.light,
-            label: 'Light',
-            subtitle: 'Bright surfaces, dark text',
+            label: context.l10n.themeLightChoice,
+            subtitle: context.l10n.themeSubtitleLight,
             icon: Icons.light_mode_outlined,
           ),
           SettingsChoice(
             value: ThemeMode.dark,
-            label: 'Dark',
-            subtitle: 'Black surfaces, light text',
+            label: context.l10n.themeDarkChoice,
+            subtitle: context.l10n.themeSubtitleDark,
             icon: Icons.dark_mode_outlined,
           ),
           SettingsChoice(
             value: ThemeMode.system,
-            label: 'System',
-            subtitle: 'Follow your phone setting',
+            label: context.l10n.themeSystemChoice,
+            subtitle: context.l10n.themeSubtitleSystem,
             icon: Icons.settings_brightness_outlined,
           ),
         ],
@@ -117,20 +119,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SettingsChoiceSheet<NavBarStyle>(
-        title: 'Bottom Navigation',
-        subtitle: 'Appearance',
+        title: context.l10n.bottomNavLabel,
+        subtitle: context.l10n.appearanceCategory,
         selectedValue: current,
-        choices: const [
+        choices: [
           SettingsChoice(
             value: NavBarStyle.classic,
-            label: 'Classic',
-            subtitle: 'Standard bar',
+            label: context.l10n.navClassicChoice,
+            subtitle: context.l10n.navSubtitleClassic,
             icon: Icons.view_headline_rounded,
           ),
           SettingsChoice(
             value: NavBarStyle.modern,
-            label: 'Modern',
-            subtitle: 'Floating pill',
+            label: context.l10n.navModernChoice,
+            subtitle: context.l10n.navSubtitleModern,
             icon: Icons.lens_rounded,
           ),
         ],
@@ -150,10 +152,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SettingsChoiceSheet<MoreTabLayout>(
-        title: 'More Tab Layout',
-        subtitle: 'Appearance',
+        title: context.l10n.moreTabLayoutLabel,
+        subtitle: context.l10n.appearanceCategory,
         selectedValue: current,
-        choices: moreTabLayoutChoices,
+        choices: moreTabLayoutChoices(context),
         onSelected: (val) {
           setState(() => _tempMoreTabLayout = val);
           ref.read(settingsProvider.notifier).setMoreTabLayout(val);
@@ -170,19 +172,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SettingsChoiceSheet<NumberSystem>(
-        title: 'Number Format',
-        subtitle: 'Money Display',
+        title: context.l10n.numberFormatLabel,
+        subtitle: context.l10n.moneyDisplayCategory,
         selectedValue: current,
-        choices: const [
+        choices: [
           SettingsChoice(
             value: NumberSystem.indian,
-            label: 'Indian',
+            label: context.l10n.numFormatIndian,
             subtitle: '1,23,000.00',
             icon: Icons.language_rounded,
           ),
           SettingsChoice(
             value: NumberSystem.international,
-            label: 'International',
+            label: context.l10n.numFormatInternational,
             subtitle: '123,000.00',
             icon: Icons.public_rounded,
           ),
@@ -203,22 +205,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SettingsChoiceSheet<SwipeMode>(
-        title: 'Horizontal Swipe',
-        subtitle: 'Transactions',
+        title: context.l10n.horizontalSwipeLabel,
+        subtitle: context.l10n.transactionsCategory,
         selectedValue: current,
-        choices: const [
+        choices: [
           SettingsChoice(
             value: SwipeMode.changeTabs,
-            label: 'Change tabs',
-            subtitle:
-                'Quickly switch between main app sections by swiping across the screen',
+            label: context.l10n.swipeChangeTabs,
+            subtitle: context.l10n.swipeSubtitleChangeTabs,
             icon: Icons.swap_horiz_rounded,
           ),
           SettingsChoice(
             value: SwipeMode.performActions,
-            label: 'Row actions',
-            subtitle:
-                'Perform quick actions like edit or delete by swiping on individual history items',
+            label: context.l10n.swipeRowActions,
+            subtitle: context.l10n.swipeSubtitleRowActions,
             icon: Icons.swipe_rounded,
           ),
         ],
@@ -238,7 +238,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (text != null && text.isNotEmpty) ...[
           Text(
             text,
-            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+            style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
           ),
           const SizedBox(width: KuberSpacing.sm),
         ],
@@ -262,7 +262,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             .where((a) => a.id.toString() == defaultAccId)
             .firstOrNull
             ?.name ??
-        'Not set';
+        context.l10n.notSet;
 
     // Fallbacks if data isn't ready
     final currentTheme =
@@ -281,22 +281,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currency = currencyFromCode(currencyCode);
 
     final themeStr = currentTheme == ThemeMode.light
-        ? 'Light'
+        ? context.l10n.themeLightChoice
         : currentTheme == ThemeMode.dark
-        ? 'Dark'
-        : 'System';
+        ? context.l10n.themeDarkChoice
+        : context.l10n.themeSystemChoice;
     final navStr = currentNavBarStyle == NavBarStyle.classic
-        ? 'Classic'
-        : 'Modern';
+        ? context.l10n.navClassicChoice
+        : context.l10n.navModernChoice;
     final moreLayoutStr = currentMoreTabLayout == MoreTabLayout.simple
-        ? 'Simple'
-        : 'Modern';
+        ? context.l10n.simpleLabel
+        : context.l10n.navModernChoice;
     final numberStr = currentNumberSystem == NumberSystem.indian
-        ? 'Indian'
-        : 'International';
+        ? context.l10n.numFormatIndian
+        : context.l10n.numFormatInternational;
     final swipeStr = currentSwipeMode == SwipeMode.changeTabs
-        ? 'Change tabs'
-        : 'Row actions';
+        ? context.l10n.swipeChangeTabs
+        : context.l10n.swipeRowActions;
 
     // Widget configurations and counts
     final homeWidgets =
@@ -324,8 +324,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Settings',
-                    style: GoogleFonts.inter(
+                    context.l10n.settingsTitle,
+                    style: localeFont(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurface,
@@ -335,8 +335,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Customize how Kuber looks, feels and behaves for you.',
-                    style: GoogleFonts.inter(
+                    context.l10n.settingsSubtitle,
+                    style: localeFont(
                       fontSize: 13,
                       color: cs.onSurfaceVariant,
                     ),
@@ -351,19 +351,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // PROFILE
-                const _SectionLabel(label: 'PROFILE'),
-                const _SectionDescription('How Kuber knows you.'),
+                _SectionLabel(label: context.l10n.profileSection),
+                _SectionDescription(context.l10n.profileDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.person_outline_rounded,
-                      label: 'Your Name',
+                      label: context.l10n.yourNameLabel,
                       onTap: () => _showNameBottomSheet(context),
                       trailing: _trailingWidget(
                         context,
                         text: _userNameController.text.isEmpty
-                            ? 'Set your name'
+                            ? context.l10n.setYourName
                             : _userNameController.text,
                       ),
                     ),
@@ -372,23 +372,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // APPEARANCE
-                const _SectionLabel(label: 'APPEARANCE'),
-                const _SectionDescription('How Kuber looks to you.'),
+                _SectionLabel(label: context.l10n.appearanceSection),
+                _SectionDescription(context.l10n.appearanceDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.palette_outlined,
-                      label: 'Theme',
-                      subtitle: 'Light, dark, or match your phone',
+                      label: context.l10n.themeLabel,
+                      subtitle: context.l10n.themeSubtitle,
                       onTap: () => _showThemeSheet(context, currentTheme),
                       trailing: _trailingWidget(context, text: themeStr),
                     ),
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.space_dashboard_rounded,
-                      label: 'Bottom Navigation',
-                      subtitle: 'Standard bar or floating pill',
+                      label: context.l10n.bottomNavLabel,
+                      subtitle: context.l10n.bottomNavSubtitle,
                       onTap: () =>
                           _showBottomNavSheet(context, currentNavBarStyle),
                       trailing: _trailingWidget(context, text: navStr),
@@ -396,8 +396,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.grid_view_rounded,
-                      label: 'More Tab Layout',
-                      subtitle: 'Simple list or Modern hero layout',
+                      label: context.l10n.moreTabLayoutLabel,
+                      subtitle: context.l10n.moreTabLayoutSubtitle,
                       onTap: () => _showMoreTabLayoutSheet(
                         context,
                         currentMoreTabLayout,
@@ -409,26 +409,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // WIDGETS
-                const _SectionLabel(label: 'WIDGETS'),
-                const _SectionDescription(
-                  'Choose what shows on Home and Analytics.',
-                ),
+                _SectionLabel(label: context.l10n.widgetsSection),
+                _SectionDescription(context.l10n.widgetsDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.home_outlined,
-                      label: 'Home Widgets',
-                      subtitle: '$enabledHomeCount enabled · drag to reorder',
+                      label: context.l10n.homeWidgetsLabel,
+                      subtitle:
+                          context.l10n.homeWidgetsSubtitle('$enabledHomeCount'),
                       onTap: () => context.push('/widget-editor/home'),
                       trailing: _trailingWidget(context),
                     ),
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.insert_chart_outlined_rounded,
-                      label: 'Analytics Widgets',
-                      subtitle:
-                          '$enabledAnalyticsCount enabled · drag to reorder',
+                      label: context.l10n.analyticsWidgetsLabel,
+                      subtitle: context.l10n
+                          .analyticsWidgetsSubtitle('$enabledAnalyticsCount'),
                       onTap: () => context.push('/widget-editor/analytics'),
                       trailing: _trailingWidget(context),
                     ),
@@ -437,17 +436,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // MONEY DISPLAY
-                const _SectionLabel(label: 'MONEY DISPLAY'),
-                const _SectionDescription(
-                  'How currency and amounts are shown across the app.',
-                ),
+                _SectionLabel(label: context.l10n.moneyDisplaySection),
+                _SectionDescription(context.l10n.moneyDisplayDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
+                    const SettingsLanguageRow(),
+                    Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.account_balance_wallet_outlined,
-                      label: 'Currency',
-                      subtitle: 'Symbol and code shown on amounts',
+                      label: context.l10n.currencyLabel,
+                      subtitle: context.l10n.currencySubtitle,
                       onTap: () => _showCurrencyPicker(context, currencyCode),
                       trailing: _trailingWidget(
                         context,
@@ -457,8 +456,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.money_rounded,
-                      label: 'Number Format',
-                      subtitle: 'Indian (1,23,000) or International (123,000)',
+                      label: context.l10n.numberFormatLabel,
+                      subtitle: context.l10n.numberFormatSubtitle,
                       onTap: () =>
                           _showNumberFormatSheet(context, currentNumberSystem),
                       trailing: _trailingWidget(context, text: numberStr),
@@ -468,17 +467,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // TRANSACTIONS
-                const _SectionLabel(label: 'TRANSACTIONS'),
-                const _SectionDescription(
-                  'Your defaults when adding new entries.',
-                ),
+                _SectionLabel(label: context.l10n.transactionsSection),
+                _SectionDescription(context.l10n.transactionsDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.account_balance_wallet_outlined,
-                      label: 'Default Account',
-                      subtitle: 'Pre-selected when you Quick Add',
+                      label: context.l10n.defaultAccountLabel,
+                      subtitle: context.l10n.defaultAccountSubtitle,
                       onTap: () => _showDefaultAccountPicker(
                         context,
                         accounts,
@@ -489,8 +486,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.swap_horiz_rounded,
-                      label: 'Horizontal Swipe',
-                      subtitle: 'What swiping left or right does',
+                      label: context.l10n.horizontalSwipeLabel,
+                      subtitle: context.l10n.horizontalSwipeSubtitle,
                       onTap: () =>
                           _showHorizontalSwipeSheet(context, currentSwipeMode),
                       trailing: _trailingWidget(context, text: swipeStr),
@@ -500,17 +497,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // PRIVACY & SECURITY
-                const _SectionLabel(label: 'PRIVACY & SECURITY'),
-                const _SectionDescription(
-                  'Keep your numbers private and your app locked.',
-                ),
+                _SectionLabel(label: context.l10n.privacySecuritySection),
+                _SectionDescription(context.l10n.privacySecurityDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.visibility_off_outlined,
-                      label: 'Privacy Mode',
-                      subtitle: 'Hide all balances and amounts',
+                      label: context.l10n.privacyModeLabel,
+                      subtitle: context.l10n.privacyModeSubtitle,
                       trailing: Switch(
                         value: ref.watch(privacyModeProvider),
                         onChanged: (_) => ref
@@ -522,8 +517,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
                       icon: Icons.fingerprint_rounded,
-                      label: 'Biometric Lock',
-                      subtitle: 'Unlock with FaceID or Fingerprint',
+                      label: context.l10n.biometricLockLabel,
+                      subtitle: context.l10n.biometricLockSubtitle,
                       trailing: Switch(
                         value: currentBiometricsEnabled,
                         onChanged: (val) async {
@@ -536,7 +531,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             if (!canAuth) {
                               showKuberSnackBar(
                                 context,
-                                'Device authentication is not available or set up',
+                                context.l10n.biometricNotAvailable,
                                 isError: true,
                               );
                               return;
@@ -554,7 +549,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               if (!context.mounted) return;
                               showKuberSnackBar(
                                 context,
-                                'Biometric lock enabled',
+                                context.l10n.biometricEnabledMsg,
                               );
                             }
                           } else {
@@ -571,7 +566,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             if (!context.mounted) return;
                             showKuberSnackBar(
                               context,
-                              'Biometric lock disabled',
+                              context.l10n.biometricDisabledMsg,
                             );
                           }
                         },
@@ -583,18 +578,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // ABOUT
-                const _SectionLabel(label: 'ABOUT'),
-                const _SectionDescription(
-                  'Learn about Kuber and the person behind it.',
-                ),
+                _SectionLabel(label: context.l10n.aboutSection),
+                _SectionDescription(context.l10n.aboutDescription),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(
                   children: [
                     _SettingsTile(
                       icon: Icons.info_outline_rounded,
-                      label: 'About Kuber',
-                      subtitle:
-                          'Vision, origin, and a letter from the developer',
+                      label: context.l10n.aboutKuberLabel,
+                      subtitle: context.l10n.aboutKuberSubtitle,
                       onTap: () => context.push('/more/about'),
                       trailing: _trailingWidget(context),
                     ),
@@ -645,8 +637,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: KuberSpacing.lg),
                 Text(
-                  'Default Account',
-                  style: GoogleFonts.inter(
+                  context.l10n.defaultAccountLabel,
+                  style: localeFont(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -657,8 +649,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   Padding(
                     padding: const EdgeInsets.all(KuberSpacing.xl),
                     child: Text(
-                      'No accounts found.',
-                      style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+                      context.l10n.noAccountsFound,
+                      style: localeFont(color: cs.onSurfaceVariant),
                     ),
                   )
                 else
@@ -681,7 +673,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           title: Text(
                             a.name,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 14,
                               fontWeight: isSelected
                                   ? FontWeight.w600
@@ -690,8 +682,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           ),
                           subtitle: Text(
-                            a.isCreditCard ? 'Credit Card' : 'Bank / Cash',
-                            style: GoogleFonts.inter(
+                            a.isCreditCard
+                                ? context.l10n.creditCardLabel
+                                : context.l10n.bankCashLabel,
+                            style: localeFont(
                               fontSize: 12,
                               color: cs.onSurfaceVariant,
                             ),
@@ -710,7 +704,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             Navigator.pop(ctx);
                             showKuberSnackBar(
                               context,
-                              '${a.name} set as default',
+                              context.l10n.setAsDefault(a.name),
                             );
                           },
                         );
@@ -733,7 +727,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               .read(settingsProvider.notifier)
                               .setDefaultAccountId(null);
                           Navigator.pop(ctx);
-                          showKuberSnackBar(context, 'Default account cleared');
+                          showKuberSnackBar(
+                            context,
+                            context.l10n.defaultAccountCleared,
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: cs.error,
@@ -746,8 +743,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: Text(
-                          'Clear Default',
-                          style: GoogleFonts.inter(
+                          context.l10n.clearDefault,
+                          style: localeFont(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -810,8 +807,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Your Name',
-                      style: GoogleFonts.inter(
+                      context.l10n.yourNameLabel,
+                      style: localeFont(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -840,14 +837,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     textCapitalization: TextCapitalization.words,
                     inputFormatters: [TitleCaseInputFormatter()],
                     onChanged: (_) => setSheetState(() {}),
-                    style: GoogleFonts.inter(fontSize: 16, color: cs.onSurface),
+                    style: localeFont(fontSize: 16, color: cs.onSurface),
                     validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Please enter your name'
+                        ? context.l10n.nameRequired
                         : null,
                     decoration: InputDecoration(
-                      hintText: 'e.g. Gautam',
+                      hintText: context.l10n.nameSheetHint,
                       counterText: '${controller.text.length}/15',
-                      counterStyle: GoogleFonts.inter(
+                      counterStyle: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),
@@ -894,8 +891,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                     ),
                     child: Text(
-                      'Done',
-                      style: GoogleFonts.inter(
+                      context.l10n.doneLabel,
+                      style: localeFont(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
@@ -922,7 +919,7 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: KuberSpacing.xs),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 12,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.8,
@@ -949,7 +946,7 @@ class _SectionDescription extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 12.5,
           color: cs.onSurfaceVariant,
           height: 1.4,
@@ -1014,7 +1011,7 @@ class _SettingsTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -1023,7 +1020,7 @@ class _SettingsTile extends StatelessWidget {
                   if (subtitle case final s?)
                     Text(
                       s,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         color: cs.onSurfaceVariant,
                       ),

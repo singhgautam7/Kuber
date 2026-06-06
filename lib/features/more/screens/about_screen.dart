@@ -1,3 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/about_l10n.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../dev/widgets/version_tap_detector.dart';
@@ -18,6 +21,7 @@ class AboutScreen extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final settings = ref.watch(settingsProvider).valueOrNull;
     final userName = settings?.userName ?? '';
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -27,35 +31,6 @@ class AboutScreen extends ConsumerWidget {
             child: KuberAppBar(showBack: true, showHome: true, title: ''),
           ),
 
-          // Header section
-          // SliverToBoxAdapter(
-          //   child: Padding(
-          //     padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         Text(
-          //           'About Kuber',
-          //           style: GoogleFonts.inter(
-          //             fontSize: 32,
-          //             fontWeight: FontWeight.w800,
-          //             color: cs.onSurface,
-          //             height: 1.15,
-          //             letterSpacing: -0.5,
-          //           ),
-          //         ),
-          //         const SizedBox(height: 6),
-          //         Text(
-          //           'Learn more about the vision, the origin, and the person behind the app.',
-          //           style: GoogleFonts.inter(
-          //             fontSize: 13,
-          //             color: cs.onSurfaceVariant,
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
             sliver: SliverList(
@@ -85,8 +60,8 @@ class AboutScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "App Version",
-                              style: GoogleFonts.inter(
+                              abL10n("App Version", lang),
+                              style: localeFont(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: cs.onSurface,
@@ -138,15 +113,15 @@ class AboutScreen extends ConsumerWidget {
                           child: Row(
                             children: [
                               Icon(
-                                Icons.lock_outline_rounded,
-                                size: 14,
-                                color: cs.primary,
-                              ),
+                                  Icons.lock_outline_rounded,
+                                  size: 14,
+                                  color: cs.primary,
+                                ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  "Privacy Note: Your data stays on your device",
-                                  style: GoogleFonts.inter(
+                                  abL10n("Privacy Note: Your data stays on your device", lang),
+                                  style: localeFont(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: cs.onSurfaceVariant,
@@ -167,29 +142,9 @@ class AboutScreen extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xxl),
 
                 // Footer
-                Column(
+                const Column(
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        children: [
-                          const TextSpan(text: "Made with "),
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Icon(
-                              Icons.favorite_rounded,
-                              color: Colors.redAccent,
-                              size: 14,
-                            ),
-                          ),
-                          const TextSpan(text: " in India"),
-                        ],
-                      ),
-                    ),
+                    _MadeInIndiaFooter(),
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.xxl),
@@ -231,6 +186,7 @@ class _WhyKuberSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,8 +194,8 @@ class _WhyKuberSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 14),
           child: Text(
-            'WHY KUBER?',
-            style: GoogleFonts.inter(
+            abL10n('WHY KUBER?', lang).toUpperCase(),
+            style: localeFont(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
@@ -254,26 +210,26 @@ class _WhyKuberSection extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           childAspectRatio: 0.95,
-          children: const [
+          children: [
             _WhyKuberFeatureTile(
               icon: Icons.bolt_rounded,
-              title: "Fast transaction entry",
-              subtitle: "Log expenses in under 3 seconds.",
+              title: abL10n("Fast transaction entry", lang),
+              subtitle: abL10n("Log expenses in under 3 seconds.", lang),
             ),
             _WhyKuberFeatureTile(
               icon: Icons.auto_awesome_mosaic_rounded,
-              title: "Minimal design",
-              subtitle: "Focus on your data, not the interface.",
+              title: abL10n("Minimal design", lang),
+              subtitle: abL10n("Focus on your data, not the interface.", lang),
             ),
             _WhyKuberFeatureTile(
               icon: Icons.cloud_off_rounded,
-              title: "Works offline",
-              subtitle: "Full functionality without an active connection.",
+              title: abL10n("Works offline", lang),
+              subtitle: abL10n("Full functionality without an active connection.", lang),
             ),
             _WhyKuberFeatureTile(
               icon: Icons.repeat_rounded,
-              title: "Built for consistency",
-              subtitle: "Reliable tools for long-term habits.",
+              title: abL10n("Built for consistency", lang),
+              subtitle: abL10n("Reliable tools for long-term habits.", lang),
             ),
           ],
         ),
@@ -351,7 +307,7 @@ class _WhyKuberFeatureTile extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -363,7 +319,7 @@ class _WhyKuberFeatureTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       color: cs.onSurfaceVariant,
                       height: 1.45,
@@ -386,9 +342,10 @@ class _DeveloperLetter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final name = userName.isNotEmpty ? userName : "there";
+    final lang = Localizations.localeOf(context).languageCode;
+    final name = userName.isNotEmpty ? userName : "";
 
-    final textStyleRegular = GoogleFonts.inter(
+    final textStyleRegular = localeFont(
       fontSize: 15,
       height: 1.75,
       color: cs.onSurface,
@@ -441,8 +398,8 @@ class _DeveloperLetter extends StatelessWidget {
               children: [
                 // Eyebrow
                 Text(
-                  "A NOTE FROM THE MAKER",
-                  style: GoogleFonts.inter(
+                  abL10n("A NOTE FROM THE MAKER", lang),
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: cs.primary,
@@ -453,7 +410,7 @@ class _DeveloperLetter extends StatelessWidget {
                 // Title
                 RichText(
                   text: TextSpan(
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurface,
@@ -461,9 +418,9 @@ class _DeveloperLetter extends StatelessWidget {
                       height: 1.1,
                     ),
                     children: [
-                      const TextSpan(text: "A Letter from the\n"),
+                      TextSpan(text: "${abL10n('A Letter from the', lang)}\n"),
                       TextSpan(
-                        text: "Developer",
+                        text: abL10n('Developer', lang),
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 38,
                           fontStyle: FontStyle.italic,
@@ -483,29 +440,23 @@ class _DeveloperLetter extends StatelessWidget {
                     style: textStyleRegular,
                     children: [
                       TextSpan(
-                        text: "Hey $name,\n\n",
+                        text: name.isNotEmpty
+                            ? abL10n("Hey {name},", lang).replaceAll("{name}", name) + "\n\n"
+                            : abL10n("Hey there,", lang) + "\n\n",
                         style: textStyleSemiBold,
-                      ),
-                      const TextSpan(
-                        text:
-                            "First of all, thank you for installing Kuber.\n\n"
-                            "Finance is one of the hardest things to stay consistent with.\n"
-                            "I realized this quite late myself how important it is to simply track where your money goes.\n"
-                            "Honestly, just building the habit already puts you ahead of most people.\n\n"
-                            "I tried many apps, but none of them truly fit my needs.\n"
-                            "Some were too complex, some too slow, some were too fancy to be an expense manager, and some just didn't feel right for everyday use.\n\n",
                       ),
                       TextSpan(
-                        text: "So I decided to build one.\n\n",
+                        text: abL10n('dev_letter_p1', lang) + "\n\n",
+                      ),
+                      TextSpan(
+                        text: abL10n('dev_letter_p2', lang) + "\n\n",
+                      ),
+                      TextSpan(
+                        text: abL10n('dev_letter_p3', lang) + "\n\n",
                         style: textStyleSemiBold,
                       ),
-                      const TextSpan(
-                        text:
-                            "Kuber is designed to be simple, fast, and focused - something you can open, log a transaction in seconds, and move on with your day.\n"
-                            "No clutter, no friction. Just clarity.\n\n"
-                            "This is my small attempt to make personal finance easier for you.\n\n"
-                            "Use it consistently, track every little transaction, and over time, you'll see the difference it makes.\n\n"
-                            "Thank you for trusting on something I built with a lot of thoughts and care.",
+                      TextSpan(
+                        text: abL10n('dev_letter_p4', lang),
                       ),
                     ],
                   ),
@@ -555,7 +506,7 @@ class _DeveloperLetter extends StatelessWidget {
                                   alignment: Alignment.center,
                                   child: Text(
                                     "GS",
-                                    style: GoogleFonts.inter(
+                                    style: localeFont(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
                                       color: Colors.white,
@@ -572,8 +523,8 @@ class _DeveloperLetter extends StatelessWidget {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        "SIGNED",
-                                        style: GoogleFonts.inter(
+                                        abL10n("SIGNED", lang),
+                                        style: localeFont(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                           color: cs.onSurfaceVariant,
@@ -606,12 +557,6 @@ class _DeveloperLetter extends StatelessWidget {
                                                   ),
                                             ),
                                           ),
-                                          const SizedBox(width: 6),
-                                          // Icon(
-                                          //   Icons.arrow_outward_rounded,
-                                          //   size: 14,
-                                          //   color: cs.primary,
-                                          // ),
                                         ],
                                       ),
                                     ],
@@ -645,8 +590,8 @@ class _DeveloperLetter extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      "VISIT",
-                                      style: GoogleFonts.inter(
+                                      abL10n("VISIT", lang),
+                                      style: localeFont(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w700,
                                         color: cs.primary,
@@ -721,7 +666,7 @@ class _FeedbackTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -730,7 +675,7 @@ class _FeedbackTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w400,
                       color: cs.onSurfaceVariant,
@@ -762,6 +707,7 @@ class _FeedbackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Container(
       width: double.infinity,
@@ -774,8 +720,8 @@ class _FeedbackCard extends StatelessWidget {
         children: [
           _FeedbackTile(
             icon: Icons.mode_comment_outlined,
-            label: "Send feedback",
-            subtitle: "Suggestions, bugs, or just to say hi",
+            label: abL10n("Send feedback", lang),
+            subtitle: abL10n("Suggestions, bugs, or just to say hi", lang),
             onTap: () => context.push('/more/feedback'),
           ),
           Divider(
@@ -787,8 +733,8 @@ class _FeedbackCard extends StatelessWidget {
           ),
           _FeedbackTile(
             icon: Icons.star_outline_rounded,
-            label: "Rate Kuber",
-            subtitle: "Help others discover the app",
+            label: abL10n("Rate Kuber", lang),
+            subtitle: abL10n("Help others discover the app", lang),
             onTap: () {
               launchUrl(
                 Uri.parse(
@@ -798,6 +744,50 @@ class _FeedbackCard extends StatelessWidget {
               );
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MadeInIndiaFooter extends ConsumerWidget {
+  const _MadeInIndiaFooter();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final version = ref.watch(appVersionProvider).valueOrNull;
+
+    final String fullText;
+    if (version != null) {
+      fullText = context.l10n.madeInIndiaVersion('{heart}', version);
+    } else {
+      fullText = context.l10n.madeInIndia('{heart}');
+    }
+
+    final parts = fullText.split('{heart}');
+    final beforeText = parts.first;
+    final afterText = parts.length > 1 ? parts.last : '';
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: localeFont(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w500,
+          color: cs.onSurfaceVariant,
+        ),
+        children: [
+          TextSpan(text: beforeText),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Icon(
+              Icons.favorite_rounded,
+              color: Colors.redAccent,
+              size: 13,
+            ),
+          ),
+          TextSpan(text: afterText),
         ],
       ),
     );

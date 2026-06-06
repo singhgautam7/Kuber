@@ -18,14 +18,15 @@
 //
 // Last-activity strip is hidden when no recent transaction is available.
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
@@ -110,7 +111,7 @@ class AccountCard extends ConsumerWidget {
                               child: Text(
                                 account.name,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 15.5,
                                   fontWeight: FontWeight.w700,
                                   color: cs.onSurface,
@@ -126,7 +127,7 @@ class AccountCard extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         _MetaRow(
-                          type: _typeFor(account),
+                          type: _typeFor(context, account),
                           last4: account.last4Digits,
                         ),
                       ],
@@ -147,8 +148,8 @@ class AccountCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isCC ? 'OUTSTANDING' : 'AVAILABLE BALANCE',
-                          style: GoogleFonts.inter(
+                          isCC ? context.l10n.outstandingLabel : context.l10n.availableBalance,
+                          style: localeFont(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                             color: isCC && balance < 0
@@ -162,7 +163,7 @@ class AccountCard extends ConsumerWidget {
                           amountString,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
                             color: amountColor,
@@ -179,8 +180,8 @@ class AccountCard extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'LIMIT',
-                            style: GoogleFonts.inter(
+                            context.l10n.limitUpper,
+                            style: localeFont(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w700,
                               color: cs.onSurfaceVariant,
@@ -193,7 +194,7 @@ class AccountCard extends ConsumerWidget {
                               fmt.formatCurrency(account.creditLimit!),
                               masked,
                             ),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurface,
@@ -228,17 +229,17 @@ class AccountCard extends ConsumerWidget {
     );
   }
 
-  String _typeFor(Account a) {
-    if (a.isCreditCard) return 'CREDIT CARD';
+  String _typeFor(BuildContext context, Account a) {
+    if (a.isCreditCard) return context.l10n.creditCardLabel.toUpperCase();
     switch (a.type.toLowerCase()) {
       case 'bank':
-        return 'BANK';
+        return context.l10n.bankLabel.toUpperCase();
       case 'card':
-        return 'CREDIT CARD';
+        return context.l10n.creditCardLabel.toUpperCase();
       case 'wallet':
-        return 'WALLET';
+        return context.l10n.walletLabel.toUpperCase();
       case 'cash':
-        return 'CASH';
+        return context.l10n.cashLabel.toUpperCase();
       default:
         return a.type.toUpperCase();
     }
@@ -259,8 +260,8 @@ class _DefaultPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(KuberRadius.sm),
       ),
       child: Text(
-        'DEFAULT',
-        style: GoogleFonts.inter(
+        context.l10n.defaultUpper,
+        style: localeFont(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           color: cs.primary,
@@ -283,7 +284,7 @@ class _MetaRow extends StatelessWidget {
       children: [
         Text(
           type,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -303,7 +304,7 @@ class _MetaRow extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             '**** $last4',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
@@ -329,7 +330,7 @@ class _QuickAddButton extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(KuberRadius.md + 2),
         child: Tooltip(
-          message: 'Add transaction',
+          message: context.l10n.addTransactionTooltip,
           child: Container(
             width: 36,
             height: 36,
@@ -403,27 +404,27 @@ class _Utilization extends StatelessWidget {
             Expanded(
               child: Text.rich(
                 TextSpan(
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant,
                   ),
                   children: [
                     TextSpan(
                       text: '${(pct * 100).toStringAsFixed(1)}%',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
                     ),
-                    const TextSpan(text: ' utilized'),
+                    TextSpan(text: ' ${context.l10n.utilizedLabel}'),
                   ],
                 ),
               ),
             ),
             Text(
-              '${maskAmount(fmt.formatCurrency(available), masked)} available',
-              style: GoogleFonts.inter(
+              '${maskAmount(fmt.formatCurrency(available), masked)} ${context.l10n.availableLabel.toLowerCase()}',
+              style: localeFont(
                 fontSize: 11,
                 color: cs.onSurfaceVariant,
               ),
@@ -450,7 +451,7 @@ class _LastActivityRow extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final isExpense = transaction.type == 'expense';
     final amountColor = isExpense ? cs.error : cs.tertiary;
-    final relTime = _formatRelative(transaction.createdAt);
+    final relTime = DateFormatter.timeAgo(transaction.createdAt);
 
     return Container(
       padding: const EdgeInsets.only(top: 12),
@@ -471,7 +472,7 @@ class _LastActivityRow extends StatelessWidget {
             child: Text(
               transaction.name,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
@@ -481,7 +482,7 @@ class _LastActivityRow extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             '· $relTime',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11.5,
               color: cs.onSurfaceVariant,
             ),
@@ -490,7 +491,7 @@ class _LastActivityRow extends StatelessWidget {
           Text(
             '${isExpense ? '−' : '+'}'
             '${maskAmount(fmt.formatCurrency(transaction.amount.abs()), masked)}',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
               color: amountColor,
@@ -499,15 +500,5 @@ class _LastActivityRow extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatRelative(DateTime at) {
-    final now = DateTime.now();
-    final diff = now.difference(at);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays == 1) return 'yesterday';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return DateFormat('MMM d').format(at);
   }
 }

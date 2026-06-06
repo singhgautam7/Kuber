@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -26,7 +27,7 @@ class BudgetHistorySheet extends ConsumerWidget {
     final historyAsync = ref.watch(budgetHistoryProvider(budget));
 
     return KuberBottomSheet(
-      title: 'Budget History',
+      title: context.l10n.budgetHistory,
       subtitle: category.name,
       child: historyAsync.when(
         loading: () => const Padding(
@@ -37,8 +38,8 @@ class BudgetHistorySheet extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 48),
           child: Center(
             child: Text(
-              'Error loading history: $err',
-              style: GoogleFonts.inter(
+              '${context.l10n.errorLabel}: $err',
+              style: localeFont(
                 color: Theme.of(context).colorScheme.error,
               ),
             ),
@@ -48,11 +49,10 @@ class BudgetHistorySheet extends ConsumerWidget {
           // Filter out months with zero spent to avoid noise, but keep
           // all months so the user can see every period.
           if (history.isEmpty) {
-            return const KuberEmptyState(
+            return KuberEmptyState(
               icon: Icons.history_rounded,
-              title: 'No History Yet',
-              description:
-                  'Your spending history for this budget will appear here once transactions are recorded.',
+              title: context.l10n.noHistoryYet,
+              description: context.l10n.budgetHistoryEmptyDesc,
             );
           }
 
@@ -93,7 +93,7 @@ class _MonthHistoryCard extends ConsumerWidget {
     final amountColor = isOver ? cs.error : cs.primary;
 
     // Status label
-    final statusLabel = isOver ? 'OVER BUDGET' : 'UNDER BUDGET';
+    final statusLabel = isOver ? context.l10n.overBudget : context.l10n.underBudget;
 
     // Right detail: "₹X EXTRA" if over, "X% LEFT" if under
     final String rightDetail;
@@ -133,7 +133,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                   children: [
                     Text(
                       monthLabel,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -142,7 +142,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       dateRange,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: cs.onSurfaceVariant,
@@ -157,7 +157,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                 children: [
                   Text(
                     formatter.formatCurrency(entry.spent),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: amountColor,
@@ -166,7 +166,7 @@ class _MonthHistoryCard extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     'ALLOCATED: ${formatter.formatCurrency(entry.budgetAmount)}',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
@@ -199,7 +199,7 @@ class _MonthHistoryCard extends ConsumerWidget {
             children: [
               Text(
                 statusLabel,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   color: statusColor,
@@ -208,7 +208,7 @@ class _MonthHistoryCard extends ConsumerWidget {
               ),
               Text(
                 rightDetail,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: statusColor,

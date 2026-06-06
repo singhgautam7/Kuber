@@ -17,10 +17,11 @@
 // Same provider wiring as before (accountListProvider, accountBalanceProvider,
 // formatterProvider, privacyModeProvider, settingsProvider).
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
@@ -51,11 +52,11 @@ class HomeAccountsCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             KuberHomeWidgetTitle(
-              title: 'ACCOUNTS',
+              title: context.l10n.accountsLabel,
               trailing: GestureDetector(
                 onTap: () => context.push('/more/accounts'),
                 child: Text(
-                  'VIEW ALL',
+                  context.l10n.viewAll,
                   style: textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.0,
@@ -175,7 +176,7 @@ class _HomeAccountTile extends ConsumerWidget {
                         Text(
                           account.name,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
                             color: cs.onSurface,
@@ -186,8 +187,8 @@ class _HomeAccountTile extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              _typeLabel(account).toUpperCase(),
-                              style: GoogleFonts.inter(
+                              _typeLabel(context, account).toUpperCase(),
+                              style: localeFont(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurfaceVariant,
@@ -198,7 +199,7 @@ class _HomeAccountTile extends ConsumerWidget {
                               const SizedBox(width: 4),
                               Text(
                                 '· **** ${account.last4Digits}',
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 10,
                                   color: cs.onSurfaceVariant,
                                 ),
@@ -213,8 +214,8 @@ class _HomeAccountTile extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                isCC ? 'OUTSTANDING' : 'AVAILABLE',
-                style: GoogleFonts.inter(
+                isCC ? context.l10n.outstandingLabel : context.l10n.availableLabel,
+                style: localeFont(
                   fontSize: 9.5,
                   fontWeight: FontWeight.w700,
                   color: isCC && balance < 0 ? cs.error : cs.onSurfaceVariant,
@@ -226,7 +227,7 @@ class _HomeAccountTile extends ConsumerWidget {
                 amountText,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: cs.onSurface,
@@ -249,12 +250,12 @@ class _HomeAccountTile extends ConsumerWidget {
     );
   }
 
-  String _typeLabel(Account a) {
-    if (a.isCreditCard) return 'Credit Card';
+  String _typeLabel(BuildContext context, Account a) {
+    if (a.isCreditCard) return context.l10n.creditCardLabel;
     return switch (a.type.toLowerCase()) {
-      'bank' => 'Bank',
-      'wallet' => 'Wallet',
-      'cash' => 'Cash',
+      'bank' => context.l10n.bankLabel,
+      'wallet' => context.l10n.walletLabel,
+      'cash' => context.l10n.cashLabel,
       _ => a.type,
     };
   }
@@ -306,20 +307,20 @@ class _MiniUtilization extends StatelessWidget {
           children: [
             Text.rich(
               TextSpan(
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 10,
                   color: cs.onSurfaceVariant,
                 ),
                 children: [
                   TextSpan(
                     text: '${(pct * 100).toStringAsFixed(0)}%',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
                   ),
-                  const TextSpan(text: ' used'),
+                  TextSpan(text: ' ${context.l10n.usedLabel}'),
                 ],
               ),
               maxLines: 1,
@@ -328,11 +329,11 @@ class _MiniUtilization extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                '${maskAmount(fmt.formatCurrency(limit), masked)} limit',
+                '${maskAmount(fmt.formatCurrency(limit), masked)} ${context.l10n.limitLabel}',
                 textAlign: TextAlign.end,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 10,
                   color: cs.onSurfaceVariant,
                 ),

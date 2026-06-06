@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -90,19 +91,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   List<KuberBarBucket> _buildTimeOfDayBuckets(
       List<Transaction> txns, AnalyticsFilter filter) {
     final buckets = [
-      _MutableBucket('Dawn', '',
+      _MutableBucket(context.l10n.bucketDawn, '',
           date: filter.from,
           endDate: filter.from.add(const Duration(hours: 5, minutes: 59))),
-      _MutableBucket('Morning', '',
+      _MutableBucket(context.l10n.bucketMorning, '',
           date: filter.from.add(const Duration(hours: 6)),
           endDate: filter.from.add(const Duration(hours: 10, minutes: 59))),
-      _MutableBucket('Noon', '',
+      _MutableBucket(context.l10n.bucketNoon, '',
           date: filter.from.add(const Duration(hours: 11)),
           endDate: filter.from.add(const Duration(hours: 13, minutes: 59))),
-      _MutableBucket('Evening', '',
+      _MutableBucket(context.l10n.bucketEvening, '',
           date: filter.from.add(const Duration(hours: 14)),
           endDate: filter.from.add(const Duration(hours: 18, minutes: 59))),
-      _MutableBucket('Night', '',
+      _MutableBucket(context.l10n.bucketNight, '',
           date: filter.from.add(const Duration(hours: 19)),
           endDate: filter.to),
     ];
@@ -170,7 +171,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       final start = fromDay.add(Duration(days: i * 7));
       final end =
           i == weeks - 1 ? to : start.add(const Duration(days: 6));
-      return _MutableBucket('Week', '${i + 1}', date: start, endDate: end);
+      return _MutableBucket(context.l10n.weekLabel, '${i + 1}', date: start, endDate: end);
     });
     for (final t in txns) {
       final dayDiff = t.createdAt.difference(fromDay).inDays;
@@ -326,8 +327,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 const SizedBox(height: KuberSpacing.xl),
                 // const KuberAppBar(title: 'Analytics'),
                 KuberPageHeader(
-                  title: 'Spending\nAnalytics',
-                  description: 'Visualize your spending patterns',
+                  title: context.l10n.analyticsTitle,
+                  description: context.l10n.analyticsDescription,
                 ),
                 const TopFilterRow(),
                 const SizedBox(height: KuberSpacing.lg),
@@ -337,16 +338,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
 
           // ── Analytics widgets (dynamic order + visibility from editor) ─
           if (isEmpty)
-            const SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
               sliver: SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    SizedBox(height: KuberSpacing.xl),
+                    const SizedBox(height: KuberSpacing.xl),
                     KuberEmptyState(
                       icon: Icons.bar_chart,
-                      title: 'No data',
-                      description: 'No transactions found for this period',
+                      title: context.l10n.noData,
+                      description: context.l10n.noTransactionsForPeriod,
                     ),
                   ],
                 ),
@@ -395,9 +396,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     required Map<int, dynamic> categoryMap,
   }) {
     return _AnalyticsCard(
-      title: 'Biggest Transactions',
+      title: context.l10n.biggestTransactions,
       trailing: AnalyticsCardSmallTabs(
-        labels: const ['Expense', 'Income'],
+        labels: [context.l10n.expenseLabel, context.l10n.incomeLabel],
         selectedIndex: _biggestTab,
         onChanged: (i) => setState(() => _biggestTab = i),
       ),
@@ -523,7 +524,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             children: [
               Expanded(
                 child: _SummaryTile(
-                  label: 'Income',
+                  label: context.l10n.incomeLabel,
                   amount: maskAmount(
                     ref.watch(formatterProvider).formatCurrency(income),
                     ref.watch(privacyModeProvider),
@@ -535,7 +536,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               const SizedBox(width: KuberSpacing.md),
               Expanded(
                 child: _SummaryTile(
-                  label: 'Expense',
+                  label: context.l10n.expenseLabel,
                   amount: maskAmount(
                     ref.watch(formatterProvider).formatCurrency(expense),
                     ref.watch(privacyModeProvider),
@@ -738,7 +739,7 @@ class _AnalyticsWidgetList extends ConsumerWidget {
           child: RepaintBoundary(
             child: KuberBarChart(
               key: TutorialStepKeys.spendingTrendsChart,
-              title: 'Spending Trend',
+              title: ctx.l10n.spendingTrend,
               buckets: buckets,
               height: 200,
               enableBucketDropdown: filter.type != FilterType.today,

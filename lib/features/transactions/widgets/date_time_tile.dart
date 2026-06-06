@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 
 /// Shared date & time selector tile used by both normal and transfer forms.
 class DateTimeTile extends StatelessWidget {
@@ -49,7 +50,7 @@ class DateTimeTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'DATE & TIME',
+                  context.l10n.dateTimeLabel,
                   style: textTheme.labelSmall?.copyWith(
                     color: cs.onSurfaceVariant,
                     letterSpacing: 1.2,
@@ -57,7 +58,7 @@ class DateTimeTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  formatDate(selectedDate),
+                  formatDate(context, selectedDate),
                   style: textTheme.bodyMedium?.copyWith(
                     color: cs.onSurface,
                   ),
@@ -76,16 +77,16 @@ class DateTimeTile extends StatelessWidget {
   }
 
   /// Format a date into a human-readable string (Today, Yesterday, or full date + time).
-  static String formatDate(DateTime date) {
+  static String formatDate(BuildContext context, DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dateOnly = DateTime(date.year, date.month, date.day);
 
     String dayPart;
     if (dateOnly == today) {
-      dayPart = 'Today';
+      dayPart = context.l10n.todayLabel;
     } else if (dateOnly == today.subtract(const Duration(days: 1))) {
-      dayPart = 'Yesterday';
+      dayPart = context.l10n.yesterdayLabel;
     } else {
       dayPart = DateFormat('dd MMM yyyy').format(date);
     }

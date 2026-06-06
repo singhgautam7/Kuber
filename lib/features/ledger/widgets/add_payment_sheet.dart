@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -52,10 +53,10 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
         .firstOrNull;
 
     return KuberBottomSheet(
-      title: 'Record Payment',
+      title: context.l10n.recordPayment,
       subtitle: widget.ledger.personName.toUpperCase(),
       actions: AppButton(
-        label: 'RECORD PAYMENT',
+        label: context.l10n.recordPaymentUpper,
         type: AppButtonType.primary,
         fullWidth: true,
         onPressed: _amount > 0 && _selectedAccountId != null
@@ -67,8 +68,8 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
         children: [
           // Amount
           Text(
-            'AMOUNT',
-            style: GoogleFonts.inter(
+            context.l10n.amountUpper,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -83,7 +84,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
             inputFormatters: [
               CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
             ],
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -91,13 +92,13 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: '0',
-              hintStyle: GoogleFonts.inter(
+              hintStyle: localeFont(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: cs.onSurfaceVariant,
               ),
               prefixText: '$symbol ',
-              prefixStyle: GoogleFonts.inter(
+              prefixStyle: localeFont(
                 fontSize: 20,
                 fontWeight: FontWeight.w300,
                 color: cs.onSurfaceVariant,
@@ -129,8 +130,8 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
 
           // Account
           Text(
-            'ACCOUNT',
-            style: GoogleFonts.inter(
+            context.l10n.accountUpper,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -151,8 +152,8 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      selectedAccount?.name ?? 'Select account',
-                      style: GoogleFonts.inter(
+                      selectedAccount?.name ?? context.l10n.selectAccountTitle,
+                      style: localeFont(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: selectedAccount != null
@@ -171,8 +172,8 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
 
           // Date
           Text(
-            'DATE',
-            style: GoogleFonts.inter(
+            context.l10n.dateUpper,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -195,7 +196,7 @@ class _AddPaymentSheetState extends ConsumerState<AddPaymentSheet> {
                   const SizedBox(width: 10),
                   Text(
                     DateFormat('MMM d, yyyy').format(_selectedDate),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,

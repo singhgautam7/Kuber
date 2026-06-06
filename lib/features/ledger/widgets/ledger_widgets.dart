@@ -18,9 +18,10 @@
 //   - `ledgerSummaryProvider` returning `({double toReceive, double owed,
 //     int receiveCount, int oweCount})`. Without it, recompute inline.
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -88,8 +89,8 @@ class LedgerHero extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'NET POSITION',
-                  style: GoogleFonts.inter(
+                  context.l10n.netPosition,
+                  style: localeFont(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -104,7 +105,7 @@ class LedgerHero extends ConsumerWidget {
                             '${maskAmount(fmt.formatCurrency(net.abs()), masked)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 32,
                     fontWeight: FontWeight.w800,
                     color: netColor,
@@ -115,23 +116,22 @@ class LedgerHero extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text.rich(
                   TextSpan(
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       color: cs.onSurfaceVariant,
                     ),
                     children: [
                       TextSpan(
                         text: isFlat
-                            ? 'evens out'
+                            ? context.l10n.ledgerEvensOut
                             : isFavour
-                            ? 'in your favour'
-                            : 'owed to others',
+                            ? context.l10n.ledgerInYourFavour
+                            : context.l10n.ledgerOwedToOthers,
                       ),
                       const TextSpan(text: ' · '),
                       TextSpan(
-                        text:
-                            '$activeCount active entr${activeCount == 1 ? 'y' : 'ies'}',
-                        style: GoogleFonts.inter(
+                        text: context.l10n.ledgerActiveEntries(activeCount),
+                        style: localeFont(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -194,7 +194,7 @@ class _SideCard extends ConsumerWidget {
     final iconData = isReceive
         ? Icons.arrow_downward_rounded
         : Icons.arrow_upward_rounded;
-    final label = isReceive ? 'You will receive' : 'You owe';
+    final label = isReceive ? context.l10n.youWillReceive : context.l10n.youOwe;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
@@ -223,7 +223,7 @@ class _SideCard extends ConsumerWidget {
                 child: Text(
                   label.toUpperCase(),
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -236,7 +236,7 @@ class _SideCard extends ConsumerWidget {
           const SizedBox(height: 6),
           Text(
             maskAmount(fmt.formatCurrency(amount), masked),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: accent,
@@ -246,10 +246,9 @@ class _SideCard extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             peopleCount == 0
-                ? 'no one'
-                : 'across $peopleCount '
-                      '${peopleCount == 1 ? 'person' : 'people'}',
-            style: GoogleFonts.inter(
+                ? context.l10n.ledgerNoOne
+                : context.l10n.ledgerAcrossPeople(peopleCount),
+            style: localeFont(
               fontSize: 10.5,
               color: cs.onSurfaceVariant,
             ),
@@ -303,11 +302,13 @@ class LedgerEntryCard extends ConsumerWidget {
 
     final dueLabel = isSettled
         ? settledAt == null
-              ? 'SETTLED'
-              : 'SETTLED ${DateFormat('MMM d').format(settledAt!).toUpperCase()}'
+              ? context.l10n.settledUpper
+              : context.l10n.settledOnUpper(
+                  DateFormat('MMM d').format(settledAt!).toUpperCase())
         : expectedDate == null
-        ? 'NO DUE DATE'
-        : 'DUE ${DateFormat('MMM d').format(expectedDate!).toUpperCase()}';
+        ? context.l10n.noDueDate
+        : context.l10n.dueOnUpper(
+            DateFormat('MMM d').format(expectedDate!).toUpperCase());
 
     final overdue =
         !isSettled &&
@@ -345,7 +346,7 @@ class LedgerEntryCard extends ConsumerWidget {
                                 child: Text(
                                   personName,
                                   overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w700,
                                     color: cs.onSurface,
@@ -360,7 +361,7 @@ class LedgerEntryCard extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text.rich(
                             TextSpan(
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 10.5,
                                 color: cs.onSurfaceVariant,
                                 letterSpacing: 0.4,
@@ -368,7 +369,7 @@ class LedgerEntryCard extends ConsumerWidget {
                               children: [
                                 TextSpan(
                                   text: dueLabel,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w600,
                                     color: overdue
@@ -379,8 +380,8 @@ class LedgerEntryCard extends ConsumerWidget {
                                 ),
                                 if (overdue)
                                   TextSpan(
-                                    text: ' · overdue',
-                                    style: GoogleFonts.inter(
+                                    text: ' · ${context.l10n.overdueLower}',
+                                    style: localeFont(
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w600,
                                       color: cs.error,
@@ -395,7 +396,7 @@ class LedgerEntryCard extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text(
                       maskAmount(fmt.formatCurrency(originalAmount), masked),
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -428,31 +429,22 @@ class LedgerEntryCard extends ConsumerWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            style: GoogleFonts.inter(
-                              fontSize: 10.5,
-                              color: cs.onSurfaceVariant,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: '${(progress * 100).toStringAsFixed(0)}%',
-                                style: GoogleFonts.inter(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurface,
-                                ),
-                              ),
-                              TextSpan(
-                                text: isLent ? ' received' : ' paid back',
-                              ),
-                            ],
+                        child: Text(
+                          isLent
+                              ? context.l10n.pctReceived(
+                                  (progress * 100).toStringAsFixed(0))
+                              : context.l10n.pctPaidBack(
+                                  (progress * 100).toStringAsFixed(0)),
+                          style: localeFont(
+                            fontSize: 10.5,
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
                       ),
                       Text(
-                        '${maskAmount(fmt.formatCurrency(remaining), masked)} remaining',
-                        style: GoogleFonts.inter(
+                        context.l10n.amountRemaining(
+                            maskAmount(fmt.formatCurrency(remaining), masked)),
+                        style: localeFont(
                           fontSize: 10.5,
                           color: cs.onSurfaceVariant,
                         ),
@@ -495,7 +487,7 @@ class _Avatar extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         _initials(),
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 13,
           fontWeight: FontWeight.w700,
           color: cs.onSurface,
@@ -519,17 +511,17 @@ class _TypePill extends StatelessWidget {
     final Color border;
     final String label;
     if (isSettled) {
-      label = 'SETTLED';
+      label = context.l10n.settledUpper;
       fg = cs.onSurfaceVariant;
       bg = cs.surfaceContainerHigh;
       border = cs.outline;
     } else if (type == LedgerEntryType.lent) {
-      label = 'LENT';
+      label = context.l10n.lentUpper;
       fg = cs.tertiary;
       bg = cs.tertiary.withValues(alpha: 0.12);
       border = cs.tertiary.withValues(alpha: 0.30);
     } else {
-      label = 'BORROWED';
+      label = context.l10n.borrowedUpper;
       fg = cs.error;
       bg = cs.error.withValues(alpha: 0.12);
       border = cs.error.withValues(alpha: 0.30);
@@ -543,7 +535,7 @@ class _TypePill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           color: fg,

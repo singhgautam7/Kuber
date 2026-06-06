@@ -4,10 +4,11 @@
 // Drop-in replacement for lib/features/ledger/screens/add_ledger_screen.dart.
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -112,8 +113,8 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit entry' : 'New entry',
-          style: GoogleFonts.inter(
+          _isEditing ? context.l10n.editEntry : context.l10n.newEntry,
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -130,23 +131,23 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
           children: [
             // ── TYPE ─────────────────────────────────────────────────
             KuberFormSection(
-              label: 'Type',
+              label: context.l10n.typeLabel,
               topGap: 0,
               children: [
                 KuberSegmented<String>(
                   groupValue: _type,
                   enabled: !_isEditing, // PRESERVED — locked while editing
                   onChanged: (v) => setState(() => _type = v),
-                  segments: const [
+                  segments: [
                     KuberSegment(
                       value: 'lent',
-                      label: 'Lent',
+                      label: context.l10n.lentLabel,
                       icon: Icons.arrow_outward_rounded,
                       tone: SegmentTone.expense,
                     ),
                     KuberSegment(
                       value: 'borrowed',
-                      label: 'Borrowed',
+                      label: context.l10n.borrowedLabel,
                       icon: Icons.south_west_rounded,
                       tone: SegmentTone.income,
                     ),
@@ -157,10 +158,10 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
 
             // ── IDENTITY ─────────────────────────────────────────────
             KuberFormSection(
-              label: 'Identity',
+              label: context.l10n.identity,
               children: [
                 KuberHeroAmountInput(
-                  label: _type == 'lent' ? 'Amount lent' : 'Amount borrowed',
+                  label: _type == 'lent' ? context.l10n.amountLent : context.l10n.amountBorrowed,
                   currencySymbol: symbol,
                   controller: _amountController,
                   inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
@@ -168,7 +169,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   onChanged: (_) => setState(() {}),
                   onCalculatorTap: () => _openCalculatorFor(_amountController),
                 ),
-                const KuberFieldLabel('Person'),
+                KuberFieldLabel(context.l10n.personLabel),
                 RawAutocomplete<String>(
                   textEditingController: _nameController,
                   focusNode: _nameFocusNode,
@@ -190,9 +191,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                       textCapitalization: TextCapitalization.words,
                       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                      decoration: const InputDecoration(
-                        hintText: 'Who?',
+                      style: localeFont(color: cs.onSurface, fontSize: 15),
+                      decoration: InputDecoration(
+                        hintText: context.l10n.whoHint,
                       ),
                     );
                   },
@@ -232,7 +233,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                                       const SizedBox(width: 12),
                                       Text(
                                         name,
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                           color: cs.onSurface,
@@ -254,29 +255,29 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   type: _type,
                   isEditing: _isEditing,
                 ),
-                KuberFieldLabel(_type == 'lent' ? 'From account' : 'To account'),
+                KuberFieldLabel(_type == 'lent' ? context.l10n.fromAccountLabel : context.l10n.toAccountLabel),
                 _accountPickerRow(),
               ],
             ),
 
             // ── SCHEDULE ─────────────────────────────────────────────
             KuberFormSection(
-              label: 'Schedule',
+              label: context.l10n.schedule,
               tinted: true,
               children: [
-                const KuberFieldLabel('Date'),
+                KuberFieldLabel(context.l10n.dateLabel),
                 _dateRow(
-                  label: _type == 'lent' ? 'Lent on' : 'Borrowed on',
+                  label: _type == 'lent' ? context.l10n.lentOn : context.l10n.borrowedOn,
                   date: _date,
                   onTap: _pickDate,
                 ),
-                const KuberFieldLabel('Expected return', optional: true),
+                KuberFieldLabel(context.l10n.expectedReturn, optional: true),
                 _expectedReturnRow(),
               ],
             ),
 
             KuberFormSection(
-              label: 'Notes',
+              label: context.l10n.notesLabel,
               children: [
                 TextField(
                   controller: _notesController,
@@ -284,9 +285,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   minLines: 1,
                   textCapitalization: TextCapitalization.sentences,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
-                  decoration: const InputDecoration(
-                    hintText: 'Context, IOU ref, anything',
+                  style: localeFont(color: cs.onSurface, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.ledgerNotesHint,
                   ),
                 ),
               ],
@@ -297,7 +298,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       ),
     ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEditing ? 'Save changes' : 'Add to ledger',
+        label: _isEditing ? context.l10n.saveChanges : context.l10n.addToLedger,
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -321,8 +322,8 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
               color: Color(acc.colorValue ?? 0xFF3B82F6),
               icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
             ),
-      label: 'Account',
-      value: acc?.name ?? 'Select account',
+      label: context.l10n.accountTitle,
+      value: acc?.name ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: () {
         showModalBottomSheet(
@@ -372,14 +373,14 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
           icon: Icons.event_outlined,
           empty: true,
         ),
-        label: 'Expected on',
-        value: 'Not set · tap to add',
+        label: context.l10n.expectedOn,
+        value: context.l10n.notSetTapToAdd,
         valueIsPlaceholder: true,
         onTap: _pickExpectedDate,
       );
     }
     final daysOut = _expectedDate!.difference(DateTime.now()).inDays;
-    final suffix = daysOut > 0 ? ' · in $daysOut days' : '';
+    final suffix = daysOut > 0 ? ' · ${context.l10n.inDays(daysOut)}' : '';
     return KuberPickerRow(
       leading: Container(
         decoration: BoxDecoration(
@@ -389,7 +390,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
         ),
         child: Icon(Icons.event_outlined, size: 16, color: cs.onSurface),
       ),
-      label: 'Expected on',
+      label: context.l10n.expectedOn,
       value: '${DateFormat('d MMM yyyy').format(_expectedDate!)}$suffix',
       onTap: _pickExpectedDate,
       clearable: true,
@@ -556,29 +557,14 @@ class _DuplicatePersonWarning extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: KuberCallout(
-        child: Text.rich(
-          TextSpan(
-            style: GoogleFonts.inter(
-              fontSize: 12.5,
-              color: cs.onSurface,
-              height: 1.5,
-            ),
-            children: [
-              const TextSpan(text: 'An active '),
-              TextSpan(
-                text: type == 'lent' ? 'lent' : 'borrow',
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const TextSpan(text: ' entry for '),
-              TextSpan(
-                text: personName.trim(),
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              const TextSpan(
-                text:
-                    ' already exists. Are you sure you want to create a new one?',
-              ),
-            ],
+        child: Text(
+          type == 'lent'
+              ? context.l10n.ledgerDuplicateWarningLent(personName.trim())
+              : context.l10n.ledgerDuplicateWarningBorrow(personName.trim()),
+          style: localeFont(
+            fontSize: 12.5,
+            color: cs.onSurface,
+            height: 1.5,
           ),
         ),
       ),

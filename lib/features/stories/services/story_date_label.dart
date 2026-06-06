@@ -1,4 +1,6 @@
 import 'package:intl/intl.dart';
+import '../../../core/utils/locale_font.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// The kinds of `dateLabel` a slide can carry. One label format per kind,
 /// matching the design handoff table. Pace comparisons, insights and welcome
@@ -40,14 +42,16 @@ String? formatBubblePeriod(
       return DateFormat('d MMMM yyyy').format(start);
     case BubblePeriodKind.weekly:
       if (start == null || end == null) return null;
-      return '${DateFormat('d MMM').format(start)} to '
+      final l10n = lookupAppLocalizations(AppLocale.current);
+      return '${DateFormat('d MMM').format(start)} ${l10n.toLabel} '
           '${DateFormat('d MMM yyyy').format(end)}';
     case BubblePeriodKind.monthly:
       if (start == null) return null;
       return DateFormat('MMMM yyyy').format(start);
     case BubblePeriodKind.yearlyYtd:
       if (start == null) return null;
-      return 'Through ${DateFormat('MMMM yyyy').format(start)}';
+      final l10n = lookupAppLocalizations(AppLocale.current);
+      return l10n.throughPeriod(DateFormat('MMMM yyyy').format(start));
     case BubblePeriodKind.yearlyFull:
       if (start == null) return null;
       return DateFormat('yyyy').format(start);

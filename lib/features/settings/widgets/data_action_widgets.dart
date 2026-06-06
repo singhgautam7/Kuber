@@ -1,5 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/loading_widgets.dart';
@@ -79,7 +80,7 @@ class ConfirmActionSheet extends StatelessWidget {
           // Title
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -107,7 +108,7 @@ class ConfirmActionSheet extends StatelessWidget {
                   Expanded(
                     child: Text(
                       description,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.error,
                         height: 1.45,
@@ -120,7 +121,7 @@ class ConfirmActionSheet extends StatelessWidget {
           else
             Text(
               description,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 color: cs.onSurfaceVariant,
                 height: 1.45,
@@ -148,7 +149,7 @@ class ConfirmActionSheet extends StatelessWidget {
               ),
               child: Text(
                 confirmLabel,
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -170,8 +171,8 @@ class ConfirmActionSheet extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Cancel',
-                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                context.l10n.cancelLabel,
+                style: localeFont(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -328,7 +329,7 @@ class _DataLoadingOverlayState extends State<DataLoadingOverlay>
               const SizedBox(height: KuberSpacing.lg),
               Text(
                 widget.message,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,

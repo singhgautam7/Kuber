@@ -13,9 +13,10 @@
 //   - `recentlyProcessedProvider` (existing) — recently-fired rule transactions
 //   - `categoryMapProvider`, `accountListProvider` (existing)
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -95,8 +96,8 @@ class RecurringHero extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'MONTHLY AUTOMATION COST',
-              style: GoogleFonts.inter(
+              context.l10n.monthlyAutomationCost,
+              style: localeFont(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -109,7 +110,7 @@ class RecurringHero extends ConsumerWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 maskAmount(fmt.formatCurrency(monthlyCost), masked),
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 30,
                   fontWeight: FontWeight.w800,
                   color: cs.onSurface,
@@ -121,7 +122,7 @@ class RecurringHero extends ConsumerWidget {
             const SizedBox(height: 4),
             Text.rich(
               TextSpan(
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11.5,
                   color: cs.onSurfaceVariant,
                 ),
@@ -129,7 +130,7 @@ class RecurringHero extends ConsumerWidget {
                   TextSpan(
                     text:
                         '$activeCount active rule${activeCount == 1 ? '' : 's'}',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                       color: cs.onSurface,
@@ -169,8 +170,8 @@ class _UpcomingStrip extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'UPCOMING CHARGES',
-            style: GoogleFonts.inter(
+            context.l10n.upcomingCharges,
+            style: localeFont(
               fontSize: 9.5,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -208,11 +209,11 @@ class _UpcomingTile extends ConsumerWidget {
 
     final daysAway = charge.daysAway;
     final whenText = daysAway <= 0
-        ? 'TODAY'
+        ? context.l10n.todayUpper
         : daysAway == 1
-        ? 'TOMORROW'
+        ? context.l10n.tomorrowUpper
         : daysAway < 7
-        ? 'IN $daysAway DAYS'
+        ? context.l10n.inDaysUpper('$daysAway')
         : DateFormat('MMM d').format(charge.on).toUpperCase();
 
     return Container(
@@ -229,7 +230,7 @@ class _UpcomingTile extends ConsumerWidget {
           Text(
             whenText,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 9.5,
               fontWeight: FontWeight.w700,
               color: soon ? warning : cs.onSurfaceVariant,
@@ -240,7 +241,7 @@ class _UpcomingTile extends ConsumerWidget {
           Text(
             charge.name,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,
@@ -249,7 +250,7 @@ class _UpcomingTile extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             maskAmount(fmt.formatCurrency(charge.amount), masked),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
@@ -301,11 +302,11 @@ class RecurringRuleCard extends ConsumerWidget {
     final whenText = nextChargeOn == null
         ? ''
         : daysAway! <= 0
-        ? 'today'
+        ? context.l10n.todayLower
         : daysAway == 1
-        ? 'tomorrow'
+        ? context.l10n.tomorrowLower
         : daysAway < 7
-        ? 'in $daysAway days'
+        ? context.l10n.inDays(daysAway)
         : DateFormat('MMM d').format(nextChargeOn!);
 
     return Material(
@@ -346,7 +347,7 @@ class RecurringRuleCard extends ConsumerWidget {
                         Text(
                           ruleName,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: cs.onSurface,
@@ -374,7 +375,7 @@ class RecurringRuleCard extends ConsumerWidget {
                                 child: Text(
                                   accountName!,
                                   overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     fontSize: 11,
                                     color: cs.onSurfaceVariant,
                                   ),
@@ -389,7 +390,7 @@ class RecurringRuleCard extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Text(
                     maskAmount(fmt.formatCurrency(amount), masked),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurface,
@@ -417,15 +418,15 @@ class RecurringRuleCard extends ConsumerWidget {
                       const SizedBox(width: 5),
                       Text.rich(
                         TextSpan(
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11,
                             color: cs.onSurfaceVariant,
                           ),
                           children: [
-                            const TextSpan(text: 'Next charge '),
+                            TextSpan(text: '${context.l10n.nextChargeLabel} '),
                             TextSpan(
                               text: whenText,
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: soon ? warning : cs.onSurface,
@@ -437,7 +438,7 @@ class RecurringRuleCard extends ConsumerWidget {
                       const Spacer(),
                       Text(
                         DateFormat('MMM d').format(nextChargeOn!),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11,
                           color: cs.onSurfaceVariant,
                         ),
@@ -470,7 +471,7 @@ class _FreqPill extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 9,
           fontWeight: FontWeight.w700,
           color: cs.primary,
@@ -539,7 +540,7 @@ class RecurringProcessedRow extends ConsumerWidget {
                   Text(
                     ruleName,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -551,7 +552,7 @@ class RecurringProcessedRow extends ConsumerWidget {
                       ?accountName,
                       DateFormat('MMM d').format(processedAt),
                     ].join(' · '),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 10.5,
                       color: cs.onSurfaceVariant,
                     ),
@@ -562,7 +563,7 @@ class RecurringProcessedRow extends ConsumerWidget {
             Text(
               '${isExpense ? '−' : '+'}'
               '${maskAmount(fmt.formatCurrency(amount.abs()), masked)}',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: isExpense ? cs.error : cs.tertiary,

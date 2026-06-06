@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -116,10 +116,10 @@ class _DiscountCalculatorScreenState
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('0%',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
                         Text('100%',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                                 fontSize: 11, color: cs.onSurfaceVariant)),
                       ],
                     ),

@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
@@ -61,7 +61,7 @@ class ToolInputLabel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 11,
         fontWeight: FontWeight.w700,
         color: cs.onSurfaceVariant,
@@ -107,20 +107,20 @@ class ToolTextField extends ConsumerWidget {
               ? [CurrencyInputFormatter(isIndian: isIndian)]
               : null,
           onChanged: onChanged,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 15,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
           decoration: InputDecoration(
             prefixText: prefix != null ? '$prefix ' : null,
-            prefixStyle: GoogleFonts.inter(
+            prefixStyle: localeFont(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
             ),
             suffixText: suffix,
-            suffixStyle: GoogleFonts.inter(
+            suffixStyle: localeFont(
               fontSize: 14,
               color: cs.onSurfaceVariant,
             ),
@@ -187,7 +187,7 @@ class ToolSegmentedControl extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   labels[i].toUpperCase(),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                     color: selected ? cs.primary : cs.onSurfaceVariant,
@@ -222,7 +222,7 @@ class ToolHeroResult extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 11,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -232,7 +232,7 @@ class ToolHeroResult extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 32,
             fontWeight: FontWeight.w800,
             color: color,
@@ -264,11 +264,11 @@ class ToolStatRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
         ),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: valueColor ?? cs.onSurface,
@@ -290,7 +290,7 @@ class ToolEmptyResult extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
         child: Text(
           'Fill in the inputs to see results',
-          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
         ),
       ),
     );

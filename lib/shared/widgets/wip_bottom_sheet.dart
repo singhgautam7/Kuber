@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 
 class WIPBottomSheet extends StatelessWidget {
@@ -89,7 +89,7 @@ class WIPBottomSheet extends StatelessWidget {
           // Title
           Text(
             title,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -102,7 +102,7 @@ class WIPBottomSheet extends StatelessWidget {
           if (subtitle != null)
             Text(
               subtitle!.toUpperCase(),
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 color: cs.primary,
@@ -117,7 +117,7 @@ class WIPBottomSheet extends StatelessWidget {
             child: content ?? Text(
               description ?? '',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 15,
                 height: 1.6,
                 color: cs.onSurfaceVariant,
@@ -141,7 +141,7 @@ class WIPBottomSheet extends StatelessWidget {
               ),
               child: Text(
                 buttonText,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,

@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -49,8 +50,8 @@ class InvestmentsScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Text(
-            'Error: $e',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            context.l10n.errorWithDetails(e.toString()),
+            style: localeFont(color: cs.onSurfaceVariant),
           ),
         ),
         data: (investments) {
@@ -74,10 +75,10 @@ class InvestmentsScreen extends ConsumerWidget {
               ),
               SliverToBoxAdapter(
                 child: KuberPageHeader(
-                  title: 'Investments',
+                  title: context.l10n.investmentsTitle,
                   description:
                       '',
-                  actionTooltip: 'Add Investment',
+                  actionTooltip: context.l10n.addInvestment,
                   onAction: () => context.push('/investments/add'),
                 ),
               ),
@@ -116,15 +117,15 @@ class InvestmentsScreen extends ConsumerWidget {
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.show_chart,
-                    title: 'No investments tracked',
-                    description: 'Tap + to add your first investment',
-                    actionLabel: 'Add Investment',
+                    title: context.l10n.noInvestments,
+                    description: context.l10n.investmentsEmptyDesc,
+                    actionLabel: context.l10n.addInvestment,
                     onAction: () => context.push('/investments/add'),
                   ),
                 ),
               if (investments.isNotEmpty) ...[
-                const SliverToBoxAdapter(
-                  child: _SectionHeader(label: 'ALL INVESTMENTS'),
+                SliverToBoxAdapter(
+                  child: _SectionHeader(label: context.l10n.allInvestmentsUpper),
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
@@ -165,7 +166,7 @@ class InvestmentsScreen extends ConsumerWidget {
             .where((e) => e.value > 0)
             .map(
               (e) => AssetSlice(
-                label: e.key,
+                label: _assetDisplay(context, e.key),
                 color: _assetColor(context, e.key),
                 value: e.value,
               ),
@@ -187,11 +188,11 @@ class _InvestmentRow extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     return InvestmentCard(
       name: investment.name,
-      assetTypeLabel: label.toUpperCase(),
+      assetTypeLabel: _assetDisplay(context, label).toUpperCase(),
       icon: _investmentIcon(investment.investmentType),
       iconColor: _assetColor(context, label),
       quantityLabel: investment.autoDebit && investment.sipAmount != null
-          ? 'SIP ${fmt.formatCurrency(investment.sipAmount!)}'
+          ? context.l10n.sipAmountPrefix(fmt.formatCurrency(investment.sipAmount!))
           : null,
       currentValue: investment.currentValue ?? 0,
       gainLossPercent: calc.computeGainLossPercent(investment),
@@ -225,7 +226,7 @@ class _SectionHeader extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: cs.onSurfaceVariant,
@@ -236,6 +237,8 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+// Internal, English-only label — used as the key for color mapping and
+// allocation grouping. Do NOT localize this; use _assetDisplay for UI text.
 String _assetLabel(String type) {
   return switch (type) {
     'sip' => 'SIP',
@@ -244,6 +247,19 @@ String _assetLabel(String type) {
     'crypto' => 'Crypto',
     'trading' => 'Trading',
     _ => 'Other',
+  };
+}
+
+// Localized, display-only label derived from the English [_assetLabel].
+String _assetDisplay(BuildContext context, String englishLabel) {
+  final l = context.l10n;
+  return switch (englishLabel) {
+    'SIP' => l.invTypeSip,
+    'Mutual Fund' => l.invTypeMutualFund,
+    'Stocks' => l.invTypeStocks,
+    'Crypto' => l.invTypeCrypto,
+    'Trading' => l.invTypeTrading,
+    _ => l.invTypeOther,
   };
 }
 

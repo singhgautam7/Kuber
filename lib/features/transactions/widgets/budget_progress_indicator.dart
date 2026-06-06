@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/l10n_ext.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
 
@@ -31,7 +32,7 @@ class BudgetProgressIndicator extends ConsumerWidget {
                 Icon(Icons.account_balance_wallet_outlined, size: 14, color: cs.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'Budget',
+                  context.l10n.budgetLabel,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -41,7 +42,7 @@ class BudgetProgressIndicator extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)} (${p.percentage.toStringAsFixed(0)}% used)',
+                    '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)} (${p.percentage.toStringAsFixed(0)}% ${context.l10n.usedLabel})',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,

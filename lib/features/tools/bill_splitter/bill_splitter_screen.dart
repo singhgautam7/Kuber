@@ -1,8 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/info_constants.dart';
@@ -144,7 +144,7 @@ class _RecentBillsSection extends ConsumerWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -153,7 +153,7 @@ class _RecentBillsSection extends ConsumerWidget {
               ),
               Text(
                 countLabel,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.6,
@@ -289,7 +289,7 @@ class _BillRow extends StatelessWidget {
                       children: [
                         Text(
                           bill.name,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 14.5,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.1,
@@ -301,7 +301,7 @@ class _BillRow extends StatelessWidget {
                         const SizedBox(height: 3),
                         Text(
                           'Paid by ${bill.paidByPersonName} · ${bill.participants.length} people · ${DateFormat('d MMM').format(bill.createdAt)}',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11.5,
                             color: cs.onSurfaceVariant,
                           ),
@@ -315,7 +315,7 @@ class _BillRow extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     formattedAmount,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.3,
@@ -369,7 +369,7 @@ class _BillRow extends StatelessWidget {
                             const SizedBox(width: 4),
                             Text(
                               _splitLabel(bill.splitType),
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.6,
@@ -390,7 +390,7 @@ class _BillRow extends StatelessWidget {
                           children: [
                             Text(
                               statusLabel,
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.8,
@@ -399,7 +399,7 @@ class _BillRow extends StatelessWidget {
                             ),
                             Text(
                               _signedShare(status, formatter, yourShare),
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.2,
@@ -497,7 +497,7 @@ class _AvatarStack extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   '+$overflow',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,

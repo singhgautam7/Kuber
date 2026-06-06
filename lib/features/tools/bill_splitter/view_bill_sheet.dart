@@ -1,8 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -74,7 +74,7 @@ class ViewBillSheet extends ConsumerWidget {
                           children: [
                             Text(
                               '${DateFormat('d MMM yyyy').format(bill.createdAt).toUpperCase()} · $splitLabel SPLIT',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.2,
@@ -84,7 +84,7 @@ class ViewBillSheet extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               bill.name,
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.6,
@@ -124,7 +124,7 @@ class ViewBillSheet extends ConsumerWidget {
                             children: [
                               Text(
                                 'TOTAL',
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.1,
@@ -137,7 +137,7 @@ class ViewBillSheet extends ConsumerWidget {
                                   bill.totalAmount,
                                   symbol: currency.symbol,
                                 ),
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: -0.7,
@@ -158,7 +158,7 @@ class ViewBillSheet extends ConsumerWidget {
                             children: [
                               Text(
                                 'PAID BY',
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.1,
@@ -176,7 +176,7 @@ class ViewBillSheet extends ConsumerWidget {
                                   Expanded(
                                     child: Text(
                                       bill.paidByPersonName,
-                                      style: GoogleFonts.inter(
+                                      style: localeFont(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: -0.1,
@@ -212,7 +212,7 @@ class ViewBillSheet extends ConsumerWidget {
                   children: [
                     Text(
                       'BREAKDOWN · ${bill.participants.length} PEOPLE',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.1,
@@ -281,7 +281,7 @@ class ViewBillSheet extends ConsumerWidget {
                                     children: [
                                       Text(
                                         p.personName,
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w700,
                                           color: cs.onSurface,
@@ -291,7 +291,7 @@ class ViewBillSheet extends ConsumerWidget {
                                       const SizedBox(height: 2),
                                       Text(
                                         statusLabel,
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: 0.7,
@@ -310,7 +310,7 @@ class ViewBillSheet extends ConsumerWidget {
                                           p.share,
                                           symbol: currency.symbol,
                                         ),
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: -0.2,
@@ -324,7 +324,7 @@ class ViewBillSheet extends ConsumerWidget {
                                           p.rawInput != null)
                                         Text(
                                           '${p.rawInput!.toStringAsFixed(0)}% of total',
-                                          style: GoogleFonts.inter(
+                                          style: localeFont(
                                             fontSize: 10.5,
                                             color: cs.onSurfaceVariant,
                                           ),
@@ -333,7 +333,7 @@ class ViewBillSheet extends ConsumerWidget {
                                           p.rawInput != null)
                                         Text(
                                           '${p.rawInput!.toStringAsFixed(0)} parts',
-                                          style: GoogleFonts.inter(
+                                          style: localeFont(
                                             fontSize: 10.5,
                                             color: cs.onSurfaceVariant,
                                           ),
@@ -346,7 +346,7 @@ class ViewBillSheet extends ConsumerWidget {
                                       bill.totalAmount,
                                       symbol: currency.symbol,
                                     ),
-                                    style: GoogleFonts.inter(
+                                    style: localeFont(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: -0.2,
@@ -519,7 +519,7 @@ class _LedgerActionsCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'LEND / BORROW',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.1,
@@ -541,7 +541,7 @@ class _LedgerActionsCard extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               child: Text(
                 'No Lend/Borrow entry is needed because You are not part of what is owed.',
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 12,
                   height: 1.35,
                   color: cs.onSurfaceVariant,
@@ -579,7 +579,7 @@ class _LedgerActionsCard extends StatelessWidget {
                         children: [
                           Text(
                             label,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: color,
@@ -588,7 +588,7 @@ class _LedgerActionsCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             formatAmount(debt.amount),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurface,
@@ -616,7 +616,7 @@ class _LedgerActionsCard extends StatelessWidget {
                         ),
                         child: Text(
                           'ADD',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,

@@ -161,7 +161,7 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
                           //     ),
                           //     child: Text(
                           //       'Add as Recurring Transaction',
-                          //       style: GoogleFonts.inter(
+                          //       style: localeFont(
                           //         fontSize: 14,
                           //         fontWeight: FontWeight.w600,
                           //       ),

@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../data/tag.dart';
@@ -93,7 +93,7 @@ class _TagSelectorBottomSheetState extends ConsumerState<TagSelectorBottomSheet>
                 children: [
                   Text(
                     "Select Tags",
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: cs.onSurface,
@@ -222,7 +222,7 @@ class _TagChip extends StatelessWidget {
       selectedColor: cs.primary,
       checkmarkColor: cs.onPrimary,
       showCheckmark: true,
-      labelStyle: GoogleFonts.inter(
+      labelStyle: localeFont(
         fontSize: 13,
         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
         color: !isEnabled 
@@ -274,7 +274,7 @@ class _TagActionTile extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 "Add \"$normalized\"",
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: cs.primary,

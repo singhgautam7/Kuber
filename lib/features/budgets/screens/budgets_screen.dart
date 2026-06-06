@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -55,9 +56,9 @@ class BudgetsScreen extends ConsumerWidget {
           // Page header
           SliverToBoxAdapter(
             child: KuberPageHeader(
-              title: 'Track\nBudgets',
+              title: context.l10n.trackBudgets,
               description: '',
-              actionTooltip: 'Create Budget',
+              actionTooltip: context.l10n.createBudget,
               onAction: () => context.push('/budgets/add'),
             ),
           ),
@@ -69,9 +70,9 @@ class BudgetsScreen extends ConsumerWidget {
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.account_balance_rounded,
-                    title: 'No budgets yet',
-                    description: 'Create budgets to control your spending per category',
-                    actionLabel: 'Create Budget',
+                    title: context.l10n.noBudgetsYet,
+                    description: context.l10n.createBudgetsDesc,
+                    actionLabel: context.l10n.createBudget,
                     onAction: () => context.push('/budgets/add'),
                   ),
                 );
@@ -175,8 +176,8 @@ class BudgetCard extends ConsumerWidget {
                       Row(
                         children: [
                           Text(
-                            category?.name ?? 'Budget',
-                            style: GoogleFonts.inter(
+                            category?.name ?? context.l10n.budgetLabel,
+                            style: localeFont(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                               color: isInactive ? cs.onSurfaceVariant : cs.onSurface,
@@ -184,23 +185,25 @@ class BudgetCard extends ConsumerWidget {
                           ),
                           if (isDisabled) ...[
                             const SizedBox(width: 8),
-                            _StatusBadge(label: 'DISABLED', color: cs.onSurfaceVariant),
+                            _StatusBadge(label: context.l10n.disabledUpper, color: cs.onSurfaceVariant),
                           ] else if (isExpired) ...[
                             const SizedBox(width: 8),
-                            _StatusBadge(label: 'EXPIRED', color: cs.error),
+                            _StatusBadge(label: context.l10n.expiredUpper, color: cs.error),
                           ],
                         ],
                       ),
                       progressAsync.when(
                         data: (p) => Text(
                           isExpired
-                            ? 'BUDGET PERIOD ENDED'
+                            ? context.l10n.budgetPeriodEnded
                             : isDisabled
-                              ? 'BUDGET IS CURRENTLY PAUSED'
+                              ? context.l10n.budgetPaused
                               : p.percentage >= 100
-                                ? 'EXCEEDED BY ${maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent - p.limit), ref.watch(privacyModeProvider))}'
-                                : '${budget.isRecurring ? 'RESETS' : 'EXPIRES'} IN ${p.daysRemaining} ${p.daysRemaining == 1 ? 'DAY' : 'DAYS'}',
-                          style: GoogleFonts.inter(
+                                ? context.l10n.exceededBy(maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent - p.limit), ref.watch(privacyModeProvider)))
+                                : (budget.isRecurring
+                                    ? context.l10n.budgetResetsIn(p.daysRemaining)
+                                    : context.l10n.budgetExpiresIn(p.daysRemaining)),
+                          style: localeFont(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: isInactive
@@ -226,8 +229,8 @@ class BudgetCard extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Progress',
-                        style: GoogleFonts.inter(
+                        context.l10n.progressLabel,
+                        style: localeFont(
                           fontSize: 12,
                           color: cs.onSurfaceVariant,
                         ),
@@ -237,7 +240,7 @@ class BudgetCard extends ConsumerWidget {
                           children: [
                             TextSpan(
                               text: '${maskAmount(ref.watch(formatterProvider).formatCurrency(p.spent), ref.watch(privacyModeProvider))} ',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 color: isInactive ? cs.onSurfaceVariant : cs.onSurface,
@@ -245,7 +248,7 @@ class BudgetCard extends ConsumerWidget {
                             ),
                             TextSpan(
                               text: '/ ${maskAmount(ref.watch(formatterProvider).formatCurrency(p.limit), ref.watch(privacyModeProvider))}',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 13,
                                 color: cs.onSurfaceVariant,
                               ),
@@ -297,7 +300,7 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 9,
           fontWeight: FontWeight.w800,
           color: color,
@@ -370,7 +373,7 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           color: color,

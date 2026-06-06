@@ -11,6 +11,8 @@
 // All values via `Theme.of(context).colorScheme`. No drop shadows — depth is
 // borders + a soft inset accent disc behind the sparkline.
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -118,8 +120,8 @@ class NetWorthHeroCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'TOTAL NET WORTH',
-                        style: GoogleFonts.inter(
+                        context.l10n.totalNetWorth,
+                        style: localeFont(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -142,7 +144,7 @@ class NetWorthHeroCard extends ConsumerWidget {
                             '${v < 0 ? '−' : ''}${fmt.formatCurrency(v.abs())}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: netWorth < 0 ? cs.error : cs.onSurface,
@@ -170,7 +172,7 @@ class NetWorthHeroCard extends ConsumerWidget {
                             '${maskAmount(fmt.formatCurrency(trendAbsolute!.abs()), masked)}'
                             ' vs last month  ·  6-month trend'
                       : '6-month trend',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11.5,
                     color: cs.onSurfaceVariant,
                     height: 1.4,
@@ -240,7 +242,7 @@ class NetWorthHeroCard extends ConsumerWidget {
                       Expanded(
                         child: _LegendBlock(
                           dotColor: cs.tertiary,
-                          label: 'Assets',
+                          label: context.l10n.assets,
                           value: maskAmount(
                             fmt.formatCurrency(totalAssets),
                             masked,
@@ -250,7 +252,7 @@ class NetWorthHeroCard extends ConsumerWidget {
                       Expanded(
                         child: _LegendBlock(
                           dotColor: cs.error,
-                          label: 'Debt',
+                          label: context.l10n.debt,
                           value: maskAmount(
                             fmt.formatCurrency(totalDebt),
                             masked,
@@ -337,7 +339,7 @@ class _TrendPill extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             '${up ? '+' : '−'}${percent.abs().toStringAsFixed(1)}%',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11.5,
               fontWeight: FontWeight.w700,
               color: color,
@@ -381,7 +383,7 @@ class _LegendBlock extends StatelessWidget {
             if (!alignEnd) ...[_Dot(color: dotColor), const SizedBox(width: 6)],
             Text(
               label.toUpperCase(),
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -394,7 +396,7 @@ class _LegendBlock extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,

@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/color_palette.dart';
@@ -90,7 +90,7 @@ class _BankLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Text(
         text.toUpperCase(),
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 10,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.4,

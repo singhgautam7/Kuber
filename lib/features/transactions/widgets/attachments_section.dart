@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:open_filex/open_filex.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -88,7 +89,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ATTACHMENTS',
+                      context.l10n.attachmentsLabel,
                       style: textTheme.labelSmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         letterSpacing: 1.2,
@@ -97,8 +98,8 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
                     const SizedBox(height: 2),
                     Text(
                       widget.displayPaths.isEmpty
-                          ? 'Add image or PDF'
-                          : '${widget.displayPaths.length} file${widget.displayPaths.length == 1 ? '' : 's'} attached',
+                          ? context.l10n.addImageOrPdf
+                          : context.l10n.filesAttached(widget.displayPaths.length),
                       style: textTheme.bodyMedium?.copyWith(
                         color: widget.displayPaths.isEmpty
                             ? cs.onSurfaceVariant
@@ -201,14 +202,14 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         return KuberBottomSheet(
-          title: 'Add Attachments',
-          subtitle: 'Max 5MB per file',
+          title: context.l10n.addAttachments,
+          subtitle: context.l10n.max5mb,
           child: Row(
             children: [
               _buildPickerCard(
                 context: sheetContext,
                 icon: Icons.camera_alt_outlined,
-                label: 'Camera',
+                label: context.l10n.cameraLabel,
                 onTap: () {
                   Navigator.of(sheetContext, rootNavigator: true).pop();
                   _pickImage(ImageSource.camera);
@@ -218,7 +219,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
               _buildPickerCard(
                 context: sheetContext,
                 icon: Icons.photo_library_outlined,
-                label: 'Gallery',
+                label: context.l10n.galleryLabel,
                 onTap: () {
                   Navigator.of(sheetContext, rootNavigator: true).pop();
                   _pickImage(ImageSource.gallery);
@@ -295,7 +296,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
         final size = await file.length();
         if (size > 5 * 1024 * 1024) {
           if (mounted) {
-            showKuberSnackBar(context, 'File exceeds 5MB limit', isError: true);
+            showKuberSnackBar(context, context.l10n.fileExceeds5mb, isError: true);
           }
           return;
         }
@@ -303,7 +304,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
       }
     } catch (e) {
       if (mounted) {
-        showKuberSnackBar(context, 'Failed to pick image: $e', isError: true);
+        showKuberSnackBar(context, context.l10n.failedToPickImage('$e'), isError: true);
       }
     } finally {
       if (mounted) setState(() => _isPickingFile = false);
@@ -324,7 +325,7 @@ class _AttachmentsSectionState extends State<AttachmentsSection> {
         final size = await file.length();
         if (size > 5 * 1024 * 1024) {
           if (mounted) {
-            showKuberSnackBar(context, 'File exceeds 5MB limit', isError: true);
+            showKuberSnackBar(context, context.l10n.fileExceeds5mb, isError: true);
           }
           return;
         }

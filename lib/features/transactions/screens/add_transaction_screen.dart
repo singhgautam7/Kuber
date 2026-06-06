@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -216,8 +217,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         ),
         title: Text(
           _isEditing
-              ? (_type == 'transfer' ? 'Edit Transfer' : 'Edit Transaction')
-              : 'Add Transaction',
+              ? (_type == 'transfer'
+                    ? context.l10n.editTransfer
+                    : context.l10n.editTransaction)
+              : context.l10n.addTransaction,
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -283,7 +286,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     // clears amount/name/notes after a successful save.
                     if (!_isEditing) ...[
                       AppButton(
-                        label: 'Save & Add Another',
+                        label: context.l10n.saveAndAddAnother,
                         type: AppButtonType.outline,
                         fullWidth: true,
                         onPressed: () => _save(keepOpen: true),
@@ -391,7 +394,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    transferSubtypeLabel(subtype),
+                    transferSubtypeLabel(context.l10n, subtype),
                     style: textTheme.labelMedium?.copyWith(
                       color: txtColor,
                       fontWeight: FontWeight.w600,
@@ -415,7 +418,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
         // FROM Account tile
         TransferAccountTile(
-          label: 'FROM ACCOUNT',
+          label: context.l10n.fromAccount,
           account: fromAccount,
           onTap: () => _showTransferAccountPicker(
             isFrom: true,
@@ -453,7 +456,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
         // TO Account tile
         TransferAccountTile(
-          label: 'TO ACCOUNT',
+          label: context.l10n.toAccount,
           account: toAccount,
           onTap: () => _showTransferAccountPicker(
             isFrom: false,
@@ -502,7 +505,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           textCapitalization: TextCapitalization.sentences,
           style: textTheme.bodyLarge?.copyWith(color: cs.onSurface),
           decoration: InputDecoration(
-            hintText: 'Transaction name',
+            hintText: context.l10n.transactionNameHint,
             hintStyle: textTheme.bodyLarge?.copyWith(
               color: cs.onSurfaceVariant,
             ),
@@ -530,19 +533,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       children: [
         Expanded(
           child: categoryMap.when(
-            loading: () => _buildSelectorTilePlaceholder('CATEGORY'),
-            error: (_, _) => _buildSelectorTilePlaceholder('CATEGORY'),
+            loading: () => _buildSelectorTilePlaceholder(context.l10n.categoryUpper),
+            error: (_, _) => _buildSelectorTilePlaceholder(context.l10n.categoryUpper),
             data: (catMap) {
               final cat = _selectedCategoryId != null
                   ? catMap[_selectedCategoryId]
                   : null;
               return SelectorTile(
                 key: TutorialStepKeys.categoryPicker,
-                label: 'CATEGORY',
+                label: context.l10n.categoryUpper,
                 icon: cat != null
                     ? IconMapper.fromString(cat.icon)
                     : Icons.category_outlined,
-                value: cat?.name ?? 'Select',
+                value: cat?.name ?? context.l10n.selectLabel,
                 iconColor: cat != null
                     ? harmonizeCategory(context, Color(cat.colorValue))
                     : cs.onSurfaceVariant,
@@ -554,19 +557,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         const SizedBox(width: KuberSpacing.md),
         Expanded(
           child: accounts.when(
-            loading: () => _buildSelectorTilePlaceholder('FROM ACCOUNT'),
-            error: (_, _) => _buildSelectorTilePlaceholder('FROM ACCOUNT'),
+            loading: () => _buildSelectorTilePlaceholder(context.l10n.fromAccount),
+            error: (_, _) => _buildSelectorTilePlaceholder(context.l10n.fromAccount),
             data: (accs) {
               final acc = _selectedAccountId != null
                   ? accs.where((a) => a.id == _selectedAccountId).firstOrNull
                   : null;
               return SelectorTile(
                 key: TutorialStepKeys.accountPicker,
-                label: 'FROM ACCOUNT',
+                label: context.l10n.fromAccount,
                 icon: acc != null
                     ? resolveAccountIcon(acc)
                     : Icons.account_balance_wallet_outlined,
-                value: acc?.name ?? 'Select',
+                value: acc?.name ?? context.l10n.selectLabel,
                 iconColor: acc != null
                     ? resolveAccountColor(acc)
                     : cs.onSurfaceVariant,
@@ -596,15 +599,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       child: AppButton(
         label: _isEditing
             ? (_type == 'expense'
-                  ? 'Update Expense'
+                  ? context.l10n.updateExpense
                   : _type == 'income'
-                  ? 'Update Income'
-                  : 'Update Transfer')
+                  ? context.l10n.updateIncome
+                  : context.l10n.updateTransferBtn)
             : (_type == 'expense'
-                  ? 'Save Expense'
+                  ? context.l10n.saveExpense
                   : _type == 'income'
-                  ? 'Save Income'
-                  : 'Save Transfer'),
+                  ? context.l10n.saveIncome
+                  : context.l10n.saveTransferBtn),
         type: AppButtonType.primary,
         fullWidth: true,
         onPressed: _save,
@@ -839,6 +842,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   /// type, account, category, and date are preserved; focus returns to the
   /// amount field. Disabled in edit mode.
   Future<void> _save({bool keepOpen = false}) async {
+    final l10n = context.l10n;
     if (_type == 'transfer') {
       await _saveTransfer(keepOpen: keepOpen);
       return;
@@ -852,21 +856,21 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (name.isEmpty) {
       showKuberSnackBar(
         context,
-        'Please enter a transaction name',
+        l10n.enterTransactionName,
         isError: true,
       );
       return;
     }
     if (amount == null || amount <= 0) {
-      showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
+      showKuberSnackBar(context, l10n.enterValidAmount, isError: true);
       return;
     }
     if (_selectedCategoryId == null) {
-      showKuberSnackBar(context, 'Please select a category', isError: true);
+      showKuberSnackBar(context, l10n.selectCategoryError, isError: true);
       return;
     }
     if (_selectedAccountId == null) {
-      showKuberSnackBar(context, 'Please select an account', isError: true);
+      showKuberSnackBar(context, l10n.selectAccountError, isError: true);
       return;
     }
 
@@ -915,7 +919,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           );
     } catch (e) {
       if (mounted) {
-        showKuberSnackBar(context, 'Failed to save: $e', isError: true);
+        showKuberSnackBar(context, l10n.failedToSave('$e'), isError: true);
       }
       return;
     }
@@ -923,14 +927,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (!mounted) return;
 
     if (keepOpen && !_isEditing) {
-      _resetForAnother('Transaction Saved! Add another?');
+      _resetForAnother(l10n.addAnotherPrompt);
       return;
     }
 
     context.pop();
     showKuberSnackBar(
       context,
-      _isEditing ? 'Transaction updated' : 'Transaction saved',
+      _isEditing ? l10n.transactionUpdated : l10n.transactionSaved,
     );
   }
 
@@ -951,17 +955,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   Future<void> _saveTransfer({bool keepOpen = false}) async {
+    final l10n = context.l10n;
     final amount = double.tryParse(
       _amountController.text.trim().replaceAll(',', ''),
     );
     if (amount == null || amount <= 0) {
-      showKuberSnackBar(context, 'Please enter a valid amount', isError: true);
+      showKuberSnackBar(context, l10n.enterValidAmount, isError: true);
       return;
     }
     if (_selectedFromAccountId == null) {
       showKuberSnackBar(
         context,
-        'Please select a source account',
+        l10n.selectSourceAccount,
         isError: true,
       );
       return;
@@ -969,7 +974,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (_selectedToAccountId == null) {
       showKuberSnackBar(
         context,
-        'Please select a destination account',
+        l10n.selectDestinationAccount,
         isError: true,
       );
       return;
@@ -977,7 +982,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (_selectedFromAccountId == _selectedToAccountId) {
       showKuberSnackBar(
         context,
-        'Source and destination accounts must be different',
+        l10n.accountsMustDiffer,
         isError: true,
       );
       return;
@@ -1012,7 +1017,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        showKuberSnackBar(context, 'Failed to save: $e', isError: true);
+        showKuberSnackBar(context, l10n.failedToSave('$e'), isError: true);
       }
       return;
     }
@@ -1020,14 +1025,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     if (!mounted) return;
 
     if (keepOpen && !_isEditing) {
-      _resetForAnother('Transaction saved! Add another');
+      _resetForAnother(l10n.addAnotherPrompt);
       return;
     }
 
     context.pop();
     showKuberSnackBar(
       context,
-      _isEditing ? 'Transfer updated' : 'Transfer saved',
+      _isEditing ? l10n.transferUpdated : l10n.transferSaved,
     );
   }
 

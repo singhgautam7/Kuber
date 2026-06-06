@@ -18,10 +18,11 @@
 // no schema changes. The last-activity strip needs a per-account "most
 // recent transaction" provider; the relevant TODO is marked below.
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -78,7 +79,7 @@ class AccountsScreen extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text(
             'Error: $e',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            style: localeFont(color: cs.onSurfaceVariant),
           ),
         ),
         data: (accounts) => _AccountsBody(accounts: accounts),
@@ -129,9 +130,9 @@ class _AccountsBody extends ConsumerWidget {
         ),
         SliverToBoxAdapter(
           child: KuberPageHeader(
-            title: 'Manage\nAccounts',
+            title: context.l10n.manageAccounts,
             description: '',
-            actionTooltip: 'Add Account',
+            actionTooltip: context.l10n.addAccount,
             onAction: () => context.push('/accounts/add'),
           ),
         ),
@@ -160,9 +161,9 @@ class _AccountsBody extends ConsumerWidget {
             hasScrollBody: false,
             child: KuberEmptyState(
               icon: Icons.account_balance_wallet_outlined,
-              title: 'No accounts yet',
-              description: 'Add your first account to start tracking',
-              actionLabel: 'Add Account',
+              title: context.l10n.noAccountsYet,
+              description: context.l10n.addFirstAccount,
+              actionLabel: context.l10n.addAccount,
               onAction: () => context.push('/accounts/add'),
             ),
           )
@@ -244,8 +245,8 @@ class _AddAnotherAccountChip extends StatelessWidget {
               ),
               const SizedBox(width: KuberSpacing.sm),
               Text(
-                'Add another account',
-                style: GoogleFonts.inter(
+                context.l10n.addAnotherAccount,
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kuber/l10n/app_localizations.dart';
 
 import '../../../core/database/isar_service.dart';
 import '../../../core/database/seed_service.dart';
@@ -35,6 +36,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   String _version = '';
   String _selectedCurrencyCode = 'INR';
   ThemeMode _selectedTheme = ThemeMode.system;
+  Locale _selectedLocale = const Locale('en');
   bool _saving = false;
 
   @override
@@ -44,6 +46,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     _nameController = TextEditingController(text: settings?.userName ?? '');
     _selectedCurrencyCode = settings?.currency ?? 'INR';
     _selectedTheme = settings?.themeMode ?? ref.read(themeModeProvider);
+    _selectedLocale = settings?.locale ?? const Locale('en');
     _loadVersion();
   }
 
@@ -111,10 +114,13 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final localizations = AppLocalizations.of(context);
     final primaryLabel = switch (_currentPage) {
-      0 => 'Get started',
-      3 => _saving ? 'Starting...' : 'Start my journey',
-      _ => 'Continue',
+      0 => localizations?.getStarted ?? 'Get started',
+      3 => _saving
+          ? (localizations?.starting ?? 'Starting...')
+          : (localizations?.startJourney ?? 'Start my journey'),
+      _ => localizations?.continueLabel ?? 'Continue',
     };
 
     return Scaffold(
@@ -140,11 +146,15 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                     nameController: _nameController,
                     selectedCurrencyCode: _selectedCurrencyCode,
                     selectedTheme: _selectedTheme,
+                    selectedLocale: _selectedLocale,
                     onCurrencyChanged: (code) {
                       setState(() => _selectedCurrencyCode = code);
                     },
                     onThemeChanged: (mode) {
                       setState(() => _selectedTheme = mode);
+                    },
+                    onLocaleChanged: (locale) {
+                      setState(() => _selectedLocale = locale);
                     },
                     onNameChanged: () => setState(() {}),
                   ),

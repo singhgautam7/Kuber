@@ -1,10 +1,10 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../features/history/providers/history_filter_provider.dart';
@@ -1200,7 +1200,7 @@ class _BucketDropdown extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   b.label,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight:
                         current == b ? FontWeight.w700 : FontWeight.w500,
@@ -1225,7 +1225,7 @@ class _BucketDropdown extends StatelessWidget {
           children: [
             Text(
               current.label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurface,
@@ -1253,4 +1253,3 @@ class _HorizontalClipper extends CustomClipper<Rect> {
   @override
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
 }
-

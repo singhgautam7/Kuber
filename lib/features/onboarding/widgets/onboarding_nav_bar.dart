@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import 'onboarding_dots_indicator.dart';
@@ -82,7 +82,7 @@ class OnboardingNavBar extends StatelessWidget {
                                     const SizedBox(width: KuberSpacing.xs),
                                     Text(
                                       'Back',
-                                      style: GoogleFonts.inter(
+                                      style: localeFont(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -133,7 +133,7 @@ class OnboardingNavBar extends StatelessWidget {
                                   primaryLabel,
                                   overflow: TextOverflow.visible,
                                   softWrap: false,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
                                   ),

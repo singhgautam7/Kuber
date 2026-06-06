@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
@@ -27,7 +28,7 @@ class _TutorialNudgeSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return KuberBottomSheet(
-      title: 'Just so you know',
+      title: context.l10n.justSoYouKnow,
       leadingIcon: SquircleIcon(icon: Icons.school_rounded, color: cs.primary),
       actions: Column(
         mainAxisSize: MainAxisSize.min,
@@ -42,7 +43,7 @@ class _TutorialNudgeSheet extends ConsumerWidget {
                   await launchTutorialFromMore(context, ref);
                 }
               },
-              child: const Text('Go to tutorials'),
+              child: Text(context.l10n.goToTutorials),
             ),
           ),
           const SizedBox(height: KuberSpacing.sm),
@@ -52,8 +53,8 @@ class _TutorialNudgeSheet extends ConsumerWidget {
               onPressed: () =>
                   Navigator.of(context, rootNavigator: true).pop(),
               child: Text(
-                'Got it',
-                style: GoogleFonts.inter(
+                context.l10n.gotIt,
+                style: localeFont(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                 ),
@@ -63,19 +64,17 @@ class _TutorialNudgeSheet extends ConsumerWidget {
         ],
       ),
       child: Column(
-        children: const [
+        children: [
           _NudgeRow(
             icon: Icons.touch_app_rounded,
-            title: 'You can explore at your own pace',
-            body:
-                'Kuber is built to feel familiar, so you can start logging right away.',
+            title: context.l10n.exploreAtOwnPace,
+            body: context.l10n.exploreAtOwnPaceBody,
           ),
-          SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpacing.md),
           _NudgeRow(
             icon: Icons.map_rounded,
-            title: 'A walkthrough is always nearby',
-            body:
-                'Open More, then App Tutorial, whenever you want a quick guided tour.',
+            title: context.l10n.walkthroughNearby,
+            body: context.l10n.walkthroughNearbyBody,
           ),
         ],
       ),
@@ -109,7 +108,7 @@ class _NudgeRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: cs.onSurface,
@@ -118,7 +117,7 @@ class _NudgeRow extends StatelessWidget {
               const SizedBox(height: KuberSpacing.xs),
               Text(
                 body,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   height: 1.45,
                   color: cs.onSurfaceVariant,

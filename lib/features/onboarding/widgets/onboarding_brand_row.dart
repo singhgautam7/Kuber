@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/brand_icon.dart';
@@ -26,7 +26,7 @@ class OnboardingBrandRow extends StatelessWidget {
           const SizedBox(width: KuberSpacing.md),
           Text(
             'Kuber',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -39,7 +39,7 @@ class OnboardingBrandRow extends StatelessWidget {
               onPressed: onSkip,
               child: Text(
                 'Skip',
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant,

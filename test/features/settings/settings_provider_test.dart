@@ -114,4 +114,6 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   Future<void> setNavBarStyle(NavBarStyle style) async {}
   @override
   Future<void> setMoreTabLayout(MoreTabLayout layout) async {}
+  @override
+  Future<void> setLocale(dynamic locale) async {}
 }

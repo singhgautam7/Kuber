@@ -1,7 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -143,7 +143,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                       children: [
                         Text(
                           'Select people',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: cs.onSurface,
@@ -153,7 +153,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                         const SizedBox(height: 2),
                         Text(
                           '${_selected.length} of ${allNames.length} selected · synced with Lent / Borrow',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 12,
                             color: cs.onSurfaceVariant,
                           ),
@@ -176,10 +176,10 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
               child: TextField(
                 controller: _searchCtrl,
                 onChanged: (v) => setState(() => _query = v),
-                style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                style: localeFont(fontSize: 14, color: cs.onSurface),
                 decoration: InputDecoration(
                   hintText: 'Search or type a new name…',
-                  hintStyle: GoogleFonts.inter(
+                  hintStyle: localeFont(
                     fontSize: 14,
                     color: cs.onSurfaceVariant,
                   ),
@@ -220,7 +220,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                   children: [
                     Text(
                       'YOUR PEOPLE',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.1,
@@ -281,7 +281,7 @@ class _PeoplePickerSheetState extends ConsumerState<_PeoplePickerSheet> {
                         Expanded(
                           child: Text(
                             'Names must be unique. Updates here also reflect in Lent / Borrow.',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 11,
                               color: cs.onSurfaceVariant,
                             ),
@@ -372,10 +372,10 @@ class _AddPersonInput extends StatelessWidget {
               controller: controller,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+              style: localeFont(fontSize: 14, color: cs.onSurface),
               decoration: InputDecoration(
                 hintText: 'Name (must be unique)...',
-                hintStyle: GoogleFonts.inter(
+                hintStyle: localeFont(
                   fontSize: 14,
                   color: cs.onSurfaceVariant,
                 ),
@@ -470,7 +470,7 @@ class _PersonTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Text(
                       isYou ? 'You' : name.split(' ').first,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: isSelected ? cs.onSurface : cs.onSurfaceVariant,
@@ -518,7 +518,7 @@ class _PersonTile extends StatelessWidget {
                   ),
                   child: Text(
                     'ME',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 8,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
@@ -571,7 +571,7 @@ class _AddPersonTile extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               'Add new',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: cs.primary,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
@@ -97,10 +98,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 // Page header
                 SliverToBoxAdapter(
                   child: KuberPageHeader(
-                    title: 'Transaction\nHistory',
-                    description: 'Your past expenses, incomes and transfers',
+                    title: context.l10n.historyTitle,
+                    description: context.l10n.historyDescription,
                     actionIcon: Icons.file_download_outlined,
-                    actionTooltip: 'Export',
+                    actionTooltip: context.l10n.exportLabel,
                     onAction: () => showExportBottomSheet(
                       context: context,
                       exportType: ExportType.transactions,
@@ -128,7 +129,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   ],
                   error: (e, _) => [
                     SliverFillRemaining(
-                      child: Center(child: Text('Error: $e')),
+                      child: Center(child: Text('${context.l10n.errorLabel}: $e')),
                     ),
                   ],
                   data: (view) {
@@ -160,7 +161,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'EXP ',
+                                  '${context.l10n.expLabel} ',
                                   style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
@@ -184,7 +185,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 ),
                                 const SizedBox(width: KuberSpacing.lg),
                                 Text(
-                                  'INC ',
+                                  '${context.l10n.incLabel} ',
                                   style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
@@ -208,7 +209,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 ),
                                 const SizedBox(width: KuberSpacing.lg),
                                 Text(
-                                  'NET ',
+                                  '${context.l10n.netLabel} ',
                                   style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
@@ -259,12 +260,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     color: cs.onSurfaceVariant,
                                   ),
                               children: [
-                                const TextSpan(text: 'SHOWING '),
+                                TextSpan(text: '${context.l10n.showingLabel} '),
                                 TextSpan(
                                   text: '$filteredCount ',
                                   style: TextStyle(color: cs.primary),
                                 ),
-                                const TextSpan(text: 'TRANSACTIONS'),
+                                TextSpan(text: context.l10n.transactionsLabel),
                               ],
                             ),
                           ),
@@ -277,13 +278,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           child: KuberEmptyState(
                             icon: Icons.receipt_long_outlined,
                             title: sourceEmpty
-                                ? 'No transactions yet'
-                                : 'No transactions found',
+                                ? context.l10n.noTransactionsYet
+                                : context.l10n.noTransactionsFound,
                             description: sourceEmpty
-                                ? 'Start tracking your expenses'
-                                : 'Try adjusting your search or filters',
+                                ? context.l10n.startTrackingExpenses
+                                : context.l10n.adjustSearchFilters,
                             actionLabel: sourceEmpty
-                                ? 'Add Transaction'
+                                ? context.l10n.addTransaction
                                 : null,
                             onAction: sourceEmpty
                                 ? () => context.push('/add-transaction')
@@ -471,7 +472,7 @@ class _SelectionActionBar extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '${selectedIds.length} selected',
+                      context.l10n.selectedCount('${selectedIds.length}'),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -481,7 +482,7 @@ class _SelectionActionBar extends ConsumerWidget {
                     Row(
                       children: [
                         Text(
-                          'EXP ${maskAmount('-${fmt.formatCurrency(totalExp)}', isPrivate)}',
+                          '${context.l10n.expLabel} ${maskAmount('-${fmt.formatCurrency(totalExp)}', isPrivate)}',
                           style: TextStyle(
                             fontSize: 10,
                             color: cs.error,
@@ -490,7 +491,7 @@ class _SelectionActionBar extends ConsumerWidget {
                         ),
                         const SizedBox(width: KuberSpacing.md),
                         Text(
-                          'INC ${maskAmount('+${fmt.formatCurrency(totalInc)}', isPrivate)}',
+                          '${context.l10n.incLabel} ${maskAmount('+${fmt.formatCurrency(totalInc)}', isPrivate)}',
                           style: TextStyle(
                             fontSize: 10,
                             color: cs.tertiary,
@@ -499,7 +500,7 @@ class _SelectionActionBar extends ConsumerWidget {
                         ),
                         const SizedBox(width: KuberSpacing.md),
                         Text(
-                          'NET ${maskAmount('${totalNet > 0
+                          '${context.l10n.netLabel} ${maskAmount('${totalNet > 0
                               ? "+"
                               : totalNet < 0
                               ? "-"
@@ -549,12 +550,14 @@ class _SelectionActionBar extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Delete ${selectedIds.length} transactions?'),
-        content: const Text('This action cannot be undone.'),
+        title: Text(
+          context.l10n.deleteTransactionsConfirm('${selectedIds.length}'),
+        ),
+        content: Text(context.l10n.actionCannotBeUndone),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancelLabel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -568,12 +571,12 @@ class _SelectionActionBar extends ConsumerWidget {
               if (context.mounted) {
                 showKuberSnackBar(
                   context,
-                  '${selectedIds.length} transactions deleted',
+                  context.l10n.transactionsDeleted('${selectedIds.length}'),
                   isError: true,
                 );
               }
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.deleteLabel),
           ),
         ],
       ),

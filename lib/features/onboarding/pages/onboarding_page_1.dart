@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../widgets/onboarding_entrance.dart';
@@ -41,9 +42,9 @@ class OnboardingPageOne extends StatelessWidget {
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 160),
                   child: Text(
-                    'Your money.\nYour rules.',
+                    context.l10n.yourMoneyYourRules,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 32,
                       height: 1.05,
                       fontWeight: FontWeight.w800,
@@ -56,9 +57,9 @@ class OnboardingPageOne extends StatelessWidget {
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 260),
                   child: Text(
-                    'An expense manager that lives on your device. No cloud, no signup, no compromises.',
+                    context.l10n.onboardingPage1Description,
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       height: 1.45,
                       color: cs.onSurfaceVariant,
@@ -105,8 +106,10 @@ class _VersionBadge extends StatelessWidget {
           ),
           const SizedBox(width: KuberSpacing.sm),
           Text(
-            'OFFLINE-FIRST · ${version.isEmpty ? 'V' : version.toUpperCase()}',
-            style: GoogleFonts.inter(
+            context.l10n.offlineFirstBadge(
+              version.isEmpty ? 'V' : version.toUpperCase(),
+            ),
+            style: localeFont(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -321,7 +324,7 @@ class _CoinOrbitPainter extends CustomPainter {
     final textPainter = TextPainter(
       text: TextSpan(
         text: '₹',
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: radius * 1.12,
           fontWeight: FontWeight.w900,
           color: _goldDark.withValues(alpha: large ? 0.95 : 0.8),

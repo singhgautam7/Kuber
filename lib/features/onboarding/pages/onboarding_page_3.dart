@@ -1,5 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../widgets/onboarding_fit.dart';
@@ -36,7 +37,7 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final features = _FeatureSpec.build(cs);
+    final features = _FeatureSpec.build(context);
 
     return Column(
       children: [
@@ -48,8 +49,8 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '8+ MODULES · ZERO CLUTTER',
-                  style: GoogleFonts.inter(
+                  context.l10n.modulesTitle,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -58,8 +59,8 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
                 ),
                 const SizedBox(height: KuberSpacing.md),
                 Text(
-                  'Everything in\none quiet place.',
-                  style: GoogleFonts.inter(
+                  context.l10n.everythingInOnePlace,
+                  style: localeFont(
                     fontSize: 28,
                     height: 1.05,
                     fontWeight: FontWeight.w800,
@@ -69,8 +70,8 @@ class _OnboardingPageThreeState extends State<OnboardingPageThree>
                 ),
                 const SizedBox(height: KuberSpacing.md),
                 Text(
-                  'Track expenses, plan budgets, monitor portfolios, and ask Kuber for answers.',
-                  style: GoogleFonts.inter(
+                  context.l10n.onboardingPage3Description,
+                  style: localeFont(
                     fontSize: 13,
                     height: 1.38,
                     color: cs.onSurfaceVariant,
@@ -137,48 +138,52 @@ class _FeatureSpec {
     required this.color,
   });
 
-  static List<_FeatureSpec> build(ColorScheme cs) => [
-    _FeatureSpec(
-      icon: Icons.account_balance_wallet_rounded,
-      label: 'Budgets',
-      color: cs.primary,
-    ),
-    _FeatureSpec(
-      icon: Icons.pie_chart_rounded,
-      label: 'Analytics',
-      color: cs.secondary,
-    ),
-    _FeatureSpec(
-      icon: Icons.sync_rounded,
-      label: 'Recurring',
-      color: cs.tertiary,
-    ),
-    _FeatureSpec(
-      icon: Icons.handshake_rounded,
-      label: 'Lend &\nborrow',
-      color: cs.error,
-    ),
-    _FeatureSpec(
-      icon: Icons.show_chart_rounded,
-      label: 'Investments',
-      color: cs.tertiary,
-    ),
-    _FeatureSpec(
-      icon: Icons.auto_awesome_rounded,
-      label: 'Ask Kuber AI',
-      color: cs.primary,
-    ),
-    _FeatureSpec(
-      icon: Icons.calculate_rounded,
-      label: 'Tools &\nCalculators',
-      color: cs.error,
-    ),
-    _FeatureSpec(
-      icon: Icons.label_rounded,
-      label: 'Tags &\nCategories',
-      color: cs.primary,
-    ),
-  ];
+  static List<_FeatureSpec> build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
+    return [
+      _FeatureSpec(
+        icon: Icons.account_balance_wallet_rounded,
+        label: l10n.budgetsModule,
+        color: cs.primary,
+      ),
+      _FeatureSpec(
+        icon: Icons.pie_chart_rounded,
+        label: l10n.analyticsModule,
+        color: cs.secondary,
+      ),
+      _FeatureSpec(
+        icon: Icons.sync_rounded,
+        label: l10n.recurringModule,
+        color: cs.tertiary,
+      ),
+      _FeatureSpec(
+        icon: Icons.handshake_rounded,
+        label: l10n.lendBorrowModule,
+        color: cs.error,
+      ),
+      _FeatureSpec(
+        icon: Icons.show_chart_rounded,
+        label: l10n.investmentsModule,
+        color: cs.tertiary,
+      ),
+      _FeatureSpec(
+        icon: Icons.auto_awesome_rounded,
+        label: l10n.askKuberModule,
+        color: cs.primary,
+      ),
+      _FeatureSpec(
+        icon: Icons.calculate_rounded,
+        label: l10n.toolsModule,
+        color: cs.error,
+      ),
+      _FeatureSpec(
+        icon: Icons.label_rounded,
+        label: l10n.tagsCategoriesModule,
+        color: cs.primary,
+      ),
+    ];
+  }
 }
 
 class _AnimatedFeatureCard extends StatelessWidget {
@@ -279,7 +284,7 @@ class _FeatureLabel extends StatelessWidget {
       label,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 12,
         height: 1.15,
         fontWeight: FontWeight.w800,
@@ -307,9 +312,9 @@ class _MorePill extends StatelessWidget {
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         child: Text(
-          '••• and much more!',
+          context.l10n.andMuchMore,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 14,
             fontWeight: FontWeight.w800,
             color: colorScheme.primary,

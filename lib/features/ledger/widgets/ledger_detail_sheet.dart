@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../shared/widgets/app_button.dart';
@@ -36,7 +37,7 @@ class LedgerDetailSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: ledger.personName,
-      subtitle: isLent ? 'LENT TRANSACTION' : 'BORROWED TRANSACTION',
+      subtitle: isLent ? context.l10n.lentTransaction : context.l10n.borrowedTransaction,
       leadingIcon: Container(
         width: 48,
         height: 48,
@@ -47,7 +48,7 @@ class LedgerDetailSheet extends ConsumerWidget {
         alignment: Alignment.center,
         child: Text(
           initials,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -60,7 +61,7 @@ class LedgerDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Add Payment',
+                  label: context.l10n.addPayment,
                   icon: Icons.payments_outlined,
                   type: AppButtonType.normal,
                   onPressed: ledger.isSettled
@@ -74,7 +75,7 @@ class LedgerDetailSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Mark Settled',
+                  label: context.l10n.markSettled,
                   icon: Icons.check_circle_outline,
                   type: AppButtonType.primary,
                   onPressed: ledger.isSettled
@@ -89,7 +90,7 @@ class LedgerDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Edit',
+                  label: context.l10n.editLabel,
                   icon: Icons.edit_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -101,7 +102,7 @@ class LedgerDetailSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Delete',
+                  label: context.l10n.deleteLabel,
                   icon: Icons.delete_outline_rounded,
                   type: AppButtonType.danger,
                   onPressed: () => _confirmDelete(context, ref),
@@ -119,21 +120,21 @@ class LedgerDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: _StatColumn(
-                  label: 'TOTAL',
+                  label: context.l10n.totalUpper,
                   value: fmt.formatCurrency(ledger.originalAmount),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
-                  label: 'PAID',
+                  label: context.l10n.paidUpper,
                   value: fmt.formatCurrency(paid),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
-                  label: 'REMAINING',
+                  label: context.l10n.remainingUpper,
                   value: fmt.formatCurrency(remaining.clamp(0, double.infinity)),
                   color: remaining > 0 ? cs.error : cs.tertiary,
                 ),
@@ -148,8 +149,8 @@ class LedgerDetailSheet extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'REPAYMENT PROGRESS',
-                style: GoogleFonts.inter(
+                context.l10n.repaymentProgress,
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant,
@@ -158,7 +159,7 @@ class LedgerDetailSheet extends ConsumerWidget {
               ),
               Text(
                 '${(progress * 100).toInt()}%',
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   color: cs.primary,
@@ -185,8 +186,8 @@ class LedgerDetailSheet extends ConsumerWidget {
                 Icon(Icons.calendar_today, size: 14, color: cs.onSurfaceVariant),
                 const SizedBox(width: 8),
                 Text(
-                  'DUE DATE',
-                  style: GoogleFonts.inter(
+                  context.l10n.dueDate,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -196,7 +197,7 @@ class LedgerDetailSheet extends ConsumerWidget {
                 const Spacer(),
                 Text(
                   DateFormat('MMM d, yyyy').format(ledger.expectedDate!),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -219,8 +220,8 @@ class LedgerDetailSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'NOTES',
-                        style: GoogleFonts.inter(
+                        context.l10n.notesUpper,
+                        style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -230,7 +231,7 @@ class LedgerDetailSheet extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         ledger.notes!,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 13,
                           color: cs.onSurface,
                         ),
@@ -246,8 +247,8 @@ class LedgerDetailSheet extends ConsumerWidget {
 
           // Payment history
           Text(
-            'PAYMENT HISTORY',
-            style: GoogleFonts.inter(
+            context.l10n.paymentHistory,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -262,8 +263,8 @@ class LedgerDetailSheet extends ConsumerWidget {
             data: (payments) {
               if (payments.isEmpty) {
                 return Text(
-                  'No payments recorded',
-                  style: GoogleFonts.inter(
+                  context.l10n.noPaymentsRecorded,
+                  style: localeFont(
                     fontSize: 13,
                     color: cs.onSurfaceVariant,
                   ),
@@ -282,8 +283,9 @@ class LedgerDetailSheet extends ConsumerWidget {
           // Created date
           Center(
             child: Text(
-              'CREATED ${DateFormat('MMM d, yyyy').format(ledger.createdAt).toUpperCase()}',
-              style: GoogleFonts.inter(
+              context.l10n.createdOnUpper(
+                  DateFormat('MMM d, yyyy').format(ledger.createdAt).toUpperCase()),
+              style: localeFont(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
@@ -316,19 +318,19 @@ class LedgerDetailSheet extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('Mark as Settled?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(context.l10n.markSettledConfirm,
+            style: localeFont(fontWeight: FontWeight.bold)),
         content: Text(
-          'This will record the remaining amount as a payment and mark this entry as settled.',
-          style: GoogleFonts.inter(),
+          context.l10n.markSettledBody,
+          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           AppButton(
-            label: 'Settle',
+            label: context.l10n.settleLabel,
             type: AppButtonType.primary,
             onPressed: () {
               ref.read(ledgerListProvider.notifier).markSettled(
@@ -350,19 +352,19 @@ class LedgerDetailSheet extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('Delete Ledger Entry?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(context.l10n.deleteLedgerConfirm,
+            style: localeFont(fontWeight: FontWeight.bold)),
         content: Text(
-          'This will delete the entry and ALL linked transactions. This cannot be undone.',
-          style: GoogleFonts.inter(),
+          context.l10n.deleteLedgerBody,
+          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           AppButton(
-            label: 'Delete',
+            label: context.l10n.deleteLabel,
             type: AppButtonType.danger,
             onPressed: () {
               ref.read(ledgerListProvider.notifier).deleteLedger(ledger);
@@ -402,7 +404,7 @@ class _StatColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -412,7 +414,7 @@ class _StatColumn extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w800,
             color: color,
@@ -445,8 +447,8 @@ class _PaymentRow extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isLent ? 'Payment Received' : 'Payment Made',
-                  style: GoogleFonts.inter(
+                  isLent ? context.l10n.paymentReceived : context.l10n.paymentMade,
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -454,7 +456,7 @@ class _PaymentRow extends ConsumerWidget {
                 ),
                 Text(
                   DateFormat('MMM d, yyyy').format(transaction.createdAt),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant,
                   ),
@@ -464,7 +466,7 @@ class _PaymentRow extends ConsumerWidget {
           ),
           Text(
             fmt.formatCurrency(transaction.amount),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,

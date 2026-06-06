@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -68,14 +69,14 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
         .firstOrNull;
 
     final title = widget.isClosure
-        ? 'Close Loan'
+        ? context.l10n.closeLoan
         : widget.isEmi
-            ? 'Pay EMI'
-            : 'Pay Extra';
+            ? context.l10n.payEmi
+            : context.l10n.payExtra;
 
     final buttonLabel = widget.isClosure
-        ? 'CONFIRM CLOSURE'
-        : 'CONFIRM PAYMENT';
+        ? context.l10n.confirmClosure
+        : context.l10n.confirmPayment;
 
     return KuberBottomSheet(
       title: title,
@@ -93,8 +94,8 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
         children: [
           // Amount
           Text(
-            'AMOUNT',
-            style: GoogleFonts.inter(
+            context.l10n.amountUpper,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -110,7 +111,7 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
               FilteringTextInputFormatter.allow(
                   RegExp(r'^\d*\.?\d{0,2}')),
             ],
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 20,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -118,13 +119,13 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: '0',
-              hintStyle: GoogleFonts.inter(
+              hintStyle: localeFont(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: cs.onSurfaceVariant,
               ),
               prefixText: '$symbol ',
-              prefixStyle: GoogleFonts.inter(
+              prefixStyle: localeFont(
                 fontSize: 20,
                 fontWeight: FontWeight.w300,
                 color: cs.onSurfaceVariant,
@@ -156,8 +157,8 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
 
           // Account
           Text(
-            'ACCOUNT',
-            style: GoogleFonts.inter(
+            context.l10n.accountUpper,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -179,8 +180,8 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      selectedAccount?.name ?? 'Select account',
-                      style: GoogleFonts.inter(
+                      selectedAccount?.name ?? context.l10n.selectAccountTitle,
+                      style: localeFont(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: selectedAccount != null
@@ -200,8 +201,8 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
 
           // Date
           Text(
-            'DATE',
-            style: GoogleFonts.inter(
+            context.l10n.dateUpper,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -226,7 +227,7 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
                   const SizedBox(width: 10),
                   Text(
                     DateFormat('MMM d, yyyy').format(_selectedDate),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -241,8 +242,8 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
           if (!widget.isEmi) ...[
             const SizedBox(height: 20),
             Text(
-              'NOTE (OPTIONAL)',
-              style: GoogleFonts.inter(
+              context.l10n.noteOptional,
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -252,10 +253,10 @@ class _LoanPaymentSheetState extends ConsumerState<LoanPaymentSheet> {
             const SizedBox(height: 8),
             TextField(
               controller: _noteController,
-              style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+              style: localeFont(fontSize: 14, color: cs.onSurface),
               decoration: InputDecoration(
-                hintText: 'Add a note...',
-                hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
+                hintText: context.l10n.addNoteHint,
+                hintStyle: localeFont(color: cs.onSurfaceVariant),
                 filled: true,
                 fillColor: cs.surfaceContainerHighest,
                 border: OutlineInputBorder(

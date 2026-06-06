@@ -10,6 +10,7 @@ class PrefsKeys {
   static const swipeMode = 'swipe_mode';
   static const biometricsEnabled = 'biometrics_enabled';
   static const numberSystem = 'number_system';
+  static const language = 'kuber_language';
 
   // Migration Keys
   static const migratedTxnLinkedRuleV1 = 'kuber_migrated_txn_linked_rule_v1';

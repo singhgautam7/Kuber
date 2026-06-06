@@ -10,6 +10,8 @@ import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/helpers/transaction_filters.dart';
+import '../../../core/utils/locale_font.dart';
+import '../../../l10n/app_localizations.dart';
 
 class InsightEngine {
   final List<Transaction> allTransactions;
@@ -36,122 +38,123 @@ class InsightEngine {
     InsightType type,
     bool isPositive,
   ) {
+    final l10n = lookupAppLocalizations(AppLocale.current);
     return switch (type) {
       InsightType.weekdayPattern => (
         Icons.bolt_rounded,
         const Color(0xFFF59E0B),
-        'WEEKDAY PATTERN',
+        l10n.insightLabelWeekdayPattern,
       ),
       InsightType.topCategory => (
         Icons.lightbulb_outline_rounded,
         KuberColors.primary,
-        'TOP CATEGORY',
+        l10n.insightLabelTopCategory,
       ),
       InsightType.categoryTrend =>
         isPositive
             ? (
                 Icons.trending_down_rounded,
                 KuberColors.income,
-                'CATEGORY TREND',
+                l10n.insightLabelCategoryTrend,
               )
             : (
                 Icons.trending_up_rounded,
                 KuberColors.expense,
-                'CATEGORY TREND',
+                l10n.insightLabelCategoryTrend,
               ),
       InsightType.monthComparison => (
         Icons.bar_chart_rounded,
         KuberColors.primary,
-        'MONTH TREND',
+        l10n.insightLabelMonthTrend,
       ),
       InsightType.weekendVsWeekday => (
         Icons.shopping_bag_outlined,
         const Color(0xFF8B5CF6),
-        'WEEKEND PATTERN',
+        l10n.insightLabelWeekendPattern,
       ),
       InsightType.biggestExpense => (
         Icons.payments_outlined,
         KuberColors.expense,
-        'BIG EXPENSE',
+        l10n.insightLabelBigExpense,
       ),
       InsightType.savingsTrend =>
         isPositive
-            ? (Icons.savings_outlined, KuberColors.income, 'SAVINGS')
-            : (Icons.warning_amber_rounded, const Color(0xFFF59E0B), 'SAVINGS'),
+            ? (Icons.savings_outlined, KuberColors.income, l10n.insightLabelSavings)
+            : (Icons.warning_amber_rounded, const Color(0xFFF59E0B), l10n.insightLabelSavings),
       InsightType.recurringBurden => (
         Icons.sync_rounded,
         KuberColors.primary,
-        'RECURRING',
+        l10n.insightLabelRecurring,
       ),
       InsightType.spendingFreeStreak => (
         Icons.local_fire_department_rounded,
         KuberColors.income,
-        'STREAK',
+        l10n.insightLabelStreak,
       ),
       InsightType.spendingHighToday => (
         Icons.notification_important_outlined,
         KuberColors.expense,
-        'TODAY',
+        l10n.insightLabelToday,
       ),
       InsightType.spendingFasterThisWeek => (
         Icons.speed_rounded,
         const Color(0xFFF59E0B),
-        'THIS WEEK',
+        l10n.insightLabelThisWeek,
       ),
       InsightType.categoryConcentration => (
         Icons.pie_chart_outline_rounded,
         KuberColors.primary,
-        'DID YOU KNOW',
+        l10n.insightLabelDidYouKnow,
       ),
       InsightType.loanEmiTotal => (
         Icons.account_balance_rounded,
         KuberColors.primary,
-        'LOANS',
+        l10n.insightLabelLoans,
       ),
       InsightType.loanPayoffCountdown => (
         Icons.event_available_rounded,
         KuberColors.income,
-        'LOANS',
+        l10n.insightLabelLoans,
       ),
       InsightType.loanInterestPaid => (
         Icons.percent_rounded,
         const Color(0xFFF59E0B),
-        'LOAN INTEREST',
+        l10n.insightLabelLoanInterest,
       ),
       InsightType.ledgerOutstanding => (
         Icons.receipt_long_rounded,
         KuberColors.primary,
-        'LEND / BORROW',
+        l10n.insightLabelLendBorrow,
       ),
       InsightType.ledgerOldestOpen => (
         Icons.schedule_rounded,
         const Color(0xFFF59E0B),
-        'LEND / BORROW',
+        l10n.insightLabelLendBorrow,
       ),
       InsightType.investmentPortfolioChange => (
         Icons.show_chart_rounded,
         KuberColors.income,
-        'INVESTMENTS',
+        l10n.insightLabelInvestments,
       ),
       InsightType.investmentTopPerformer => (
         Icons.trending_up_rounded,
         KuberColors.income,
-        'TOP INVESTMENT',
+        l10n.insightLabelTopInvestment,
       ),
       InsightType.investmentPeriodInvested => (
         Icons.savings_rounded,
         KuberColors.primary,
-        'INVESTMENTS',
+        l10n.insightLabelInvestments,
       ),
       InsightType.fallbackTotal => (
         Icons.account_balance_wallet_rounded,
         KuberColors.primary,
-        'SUMMARY',
+        l10n.insightLabelSummary,
       ),
       InsightType.fallbackTip => (
         Icons.lightbulb_outline_rounded,
         KuberColors.income,
-        'TIP',
+        l10n.insightLabelTip,
       ),
     };
   }
@@ -247,14 +250,15 @@ class InsightEngine {
     }
     final otherMedian = median(otherAmounts);
 
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
+    final l10n = lookupAppLocalizations(AppLocale.current);
+    final days = [
+      l10n.weekdayMonday,
+      l10n.weekdayTuesday,
+      l10n.weekdayWednesday,
+      l10n.weekdayThursday,
+      l10n.weekdayFriday,
+      l10n.weekdaySaturday,
+      l10n.weekdaySunday,
     ];
     final dayName = days[peakDay - 1];
     final cs = currencySymbol;
@@ -268,15 +272,18 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.weekdayPattern,
-        message:
-            'You typically spend $cs$highest on ${dayName}s vs $cs${otherMedian.toStringAsFixed(0)} on other days',
+        message: l10n.weekdayPatternInsight(
+          '$cs$highest',
+          dayName,
+          '$cs${otherMedian.toStringAsFixed(0)}',
+        ),
         emoji: '⚡',
         confidence: (pctAbove / 100).clamp(0.3, 0.95),
         isPositive: false,
         iconData: icon,
         iconColor: color,
         typeLabel: label,
-        highlights: ['$cs$highest', '${dayName}s'],
+        highlights: ['$cs$highest', dayName],
         highlightIsWarning: true,
       ),
     ];
@@ -312,7 +319,11 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.topCategory,
-        message: '${pct.toInt()}% of spending goes to $catName ($cs$amount)',
+        message: lookupAppLocalizations(AppLocale.current).topCategoryInsight(
+          pct.toInt().toString(),
+          catName,
+          '$cs$amount',
+        ),
         emoji: '🏷️',
         confidence: (pct / 100).clamp(0.3, 0.9),
         isPositive: false,
@@ -355,7 +366,10 @@ class InsightEngine {
 
       final insight = KuberInsight(
         type: InsightType.categoryTrend,
-        message: '$catName spending is ${formatDelta(pctChange)} vs last month',
+        message: lookupAppLocalizations(AppLocale.current).categoryTrendInsight(
+          catName,
+          formatDelta(pctChange),
+        ),
         emoji: isUp ? '📈' : '📉',
         confidence: (pctChange.abs() / 200).clamp(0.3, 0.9),
         isPositive: !isUp,
@@ -416,8 +430,9 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.monthComparison,
-        message:
-            'Spending is ${formatDelta(pctChange)} vs this point last month',
+        message: lookupAppLocalizations(AppLocale.current).monthComparisonInsight(
+          formatDelta(pctChange),
+        ),
         emoji: isUp ? '📈' : '📉',
         confidence: (pctChange.abs() / 100).clamp(0.3, 0.9),
         isPositive: !isUp,
@@ -490,8 +505,10 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.weekendVsWeekday,
-        message:
-            'Weekend transactions average $cs${weekendMedian.toStringAsFixed(0)} vs $cs${weekdayMedian.toStringAsFixed(0)} on weekdays',
+        message: lookupAppLocalizations(AppLocale.current).weekendVsWeekdayInsight(
+          '$cs${weekendMedian.toStringAsFixed(0)}',
+          '$cs${weekdayMedian.toStringAsFixed(0)}',
+        ),
         emoji: pctDiff > 0 ? '🎉' : '💼',
         confidence: (pctDiff.abs() / 100).clamp(0.3, 0.85),
         isPositive: pctDiff <= 0,
@@ -530,8 +547,11 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.biggestExpense,
-        message:
-            '${biggest.name} (${_moneyWhole(biggest.amount)}) was ${ratio.toStringAsFixed(1)}× your typical spend',
+        message: lookupAppLocalizations(AppLocale.current).biggestExpenseInsight(
+          biggest.name,
+          _moneyWhole(biggest.amount),
+          ratio.toStringAsFixed(1),
+        ),
         emoji: '💸',
         confidence: (ratio / 10).clamp(0.4, 0.9),
         isPositive: false,
@@ -573,7 +593,7 @@ class InsightEngine {
       return [
         KuberInsight(
           type: InsightType.savingsTrend,
-          message: 'You\'re saving money this month. Keep it up!',
+          message: lookupAppLocalizations(AppLocale.current).savingsTrendPositive,
           emoji: '🎯',
           confidence: 0.7,
           isPositive: true,
@@ -597,8 +617,8 @@ class InsightEngine {
         KuberInsight(
           type: InsightType.savingsTrend,
           message: isUp
-              ? 'Savings are ${formatDelta(pctChange)} vs last month'
-              : 'Savings dipped ${formatDelta(pctChange)} vs last month',
+              ? lookupAppLocalizations(AppLocale.current).savingsTrendInsight(formatDelta(pctChange))
+              : lookupAppLocalizations(AppLocale.current).savingsTrendDipInsight(formatDelta(pctChange)),
           emoji: isUp ? '🎯' : '⚠️',
           confidence: (pctChange.abs() / 100).clamp(0.3, 0.85),
           isPositive: isUp,
@@ -641,8 +661,9 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.recurringBurden,
-        message:
-            '${formatter.formatPercentage(pct)} of spending is from recurring transactions',
+        message: lookupAppLocalizations(AppLocale.current).recurringBurdenInsight(
+          formatter.formatPercentage(pct),
+        ),
         emoji: '🔄',
         confidence: (pct / 100).clamp(0.4, 0.85),
         isPositive: false,
@@ -690,7 +711,9 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.spendingFreeStreak,
-        message: '$streak-day spending-free streak before today!',
+        message: lookupAppLocalizations(AppLocale.current).streakInsight(
+          streak.toString(),
+        ),
         emoji: '🔥',
         confidence: (streak / 14).clamp(0.4, 0.9),
         isPositive: true,
@@ -757,8 +780,11 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.spendingHighToday,
-        message:
-            "You've spent $amountStr today, which is $diffStr above your 30-day daily average of $medStr",
+        message: lookupAppLocalizations(AppLocale.current).spentTodayInsight(
+          amountStr,
+          diffStr,
+          medStr,
+        ),
         confidence: (todayTotal / (dailyMedian * 2)).clamp(0.5, 1.0),
         isPositive: false,
         iconData: icon,
@@ -830,8 +856,11 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.spendingFasterThisWeek,
-        message:
-            "You're spending $weekStr/day this week, which is $diffStr faster than your usual $baseStr/day",
+        message: lookupAppLocalizations(AppLocale.current).spendingFasterInsight(
+          weekStr,
+          diffStr,
+          baseStr,
+        ),
         confidence: (thisWeekDaily / (baselineDaily * 1.3)).clamp(0.5, 0.9),
         isPositive: false,
         iconData: icon,
@@ -876,7 +905,10 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.categoryConcentration,
-        message: '$pctStr of your spending ($amtStr) goes to just 3 categories',
+        message: lookupAppLocalizations(AppLocale.current).categoryConcentrationInsight(
+          pctStr,
+          amtStr,
+        ),
         confidence: (pct / 100) * 0.7,
         isPositive: false,
         iconData: icon,
@@ -917,7 +949,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.loanEmiTotal,
-          message: 'Loan EMIs add up to $amount this month',
+          message: lookupAppLocalizations(AppLocale.current).loanEmiTotalInsight(amount),
           confidence: (activeLoans.length / 5).clamp(0.35, 0.85),
           isPositive: false,
           iconData: icon,
@@ -942,8 +974,11 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.loanPayoffCountdown,
-          message:
-              '${loan.name} is about $months month${months == 1 ? '' : 's'} from payoff',
+          message: lookupAppLocalizations(AppLocale.current).loanPayoffCountdownInsight(
+            loan.name,
+            months.toString(),
+            months == 1 ? '' : 's',
+          ),
           confidence: 0.55,
           isPositive: true,
           iconData: icon,
@@ -974,7 +1009,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.loanInterestPaid,
-          message: 'Total loan interest paid is $amount so far',
+          message: lookupAppLocalizations(AppLocale.current).loanInterestPaidInsight(amount),
           confidence: 0.5,
           isPositive: false,
           iconData: icon,
@@ -1011,8 +1046,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.ledgerOutstanding,
-          message:
-              'Open lend and borrow totals are $receive owed to you and $owe owed by you',
+          message: lookupAppLocalizations(AppLocale.current).ledgerOutstandingInsight(receive, owe),
           confidence: 0.65,
           isPositive: owedToUser >= owedByUser,
           iconData: icon,
@@ -1035,8 +1069,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.ledgerOldestOpen,
-          message:
-              '${oldest.personName} has the oldest open entry at $ageDays days',
+          message: lookupAppLocalizations(AppLocale.current).ledgerOldestOpenInsight(oldest.personName, ageDays.toString()),
           confidence: (ageDays / 60).clamp(0.35, 0.85),
           isPositive: false,
           iconData: icon,
@@ -1077,7 +1110,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.investmentPortfolioChange,
-          message: 'Your portfolio is $amount versus invested value',
+          message: lookupAppLocalizations(AppLocale.current).investmentPortfolioChangeInsight(amount),
           confidence: (change.abs() / invested).clamp(0.35, 0.9),
           isPositive: isPositive,
           iconData: icon,
@@ -1110,7 +1143,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.investmentTopPerformer,
-          message: '${top.investment.name} is your top performer at $pct gain',
+          message: lookupAppLocalizations(AppLocale.current).investmentTopPerformerInsight(top.investment.name, pct),
           confidence: top.gain.clamp(0.35, 0.9),
           isPositive: true,
           iconData: icon,
@@ -1138,7 +1171,7 @@ class InsightEngine {
       insights.add(
         KuberInsight(
           type: InsightType.investmentPeriodInvested,
-          message: 'You invested $amount this month',
+          message: lookupAppLocalizations(AppLocale.current).investmentPeriodInvestedInsight(amount),
           confidence: 0.55,
           isPositive: true,
           iconData: icon,
@@ -1161,7 +1194,7 @@ class InsightEngine {
       return [
         KuberInsight(
           type: InsightType.fallbackTip,
-          message: 'Start adding transactions to unlock smart insights',
+          message: lookupAppLocalizations(AppLocale.current).fallbackTipInsight,
           emoji: '💡',
           confidence: 0.1,
           isPositive: true,
@@ -1179,7 +1212,7 @@ class InsightEngine {
     return [
       KuberInsight(
         type: InsightType.fallbackTotal,
-        message: 'You\'ve spent ${_moneyWhole(total)} in the last 30 days',
+        message: lookupAppLocalizations(AppLocale.current).fallbackTotalInsight(_moneyWhole(total)),
         emoji: '💰',
         confidence: 0.15,
         isPositive: false,

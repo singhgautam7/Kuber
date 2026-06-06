@@ -1,0 +1,2196 @@
+{
+  "@@locale": "en",
+  "continueLabel": "Continue",
+  "@continueLabel": {},
+  "cancelLabel": "Cancel",
+  "@cancelLabel": {},
+  "saveLabel": "Save",
+  "@saveLabel": {},
+  "editLabel": "Edit",
+  "@editLabel": {},
+  "deleteLabel": "Delete",
+  "@deleteLabel": {},
+  "gotIt": "Got it",
+  "@gotIt": {},
+  "skip": "Skip",
+  "@skip": {},
+  "search": "Search",
+  "@search": {},
+  "getStarted": "Get started",
+  "@getStarted": {},
+  "starting": "Starting...",
+  "@starting": {},
+  "startJourney": "Start my journey",
+  "@startJourney": {},
+  "yourMoneyYourRules": "Your money.\nYour rules.",
+  "@yourMoneyYourRules": {},
+  "onboardingPage1Description": "An expense manager that lives on your device. No cloud, no signup, no compromises.",
+  "@onboardingPage1Description": {},
+  "offlineFirstBadge": "OFFLINE-FIRST · {version}",
+  "@offlineFirstBadge": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "privateByDesign": "Private by design.",
+  "@privateByDesign": {},
+  "onboardingPage2Description": "Your money stays on your device. No telemetry, no syncing, no third parties.",
+  "@onboardingPage2Description": {},
+  "fullyOfflineTitle": "Fully offline",
+  "@fullyOfflineTitle": {},
+  "fullyOfflineBody": "No cloud servers. Nothing to breach. Works in airplane mode.",
+  "@fullyOfflineBody": {},
+  "noAccountTitle": "No account needed",
+  "@noAccountTitle": {},
+  "noAccountBody": "Open the app and start. Zero signup, zero friction.",
+  "@noAccountBody": {},
+  "privacyModeTitle": "Privacy mode",
+  "@privacyModeTitle": {},
+  "privacyModeBody": "One tap hides every balance when you hand over your phone.",
+  "@privacyModeBody": {},
+  "modulesTitle": "8+ MODULES · ZERO CLUTTER",
+  "@modulesTitle": {},
+  "everythingInOnePlace": "Everything in\none quiet place.",
+  "@everythingInOnePlace": {},
+  "onboardingPage3Description": "Track expenses, plan budgets, monitor portfolios, and ask Kuber for answers.",
+  "@onboardingPage3Description": {},
+  "budgetsModule": "Budgets",
+  "@budgetsModule": {},
+  "analyticsModule": "Analytics",
+  "@analyticsModule": {},
+  "recurringModule": "Recurring",
+  "@recurringModule": {},
+  "lendBorrowModule": "Lend &\nborrow",
+  "@lendBorrowModule": {},
+  "investmentsModule": "Investments",
+  "@investmentsModule": {},
+  "askKuberModule": "Ask Kuber AI",
+  "@askKuberModule": {},
+  "toolsModule": "Tools &\nCalculators",
+  "@toolsModule": {},
+  "tagsCategoriesModule": "Tags &\nCategories",
+  "@tagsCategoriesModule": {},
+  "andMuchMore": "••• and much more!",
+  "@andMuchMore": {},
+  "makeItYours": "Make it yours.",
+  "@makeItYours": {},
+  "threeQuickChoices": "Three quick choices and you're in.",
+  "@threeQuickChoices": {},
+  "yourName": "YOUR NAME",
+  "@yourName": {},
+  "currency": "CURRENCY",
+  "@currency": {},
+  "theme": "THEME",
+  "@theme": {},
+  "language": "LANGUAGE",
+  "@language": {},
+  "namePlaceholder": "Your name",
+  "@namePlaceholder": {},
+  "nameRequired": "Please enter your name",
+  "@nameRequired": {},
+  "nameTooLong": "Name must be 15 characters or fewer",
+  "@nameTooLong": {},
+  "themeLight": "LIGHT",
+  "@themeLight": {},
+  "themeDark": "DARK",
+  "@themeDark": {},
+  "themeSystem": "SYSTEM",
+  "@themeSystem": {},
+  "justSoYouKnow": "Just so you know",
+  "@justSoYouKnow": {},
+  "goToTutorials": "Go to tutorials",
+  "@goToTutorials": {},
+  "exploreAtOwnPace": "You can explore at your own pace",
+  "@exploreAtOwnPace": {},
+  "exploreAtOwnPaceBody": "Kuber is built to feel familiar, so you can start logging right away.",
+  "@exploreAtOwnPaceBody": {},
+  "walkthroughNearby": "A walkthrough is always nearby",
+  "@walkthroughNearby": {},
+  "walkthroughNearbyBody": "Open More, then App Tutorial, whenever you want a quick guided tour.",
+  "@walkthroughNearbyBody": {},
+  "settingsTitle": "Settings",
+  "@settingsTitle": {},
+  "settingsSubtitle": "Customize how Kuber looks, feels and behaves for you.",
+  "@settingsSubtitle": {},
+  "profileSection": "PROFILE",
+  "@profileSection": {},
+  "profileDescription": "How Kuber knows you.",
+  "@profileDescription": {},
+  "yourNameLabel": "Your Name",
+  "@yourNameLabel": {},
+  "userNameUpdated": "Name updated",
+  "@userNameUpdated": {},
+  "appearanceSection": "APPEARANCE",
+  "@appearanceSection": {},
+  "appearanceDescription": "How Kuber looks to you.",
+  "@appearanceDescription": {},
+  "themeLabel": "Theme",
+  "@themeLabel": {},
+  "themeSubtitle": "Light, dark, or match your phone",
+  "@themeSubtitle": {},
+  "bottomNavLabel": "Bottom Navigation",
+  "@bottomNavLabel": {},
+  "bottomNavSubtitle": "Standard bar or floating pill",
+  "@bottomNavSubtitle": {},
+  "moreTabLayoutLabel": "More Tab Layout",
+  "@moreTabLayoutLabel": {},
+  "moreTabLayoutSubtitle": "Simple list or Modern hero layout",
+  "@moreTabLayoutSubtitle": {},
+  "widgetsSection": "WIDGETS",
+  "@widgetsSection": {},
+  "widgetsDescription": "Choose what shows on Home and Analytics.",
+  "@widgetsDescription": {},
+  "homeWidgetsLabel": "Home Widgets",
+  "@homeWidgetsLabel": {},
+  "homeWidgetsSubtitle": "{count} enabled · drag to reorder",
+  "@homeWidgetsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsWidgetsLabel": "Analytics Widgets",
+  "@analyticsWidgetsLabel": {},
+  "analyticsWidgetsSubtitle": "{count} enabled · drag to reorder",
+  "@analyticsWidgetsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "moneyDisplaySection": "MONEY DISPLAY",
+  "@moneyDisplaySection": {},
+  "moneyDisplayDescription": "How currency and amounts are shown across the app.",
+  "@moneyDisplayDescription": {},
+  "currencyLabel": "Currency",
+  "@currencyLabel": {},
+  "currencySubtitle": "Symbol and code shown on amounts",
+  "@currencySubtitle": {},
+  "numberFormatLabel": "Number Format",
+  "@numberFormatLabel": {},
+  "numberFormatSubtitle": "Indian (1,23,000) or International (123,000)",
+  "@numberFormatSubtitle": {},
+  "transactionsSection": "TRANSACTIONS",
+  "@transactionsSection": {},
+  "transactionsDescription": "Your defaults when adding new entries.",
+  "@transactionsDescription": {},
+  "defaultAccountLabel": "Default Account",
+  "@defaultAccountLabel": {},
+  "defaultAccountSubtitle": "Pre-selected when you Quick Add",
+  "@defaultAccountSubtitle": {},
+  "horizontalSwipeLabel": "Horizontal Swipe",
+  "@horizontalSwipeLabel": {},
+  "horizontalSwipeSubtitle": "What swiping left or right does",
+  "@horizontalSwipeSubtitle": {},
+  "privacySecuritySection": "PRIVACY & SECURITY",
+  "@privacySecuritySection": {},
+  "privacySecurityDescription": "Keep your numbers private and your app locked.",
+  "@privacySecurityDescription": {},
+  "privacyModeLabel": "Privacy Mode",
+  "@privacyModeLabel": {},
+  "privacyModeSubtitle": "Hide all balances and amounts",
+  "@privacyModeSubtitle": {},
+  "biometricLockLabel": "Biometric Lock",
+  "@biometricLockLabel": {},
+  "biometricLockSubtitle": "Unlock with FaceID or Fingerprint",
+  "@biometricLockSubtitle": {},
+  "aboutSection": "ABOUT",
+  "@aboutSection": {},
+  "aboutDescription": "Learn about Kuber and the person behind it.",
+  "@aboutDescription": {},
+  "aboutKuberLabel": "About Kuber",
+  "@aboutKuberLabel": {},
+  "aboutKuberSubtitle": "Vision, origin, and a letter from the developer",
+  "@aboutKuberSubtitle": {},
+  "clearDefault": "Clear Default",
+  "@clearDefault": {},
+  "defaultAccountCleared": "Default account cleared",
+  "@defaultAccountCleared": {},
+  "noAccountsFound": "No accounts found.",
+  "@noAccountsFound": {},
+  "biometricNotAvailable": "Device authentication is not available or set up",
+  "@biometricNotAvailable": {},
+  "biometricEnabledMsg": "Biometric lock enabled",
+  "@biometricEnabledMsg": {},
+  "biometricDisabledMsg": "Biometric lock disabled",
+  "@biometricDisabledMsg": {},
+  "updateNameTitle": "Update Name",
+  "@updateNameTitle": {},
+  "enterNameHint": "Enter name",
+  "@enterNameHint": {},
+  "saveBtn": "Save",
+  "@saveBtn": {},
+  "themeLightChoice": "Light",
+  "@themeLightChoice": {},
+  "themeDarkChoice": "Dark",
+  "@themeDarkChoice": {},
+  "themeSystemChoice": "System",
+  "@themeSystemChoice": {},
+  "themeSubtitleLight": "Bright surfaces, dark text",
+  "@themeSubtitleLight": {},
+  "themeSubtitleDark": "Black surfaces, light text",
+  "@themeSubtitleDark": {},
+  "themeSubtitleSystem": "Follow your phone setting",
+  "@themeSubtitleSystem": {},
+  "navClassicChoice": "Classic",
+  "@navClassicChoice": {},
+  "navModernChoice": "Modern",
+  "@navModernChoice": {},
+  "navSubtitleClassic": "Standard bar",
+  "@navSubtitleClassic": {},
+  "navSubtitleModern": "Floating pill",
+  "@navSubtitleModern": {},
+  "numFormatIndian": "Indian",
+  "@numFormatIndian": {},
+  "numFormatInternational": "International",
+  "@numFormatInternational": {},
+  "swipeChangeTabs": "Change tabs",
+  "@swipeChangeTabs": {},
+  "swipeRowActions": "Row actions",
+  "@swipeRowActions": {},
+  "swipeSubtitleChangeTabs": "Quickly switch between main app sections by swiping across the screen",
+  "@swipeSubtitleChangeTabs": {},
+  "swipeSubtitleRowActions": "Perform quick actions like edit or delete by swiping on individual history items",
+  "@swipeSubtitleRowActions": {},
+  "spentTodayInsight": "You spent {amount} today, which is {diff} above your 30-day daily average of {avg}",
+  "@spentTodayInsight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      },
+      "avg": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayPatternInsight": "You typically spend {highest} on {dayName} vs {median} on other days",
+  "@weekdayPatternInsight": {
+    "placeholders": {
+      "highest": {
+        "type": "String"
+      },
+      "dayName": {
+        "type": "String"
+      },
+      "median": {
+        "type": "String"
+      }
+    }
+  },
+  "topCategoryInsight": "{pct}% of spending goes to {catName} ({amount})",
+  "@topCategoryInsight": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "catName": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryTrendInsight": "{catName} spending is {change} vs last month",
+  "@categoryTrendInsight": {
+    "placeholders": {
+      "catName": {
+        "type": "String"
+      },
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "monthComparisonInsight": "Spending is {change} vs this point last month",
+  "@monthComparisonInsight": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "weekendVsWeekdayInsight": "Weekend transactions average {weekend} vs {weekday} on weekdays",
+  "@weekendVsWeekdayInsight": {
+    "placeholders": {
+      "weekend": {
+        "type": "String"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "biggestExpenseInsight": "{name} ({amount}) was {ratio}× your typical spend",
+  "@biggestExpenseInsight": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "ratio": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsTrendPositive": "You're saving money this month. Keep it up!",
+  "@savingsTrendPositive": {},
+  "savingsTrendInsight": "Savings are {change} vs last month",
+  "@savingsTrendInsight": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsTrendDipInsight": "Savings dipped {change} vs last month",
+  "@savingsTrendDipInsight": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringBurdenInsight": "{pct} of spending is from recurring transactions",
+  "@recurringBurdenInsight": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "streakInsight": "{streak}-day spending-free streak before today!",
+  "@streakInsight": {
+    "placeholders": {
+      "streak": {
+        "type": "String"
+      }
+    }
+  },
+  "spendingFasterInsight": "You're spending {weekStr}/day this week, which is {diffStr} faster than your usual {baseStr}/day",
+  "@spendingFasterInsight": {
+    "placeholders": {
+      "weekStr": {
+        "type": "String"
+      },
+      "diffStr": {
+        "type": "String"
+      },
+      "baseStr": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryConcentrationInsight": "{pctStr} of your spending ({amtStr}) goes to just 3 categories",
+  "@categoryConcentrationInsight": {
+    "placeholders": {
+      "pctStr": {
+        "type": "String"
+      },
+      "amtStr": {
+        "type": "String"
+      }
+    }
+  },
+  "loanEmiTotalInsight": "Loan EMIs add up to {amount} this month",
+  "@loanEmiTotalInsight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loanPayoffCountdownInsight": "{name} is about {months} month{pluralSuffix} from payoff",
+  "@loanPayoffCountdownInsight": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "months": {
+        "type": "String"
+      },
+      "pluralSuffix": {
+        "type": "String"
+      }
+    }
+  },
+  "loanInterestPaidInsight": "Total loan interest paid is {amount} so far",
+  "@loanInterestPaidInsight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerOutstandingInsight": "Open lend and borrow totals are {receive} owed to you and {owe} owed by you",
+  "@ledgerOutstandingInsight": {
+    "placeholders": {
+      "receive": {
+        "type": "String"
+      },
+      "owe": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerOldestOpenInsight": "{personName} has the oldest open entry at {ageDays} days",
+  "@ledgerOldestOpenInsight": {
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "ageDays": {
+        "type": "String"
+      }
+    }
+  },
+  "investmentPortfolioChangeInsight": "Your portfolio is {amount} versus invested value",
+  "@investmentPortfolioChangeInsight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "investmentTopPerformerInsight": "{name} is your top performer at {pct} gain",
+  "@investmentTopPerformerInsight": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "investmentPeriodInvestedInsight": "You invested {amount} this month",
+  "@investmentPeriodInvestedInsight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fallbackTipInsight": "Start adding transactions to unlock smart insights",
+  "@fallbackTipInsight": {},
+  "fallbackTotalInsight": "You've spent {amount} in the last 30 days",
+  "@fallbackTotalInsight": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "spentLastWeek": "spent last week",
+  "@spentLastWeek": {},
+  "spentLastMonth": "spent in {month}",
+  "@spentLastMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "spentLastYear": "spent in {year}",
+  "@spentLastYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "averageDay": "About {amount} a day on average",
+  "@averageDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "biggestDay": "{day} was your biggest day at {amount}",
+  "@biggestDay": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savedEarned": "You saved {pct}% of what you earned",
+  "@savedEarned": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "biggestSingleSpend": "Biggest single spend was {name} on {category}",
+  "@biggestSingleSpend": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "spentLess": "You spent less than before",
+  "@spentLess": {},
+  "spentMore": "You spent more than before",
+  "@spentMore": {},
+  "comparedTitle": "Compared",
+  "@comparedTitle": {},
+  "comparedLess": "You spent less than before",
+  "@comparedLess": {},
+  "comparedMore": "You spent more than before",
+  "@comparedMore": {},
+  "deltaLess": "{amount} less than {label}",
+  "@deltaLess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "deltaMore": "{amount} more than {label}",
+  "@deltaMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyEmi": "Monthly EMI",
+  "@monthlyEmi": {},
+  "principal": "Principal",
+  "@principal": {},
+  "lender": "Lender",
+  "@lender": {},
+  "ledgerOwesYou": "{person} owes you {amount}",
+  "@ledgerOwesYou": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerYouOwe": "You owe {person} {amount}",
+  "@ledgerYouOwe": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerEntryOpen": "This entry is still open.",
+  "@ledgerEntryOpen": {},
+  "portfolioCheck": "Portfolio check",
+  "@portfolioCheck": {},
+  "investedLabel": "Invested",
+  "@investedLabel": {},
+  "currentValueLabel": "Current value",
+  "@currentValueLabel": {},
+  "welcomeTitle": "Welcome to Kuber",
+  "@welcomeTitle": {},
+  "welcomeSubtitle": "Thanks for installing. Your money, beautifully tracked.",
+  "@welcomeSubtitle": {},
+  "basicsTitle": "Track every rupee",
+  "@basicsTitle": {},
+  "basicsSubtitle": "Expenses, income, transfers, and budgets, all in one place.",
+  "@basicsSubtitle": {},
+  "beyondBasicsTitle": "There is more in here",
+  "@beyondBasicsTitle": {},
+  "beyondBasicsSubtitle": "Lend and borrow, EMIs, investments, and handy calculators.",
+  "@beyondBasicsSubtitle": {},
+  "spaceIsYoursTitle": "Your money stories",
+  "@spaceIsYoursTitle": {},
+  "spaceIsYoursSubtitle": "Recaps and highlights about your spending will appear right here.",
+  "@spaceIsYoursSubtitle": {},
+  "spentYesterday": "spent yesterday",
+  "@spentYesterday": {},
+  "topSpend": "Top spend: {name} on {category}",
+  "@topSpend": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "topCategories": "Top categories",
+  "@topCategories": {},
+  "noSpendDay": "A no spend day. Nice.",
+  "@noSpendDay": {},
+  "noSpendStreak": "That is a {streak} day no spend streak",
+  "@noSpendStreak": {
+    "placeholders": {
+      "streak": {
+        "type": "String"
+      }
+    }
+  },
+  "noSpendStreakEnded": "Your {streak} day no spend streak ended",
+  "@noSpendStreakEnded": {
+    "placeholders": {
+      "streak": {
+        "type": "String"
+      }
+    }
+  },
+  "dailyRecapHeader": "Daily",
+  "@dailyRecapHeader": {},
+  "weeklyRecapHeader": "Weekly recap",
+  "@weeklyRecapHeader": {},
+  "monthlyRecapHeader": "Monthly recap",
+  "@monthlyRecapHeader": {},
+  "yearlyRecapHeader": "Year in review",
+  "@yearlyRecapHeader": {},
+  "highlightHeader": "Highlight",
+  "@highlightHeader": {},
+  "loansHeader": "Loans",
+  "@loansHeader": {},
+  "ledgerHeader": "Lend / Borrow",
+  "@ledgerHeader": {},
+  "investmentsHeader": "Investments",
+  "@investmentsHeader": {},
+  "averageMonth": "About {amount} a month on average",
+  "@averageMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "biggestMonth": "{month} was your biggest month at {amount}",
+  "@biggestMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "lessLabel": "less",
+  "@lessLabel": {},
+  "moreLabel": "more",
+  "@moreLabel": {},
+  "theWeekBefore": "the week before",
+  "@theWeekBefore": {},
+  "aboveAverage": "{amount} above your 30-day average",
+  "@aboveAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "belowAverage": "{amount} below your 30-day average",
+  "@belowAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toLabel": "to",
+  "@toLabel": {},
+  "throughPeriod": "Through {date}",
+  "@throughPeriod": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWeek": "This Week",
+  "@thisWeek": {},
+  "previousWeek": "Previous Week",
+  "@previousWeek": {},
+  "thisMonth": "This Month",
+  "@thisMonth": {},
+  "previousMonth": "Previous Month",
+  "@previousMonth": {},
+  "thisYear": "This Year",
+  "@thisYear": {},
+  "previousYear": "Previous Year",
+  "@previousYear": {},
+  "uncategorized": "Uncategorized",
+  "@uncategorized": {},
+  "chooseAppLanguage": "Choose app language",
+  "selectLanguage": "Select language",
+  "searchLanguage": "Search language",
+  "noLanguagesFound": "No languages found",
+  "appearanceCategory": "Appearance",
+  "moneyDisplayCategory": "Money Display",
+  "transactionsCategory": "Transactions",
+  "notSet": "Not set",
+  "setYourName": "Set your name",
+  "simpleLabel": "Simple",
+  "creditCardLabel": "Credit Card",
+  "bankCashLabel": "Bank / Cash",
+  "setAsDefault": "{name} set as default",
+  "@setAsDefault": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nameSheetHint": "e.g. Gautam",
+  "doneLabel": "Done",
+  "moreTabSimpleSubtitle": "Uniform list of cards. Familiar and predictable.",
+  "moreTabModernSubtitle": "Hero items, tile grid and compact lists. Differentiated by section.",
+  "selectCurrency": "Select Currency",
+  "searchCurrencyHint": "Search by name, code or symbol…",
+  "noCurrenciesFound": "No currencies found",
+  "welcomeHeader": "Welcome",
+  "basicsHeader": "The basics",
+  "beyondBasicsHeader": "Beyond the basics",
+  "spaceIsYoursHeader": "This space is yours",
+  "homeSubtitle1": "Let's manage your money wisely",
+  "homeSubtitle2": "Track every rupee, every day",
+  "homeSubtitle3": "Stay on top of your finances",
+  "homeSubtitle4": "Your wallet will thank you later",
+  "homeSubtitle5": "Small savings, big results",
+  "homeSubtitle6": "Every transaction counts",
+  "homeSubtitle7": "Building smart money habits",
+  "greetingMorning": "Morning",
+  "greetingAfternoon": "Afternoon",
+  "greetingEvening": "Evening",
+  "errorLabel": "Error",
+  "last7Days": "LAST 7 DAYS",
+  "netLabel": "NET",
+  "spendingAnalysisEmpty": "No income or expense transactions in the last 7 days. Add a transaction to see your spending analysis here.\n\nNote: Transfers are not included.",
+  "notificationsTooltip": "Notifications",
+  "askKuber": "Ask Kuber",
+  "privacyModeOn": "Privacy mode: On",
+  "privacyModeOff": "Privacy mode: Off",
+  "accountsLabel": "ACCOUNTS",
+  "viewAll": "VIEW ALL",
+  "outstandingLabel": "OUTSTANDING",
+  "availableLabel": "AVAILABLE",
+  "bankLabel": "Bank",
+  "walletLabel": "Wallet",
+  "cashLabel": "Cash",
+  "usedLabel": "used",
+  "limitLabel": "limit",
+  "recurringHeader": "RECURRING",
+  "statusProcessed": "PROCESSED",
+  "statusPending": "PENDING",
+  "statusScheduled": "SCHEDULED",
+  "quickAddInvalidAmount": "Enter a valid amount (e.g. 200 on coffee)",
+  "quickAddNoAccountNamed": "No account named \"{name}\" found",
+  "@quickAddNoAccountNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quickAddCouldNotResolveCategory": "Could not resolve category",
+  "quickAddAdded": "{amount} added to {category}",
+  "@quickAddAdded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "noAccountFoundTitle": "No account found",
+  "noAccountMatchedBody": "No account matched \"{hint}\" and no default account is set. Set a default account in Settings to use Quick Add.",
+  "@noAccountMatchedBody": {
+    "placeholders": {
+      "hint": {
+        "type": "String"
+      }
+    }
+  },
+  "noDefaultAccountBody": "No default account is set. Set one in Settings to use Quick Add.",
+  "openSettings": "Open Settings",
+  "quickAddTitle": "QUICK ADD (BETA)",
+  "quickAddInfoTitle": "Quick Add",
+  "quickAddInfoDesc": "Record an expense instantly using natural language. No forms, no tapping. Just type what you spent and Kuber figures out the rest.",
+  "quickAddBasicAmount": "Basic Amount",
+  "quickAddBasicAmountDesc": "\"250\" or \"₹250\" adds ₹250 to the General category.",
+  "quickAddWithCategory": "With Category",
+  "quickAddWithCategoryDesc": "\"250 on food\", \"150 in gaming\", \"300 for rent\" links to an existing category or creates one.",
+  "quickAddWithAccount": "With Account",
+  "quickAddWithAccountDesc": "\"150 for uber from hdfc\" matches your HDFC account by name.",
+  "quickAddActionWords": "Action Words",
+  "quickAddActionWordsDesc": "\"Add 200 on coffee\", \"Log 500 for groceries\", \"Create 1000 in savings\" - leading action words are stripped automatically.",
+  "quickAddDefaultAccountInfo": "Default Account",
+  "quickAddDefaultAccountInfoDesc": "Set a default account in Settings to skip typing \"from ...\" every time.",
+  "quickAddHint": "e.g. 250 on groceries from HDFC",
+  "spendingPattern": "SPENDING PATTERN",
+  "avgDaily": "AVG DAILY",
+  "last90Days": "last 90 days",
+  "statThisMonth": "THIS MONTH",
+  "statDays": "{days} days",
+  "@statDays": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "projectedLabel": "PROJECTED",
+  "endOfMonth": "end of month",
+  "budgetSnapshot": "BUDGET SNAPSHOT",
+  "budgetExceeded": "Exceeded",
+  "budgetHighUsage": "High usage",
+  "budgetNearLimit": "Near limit",
+  "budgetOnTrack": "On track",
+  "categoryLabel": "Category",
+  "budgetRemaining": "{amount} remaining",
+  "@budgetRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recentTransactions": "RECENT TRANSACTIONS",
+  "noTransactionsYet": "No transactions yet",
+  "smartInsights": "SMART INSIGHTS",
+  "smartInsightsEmpty": "Keep adding transactions to unlock\ninsights about your finances.",
+  "insightLabelWeekdayPattern": "WEEKDAY PATTERN",
+  "insightLabelTopCategory": "TOP CATEGORY",
+  "insightLabelCategoryTrend": "CATEGORY TREND",
+  "insightLabelMonthTrend": "MONTH TREND",
+  "insightLabelWeekendPattern": "WEEKEND PATTERN",
+  "insightLabelBigExpense": "BIG EXPENSE",
+  "insightLabelSavings": "SAVINGS",
+  "insightLabelRecurring": "RECURRING",
+  "insightLabelStreak": "STREAK",
+  "insightLabelToday": "TODAY",
+  "insightLabelThisWeek": "THIS WEEK",
+  "insightLabelDidYouKnow": "DID YOU KNOW",
+  "insightLabelLoans": "LOANS",
+  "insightLabelLoanInterest": "LOAN INTEREST",
+  "insightLabelLendBorrow": "LEND / BORROW",
+  "insightLabelInvestments": "INVESTMENTS",
+  "insightLabelTopInvestment": "TOP INVESTMENT",
+  "insightLabelSummary": "SUMMARY",
+  "insightLabelTip": "TIP",
+  "weekdayMonday": "Monday",
+  "weekdayTuesday": "Tuesday",
+  "weekdayWednesday": "Wednesday",
+  "weekdayThursday": "Thursday",
+  "weekdayFriday": "Friday",
+  "weekdaySaturday": "Saturday",
+  "weekdaySunday": "Sunday",
+  "historyTitle": "Transaction\nHistory",
+  "historyDescription": "Your past expenses, incomes and transfers",
+  "exportLabel": "Export",
+  "expLabel": "EXP",
+  "incLabel": "INC",
+  "showingLabel": "SHOWING",
+  "transactionsLabel": "TRANSACTIONS",
+  "noTransactionsFound": "No transactions found",
+  "startTrackingExpenses": "Start tracking your expenses",
+  "adjustSearchFilters": "Try adjusting your search or filters",
+  "addTransaction": "Add Transaction",
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTransactionsConfirm": "Delete {count} transactions?",
+  "@deleteTransactionsConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "actionCannotBeUndone": "This action cannot be undone.",
+  "transactionsDeleted": "{count} transactions deleted",
+  "@transactionsDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsMoreCount": "+{count} more",
+  "@tagsMoreCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCorrectionSubtitle": "Account correction · excluded from analytics",
+  "unknownLabel": "Unknown",
+  "transferLabel": "Transfer",
+  "adjustmentLabel": "ADJUSTMENT",
+  "editTransfer": "Edit Transfer",
+  "editTransaction": "Edit Transaction",
+  "saveAndAddAnother": "Save & Add Another",
+  "fromAccount": "FROM ACCOUNT",
+  "toAccount": "TO ACCOUNT",
+  "transactionNameHint": "Transaction name",
+  "categoryUpper": "CATEGORY",
+  "selectLabel": "Select",
+  "updateExpense": "Update Expense",
+  "updateIncome": "Update Income",
+  "updateTransferBtn": "Update Transfer",
+  "saveExpense": "Save Expense",
+  "saveIncome": "Save Income",
+  "saveTransferBtn": "Save Transfer",
+  "enterTransactionName": "Please enter a transaction name",
+  "enterValidAmount": "Please enter a valid amount",
+  "selectCategoryError": "Please select a category",
+  "selectAccountError": "Please select an account",
+  "selectSourceAccount": "Please select a source account",
+  "selectDestinationAccount": "Please select a destination account",
+  "accountsMustDiffer": "Source and destination accounts must be different",
+  "failedToSave": "Failed to save: {error}",
+  "@failedToSave": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addAnotherPrompt": "Transaction saved! Add another?",
+  "transactionUpdated": "Transaction updated",
+  "transactionSaved": "Transaction saved",
+  "transferUpdated": "Transfer updated",
+  "transferSaved": "Transfer saved",
+  "creditCardPayment": "Credit Card Payment",
+  "creditCardWithdrawal": "Credit Card Withdrawal",
+  "creditCardTransfer": "Credit Card Transfer",
+  "selectCategoryTitle": "Select Category",
+  "searchCategories": "Search categories",
+  "noCategoriesFound": "No categories found",
+  "ungrouped": "Ungrouped",
+  "addNewCategory": "Add new category",
+  "budgetExists": "BUDGET EXISTS",
+  "selectAccountTitle": "Select Account",
+  "chooseAccountSubtitle": "Choose the account for this transaction",
+  "noAccountsYet": "No accounts yet",
+  "addNewAccount": "Add new account",
+  "addNoteHint": "Add a note (optional)",
+  "tagsUpper": "TAGS",
+  "noTagsSelected": "No tags selected",
+  "tagsSelectedCount": "{count} tags selected",
+  "@tagsSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "dateTimeLabel": "DATE & TIME",
+  "todayLabel": "Today",
+  "yesterdayLabel": "Yesterday",
+  "expenseLabel": "Expense",
+  "incomeLabel": "Income",
+  "budgetLabel": "Budget",
+  "attachmentsLabel": "ATTACHMENTS",
+  "addImageOrPdf": "Add image or PDF",
+  "filesAttached": "{count, plural, =1{1 file attached} other{{count} files attached}}",
+  "@filesAttached": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "addAttachments": "Add Attachments",
+  "max5mb": "Max 5MB per file",
+  "cameraLabel": "Camera",
+  "galleryLabel": "Gallery",
+  "fileExceeds5mb": "File exceeds 5MB limit",
+  "failedToPickImage": "Failed to pick image: {error}",
+  "@failedToPickImage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "transactionDeleted": "Transaction deleted",
+  "transferDeleted": "Transfer deleted",
+  "undoLabel": "UNDO",
+  "transactionAmount": "TRANSACTION AMOUNT",
+  "accountUpper": "ACCOUNT",
+  "notesUpper": "NOTES",
+  "addedUsingPrompt": "ADDED USING PROMPT",
+  "attachedTags": "ATTACHED TAGS",
+  "noneLabel": "None",
+  "filtersUpper": "FILTERS",
+  "filterExpensesTooltip": "Filter expenses",
+  "filterExp": "Exp",
+  "filterIncomeTooltip": "Filter income",
+  "filterInc": "Inc",
+  "advancedFiltersTooltip": "Advanced filters",
+  "clearFiltersTooltip": "Clear filters",
+  "searchTransactionsTooltip": "Search transactions",
+  "searchTransactionsHint": "Search transactions...",
+  "applySearchTooltip": "Apply search",
+  "selectRange": "Select Range",
+  "advancedFiltersTitle": "Advanced Filters",
+  "clearAll": "CLEAR ALL",
+  "dateRangeLabel": "DATE RANGE",
+  "selectDateRange": "Select date range",
+  "transactionNameLabel": "TRANSACTION NAME",
+  "searchViaName": "Search via name.",
+  "typeFilterLabel": "TYPE",
+  "amountRangeLabel": "AMOUNT RANGE",
+  "minLabel": "min",
+  "maxLabel": "max",
+  "errorLoadingAccounts": "Error loading accounts",
+  "categoriesLabel": "CATEGORIES",
+  "errorLoadingCategories": "Error loading categories",
+  "errorLoadingTags": "Error loading tags",
+  "applyFilters": "APPLY FILTERS",
+  "creditShort": "Credit",
+  "bucketDawn": "Dawn",
+  "bucketMorning": "Morning",
+  "bucketNoon": "Noon",
+  "bucketEvening": "Evening",
+  "bucketNight": "Night",
+  "weekLabel": "Week",
+  "analyticsTitle": "Spending\nAnalytics",
+  "analyticsDescription": "Visualize your spending patterns",
+  "noData": "No data",
+  "noTransactionsForPeriod": "No transactions found for this period",
+  "biggestTransactions": "Biggest Transactions",
+  "spendingTrend": "Spending Trend",
+  "activeSelection": "ACTIVE SELECTION",
+  "quickFilters": "QUICK FILTERS",
+  "jumpTo": "Jump To",
+  "invalidFormat": "Invalid format",
+  "startBeforeEnd": "Start must be before End",
+  "futureDatesNotAllowed": "Future dates not allowed",
+  "manualDateRange": "Manual Date Range",
+  "manualDateRangeDesc": "Specify a custom period for your financial analysis.",
+  "fromDateLabel": "FROM DATE (DD/MM/YYYY)",
+  "toDateLabel": "TO DATE (DD/MM/YYYY)",
+  "doneUpper": "DONE",
+  "cancelUpper": "CANCEL",
+  "thresholdSettings": "Threshold Settings",
+  "resetToDefaults": "Reset to Defaults",
+  "thresholdSmallDesc": "Amount below which transactions are marked as Small.",
+  "thresholdLargeDesc": "Amount above which transactions are marked as Large.",
+  "previewLogic": "PREVIEW LOGIC",
+  "sizeSmall": "Small",
+  "sizeMedium": "Medium",
+  "sizeLarge": "Large",
+  "budgetVsActual": "Budget vs Actual",
+  "errorLoadingBudgets": "Error loading budgets",
+  "noActiveBudgets": "No active budgets",
+  "tagWiseAnalytics": "Tag-wise Analytics",
+  "spendingByTag": "Spending by Tag",
+  "topTagsContribution": "TOP TAGS CONTRIBUTION",
+  "noTagsInRange": "There are no tag-related transactions in your selected date range",
+  "spendingDistribution": "Spending Distribution",
+  "groupLabel": "Group",
+  "errorLoadingData": "Error loading data",
+  "noDataAvailable": "No data available",
+  "transactionSizeDistribution": "Transaction Size Distribution",
+  "frequencyByTicketSize": "Frequency by ticket size",
+  "avgWeeklyHeatmap": "Avg Weekly Heatmap",
+  "basedOnSelectedFilter": "Based on your selected filter",
+  "intensity": "INTENSITY",
+  "applyFilter": "Apply Filter",
+  "thresholdFloorHeading": "Small/Medium Boundary (Floor)",
+  "thresholdCeilingHeading": "Medium/Large Boundary (Ceiling)",
+  "manageAccounts": "Manage\nAccounts",
+  "addAccount": "Add Account",
+  "editAccount": "Edit Account",
+  "addFirstAccount": "Add your first account to start tracking",
+  "addAnotherAccount": "Add another account",
+  "availableBalance": "AVAILABLE BALANCE",
+  "limitUpper": "LIMIT",
+  "defaultUpper": "DEFAULT",
+  "addTransactionTooltip": "Add transaction",
+  "savingsAccount": "Savings Account",
+  "viewTransactions": "View Transactions",
+  "errorLoadingBalance": "Error loading balance",
+  "editLimitSpent": "Edit limit spent",
+  "editBalance": "Edit balance",
+  "deleteAccount": "Delete Account",
+  "removeDefault": "Remove Default",
+  "setAsDefaultLabel": "Set as Default",
+  "currentAvailableBalance": "CURRENT AVAILABLE BALANCE",
+  "limitSpent": "LIMIT SPENT",
+  "totalLimit": "TOTAL LIMIT",
+  "cannotDeleteAccount": "Cannot delete account",
+  "cannotDeleteAccountBody": "This account has transactions linked to it. To delete this account, delete the linked transactions first.",
+  "okLabel": "OK",
+  "deleteAccountConfirm": "Delete Account?",
+  "limitSpentUpdated": "Limit spent updated successfully",
+  "balanceUpdated": "Balance updated successfully",
+  "currentLimitSpent": "CURRENT LIMIT SPENT",
+  "currentBalance": "CURRENT BALANCE",
+  "newLimitSpent": "New Limit Spent",
+  "newBalance": "New Balance",
+  "enterAccountName": "Please enter an account name",
+  "identity": "Identity",
+  "creditCardName": "Credit card name",
+  "cashName": "Cash name",
+  "bankName": "Bank name",
+  "iconLabel": "Icon",
+  "colorLabel": "Color",
+  "typeLabel": "Type",
+  "last4DigitsHint": "Last 4 digits (optional)",
+  "balanceLabel": "Balance",
+  "initialBalance": "Initial balance",
+  "limitSpentField": "Limit spent",
+  "totalLimitField": "Total limit",
+  "saveAccount": "Save account",
+  "totalNetWorth": "TOTAL NET WORTH",
+  "assets": "Assets",
+  "debt": "Debt",
+  "cardLast4Note": "Card's last 4 digits · not shared anywhere",
+  "lastTransaction": "Last transaction {time}",
+  "@lastTransaction": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountBody": "Are you sure you want to delete {name}? This action cannot be undone.",
+  "@deleteAccountBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adjustmentNote": "adjustment will be recorded as a transaction (analytics won't be affected)",
+  "trackBudgets": "Track\nBudgets",
+  "createBudget": "Create Budget",
+  "editBudget": "Edit Budget",
+  "noBudgetsYet": "No budgets yet",
+  "createBudgetsDesc": "Create budgets to control your spending per category",
+  "disabledUpper": "DISABLED",
+  "expiredUpper": "EXPIRED",
+  "budgetPeriodEnded": "BUDGET PERIOD ENDED",
+  "budgetPaused": "BUDGET IS CURRENTLY PAUSED",
+  "budgetResetsIn": "RESETS IN {count, plural, =1{1 DAY} other{{count} DAYS}}",
+  "@budgetResetsIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetExpiresIn": "EXPIRES IN {count, plural, =1{1 DAY} other{{count} DAYS}}",
+  "@budgetExpiresIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "progressLabel": "Progress",
+  "selectCategoryUpper": "SELECT CATEGORY",
+  "budgetAmount": "BUDGET AMOUNT",
+  "appliesTo": "APPLIES TO",
+  "thisMonthOnly": "This month\nonly",
+  "everyMonth": "Every\nmonth",
+  "budgetAlerts": "BUDGET ALERTS",
+  "addAlert": "ADD ALERT",
+  "saveBudget": "SAVE BUDGET",
+  "tapToChangeCategory": "Tap to change category",
+  "chooseCategory": "Choose category",
+  "monthlyBudgetPlan": "MONTHLY BUDGET PLAN",
+  "currentSpending": "CURRENT SPENDING",
+  "utilization": "UTILIZATION",
+  "budgetDetails": "BUDGET DETAILS",
+  "createdOn": "CREATED ON",
+  "renewsOn": "RENEWS ON",
+  "expiresOn": "EXPIRES ON",
+  "startedOn": "STARTED ON",
+  "statusUpper": "STATUS",
+  "activeLabel": "Active",
+  "pausedLabel": "Paused",
+  "activeAlerts": "ACTIVE ALERTS",
+  "noAlertsSet": "No alerts set",
+  "actionsUpper": "ACTIONS",
+  "pauseLabel": "Pause",
+  "resumeLabel": "Resume",
+  "historyLabel": "History",
+  "deleteBudgetConfirm": "Delete budget?",
+  "budgetHistory": "Budget History",
+  "noHistoryYet": "No History Yet",
+  "budgetHistoryEmptyDesc": "Your spending history for this budget will appear here once transactions are recorded.",
+  "overBudget": "OVER BUDGET",
+  "underBudget": "UNDER BUDGET",
+  "enterValidValue": "Enter a valid value",
+  "amountExceedsBudget": "Amount cannot exceed budget limit",
+  "alertAlreadyExists": "An alert for this value already exists",
+  "addAlertTitle": "Add Alert",
+  "selectAlertType": "SELECT ALERT TYPE",
+  "percentageType": "Percentage (%)",
+  "pushNotification": "Push Notification",
+  "exceededBy": "EXCEEDED BY {amount}",
+  "@exceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetAlreadyExists": "A budget already exists for this category",
+  "deleteBudgetBody": "The budget for \"{name}\" will be permanently deleted.",
+  "@deleteBudgetBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "alertDesc": "Alert me when spending reaches {value} of my monthly budget.",
+  "@alertDesc": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "percentageCannotExceed": "Percentage cannot exceed 100%",
+  "alertAmountType": "Fixed Amount ({symbol})",
+  "@alertAmountType": {
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "loansTitle": "Loans",
+  "addLoan": "Add Loan",
+  "noLoansAdded": "No loans added",
+  "loansEmptyDesc": "Tap + to track your first loan EMI",
+  "activeLoans": "ACTIVE LOANS",
+  "editLoan": "Edit loan",
+  "newLoan": "New loan",
+  "loanAmount": "Loan amount",
+  "totalPrincipal": "Total principal",
+  "loanType": "Loan type",
+  "loanTypeVehicle": "Vehicle",
+  "loanTypePersonal": "Personal",
+  "loanTypeEducation": "Education",
+  "loanTypeOther": "Other",
+  "loanName": "Loan name",
+  "loanNameHint": "e.g. Maruti Brezza",
+  "lenderHint": "e.g. HDFC Bank",
+  "referenceNumber": "Reference number",
+  "referenceNumberHint": "Sanction / loan ID",
+  "termsLabel": "Terms",
+  "interestRate": "Interest rate",
+  "rateFixed": "Fixed",
+  "rateFloating": "Floating",
+  "payEmi": "Pay EMI",
+  "payExtra": "Pay Extra",
+  "closeLoan": "Close Loan",
+  "progressUpper": "PROGRESS",
+  "totalUpper": "TOTAL",
+  "paidUpper": "PAID",
+  "remainingUpper": "REMAINING",
+  "nextEmiDue": "NEXT EMI DUE",
+  "interestRateUpper": "INTEREST RATE",
+  "paymentHistory": "PAYMENT HISTORY",
+  "noPaymentsRecorded": "No payments recorded",
+  "deleteLoanConfirm": "Delete Loan?",
+  "deleteLoanBody": "This will delete the loan and ALL linked payment transactions. This cannot be undone.",
+  "emiPaid": "EMI Paid",
+  "extraPayment": "Extra Payment",
+  "loanClosure": "Loan Closure",
+  "confirmClosure": "CONFIRM CLOSURE",
+  "confirmPayment": "CONFIRM PAYMENT",
+  "amountUpper": "AMOUNT",
+  "dateUpper": "DATE",
+  "noteOptional": "NOTE (OPTIONAL)",
+  "totalOutstandingDebt": "TOTAL OUTSTANDING DEBT",
+  "paidLabel": "Paid",
+  "outstandingTitle": "Outstanding",
+  "interestLabel": "Interest",
+  "nextDue": "Next due",
+  "completedUpper": "COMPLETED",
+  "lenderField": "Lender",
+  "loanTypeHome": "Home",
+  "monthlyOutflow": "Monthly outflow",
+  "perMonth": "per month",
+  "tenure": "Tenure",
+  "schedule": "Schedule",
+  "loanStartDate": "Loan start date",
+  "repaymentStart": "Repayment start",
+  "firstEmiOn": "First EMI on",
+  "monthlyBillDate": "Monthly bill date",
+  "sourceAccount": "Source account",
+  "autoAddTransactions": "Auto-add transactions",
+  "autoAddTransactionsSub": "Post each EMI to \"Loan EMI\" category on its bill date",
+  "notesLabel": "Notes",
+  "loanNotesHint": "Documentation · sanction letter ref · anything",
+  "saveChanges": "Save changes",
+  "confirmAddLoan": "Confirm & add loan",
+  "percentPaid": "{pct}% Paid",
+  "@percentPaid": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "navHome": "Home",
+  "@navHome": {},
+  "navHistory": "History",
+  "@navHistory": {},
+  "navAnalytics": "Analytics",
+  "@navAnalytics": {},
+  "navMore": "More",
+  "@navMore": {},
+  "speedDialRecurring": "Add a Recurring Transaction",
+  "@speedDialRecurring": {},
+  "speedDialLoan": "Add a Loan",
+  "@speedDialLoan": {},
+  "speedDialInvestment": "Add an Investment",
+  "@speedDialInvestment": {},
+  "speedDialLendBorrow": "Lend / Borrow Money",
+  "@speedDialLendBorrow": {},
+  "moneyStoriesTitle": "MONEY STORIES",
+  "@moneyStoriesTitle": {},
+  "moneyStoriesEmpty": "Keep spending to see your money stories soon.",
+  "@moneyStoriesEmpty": {},
+  "bubbleWelcome": "Welcome",
+  "@bubbleWelcome": {},
+  "bubbleDaily": "Daily",
+  "@bubbleDaily": {},
+  "bubbleWeekly": "Weekly",
+  "@bubbleWeekly": {},
+  "bubbleMonthly": "Monthly",
+  "@bubbleMonthly": {},
+  "bubbleYearly": "Yearly",
+  "@bubbleYearly": {},
+  "bubbleLoans": "Loans",
+  "@bubbleLoans": {},
+  "bubbleInvestments": "Investments",
+  "@bubbleInvestments": {},
+  "bubbleLedger": "Ledger",
+  "@bubbleLedger": {},
+  "bubbleInsights": "Insights",
+  "@bubbleInsights": {},
+  "storiesArchiveTitle": "Stories Archive",
+  "@storiesArchiveTitle": {},
+  "storiesArchiveDesc": "Every recap Kuber has made for you, newest first.",
+  "@storiesArchiveDesc": {},
+  "noStoriesYet": "No stories yet",
+  "@noStoriesYet": {},
+  "keepUsingToSeeRecaps": "Keep using Kuber to see your recaps here.",
+  "@keepUsingToSeeRecaps": {},
+  "earlierThisWeek": "Earlier this week",
+  "@earlierThisWeek": {},
+  "earlierThisMonth": "Earlier this month",
+  "@earlierThisMonth": {},
+  "olderLabel": "Older",
+  "@olderLabel": {},
+  "loadingOlderStories": "Loading older stories",
+  "@loadingOlderStories": {},
+  "justNow": "Just now",
+  "@justNow": {},
+  "minsAgo": "{count, plural, one{1 min ago} other{{count} mins ago}}",
+  "hoursAgo": "{count, plural, one{1 hour ago} other{{count} hours ago}}",
+  "daysAgo": "{count, plural, one{1 day ago} other{{count} days ago}}",
+  "relativeToday": "Today, {time}",
+  "relativeYesterday": "Yesterday, {time}",
+  "utilizedLabel": "utilized",
+  "@utilizedLabel": {},
+  "@availableLabel": {},
+  "utilizedPct": "{pct}% Utilized",
+  "editWidgets": "Edit Widgets",
+  "@editWidgets": {},
+  "editHomeWidgets": "Edit Home Widgets",
+  "@editHomeWidgets": {},
+  "editHomeWidgetsDesc": "Choose and reorder Home widgets",
+  "@editHomeWidgetsDesc": {},
+  "editAnalyticsWidgets": "Edit Analytics Widgets",
+  "@editAnalyticsWidgets": {},
+  "editAnalyticsWidgetsDesc": "Choose and reorder Analytics widgets",
+  "@editAnalyticsWidgetsDesc": {},
+  "filterAll": "ALL",
+  "@filterAll": {},
+  "filterToday": "TODAY",
+  "@filterToday": {},
+  "filterThisWeek": "THIS WEEK",
+  "@filterThisWeek": {},
+  "filterLastWeek": "LAST WEEK",
+  "@filterLastWeek": {},
+  "filterThisMonth": "THIS MONTH",
+  "@filterThisMonth": {},
+  "filterLastMonth": "LAST MONTH",
+  "@filterLastMonth": {},
+  "filterThisYear": "THIS YEAR",
+  "@filterThisYear": {},
+  "filterCustom": "CUSTOM",
+  "@filterCustom": {},
+  "moreManageTitle": "Manage",
+  "@moreManageTitle": {},
+  "moreToolsTitle": "Tools",
+  "@moreToolsTitle": {},
+  "moreAppTitle": "App",
+  "@moreAppTitle": {},
+  "moreTutorialTitle": "Tutorial",
+  "@moreTutorialTitle": {},
+  "moreHelpUsTitle": "Help Us",
+  "@moreHelpUsTitle": {},
+  "moreAboutTitle": "About",
+  "@moreAboutTitle": {},
+  "moreSearchTooltip": "Search",
+  "@moreSearchTooltip": {},
+  "moreManageSubtitle": "Manage your settings, tools and data",
+  "@moreManageSubtitle": {},
+  "menuAccounts": "Accounts",
+  "@menuAccounts": {},
+  "menuAccountsDesc": "Your wallets and bank accounts",
+  "@menuAccountsDesc": {},
+  "menuCategories": "Categories",
+  "@menuCategories": {},
+  "menuCategoriesDesc": "Organize your transactions",
+  "@menuCategoriesDesc": {},
+  "menuTags": "Tags",
+  "@menuTags": {},
+  "menuTagsDesc": "Organize the labels for your transactions",
+  "@menuTagsDesc": {},
+  "menuBudgets": "Budgets",
+  "@menuBudgets": {},
+  "menuBudgetsDesc": "Track and control your monthly spending",
+  "@menuBudgetsDesc": {},
+  "menuRecurring": "Recurring Transactions",
+  "@menuRecurring": {},
+  "menuRecurringDesc": "Automated scheduled transactions",
+  "@menuRecurringDesc": {},
+  "menuLedger": "Lend / Borrow",
+  "@menuLedger": {},
+  "menuLedgerDesc": "Track money you lent or borrowed",
+  "@menuLedgerDesc": {},
+  "menuLoans": "Loans",
+  "@menuLoans": {},
+  "menuLoansDesc": "Track EMIs and repayment progress",
+  "@menuLoansDesc": {},
+  "menuInvestments": "Investments",
+  "@menuInvestments": {},
+  "menuInvestmentsDesc": "Track portfolio value and growth",
+  "@menuInvestmentsDesc": {},
+  "menuAskKuber": "Ask Kuber (Beta)",
+  "@menuAskKuber": {},
+  "menuAskKuberDesc": "On-device smart assistant",
+  "@menuAskKuberDesc": {},
+  "menuCalculators": "Calculators & Tools",
+  "@menuCalculators": {},
+  "menuCalculatorsDesc": "EMI, SIP, salary, GST, split & more",
+  "@menuCalculatorsDesc": {},
+  "menuSettings": "Settings",
+  "@menuSettings": {},
+  "menuSettingsDesc": "Theme, currency, and profile",
+  "@menuSettingsDesc": {},
+  "menuData": "Data",
+  "@menuData": {},
+  "menuDataDesc": "Export, import, automatic backups",
+  "@menuDataDesc": {},
+  "menuStoriesArchive": "Money Stories Archive",
+  "@menuStoriesArchive": {},
+  "menuStoriesArchiveDesc": "Every recap, newest first",
+  "@menuStoriesArchiveDesc": {},
+  "menuTroubleshoot": "Troubleshoot",
+  "@menuTroubleshoot": {},
+  "menuTroubleshootDesc": "Fix data and suggestion issues",
+  "@menuTroubleshootDesc": {},
+  "menuTutorial": "App Tutorial (Beta)",
+  "@menuTutorial": {},
+  "menuTutorialDesc": "Replay the feature walkthrough",
+  "@menuTutorialDesc": {},
+  "menuWelcomeTour": "Welcome Tour",
+  "@menuWelcomeTour": {},
+  "menuWelcomeTourDesc": "Replay the welcome and setup screens",
+  "@menuWelcomeTourDesc": {},
+  "menuRateUs": "Rate Us on Play Store",
+  "@menuRateUs": {},
+  "menuRateUsDesc": "Enjoying Kuber? Leave a review",
+  "@menuRateUsDesc": {},
+  "menuShareApp": "Share This App",
+  "@menuShareApp": {},
+  "menuShareAppDesc": "Recommend Kuber to friends and family",
+  "@menuShareAppDesc": {},
+  "menuFeedback": "Submit a Feedback",
+  "@menuFeedback": {},
+  "menuFeedbackDesc": "Report a bug or suggest a feature",
+  "@menuFeedbackDesc": {},
+  "menuAbout": "About Kuber",
+  "@menuAbout": {},
+  "menuAboutDesc": "Vision, origin, and developer",
+  "@menuAboutDesc": {},
+  "menuPermissions": "Permissions",
+  "@menuPermissions": {},
+  "menuPermissionsDesc": "App limits and security",
+  "@menuPermissionsDesc": {},
+  "menuDevTools": "Dev Tools",
+  "@menuDevTools": {},
+  "menuDevToolsDesc": "Developer-only tools",
+  "@menuDevToolsDesc": {},
+  "madeInIndia": "Made with {heart} in India",
+  "madeInIndiaVersion": "Made with {heart} in India · v{version}",
+  "shareMessage": "Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber",
+  "@shareMessage": {},
+  "menuManageSpaces": "8 spaces",
+  "@menuManageSpaces": {},
+  "menuHelpUsHint": "Tap to support",
+  "@menuHelpUsHint": {},
+  "menuRateKuber": "Rate Kuber",
+  "@menuRateKuber": {},
+  "menuShare": "Share",
+  "@menuShare": {},
+  "menuFeedbackShort": "Feedback",
+  "@menuFeedbackShort": {},
+  "menuAppTutorialShort": "App Tutorial",
+  "@menuAppTutorialShort": {},
+  "menuNotifications": "Notifications",
+  "@menuNotifications": {},
+  "menuNotificationsDesc": "Recent alerts and reminders",
+  "@menuNotificationsDesc": {},
+  "manageCategoriesTitle": "Manage\nCategories",
+  "@manageCategoriesTitle": {},
+  "addCategoryGroup": "Add Category/Group",
+  "@addCategoryGroup": {},
+  "noCategoriesYet": "No categories yet",
+  "@noCategoriesYet": {},
+  "createCategoriesToOrganize": "Create categories to organize your expenses",
+  "@createCategoriesToOrganize": {},
+  "searchCategoriesGroups": "Search categories and groups...",
+  "@searchCategoriesGroups": {},
+  "noMatches": "No matches",
+  "@noMatches": {},
+  "noCategoriesGroupsMatch": "No categories or groups match \"{query}\".",
+  "ungroupedLabel": "Ungrouped",
+  "@ungroupedLabel": {},
+  "categoryGroupLabel": "Category group",
+  "@categoryGroupLabel": {},
+  "editGroupLabel": "Edit group",
+  "@editGroupLabel": {},
+  "deleteGroupLabel": "Delete group",
+  "@deleteGroupLabel": {},
+  "groupAlreadyExists": "This group already exists",
+  "@groupAlreadyExists": {},
+  "groupNameEmpty": "Group name cannot be empty",
+  "@groupNameEmpty": {},
+  "addNewHeader": "Add New",
+  "@addNewHeader": {},
+  "addClassifyDesc": "Classify your transactions for better tracking",
+  "@addClassifyDesc": {},
+  "addGroupHeader": "Add Group",
+  "@addGroupHeader": {},
+  "addGroupDesc": "Organize categories into sections for better clarity",
+  "@addGroupDesc": {},
+  "manageTagsTitle": "Manage\nTags",
+  "@manageTagsTitle": {},
+  "addTagLabel": "Add Tag",
+  "@addTagLabel": {},
+  "noTagsYet": "No tags yet",
+  "@noTagsYet": {},
+  "createTagsToLabel": "Create tags to label transactions (e.g. #trip, #work)",
+  "@createTagsToLabel": {},
+  "searchTags": "Search tags...",
+  "@searchTags": {},
+  "noTagsMatch": "No tags match \"{query}\".",
+  "editTag": "Edit Tag",
+  "@editTag": {},
+  "deleteTag": "Delete Tag",
+  "@deleteTag": {},
+  "tagNameEmpty": "Tag name cannot be empty",
+  "@tagNameEmpty": {},
+  "tagAlreadyExists": "This tag already exists",
+  "@tagAlreadyExists": {},
+  "recurringTitle": "Recurring\nTransactions",
+  "@recurringTitle": {},
+  "recurringDesc": "Automate your regular income and expenses",
+  "@recurringDesc": {},
+  "addRule": "Add Rule",
+  "@addRule": {},
+  "noRulesYet": "No recurring rules yet",
+  "@noRulesYet": {},
+  "createRulesToAutomate": "Create a rule to automate rent, salary, SIPs etc.",
+  "@createRulesToAutomate": {},
+  "activeRules": "ACTIVE RULES",
+  "@activeRules": {},
+  "pausedRules": "PAUSED RULES",
+  "@pausedRules": {},
+  "editRule": "Edit Rule",
+  "@editRule": {},
+  "ruleName": "Rule name",
+  "@ruleName": {},
+  "ruleAmount": "Amount",
+  "@ruleAmount": {},
+  "ruleFrequency": "Frequency",
+  "@ruleFrequency": {},
+  "nextProcessDate": "Next process date",
+  "@nextProcessDate": {},
+  "deleteRuleConfirm": "Delete Rule?",
+  "@deleteRuleConfirm": {},
+  "deleteRuleBody": "This will delete the recurring rule. Existing transactions created by this rule will not be deleted.",
+  "@deleteRuleBody": {},
+  "rulePaused": "Rule paused",
+  "@rulePaused": {},
+  "ruleResumed": "Rule resumed",
+  "@ruleResumed": {},
+  "ledgerTitle": "Lend / Borrow",
+  "@ledgerTitle": {},
+  "ledgerDesc": "Track money you lent to or borrowed from others",
+  "@ledgerDesc": {},
+  "addEntry": "Add Entry",
+  "@addEntry": {},
+  "noLedgerYet": "No entries yet",
+  "@noLedgerYet": {},
+  "createLedgerToTrack": "Tap + to track money you lend or borrow",
+  "@createLedgerToTrack": {},
+  "whoOwes": "WHO OWES",
+  "@whoOwes": {},
+  "youOweLabel": "You owe",
+  "@youOweLabel": {},
+  "owesYouLabel": "Owes you",
+  "@owesYouLabel": {},
+  "settledLabel": "Settled",
+  "@settledLabel": {},
+  "settleUp": "Settle Up",
+  "@settleUp": {},
+  "deleteEntryConfirm": "Delete Entry?",
+  "@deleteEntryConfirm": {},
+  "deleteEntryBody": "This will delete this entry and all its payments. This cannot be undone.",
+  "@deleteEntryBody": {},
+  "investmentsTitle": "Investments",
+  "@investmentsTitle": {},
+  "investmentsDesc": "Track your portfolio value, contributions and growth",
+  "@investmentsDesc": {},
+  "addInvestment": "Add Investment",
+  "@addInvestment": {},
+  "noInvestmentsYet": "No investments yet",
+  "@noInvestmentsYet": {},
+  "createInvestmentToTrack": "Tap + to track your SIPs, mutual funds, stocks etc.",
+  "@createInvestmentToTrack": {},
+  "portfolioValue": "PORTFOLIO VALUE",
+  "@portfolioValue": {},
+  "totalInvested": "TOTAL INVESTED",
+  "@totalInvested": {},
+  "gainLoss": "GAIN / LOSS",
+  "@gainLoss": {},
+  "deleteInvestmentConfirm": "Delete Investment?",
+  "@deleteInvestmentConfirm": {},
+  "deleteInvestmentBody": "This will delete the investment record and all its transactions.",
+  "@deleteInvestmentBody": {},
+  "troubleshootTitle": "Troubleshoot",
+  "@troubleshootTitle": {},
+  "troubleshootDesc": "Fix data inconsistency and suggestion issues.",
+  "@troubleshootDesc": {},
+  "rebuildSuggestions": "Rebuild Suggestions",
+  "@rebuildSuggestions": {},
+  "rebuildSuggestionsDesc": "Regenerates transaction autocompletes based on your history.",
+  "@rebuildSuggestionsDesc": {},
+  "suggestionsRebuilt": "Suggestions rebuilt successfully",
+  "@suggestionsRebuilt": {},
+  "cleanOrphans": "Clean Orphaned Data",
+  "@cleanOrphans": {},
+  "cleanOrphansDesc": "Removes transactions linked to deleted categories or accounts.",
+  "@cleanOrphansDesc": {},
+  "orphansCleaned": "Orphaned data cleaned up",
+  "@orphansCleaned": {},
+  "clearCache": "Clear App Cache",
+  "@clearCache": {},
+  "clearCacheDesc": "Clears temporary files and rebuilds internal database indexes.",
+  "@clearCacheDesc": {},
+  "cacheCleared": "Cache cleared successfully",
+  "@cacheCleared": {},
+  "aboutKuberHeader": "About Kuber",
+  "@aboutKuberHeader": {},
+  "aboutKuberDesc": "Kuber is a beautifully simple, offline-first personal finance tracker.",
+  "@aboutKuberDesc": {},
+  "privacyPromise": "Privacy Promise",
+  "@privacyPromise": {},
+  "privacyPromiseDesc": "Your data never leaves your device. No analytics, no tracking, no cloud sync.",
+  "@privacyPromiseDesc": {},
+  "openSource": "Open Source",
+  "@openSource": {},
+  "openSourceDesc": "Built with open technologies, fully transparent and auditable.",
+  "@openSourceDesc": {},
+  "developerNote": "Note from the Developer",
+  "@developerNote": {},
+  "developerNoteDesc": "Kuber is built with love to solve personal finance tracking. Thank you for using it!",
+  "@developerNoteDesc": {},
+  "permissionsTitle": "Permissions",
+  "@permissionsTitle": {},
+  "permissionsDesc": "App access requirements and security limits.",
+  "@permissionsDesc": {},
+  "storagePermission": "Storage Access",
+  "@storagePermission": {},
+  "storagePermissionDesc": "Required to pick attachment images, PDFs and write backups to your device.",
+  "@storagePermissionDesc": {},
+  "biometricPermission": "Biometric Authentication",
+  "@biometricPermission": {},
+  "biometricPermissionDesc": "Optional. Used for unlocking Kuber securely using Face ID or fingerprint.",
+  "@biometricPermissionDesc": {},
+  "networkPermission": "Network Access",
+  "@networkPermission": {},
+  "networkPermissionDesc": "Only used to fetch live currency conversion rates. App works 100% offline.",
+  "@networkPermissionDesc": {},
+  "feedbackTitle": "Feedback",
+  "@feedbackTitle": {},
+  "feedbackDesc": "Report issues, suggest features, or say hi!",
+  "@feedbackDesc": {},
+  "feedbackType": "FEEDBACK TYPE",
+  "@feedbackType": {},
+  "feedbackTypeBug": "Bug Report",
+  "@feedbackTypeBug": {},
+  "feedbackTypeFeature": "Feature Request",
+  "@feedbackTypeFeature": {},
+  "feedbackTypeOther": "Other",
+  "@feedbackTypeOther": {},
+  "feedbackMessage": "YOUR MESSAGE",
+  "@feedbackMessage": {},
+  "feedbackMessageHint": "Explain the issue or your suggestion in detail...",
+  "@feedbackMessageHint": {},
+  "submitFeedback": "Submit Feedback",
+  "@submitFeedback": {},
+  "feedbackThankYou": "Thank you for your feedback!",
+  "@feedbackThankYou": {},
+  "feedbackMessageRequired": "Please enter your message first",
+  "@feedbackMessageRequired": {},
+  "dataManagementTitle": "Data Management",
+  "@dataManagementTitle": {},
+  "dataManagementDesc": "Export, import, and manage your data.",
+  "@dataManagementDesc": {},
+  "exportData": "Export Data",
+  "@exportData": {},
+  "exportDataDesc": "Export all transactions, accounts and settings to JSON.",
+  "@exportDataDesc": {},
+  "importData": "Import Data",
+  "@importData": {},
+  "importDataDesc": "Import a previously exported JSON backup file.",
+  "@importDataDesc": {},
+  "clearAllData": "Clear All Data",
+  "@clearAllData": {},
+  "clearAllDataDesc": "Permanently deletes all transactions, accounts and settings from this device. Cannot be undone.",
+  "@clearAllDataDesc": {},
+  "clearDataConfirm": "Clear All Data?",
+  "@clearDataConfirm": {},
+  "clearDataConfirmBody": "This will permanently delete all your transactions, accounts, budgets, and settings. This action is irreversible. Type DELETE to confirm.",
+  "@clearDataConfirmBody": {},
+  "backupTitle": "Backups",
+  "@backupTitle": {},
+  "backupDesc": "Create manual backups or schedule automatic backups.",
+  "@backupDesc": {},
+  "lentBorrowedTitle": "Lent &\nBorrowed",
+  "noLedgerEntries": "No ledger entries yet",
+  "ledgerEmptyDesc": "Tap + to record a lend or borrow",
+  "settledUpper": "SETTLED",
+  "lentLabel": "Lent",
+  "borrowedLabel": "Borrowed",
+  "editEntry": "Edit entry",
+  "newEntry": "New entry",
+  "amountLent": "Amount lent",
+  "amountBorrowed": "Amount borrowed",
+  "personLabel": "Person",
+  "whoHint": "Who?",
+  "fromAccountLabel": "From account",
+  "toAccountLabel": "To account",
+  "dateLabel": "Date",
+  "lentOn": "Lent on",
+  "borrowedOn": "Borrowed on",
+  "expectedReturn": "Expected return",
+  "ledgerNotesHint": "Context, IOU ref, anything",
+  "addToLedger": "Add to ledger",
+  "accountTitle": "Account",
+  "expectedOn": "Expected on",
+  "lentTransaction": "LENT TRANSACTION",
+  "borrowedTransaction": "BORROWED TRANSACTION",
+  "addPayment": "Add Payment",
+  "markSettled": "Mark Settled",
+  "repaymentProgress": "REPAYMENT PROGRESS",
+  "dueDate": "DUE DATE",
+  "markSettledConfirm": "Mark as Settled?",
+  "markSettledBody": "This will record the remaining amount as a payment and mark this entry as settled.",
+  "settleLabel": "Settle",
+  "deleteLedgerConfirm": "Delete Ledger Entry?",
+  "deleteLedgerBody": "This will delete the entry and ALL linked transactions. This cannot be undone.",
+  "paymentReceived": "Payment Received",
+  "paymentMade": "Payment Made",
+  "recordPayment": "Record Payment",
+  "recordPaymentUpper": "RECORD PAYMENT",
+  "netPosition": "NET POSITION",
+  "youWillReceive": "You will receive",
+  "youOwe": "You owe",
+  "noDueDate": "NO DUE DATE",
+  "lentUpper": "LENT",
+  "borrowedUpper": "BORROWED",
+  "ledgerDuplicateWarningLent": "An active lent entry for {person} already exists. Are you sure you want to create a new one?",
+  "@ledgerDuplicateWarningLent": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerDuplicateWarningBorrow": "An active borrow entry for {person} already exists. Are you sure you want to create a new one?",
+  "@ledgerDuplicateWarningBorrow": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerEvensOut": "evens out",
+  "ledgerInYourFavour": "in your favour",
+  "ledgerOwedToOthers": "owed to others",
+  "ledgerActiveEntries": "{count, plural, =1{1 active entry} other{{count} active entries}}",
+  "@ledgerActiveEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ledgerNoOne": "no one",
+  "ledgerAcrossPeople": "{count, plural, =1{across 1 person} other{across {count} people}}",
+  "@ledgerAcrossPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settledOnUpper": "SETTLED {date}",
+  "@settledOnUpper": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dueOnUpper": "DUE {date}",
+  "@dueOnUpper": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "overdueLower": "overdue",
+  "pctReceived": "{pct}% received",
+  "@pctReceived": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "pctPaidBack": "{pct}% paid back",
+  "@pctPaidBack": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "amountRemaining": "{amount} remaining",
+  "@amountRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "errorWithDetails": "Error: {details}",
+  "@errorWithDetails": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "notSetTapToAdd": "Not set · tap to add",
+  "inDays": "{count, plural, =1{in 1 day} other{in {count} days}}",
+  "@inDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createdOnUpper": "CREATED {date}",
+  "@createdOnUpper": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "noInvestments": "No investments tracked",
+  "investmentsEmptyDesc": "Tap + to add your first investment",
+  "allInvestmentsUpper": "ALL INVESTMENTS",
+  "invTypeSip": "SIP",
+  "invTypeMutualFund": "Mutual Fund",
+  "invTypeStocks": "Stocks",
+  "invTypeGold": "Gold",
+  "invTypeFd": "FD",
+  "invTypeRd": "RD",
+  "invTypeCrypto": "Crypto",
+  "invTypeTrading": "Trading",
+  "invTypeRealEstate": "Real Estate",
+  "invTypeOther": "Other",
+  "editInvestment": "Edit investment",
+  "newInvestment": "New investment",
+  "investmentName": "Investment name",
+  "valueLabel": "Value",
+  "totalInvestedInclNew": "Total invested (incl. new contribution)",
+  "investedAmountInitial": "Invested amount (initial)",
+  "autoDebitSip": "Auto-debit SIP",
+  "enableAutoDebitSip": "Enable auto-debit SIP",
+  "automateMonthlyContrib": "Automate your monthly contributions",
+  "monthlySipAmount": "Monthly SIP amount",
+  "sipDate": "SIP date",
+  "debitedFrom": "Debited from",
+  "optionalContext": "Optional context",
+  "addContribution": "Add Contribution",
+  "updateValue": "Update Value",
+  "investedUpper": "INVESTED",
+  "currentUpper": "CURRENT",
+  "gainLossUpper": "GAIN/LOSS",
+  "sipConfiguration": "SIP CONFIGURATION",
+  "monthlySip": "Monthly SIP",
+  "strategyNotes": "STRATEGY NOTES",
+  "contributionHistory": "CONTRIBUTION HISTORY",
+  "noContributions": "No contributions recorded",
+  "updateCurrentValue": "Update Current Value",
+  "updateLabel": "Update",
+  "contributionLabel": "Contribution",
+  "recordContributionUpper": "RECORD CONTRIBUTION",
+  "noteOptionalUpper": "NOTE (OPTIONAL)",
+  "assetAllocation": "ASSET ALLOCATION",
+  "investmentNameHint": "e.g. Nifty 50 Index Fund",
+  "sipAmountPrefix": "SIP {amount}",
+  "@sipAmountPrefix": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlySipValue": "{amount} on {day}th",
+  "@monthlySipValue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "addRecurring": "Add Recurring",
+  "noRecurring": "No recurring transactions",
+  "recurringEmptyDesc": "Automate subscriptions and repeated payments",
+  "rulesUpper": "RULES",
+  "recentlyProcessed": "RECENTLY PROCESSED",
+  "freqDaily": "Daily",
+  "freqWeekly": "Weekly",
+  "freqBiweekly": "Biweekly",
+  "freqMonthly": "Monthly",
+  "freqQuarterly": "Quarterly",
+  "freqYearly": "Yearly",
+  "freqCustom": "Custom",
+  "editRecurring": "Edit recurring",
+  "newRecurring": "New recurring",
+  "transactionLabel": "Transaction",
+  "amountTitle": "Amount",
+  "recurringNameHint": "Name (e.g. Netflix, Rent)",
+  "whereLabel": "Where",
+  "scheduleSublabel": "When this transaction repeats",
+  "frequencyLabel": "Frequency",
+  "everyLabel": "Every",
+  "daysLabel": "days",
+  "startsOn": "Starts on",
+  "startDate": "Start date",
+  "endsLabel": "Ends",
+  "neverLabel": "Never",
+  "afterN": "After N",
+  "onDate": "On date",
+  "afterLabel": "After",
+  "occurrencesLabel": "occurrences",
+  "endDate": "End date",
+  "recurringNotesHint": "Optional · context, reference, anything",
+  "saveRecurring": "Save recurring",
+  "nextOccurrenceLabel": "Next occurrence",
+  "cadenceDaily": "then every day",
+  "cadenceWeekly": "then every week",
+  "cadenceBiweekly": "then every 2 weeks",
+  "cadenceMonthly": "then every month",
+  "cadenceYearly": "then every year",
+  "cadenceCustom": "then every custom interval",
+  "activeUpper": "ACTIVE",
+  "activeCustomUpper": "ACTIVE • CUSTOM",
+  "pausedUpper": "PAUSED",
+  "freqEveryNDays": "Every {count} days",
+  "@freqEveryNDays": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringAmountLabel": "RECURRING {type} AMOUNT",
+  "@recurringAmountLabel": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "frequencyUpper": "FREQUENCY",
+  "deleteAutomationConfirm": "Delete automation?",
+  "deleteAutomationBody": "The recurring rule for \"{name}\" will be permanently deleted.",
+  "@deleteAutomationBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyAutomationCost": "MONTHLY AUTOMATION COST",
+  "upcomingCharges": "UPCOMING CHARGES",
+  "todayUpper": "TODAY",
+  "tomorrowUpper": "TOMORROW",
+  "yesterdayUpper": "YESTERDAY",
+  "inDaysUpper": "IN {count} DAYS",
+  "@inDaysUpper": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "nextChargeLabel": "Next charge",
+  "backingUpAuto": "Backing up automatically",
+  "processingRecurring": "Processing Recurring",
+  "savingCopyToFolder": "Saving a copy to your chosen folder.",
+  "creatingMissedTxns": "Creating missed transactions.",
+  "folderUpper": "FOLDER",
+  "processedUpper": "PROCESSED",
+  "selectedLabel": "Selected",
+  "nTransactions": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@nTransactions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "networkUpper": "NETWORK",
+  "localOnly": "Local Only",
+  "transactionHistory": "Transaction History",
+  "errorLoadingHistory": "Error loading history: {details}",
+  "@errorLoadingHistory": {
+    "placeholders": {
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringHistoryEmptyDesc": "Transactions generated by this automation will appear here.",
+  "todayLower": "today",
+  "tomorrowLower": "tomorrow",
+  "betaBadge": "BETA",
+  "noCategories": "No categories yet",
+  "categoriesEmptyDesc": "Create categories to organize your expenses",
+  "addCategory": "Add Category",
+  "searchCategoriesHint": "Search categories and groups...",
+  "addNew": "Add New",
+  "addCategoryDesc": "Classify your transactions for better tracking",
+  "addGroup": "Add Group",
+  "editGroup": "Edit Group",
+  "categoryGroupSubtitle": "Category group",
+  "groupNameHint": "Group name (e.g. Food, Transport)",
+  "deleteGroupConfirm": "Delete Group?",
+  "deleteGroupBody": "Categories in \"{name}\" will be moved to \"Ungrouped\".",
+  "@deleteGroupBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryDetail": "Category Detail",
+  "groupUpper": "GROUP",
+  "typeUpper": "TYPE",
+  "incomeAndExpense": "Income & Expense",
+  "cannotDeleteCategory": "Cannot delete category",
+  "cannotDeleteCategoryBody": "This category has transactions linked to it. To delete this category, delete the linked transactions first.",
+  "editCategory": "Edit category",
+  "newCategory": "New category",
+  "optionalLabel": "Optional",
+  "appearance": "Appearance",
+  "bothLabel": "Both",
+  "saveCategory": "Save category",
+  "categoryUpdated": "Category updated",
+  "categoryAdded": "Category added",
+  "categoryNameLabel": "Category name",
+  "livePreview": "LIVE PREVIEW",
+  "selectGroup": "Select Group",
+  "groupNameShortHint": "Group name...",
+  "addNewGroup": "Add New Group",
+  "noBudgetSet": "No budget set",
+  "categoriesTitle": "Manage\nCategories",
+  "noCategoryMatches": "No categories or groups match \"{query}\".",
+  "@noCategoryMatches": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCategoryConfirm": "Delete category?",
+  "deleteCategoryBody": "\"{name}\" will be permanently deleted.",
+  "@deleteCategoryBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNameHint": "e.g. Groceries, Rent, Salary"
+}

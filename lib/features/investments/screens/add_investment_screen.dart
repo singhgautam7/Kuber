@@ -5,10 +5,11 @@
 //   lib/features/investments/screens/add_investment_screen.dart
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -115,8 +116,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit investment' : 'New investment',
-          style: GoogleFonts.inter(
+          _isEditing ? context.l10n.editInvestment : context.l10n.newInvestment,
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -133,58 +134,58 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
           children: [
             // ── IDENTITY ─────────────────────────────────────────────
             KuberFormSection(
-              label: 'Identity',
+              label: context.l10n.identity,
               topGap: 0,
               children: [
-                const KuberFieldLabel('Investment name'),
+                KuberFieldLabel(context.l10n.investmentName),
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                  decoration: const InputDecoration(
-                    hintText: 'e.g. Nifty 50 Index Fund',
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.investmentNameHint,
                   ),
                 ),
               ],
             ),
 
             KuberFormSection(
-              label: 'Type',
+              label: context.l10n.typeLabel,
               children: [
                 KuberChipGrid<String>(
                   columns: 3,
                   selected: _investmentType,
                   onChanged: (v) => setState(() => _investmentType = v),
-                  options: const [
+                  options: [
                     KuberChipOption(
                         value: 'sip',
-                        label: 'SIP',
+                        label: context.l10n.invTypeSip,
                         icon: Icons.savings_outlined),
                     KuberChipOption(
                         value: 'mutual_fund',
-                        label: 'Mutual Fund',
+                        label: context.l10n.invTypeMutualFund,
                         icon: Icons.pie_chart_outline),
                     KuberChipOption(
                         value: 'stocks',
-                        label: 'Stocks',
+                        label: context.l10n.invTypeStocks,
                         icon: Icons.show_chart_rounded),
                     KuberChipOption(
                         value: 'gold',
-                        label: 'Gold',
+                        label: context.l10n.invTypeGold,
                         icon: Icons.diamond_outlined),
                     KuberChipOption(
                         value: 'fd',
-                        label: 'FD',
+                        label: context.l10n.invTypeFd,
                         icon: Icons.account_balance_outlined),
                     KuberChipOption(
                         value: 'rd',
-                        label: 'RD',
+                        label: context.l10n.invTypeRd,
                         icon: Icons.savings_rounded),
                     KuberChipOption(
                         value: 'other',
-                        label: 'Other',
+                        label: context.l10n.invTypeOther,
                         icon: Icons.more_horiz_rounded),
                   ],
                 ),
@@ -192,20 +193,20 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             ),
 
             KuberFormSection(
-              label: 'Value',
+              label: context.l10n.valueLabel,
               children: [
                 KuberFieldLabel(_isEditing
-                    ? 'Total invested (incl. new contribution)'
-                    : 'Invested amount (initial)'),
+                    ? context.l10n.totalInvestedInclNew
+                    : context.l10n.investedAmountInitial),
                 TextField(
                   controller: _investedController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
                   decoration: InputDecoration(
                     prefixText: '$symbol ',
-                    prefixStyle: GoogleFonts.inter(
+                    prefixStyle: localeFont(
                         color: cs.onSurfaceVariant),
                     suffixIcon: IconButton(
                       onPressed: () =>
@@ -216,7 +217,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   ),
                 ),
                 KuberHeroAmountInput(
-                  label: 'Current value',
+                  label: context.l10n.currentValueLabel,
                   currencySymbol: symbol,
                   controller: _currentValueController,
                   inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
@@ -233,12 +234,12 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             ),
 
             KuberFormSection(
-              label: 'Auto-debit SIP',
+              label: context.l10n.autoDebitSip,
               children: [
                 KuberSwitchRow(
                   icon: Icons.repeat_rounded,
-                  name: 'Enable auto-debit SIP',
-                  sub: 'Automate your monthly contributions',
+                  name: context.l10n.enableAutoDebitSip,
+                  sub: context.l10n.automateMonthlyContrib,
                   value: _autoDebit,
                   onChanged: (v) => setState(() => _autoDebit = v),
                 ),
@@ -252,18 +253,18 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const KuberFieldLabel('Monthly SIP amount'),
+                              KuberFieldLabel(context.l10n.monthlySipAmount),
                               TextField(
                                 controller: _sipAmountController,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
                                 onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                                 onChanged: (_) => setState(() {}),
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                     color: cs.onSurface, fontSize: 15),
                                 decoration: InputDecoration(
                                   prefixText: '$symbol ',
-                                  prefixStyle: GoogleFonts.inter(
+                                  prefixStyle: localeFont(
                                       color: cs.onSurfaceVariant),
                                   suffixIcon: IconButton(
                                     onPressed: () => _openCalculatorFor(
@@ -275,13 +276,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              const KuberFieldLabel('SIP date'),
+                              KuberFieldLabel(context.l10n.sipDate),
                               KuberDayGrid(
                                 selected: _sipDate,
                                 onChanged: (v) => setState(() => _sipDate = v),
                               ),
                               const SizedBox(height: 10),
-                              const KuberFieldLabel('Debited from'),
+                              KuberFieldLabel(context.l10n.debitedFrom),
                               _accountPickerRow(),
                             ],
                           ),
@@ -291,7 +292,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
             ),
 
             KuberFormSection(
-              label: 'Notes',
+              label: context.l10n.notesLabel,
               children: [
                 TextField(
                   controller: _notesController,
@@ -302,7 +303,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
               ),
 
               KuberFormSection(
-                label: 'Notes',
+                label: context.l10n.notesLabel,
                 children: [
                   TextField(
                     controller: _notesController,
@@ -310,9 +311,9 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                     minLines: 1,
                     textCapitalization: TextCapitalization.sentences,
                     onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                    style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
-                    decoration: const InputDecoration(
-                      hintText: 'Optional context',
+                    style: localeFont(color: cs.onSurface, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.optionalContext,
                     ),
                   ),
                 ],
@@ -322,7 +323,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       ),
     ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEditing ? 'Save changes' : 'Add investment',
+        label: _isEditing ? context.l10n.saveChanges : context.l10n.addInvestment,
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -346,8 +347,8 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
               color: Color(acc.colorValue ?? 0xFF3B82F6),
               icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
             ),
-      label: 'Account',
-      value: acc?.name ?? 'Select account',
+      label: context.l10n.accountTitle,
+      value: acc?.name ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: () {
         showModalBottomSheet(
@@ -493,7 +494,7 @@ class _GainLossChip extends StatelessWidget {
                 TextSpan(
                   text:
                       '${positive ? '+' : '−'}$symbol${delta.abs().toStringAsFixed(0)}',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: tone,
@@ -502,7 +503,7 @@ class _GainLossChip extends StatelessWidget {
                 TextSpan(
                   text:
                       ' · ${positive ? '+' : '−'}${pct.abs().toStringAsFixed(2)}%',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12,
                     color: cs.onSurface,
                   ),

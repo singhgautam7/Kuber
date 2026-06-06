@@ -17,6 +17,8 @@
 //     DateTime? nextDue})`. Without it, recompute inline from
 //     `calc.totalOutstanding` / `calc.totalPaidAllLoans` (already there).
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -105,8 +107,8 @@ class LoansHero extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'TOTAL OUTSTANDING DEBT',
-                        style: GoogleFonts.inter(
+                        context.l10n.totalOutstandingDebt,
+                        style: localeFont(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -148,7 +150,7 @@ class LoansHero extends ConsumerWidget {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -179,7 +181,7 @@ class LoansHero extends ConsumerWidget {
                               const SizedBox(width: 4),
                               Text(
                                 '${(paidPct * 100).toStringAsFixed(0)}% paid',
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
                                   color: cs.tertiary,
@@ -194,7 +196,7 @@ class LoansHero extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text.rich(
                   TextSpan(
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       color: cs.onSurfaceVariant,
                     ),
@@ -203,7 +205,7 @@ class LoansHero extends ConsumerWidget {
                         text: activeCount == 0
                             ? 'no active loans'
                             : '$activeCount active loan${activeCount == 1 ? '' : 's'}',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -254,7 +256,7 @@ class LoansHero extends ConsumerWidget {
                       Expanded(
                         child: _LegendBlock(
                           color: cs.tertiary,
-                          label: 'Paid',
+                          label: context.l10n.paidLabel,
                           value: maskAmount(
                             fmt.formatCurrency(totalPaid),
                             masked,
@@ -264,7 +266,7 @@ class LoansHero extends ConsumerWidget {
                       Expanded(
                         child: _LegendBlock(
                           color: cs.outlineVariant,
-                          label: 'Outstanding',
+                          label: context.l10n.outstandingTitle,
                           value: maskAmount(
                             fmt.formatCurrency(totalOutstanding),
                             masked,
@@ -313,7 +315,7 @@ class _LegendBlock extends StatelessWidget {
             if (!alignEnd) ...[_Dot(color: color), const SizedBox(width: 6)],
             Text(
               label.toUpperCase(),
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -326,7 +328,7 @@ class _LegendBlock extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -445,7 +447,7 @@ class LoanCard extends ConsumerWidget {
                               child: Text(
                                 name,
                                 overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: cs.onSurface,
@@ -463,7 +465,7 @@ class LoanCard extends ConsumerWidget {
                         Text(
                           lenderLabel,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11,
                             color: cs.onSurfaceVariant,
                           ),
@@ -476,8 +478,8 @@ class LoanCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        isCompleted ? 'PAID' : 'OUTSTANDING',
-                        style: GoogleFonts.inter(
+                        isCompleted ? context.l10n.paidUpper : context.l10n.outstandingLabel,
+                        style: localeFont(
                           fontSize: 9.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -494,7 +496,7 @@ class LoanCard extends ConsumerWidget {
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -527,14 +529,14 @@ class LoanCard extends ConsumerWidget {
                   Expanded(
                     child: Text.rich(
                       TextSpan(
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11,
                           color: cs.onSurfaceVariant,
                         ),
                         children: [
                           TextSpan(
                             text: '${(progress * 100).toStringAsFixed(0)}%',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurface,
@@ -570,20 +572,20 @@ class LoanCard extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: _StripItem(
-                          label: 'Monthly EMI',
+                          label: context.l10n.monthlyEmi,
                           value: maskAmount(fmt.formatCurrency(emi), masked),
                         ),
                       ),
                       if (interestRate != null)
                         Expanded(
                           child: _StripItem(
-                            label: 'Interest',
+                            label: context.l10n.interestLabel,
                             value: '${interestRate!.toStringAsFixed(2)}%',
                           ),
                         ),
                       Expanded(
                         child: _StripItem(
-                          label: 'Next due',
+                          label: context.l10n.nextDue,
                           value: nextDue == null
                               ? '—'
                               : DateFormat('MMM d').format(nextDue!),
@@ -618,7 +620,7 @@ class _StripItem extends StatelessWidget {
           label.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 9.5,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -630,7 +632,7 @@ class _StripItem extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             color: valueColor ?? cs.onSurface,
@@ -659,8 +661,8 @@ class _CompletePill extends StatelessWidget {
           Icon(Icons.check_rounded, size: 11, color: cs.tertiary),
           const SizedBox(width: 3),
           Text(
-            'COMPLETED',
-            style: GoogleFonts.inter(
+            context.l10n.completedUpper,
+            style: localeFont(
               fontSize: 9,
               fontWeight: FontWeight.w700,
               color: cs.tertiary,
@@ -699,8 +701,8 @@ class LoansCompletedToggle extends StatelessWidget {
         child: Row(
           children: [
             Text(
-              'COMPLETED',
-              style: GoogleFonts.inter(
+              context.l10n.completedUpper,
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -716,7 +718,7 @@ class LoansCompletedToggle extends StatelessWidget {
               ),
               child: Text(
                 '$count',
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   color: cs.tertiary,

@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../settings/widgets/settings_widgets.dart';
@@ -20,18 +21,18 @@ class OnboardingPageTwo extends StatelessWidget {
     final cards = [
       (
         icon: Icons.wifi_off_rounded,
-        title: 'Fully offline',
-        body: 'No cloud servers. Nothing to breach. Works in airplane mode.',
+        title: context.l10n.fullyOfflineTitle,
+        body: context.l10n.fullyOfflineBody,
       ),
       (
         icon: Icons.no_accounts_rounded,
-        title: 'No account needed',
-        body: 'Open the app and start. Zero signup, zero friction.',
+        title: context.l10n.noAccountTitle,
+        body: context.l10n.noAccountBody,
       ),
       (
         icon: Icons.visibility_off_outlined,
-        title: 'Privacy mode',
-        body: 'One tap hides every balance when you hand over your phone.',
+        title: context.l10n.privacyModeTitle,
+        body: context.l10n.privacyModeBody,
       ),
     ];
 
@@ -48,8 +49,8 @@ class OnboardingPageTwo extends StatelessWidget {
                 const SizedBox(height: KuberSpacing.lg),
                 OnboardingEntrance(
                   child: Text(
-                    'Private by design.',
-                    style: GoogleFonts.inter(
+                    context.l10n.privateByDesign,
+                    style: localeFont(
                       fontSize: 28,
                       height: 1.08,
                       fontWeight: FontWeight.w800,
@@ -62,8 +63,8 @@ class OnboardingPageTwo extends StatelessWidget {
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 90),
                   child: Text(
-                    'Your money stays on your device. No telemetry, no syncing, no third parties.',
-                    style: GoogleFonts.inter(
+                    context.l10n.onboardingPage2Description,
+                    style: localeFont(
                       fontSize: 13,
                       height: 1.42,
                       color: cs.onSurfaceVariant,
@@ -134,7 +135,7 @@ class _PrivacyFeatureCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 18,
                     height: 1.1,
                     fontWeight: FontWeight.w800,
@@ -145,7 +146,7 @@ class _PrivacyFeatureCard extends StatelessWidget {
                 const SizedBox(height: KuberSpacing.xs),
                 Text(
                   body,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     height: 1.32,
                     color: cs.onSurfaceVariant,

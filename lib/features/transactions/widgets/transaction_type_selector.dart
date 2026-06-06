@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 
 class TransactionTypeSelector extends StatelessWidget {
   final String selected;
@@ -15,12 +16,16 @@ class TransactionTypeSelector extends StatelessWidget {
   });
 
   static const _types = ['expense', 'income', 'transfer'];
-  static const _labels = ['Expense', 'Income', 'Transfer'];
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final labels = [
+      context.l10n.expenseLabel,
+      context.l10n.incomeLabel,
+      context.l10n.transferLabel,
+    ];
 
     return Container(
       height: 48,
@@ -47,7 +52,7 @@ class TransactionTypeSelector extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  _labels[i],
+                  labels[i],
                   style: textTheme.labelLarge?.copyWith(
                     color: isSelected
                         ? (enabled ? cs.onPrimary : cs.onSurface)

@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -97,7 +98,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: KuberAppBar(
-        title: widget.existingBudget == null ? 'Create Budget' : 'Edit Budget',
+        title: widget.existingBudget == null ? context.l10n.createBudget : context.l10n.editBudget,
         showBack: true,
       ),
       body: SingleChildScrollView(
@@ -105,7 +106,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SectionHeader(title: 'SELECT CATEGORY'),
+            _SectionHeader(title: context.l10n.selectCategoryUpper),
             const SizedBox(height: KuberSpacing.sm),
             _CategorySelector(
               selected: _selectedCategory,
@@ -126,8 +127,8 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(top: 8, left: 4),
                       child: Text(
-                        'A budget already exists for this category',
-                        style: GoogleFonts.inter(
+                        context.l10n.budgetAlreadyExists,
+                        style: localeFont(
                           fontSize: 12,
                           color: cs.error,
                           fontWeight: FontWeight.w500,
@@ -139,12 +140,12 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                 },
               ),
             const SizedBox(height: KuberSpacing.xl),
-            _SectionHeader(title: 'BUDGET AMOUNT'),
+            _SectionHeader(title: context.l10n.budgetAmount),
             const SizedBox(height: KuberSpacing.sm),
             TextField(
               controller: _amountController,
               keyboardType: TextInputType.number,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
               ),
@@ -160,14 +161,14 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
               ),
             ),
             const SizedBox(height: KuberSpacing.xl),
-            _SectionHeader(title: 'APPLIES TO'),
+            _SectionHeader(title: context.l10n.appliesTo),
             const SizedBox(height: KuberSpacing.sm),
             Row(
               children: [
                 Expanded(
                   child: _OptionCard(
                     icon: Icons.calendar_today_outlined,
-                    label: 'This month\nonly',
+                    label: context.l10n.thisMonthOnly,
                     isSelected: !_isEveryMonth,
                     onTap: () => setState(() => _isEveryMonth = false),
                   ),
@@ -176,7 +177,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                 Expanded(
                   child: _OptionCard(
                     icon: Icons.refresh_rounded,
-                    label: 'Every\nmonth',
+                    label: context.l10n.everyMonth,
                     isSelected: _isEveryMonth,
                     onTap: () => setState(() => _isEveryMonth = true),
                   ),
@@ -187,11 +188,11 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _SectionHeader(title: 'BUDGET ALERTS'),
+                _SectionHeader(title: context.l10n.budgetAlerts),
                 TextButton.icon(
                   onPressed: _addAlert,
                   icon: const Icon(Icons.add, size: 16),
-                  label: const Text('ADD ALERT'),
+                  label: Text(context.l10n.addAlert),
                 ),
               ],
             ),
@@ -246,7 +247,7 @@ class _AddEditBudgetScreenState extends ConsumerState<AddEditBudgetScreen> {
                     : cs.surfaceContainerHighest,
               ),
               icon: const Icon(Icons.save_rounded),
-              label: const Text('SAVE BUDGET'),
+              label: Text(context.l10n.saveBudget),
             );
           },
         ),
@@ -336,7 +337,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 11,
         fontWeight: FontWeight.w600,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -386,11 +387,11 @@ class _CategorySelector extends StatelessWidget {
                   children: [
                     Text(
                       selected!.name,
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                      style: localeFont(fontWeight: FontWeight.w600),
                     ),
                     Text(
-                      'Tap to change category',
-                      style: GoogleFonts.inter(
+                      context.l10n.tapToChangeCategory,
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),
@@ -401,8 +402,8 @@ class _CategorySelector extends StatelessWidget {
             ] else
               Expanded(
                 child: Text(
-                  'Choose category',
-                  style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+                  context.l10n.chooseCategory,
+                  style: localeFont(color: cs.onSurfaceVariant),
                 ),
               ),
             Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
@@ -447,7 +448,7 @@ class _OptionCard extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected ? cs.primary : cs.onSurface,
@@ -474,7 +475,7 @@ class _AlertChip extends ConsumerWidget {
         : ref.watch(formatterProvider).formatCurrency(alert.value);
 
     return Chip(
-      label: Text(label, style: GoogleFonts.inter(fontSize: 12)),
+      label: Text(label, style: localeFont(fontSize: 12)),
       onDeleted: onDelete,
       backgroundColor: cs.surfaceContainer,
       deleteIconColor: cs.onSurfaceVariant,

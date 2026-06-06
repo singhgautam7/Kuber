@@ -1,5 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import '../../../core/utils/l10n_ext.dart';
 
 import '../providers/analytics_provider.dart';
 
@@ -23,7 +24,7 @@ class QuickFilterChipsRow extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'QUICK FILTERS',
+            context.l10n.quickFilters,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               fontWeight: FontWeight.w800,
@@ -43,7 +44,7 @@ class QuickFilterChipsRow extends StatelessWidget {
               final type = types[index];
               final isSelected = selectedType == type;
               return _FilterChip(
-                label: _typeLabel(type),
+                label: _typeLabel(context, type),
                 selected: isSelected,
                 onTap: () => onTypeSelected(type),
               );
@@ -54,8 +55,25 @@ class QuickFilterChipsRow extends StatelessWidget {
     );
   }
 
-  String _typeLabel(FilterType t) {
-    return t.name.toUpperCase().replaceAll('THIS', 'THIS ').replaceAll('LAST', 'LAST ');
+  String _typeLabel(BuildContext context, FilterType t) {
+    switch (t) {
+      case FilterType.all:
+        return context.l10n.filterAll;
+      case FilterType.today:
+        return context.l10n.filterToday;
+      case FilterType.thisWeek:
+        return context.l10n.filterThisWeek;
+      case FilterType.lastWeek:
+        return context.l10n.filterLastWeek;
+      case FilterType.thisMonth:
+        return context.l10n.filterThisMonth;
+      case FilterType.lastMonth:
+        return context.l10n.filterLastMonth;
+      case FilterType.thisYear:
+        return context.l10n.filterThisYear;
+      case FilterType.custom:
+        return context.l10n.filterCustom;
+    }
   }
 }
 
@@ -80,7 +98,7 @@ class _FilterChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 12,
             fontWeight: FontWeight.w800,
             color: selected ? cs.onPrimary : cs.onSurfaceVariant,

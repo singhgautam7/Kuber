@@ -1,9 +1,9 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -79,7 +79,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                       children: [
                         Text(
                           'Charts',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 32,
                             fontWeight: FontWeight.w800,
                             color: cs.onSurface,
@@ -90,7 +90,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                         const SizedBox(height: 4),
                         Text(
                           'Visualise your spending patterns over time.',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                               fontSize: 13, color: cs.onSurfaceVariant),
                         ),
                       ],
@@ -116,7 +116,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
                               size: 14, color: cs.onSurfaceVariant),
                           const SizedBox(width: 6),
                           Text('WIP',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: cs.onSurfaceVariant)),
@@ -140,7 +140,7 @@ class _ChartsBodyState extends ConsumerState<_ChartsBody> {
             loading: () => _ChartSkeleton(),
             error: (e, _) => Center(
               child: Text('Failed to load data',
-                  style: GoogleFonts.inter(color: cs.error)),
+                  style: localeFont(color: cs.error)),
             ),
             data: (buckets) => _ScrollableBarChart(buckets: buckets),
           ),
@@ -199,7 +199,7 @@ class _PeriodChipRow extends ConsumerWidget {
               ),
               child: Text(
                 p.label,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
@@ -269,7 +269,7 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
     if (buckets.isEmpty) {
       return Center(
         child: Text('No data for this period',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+            style: localeFont(color: cs.onSurfaceVariant)),
       );
     }
 
@@ -337,7 +337,7 @@ class _ScrollableBarChartState extends ConsumerState<_ScrollableBarChart> {
                             padding: const EdgeInsets.only(top: 6),
                             child: Text(
                               buckets[idx].label,
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 10,
                                 color: idx == selectedIdx
                                     ? cs.primary
@@ -439,7 +439,7 @@ class _YAxisLabels extends StatelessWidget {
         if (val < 0) return const SizedBox.shrink();
         return Text(
           _compactValue(val),
-          style: GoogleFonts.inter(
+          style: localeFont(
               fontSize: 10,
               color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w500),
@@ -467,7 +467,7 @@ class _DetailsPanel extends ConsumerWidget {
         if (buckets.isEmpty || selectedIdx == null) {
           return Center(
             child: Text('Tap a bar to see details',
-                style: GoogleFonts.inter(color: cs.onSurfaceVariant)),
+                style: localeFont(color: cs.onSurfaceVariant)),
           );
         }
         final bucket = buckets[selectedIdx.clamp(0, buckets.length - 1)];
@@ -483,7 +483,7 @@ class _DetailsPanel extends ConsumerWidget {
               // Period label
               Text(
                 _periodLabel(bucket, period),
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant,
@@ -522,7 +522,7 @@ class _DetailsPanel extends ConsumerWidget {
                 data: (stats) {
                   if (stats.isEmpty) {
                     return Text('No expense breakdown available.',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                             fontSize: 13, color: cs.onSurfaceVariant));
                   }
                   return Column(
@@ -530,7 +530,7 @@ class _DetailsPanel extends ConsumerWidget {
                     children: [
                       Text(
                         'BY CATEGORY',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -556,7 +556,7 @@ class _DetailsPanel extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   s.category.name,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,
                                       color: cs.onSurface),
@@ -564,7 +564,7 @@ class _DetailsPanel extends ConsumerWidget {
                               ),
                               Text(
                                 formatter.formatCurrency(s.total),
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: cs.onSurface),
@@ -575,7 +575,7 @@ class _DetailsPanel extends ConsumerWidget {
                                 child: Text(
                                   '${s.percentage.toStringAsFixed(0)}%',
                                   textAlign: TextAlign.right,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                       fontSize: 11,
                                       color: cs.onSurfaceVariant),
                                 ),
@@ -689,7 +689,7 @@ class _SummaryTile extends StatelessWidget {
           children: [
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -699,7 +699,7 @@ class _SummaryTile extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               '$prefix$value',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: color,

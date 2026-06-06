@@ -1,9 +1,10 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/utils/l10n_ext.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../providers/analytics_provider.dart';
 
@@ -43,8 +44,8 @@ class TopFilterRow extends ConsumerWidget {
                   Icon(Icons.unfold_more_rounded, size: 14, color: cs.primary),
                   const SizedBox(width: 6),
                   Text(
-                    _typeLabel(filter.type),
-                    style: GoogleFonts.inter(
+                    _typeLabel(context, filter.type),
+                    style: localeFont(
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
                       color: cs.primary,
@@ -119,8 +120,25 @@ class TopFilterRow extends ConsumerWidget {
     );
   }
 
-  String _typeLabel(FilterType t) {
-    return t.name.toUpperCase().replaceAll('THIS', 'THIS ').replaceAll('LAST', 'LAST ');
+  String _typeLabel(BuildContext context, FilterType t) {
+    switch (t) {
+      case FilterType.all:
+        return context.l10n.filterAll;
+      case FilterType.today:
+        return context.l10n.filterToday;
+      case FilterType.thisWeek:
+        return context.l10n.filterThisWeek;
+      case FilterType.lastWeek:
+        return context.l10n.filterLastWeek;
+      case FilterType.thisMonth:
+        return context.l10n.filterThisMonth;
+      case FilterType.lastMonth:
+        return context.l10n.filterLastMonth;
+      case FilterType.thisYear:
+        return context.l10n.filterThisYear;
+      case FilterType.custom:
+        return context.l10n.filterCustom;
+    }
   }
 
   String _rangeLabel(DateTime from, DateTime to) {

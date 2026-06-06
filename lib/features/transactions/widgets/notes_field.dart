@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/l10n_ext.dart';
+
 /// Shared notes text field used by both normal and transfer forms.
 class NotesField extends StatelessWidget {
   final TextEditingController controller;
@@ -26,7 +28,7 @@ class NotesField extends StatelessWidget {
         color: cs.onSurface,
       ),
       decoration: InputDecoration(
-        hintText: 'Add a note (optional)',
+        hintText: context.l10n.addNoteHint,
         hintStyle: textTheme.bodyMedium?.copyWith(
           color: cs.onSurfaceVariant,
         ),

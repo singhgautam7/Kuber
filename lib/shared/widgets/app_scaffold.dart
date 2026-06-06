@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
@@ -524,6 +525,21 @@ class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
   }
 }
 
+String _localNavLabel(BuildContext context, String label) {
+  switch (label) {
+    case 'Home':
+      return context.l10n.navHome;
+    case 'History':
+      return context.l10n.navHistory;
+    case 'Analytics':
+      return context.l10n.navAnalytics;
+    case 'More':
+      return context.l10n.navMore;
+    default:
+      return label;
+  }
+}
+
 class _NavBarItem extends StatefulWidget {
   final KuberNavItem item;
   final bool isSelected;
@@ -601,6 +617,7 @@ class _NavBarItemState extends State<_NavBarItem>
           final iconColor = Color.lerp(unselectedColor, selectedColor, t)!;
           final iconData = t > 0.5 ? widget.item.activeIcon : widget.item.icon;
           final iconContent = Icon(iconData, size: 22, color: iconColor);
+          final labelStr = _localNavLabel(context, widget.item.label);
 
           if (widget.fullTint) {
             // Modern: no background tint — active state shown via icon/text color only
@@ -611,7 +628,7 @@ class _NavBarItemState extends State<_NavBarItem>
                   Icon(iconData, size: 24, color: iconColor),
                   const SizedBox(height: 3),
                   Text(
-                    widget.item.label,
+                    labelStr,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: widget.tt.labelSmall!.copyWith(
@@ -654,7 +671,7 @@ class _NavBarItemState extends State<_NavBarItem>
                       : FontWeight.w500,
                   color: widget.isSelected ? selectedColor : unselectedColor,
                 ),
-                child: Text(widget.item.label),
+                child: Text(labelStr),
               ),
             ],
           );
@@ -684,7 +701,7 @@ class _SpeedDialMenu extends AnimatedWidget {
           context,
           index: 3,
           icon: Icons.sync_rounded,
-          label: 'Add a Recurring Transaction',
+          label: context.l10n.speedDialRecurring,
           onTap: () {
             onClose();
             context.push('/recurring/add');
@@ -695,7 +712,7 @@ class _SpeedDialMenu extends AnimatedWidget {
           context,
           index: 2,
           icon: Icons.account_balance_rounded,
-          label: 'Add a Loan',
+          label: context.l10n.speedDialLoan,
           onTap: () {
             onClose();
             context.push('/loans/add');
@@ -706,7 +723,7 @@ class _SpeedDialMenu extends AnimatedWidget {
           context,
           index: 1,
           icon: Icons.show_chart_rounded,
-          label: 'Add an Investment',
+          label: context.l10n.speedDialInvestment,
           onTap: () {
             onClose();
             context.push('/investments/add');
@@ -717,7 +734,7 @@ class _SpeedDialMenu extends AnimatedWidget {
           context,
           index: 0,
           icon: Icons.handshake_outlined,
-          label: 'Lend / Borrow Money',
+          label: context.l10n.speedDialLendBorrow,
           onTap: () {
             onClose();
             context.push('/ledger/add');
@@ -764,7 +781,7 @@ class _SpeedDialMenu extends AnimatedWidget {
                 const SizedBox(width: KuberSpacing.sm),
                 Text(
                   label,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: cs.onSurface,

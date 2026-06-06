@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/analytics/providers/analytics_provider.dart'
     show FilterType;
@@ -288,7 +288,7 @@ class _StickyPrimary extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
               ),
