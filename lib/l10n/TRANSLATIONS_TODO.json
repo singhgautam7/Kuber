@@ -1546,5 +1546,53 @@
     "telgu": "",
     "malyalam": "",
     "kannada": ""
+  },
+  {
+    "key": "incShort",
+    "english": "INC",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "expShort",
+    "english": "EXP",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "disbursedOn",
+    "english": "Disbursed on",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
+  },
+  {
+    "key": "emiDebitedFrom",
+    "english": "EMI debited from",
+    "hindi": "",
+    "marathi": "",
+    "bengali": "",
+    "punjabi": "",
+    "tamil": "",
+    "telgu": "",
+    "malyalam": "",
+    "kannada": ""
   }
 ]

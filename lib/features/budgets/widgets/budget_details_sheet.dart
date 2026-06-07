@@ -350,7 +350,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
               Navigator.of(ctx).pop(); // close dialog
               Navigator.of(context).pop(); // close sheet
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.deleteLabel),
           ),
         ],
       ),

@@ -8251,6 +8251,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next ›'**
   String get nextArrow;
+
+  /// No description provided for @incShort.
+  ///
+  /// In en, this message translates to:
+  /// **'INC'**
+  String get incShort;
+
+  /// No description provided for @expShort.
+  ///
+  /// In en, this message translates to:
+  /// **'EXP'**
+  String get expShort;
+
+  /// No description provided for @disbursedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Disbursed on'**
+  String get disbursedOn;
+
+  /// No description provided for @emiDebitedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'EMI debited from'**
+  String get emiDebitedFrom;
 }
 
 class _AppLocalizationsDelegate

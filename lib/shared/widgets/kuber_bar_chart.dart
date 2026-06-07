@@ -247,9 +247,9 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                         Expanded(
                           child: Row(
                             children: [
-                              _LegendDot(color: cs.tertiary, label: 'INC'),
+                              _LegendDot(color: cs.tertiary, label: context.l10n.incShort),
                               const SizedBox(width: KuberSpacing.md),
-                              _LegendDot(color: cs.error, label: 'EXP'),
+                              _LegendDot(color: cs.error, label: context.l10n.expShort),
                             ],
                           ),
                         ),
@@ -1002,7 +1002,7 @@ class _TooltipOverlay extends ConsumerWidget {
                         ),
                       ),
                       _TooltipRow(
-                        label: 'Net',
+                        label: context.l10n.netLabel,
                         amount: maskAmount(
                             (net >= 0 ? whole(net) : '-${whole(net.abs())}'),
                             isPrivate),

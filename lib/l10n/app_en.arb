@@ -2616,5 +2616,9 @@
     }
   },
   "skipTour": "Skip tour",
-  "nextArrow": "Next ›"
+  "nextArrow": "Next ›",
+  "incShort": "INC",
+  "expShort": "EXP",
+  "disbursedOn": "Disbursed on",
+  "emiDebitedFrom": "EMI debited from"
 }

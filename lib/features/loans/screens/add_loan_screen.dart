@@ -418,8 +418,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           icon: Icons.calendar_today_rounded,
           empty: true,
         ),
-        label: 'Disbursed on',
-        value: 'Not set · tap to add',
+        label: context.l10n.disbursedOn,
+        value: context.l10n.notSetTapToAdd,
         valueIsPlaceholder: true,
         onTap: _pickLoanStartDate,
       );
@@ -434,7 +434,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         child: Icon(Icons.calendar_today_rounded,
             size: 16, color: cs.onSurface),
       ),
-      label: 'Disbursed on',
+      label: context.l10n.disbursedOn,
       value: DateFormat('d MMM yyyy').format(_loanStartDate!),
       onTap: _pickLoanStartDate,
       clearable: true,
@@ -482,8 +482,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
               color: Color(acc.colorValue ?? 0xFF3B82F6),
               icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
             ),
-      label: 'EMI debited from',
-      value: acc?.name ?? 'Select account',
+      label: context.l10n.emiDebitedFrom,
+      value: acc?.name ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: () {
         showModalBottomSheet(

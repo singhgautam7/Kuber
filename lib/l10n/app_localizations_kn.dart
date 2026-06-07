@@ -4572,4 +4572,16 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get nextArrow => 'Next ›';
+
+  @override
+  String get incShort => 'INC';
+
+  @override
+  String get expShort => 'EXP';
+
+  @override
+  String get disbursedOn => 'Disbursed on';
+
+  @override
+  String get emiDebitedFrom => 'EMI debited from';
 }
