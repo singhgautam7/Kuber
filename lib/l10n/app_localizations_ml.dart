@@ -4130,463 +4130,476 @@ class AppLocalizationsMl extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count recurring transactions added',
-      one: 'New recurring transaction',
+      other: '$count ആവർത്തന ഇടപാടുകൾ ചേർത്തു',
+      one: 'പുതിയ ആവർത്തന ഇടപാട്',
     );
     return '$_temp0';
   }
 
   @override
   String notifRecurringBody(String name) {
-    return '$name - added while you were away';
+    return '$name - നിങ്ങൾ ഇല്ലാതിരുന്നപ്പോൾ ചേർത്തത്';
   }
 
   @override
-  String get notifLoanEmiTitle => 'Loan EMI deducted';
+  String get notifLoanEmiTitle => 'ലോൺ EMI കുറച്ചു';
 
   @override
   String notifLoanEmiBody(String name) {
-    return '$name - EMI added to your transactions';
+    return '$name - നിങ്ങളുടെ ഇടപാടുകളിലേക്ക് EMI ചേർത്തു';
   }
 
   @override
-  String get notifInvestmentTitle => 'Investment contribution added';
+  String get notifInvestmentTitle => 'നിക്ഷേപ വിഹിതം ചേർത്തു';
 
   @override
   String notifInvestmentBody(String name) {
-    return '$name - SIP contribution recorded';
+    return '$name - SIP വിഹിതം രേഖപ്പെടുത്തി';
   }
 
   @override
-  String get notifMoneyToCollect => 'Money to collect';
+  String get notifMoneyToCollect => 'ലഭിക്കാനുള്ള പണം';
 
   @override
-  String get notifMoneyToRepay => 'Money to repay';
+  String get notifMoneyToRepay => 'തിരികെ നൽകാനുള്ള പണം';
 
   @override
   String notifLedgerReminderBody(String person, int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$person - $count days overdue',
-      one: '$person - 1 day overdue',
-      zero: '$person - due today',
+      other: '$person - $count ദിവസങ്ങൾ വൈകി',
+      one: '$person - 1 ദിവസം വൈകി',
+      zero: '$person - ഇന്ന് നൽകണം',
     );
     return '$_temp0';
   }
 
   @override
-  String get notifBudgetAlertTitle => 'Budget Alert';
+  String get notifBudgetAlertTitle => 'ബജറ്റ് മുന്നറിയിപ്പ്';
 
   @override
   String notifBudgetReachedBody(String pct, String category) {
-    return 'You\'ve reached $pct% of your $category budget';
+    return 'നിങ്ങളുടെ $category ബജറ്റിന്റെ $pct% നിങ്ങൾ ഉപയോഗിച്ചു';
   }
 
   @override
   String notifBudgetSpentBody(String amount, String category) {
-    return 'You\'ve spent $amount in $category category';
+    return '$category വിഭാഗത്തിൽ നിങ്ങൾ $amount ചെലവഴിച്ചു';
   }
 
   @override
-  String get wgtBalanceHeroName => 'Balance Card';
+  String get wgtBalanceHeroName => 'ബാലൻസ് കാർഡ്';
 
   @override
   String get wgtBalanceHeroDesc =>
-      'Current-month net with income / expense split';
+      'വരുമാനം / ചെലവ് എന്നിവ സഹിതം ഈ മാസത്തെ നെറ്റ്';
 
   @override
-  String get wgtInsightStoriesName => 'Money Stories';
+  String get wgtInsightStoriesName => 'മണി സ്റ്റോറീസ്';
 
   @override
-  String get wgtInsightStoriesDesc => 'Recaps and highlights about your money';
+  String get wgtInsightStoriesDesc =>
+      'നിങ്ങളുടെ പണത്തെക്കുറിച്ചുള്ള വിവരങ്ങളും ഹൈലൈറ്റുകളും';
 
   @override
-  String get wgtQuickAddName => 'Quick Add';
+  String get wgtQuickAddName => 'വേഗത്തിൽ ചേർക്കുക';
 
   @override
-  String get wgtQuickAddDesc => 'One-tap expense / income / transfer entry';
+  String get wgtQuickAddDesc =>
+      'ഒറ്റ ടാപ്പിൽ ചെലവ് / വരുമാനം / ട്രാൻസ്ഫർ ചേർക്കാം';
 
   @override
-  String get wgtSpendingStatsName => 'Spending Stats';
+  String get wgtSpendingStatsName => 'ചെലവ് കണക്കുകൾ';
 
   @override
-  String get wgtSpendingStatsDesc => 'Spent vs received this month';
+  String get wgtSpendingStatsDesc => 'ഈ മാസം ചെലവഴിച്ചതും ലഭിച്ചതും';
 
   @override
-  String get wgtHomeAccountsName => 'Bank Accounts';
+  String get wgtHomeAccountsName => 'ബാങ്ക് അക്കൗണ്ടുകൾ';
 
   @override
-  String get wgtHomeAccountsDesc => 'All accounts and balances';
+  String get wgtHomeAccountsDesc => 'എല്ലാ അക്കൗണ്ടുകളും ബാലൻസുകളും';
 
   @override
-  String get wgtSevenDayChartName => 'Last 7 Days Chart';
+  String get wgtSevenDayChartName => 'കഴിഞ്ഞ 7 ദിവസത്തെ ചാർട്ട്';
 
   @override
   String get wgtSevenDayChartDesc =>
-      'Daily income vs expense for the past week';
+      'കഴിഞ്ഞ ആഴ്‌ചയിലെ പ്രതിദിന വരുമാനവും ചെലവും';
 
   @override
-  String get wgtBudgetSnapshotName => 'Budget Snapshot';
+  String get wgtBudgetSnapshotName => 'ബജറ്റ് സ്നാപ്പ്ഷോട്ട്';
 
   @override
-  String get wgtBudgetSnapshotDesc => 'Progress against active budgets';
+  String get wgtBudgetSnapshotDesc => 'സജീവ ബജറ്റുകളുടെ പുരോഗതി';
 
   @override
-  String get wgtUpcomingRecurringName => 'Upcoming Recurring';
+  String get wgtUpcomingRecurringName => 'വരാനിരിക്കുന്ന ആവർത്തന ഇടപാടുകൾ';
 
   @override
-  String get wgtUpcomingRecurringDesc => 'Next recurring transactions due';
+  String get wgtUpcomingRecurringDesc => 'അടുത്തതായി നൽകേണ്ട ആവർത്തന ഇടപാടുകൾ';
 
   @override
-  String get wgtRecentTransactionsName => 'Recent Transactions';
+  String get wgtRecentTransactionsName => 'സമീപകാല ഇടപാടുകൾ';
 
   @override
-  String get wgtRecentTransactionsDesc => 'Latest activity at a glance';
+  String get wgtRecentTransactionsDesc =>
+      'ഏറ്റവും പുതിയ പ്രവർത്തനങ്ങൾ ഒറ്റനോട്ടത്തിൽ';
 
   @override
-  String get wgtSummaryCardName => 'Summary Card';
+  String get wgtSummaryCardName => 'സമ്മറി കാർഡ്';
 
   @override
-  String get wgtSummaryCardDesc => 'Income, expense and net for the period';
+  String get wgtSummaryCardDesc => 'ഈ കാലയളവിലെ വരുമാനം, ചെലവ്, നെറ്റ് എന്നിവ';
 
   @override
-  String get wgtSpendingTrendName => 'Spending Trend';
+  String get wgtSpendingTrendName => 'ചെലവിന്റെ ട്രെൻഡ്';
 
   @override
-  String get wgtSpendingTrendDesc => 'Bar / line chart with bucket dropdown';
+  String get wgtSpendingTrendDesc =>
+      'ബക്കറ്റ് ഡ്രോപ്പ്ഡൗൺ ഉള്ള ബാർ / ലൈൻ ചാർട്ട്';
 
   @override
-  String get wgtWeeklyHeatmapName => 'Weekly Heatmap';
+  String get wgtWeeklyHeatmapName => 'പ്രതിവാര ഹീറ്റ്മാപ്പ്';
 
   @override
-  String get wgtWeeklyHeatmapDesc => 'Average expense by day of week';
+  String get wgtWeeklyHeatmapDesc => 'ആഴ്‌ചയിലെ ഓരോ ദിവസത്തെയും ശരാശരി ചെലവ്';
 
   @override
-  String get wgtSizeDistributionName => 'Transaction Sizes';
+  String get wgtSizeDistributionName => 'ഇടപാട് വലുപ്പങ്ങൾ';
 
   @override
-  String get wgtSizeDistributionDesc => 'Small / medium / large breakdown';
+  String get wgtSizeDistributionDesc =>
+      'ചെറുത് / ഇടത്തരം / വലുത് എന്നിങ്ങനെ തരംതിരിക്കുന്നത്';
 
   @override
-  String get wgtCategoryBreakdownName => 'Category Breakdown';
+  String get wgtCategoryBreakdownName => 'വിഭാഗം തിരിച്ച്';
 
   @override
-  String get wgtCategoryBreakdownDesc => 'Spending grouped by category';
+  String get wgtCategoryBreakdownDesc =>
+      'വിഭാഗം തിരിച്ച് ഗ്രൂപ്പ് ചെയ്ത ചെലവുകൾ';
 
   @override
-  String get wgtTagAnalyticsName => 'Tag Analytics';
+  String get wgtTagAnalyticsName => 'ടാഗ് അനലിറ്റിക്‌സ്';
 
   @override
-  String get wgtTagAnalyticsDesc => 'Totals grouped by tag';
+  String get wgtTagAnalyticsDesc => 'ടാഗ് തിരിച്ച് ഗ്രൂപ്പ് ചെയ്ത ആകെത്തുക';
 
   @override
-  String get wgtBiggestTransactionsName => 'Biggest Transactions';
+  String get wgtBiggestTransactionsName => 'ഏറ്റവും വലിയ ഇടപാടുകൾ';
 
   @override
-  String get wgtBiggestTransactionsDesc => 'Top 5 by amount, expense or income';
+  String get wgtBiggestTransactionsDesc =>
+      'തുക, ചെലവ് അല്ലെങ്കിൽ വരുമാനം അനുസരിച്ചുള്ള ആദ്യ 5 എണ്ണം';
 
   @override
-  String get atLeastOneWidget => 'At least one widget must be enabled';
+  String get atLeastOneWidget =>
+      'കുറഞ്ഞത് ഒരു വിഡ്ജറ്റെങ്കിലും ഓൺ ആക്കിയിരിക്കണം';
 
   @override
-  String get discardChangesConfirm => 'Discard changes?';
+  String get discardChangesConfirm => 'മാറ്റങ്ങൾ ഒഴിവാക്കണോ?';
 
   @override
   String get discardChangesBody =>
-      'You have unsaved changes to your widgets. Leaving now will discard them.';
+      'നിങ്ങളുടെ വിഡ്ജറ്റുകളിൽ സേവ് ചെയ്യാത്ത മാറ്റങ്ങളുണ്ട്. ഇപ്പോൾ പുറത്തുപോയാൽ അവ ഒഴിവാക്കപ്പെടും.';
 
   @override
-  String get keepEditing => 'Keep editing';
+  String get keepEditing => 'എഡിറ്റ് ചെയ്യുന്നത് തുടരുക';
 
   @override
-  String get discardLabel => 'Discard';
+  String get discardLabel => 'ഒഴിവാക്കുക';
 
   @override
-  String get unlockToContinue => 'Unlock to continue';
+  String get unlockToContinue => 'തുടരാൻ അൺലോക്ക് ചെയ്യുക';
 
   @override
-  String get splashTagline => 'Your personal money diary';
+  String get splashTagline => 'നിങ്ങളുടെ വ്യക്തിഗത മണി ഡയറി';
 
   @override
-  String get tutCh0Title => 'Transactions';
+  String get tutCh0Title => 'ഇടപാടുകൾ';
 
   @override
   String get tutCh0Desc =>
-      'Add income, expenses, transfers, notes, receipts and tags.';
+      'വരുമാനം, ചെലവുകൾ, ട്രാൻസ്ഫറുകൾ, നോട്ട്സ്, രസീതുകൾ, ടാഗുകൾ എന്നിവ ചേർക്കുക.';
 
   @override
-  String get tutCh0St0Title => 'Enter amount';
+  String get tutCh0St0Title => 'തുക നൽകുക';
 
   @override
   String get tutCh0St0Desc =>
-      'Type the amount directly. Tap the calculator icon to open the built-in expression calculator.';
+      'തുക നേരിട്ട് ടൈപ്പ് ചെയ്യുക. ബിൽറ്റ്-ഇൻ എക്സ്പ്രഷൻ കാൽക്കുലേറ്റർ തുറക്കാൻ കാൽക്കുലേറ്റർ ഐക്കണിൽ ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh0St1Title => 'Transaction type';
+  String get tutCh0St1Title => 'ഇടപാടിന്റെ തരം';
 
   @override
   String get tutCh0St1Desc =>
-      'Choose Income, Expense, or Transfer between your accounts.';
+      'വരുമാനം, ചെലവ് അല്ലെങ്കിൽ നിങ്ങളുടെ അക്കൗണ്ടുകൾക്കിടയിലുള്ള ട്രാൻസ്ഫർ തിരഞ്ഞെടുക്കുക.';
 
   @override
-  String get tutCh0St2Title => 'Pick a category';
+  String get tutCh0St2Title => 'ഒരു വിഭാഗം തിരഞ്ഞെടുക്കുക';
 
   @override
   String get tutCh0St2Desc =>
-      'Categories organize your spending. Tap to choose an existing one or create your own.';
+      'വിഭാഗങ്ങൾ നിങ്ങളുടെ ചെലവുകൾ ക്രമീകരിക്കുന്നു. നിലവിലുള്ളത് തിരഞ്ഞെടുക്കാനോ നിങ്ങളുടേതായ ഒന്ന് നിർമ്മിക്കാനോ ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh0St3Title => 'Pick an account';
+  String get tutCh0St3Title => 'ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക';
 
   @override
   String get tutCh0St3Desc =>
-      'Choose which wallet or bank account this belongs to.';
+      'ഇത് ഏത് വാലറ്റിലേക്കോ ബാങ്ക് അക്കൗണ്ടിലേക്കോ ആണെന്ന് തിരഞ്ഞെടുക്കുക.';
 
   @override
-  String get tutCh0St4Title => 'Name it';
+  String get tutCh0St4Title => 'പേര് നൽകുക';
 
   @override
   String get tutCh0St4Desc =>
-      'Start typing and Kuber will suggest from your past transactions automatically.';
+      'ടൈപ്പ് ചെയ്യാൻ തുടങ്ങുക, നിങ്ങളുടെ മുൻകാല ഇടപാടുകളിൽ നിന്ന് Kuber സ്വയമേവ നിർദ്ദേശങ്ങൾ നൽകും.';
 
   @override
-  String get tutCh0St5Title => 'Smart suggestions';
+  String get tutCh0St5Title => 'സ്മാർട്ട് നിർദ്ദേശങ്ങൾ';
 
   @override
   String get tutCh0St5Desc =>
-      'Tap a suggestion to auto-fill the name, category, and account in one tap.';
+      'ഒറ്റ ടാപ്പിൽ പേര്, വിഭാഗം, അക്കൗണ്ട് എന്നിവ ഓട്ടോ-ഫിൽ ചെയ്യാൻ ഒരു നിർദ്ദേശത്തിൽ ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh0St6Title => 'Notes & attachments';
+  String get tutCh0St6Title => 'കുറിപ്പുകളും അറ്റാച്ച്മെന്റുകളും';
 
   @override
-  String get tutCh0St6Desc => 'Add context or attach a photo of your receipt.';
+  String get tutCh0St6Desc =>
+      'കൂടുതൽ വിവരങ്ങൾ ചേർക്കുക അല്ലെങ്കിൽ നിങ്ങളുടെ രസീതീന്റെ ഫോട്ടോ അറ്റാച്ചുചെയ്യുക.';
 
   @override
-  String get tutCh0St7Title => 'Add tags';
+  String get tutCh0St7Title => 'ടാഗുകൾ ചേർക്കുക';
 
   @override
   String get tutCh0St7Desc =>
-      'Tags are custom labels that group transactions across categories.';
+      'വിവിധ വിഭാഗങ്ങളിലുടനീളമുള്ള ഇടപാടുകളെ ഗ്രൂപ്പുചെയ്യുന്ന കസ്റ്റം ലേബലുകളാണ് ടാഗുകൾ.';
 
   @override
-  String get tutCh1Title => 'Home';
+  String get tutCh1Title => 'ഹോം';
 
   @override
-  String get tutCh1Desc => 'Read your monthly snapshot and use quick actions.';
+  String get tutCh1Desc =>
+      'നിങ്ങളുടെ പ്രതിമാസ സ്നാപ്പ്ഷോട്ട് വായിച്ച് വേഗത്തിലുള്ള പ്രവർത്തനങ്ങൾ ഉപയോഗിക്കുക.';
 
   @override
-  String get tutCh1St0Title => 'Your monthly snapshot';
+  String get tutCh1St0Title => 'നിങ്ങളുടെ പ്രതിമാസ സ്നാപ്പ്ഷോട്ട്';
 
   @override
   String get tutCh1St0Desc =>
-      'Net flow for this month at a glance. Green is income, red is expense. Tap to drill down.';
+      'ഈ മാസത്തെ നെറ്റ് ഫ്ലോ ഒറ്റനോട്ടത്തിൽ. പച്ച നിറം വരുമാനവും ചുവപ്പ് നിറം ചെലവുമാണ്. വിശദാംശങ്ങൾക്കായി ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh1St1Title => 'Privacy mode';
+  String get tutCh1St1Title => 'പ്രൈവസി മോഡ്';
 
   @override
   String get tutCh1St1Desc =>
-      'Tap the eye icon to instantly hide every balance. Perfect for public places.';
+      'ഓരോ ബാലൻസും ഉടനടി മറയ്‌ക്കാൻ കണ്ണ് ഐക്കണിൽ ടാപ്പ് ചെയ്യുക. പൊതു ഇടങ്ങൾക്ക് അനുയോജ്യമാണ്.';
 
   @override
-  String get tutCh1St2Title => 'Quick Add';
+  String get tutCh1St2Title => 'വേഗത്തിൽ ചേർക്കുക';
 
   @override
   String get tutCh1St2Desc =>
-      'Log a transaction in seconds without opening the full form. Just type and go.';
+      'മുഴുവൻ ഫോമും തുറക്കാതെ തന്നെ നിമിഷങ്ങൾക്കുള്ളിൽ ഒരു ഇടപാട് രേഖപ്പെടുത്തുക. ടൈപ്പ് ചെയ്ത് മുന്നോട്ട് പോകുക.';
 
   @override
-  String get tutCh1St3Title => 'Recent transactions';
+  String get tutCh1St3Title => 'സമീപകാല ഇടപാടുകൾ';
 
   @override
   String get tutCh1St3Desc =>
-      'Your last few transactions appear below the balance card. Tap any to view or edit.';
+      'നിങ്ങളുടെ അവസാനത്തെ ചില ഇടപാടുകൾ ബാലൻസ് കാർഡിന് താഴെ കാണാം. കാണാനോ എഡിറ്റ് ചെയ്യാനോ ഏതിലെങ്കിലും ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh1St4Title => 'Navigation';
+  String get tutCh1St4Title => 'നാവിഗേഷൻ';
 
   @override
   String get tutCh1St4Desc =>
-      'Use the bottom bar to switch between Home, History, Analytics, and More.';
+      'ഹോം, ഹിസ്റ്ററി, അനലിറ്റിക്സ്, കൂടുതൽ എന്നിവയ്ക്കിടയിൽ മാറാൻ താഴെയുള്ള ബാർ ഉപയോഗിക്കുക.';
 
   @override
-  String get tutCh2Title => 'History';
+  String get tutCh2Title => 'ഹിസ്റ്ററി';
 
   @override
-  String get tutCh2Desc => 'Find, filter, inspect and edit past transactions.';
+  String get tutCh2Desc =>
+      'മുൻകാല ഇടപാടുകൾ കണ്ടെത്തുക, ഫിൽട്ടർ ചെയ്യുക, പരിശോധിക്കുക, എഡിറ്റ് ചെയ്യുക.';
 
   @override
-  String get tutCh2St0Title => 'Transaction timeline';
+  String get tutCh2St0Title => 'ഇടപാട് ടൈംലൈൻ';
 
   @override
   String get tutCh2St0Desc =>
-      'All your transactions, grouped by date. Most recent at the top.';
+      'നിങ്ങളുടെ എല്ലാ ഇടപാടുകളും തീയതി തിരിച്ച് നൽകിയിരിക്കുന്നു. ഏറ്റവും പുതിയത് മുകളിൽ.';
 
   @override
-  String get tutCh2St1Title => 'Quick filters';
+  String get tutCh2St1Title => 'ക്വിക്ക് ഫിൽറ്ററുകൾ';
 
   @override
   String get tutCh2St1Desc =>
-      'Filter by Income, Expense, or Transfer instantly using these chips.';
+      'ഈ ചിപ്പുകൾ ഉപയോഗിച്ച് വരുമാനം, ചെലവ് അല്ലെങ്കിൽ ട്രാൻസ്ഫർ എന്നിവ വേഗത്തിൽ ഫിൽട്ടർ ചെയ്യുക.';
 
   @override
-  String get tutCh2St2Title => 'Advanced filters';
+  String get tutCh2St2Title => 'വിപുലമായ ഫിൽറ്ററുകൾ';
 
   @override
   String get tutCh2St2Desc =>
-      'Tap the filter icon to search by date range, account, category, or tags simultaneously.';
+      'തീയതി പരിധി, അക്കൗണ്ട്, വിഭാഗം അല്ലെങ്കിൽ ടാഗുകൾ എന്നിവ ഉപയോഗിച്ച് ഒരേസമയം തിരയാൻ ഫിൽട്ടർ ഐക്കണിൽ ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh2St3Title => 'Tap to edit';
+  String get tutCh2St3Title => 'എഡിറ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക';
 
   @override
   String get tutCh2St3Desc =>
-      'Tap any transaction to view full details, edit fields, or delete it.';
+      'മുഴുവൻ വിവരങ്ങളും കാണാനോ എഡിറ്റ് ചെയ്യാനോ ഇല്ലാതാക്കാനോ ഏതെങ്കിലും ഇടപാടിൽ ടാപ്പ് ചെയ്യുക.';
 
   @override
-  String get tutCh3Title => 'Analytics';
+  String get tutCh3Title => 'അനലിറ്റിക്സ്';
 
   @override
-  String get tutCh3Desc => 'Spot trends and understand where your money goes.';
+  String get tutCh3Desc =>
+      'ട്രെൻഡുകൾ മനസ്സിലാക്കി നിങ്ങളുടെ പണം എവിടെയാണ് ചിലവാകുന്നതെന്ന് അറിയുക.';
 
   @override
-  String get tutCh3St0Title => 'Set the date range first';
+  String get tutCh3St0Title => 'ആദ്യം തീയതി പരിധി സജ്ജമാക്കുക';
 
   @override
   String get tutCh3St0Desc =>
-      'By default only today\'s data is shown. Tap this pill and pick \"All time\" so the charts below have something to graph.';
+      'ഡിഫോൾട്ടായി ഇന്നത്തെ ഡാറ്റ മാത്രമാണ് കാണിക്കുന്നത്. താഴെയുള്ള ചാർട്ടുകളിൽ ഗ്രാഫ് വരാൻ ഈ പില്ലിൽ ടാപ്പ് ചെയ്ത് \"All time\" തിരഞ്ഞെടുക്കുക.';
 
   @override
-  String get tutCh3St1Title => 'Your financial snapshot';
+  String get tutCh3St1Title => 'നിങ്ങളുടെ സാമ്പത്തിക സ്നാപ്പ്ഷോട്ട്';
 
   @override
   String get tutCh3St1Desc =>
-      'Visual breakdowns of where your money goes each month.';
+      'ഓരോ മാസവും നിങ്ങളുടെ പണം എവിടെയാണ് പോകുന്നതെന്ന് കാണിക്കുന്ന വിഷ്വൽ ബ്രേക്ക്ഡൗൺ.';
 
   @override
-  String get tutCh3St2Title => 'Spending trends';
+  String get tutCh3St2Title => 'ചെലവിന്റെ ട്രെൻഡുകൾ';
 
   @override
   String get tutCh3St2Desc =>
-      'A bar chart showing daily spending. Switch between 7-day and custom time ranges.';
+      'പ്രതിദിന ചെലവ് കാണിക്കുന്ന ഒരു ബാർ ചാർട്ട്. 7 ദിവസത്തിനും കസ്റ്റം സമയ പരിധിക്കുമിടയിൽ മാറ്റുക.';
 
   @override
-  String get tutCh3St3Title => 'Category breakdown';
+  String get tutCh3St3Title => 'വിഭാഗം തിരിച്ച്';
 
   @override
   String get tutCh3St3Desc =>
-      'See which categories consume the most of your budget at a glance.';
+      'ഏത് വിഭാഗങ്ങളിലാണ് നിങ്ങളുടെ ബജറ്റിന്റെ ഭൂരിഭാഗവും ചെലവാകുന്നതെന്ന് ഒറ്റനോട്ടത്തിൽ കാണുക.';
 
   @override
-  String get tutCh3St4Title => 'Filters carry over';
+  String get tutCh3St4Title => 'ഫിൽറ്ററുകൾ തുടരും';
 
   @override
   String get tutCh3St4Desc =>
-      'Any filters you set on the History page also update your analytics view.';
+      'ഹിസ്റ്ററി പേജിൽ നിങ്ങൾ സജ്ജമാക്കുന്ന ഏത് ഫിൽറ്ററുകളും നിങ്ങളുടെ അനലിറ്റിക്സ് കാഴ്ചയെയും അപ്ഡേറ്റ് ചെയ്യുന്നു.';
 
   @override
-  String get tutCh4Title => 'More & Settings';
+  String get tutCh4Title => 'കൂടുതൽ വിവരങ്ങളും ക്രമീകരണങ്ങളും';
 
   @override
   String get tutCh4Desc =>
-      'Customize Kuber, manage data and explore deeper tools.';
+      'Kuber കസ്റ്റമൈസ് ചെയ്യുക, ഡാറ്റ മാനേജ് ചെയ്യുക, കൂടുതൽ ടൂളുകൾ പര്യവേക്ഷണം ചെയ്യുക.';
 
   @override
-  String get tutCh4St0Title => 'Budgets';
+  String get tutCh4St0Title => 'ബജറ്റുകൾ';
 
   @override
   String get tutCh4St0Desc =>
-      'Set monthly spending limits per category. Kuber tracks your progress automatically.';
+      'ഓരോ വിഭാഗത്തിനും പ്രതിമാസ ചെലവ് പരിധികൾ സജ്ജമാക്കുക. Kuber സ്വയമേവ നിങ്ങളുടെ പുരോഗതി ട്രാക്ക് ചെയ്യുന്നു.';
 
   @override
-  String get tutCh4St1Title => 'Ask Kuber';
+  String get tutCh4St1Title => 'Kuber-നോട് ചോദിക്കുക';
 
   @override
   String get tutCh4St1Desc =>
-      'Your on-device AI assistant. Ask questions about your spending privately.';
+      'നിങ്ങളുടെ ഓൺ-ഡിവൈസ് AI അസിസ്റ്റന്റ്. നിങ്ങളുടെ ചെലവുകളെക്കുറിച്ച് സ്വകാര്യമായി ചോദ്യങ്ങൾ ചോദിക്കുക.';
 
   @override
-  String get tutCh4St2Title => 'Your data';
+  String get tutCh4St2Title => 'നിങ്ങളുടെ ഡാറ്റ';
 
   @override
   String get tutCh4St2Desc =>
-      'Export as CSV, import from backup, or generate sample data. Everything stays on your device.';
+      'CSV ആയി എക്സ്പോർട്ട് ചെയ്യുക, ബാക്കപ്പിൽ നിന്ന് ഇംപോർട്ട് ചെയ്യുക, അല്ലെങ്കിൽ സാമ്പിൾ ഡാറ്റ സൃഷ്ടിക്കുക. എല്ലാം നിങ്ങളുടെ ഉപകരണത്തിൽ തന്നെ സുരക്ഷിതമായിരിക്കും.';
 
   @override
-  String get tutorialUpper => 'TUTORIAL';
+  String get tutorialUpper => 'ട്യൂട്ടോറിയൽ';
 
   @override
-  String get pickChapter => 'Pick a chapter.';
+  String get pickChapter => 'ഒരു അധ്യായം തിരഞ്ഞെടുക്കുക.';
 
   @override
   String get pickChapterSubtitle =>
-      'Five quick chapters, about 2 minutes each. Jump in anywhere.';
+      'അഞ്ച് ചെറിയ അധ്യായങ്ങൾ, ഓരോന്നും ഏകദേശം 2 മിനിറ്റ്. എവിടെനിന്നും ആരംഭിക്കാം.';
 
   @override
-  String get startFromBeginning => 'Start from beginning →';
+  String get startFromBeginning => 'തുടക്കത്തിൽ നിന്ന് ആരംഭിക്കുക →';
 
   @override
-  String get skipTutorialConfirm => 'Skip tutorial?';
+  String get skipTutorialConfirm => 'ട്യൂട്ടോറിയൽ ഒഴിവാക്കണോ?';
 
   @override
-  String get keepGoing => 'Keep going';
+  String get keepGoing => 'തുടരുക';
 
   @override
-  String get skipLabel => 'Skip';
+  String get skipLabel => 'ഒഴിവാക്കുക';
 
   @override
-  String get replayHint => 'You can always replay it from More → Tutorial.';
+  String get replayHint =>
+      'കൂടുതൽ → ട്യൂട്ടോറിയൽ എന്നതിൽ നിന്ന് നിങ്ങൾക്ക് ഇത് എപ്പോഴും വീണ്ടും പ്ലേ ചെയ്യാം.';
 
   @override
   String get replayHintApp =>
-      'You can always replay it from More → App Tutorial.';
+      'കൂടുതൽ → ആപ്പ് ട്യൂട്ടോറിയൽ എന്നതിൽ നിന്ന് നിങ്ങൾക്ക് ഇത് എപ്പോഴും വീണ്ടും പ്ലേ ചെയ്യാം.';
 
   @override
   String tutStepsAndMin(String count, String mins) {
-    return '$count steps · ~$mins min';
+    return '$count ഘട്ടങ്ങൾ · ~$mins മിനിറ്റ്';
   }
 
   @override
   String chapterDoneTitle(String num) {
-    return 'Chapter $num done! 🎉';
+    return 'അധ്യായം $num പൂർത്തിയായി! 🎉';
   }
 
   @override
-  String get endTutorial => 'End tutorial';
+  String get endTutorial => 'ട്യൂട്ടോറിയൽ അവസാനിപ്പിക്കുക';
 
   @override
   String readyToStart(String title) {
-    return 'Ready to start \"$title\"?';
+    return '\"$title\" ആരംഭിക്കാൻ തയ്യാറാണോ?';
   }
 
   @override
-  String get exitTutorialConfirm => 'Exit tutorial?';
+  String get exitTutorialConfirm => 'ട്യൂട്ടോറിയലിൽ നിന്ന് പുറത്തുകടക്കണോ?';
 
   @override
-  String get exitLabel => 'Exit';
+  String get exitLabel => 'പുറത്തുകടക്കുക';
 
   @override
   String chapterXofY(String current, String total) {
-    return 'Chapter $current of $total';
+    return '$total-ൽ $current-ാമത്തെ അധ്യായം';
   }
 
   @override
-  String get skipTour => 'Skip tour';
+  String get skipTour => 'ടൂർ ഒഴിവാക്കുക';
 
   @override
-  String get nextArrow => 'Next ›';
+  String get nextArrow => 'അടുത്തത് ›';
 
   @override
-  String get incShort => 'INC';
+  String get incShort => 'വരുമാനം';
 
   @override
-  String get expShort => 'EXP';
+  String get expShort => 'ചെലവ്';
 
   @override
-  String get disbursedOn => 'Disbursed on';
+  String get disbursedOn => 'വിതരണം ചെയ്ത തീയതി';
 
   @override
-  String get emiDebitedFrom => 'EMI debited from';
+  String get emiDebitedFrom => 'ഇതിൽ നിന്നും EMI കുറച്ചു';
 }
