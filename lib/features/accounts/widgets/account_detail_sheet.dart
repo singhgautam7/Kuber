@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -22,8 +23,8 @@ class AccountDetailSheet extends ConsumerWidget {
 
   const AccountDetailSheet({super.key, required this.account});
 
-  String _accountTypeLabel(Account account) {
-    String label = account.isCreditCard ? 'Credit Card' : 'Savings Account';
+  String _accountTypeLabel(BuildContext context, Account account) {
+    String label = account.isCreditCard ? context.l10n.creditCardLabel : context.l10n.savingsAccount;
     if (account.last4Digits != null) {
       label += ' • **** ${account.last4Digits}';
     }
@@ -43,14 +44,14 @@ class AccountDetailSheet extends ConsumerWidget {
 
     return KuberBottomSheet(
       title: account.name,
-      subtitle: _accountTypeLabel(account),
+      subtitle: _accountTypeLabel(context, account),
       leadingIcon: CategoryIcon.square(
         icon: account.icon != null ? IconMapper.fromString(account.icon!) : Icons.account_balance,
         rawColor: account.colorValue != null ? Color(account.colorValue!) : cs.primary,
         size: 48,
       ),
       actions: AppButton(
-        label: 'View Transactions',
+        label: context.l10n.viewTransactions,
         icon: Icons.receipt_long_rounded,
         type: AppButtonType.primary,
         fullWidth: true,
@@ -69,8 +70,8 @@ class AccountDetailSheet extends ConsumerWidget {
           // Primary Value Section
           balanceAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Text('Error loading balance',
-                style: GoogleFonts.inter(color: cs.error)),
+            error: (e, _) => Text(context.l10n.errorLoadingBalance,
+                style: localeFont(color: cs.error)),
             data: (balance) {
               if (account.isCreditCard) {
                 return _buildCreditCardSection(context, ref, balance);
@@ -94,9 +95,9 @@ class AccountDetailSheet extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Text(
                     txn != null
-                        ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
-                        : 'No transactions yet',
-                    style: GoogleFonts.inter(
+                        ? context.l10n.lastTransaction(DateFormatter.timeAgo(txn.createdAt))
+                        : context.l10n.noTransactionsYet,
+                    style: localeFont(
                       fontSize: 12,
                       color: cs.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
@@ -113,7 +114,7 @@ class AccountDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Edit account',
+                  label: context.l10n.editAccount,
                   icon: Icons.edit_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -125,7 +126,7 @@ class AccountDetailSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: account.isCreditCard ? 'Edit limit spent' : 'Edit balance',
+                  label: account.isCreditCard ? context.l10n.editLimitSpent : context.l10n.editBalance,
                   icon: Icons.account_balance_wallet_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -154,7 +155,7 @@ class AccountDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           AppButton(
-            label: 'Delete Account',
+            label: context.l10n.deleteAccount,
             icon: Icons.delete_outline_rounded,
             type: AppButtonType.danger,
             fullWidth: true,
@@ -162,7 +163,7 @@ class AccountDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           AppButton(
-            label: isDefault ? 'Remove Default' : 'Set as Default',
+            label: isDefault ? context.l10n.removeDefault : context.l10n.setAsDefaultLabel,
             icon: isDefault
                 ? Icons.check_circle_rounded
                 : Icons.star_outline_rounded,
@@ -175,8 +176,8 @@ class AccountDetailSheet extends ConsumerWidget {
               showKuberSnackBar(
                 context,
                 isDefault
-                    ? 'Default account cleared'
-                    : '${account.name} set as default',
+                    ? context.l10n.defaultAccountCleared
+                    : context.l10n.setAsDefault(account.name),
               );
             },
           ),
@@ -194,8 +195,8 @@ class AccountDetailSheet extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'CURRENT AVAILABLE BALANCE',
-          style: GoogleFonts.inter(
+          context.l10n.currentAvailableBalance,
+          style: localeFont(
             fontSize: 11,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -205,7 +206,7 @@ class AccountDetailSheet extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(
           formatter.formatCurrency(balance),
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 32,
             fontWeight: FontWeight.w800,
             color: color,
@@ -235,8 +236,8 @@ class AccountDetailSheet extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'LIMIT SPENT',
-                  style: GoogleFonts.inter(
+                  context.l10n.limitSpent,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -246,7 +247,7 @@ class AccountDetailSheet extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   formatter.formatCurrency(utilized),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
                     color: utilized > 0 ? cs.error : cs.onSurface,
@@ -259,8 +260,8 @@ class AccountDetailSheet extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  'TOTAL LIMIT',
-                  style: GoogleFonts.inter(
+                  context.l10n.totalLimit,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -270,7 +271,7 @@ class AccountDetailSheet extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   formatter.formatCurrency(account.creditLimit ?? 0),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -285,16 +286,16 @@ class AccountDetailSheet extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${(percent * 100).toInt()}% Utilized',
-              style: GoogleFonts.inter(
+              context.l10n.utilizedPct((percent * 100).toInt().toString()),
+              style: localeFont(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
             ),
             Text(
-              'REMAINING: ${formatter.formatCurrency(remaining)}',
-              style: GoogleFonts.inter(
+              '${context.l10n.remainingUpper}: ${formatter.formatCurrency(remaining)}',
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -328,14 +329,14 @@ class AccountDetailSheet extends ConsumerWidget {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: cs.surface,
-          title: Text('Cannot delete account',
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          title: Text(context.l10n.cannotDeleteAccount,
+              style: localeFont(fontWeight: FontWeight.bold)),
           content: Text(
-              'This account has transactions linked to it. To delete this account, delete the linked transactions first.',
-              style: GoogleFonts.inter()),
+              context.l10n.cannotDeleteAccountBody,
+              style: localeFont()),
           actions: [
             AppButton(
-              label: 'OK',
+              label: context.l10n.okLabel,
               type: AppButtonType.primary,
               onPressed: () => Navigator.pop(ctx),
             ),
@@ -347,18 +348,18 @@ class AccountDetailSheet extends ConsumerWidget {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: cs.surface,
-          title: Text('Delete Account?',
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          title: Text(context.l10n.deleteAccountConfirm,
+              style: localeFont(fontWeight: FontWeight.bold)),
           content: Text(
-              'Are you sure you want to delete ${account.name}? This action cannot be undone.',
-              style: GoogleFonts.inter()),
+              context.l10n.deleteAccountBody(account.name),
+              style: localeFont()),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('Cancel', style: GoogleFonts.inter()),
+              child: Text(context.l10n.cancelLabel, style: localeFont()),
             ),
             AppButton(
-              label: 'Delete',
+              label: context.l10n.deleteLabel,
               type: AppButtonType.primary,
               onPressed: () {
                 ref.read(accountListProvider.notifier).delete(account.id);
@@ -373,4 +374,3 @@ class AccountDetailSheet extends ConsumerWidget {
   }
 
 }
-

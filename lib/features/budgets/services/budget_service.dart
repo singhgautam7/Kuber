@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kuber/core/utils/locale_font.dart' show AppLocale;
+import 'package:kuber/l10n/app_localizations.dart' show lookupAppLocalizations;
 import '../data/budget.dart';
 import '../data/budget_repository.dart';
 import '../../../core/services/notification_service.dart';
@@ -75,12 +77,14 @@ class BudgetService {
           final cat = categories.where((c) => c.id.toString() == budget.categoryId).firstOrNull;
           if (cat == null) return;
 
-          final title = 'Budget Alert';
+          final loc = lookupAppLocalizations(AppLocale.current);
+          final title = loc.notifBudgetAlertTitle;
           String body;
           if (alert.type == BudgetAlertType.percentage) {
-            body = "You've reached ${alert.value.toInt()}% of your ${cat.name} budget";
+            body = loc.notifBudgetReachedBody('${alert.value.toInt()}', cat.name);
           } else {
-            body = "You've spent ${ref.read(formatterProvider).formatCurrency(alert.value)} in ${cat.name} category";
+            body = loc.notifBudgetSpentBody(
+                ref.read(formatterProvider).formatCurrency(alert.value), cat.name);
           }
 
           final payload = 'budget:${budget.id}';

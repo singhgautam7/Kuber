@@ -16,6 +16,8 @@
 //   - New optional `assetAllocationProvider` returns
 //     `List<({String label, Color color, double valueRupees})>` sorted desc.
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,8 +102,8 @@ class PortfolioHero extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'PORTFOLIO VALUE',
-                        style: GoogleFonts.inter(
+                        context.l10n.portfolioValue,
+                        style: localeFont(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -140,7 +142,7 @@ class PortfolioHero extends ConsumerWidget {
                         maskAmount(fmt.formatCurrency(currentValue), masked),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -170,7 +172,7 @@ class PortfolioHero extends ConsumerWidget {
                             const SizedBox(width: 4),
                             Text(
                               '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
                                 color: gainColor,
@@ -186,7 +188,7 @@ class PortfolioHero extends ConsumerWidget {
                 Text(
                   '${isGain ? '+' : '−'}${maskAmount(fmt.formatCurrency(gainLoss.abs()), masked)} '
                   '${isGain ? 'unrealised gain' : 'unrealised loss'} · since you started',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11.5,
                     color: cs.onSurfaceVariant,
                   ),
@@ -221,14 +223,14 @@ class PortfolioHero extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: _BreakdownColumn(
-                      label: 'INVESTED',
+                      label: context.l10n.investedUpper,
                       value: maskAmount(fmt.formatCurrency(invested), masked),
                       color: cs.onSurface,
                     ),
                   ),
                   Expanded(
                     child: _BreakdownColumn(
-                      label: 'CURRENT',
+                      label: context.l10n.currentUpper,
                       value: maskAmount(
                         fmt.formatCurrency(currentValue),
                         masked,
@@ -269,7 +271,7 @@ class _BreakdownColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 9.5,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -279,7 +281,7 @@ class _BreakdownColumn extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 15,
             fontWeight: FontWeight.w700,
             color: color,
@@ -396,8 +398,8 @@ class AssetAllocationStrip extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'ASSET ALLOCATION',
-            style: GoogleFonts.inter(
+            context.l10n.assetAllocation,
+            style: localeFont(
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -473,7 +475,7 @@ class _AllocChip extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10.5,
               fontWeight: FontWeight.w500,
               color: cs.onSurface,
@@ -482,7 +484,7 @@ class _AllocChip extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             '${percent.toStringAsFixed(0)}%',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10.5,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -562,7 +564,7 @@ class InvestmentCard extends ConsumerWidget {
                     Text(
                       name,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -574,7 +576,7 @@ class InvestmentCard extends ConsumerWidget {
                       children: [
                         Text(
                           assetTypeLabel.toUpperCase(),
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                             color: cs.onSurfaceVariant,
@@ -596,7 +598,7 @@ class InvestmentCard extends ConsumerWidget {
                             child: Text(
                               quantityLabel!,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11,
                                 color: cs.onSurfaceVariant,
                               ),
@@ -615,7 +617,7 @@ class InvestmentCard extends ConsumerWidget {
                 children: [
                   Text(
                     maskAmount(fmt.formatCurrency(currentValue), masked),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurface,
@@ -645,7 +647,7 @@ class InvestmentCard extends ConsumerWidget {
                         const SizedBox(width: 3),
                         Text(
                           '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                             color: gainColor,

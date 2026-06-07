@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
@@ -37,13 +38,14 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
   }
 
   Future<void> _submit([String? override]) async {
+    final l10n = context.l10n;
     final input = (override ?? _controller.text).trim();
     if (input.isEmpty) return;
 
     final parsed = parseQuickAdd(input);
 
     if (parsed.amount == null || parsed.amount! <= 0) {
-      setState(() => _error = 'Enter a valid amount (e.g. 200 on coffee)');
+      setState(() => _error = l10n.quickAddInvalidAmount);
       return;
     }
     setState(() {
@@ -65,7 +67,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
         resolvedAccountId = match.id.toString();
       } else {
         setState(() {
-          _error = 'No account named "${parsed.accountHint}" found';
+          _error = l10n.quickAddNoAccountNamed(parsed.accountHint!);
           _isLoading = false;
         });
         return;
@@ -111,7 +113,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     if (resolvedCategory == null) {
       if (mounted) {
         setState(() {
-          _error = 'Could not resolve category';
+          _error = l10n.quickAddCouldNotResolveCategory;
           _isLoading = false;
         });
       }
@@ -143,7 +145,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
 
     showKuberSnackBar(
       context,
-      '$symbol$amountStr added to ${resolvedCategory.name}',
+      l10n.quickAddAdded('$symbol$amountStr', resolvedCategory.name),
     );
     _controller.clear();
     setState(() => _isLoading = false);
@@ -151,26 +153,26 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
 
   void _showNoAccountDialog(String? hint) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('No account found',
-            style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+        title: Text(l10n.noAccountFoundTitle,
+            style: localeFont(fontWeight: FontWeight.w700)),
         content: Text(
           hint != null
-              ? 'No account matched "$hint" and no default account is set.'
-                  ' Set a default account in Settings to use Quick Add.'
-              : 'No default account is set. Set one in Settings to use Quick Add.',
-          style: GoogleFonts.inter(),
+              ? l10n.noAccountMatchedBody(hint)
+              : l10n.noDefaultAccountBody,
+          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(l10n.cancelLabel, style: localeFont()),
           ),
           AppButton(
-            label: 'Open Settings',
+            label: l10n.openSettings,
             type: AppButtonType.primary,
             onPressed: () {
               Navigator.pop(ctx);
@@ -190,35 +192,35 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         KuberHomeWidgetTitle(
-          title: 'QUICK ADD (BETA)',
-          infoConfig: const KuberInfoConfig(
-            title: 'Quick Add',
-            description: 'Record an expense instantly using natural language. No forms, no tapping. Just type what you spent and Kuber figures out the rest.',
+          title: context.l10n.quickAddTitle,
+          infoConfig: KuberInfoConfig(
+            title: context.l10n.quickAddInfoTitle,
+            description: context.l10n.quickAddInfoDesc,
             items: [
               KuberInfoItem(
                 icon: Icons.flash_on_rounded,
-                title: 'Basic Amount',
-                description: '"250" or "₹250" adds ₹250 to the General category.',
+                title: context.l10n.quickAddBasicAmount,
+                description: context.l10n.quickAddBasicAmountDesc,
               ),
               KuberInfoItem(
                 icon: Icons.category_outlined,
-                title: 'With Category',
-                description: '"250 on food", "150 in gaming", "300 for rent" links to an existing category or creates one.',
+                title: context.l10n.quickAddWithCategory,
+                description: context.l10n.quickAddWithCategoryDesc,
               ),
               KuberInfoItem(
                 icon: Icons.account_balance_wallet_rounded,
-                title: 'With Account',
-                description: '"150 for uber from hdfc" matches your HDFC account by name.',
+                title: context.l10n.quickAddWithAccount,
+                description: context.l10n.quickAddWithAccountDesc,
               ),
               KuberInfoItem(
                 icon: Icons.auto_fix_high_rounded,
-                title: 'Action Words',
-                description: '"Add 200 on coffee", "Log 500 for groceries", "Create 1000 in savings" - leading action words are stripped automatically.',
+                title: context.l10n.quickAddActionWords,
+                description: context.l10n.quickAddActionWordsDesc,
               ),
               KuberInfoItem(
                 icon: Icons.star_outline_rounded,
-                title: 'Default Account',
-                description: 'Set a default account in Settings to skip typing "from ..." every time.',
+                title: context.l10n.quickAddDefaultAccountInfo,
+                description: context.l10n.quickAddDefaultAccountInfoDesc,
               ),
             ],
           ),
@@ -232,13 +234,13 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                 child: TextField(
                   controller: _controller,
                   enabled: !_isLoading,
-                  style: GoogleFonts.inter(fontSize: 15, color: cs.onSurface),
+                  style: localeFont(fontSize: 15, color: cs.onSurface),
                   onTapOutside: (_) {
                     FocusManager.instance.primaryFocus?.unfocus();
                   },
                   decoration: InputDecoration(
-                    hintText: 'e.g. 250 on groceries from HDFC',
-                    hintStyle: GoogleFonts.inter(
+                    hintText: context.l10n.quickAddHint,
+                    hintStyle: localeFont(
                         fontSize: 15,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
                   ),
@@ -300,7 +302,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
           const SizedBox(height: KuberSpacing.sm),
           Text(
             _error!,
-            style: GoogleFonts.inter(fontSize: 12, color: cs.error),
+            style: localeFont(fontSize: 12, color: cs.error),
           ),
         ],
       ],

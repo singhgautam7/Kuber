@@ -1,8 +1,8 @@
 // ignore_for_file: use_null_aware_elements
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -33,7 +33,7 @@ class DevToolsScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'Developer\nTools',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurface,
@@ -44,7 +44,7 @@ class DevToolsScreen extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Text(
                     'These tools are for development and debugging only. Not intended for regular use.',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13,
                       color: cs.onSurfaceVariant,
                     ),
@@ -105,7 +105,7 @@ class DevToolsScreen extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.lg)),
         title: Text(
           'Disable Dev Tools?',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontWeight: FontWeight.w700,
             fontSize: 20,
             color: cs.onSurface,
@@ -113,7 +113,7 @@ class DevToolsScreen extends ConsumerWidget {
         ),
         content: Text(
           'You can re-enable by tapping the version number 7 times.',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 15,
             color: cs.onSurfaceVariant,
           ),
@@ -123,7 +123,7 @@ class DevToolsScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
               ),
@@ -137,7 +137,7 @@ class DevToolsScreen extends ConsumerWidget {
             ),
             child: Text(
               'Disable',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              style: localeFont(fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -168,7 +168,7 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: KuberSpacing.xs),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.8,
@@ -237,7 +237,7 @@ class _SettingsTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -246,7 +246,7 @@ class _SettingsTile extends StatelessWidget {
                   if (subtitle != null)
                     Text(
                       subtitle!,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         color: cs.onSurfaceVariant,
                       ),

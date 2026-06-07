@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 
 class KuberEmptyState extends StatelessWidget {
@@ -44,7 +44,7 @@ class KuberEmptyState extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               title,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
@@ -54,7 +54,7 @@ class KuberEmptyState extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               description,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 color: cs.onSurfaceVariant,
               ),
@@ -78,7 +78,7 @@ class KuberEmptyState extends StatelessWidget {
                 icon: const Icon(Icons.add_rounded, size: 20),
                 label: Text(
                   actionLabel!,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontWeight: FontWeight.w600,
                   ),
                 ),

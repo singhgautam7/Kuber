@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -48,26 +49,26 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
   String get _description {
     final value = double.tryParse(_controller.text) ?? 0;
     if (_type == BudgetAlertType.percentage) {
-      return 'Alert me when spending reaches ${ref.watch(formatterProvider).formatPercentage(value)} of my monthly budget.';
+      return context.l10n.alertDesc(ref.watch(formatterProvider).formatPercentage(value));
     } else {
-      return 'Alert me when spending reaches ${ref.watch(formatterProvider).formatCurrency(value)} of my monthly budget.';
+      return context.l10n.alertDesc(ref.watch(formatterProvider).formatCurrency(value));
     }
   }
 
   String? get _errorText {
-    if (_controller.text.isEmpty) return 'Enter a valid value';
+    if (_controller.text.isEmpty) return context.l10n.enterValidValue;
     final value = double.tryParse(_controller.text);
-    if (value == null || value <= 0) return 'Enter a valid value';
+    if (value == null || value <= 0) return context.l10n.enterValidValue;
 
     if (_type == BudgetAlertType.percentage) {
-      if (value > 100) return 'Percentage cannot exceed 100%';
+      if (value > 100) return context.l10n.percentageCannotExceed;
     } else {
-      if (value > widget.budgetAmount) return 'Amount cannot exceed budget limit';
+      if (value > widget.budgetAmount) return context.l10n.amountExceedsBudget;
     }
 
     // Check for duplicates
     final isDuplicate = widget.existingAlerts.any((a) => a.type == _type && a.value == value);
-    if (isDuplicate) return 'An alert for this value already exists';
+    if (isDuplicate) return context.l10n.alertAlreadyExists;
 
     return null;
   }
@@ -120,8 +121,8 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Add Alert',
-                style: GoogleFonts.inter(
+                context.l10n.addAlertTitle,
+                style: localeFont(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurface,
@@ -145,8 +146,8 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
 
           // Alert type toggle
           Text(
-            'SELECT ALERT TYPE',
-            style: GoogleFonts.inter(
+            context.l10n.selectAlertType,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -163,12 +164,12 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
             child: Row(
               children: [
                 _buildToggleButton(
-                  'Percentage (%)',
+                  context.l10n.percentageType,
                   _type == BudgetAlertType.percentage,
                   () => setState(() => _type = BudgetAlertType.percentage),
                 ),
                 _buildToggleButton(
-                  'Fixed Amount (${ref.watch(currencyProvider).symbol})',
+                  context.l10n.alertAmountType(ref.watch(currencyProvider).symbol),
                   _type == BudgetAlertType.amount,
                   () => setState(() => _type = BudgetAlertType.amount),
                 ),
@@ -207,7 +208,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                         hintText: "0",
                         hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.2)),
                       ),
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 36,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
@@ -218,7 +219,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                 const SizedBox(width: 8),
                 Text(
                   _type == BudgetAlertType.percentage ? '%' : ref.watch(currencyProvider).symbol,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 28,
                     fontWeight: FontWeight.w500,
                     color: cs.onSurfaceVariant,
@@ -244,7 +245,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                 Expanded(
                   child: Text(
                     _description,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13,
                       height: 1.5,
                       color: cs.onSurface,
@@ -269,8 +270,8 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'Push Notification',
-                    style: GoogleFonts.inter(
+                    context.l10n.pushNotification,
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
                       color: cs.onSurface,
@@ -300,7 +301,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                     child: Center(
                       child: Text(
                         _errorText!,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: cs.error,
@@ -324,8 +325,8 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'ADD ALERT',
-                    style: GoogleFonts.inter(
+                    context.l10n.addAlert,
+                    style: localeFont(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.0,
@@ -366,7 +367,7 @@ class _AddAlertBottomSheetState extends ConsumerState<AddAlertBottomSheet> {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               color: isSelected ? cs.primary : cs.onSurfaceVariant,

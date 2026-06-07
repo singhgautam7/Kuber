@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart' show Locale;
 import 'package:flutter/foundation.dart' show compute;
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:isar_community/isar.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/locale_font.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../features/settings/providers/settings_provider.dart';
 import '../../categories/data/category.dart';
 import '../../dashboard/providers/insight_engine.dart';
@@ -76,6 +80,7 @@ class StoryGenerationService {
       now: at,
       existingMeta: meta,
       lastInvestmentsAt: lastInvestmentsAt,
+      locale: AppLocale.current,
     );
 
     final resolved = await compute(_buildStoryCandidates, input);
@@ -95,6 +100,7 @@ class _StoryGenInput {
   final DateTime now;
   final Map<String, ExistingStoryMeta> existingMeta;
   final DateTime? lastInvestmentsAt;
+  final Locale locale;
 
   const _StoryGenInput({
     required this.txns,
@@ -105,6 +111,7 @@ class _StoryGenInput {
     required this.now,
     required this.existingMeta,
     required this.lastInvestmentsAt,
+    required this.locale,
   });
 }
 
@@ -127,7 +134,12 @@ class ExistingStoryMeta {
 }
 
 /// Isolate entry point invoked via [compute].
-List<InsightStory> _buildStoryCandidates(_StoryGenInput input) {
+Future<List<InsightStory>> _buildStoryCandidates(_StoryGenInput input) async {
+  AppLocale.current = input.locale;
+  Intl.defaultLocale = input.locale.languageCode;
+  // Date symbol data is per-isolate; load the active locale so DateFormat in
+  // story_date_label can render localized month/day names without throwing.
+  await initializeDateFormatting(input.locale.languageCode);
   return _StoryCandidateBuilder(
     AppFormatter(system: NumberSystem.indian),
   ).build(input);
@@ -137,6 +149,15 @@ class _StoryCandidateBuilder {
   final AppFormatter formatter;
 
   _StoryCandidateBuilder(this.formatter);
+
+  String _getSpentWord(String languageCode) {
+    return switch (languageCode) {
+      'hi' || 'mr' => 'खर्च',
+      'pa' => 'ਖਰਚ',
+      'bn' => 'খরচ',
+      _ => 'spent',
+    };
+  }
 
   late Map<String, ExistingStoryMeta> _meta;
   final _out = <InsightStory>[];
@@ -212,18 +233,20 @@ class _StoryCandidateBuilder {
       final summary = _summary(txns, yesterday, end);
       final slides = <StorySlide>[];
       final label = formatBubblePeriod(BubblePeriodKind.daily, start: yesterday);
+      final l10n = lookupAppLocalizations(AppLocale.current);
 
       if (summary.expense > 0 || summary.income > 0) {
+        final emphasisText = _getSpentWord(AppLocale.current.languageCode);
         slides.add(
           StorySlide(
             variant: SlideVariant.hero,
             background: StoryColorKey.blue,
             icon: 'calendar',
-            header: 'Daily',
+            header: l10n.dailyRecapHeader,
             dateLabel: label,
             hero: _money(summary.expense),
-            title: 'spent yesterday',
-            emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
+            title: l10n.spentYesterday,
+            emphasis: [Emphasis(emphasisText, EmphasisStyle.bold)],
             footer: _avgComparisonFooter(txns, yesterday, summary.expense),
           ),
         );
@@ -235,9 +258,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.blue,
             icon: 'wallet',
-            header: 'Daily',
+            header: l10n.dailyRecapHeader,
             dateLabel: label,
-            title: 'Top spend: ${top.$2} on ${top.$1}',
+            title: l10n.topSpend(top.$2, top.$1),
             emphasis: [Emphasis(top.$2, EmphasisStyle.primary)],
           ),
         );
@@ -249,9 +272,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.stats,
             background: StoryColorKey.blue,
             icon: 'category',
-            header: 'Daily',
+            header: l10n.dailyRecapHeader,
             dateLabel: label,
-            title: 'Top categories',
+            title: l10n.topCategories,
             stats: _categoryStats(summary, categories),
           ),
         );
@@ -288,26 +311,29 @@ class _StoryCandidateBuilder {
         start: lastStart,
         end: lastSun,
       );
+      final l10n = lookupAppLocalizations(AppLocale.current);
+      final emphasisText = _getSpentWord(AppLocale.current.languageCode);
+
       final slides = <StorySlide>[
         StorySlide(
           variant: SlideVariant.hero,
           background: StoryColorKey.violet,
           icon: 'chart',
-          header: 'Weekly recap',
+          header: l10n.weeklyRecapHeader,
           dateLabel: label,
           hero: _money(summary.expense),
-          title: 'spent last week',
-          emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
-          footer: _deltaFooter('the week before', summary.expense, before.expense),
+          title: l10n.spentLastWeek,
+          emphasis: [Emphasis(emphasisText, EmphasisStyle.bold)],
+          footer: _deltaFooter(l10n.theWeekBefore, summary.expense, before.expense),
         ),
       ];
       if (before.expense > 0) {
         slides.add(
           _comparisonSlide(
             color: StoryColorKey.violet,
-            nowLabel: 'This Week (${_shortRange(lastStart, lastSun)})',
+            nowLabel: '${l10n.thisWeek} (${_shortRange(lastStart, lastSun)})',
             nowAmount: summary.expense,
-            priorLabel: 'Previous Week (${_shortRange(beforeStart, beforeSun)})',
+            priorLabel: '${l10n.previousWeek} (${_shortRange(beforeStart, beforeSun)})',
             priorAmount: before.expense,
           ),
         );
@@ -317,9 +343,9 @@ class _StoryCandidateBuilder {
           variant: SlideVariant.statement,
           background: StoryColorKey.violet,
           icon: 'calendar',
-          header: 'Weekly recap',
+          header: l10n.weeklyRecapHeader,
           dateLabel: label,
-          title: 'About ${_money(summary.expense / 7)} a day on average',
+          title: l10n.averageDay(_money(summary.expense / 7)),
           emphasis: [Emphasis(_money(summary.expense / 7), EmphasisStyle.primary)],
         ),
       );
@@ -330,9 +356,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.violet,
             icon: 'trending_up',
-            header: 'Weekly recap',
+            header: l10n.weeklyRecapHeader,
             dateLabel: label,
-            title: '${biggest.$1} was your biggest day at ${biggest.$2}',
+            title: l10n.biggestDay(biggest.$1, biggest.$2),
             emphasis: [Emphasis(biggest.$2, EmphasisStyle.primary)],
           ),
         );
@@ -343,9 +369,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.stats,
             background: StoryColorKey.violet,
             icon: 'category',
-            header: 'Weekly recap',
+            header: l10n.weeklyRecapHeader,
             dateLabel: label,
-            title: 'Top categories',
+            title: l10n.topCategories,
             stats: _categoryStats(summary, categories),
           ),
         );
@@ -380,16 +406,19 @@ class _StoryCandidateBuilder {
       }
       final before = _summary(txns, beforeStart, lastStart);
       final label = formatBubblePeriod(BubblePeriodKind.monthly, start: lastStart);
+      final l10n = lookupAppLocalizations(AppLocale.current);
+      final emphasisText = _getSpentWord(AppLocale.current.languageCode);
+
       final slides = <StorySlide>[
         StorySlide(
           variant: SlideVariant.hero,
           background: StoryColorKey.amber,
           icon: 'calendar',
-          header: 'Monthly recap',
+          header: l10n.monthlyRecapHeader,
           dateLabel: label,
           hero: _money(summary.expense),
-          title: 'spent in $lastName',
-          emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
+          title: l10n.spentLastMonth(lastName),
+          emphasis: [Emphasis(emphasisText, EmphasisStyle.bold)],
           footer: _deltaFooter(beforeName, summary.expense, before.expense),
         ),
       ];
@@ -397,9 +426,9 @@ class _StoryCandidateBuilder {
         slides.add(
           _comparisonSlide(
             color: StoryColorKey.amber,
-            nowLabel: 'This Month ($lastName)',
+            nowLabel: '${l10n.thisMonth} ($lastName)',
             nowAmount: summary.expense,
-            priorLabel: 'Previous Month ($beforeName)',
+            priorLabel: '${l10n.previousMonth} ($beforeName)',
             priorAmount: before.expense,
           ),
         );
@@ -409,9 +438,9 @@ class _StoryCandidateBuilder {
           variant: SlideVariant.statement,
           background: StoryColorKey.amber,
           icon: 'calendar',
-          header: 'Monthly recap',
+          header: l10n.monthlyRecapHeader,
           dateLabel: label,
-          title: 'About ${_money(summary.expense / daysInLast)} a day on average',
+          title: l10n.averageDay(_money(summary.expense / daysInLast)),
           emphasis: [
             Emphasis(_money(summary.expense / daysInLast), EmphasisStyle.primary),
           ],
@@ -423,9 +452,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.stats,
             background: StoryColorKey.amber,
             icon: 'category',
-            header: 'Monthly recap',
+            header: l10n.monthlyRecapHeader,
             dateLabel: label,
-            title: 'Top categories',
+            title: l10n.topCategories,
             stats: _categoryStats(summary, categories),
           ),
         );
@@ -437,9 +466,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.amber,
             icon: 'wallet',
-            header: 'Monthly recap',
+            header: l10n.monthlyRecapHeader,
             dateLabel: label,
-            title: 'Biggest single spend was ${top.$2} on ${top.$1}',
+            title: l10n.biggestSingleSpend(top.$2, top.$1),
             emphasis: [Emphasis(top.$2, EmphasisStyle.primary)],
           ),
         );
@@ -452,9 +481,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.amber,
             icon: 'savings',
-            header: 'Monthly recap',
+            header: l10n.monthlyRecapHeader,
             dateLabel: label,
-            title: 'You saved $rate% of what you earned',
+            title: l10n.savedEarned(rate.toString()),
             emphasis: [Emphasis('$rate%', EmphasisStyle.primary)],
           ),
         );
@@ -487,16 +516,19 @@ class _StoryCandidateBuilder {
       }
       final before = _summary(txns, beforeStart, start);
       final label = formatBubblePeriod(BubblePeriodKind.yearlyFull, start: start);
+      final l10n = lookupAppLocalizations(AppLocale.current);
+      final emphasisText = _getSpentWord(AppLocale.current.languageCode);
+
       final slides = <StorySlide>[
         StorySlide(
           variant: SlideVariant.hero,
           background: StoryColorKey.gold,
           icon: 'trophy',
-          header: 'Year in review',
+          header: l10n.yearlyRecapHeader,
           dateLabel: label,
           hero: _money(summary.expense),
-          title: 'spent in $lastYear',
-          emphasis: const [Emphasis('spent', EmphasisStyle.bold)],
+          title: l10n.spentLastYear(lastYear.toString()),
+          emphasis: [Emphasis(emphasisText, EmphasisStyle.bold)],
           footer: _deltaFooter('${lastYear - 1}', summary.expense, before.expense),
         ),
       ];
@@ -504,9 +536,9 @@ class _StoryCandidateBuilder {
         slides.add(
           _comparisonSlide(
             color: StoryColorKey.gold,
-            nowLabel: 'This Year ($lastYear)',
+            nowLabel: '${l10n.thisYear} ($lastYear)',
             nowAmount: summary.expense,
-            priorLabel: 'Previous Year (${lastYear - 1})',
+            priorLabel: '${l10n.previousYear} (${lastYear - 1})',
             priorAmount: before.expense,
           ),
         );
@@ -516,9 +548,9 @@ class _StoryCandidateBuilder {
           variant: SlideVariant.statement,
           background: StoryColorKey.gold,
           icon: 'calendar',
-          header: 'Year in review',
+          header: l10n.yearlyRecapHeader,
           dateLabel: label,
-          title: 'About ${_money(summary.expense / 12)} a month on average',
+          title: l10n.averageMonth(_money(summary.expense / 12)),
           emphasis: [Emphasis(_money(summary.expense / 12), EmphasisStyle.primary)],
         ),
       );
@@ -529,9 +561,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.gold,
             icon: 'trending_up',
-            header: 'Year in review',
+            header: l10n.yearlyRecapHeader,
             dateLabel: label,
-            title: '${highest.$1} was your biggest month at ${highest.$2}',
+            title: l10n.biggestMonth(highest.$1, highest.$2),
             emphasis: [Emphasis(highest.$2, EmphasisStyle.primary)],
           ),
         );
@@ -542,9 +574,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.stats,
             background: StoryColorKey.gold,
             icon: 'category',
-            header: 'Year in review',
+            header: l10n.yearlyRecapHeader,
             dateLabel: label,
-            title: 'Top categories',
+            title: l10n.topCategories,
             stats: _categoryStats(summary, categories),
           ),
         );
@@ -557,9 +589,9 @@ class _StoryCandidateBuilder {
             variant: SlideVariant.statement,
             background: StoryColorKey.gold,
             icon: 'savings',
-            header: 'Year in review',
+            header: l10n.yearlyRecapHeader,
             dateLabel: label,
-            title: 'You saved $rate% of what you earned',
+            title: l10n.savedEarned(rate.toString()),
             emphasis: [Emphasis('$rate%', EmphasisStyle.primary)],
           ),
         );
@@ -579,19 +611,20 @@ class _StoryCandidateBuilder {
   }) {
     final less = nowAmount < priorAmount;
     final diff = (nowAmount - priorAmount).abs();
+    final l10n = lookupAppLocalizations(AppLocale.current);
     return StorySlide(
       variant: SlideVariant.compare,
       background: color,
       icon: less ? 'trending_down' : 'trending_up',
-      header: 'Compared',
-      title: less ? 'You spent less than before' : 'You spent more than before',
+      header: l10n.comparedTitle,
+      title: less ? l10n.comparedLess : l10n.comparedMore,
       compare: CompareData(
         priorLabel: priorLabel,
         prior: _money(priorAmount),
         nowLabel: nowLabel,
         now: _money(nowAmount),
         deltaIcon: less ? 'trending_down' : 'trending_up',
-        delta: '${_money(diff)} ${less ? 'less' : 'more'}',
+        delta: '${_money(diff)} ${less ? l10n.lessLabel : l10n.moreLabel}',
       ),
     );
   }
@@ -601,11 +634,12 @@ class _StoryCandidateBuilder {
   String _shortRange(DateTime start, DateTime endInclusive) {
     final sameMonth =
         start.month == endInclusive.month && start.year == endInclusive.year;
+    final l10n = lookupAppLocalizations(AppLocale.current);
     if (sameMonth) {
-      return '${start.day} to ${endInclusive.day} '
+      return '${start.day} ${l10n.toLabel} ${endInclusive.day} '
           '${DateFormat('MMM').format(endInclusive)}';
     }
-    return '${DateFormat('d MMM').format(start)} to '
+    return '${DateFormat('d MMM').format(start)} ${l10n.toLabel} '
         '${DateFormat('d MMM').format(endInclusive)}';
   }
 
@@ -617,19 +651,20 @@ class _StoryCandidateBuilder {
     final active = loans.where((l) => !l.isCompleted).take(6).toList();
     if (active.isEmpty) return;
     _upsertEntity(StoryKeys.loans, now, _loanCadence, () {
+      final l10n = lookupAppLocalizations(AppLocale.current);
       final slides = [
         for (final loan in active)
           StorySlide(
             variant: SlideVariant.stats,
             background: StoryColorKey.cyan,
             icon: 'loan',
-            header: 'Loans',
+            header: l10n.loansHeader,
             title: loan.name,
             stats: [
-              StatItem('Monthly EMI', _money(loan.emiAmount)),
-              StatItem('Principal', _money(loan.principalAmount)),
+              StatItem(l10n.monthlyEmi, _money(loan.emiAmount)),
+              StatItem(l10n.principal, _money(loan.principalAmount)),
               if (loan.lenderName.isNotEmpty)
-                StatItem('Lender', loan.lenderName),
+                StatItem(l10n.lender, loan.lenderName),
             ],
           ),
       ];
@@ -642,6 +677,7 @@ class _StoryCandidateBuilder {
     final open = ledgers.where((l) => !l.isSettled).take(6).toList();
     if (open.isEmpty) return;
     _upsertEntity(StoryKeys.ledger, now, _ledgerCadence, () {
+      final l10n = lookupAppLocalizations(AppLocale.current);
       final slides = [
         for (final ledger in open)
           () {
@@ -651,11 +687,11 @@ class _StoryCandidateBuilder {
               variant: SlideVariant.statement,
               background: StoryColorKey.slate,
               icon: 'ledger',
-              header: 'Lend / Borrow',
+              header: l10n.ledgerHeader,
               title: isLent
-                  ? '${ledger.personName} owes you $amount'
-                  : 'You owe ${ledger.personName} $amount',
-              subtitle: 'This entry is still open.',
+                  ? l10n.ledgerOwesYou(ledger.personName, amount)
+                  : l10n.ledgerYouOwe(ledger.personName, amount),
+              subtitle: l10n.ledgerEntryOpen,
               emphasis: [Emphasis(amount, EmphasisStyle.primary)],
             );
           }(),
@@ -685,21 +721,22 @@ class _StoryCandidateBuilder {
       (sum, i) => sum + (i.currentValue ?? i.investedAmount ?? 0),
     );
     final delta = current - invested;
+    final l10n = lookupAppLocalizations(AppLocale.current);
     final story = _story('investments', now, [
       StorySlide(
         variant: SlideVariant.compare,
         background: StoryColorKey.blue,
         icon: 'investment',
-        header: 'Investments',
+        header: l10n.investmentsHeader,
         dateLabel: formatBubblePeriod(
           BubblePeriodKind.investments,
-          sourcePeriod: 'This week',
+          sourcePeriod: l10n.thisWeek,
         ),
-        title: 'Portfolio check',
+        title: l10n.portfolioCheck,
         compare: CompareData(
-          priorLabel: 'Invested',
+          priorLabel: l10n.investedLabel,
           prior: _money(invested),
-          nowLabel: 'Current value',
+          nowLabel: l10n.currentValueLabel,
           now: _money(current),
           deltaIcon: delta >= 0 ? 'trending_up' : 'trending_down',
           delta: '${delta >= 0 ? '+' : '-'}${_money(delta.abs())}',
@@ -734,6 +771,7 @@ class _StoryCandidateBuilder {
           .toList();
       if (insights.isEmpty) return null;
 
+      final l10n = lookupAppLocalizations(AppLocale.current);
       final slides = [
         for (final insight in insights)
           () {
@@ -743,7 +781,7 @@ class _StoryCandidateBuilder {
               background: color,
               icon: icon,
               header: insight.typeLabel.isEmpty
-                  ? 'Highlight'
+                  ? l10n.highlightHeader
                   : insight.typeLabel,
               title: _stripEmDash(insight.message),
               emphasis: [
@@ -787,17 +825,19 @@ class _StoryCandidateBuilder {
     final avg = trailing / 30;
     if (avg == 0) return null;
     final diff = spent - avg;
+    final l10n = lookupAppLocalizations(AppLocale.current);
     return diff >= 0
-        ? '${_money(diff)} above your 30 day average'
-        : '${_money(diff.abs())} below your 30 day average';
+        ? l10n.aboveAverage(_money(diff))
+        : l10n.belowAverage(_money(diff.abs()));
   }
 
   String? _deltaFooter(String label, double current, double prior) {
     if (prior == 0) return null;
     final diff = current - prior;
+    final l10n = lookupAppLocalizations(AppLocale.current);
     return diff <= 0
-        ? '${_money(diff.abs())} less than $label'
-        : '${_money(diff)} more than $label';
+        ? l10n.deltaLess(_money(diff.abs()), label)
+        : l10n.deltaMore(_money(diff), label);
   }
 
   /// (transactionName, amountString) of the biggest single expense in range.
@@ -816,10 +856,11 @@ class _StoryCandidateBuilder {
       if (top == null || t.amount > top.amount) top = t;
     }
     if (top == null) return null;
+    final l10n = lookupAppLocalizations(AppLocale.current);
     final catById = {for (final c in categories) c.id.toString(): c.name};
     final name = top.name.trim().isNotEmpty
         ? top.name.trim()
-        : (catById[top.categoryId] ?? 'Uncategorized');
+        : (catById[top.categoryId] ?? l10n.uncategorized);
     return (name, _money(top.amount));
   }
 
@@ -829,9 +870,10 @@ class _StoryCandidateBuilder {
     final entries = summary.spendingByCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final top = entries.first;
+    final l10n = lookupAppLocalizations(AppLocale.current);
     final catById = {for (final c in categories) c.id.toString(): c.name};
     final pct = (top.value / summary.expense * 100).round();
-    return (catById[top.key] ?? 'Uncategorized', pct);
+    return (catById[top.key] ?? l10n.uncategorized, pct);
   }
 
   List<StatItem> _categoryStats(
@@ -840,10 +882,11 @@ class _StoryCandidateBuilder {
   ) {
     final entries = summary.spendingByCategory.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
+    final l10n = lookupAppLocalizations(AppLocale.current);
     final catById = {for (final c in categories) c.id.toString(): c.name};
     return [
       for (final e in entries.take(4))
-        StatItem(catById[e.key] ?? 'Uncategorized', _money(e.value)),
+        StatItem(catById[e.key] ?? l10n.uncategorized, _money(e.value)),
     ];
   }
 
@@ -862,16 +905,7 @@ class _StoryCandidateBuilder {
     }
     if (totals.isEmpty) return null;
     final best = totals.entries.reduce((a, b) => a.value >= b.value ? a : b);
-    const weekdays = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-    return (weekdays[best.key.weekday - 1], _money(best.value));
+    return (DateFormat('EEEE').format(best.key), _money(best.value));
   }
 
   /// (monthLabel, amountString) of the highest-spend month in the given year,
@@ -895,21 +929,10 @@ class _StoryCandidateBuilder {
       }
     }
     if (bestMonth == 0 || bestTotal <= 0) return null;
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return (months[bestMonth - 1], _money(bestTotal));
+    return (
+      DateFormat('MMMM').format(DateTime(year, bestMonth, 1)),
+      _money(bestTotal),
+    );
   }
 
   /// No-spend streak slide for the daily recap, or null when not relevant.
@@ -931,6 +954,8 @@ class _StoryCandidateBuilder {
     bool spentOn(DateTime day) =>
         _spend(txns, day, day.add(const Duration(days: 1))) > 0;
 
+    final l10n = lookupAppLocalizations(AppLocale.current);
+
     if (!spentOn(yesterday)) {
       // Count the no-spend streak ending yesterday (inclusive).
       var streak = 0;
@@ -939,16 +964,22 @@ class _StoryCandidateBuilder {
         streak++;
         day = day.subtract(const Duration(days: 1));
       }
+      final emphasisText = switch (AppLocale.current.languageCode) {
+        'hi' || 'bn' => '$streak दिन',
+        'pa' => '$streak ਦਿਨ',
+        'mr' => '$streak दिवस',
+        _ => '$streak day',
+      };
       return StorySlide(
         variant: SlideVariant.statement,
         background: color,
         icon: 'fire',
-        header: 'Daily',
+        header: l10n.dailyRecapHeader,
         dateLabel: label,
         title: streak == 1
-            ? 'A no spend day. Nice.'
-            : 'That is a $streak day no spend streak',
-        emphasis: [Emphasis('$streak day', EmphasisStyle.primary)],
+            ? l10n.noSpendDay
+            : l10n.noSpendStreak(streak.toString()),
+        emphasis: [Emphasis(emphasisText, EmphasisStyle.primary)],
       );
     }
 
@@ -967,14 +998,20 @@ class _StoryCandidateBuilder {
       day = day.subtract(const Duration(days: 1));
     }
     if (foundPriorSpend && prior >= 2) {
+      final emphasisText = switch (AppLocale.current.languageCode) {
+        'hi' || 'bn' => '$prior दिन',
+        'pa' => '$prior ਦਿਨ',
+        'mr' => '$prior दिवस',
+        _ => '$prior day',
+      };
       return StorySlide(
         variant: SlideVariant.statement,
         background: color,
         icon: 'warning',
-        header: 'Daily',
+        header: l10n.dailyRecapHeader,
         dateLabel: label,
-        title: 'Your $prior day no spend streak ended',
-        emphasis: [Emphasis('$prior day', EmphasisStyle.warning)],
+        title: l10n.noSpendStreakEnded(prior.toString()),
+        emphasis: [Emphasis(emphasisText, EmphasisStyle.warning)],
       );
     }
     return null;

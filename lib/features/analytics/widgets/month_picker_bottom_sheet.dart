@@ -1,5 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class MonthPickerBottomSheet extends StatefulWidget {
@@ -56,7 +57,7 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Jump To',
+                context.l10n.jumpTo,
                 style: tt.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
@@ -121,7 +122,7 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
                   alignment: Alignment.center,
                   child: Text(
                     DateFormat('MMM').format(date).toUpperCase(),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
                       color: isSelected ? cs.primary : cs.onSurfaceVariant,

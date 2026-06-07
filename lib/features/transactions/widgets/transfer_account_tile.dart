@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../accounts/data/account.dart';
 
@@ -62,7 +63,7 @@ class TransferAccountTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    account?.name ?? 'Select Account',
+                    account?.name ?? context.l10n.selectAccountTitle,
                     style: textTheme.bodyMedium?.copyWith(
                       color: account != null
                           ? cs.onSurface

@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/info_constants.dart';
@@ -145,7 +145,7 @@ class _CurrencyConverterScreenState
                   padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
                   child: RichText(
                     text: TextSpan(
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.0,
@@ -330,7 +330,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         'Select Currency',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -363,10 +363,10 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                   autofocus: false,
                   onChanged: (v) => setState(() => _query = v),
                   style:
-                      GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                      localeFont(fontSize: 14, color: cs.onSurface),
                   decoration: InputDecoration(
                     hintText: 'Search currencies...',
-                    hintStyle: GoogleFonts.inter(
+                    hintStyle: localeFont(
                         fontSize: 14, color: cs.onSurfaceVariant),
                     prefixIcon: Icon(Icons.search_rounded,
                         color: cs.onSurfaceVariant, size: 20),
@@ -413,7 +413,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                           horizontal: KuberSpacing.sm),
                       title: Text(
                         code,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -421,7 +421,7 @@ class _CurrencyPickerSheetState extends State<_CurrencyPickerSheet> {
                       ),
                       subtitle: Text(
                         name,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           color: cs.onSurfaceVariant,
                         ),
@@ -485,7 +485,7 @@ class _CurrencySelector extends StatelessWidget {
               children: [
                 Text(
                   code,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -493,7 +493,7 @@ class _CurrencySelector extends StatelessWidget {
                 ),
                 Text(
                   name,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant,
                   ),
@@ -541,7 +541,7 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: KuberSpacing.md),
             Text(
               'Could not load exchange rates',
-              style: GoogleFonts.inter(
+              style: localeFont(
                   fontSize: 14, color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),

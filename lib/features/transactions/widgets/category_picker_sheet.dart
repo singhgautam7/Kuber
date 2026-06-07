@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/add_new_button.dart';
@@ -81,7 +82,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                 Row(
                   children: [
                     Text(
-                      'Select Category',
+                      context.l10n.selectCategoryTitle,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
@@ -106,7 +107,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                     color: cs.onSurface,
                   ),
                   decoration: InputDecoration(
-                    hintText: 'Search categories',
+                    hintText: context.l10n.searchCategories,
                     hintStyle: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
@@ -127,7 +128,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
           Flexible(
             child: categories.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
               data: (cats) {
                 final groupsData = groups.valueOrNull ?? [];
 
@@ -158,7 +159,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
                     child: Padding(
                       padding: const EdgeInsets.all(KuberSpacing.lg),
                       child: Text(
-                        'No categories found',
+                        context.l10n.noCategoriesFound,
                         style: textTheme.bodyMedium?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -235,8 +236,8 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
 
                     // Ungrouped categories
                     if (grouped.containsKey(null) && grouped[null]!.isNotEmpty) ...[
-                      const SliverToBoxAdapter(
-                        child: _GroupHeader(name: 'Ungrouped'),
+                      SliverToBoxAdapter(
+                        child: _GroupHeader(name: context.l10n.ungrouped),
                       ),
                       SliverPadding(
                         padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
@@ -272,7 +273,7 @@ class _CategoryPickerSheetState extends ConsumerState<CategoryPickerSheet> {
           Padding(
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom + 16),
             child: AddNewButton(
-              label: 'Add new category',
+              label: context.l10n.addNewCategory,
               onTap: () {
                 // Close the picker sheet first
                 Navigator.pop(context);
@@ -379,7 +380,7 @@ class _CategoryItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text(
-                'BUDGET EXISTS',
+                context.l10n.budgetExists,
                 style: textTheme.labelSmall?.copyWith(
                   fontSize: 8,
                   fontWeight: FontWeight.w800,

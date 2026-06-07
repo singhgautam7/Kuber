@@ -1,4 +1,6 @@
 import 'package:isar_community/isar.dart';
+import 'package:kuber/core/utils/locale_font.dart' show AppLocale;
+import 'package:kuber/l10n/app_localizations.dart' show lookupAppLocalizations;
 
 import '../../investments/data/investment.dart';
 import '../../loans/data/loan.dart';
@@ -76,11 +78,10 @@ class RecurringProcessor {
         }
 
         if (created > 0) {
+          final l = lookupAppLocalizations(AppLocale.current);
           recurringNotifications[rule.id] = _PendingNotification(
-            title: created == 1
-                ? 'New recurring transaction'
-                : '$created recurring transactions added',
-            body: '${rule.name} - added while you were away',
+            title: l.notifNewRecurring(created),
+            body: l.notifRecurringBody(rule.name),
             payload: 'recurring:${rule.id}',
           );
         }
@@ -163,10 +164,11 @@ class RecurringProcessor {
       });
       suggestionService.upsertSuggestion(t).ignore();
 
+      final l = lookupAppLocalizations(AppLocale.current);
       await notificationRepo.add(
         type: NotificationType.loanEmi,
-        title: 'Loan EMI deducted',
-        body: '${loan.name} - EMI added to your transactions',
+        title: l.notifLoanEmiTitle,
+        body: l.notifLoanEmiBody(loan.name),
         payload: 'loan:${loan.uid}',
       );
       created++;
@@ -226,10 +228,11 @@ class RecurringProcessor {
 
       // Investment SIP debits are surfaced under the recurring-transaction
       // type since there's no dedicated investment notification channel.
+      final l = lookupAppLocalizations(AppLocale.current);
       await notificationRepo.add(
         type: NotificationType.recurringTransaction,
-        title: 'Investment contribution added',
-        body: '${inv.name} - SIP contribution recorded',
+        title: l.notifInvestmentTitle,
+        body: l.notifInvestmentBody(inv.name),
         payload: 'investment:${inv.uid}',
       );
       created++;

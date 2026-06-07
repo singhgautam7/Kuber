@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../transactions/data/transaction.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -53,7 +54,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Avg Weekly Heatmap',
+                        context.l10n.avgWeeklyHeatmap,
                         style: tt.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -63,7 +64,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Based on your selected filter',
+                        context.l10n.basedOnSelectedFilter,
                         style: tt.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -145,7 +146,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'INTENSITY',
+                  context.l10n.intensity,
                   style: tt.labelSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,

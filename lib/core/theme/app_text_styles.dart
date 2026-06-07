@@ -1,3 +1,4 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -13,25 +14,25 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTextStyles {
   // Base Inter styles — resolved once and cached (note: `final`, not `get`,
   // so the GoogleFonts lookup does not run on every access).
-  static final TextStyle inter = GoogleFonts.inter();
+  static final TextStyle inter = localeFont();
 
-  static final TextStyle regular = GoogleFonts.inter(
+  static final TextStyle regular = localeFont(
     fontWeight: FontWeight.w400,
   );
 
-  static final TextStyle medium = GoogleFonts.inter(
+  static final TextStyle medium = localeFont(
     fontWeight: FontWeight.w500,
   );
 
-  static final TextStyle semiBold = GoogleFonts.inter(
+  static final TextStyle semiBold = localeFont(
     fontWeight: FontWeight.w600,
   );
 
-  static final TextStyle bold = GoogleFonts.inter(
+  static final TextStyle bold = localeFont(
     fontWeight: FontWeight.w700,
   );
 
-  static final TextStyle extraBold = GoogleFonts.inter(
+  static final TextStyle extraBold = localeFont(
     fontWeight: FontWeight.w800,
   );
 

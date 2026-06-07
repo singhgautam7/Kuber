@@ -1,5 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class ManualDateRangeBottomSheet extends StatefulWidget {
@@ -89,19 +90,19 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
     final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
 
     if (fromDate == null) {
-      setState(() => _fromError = 'Invalid format');
+      setState(() => _fromError = context.l10n.invalidFormat);
       return;
     }
     if (toDate == null) {
-      setState(() => _toError = 'Invalid format');
+      setState(() => _toError = context.l10n.invalidFormat);
       return;
     }
     if (fromDate.isAfter(toDate)) {
-      setState(() => _toError = 'Start must be before End');
+      setState(() => _toError = context.l10n.startBeforeEnd);
       return;
     }
     if (toDate.isAfter(today)) {
-      setState(() => _toError = 'Future dates not allowed');
+      setState(() => _toError = context.l10n.futureDatesNotAllowed);
       return;
     }
 
@@ -139,18 +140,18 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
           ),
           const SizedBox(height: 24),
           Text(
-            'Manual Date Range',
+            context.l10n.manualDateRange,
             style: tt.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(
-            'Specify a custom period for your financial analysis.',
+            context.l10n.manualDateRangeDesc,
             style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
           
           _buildDateField(
-            label: 'FROM DATE (DD/MM/YYYY)',
+            label: context.l10n.fromDateLabel,
             controller: _fromController,
             error: _fromError,
             cs: cs,
@@ -158,7 +159,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
           ),
           const SizedBox(height: 20),
           _buildDateField(
-            label: 'TO DATE (DD/MM/YYYY)',
+            label: context.l10n.toDateLabel,
             controller: _toController,
             error: _toError,
             cs: cs,
@@ -183,8 +184,8 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'DONE',
-                    style: GoogleFonts.inter(
+                    context.l10n.doneUpper,
+                    style: localeFont(
                       fontWeight: FontWeight.w800,
                       letterSpacing: 2,
                     ),
@@ -200,7 +201,7 @@ class _ManualDateRangeBottomSheetState extends State<ManualDateRangeBottomSheet>
             child: TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'CANCEL',
+                context.l10n.cancelUpper,
                 style: tt.labelLarge?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontWeight: FontWeight.w800,

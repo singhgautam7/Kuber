@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SquircleIcon extends StatelessWidget {
   final IconData icon;
@@ -91,7 +91,7 @@ class SettingsCardSelector<T> extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         option.label,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                           color: isSelected ? cs.primary : cs.onSurfaceVariant,
@@ -101,7 +101,7 @@ class SettingsCardSelector<T> extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           option.subtitle!,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 10,
                             color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                           ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/history_filter.dart';
 import '../providers/history_filter_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/l10n_ext.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 
 class HistoryFilterWidget extends ConsumerStatefulWidget {
@@ -106,7 +107,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
               // FILTERS Label
               if (showFiltersLabel)
                 Text(
-                  'FILTERS',
+                  context.l10n.filtersUpper,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -117,20 +118,20 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
               const Spacer(),
               // Quick Filters: Exp / Inc
               Tooltip(
-                message: 'Filter expenses',
+                message: context.l10n.filterExpensesTooltip,
                 triggerMode: TooltipTriggerMode.longPress,
                 child: _QuickFilterButton(
-                  label: 'Exp',
+                  label: context.l10n.filterExp,
                   isSelected: filter.types.contains('expense'),
                   onTap: () => notifier.setType('expense'),
                 ),
               ),
               const SizedBox(width: 8),
               Tooltip(
-                message: 'Filter income',
+                message: context.l10n.filterIncomeTooltip,
                 triggerMode: TooltipTriggerMode.longPress,
                 child: _QuickFilterButton(
-                  label: 'Inc',
+                  label: context.l10n.filterInc,
                   isSelected: filter.types.contains('income'),
                   onTap: () => notifier.setType('income'),
                 ),
@@ -146,7 +147,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
             const SizedBox(width: 8),
             // Filter Icon with Badge
             Tooltip(
-              message: 'Advanced filters',
+              message: context.l10n.advancedFiltersTooltip,
               triggerMode: TooltipTriggerMode.longPress,
               child: _FilterIconButton(
                 key: TutorialStepKeys.historyFilterIcon,
@@ -158,7 +159,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
             const SizedBox(width: 8),
             // Clear Button
             Tooltip(
-              message: 'Clear filters',
+              message: context.l10n.clearFiltersTooltip,
               triggerMode: TooltipTriggerMode.longPress,
               child: _ClearButton(
                 isEnabled: !filter.isEmpty,
@@ -176,7 +177,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
 
   Widget _buildSearchIcon(ColorScheme cs) {
     return Tooltip(
-      message: 'Search transactions',
+      message: context.l10n.searchTransactionsTooltip,
       triggerMode: TooltipTriggerMode.longPress,
       child: GestureDetector(
         key: const ValueKey('search_icon'),
@@ -211,7 +212,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
       ),
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
-        hintText: 'Search transactions...',
+        hintText: context.l10n.searchTransactionsHint,
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
           fontSize: 14,
           color: cs.onSurfaceVariant,
@@ -240,7 +241,7 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
           borderSide: BorderSide(color: cs.outline),
         ),
         suffixIcon: Tooltip(
-          message: 'Apply search',
+          message: context.l10n.applySearchTooltip,
           child: IconButton(
             icon: Icon(Icons.check_rounded, color: cs.primary, size: 20),
             onPressed: () => _onSearchSubmit(_searchController.text),

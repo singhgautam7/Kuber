@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 
@@ -74,20 +75,20 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
     final count = ref.watch(recurringProcessResultProvider);
     final textTheme = Theme.of(context).textTheme;
     final title = switch (_phase) {
-      _LoaderPhase.backup => 'Backing up automatically',
-      _LoaderPhase.recurring => 'Processing Recurring',
+      _LoaderPhase.backup => context.l10n.backingUpAuto,
+      _LoaderPhase.recurring => context.l10n.processingRecurring,
     };
     final subtitle = switch (_phase) {
-      _LoaderPhase.backup => 'Saving a copy to your chosen folder.',
-      _LoaderPhase.recurring => 'Creating missed transactions.',
+      _LoaderPhase.backup => context.l10n.savingCopyToFolder,
+      _LoaderPhase.recurring => context.l10n.creatingMissedTxns,
     };
     final statusLabel = switch (_phase) {
-      _LoaderPhase.backup => 'FOLDER',
-      _LoaderPhase.recurring => 'PROCESSED',
+      _LoaderPhase.backup => context.l10n.folderUpper,
+      _LoaderPhase.recurring => context.l10n.processedUpper,
     };
     final statusValue = switch (_phase) {
-      _LoaderPhase.backup => 'Selected',
-      _LoaderPhase.recurring => '$count transaction${count == 1 ? '' : 's'}',
+      _LoaderPhase.backup => context.l10n.selectedLabel,
+      _LoaderPhase.recurring => context.l10n.nTransactions(count),
     };
 
     return Scaffold(
@@ -122,7 +123,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const StatusPill(label: 'NETWORK', value: 'Local Only'),
+                  StatusPill(label: context.l10n.networkUpper, value: context.l10n.localOnly),
                   const SizedBox(width: KuberSpacing.md),
                   StatusPill(label: statusLabel, value: statusValue),
                 ],

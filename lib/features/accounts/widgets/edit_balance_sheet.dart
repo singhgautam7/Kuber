@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
@@ -85,8 +86,8 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
       showKuberSnackBar(
         context,
         widget.isCredit
-            ? 'Limit spent updated successfully'
-            : 'Balance updated successfully',
+            ? context.l10n.limitSpentUpdated
+            : context.l10n.balanceUpdated,
       );
     }
   }
@@ -96,9 +97,9 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final symbol = ref.watch(currencyProvider).symbol;
-    final label = widget.isCredit ? 'Edit Limit Spent' : 'Edit Balance';
+    final label = widget.isCredit ? context.l10n.editLimitSpent : context.l10n.editBalance;
     final currentLabel =
-        widget.isCredit ? 'CURRENT LIMIT SPENT' : 'CURRENT BALANCE';
+        widget.isCredit ? context.l10n.currentLimitSpent : context.l10n.currentBalance;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -139,7 +140,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
                   children: [
                     Text(
                       widget.account.name,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -149,7 +150,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
                     const SizedBox(height: 2),
                     Text(
                       label,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 13,
                         color: cs.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
@@ -174,7 +175,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
           // Current value display
           Text(
             currentLabel,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -184,7 +185,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
           const SizedBox(height: 6),
           Text(
             formatter.formatCurrency(widget.currentValue),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -202,20 +203,20 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
               FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
             ],
             autofocus: true,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,
             ),
             decoration: InputDecoration(
-              labelText: widget.isCredit ? 'New Limit Spent' : 'New Balance',
+              labelText: widget.isCredit ? context.l10n.newLimitSpent : context.l10n.newBalance,
               prefixText: widget.isCredit ? '-$symbol ' : '$symbol ',
-              prefixStyle: GoogleFonts.inter(
+              prefixStyle: localeFont(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: widget.isCredit ? cs.error : cs.onSurfaceVariant,
               ),
-              labelStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
+              labelStyle: localeFont(color: cs.onSurfaceVariant),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(KuberRadius.md),
               ),
@@ -235,7 +236,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
             const SizedBox(height: 12),
             RichText(
               text: TextSpan(
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: cs.onSurfaceVariant,
@@ -248,7 +249,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
                       color: _diff > 0 ? cs.tertiary : cs.error,
                     ),
                   ),
-                  const TextSpan(text: ' adjustment will be recorded as a transaction (analytics won\'t be affected)'),
+                  TextSpan(text: ' ${context.l10n.adjustmentNote}'),
                 ],
               ),
             ),
@@ -258,7 +259,7 @@ class _EditBalanceSheetState extends ConsumerState<EditBalanceSheet> {
 
           // Save button
           AppButton(
-            label: 'Save',
+            label: context.l10n.saveLabel,
             type: AppButtonType.primary,
             fullWidth: true,
             isLoading: _saving,

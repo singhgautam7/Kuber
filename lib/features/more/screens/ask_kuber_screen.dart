@@ -1,9 +1,9 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/info_config.dart';
@@ -920,14 +920,14 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                       children: [
                         Text(
                           'Ask Kuber (Beta)',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: cs.onSurface),
                         ),
                         Text(
                           'On-device • No internet required',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                               fontSize: 11, color: cs.onSurfaceVariant),
                         ),
                       ],
@@ -996,7 +996,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                               ),
                               child: Text(
                                 s,
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
                                   color: cs.primary,
@@ -1026,13 +1026,13 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen> {
                     enabled: !_isProcessing,
                     maxLines: 4,
                     minLines: 1,
-                    style: GoogleFonts.inter(fontSize: 15, color: cs.onSurface),
+                    style: localeFont(fontSize: 15, color: cs.onSurface),
                     onTapOutside: (_) {
                       FocusManager.instance.primaryFocus?.unfocus();
                     },
                     decoration: InputDecoration(
                       hintText: 'Ask about your spending...',
-                      hintStyle: GoogleFonts.inter(
+                      hintStyle: localeFont(
                           fontSize: 15,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
                     ),
@@ -1185,7 +1185,7 @@ class _DateSeparator extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
           child: Text(
             label,
-            style: GoogleFonts.inter(
+            style: localeFont(
                 fontSize: 11,
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600),
@@ -1227,12 +1227,12 @@ class _UserBubble extends StatelessWidget {
             children: [
               Text(
                 message.text,
-                style: GoogleFonts.inter(fontSize: 14, color: cs.onPrimary),
+                style: localeFont(fontSize: 14, color: cs.onPrimary),
               ),
               const SizedBox(height: 3),
               Text(
                 DateFormat('h:mm a').format(message.time),
-                style: GoogleFonts.inter(
+                style: localeFont(
                     fontSize: 10,
                     color: cs.onPrimary.withValues(alpha: 0.7)),
               ),
@@ -1352,14 +1352,14 @@ class _KuberBubbleState extends State<_KuberBubble>
                           RichText(
                             text: _buildRichText(
                               widget.message.text,
-                              GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                              localeFont(fontSize: 14, color: cs.onSurface),
                               cs.primary,
                             ),
                           ),
                           const SizedBox(height: 3),
                           Text(
                             DateFormat('h:mm a').format(widget.message.time),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                                 fontSize: 10, color: cs.onSurfaceVariant),
                           ),
                         ],
@@ -1391,7 +1391,7 @@ class _KuberBubbleState extends State<_KuberBubble>
                               const SizedBox(width: 4),
                               Text(
                                 'SHOW THINKING',
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.8,
@@ -1455,7 +1455,7 @@ class _ThinkingRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 3),
       child: RichText(
         text: TextSpan(
-          style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
           children: [
             TextSpan(
                 text: '$label: ',

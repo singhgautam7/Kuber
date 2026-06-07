@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -79,7 +80,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
             const SizedBox(height: KuberSpacing.lg),
             Text(
               'Kuber',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 36,
                 fontWeight: FontWeight.w800,
                 color: cs.primary,
@@ -88,7 +89,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
             const SizedBox(height: KuberSpacing.sm),
             Text(
               'your personal financial log',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
                 color: cs.onSurfaceVariant,
@@ -102,8 +103,8 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                 onPressed: () => ref.read(authProvider.notifier).authenticate(),
                 icon: const Icon(Icons.lock_open_rounded),
                 label: Text(
-                  'Unlock to continue',
-                  style: GoogleFonts.inter(
+                  context.l10n.unlockToContinue,
+                  style: localeFont(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),

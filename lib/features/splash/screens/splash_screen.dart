@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -90,7 +91,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 const SizedBox(height: KuberSpacing.lg),
                 Text(
                   'Kuber',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
                     color: cs.primary,
@@ -98,8 +99,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 ),
                 const SizedBox(height: KuberSpacing.sm),
                 Text(
-                  'Your personal money diary',
-                  style: GoogleFonts.inter(
+                  context.l10n.splashTagline,
+                  style: localeFont(
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                     color: cs.onSurfaceVariant,

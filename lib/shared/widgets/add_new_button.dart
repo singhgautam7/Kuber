@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AddNewButton extends StatelessWidget {
   final String label;
@@ -33,7 +33,7 @@ class AddNewButton extends StatelessWidget {
           icon: Icon(Icons.add_rounded,
               color: cs.onSurfaceVariant, size: 18),
           label: Text(label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: cs.onSurface)),

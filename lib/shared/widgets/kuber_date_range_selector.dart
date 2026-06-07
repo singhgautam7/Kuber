@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../features/analytics/providers/analytics_provider.dart'
     show FilterType;
@@ -10,6 +10,7 @@ import '../../features/analytics/widgets/manual_date_range_bottom_sheet.dart';
 import '../../features/analytics/widgets/month_picker_bottom_sheet.dart';
 import '../../features/analytics/widgets/quick_filter_chips_row.dart';
 import '../../features/transactions/providers/transaction_provider.dart';
+import '../../core/utils/breakpoints.dart';
 import 'horizontal_fade_wrapper.dart';
 
 class KuberDateRangeResult {
@@ -263,10 +264,13 @@ class _StickyPrimary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+    // Read the OS nav-bar inset from the root view: this button lives in
+    // Scaffold.bottomSheet, where Flutter zeroes MediaQuery padding/viewPadding,
+    // so viewPaddingOf would return 0 and the button slides under the system
+    // nav bar (incl. 3-button navigation) in edge-to-edge mode.
+    final bottomInset = systemNavBarInset(context);
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 12 + bottomInset),
         decoration: BoxDecoration(
           color: cs.surface,
           border: Border(
@@ -288,14 +292,13 @@ class _StickyPrimary extends StatelessWidget {
             ),
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
               ),
             ),
           ),
         ),
-      ),
     );
   }
 }

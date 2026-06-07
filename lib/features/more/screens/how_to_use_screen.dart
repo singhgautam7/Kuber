@@ -1,51 +1,39 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
 class HowToUseScreen extends StatelessWidget {
   const HowToUseScreen({super.key});
 
-  static const _faqs = [
-    (
-      title: 'How do I add a transaction?',
-      body:
-          'Tap the + button on the bottom right to add a new transaction. Fill in the amount, select a category and account, then save.',
-    ),
-    (
-      title: 'How do I manage accounts?',
-      body:
-          'Go to More → Accounts to see all your wallets and bank accounts. You can add new accounts or edit existing ones from there.',
-    ),
-    (
-      title: 'How do transfers work?',
-      body:
-          'When adding a transaction, select "Transfer" as the type. Pick the source and destination accounts and the amount will be moved between them.',
-    ),
-    (
-      title: 'Can I customize categories?',
-      body:
-          'Yes! Go to More → Categories to view all categories. Default categories cannot be deleted, but you can add your own custom categories.',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = context.l10n;
+    final faqs = [
+      (title: l.faqAddTxnQ, body: l.faqAddTxnA),
+      (title: l.faqAccountsQ, body: l.faqAccountsA),
+      (title: l.faqTransfersQ, body: l.faqTransfersA),
+      (title: l.faqCategoriesQ, body: l.faqCategoriesA),
+    ];
 
     return Scaffold(
       backgroundColor: cs.surface,
       appBar: KuberAppBar(showBack: true, showHome: true, title: ''),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.lg,
+        padding: EdgeInsets.only(
+          left: KuberSpacing.lg,
+          right: KuberSpacing.lg,
+          top: KuberSpacing.lg,
+          bottom: KuberSpacing.lg + systemNavBarInset(context),
         ),
         children: [
           Text(
-            'Frequently Asked Questions',
-            style: GoogleFonts.inter(
+            l.faqTitle,
+            style: localeFont(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,
@@ -53,7 +41,7 @@ class HowToUseScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: KuberSpacing.lg),
-          for (final faq in _faqs) ...[
+          for (final faq in faqs) ...[
             Container(
               decoration: BoxDecoration(
                 color: cs.surfaceContainer,
@@ -74,7 +62,7 @@ class HowToUseScreen extends StatelessWidget {
                 ),
                 title: Text(
                   faq.title,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -85,7 +73,7 @@ class HowToUseScreen extends StatelessWidget {
                 children: [
                   Text(
                     faq.body,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13,
                       color: cs.onSurfaceVariant,
                       height: 1.5,

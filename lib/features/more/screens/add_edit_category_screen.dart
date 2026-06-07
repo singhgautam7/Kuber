@@ -4,10 +4,11 @@
 // Drop-in replacement for lib/features/more/screens/add_edit_category_screen.dart.
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -106,8 +107,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit category' : 'New category',
-          style: GoogleFonts.inter(
+          _isEditing ? context.l10n.editCategory : context.l10n.newCategory,
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -125,7 +126,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
           children: [
             // ── IDENTITY ─────────────────────────────────────────────
             KuberFormSection(
-              label: 'Identity',
+              label: context.l10n.identity,
               topGap: 0,
               children: [
                 TextField(
@@ -133,9 +134,9 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                   textCapitalization: TextCapitalization.words,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                  decoration: const InputDecoration(
-                    hintText: 'e.g. Groceries, Rent, Salary',
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.categoryNameHint,
                   ),
                 ),
                 _LivePreview(
@@ -150,27 +151,27 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
             // ── GROUP (optional · hidden in Advanced Setup) ──────────
             if (_shouldShowGroup)
               KuberFormSection(
-                label: 'Group',
-                sublabel: 'Optional',
+                label: context.l10n.groupLabel,
+                sublabel: context.l10n.optionalLabel,
                 children: [
                   Consumer(builder: (context, ref, _) {
                     final groupsAsync = ref.watch(categoryGroupListProvider);
                     final groupName = _selectedGroupId == null
-                        ? 'None'
+                        ? context.l10n.noneLabel
                         : (groupsAsync.value
                                 ?.firstWhere(
                                   (g) => g.id == _selectedGroupId,
-                                  orElse: () => CategoryGroup()..name = 'None',
+                                  orElse: () => CategoryGroup()..name = context.l10n.noneLabel,
                                 )
                                 .name ??
-                            'None');
+                            context.l10n.noneLabel);
                     return KuberPickerRow(
                       leading: KuberLeadingSwatch(
                         color: cs.surfaceContainerHigh,
                         icon: Icons.folder_outlined,
                         empty: true,
                       ),
-                      label: 'Group',
+                      label: context.l10n.groupLabel,
                       value: groupName,
                       valueIsPlaceholder: _selectedGroupId == null,
                       onTap: _openGroupPicker,
@@ -181,14 +182,14 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
             // ── APPEARANCE ───────────────────────────────────────────
             KuberFormSection(
-              label: 'Appearance',
+              label: context.l10n.appearance,
               children: [
                 KuberPickerRow(
                   leading: KuberLeadingSwatch(
                     color: _selectedColor,
                     icon: IconMapper.fromString(_selectedIcon),
                   ),
-                  label: 'Icon',
+                  label: context.l10n.iconLabel,
                   value: IconMapper.labelFor(_selectedIcon),
                   onTap: () => showIconPicker(
                     context: context,
@@ -206,7 +207,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
                   ),
-                  label: 'Color',
+                  label: context.l10n.colorLabel,
                   value: AppColorPalette.nameFor(_selectedColor.toARGB32()),
                   onTap: () => showColorPicker(
                     context: context,
@@ -220,27 +221,27 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
 
             // ── TYPE ─────────────────────────────────────────────────
             KuberFormSection(
-              label: 'Type',
+              label: context.l10n.typeLabel,
               children: [
                 KuberSegmented<String>(
                   groupValue: _selectedType,
                   onChanged: (v) => setState(() => _selectedType = v),
-                  segments: const [
+                  segments: [
                     KuberSegment(
                       value: 'expense',
-                      label: 'Expense',
+                      label: context.l10n.expenseLabel,
                       icon: Icons.arrow_outward_rounded,
                       tone: SegmentTone.expense,
                     ),
                     KuberSegment(
                       value: 'income',
-                      label: 'Income',
+                      label: context.l10n.incomeLabel,
                       icon: Icons.south_west_rounded,
                       tone: SegmentTone.income,
                     ),
                     KuberSegment(
                       value: 'both',
-                      label: 'Both',
+                      label: context.l10n.bothLabel,
                       icon: Icons.swap_vert_rounded,
                     ),
                   ],
@@ -253,8 +254,8 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     ),
       bottomNavigationBar: KuberSaveButton(
         label: widget.existingCategory != null
-            ? widget.saveLabel ?? 'Save changes'
-            : widget.saveLabel ?? 'Save category',
+            ? widget.saveLabel ?? context.l10n.saveChanges
+            : widget.saveLabel ?? context.l10n.saveCategory,
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -319,7 +320,7 @@ class _AddEditCategoryScreenState extends ConsumerState<AddEditCategoryScreen> {
     if (!widget.returnToCategoryPicker) {
       showKuberSnackBar(
         context,
-        _isEditing ? 'Category updated' : 'Category added',
+        _isEditing ? context.l10n.categoryUpdated : context.l10n.categoryAdded,
       );
     }
   }
@@ -341,8 +342,12 @@ class _LivePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final displayName = name.trim().isEmpty ? 'Category name' : name;
-    final typeLabel = '${type[0].toUpperCase()}${type.substring(1)}';
+    final displayName = name.trim().isEmpty ? context.l10n.categoryNameLabel : name;
+    final typeLabel = type == 'both'
+        ? context.l10n.bothLabel
+        : type == 'income'
+            ? context.l10n.incomeLabel
+            : context.l10n.expenseLabel;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -354,8 +359,8 @@ class _LivePreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'LIVE PREVIEW',
-            style: GoogleFonts.inter(
+            context.l10n.livePreview,
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.4,
@@ -384,7 +389,7 @@ class _LivePreview extends StatelessWidget {
                       displayName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: name.trim().isEmpty
@@ -395,7 +400,7 @@ class _LivePreview extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       typeLabel,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),
@@ -478,8 +483,8 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
             child: Row(
               children: [
                 Text(
-                  'Select Group',
-                  style: GoogleFonts.inter(
+                  context.l10n.selectGroup,
+                  style: localeFont(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -504,7 +509,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.all(32),
-                child: Text('Error: $e'),
+                child: Text(context.l10n.errorWithDetails(e.toString())),
               ),
               data: (groups) {
                 final sortedGroups = groups.toList()
@@ -517,7 +522,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
                     _buildOption(
                       context,
                       id: null,
-                      name: 'None',
+                      name: context.l10n.noneLabel,
                       isSelected: widget.selectedGroupId == null,
                     ),
                     ...sortedGroups.map(
@@ -553,18 +558,18 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
                               maxLength: 15,
                               textCapitalization: TextCapitalization.words,
                               decoration: InputDecoration(
-                                hintText: 'Group name...',
+                                hintText: context.l10n.groupNameShortHint,
                                 isDense: true,
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                   vertical: 12,
                                 ),
                                 errorText: (name.isNotEmpty && isDuplicate)
-                                    ? 'This group already exists'
+                                    ? context.l10n.groupAlreadyExists
                                     : null,
                                 counterText:
                                     '${_groupNameController.text.length} / 15',
-                                counterStyle: GoogleFonts.inter(
+                                counterStyle: localeFont(
                                   fontSize: 10,
                                   color: _groupNameController.text.length >= 15
                                       ? cs.error
@@ -592,7 +597,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
                     ],
                   )
                 : AppButton(
-                    label: 'Add New Group',
+                    label: context.l10n.addNewGroup,
                     icon: Icons.add_rounded,
                     type: AppButtonType.outline,
                     fullWidth: true,
@@ -625,7 +630,7 @@ class _GroupPickerSheetState extends ConsumerState<_GroupPickerSheet> {
             Expanded(
               child: Text(
                 name,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 16,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected ? cs.primary : cs.onSurface,

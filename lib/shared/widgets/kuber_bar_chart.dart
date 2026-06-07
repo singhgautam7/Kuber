@@ -1,10 +1,11 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../features/history/providers/history_filter_provider.dart';
@@ -246,9 +247,9 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
                         Expanded(
                           child: Row(
                             children: [
-                              _LegendDot(color: cs.tertiary, label: 'INC'),
+                              _LegendDot(color: cs.tertiary, label: context.l10n.incShort),
                               const SizedBox(width: KuberSpacing.md),
-                              _LegendDot(color: cs.error, label: 'EXP'),
+                              _LegendDot(color: cs.error, label: context.l10n.expShort),
                             ],
                           ),
                         ),
@@ -980,14 +981,14 @@ class _TooltipOverlay extends ConsumerWidget {
                       ),
                       const SizedBox(height: KuberSpacing.sm),
                       _TooltipRow(
-                        label: 'Income',
+                        label: context.l10n.incomeLabel,
                         amount: maskAmount('+${whole(bucket.income)}', isPrivate),
                         color: cs.tertiary,
                         labelColor: cs.onSurfaceVariant,
                       ),
                       const SizedBox(height: 4),
                       _TooltipRow(
-                        label: 'Expense',
+                        label: context.l10n.expenseLabel,
                         amount: maskAmount('-${whole(bucket.expense)}', isPrivate),
                         color: cs.error,
                         labelColor: cs.onSurfaceVariant,
@@ -1001,7 +1002,7 @@ class _TooltipOverlay extends ConsumerWidget {
                         ),
                       ),
                       _TooltipRow(
-                        label: 'Net',
+                        label: context.l10n.netLabel,
                         amount: maskAmount(
                             (net >= 0 ? whole(net) : '-${whole(net.abs())}'),
                             isPrivate),
@@ -1033,7 +1034,7 @@ class _TooltipOverlay extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'View Transactions',
+                                context.l10n.viewTransactions,
                                 style: tt.labelSmall?.copyWith(
                                   color: cs.primary,
                                   fontWeight: FontWeight.w700,
@@ -1200,7 +1201,7 @@ class _BucketDropdown extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   b.label,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight:
                         current == b ? FontWeight.w700 : FontWeight.w500,
@@ -1225,7 +1226,7 @@ class _BucketDropdown extends StatelessWidget {
           children: [
             Text(
               current.label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurface,
@@ -1253,4 +1254,3 @@ class _HorizontalClipper extends CustomClipper<Rect> {
   @override
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
 }
-

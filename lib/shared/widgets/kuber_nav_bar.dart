@@ -2,10 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/l10n_ext.dart';
 
 // ---------------------------------------------------------------------------
 // Nav item data
 // ---------------------------------------------------------------------------
+
+String _localNavLabel(BuildContext context, String label) {
+  switch (label) {
+    case 'Home':
+      return context.l10n.navHome;
+    case 'History':
+      return context.l10n.navHistory;
+    case 'Analytics':
+      return context.l10n.navAnalytics;
+    case 'More':
+      return context.l10n.navMore;
+    default:
+      return label;
+  }
+}
 
 class KuberNavItem {
   final IconData icon;
@@ -131,7 +147,7 @@ class KuberNavRail extends StatelessWidget {
                             color: Colors.white, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          'Add Transaction',
+                          context.l10n.addTransaction,
                           style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -182,7 +198,7 @@ class _RailItem extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                item.label,
+                _localNavLabel(context, item.label),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,

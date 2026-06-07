@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -52,7 +53,7 @@ class _InvestmentDetailSheetState
 
     return KuberBottomSheet(
       title: investment.name,
-      subtitle: _investmentTypeLabel(investment.investmentType),
+      subtitle: _typeLabelLocalized(investment.investmentType),
       leadingIcon: Container(
         width: 48,
         height: 48,
@@ -73,7 +74,7 @@ class _InvestmentDetailSheetState
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Add Contribution',
+                  label: context.l10n.addContribution,
                   icon: Icons.add_circle_outline,
                   type: AppButtonType.primary,
                   onPressed: () {
@@ -85,7 +86,7 @@ class _InvestmentDetailSheetState
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Update Value',
+                  label: context.l10n.updateValue,
                   icon: Icons.edit_outlined,
                   type: AppButtonType.normal,
                   onPressed: () =>
@@ -99,7 +100,7 @@ class _InvestmentDetailSheetState
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Edit',
+                  label: context.l10n.editLabel,
                   icon: Icons.edit_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -111,7 +112,7 @@ class _InvestmentDetailSheetState
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Delete',
+                  label: context.l10n.deleteLabel,
                   icon: Icons.delete_outline_rounded,
                   type: AppButtonType.danger,
                   onPressed: () => _confirmDelete(context, ref),
@@ -129,14 +130,14 @@ class _InvestmentDetailSheetState
             children: [
               Expanded(
                 child: _StatColumn(
-                  label: 'INVESTED',
+                  label: context.l10n.investedUpper,
                   value: fmt.formatCurrency(totalInvested),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
-                  label: 'CURRENT',
+                  label: context.l10n.currentUpper,
                   value: hasCurrentValue
                       ? fmt.formatCurrency(investment.currentValue!)
                       : '—',
@@ -147,8 +148,8 @@ class _InvestmentDetailSheetState
                 child: Column(
                   children: [
                     Text(
-                      'GAIN/LOSS',
-                      style: GoogleFonts.inter(
+                      context.l10n.gainLossUpper,
+                      style: localeFont(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurfaceVariant,
@@ -160,7 +161,7 @@ class _InvestmentDetailSheetState
                       hasCurrentValue
                           ? '${isGain ? '+' : ''}${fmt.formatCurrency(gainLoss)}'
                           : '—',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                         color: hasCurrentValue
@@ -171,7 +172,7 @@ class _InvestmentDetailSheetState
                     if (hasCurrentValue)
                       Text(
                         '${isGain ? '+' : ''}${gainLossPercent.toStringAsFixed(1)}%',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: isGain ? cs.tertiary : cs.error,
@@ -187,8 +188,8 @@ class _InvestmentDetailSheetState
           if (investment.autoDebit) ...[
             const SizedBox(height: 24),
             Text(
-              'SIP CONFIGURATION',
-              style: GoogleFonts.inter(
+              context.l10n.sipConfiguration,
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -199,14 +200,16 @@ class _InvestmentDetailSheetState
             if (investment.sipAmount != null)
               _InfoRow(
                 icon: Icons.savings_outlined,
-                label: 'Monthly SIP',
-                value: '${fmt.formatCurrency(investment.sipAmount!)} on ${investment.sipDate}th',
+                label: context.l10n.monthlySip,
+                value: context.l10n.monthlySipValue(
+                    fmt.formatCurrency(investment.sipAmount!),
+                    '${investment.sipDate}'),
               ),
             if (investment.accountId != null) ...[
               const SizedBox(height: 8),
               _InfoRow(
                 icon: Icons.account_balance_wallet_outlined,
-                label: 'Source Account',
+                label: context.l10n.sourceAccount,
                 value: investment.accountId!,
               ),
             ],
@@ -225,8 +228,8 @@ class _InvestmentDetailSheetState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'STRATEGY NOTES',
-                        style: GoogleFonts.inter(
+                        context.l10n.strategyNotes,
+                        style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -236,7 +239,7 @@ class _InvestmentDetailSheetState
                       const SizedBox(height: 4),
                       Text(
                         investment.notes!,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 13,
                           fontStyle: FontStyle.italic,
                           color: cs.onSurfaceVariant,
@@ -253,8 +256,8 @@ class _InvestmentDetailSheetState
 
           // Contribution history
           Text(
-            'CONTRIBUTION HISTORY',
-            style: GoogleFonts.inter(
+            context.l10n.contributionHistory,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -269,8 +272,8 @@ class _InvestmentDetailSheetState
             data: (contributions) {
               if (contributions.isEmpty) {
                 return Text(
-                  'No contributions recorded',
-                  style: GoogleFonts.inter(
+                  context.l10n.noContributions,
+                  style: localeFont(
                     fontSize: 13,
                     color: cs.onSurfaceVariant,
                   ),
@@ -289,8 +292,9 @@ class _InvestmentDetailSheetState
 
           Center(
             child: Text(
-              'CREATED ${DateFormat('MMM d, yyyy').format(investment.createdAt).toUpperCase()}',
-              style: GoogleFonts.inter(
+              context.l10n.createdOnUpper(
+                  DateFormat('MMM d, yyyy').format(investment.createdAt).toUpperCase()),
+              style: localeFont(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
@@ -333,8 +337,8 @@ class _InvestmentDetailSheetState
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('Update Current Value',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(context.l10n.updateCurrentValue,
+            style: localeFont(fontWeight: FontWeight.bold)),
         content: TextField(
           controller: controller,
           keyboardType:
@@ -343,16 +347,16 @@ class _InvestmentDetailSheetState
           inputFormatters: [
             CurrencyInputFormatter(isIndian: fmt.system == NumberSystem.indian),
           ],
-          style: GoogleFonts.inter(fontSize: 18, color: cs.onSurface),
+          style: localeFont(fontSize: 18, color: cs.onSurface),
           decoration: InputDecoration(
             prefixText: '$symbol ',
-            prefixStyle: GoogleFonts.inter(
+            prefixStyle: localeFont(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
             hintText: '0',
-            hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            hintStyle: localeFont(color: cs.onSurfaceVariant),
             filled: true,
             fillColor: cs.surfaceContainerHighest,
             border: OutlineInputBorder(
@@ -364,10 +368,10 @@ class _InvestmentDetailSheetState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           AppButton(
-            label: 'Update',
+            label: context.l10n.updateLabel,
             type: AppButtonType.primary,
             onPressed: () {
               final value = double.tryParse(controller.text.trim().replaceAll(',', ''));
@@ -388,19 +392,19 @@ class _InvestmentDetailSheetState
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('Delete Investment?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(context.l10n.deleteInvestmentConfirm,
+            style: localeFont(fontWeight: FontWeight.bold)),
         content: Text(
-          'This will delete the investment and ALL linked contribution transactions. This cannot be undone.',
-          style: GoogleFonts.inter(),
+          context.l10n.deleteInvestmentBody,
+          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           AppButton(
-            label: 'Delete',
+            label: context.l10n.deleteLabel,
             type: AppButtonType.danger,
             onPressed: () {
               ref
@@ -434,23 +438,18 @@ class _InvestmentDetailSheetState
     }
   }
 
-  static String _investmentTypeLabel(String type) {
-    switch (type) {
-      case 'sip':
-        return 'SIP';
-      case 'mutual_fund':
-        return 'MUTUAL FUND';
-      case 'stocks':
-        return 'STOCKS';
-      case 'crypto':
-        return 'CRYPTO';
-      case 'trading':
-        return 'TRADING';
-      case 'real_estate':
-        return 'REAL ESTATE';
-      default:
-        return 'OTHER';
-    }
+  String _typeLabelLocalized(String type) {
+    final l = context.l10n;
+    final label = switch (type) {
+      'sip' => l.invTypeSip,
+      'mutual_fund' => l.invTypeMutualFund,
+      'stocks' => l.invTypeStocks,
+      'crypto' => l.invTypeCrypto,
+      'trading' => l.invTypeTrading,
+      'real_estate' => l.invTypeRealEstate,
+      _ => l.invTypeOther,
+    };
+    return label.toUpperCase();
   }
 }
 
@@ -472,7 +471,7 @@ class _StatColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -482,7 +481,7 @@ class _StatColumn extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w800,
             color: color,
@@ -513,7 +512,7 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 12,
             color: cs.onSurfaceVariant,
           ),
@@ -521,7 +520,7 @@ class _InfoRow extends StatelessWidget {
         const Spacer(),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -553,8 +552,8 @@ class _ContributionRow extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Contribution',
-                  style: GoogleFonts.inter(
+                  context.l10n.contributionLabel,
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -562,7 +561,7 @@ class _ContributionRow extends ConsumerWidget {
                 ),
                 Text(
                   DateFormat('MMM d, yyyy').format(transaction.createdAt),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant,
                   ),
@@ -572,7 +571,7 @@ class _ContributionRow extends ConsumerWidget {
           ),
           Text(
             fmt.formatCurrency(transaction.amount),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,

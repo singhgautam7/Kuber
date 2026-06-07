@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -95,7 +96,7 @@ class RecurringScreen extends ConsumerWidget {
       backgroundColor: cs.surface,
       body: rulesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
         data: (rules) {
           final catMap = categoryMapAsync.valueOrNull ?? {};
           final accounts = accountsAsync.valueOrNull ?? [];
@@ -112,9 +113,9 @@ class RecurringScreen extends ConsumerWidget {
               ),
               SliverToBoxAdapter(
                 child: KuberPageHeader(
-                  title: 'Recurring\nTransactions',
+                  title: context.l10n.recurringTitle,
                   description: '',
-                  actionTooltip: 'Add Recurring',
+                  actionTooltip: context.l10n.addRecurring,
                   onAction: () => context.push('/recurring/add'),
                 ),
               ),
@@ -123,9 +124,9 @@ class RecurringScreen extends ConsumerWidget {
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.repeat_rounded,
-                    title: 'No recurring transactions',
-                    description: 'Automate subscriptions and repeated payments',
-                    actionLabel: 'Add Recurring',
+                    title: context.l10n.noRecurring,
+                    description: context.l10n.recurringEmptyDesc,
+                    actionLabel: context.l10n.addRecurring,
                     onAction: () => context.push('/recurring/add'),
                   ),
                 )
@@ -154,7 +155,7 @@ class RecurringScreen extends ConsumerWidget {
                             error: (_, __) => const SizedBox.shrink(),
                           ),
                       const SizedBox(height: KuberSpacing.lg),
-                      const _SectionLabel('RULES'),
+                      _SectionLabel(context.l10n.rulesUpper),
                       const SizedBox(height: KuberSpacing.sm),
                       ...rules.map((rule) {
                         final catId = int.tryParse(rule.categoryId);
@@ -169,7 +170,7 @@ class RecurringScreen extends ConsumerWidget {
                           ),
                           child: RecurringRuleCard(
                             ruleName: rule.name,
-                            frequencyLabel: _frequencyLabel(rule.frequency),
+                            frequencyLabel: _frequencyLabelLocalized(context, rule.frequency),
                             accountName: accountName,
                             icon: cat != null
                                 ? IconMapper.fromString(cat.icon)
@@ -198,7 +199,7 @@ class RecurringScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: KuberSpacing.lg),
-                              const _SectionLabel('RECENTLY PROCESSED'),
+                              _SectionLabel(context.l10n.recentlyProcessed),
                               const SizedBox(height: KuberSpacing.sm),
                               ...transactions.map((t) {
                                 final catId = int.tryParse(t.categoryId);
@@ -250,17 +251,20 @@ class RecurringScreen extends ConsumerWidget {
     );
   }
 
-  static String _frequencyLabel(String frequency) {
-    return switch (frequency) {
-      'daily' => 'DAILY',
-      'weekly' => 'WEEKLY',
-      'biweekly' => 'BIWEEKLY',
-      'quarterly' => 'QUARTERLY',
-      'yearly' => 'YEARLY',
-      'custom' => 'CUSTOM',
-      _ => 'MONTHLY',
-    };
-  }
+}
+
+String _frequencyLabelLocalized(BuildContext context, String frequency) {
+  final l = context.l10n;
+  final label = switch (frequency) {
+    'daily' => l.freqDaily,
+    'weekly' => l.freqWeekly,
+    'biweekly' => l.freqBiweekly,
+    'quarterly' => l.freqQuarterly,
+    'yearly' => l.freqYearly,
+    'custom' => l.freqCustom,
+    _ => l.freqMonthly,
+  };
+  return label.toUpperCase();
 }
 
 class _SectionLabel extends StatelessWidget {
@@ -272,7 +276,7 @@ class _SectionLabel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 11,
         fontWeight: FontWeight.w600,
         color: cs.onSurfaceVariant,

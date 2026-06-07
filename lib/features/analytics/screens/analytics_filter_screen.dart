@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/l10n_ext.dart';
 
 import '../../../shared/widgets/kuber_date_range_selector.dart';
 import '../providers/analytics_provider.dart';
@@ -11,7 +12,7 @@ class AnalyticsFilterScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filter = ref.read(analyticsFilterProvider);
     return KuberDateRangeSelector(
-      primaryButtonLabel: 'Apply Filter',
+      primaryButtonLabel: context.l10n.applyFilter,
       initialType: filter.type,
       initialFrom: filter.from,
       initialTo: filter.to,

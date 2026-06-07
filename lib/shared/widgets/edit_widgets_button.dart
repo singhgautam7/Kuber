@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../features/widget_editor/models/home_widget_config.dart';
@@ -42,8 +43,8 @@ class EditWidgetsButton extends StatelessWidget {
           ),
           icon: Icon(Icons.tune_rounded, size: 18, color: cs.onSurfaceVariant),
           label: Text(
-            'Edit Widgets',
-            style: GoogleFonts.inter(
+            context.l10n.editWidgets,
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.2,
@@ -73,15 +74,15 @@ class EditWidgetsSettingsRows extends StatelessWidget {
       children: [
         _SettingsRow(
           icon: Icons.home_outlined,
-          label: 'Edit Home Widgets',
-          subtitle: 'Choose and reorder Home widgets',
+          label: context.l10n.editHomeWidgets,
+          subtitle: context.l10n.editHomeWidgetsDesc,
           onTap: onHomeTap,
         ),
         Divider(height: 1, color: cs.outline),
         _SettingsRow(
           icon: Icons.insert_chart_outlined_rounded,
-          label: 'Edit Analytics Widgets',
-          subtitle: 'Choose and reorder Analytics widgets',
+          label: context.l10n.editAnalyticsWidgets,
+          subtitle: context.l10n.editAnalyticsWidgetsDesc,
           onTap: onAnalyticsTap,
         ),
       ],
@@ -127,7 +128,7 @@ class _SettingsRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -135,7 +136,7 @@ class _SettingsRow extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       color: cs.onSurfaceVariant,
                     ),

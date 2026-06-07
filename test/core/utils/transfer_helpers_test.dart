@@ -1,6 +1,8 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kuber/core/utils/transfer_helpers.dart';
 import 'package:kuber/features/accounts/data/account.dart';
+import 'package:kuber/l10n/app_localizations.dart';
 
 void main() {
   Account makeTestAccount({bool isCreditCard = false}) {
@@ -44,18 +46,22 @@ void main() {
   });
 
   group('transferSubtypeLabel', () {
+    final l10n = lookupAppLocalizations(const Locale('en'));
     test('returns correct labels', () {
-      expect(transferSubtypeLabel(TransferSubtype.normalTransfer), 'Transfer');
       expect(
-        transferSubtypeLabel(TransferSubtype.creditCardPayment),
+        transferSubtypeLabel(l10n, TransferSubtype.normalTransfer),
+        'Transfer',
+      );
+      expect(
+        transferSubtypeLabel(l10n, TransferSubtype.creditCardPayment),
         'Credit Card Payment',
       );
       expect(
-        transferSubtypeLabel(TransferSubtype.creditCardWithdrawal),
+        transferSubtypeLabel(l10n, TransferSubtype.creditCardWithdrawal),
         'Credit Card Withdrawal',
       );
       expect(
-        transferSubtypeLabel(TransferSubtype.creditCardTransfer),
+        transferSubtypeLabel(l10n, TransferSubtype.creditCardTransfer),
         'Credit Card Transfer',
       );
     });

@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kuber/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
@@ -10,14 +11,17 @@ import '../../settings/providers/settings_provider.dart';
 import '../../settings/widgets/currency_selector_sheet.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import '../widgets/onboarding_fit.dart';
+import '../widgets/setup_language_row.dart';
 
 class OnboardingPageFour extends ConsumerWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
   final String selectedCurrencyCode;
   final ThemeMode selectedTheme;
+  final Locale selectedLocale;
   final ValueChanged<String> onCurrencyChanged;
   final ValueChanged<ThemeMode> onThemeChanged;
+  final ValueChanged<Locale> onLocaleChanged;
   final VoidCallback onNameChanged;
 
   const OnboardingPageFour({
@@ -26,14 +30,29 @@ class OnboardingPageFour extends ConsumerWidget {
     required this.nameController,
     required this.selectedCurrencyCode,
     required this.selectedTheme,
+    required this.selectedLocale,
     required this.onCurrencyChanged,
     required this.onThemeChanged,
+    required this.onLocaleChanged,
     required this.onNameChanged,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final localizations = AppLocalizations.of(context);
+
+    final titleText = localizations?.makeItYours ?? 'Make it yours.';
+    final subtitleText = localizations?.threeQuickChoices ?? "Three quick choices and you're in.";
+    final nameLabel = localizations?.yourName ?? 'YOUR NAME';
+    final namePlaceholder = localizations?.namePlaceholder ?? 'Your name';
+    final nameRequired = localizations?.nameRequired ?? 'Please enter your name';
+    final nameTooLong = localizations?.nameTooLong ?? 'Name must be 15 characters or fewer';
+    final currencyLabel = localizations?.currency ?? 'CURRENCY';
+    final themeLabel = localizations?.theme ?? 'THEME';
+    final themeLight = localizations?.themeLight ?? 'LIGHT';
+    final themeDark = localizations?.themeDark ?? 'DARK';
+    final themeSystem = localizations?.themeSystem ?? 'SYSTEM';
 
     return Column(
       children: [
@@ -49,8 +68,8 @@ class OnboardingPageFour extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Make it yours.',
-                    style: GoogleFonts.inter(
+                    titleText,
+                    style: localeFont(
                       fontSize: 28,
                       height: 1.08,
                       fontWeight: FontWeight.w800,
@@ -60,14 +79,14 @@ class OnboardingPageFour extends ConsumerWidget {
                   ),
                   const SizedBox(height: KuberSpacing.md),
                   Text(
-                    "Three quick choices and you're in.",
-                    style: GoogleFonts.inter(
+                    subtitleText,
+                    style: localeFont(
                       fontSize: 14,
                       color: cs.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: KuberSpacing.lg),
-                  const _SectionLabel('YOUR NAME'),
+                  _SectionLabel(nameLabel),
                   const SizedBox(height: KuberSpacing.xs),
                   TextFormField(
                     controller: nameController,
@@ -78,7 +97,7 @@ class OnboardingPageFour extends ConsumerWidget {
                     ],
                     maxLength: 15,
                     textCapitalization: TextCapitalization.words,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -86,18 +105,18 @@ class OnboardingPageFour extends ConsumerWidget {
                     validator: (value) {
                       final text = value?.trim() ?? '';
                       if (text.isEmpty) {
-                        return 'Please enter your name';
+                        return nameRequired;
                       }
                       if (text.length > 15) {
-                        return 'Name must be 15 characters or fewer';
+                        return nameTooLong;
                       }
                       return null;
                     },
                     decoration: InputDecoration(
-                      hintText: 'Your name',
+                      hintText: namePlaceholder,
                       counterText:
                           '${nameController.text.characters.length}/15',
-                      hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
+                      hintStyle: localeFont(color: cs.onSurfaceVariant),
                       filled: true,
                       fillColor: cs.surfaceContainer,
                       contentPadding: const EdgeInsets.symmetric(
@@ -115,7 +134,12 @@ class OnboardingPageFour extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: KuberSpacing.md),
-                  const _SectionLabel('CURRENCY'),
+                  SetupLanguageRow(
+                    selectedLocale: selectedLocale,
+                    onLocaleChanged: onLocaleChanged,
+                  ),
+                  const SizedBox(height: KuberSpacing.md),
+                  _SectionLabel(currencyLabel),
                   const SizedBox(height: KuberSpacing.xs),
                   _CurrencyTile(
                     code: selectedCurrencyCode,
@@ -129,23 +153,23 @@ class OnboardingPageFour extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: KuberSpacing.md),
-                  const _SectionLabel('THEME'),
+                  _SectionLabel(themeLabel),
                   const SizedBox(height: KuberSpacing.xs),
                   SettingsCardSelector<ThemeMode>(
-                    options: const [
+                    options: [
                       SelectorOption(
                         value: ThemeMode.light,
-                        label: 'LIGHT',
+                        label: themeLight,
                         icon: Icons.light_mode_outlined,
                       ),
                       SelectorOption(
                         value: ThemeMode.dark,
-                        label: 'DARK',
+                        label: themeDark,
                         icon: Icons.dark_mode_outlined,
                       ),
                       SelectorOption(
                         value: ThemeMode.system,
-                        label: 'SYSTEM',
+                        label: themeSystem,
                         icon: Icons.phone_android_rounded,
                       ),
                     ],
@@ -175,7 +199,7 @@ class _SectionLabel extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Text(
       label,
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 11,
         fontWeight: FontWeight.w700,
         color: cs.onSurfaceVariant,
@@ -221,7 +245,7 @@ class _CurrencyTile extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   currency.symbol,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: cs.primary,
@@ -237,7 +261,7 @@ class _CurrencyTile extends StatelessWidget {
                       currency.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -246,7 +270,7 @@ class _CurrencyTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${currency.code}${_currencyFlag(currency.code)}',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 13,
                         color: cs.onSurfaceVariant,
                       ),

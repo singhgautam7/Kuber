@@ -23,9 +23,10 @@
 // Both `categoryStatsProvider` and `budgetByCategoryProvider` continue to be
 // consumed for per-row utilization.
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -123,7 +124,7 @@ class CategorySpendHero extends ConsumerWidget {
                     children: [
                       Text(
                         '$monthLabel Spend by Category'.toUpperCase(),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -135,7 +136,7 @@ class CategorySpendHero extends ConsumerWidget {
                         maskAmount(fmt.formatCurrency(total), masked),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurface,
@@ -146,7 +147,7 @@ class CategorySpendHero extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text.rich(
                         TextSpan(
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11.5,
                             color: cs.onSurfaceVariant,
                           ),
@@ -154,7 +155,7 @@ class CategorySpendHero extends ConsumerWidget {
                             const TextSpan(text: 'across '),
                             TextSpan(
                               text: '$categoryCount categories',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurface,
@@ -254,7 +255,7 @@ class _TrendChip extends StatelessWidget {
           const SizedBox(width: 3),
           Text(
             '${up ? '+' : '−'}${percent.abs().toStringAsFixed(0)}%',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
               color: color,
@@ -305,7 +306,7 @@ class _LegendGrid extends ConsumerWidget {
               child: Text(
                 s.name,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: cs.onSurface,
@@ -315,7 +316,7 @@ class _LegendGrid extends ConsumerWidget {
             const SizedBox(width: 6),
             Text(
               maskAmount(fmt.formatCurrency(s.amount), masked),
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 color: cs.onSurfaceVariant,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -421,7 +422,7 @@ class CategoryListItem extends ConsumerWidget {
                         Text(
                           category.name,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: cs.onSurface,
@@ -454,7 +455,7 @@ class CategoryListItem extends ConsumerWidget {
                                 fmt.formatCurrency(amountSpent),
                                 masked,
                               ),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: isIncome ? cs.tertiary : cs.onSurface,
@@ -464,7 +465,7 @@ class CategoryListItem extends ConsumerWidget {
                       if (hasActiveBudget)
                         Text(
                           'of ${maskAmount(fmt.formatCurrency(budget.amount), masked)}',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 10,
                             color: cs.onSurfaceVariant,
                           ),
@@ -505,7 +506,7 @@ class _MetaRow extends StatelessWidget {
       children: [
         Text(
           type.toUpperCase(),
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -524,7 +525,7 @@ class _MetaRow extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           txnCount == 1 ? '1 txn' : '$txnCount txns',
-          style: GoogleFonts.inter(fontSize: 11, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
         ),
       ],
     );
@@ -561,7 +562,7 @@ class _GroupTag extends StatelessWidget {
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
@@ -625,14 +626,14 @@ class _BudgetUtilization extends StatelessWidget {
             Expanded(
               child: Text.rich(
                 TextSpan(
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 10.5,
                     color: isOver ? cs.error : cs.onSurfaceVariant,
                   ),
                   children: [
                     TextSpan(
                       text: '${(pct * 100).toStringAsFixed(0)}%',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w600,
                         color: isOver ? cs.error : cs.onSurface,
@@ -647,7 +648,7 @@ class _BudgetUtilization extends StatelessWidget {
               isOver
                   ? '${maskAmount(fmt.formatCurrency(spent - budget), masked)} over'
                   : '${maskAmount(fmt.formatCurrency(budget - spent), masked)} left',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 10.5,
                 color: cs.onSurfaceVariant,
               ),
@@ -683,8 +684,8 @@ class _NoBudgetChip extends StatelessWidget {
             ),
             const SizedBox(width: 5),
             Text(
-              'No budget set',
-              style: GoogleFonts.inter(
+              context.l10n.noBudgetSet,
+              style: localeFont(
                 fontSize: 10,
                 color: cs.onSurfaceVariant,
               ),

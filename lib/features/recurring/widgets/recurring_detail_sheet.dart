@@ -1,6 +1,7 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -60,7 +61,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             }
           },
         ) ??
-        'Unknown';
+        context.l10n.unknownLabel;
 
     final iconData = cat != null
         ? IconMapper.fromString(cat.icon)
@@ -76,12 +77,12 @@ class RecurringDetailSheet extends ConsumerWidget {
     final isExpired = RecurringRepository.isExpired(rule);
 
     final statusLabel = isPaused
-        ? 'PAUSED'
+        ? context.l10n.pausedUpper
         : isExpired
-            ? 'EXPIRED'
+            ? context.l10n.expiredUpper
             : rule.frequency == 'custom'
-                ? 'ACTIVE \u2022 CUSTOM'
-                : 'ACTIVE';
+                ? context.l10n.activeCustomUpper
+                : context.l10n.activeUpper;
     final statusColor = isPaused
         ? cs.onSurfaceVariant
         : isExpired
@@ -89,15 +90,15 @@ class RecurringDetailSheet extends ConsumerWidget {
             : cs.tertiary;
 
     final frequencyLabel = rule.frequency == 'custom'
-        ? 'Every ${rule.customDays ?? 1} days'
-        : rule.frequency[0].toUpperCase() + rule.frequency.substring(1);
+        ? context.l10n.freqEveryNDays('${rule.customDays ?? 1}')
+        : _freqTitle(context, rule.frequency);
 
     final createdDateStr =
         DateFormat('MMM d, yyyy').format(rule.createdAt).toUpperCase();
 
     return KuberBottomSheet(
       title: rule.name,
-      subtitle: 'CREATED ON $createdDateStr',
+      subtitle: context.l10n.createdOnUpper(createdDateStr),
       leadingIcon: CategoryIcon.square(
         icon: iconData,
         rawColor: iconColor,
@@ -108,8 +109,10 @@ class RecurringDetailSheet extends ConsumerWidget {
         children: [
           // ── Recurring amount label ────────────────────────────────────
           Text(
-            'RECURRING ${rule.type.toUpperCase()} AMOUNT',
-            style: GoogleFonts.inter(
+            context.l10n.recurringAmountLabel(
+                (rule.type == 'income' ? context.l10n.incomeLabel : context.l10n.expenseLabel)
+                    .toUpperCase()),
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -119,7 +122,7 @@ class RecurringDetailSheet extends ConsumerWidget {
           const SizedBox(height: KuberSpacing.xs),
           Text(
             '${isIncome ? '+' : '−'}₹${rule.amount.toStringAsFixed(0)}',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 32,
               fontWeight: FontWeight.w800,
               color: amountColor,
@@ -133,14 +136,14 @@ class RecurringDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: _DetailCell(
-                  label: 'FREQUENCY',
+                  label: context.l10n.frequencyUpper,
                   value: frequencyLabel.toUpperCase(),
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
               Expanded(
                 child: _DetailCell(
-                  label: 'STATUS',
+                  label: context.l10n.statusUpper,
                   value: statusLabel,
                   valueColor: statusColor,
                 ),
@@ -152,14 +155,14 @@ class RecurringDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: _DetailCell(
-                  label: 'ACCOUNT',
+                  label: context.l10n.accountUpper,
                   value: accountName.toUpperCase(),
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
               Expanded(
                 child: _DetailCell(
-                  label: 'NEXT DUE',
+                  label: context.l10n.nextDue.toUpperCase(),
                   value: DateFormat('MMM d').format(rule.nextDueAt).toUpperCase(),
                 ),
               ),
@@ -172,7 +175,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Edit',
+                  label: context.l10n.editLabel,
                   icon: Icons.edit_outlined,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -183,7 +186,7 @@ class RecurringDetailSheet extends ConsumerWidget {
               const SizedBox(width: KuberSpacing.md),
               Expanded(
                 child: AppButton(
-                  label: isPaused ? 'Resume' : 'Pause',
+                  label: isPaused ? context.l10n.resumeLabel : context.l10n.pauseLabel,
                   icon: isPaused
                       ? Icons.play_arrow_rounded
                       : Icons.pause_rounded,
@@ -203,7 +206,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'History',
+                  label: context.l10n.historyLabel,
                   icon: Icons.history_rounded,
                   type: AppButtonType.primary,
                   onPressed: () {
@@ -226,7 +229,7 @@ class RecurringDetailSheet extends ConsumerWidget {
               const SizedBox(width: KuberSpacing.md),
               Expanded(
                 child: AppButton(
-                  label: 'Delete',
+                  label: context.l10n.deleteLabel,
                   icon: Icons.delete_outline_rounded,
                   type: AppButtonType.danger,
                   onPressed: () => _confirmDelete(context, ref),
@@ -251,20 +254,20 @@ class RecurringDetailSheet extends ConsumerWidget {
           side: BorderSide(color: cs.outline, width: 1),
         ),
         title: Text(
-          'Delete automation?',
-          style: GoogleFonts.inter(
+          context.l10n.deleteAutomationConfirm,
+          style: localeFont(
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
         ),
         content: Text(
-          'The recurring rule for "${rule.name}" will be permanently deleted.',
-          style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+          context.l10n.deleteAutomationBody(rule.name),
+          style: localeFont(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -278,12 +281,25 @@ class RecurringDetailSheet extends ConsumerWidget {
               Navigator.pop(ctx);
               Navigator.of(context, rootNavigator: true).pop();
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.deleteLabel),
           ),
         ],
       ),
     );
   }
+}
+
+String _freqTitle(BuildContext context, String value) {
+  final l = context.l10n;
+  return switch (value) {
+    'daily' => l.freqDaily,
+    'weekly' => l.freqWeekly,
+    'biweekly' => l.freqBiweekly,
+    'yearly' => l.freqYearly,
+    'quarterly' => l.freqQuarterly,
+    'custom' => l.freqCustom,
+    _ => l.freqMonthly,
+  };
 }
 
 class _DetailCell extends StatelessWidget {
@@ -311,7 +327,7 @@ class _DetailCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -321,7 +337,7 @@ class _DetailCell extends StatelessWidget {
           const SizedBox(height: KuberSpacing.xs),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: valueColor ?? cs.onSurface,

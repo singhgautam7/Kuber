@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -39,7 +40,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
 
         return KuberBottomSheet(
           title: category.name,
-          subtitle: 'MONTHLY BUDGET PLAN',
+          subtitle: context.l10n.monthlyBudgetPlan,
           leadingIcon: CategoryIcon.square(
             icon: IconMapper.fromString(category.icon),
             rawColor: Color(category.colorValue),
@@ -57,8 +58,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'CURRENT SPENDING',
-                            style: GoogleFonts.inter(
+                            context.l10n.currentSpending,
+                            style: localeFont(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurfaceVariant,
@@ -73,7 +74,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                                   text: ref
                                       .watch(formatterProvider)
                                       .formatCurrency(p.spent),
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
                                     color: cs.onSurface,
@@ -82,7 +83,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                                 TextSpan(
                                   text:
                                       ' / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     fontSize: 16,
                                     color: cs.onSurfaceVariant,
                                   ),
@@ -100,8 +101,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            'UTILIZATION',
-                            style: GoogleFonts.inter(
+                            context.l10n.utilization,
+                            style: localeFont(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurfaceVariant,
@@ -113,7 +114,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                             ref
                                 .watch(formatterProvider)
                                 .formatPercentage(p.percentage),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
                               color: _getUtilizationColor(p.percentage, cs),
@@ -141,20 +142,20 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(ref.watch(formatterProvider).formatCurrency(0),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                             fontSize: 12, color: cs.onSurfaceVariant)),
                     Text(
                         ref
                             .watch(formatterProvider)
                             .formatCompactCurrency(p.limit),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                             fontSize: 12, color: cs.onSurfaceVariant)),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'BUDGET DETAILS',
-                  style: GoogleFonts.inter(
+                  context.l10n.budgetDetails,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
@@ -166,14 +167,14 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   children: [
                     Expanded(
                         child: _DetailCell(
-                      label: 'CREATED ON',
+                      label: context.l10n.createdOn,
                       value:
                           DateFormat('MMM d, yyyy').format(budget.createdAt),
                     )),
                     const SizedBox(width: KuberSpacing.sm),
                     Expanded(
                         child: _DetailCell(
-                      label: budget.isRecurring ? 'RENEWS ON' : 'EXPIRES ON',
+                      label: budget.isRecurring ? context.l10n.renewsOn : context.l10n.expiresOn,
                       value: DateFormat('MMM d, yyyy').format(p.endDate),
                     )),
                   ],
@@ -183,21 +184,21 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   children: [
                     Expanded(
                         child: _DetailCell(
-                      label: 'STARTED ON',
+                      label: context.l10n.startedOn,
                       value: DateFormat('MMM d, yyyy').format(budget.startDate),
                     )),
                     const SizedBox(width: KuberSpacing.sm),
                     Expanded(
                         child: _DetailCell(
-                      label: 'STATUS',
-                      value: budget.isActive ? 'Active' : 'Paused',
+                      label: context.l10n.statusUpper,
+                      value: budget.isActive ? context.l10n.activeLabel : context.l10n.pausedLabel,
                     )),
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.lg),
                 Text(
-                  'ACTIVE ALERTS',
-                  style: GoogleFonts.inter(
+                  context.l10n.activeAlerts,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
@@ -206,8 +207,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
                 ),
                 const SizedBox(height: KuberSpacing.xs),
                 if (alerts.isEmpty)
-                  Text('No alerts set',
-                      style: GoogleFonts.inter(color: cs.onSurfaceVariant))
+                  Text(context.l10n.noAlertsSet,
+                      style: localeFont(color: cs.onSurfaceVariant))
                 else
                   Column(
                     children: alerts
@@ -221,8 +222,8 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   ),
                 const SizedBox(height: KuberSpacing.lg),
                 Text(
-                  'ACTIONS',
-                  style: GoogleFonts.inter(
+                  context.l10n.actionsUpper,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
@@ -234,7 +235,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: AppButton(
-                        label: 'Edit',
+                        label: context.l10n.editLabel,
                         icon: Icons.edit_outlined,
                         type: AppButtonType.normal,
                         onPressed: () {
@@ -246,7 +247,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: AppButton(
-                        label: budget.isActive ? 'Pause' : 'Resume',
+                        label: budget.isActive ? context.l10n.pauseLabel : context.l10n.resumeLabel,
                         icon: budget.isActive
                             ? Icons.pause_rounded
                             : Icons.play_arrow_rounded,
@@ -266,7 +267,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: AppButton(
-                        label: 'History',
+                        label: context.l10n.historyLabel,
                         icon: Icons.history_rounded,
                         type: AppButtonType.primary,
                         onPressed: () {
@@ -289,7 +290,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: AppButton(
-                        label: 'Delete',
+                        label: context.l10n.deleteLabel,
                         icon: Icons.delete_outline_rounded,
                         type: AppButtonType.danger,
                         onPressed: () => _confirmDeleteBudget(
@@ -323,19 +324,19 @@ class BudgetDetailsSheet extends ConsumerWidget {
           borderRadius: BorderRadius.circular(KuberRadius.sm),
           side: BorderSide(color: cs.outline, width: 1),
         ),
-        title: Text('Delete budget?',
-            style: GoogleFonts.inter(
+        title: Text(context.l10n.deleteBudgetConfirm,
+            style: localeFont(
               fontWeight: FontWeight.w600,
               fontSize: 18,
             )),
-        content: Text('The budget for "${category.name}" will be permanently deleted.',
-            style: GoogleFonts.inter(
+        content: Text(context.l10n.deleteBudgetBody(category.name),
+            style: localeFont(
               color: cs.onSurfaceVariant,
             )),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancelLabel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -349,7 +350,7 @@ class BudgetDetailsSheet extends ConsumerWidget {
               Navigator.of(ctx).pop(); // close dialog
               Navigator.of(context).pop(); // close sheet
             },
-            child: const Text('Delete'),
+            child: Text(context.l10n.deleteLabel),
           ),
         ],
       ),
@@ -414,7 +415,7 @@ class _AlertRow extends ConsumerWidget {
           Expanded(
             child: Text(
               label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                   fontWeight: FontWeight.w500, color: cs.onSurface),
             ),
           ),
@@ -426,7 +427,7 @@ class _AlertRow extends ConsumerWidget {
             ),
             child: Text(
               status,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 color: statusColor,
@@ -464,7 +465,7 @@ class _DetailCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -474,7 +475,7 @@ class _DetailCell extends StatelessWidget {
           const SizedBox(height: KuberSpacing.xs),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,

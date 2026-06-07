@@ -1,9 +1,10 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -113,8 +114,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
       children: [
         Center(
           child: Text(
-            'Import Data',
-            style: GoogleFonts.inter(
+            context.l10n.dataImportTitle,
+            style: localeFont(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -125,8 +126,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
         const SizedBox(height: KuberSpacing.xl),
 
         Text(
-          'SELECT FORMAT',
-          style: GoogleFonts.inter(
+          context.l10n.selectFormat,
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant,
@@ -135,17 +136,17 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         SettingsCardSelector<_ImportFmt>(
-          options: const [
+          options: [
             SelectorOption(
               value: _ImportFmt.csv,
               label: 'CSV',
-              subtitle: 'SPREADSHEET',
+              subtitle: context.l10n.spreadsheetLabel,
               icon: Icons.description_outlined,
             ),
             SelectorOption(
               value: _ImportFmt.json,
               label: 'JSON',
-              subtitle: 'BACKUP',
+              subtitle: context.l10n.backupUpper,
               icon: Icons.data_object_rounded,
             ),
           ],
@@ -161,7 +162,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
         const SizedBox(height: KuberSpacing.xl),
 
         AppButton(
-          label: 'Select File & Import',
+          label: context.l10n.selectFileImport,
           icon: Icons.folder_open_outlined,
           type: AppButtonType.primary,
           fullWidth: true,
@@ -190,8 +191,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Override existing data',
-                      style: GoogleFonts.inter(
+                      context.l10n.overrideExistingData,
+                      style: localeFont(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -200,9 +201,9 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     const SizedBox(height: 4),
                     Text(
                       _override
-                          ? 'All existing data will be wiped before import.'
-                          : 'New records will be merged with existing data.',
-                      style: GoogleFonts.inter(
+                          ? context.l10n.importWipeDesc
+                          : context.l10n.importMergeDesc,
+                      style: localeFont(
                         fontSize: 11,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.8),
                         height: 1.3,
@@ -224,11 +225,11 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           const SizedBox(height: KuberSpacing.md),
           _buildDangerChip(
             cs,
-            'All existing data will be permanently deleted before import.',
+            context.l10n.importWipeWarning,
           ),
         ] else ...[
           const SizedBox(height: KuberSpacing.md),
-          _buildInfoChip(cs, 'New records will be merged with your existing data.'),
+          _buildInfoChip(cs, context.l10n.importMergeChip),
         ],
         const SizedBox(height: KuberSpacing.lg),
         _buildTemplateCard(cs),
@@ -239,7 +240,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
   Widget _buildJsonDanger(ColorScheme cs) {
     return _buildDangerChip(
       cs,
-      'All existing data will be permanently deleted and replaced with the backup.',
+      context.l10n.importReplaceWarning,
     );
   }
 
@@ -259,7 +260,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 color: cs.error,
                 height: 1.45,
@@ -287,7 +288,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
           Expanded(
             child: Text(
               message,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 color: cs.onSurfaceVariant,
                 height: 1.45,
@@ -325,7 +326,7 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                 const SizedBox(width: KuberSpacing.sm),
                 Text(
                   'MIGRATING FROM ANOTHER APP?',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: cs.secondary,
@@ -344,8 +345,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Download Template',
-                        style: GoogleFonts.inter(
+                        context.l10n.downloadTemplate,
+                        style: localeFont(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -353,8 +354,8 @@ class _DataImportBottomSheetState extends ConsumerState<DataImportBottomSheet> {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'Get a CSV with the correct column headers to format your data.',
-                        style: GoogleFonts.inter(
+                        context.l10n.downloadTemplateDesc,
+                        style: localeFont(
                           fontSize: 11,
                           color: cs.onSurfaceVariant,
                           height: 1.35,

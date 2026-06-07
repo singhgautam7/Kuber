@@ -13,9 +13,9 @@
 // Lives at: lib/shared/widgets/kuber_form_widgets.dart
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
 
@@ -61,7 +61,7 @@ class KuberFormSection extends StatelessWidget {
                   children: [
                     Text(
                       label.toUpperCase(),
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.6,
@@ -72,7 +72,7 @@ class KuberFormSection extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         sublabel!,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.85),
                         ),
@@ -137,7 +137,7 @@ class KuberFieldLabel extends StatelessWidget {
               ? [
                   TextSpan(
                     text: '  · optional',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w500,
                       color: cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -145,7 +145,7 @@ class KuberFieldLabel extends StatelessWidget {
                   ),
                 ]
               : null,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 11.5,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
@@ -208,7 +208,7 @@ class KuberHeroAmountInput extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.4,
@@ -221,7 +221,7 @@ class KuberHeroAmountInput extends StatelessWidget {
             children: [
               Text(
                 currencySymbol,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,
@@ -238,7 +238,7 @@ class KuberHeroAmountInput extends StatelessWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,
@@ -337,7 +337,7 @@ class KuberPickerRow extends StatelessWidget {
                   children: [
                     Text(
                       label.toUpperCase(),
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.2,
@@ -349,7 +349,7 @@ class KuberPickerRow extends StatelessWidget {
                       value,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 14.5,
                         fontWeight: valueIsPlaceholder
                             ? FontWeight.w500
@@ -437,7 +437,7 @@ class KuberSwitchRow extends StatelessWidget {
                 children: [
                   Text(
                     name,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -446,7 +446,7 @@ class KuberSwitchRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     sub,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       color: cs.onSurfaceVariant,
                     ),
@@ -574,7 +574,7 @@ class _SegmentButton extends StatelessWidget {
               ],
               Text(
                 segment.label,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: selected ? activeColor : cs.onSurfaceVariant,
@@ -650,7 +650,7 @@ class KuberChipGrid<T> extends StatelessWidget {
                   ],
                   Text(
                     opt.label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,
                       color: isSelected ? cs.primary : cs.onSurfaceVariant,
@@ -718,7 +718,7 @@ class KuberDayGrid extends StatelessWidget {
               child: Center(
                 child: Text(
                   '$day',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected ? cs.primary : cs.onSurfaceVariant,
@@ -774,7 +774,7 @@ class KuberAnswerCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 labelText.toUpperCase(),
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.4,
@@ -790,7 +790,7 @@ class KuberAnswerCard extends StatelessWidget {
             children: [
               Text(
                 amountText,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 30,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.6,
@@ -801,7 +801,7 @@ class KuberAnswerCard extends StatelessWidget {
               const Spacer(),
               Text(
                 unitText,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 12.5,
                   color: cs.onSurfaceVariant,
                 ),
@@ -830,7 +830,7 @@ class KuberAnswerCard extends StatelessWidget {
                         children: [
                           Text(
                             meta[i].key.toUpperCase(),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1,
@@ -840,7 +840,7 @@ class KuberAnswerCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             meta[i].value,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurface,
@@ -918,7 +918,7 @@ class KuberSaveButton extends StatelessWidget {
                     )
                   : Text(
                       label,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.4,
@@ -1020,4 +1020,3 @@ extension FocusDismissibleFuture<T> on Future<T> {
     });
   }
 }
-

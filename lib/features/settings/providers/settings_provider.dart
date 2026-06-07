@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
+import '../../../core/utils/locale_font.dart';
 
 final formatterProvider = Provider((ref) {
   final settings = ref.watch(settingsProvider).valueOrNull;
@@ -28,6 +29,11 @@ final currencyProvider = Provider<KuberCurrency>((ref) {
   final settings = ref.watch(settingsProvider);
   final code = settings.valueOrNull?.currency ?? 'INR';
   return currencyFromCode(code);
+});
+
+final localeProvider = Provider<Locale>((ref) {
+  final settings = ref.watch(settingsProvider).valueOrNull;
+  return settings?.locale ?? const Locale('en');
 });
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
@@ -79,6 +85,7 @@ class SettingsState {
   final double thresholdCeiling;
   final NavBarStyle navBarStyle;
   final MoreTabLayout moreTabLayout;
+  final Locale locale;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -94,6 +101,7 @@ class SettingsState {
     this.thresholdCeiling = 2000,
     this.navBarStyle = NavBarStyle.classic,
     this.moreTabLayout = MoreTabLayout.modern,
+    this.locale = const Locale('en'),
   });
 
   SettingsState copyWith({
@@ -109,6 +117,7 @@ class SettingsState {
     double? thresholdCeiling,
     NavBarStyle? navBarStyle,
     MoreTabLayout? moreTabLayout,
+    Locale? locale,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -124,6 +133,7 @@ class SettingsState {
       thresholdCeiling: thresholdCeiling ?? this.thresholdCeiling,
       navBarStyle: navBarStyle ?? this.navBarStyle,
       moreTabLayout: moreTabLayout ?? this.moreTabLayout,
+      locale: locale ?? this.locale,
     );
   }
 }
@@ -150,6 +160,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
     final moreTabLayoutIndex =
         prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.modern.index;
+    final languageCode = prefs.getString(PrefsKeys.language) ?? 'en';
+    final locale = Locale(languageCode);
+    AppLocale.current = locale;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -165,6 +178,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       thresholdCeiling: thresholdCeiling,
       navBarStyle: NavBarStyle.values[navBarStyleIndex],
       moreTabLayout: MoreTabLayout.values[moreTabLayoutIndex],
+      locale: locale,
     );
   }
 
@@ -189,8 +203,16 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         privacyMode: cur.privacyMode,
         navBarStyle: cur.navBarStyle,
         moreTabLayout: cur.moreTabLayout,
+        locale: cur.locale,
       ),
     );
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(PrefsKeys.language, locale.languageCode);
+    AppLocale.current = locale;
+    state = AsyncData(state.requireValue.copyWith(locale: locale));
   }
 
   Future<void> setNavBarStyle(NavBarStyle style) async {

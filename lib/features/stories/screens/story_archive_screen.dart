@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
@@ -88,7 +89,7 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
         data: (state) {
-          final groups = _grouped(state.stories);
+          final groups = _grouped(context, state.stories);
           return CustomScrollView(
             controller: _scroll,
             slivers: [
@@ -107,7 +108,7 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Stories\nArchive',
+                        context.l10n.storiesArchiveTitle,
                         style: AppTextStyles.inter.copyWith(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
@@ -117,7 +118,7 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Every recap Kuber has made for you, newest first.',
+                        context.l10n.storiesArchiveDesc,
                         style: AppTextStyles.inter.copyWith(
                           fontSize: 13,
                           color: cs.onSurfaceVariant,
@@ -128,14 +129,14 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                 ),
               ),
               if (state.stories.isEmpty)
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   hasScrollBody: false,
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: 120),
+                    padding: const EdgeInsets.only(bottom: 120),
                     child: Center(
                       child: KuberEmptyState(
-                        title: 'No stories yet',
-                        description: 'Keep using Kuber to see your recaps here.',
+                        title: context.l10n.noStoriesYet,
+                        description: context.l10n.keepUsingToSeeRecaps,
                         icon: Icons.auto_awesome_outlined,
                       ),
                     ),
@@ -182,24 +183,24 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
     );
   }
 
-  Map<String, List<StoryViewData>> _grouped(List<StoryViewData> stories) {
+  Map<String, List<StoryViewData>> _grouped(BuildContext context, List<StoryViewData> stories) {
     final out = <String, List<StoryViewData>>{};
     for (final story in stories) {
-      (out[_bucketLabel(story.generatedAt)] ??= []).add(story);
+      (out[_bucketLabel(context, story.generatedAt)] ??= []).add(story);
     }
     return out;
   }
 
-  String _bucketLabel(DateTime date) {
+  String _bucketLabel(BuildContext context, DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final day = DateTime(date.year, date.month, date.day);
     final diff = today.difference(day).inDays;
-    if (diff <= 0) return 'Today';
-    if (diff == 1) return 'Yesterday';
-    if (diff <= 6) return 'Earlier this week';
-    if (diff <= 30) return 'Earlier this month';
-    return 'Older';
+    if (diff <= 0) return context.l10n.todayLabel;
+    if (diff == 1) return context.l10n.yesterdayLabel;
+    if (diff <= 6) return context.l10n.earlierThisWeek;
+    if (diff <= 30) return context.l10n.earlierThisMonth;
+    return context.l10n.olderLabel;
   }
 }
 
@@ -378,7 +379,7 @@ class _LoadingFooter extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Text(
-          'Loading older stories',
+          context.l10n.loadingOlderStories,
           style: AppTextStyles.inter.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
         ),
       ],

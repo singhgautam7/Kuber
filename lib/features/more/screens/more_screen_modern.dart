@@ -23,6 +23,8 @@
 //     MoreTabLayout.modern => const MoreScreenModern(),
 //   };
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,6 +51,30 @@ import '../screens/more_screen.dart' show launchTutorialFromMore;
 class MoreScreenModern extends ConsumerWidget {
   const MoreScreenModern({super.key});
 
+  String _accountsTrackedLabel(BuildContext context, int count) {
+    final lang = AppLocale.current.languageCode;
+    switch (lang) {
+      case 'hi':
+        return count == 1 ? '1 खाता ट्रैक किया गया' : '$count खाते ट्रैक किए गए';
+      case 'kn':
+        return count == 1 ? '1 ಖಾತೆಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ' : '$count ಖಾತೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ';
+      case 'ml':
+        return count == 1 ? '1 അക്കൗണ്ട് ട്രാക്ക് ചെയ്തു' : '$count അക്കൗಂಡുകൾ ಟ്രാക്ക് ചെയ്തു';
+      case 'ta':
+        return count == 1 ? '1 கணக்கு கண்கಾಣிக்கப்படுகிறது' : '$count கணக்குகள் கண்கಾಣிக்கப்படுகின்றன';
+      case 'te':
+        return count == 1 ? '1 ఖాటా ట్రాక్ చేయబడింది' : '$count ಖಾತಗಳು ಟ್ರ್ಯಾಕ್ చేయబడ్డాయి';
+      case 'mr':
+        return count == 1 ? '1 खाते ट्रॅक केले' : '$count खाती ट्रॅक केली';
+      case 'bn':
+        return count == 1 ? '1টি অ্যাকাউন্ট ট্র্যাক করা হয়েছে' : '$countটি অ্যাকাউন্ট ট্র্যাক করা হয়েছে';
+      case 'pa':
+        return count == 1 ? '1 ਖਾਤਾ ਟ੍ਰੈਕ ਕੀਤਾ ਗਿਆ' : '$count ਖਾਤੇ ਟ੍ਰੈਕ ਕੀਤੇ ਗਏ';
+      default:
+        return count == 1 ? '1 account tracked' : '$count accounts tracked';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
@@ -63,10 +89,10 @@ class MoreScreenModern extends ConsumerWidget {
           const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.xl)),
           SliverToBoxAdapter(
             child: KuberPageHeader(
-              title: 'More',
-              description: 'Manage your settings, tools and data',
+              title: context.l10n.navMore,
+              description: context.l10n.moreManageSubtitle,
               actionIcon: Icons.search_rounded,
-              actionTooltip: 'Search',
+              actionTooltip: context.l10n.moreSearchTooltip,
               onAction: () => context.push('/more/search'),
             ),
           ),
@@ -79,13 +105,12 @@ class MoreScreenModern extends ConsumerWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // 01 / MANAGE -------------------------------------------------
-                const _GroupHead(num: '01', name: 'Manage', hint: '8 spaces'),
+                _GroupHead(num: '01', name: context.l10n.moreManageTitle, hint: context.l10n.menuManageSpaces),
                 _HeroTile(
                   icon: Icons.account_balance_wallet,
-                  label: 'ACCOUNTS',
-                  title: 'Your wallets and\nbank accounts',
-                  meta:
-                      '$accountCount account${accountCount == 1 ? '' : 's'} tracked',
+                  label: context.l10n.menuAccounts.toUpperCase(),
+                  title: context.l10n.menuAccountsDesc,
+                  meta: _accountsTrackedLabel(context, accountCount),
                   onTap: () => context.push('/more/accounts'),
                 ),
                 const SizedBox(height: KuberSpacing.sm),
@@ -93,45 +118,45 @@ class MoreScreenModern extends ConsumerWidget {
                   items: [
                     _ManageTileData(
                       icon: Icons.category,
-                      label: 'Categories',
-                      sub: 'Organize transactions',
+                      label: context.l10n.menuCategories,
+                      sub: context.l10n.menuCategoriesDesc,
                       onTap: () => context.push('/more/categories'),
                     ),
                     _ManageTileData(
                       icon: Icons.label_rounded,
-                      label: 'Tags',
-                      sub: 'Labels for entries',
+                      label: context.l10n.menuTags,
+                      sub: context.l10n.menuTagsDesc,
                       onTap: () => context.push('/more/tags'),
                     ),
                     _ManageTileData(
                       key: TutorialStepKeys.moreBudgetsItem,
                       icon: Icons.pie_chart_rounded,
-                      label: 'Budgets',
-                      sub: 'Monthly spending limits',
+                      label: context.l10n.menuBudgets,
+                      sub: context.l10n.menuBudgetsDesc,
                       onTap: () => context.push('/more/budgets'),
                     ),
                     _ManageTileData(
                       icon: Icons.sync_rounded,
-                      label: 'Recurring',
-                      sub: 'Scheduled transactions',
+                      label: context.l10n.recurringHeader,
+                      sub: context.l10n.menuRecurringDesc,
                       onTap: () => context.push('/more/recurring'),
                     ),
                     _ManageTileData(
                       icon: Icons.handshake,
-                      label: 'Lend / Borrow',
-                      sub: 'Money you owe or are owed',
+                      label: context.l10n.menuLedger,
+                      sub: context.l10n.menuLedgerDesc,
                       onTap: () => context.push('/more/ledger'),
                     ),
                     _ManageTileData(
                       icon: Icons.account_balance_outlined,
-                      label: 'Loans',
-                      sub: 'EMIs and repayment',
+                      label: context.l10n.menuLoans,
+                      sub: context.l10n.menuLoansDesc,
                       onTap: () => context.push('/more/loans'),
                     ),
                     _ManageTileData(
                       icon: Icons.show_chart_rounded,
-                      label: 'Investments',
-                      sub: 'Portfolio and growth',
+                      label: context.l10n.menuInvestments,
+                      sub: context.l10n.menuInvestmentsDesc,
                       onTap: () => context.push('/more/investments'),
                     ),
                   ],
@@ -140,15 +165,15 @@ class MoreScreenModern extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // 02 / TOOLS --------------------------------------------------
-                const _GroupHead(num: '02', name: 'Tools'),
+                _GroupHead(num: '02', name: context.l10n.moreToolsTitle),
                 Row(
                   children: [
                     Expanded(
                       child: _ToolCard(
                         key: TutorialStepKeys.moreAskKuberItem,
                         icon: Icons.auto_awesome_rounded,
-                        title: 'Ask Kuber',
-                        subtitle: 'On-device smart assistant',
+                        title: context.l10n.askKuber,
+                        subtitle: context.l10n.menuAskKuberDesc,
                         accent: _ToolAccent.warning,
                         showBetaPill: true,
                         onTap: () => context.push('/more/ask-kuber'),
@@ -158,8 +183,8 @@ class MoreScreenModern extends ConsumerWidget {
                     Expanded(
                       child: _ToolCard(
                         icon: Icons.calculate_rounded,
-                        title: 'Calculators',
-                        subtitle: 'EMI, SIP, salary, GST, split & more',
+                        title: context.l10n.menuCalculators,
+                        subtitle: context.l10n.menuCalculatorsDesc,
                         accent: _ToolAccent.primary,
                         onTap: () => context.push('/more/tools'),
                       ),
@@ -170,38 +195,38 @@ class MoreScreenModern extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // 03 / APP ----------------------------------------------------
-                const _GroupHead(num: '03', name: 'App'),
+                _GroupHead(num: '03', name: context.l10n.moreAppTitle),
                 _CompactList(
                   rows: [
                     _CompactRowData(
                       icon: Icons.settings,
-                      label: 'Settings',
-                      sub: 'Theme, currency, profile',
+                      label: context.l10n.menuSettings,
+                      sub: context.l10n.menuSettingsDesc,
                       onTap: () => context.push('/more/settings'),
                     ),
                     _CompactRowData(
                       key: TutorialStepKeys.moreDataItem,
                       icon: Icons.storage_rounded,
-                      label: 'Data',
-                      sub: 'Export, import, automatic backups',
+                      label: context.l10n.menuData,
+                      sub: context.l10n.menuDataDesc,
                       onTap: () => context.push('/more/data'),
                     ),
                     _CompactRowData(
                       icon: Icons.notifications_outlined,
-                      label: 'Notifications',
-                      sub: 'Recent alerts and reminders',
+                      label: context.l10n.menuNotifications,
+                      sub: context.l10n.menuNotificationsDesc,
                       onTap: () => _openNotificationsSheet(context, ref),
                     ),
                     _CompactRowData(
                       icon: Icons.auto_stories_rounded,
-                      label: 'Money Stories Archive',
-                      sub: 'Every recap, newest first',
+                      label: context.l10n.menuStoriesArchive,
+                      sub: context.l10n.menuStoriesArchiveDesc,
                       onTap: () => context.push('/more/stories-archive'),
                     ),
                     _CompactRowData(
                       icon: Icons.build,
-                      label: 'Troubleshoot',
-                      sub: 'Fix data and suggestion issues',
+                      label: context.l10n.menuTroubleshoot,
+                      sub: context.l10n.menuTroubleshootDesc,
                       onTap: () => context.push('/more/troubleshoot'),
                     ),
                   ],
@@ -210,18 +235,18 @@ class MoreScreenModern extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // 04 / TUTORIAL -----------------------------------------------
-                const _GroupHead(num: '04', name: 'Tutorial'),
+                _GroupHead(num: '04', name: context.l10n.moreTutorialTitle),
                 _DenseList(
                   rows: [
                     _DenseRowData(
                       icon: Icons.school_rounded,
-                      label: 'App Tutorial',
+                      label: context.l10n.menuAppTutorialShort,
                       labelSuffix: '(Beta)',
                       onTap: () => launchTutorialFromMore(context, ref),
                     ),
                     _DenseRowData(
                       icon: Icons.auto_stories_rounded,
-                      label: 'Welcome Tour',
+                      label: context.l10n.menuWelcomeTour,
                       onTap: () => context.push('/onboarding?replay=true'),
                     ),
                   ],
@@ -229,24 +254,24 @@ class MoreScreenModern extends ConsumerWidget {
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // 05 / CONTACT US ---------------------------------------------
-                const _GroupHead(num: '05', name: 'Contact Us'),
+                // 05 / ABOUT ---------------------------------------------
+                _GroupHead(num: '05', name: context.l10n.moreAboutTitle),
                 _DenseList(
                   rows: [
                     _DenseRowData(
                       icon: Icons.info_outline_rounded,
-                      label: 'About Kuber',
+                      label: context.l10n.menuAbout,
                       onTap: () => context.pushNamed('about'),
                     ),
                     _DenseRowData(
                       icon: Icons.security_outlined,
-                      label: 'Permissions',
+                      label: context.l10n.menuPermissions,
                       onTap: () => context.pushNamed('permissions'),
                     ),
                     if (isDevMode)
                       _DenseRowData(
                         icon: Icons.bug_report,
-                        label: 'Dev Tools',
+                        label: context.l10n.menuDevTools,
                         onTap: () => context.push('/more/dev-tools'),
                       ),
                   ],
@@ -255,16 +280,16 @@ class MoreScreenModern extends ConsumerWidget {
                 const SizedBox(height: KuberSpacing.xl),
 
                 // 06 / HELP US ------------------------------------------------
-                const _GroupHead(
+                _GroupHead(
                   num: '06',
-                  name: 'Help Us',
-                  hint: 'Tap to support',
+                  name: context.l10n.moreHelpUsTitle,
+                  hint: context.l10n.menuHelpUsHint,
                 ),
                 _HelpStrip(
                   actions: [
                     _HelpAction(
                       icon: Icons.star_rate_rounded,
-                      label: 'Rate Kuber',
+                      label: context.l10n.menuRateKuber,
                       accent: _HelpAccent.warning,
                       onTap: () => launchUrl(
                         Uri.parse(
@@ -275,20 +300,16 @@ class MoreScreenModern extends ConsumerWidget {
                     ),
                     _HelpAction(
                       icon: Icons.share_rounded,
-                      label: 'Share',
+                      label: context.l10n.menuShare,
                       onTap: () => SharePlus.instance.share(
                         ShareParams(
-                          text:
-                              'Manage your expenses like never before. Kuber is a '
-                              'beautifully simple expense manager, made with love '
-                              'in India. Download it here: '
-                              'https://play.google.com/store/apps/details?id=com.grs.kuber',
+                          text: context.l10n.shareMessage,
                         ),
                       ),
                     ),
                     _HelpAction(
                       icon: Icons.feedback,
-                      label: 'Feedback',
+                      label: context.l10n.menuFeedbackShort,
                       onTap: () => context.push('/more/feedback'),
                     ),
                   ],
@@ -338,7 +359,7 @@ class _GroupHead extends StatelessWidget {
           const SizedBox(width: KuberSpacing.sm),
           Text(
             name.toUpperCase(),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: cs.primary,
@@ -349,7 +370,7 @@ class _GroupHead extends StatelessWidget {
             const Spacer(),
             Text(
               h,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 color: cs.onSurfaceVariant,
               ),
@@ -433,7 +454,7 @@ class _HeroTile extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurfaceVariant,
@@ -443,7 +464,7 @@ class _HeroTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       title,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -454,7 +475,7 @@ class _HeroTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       meta,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),
@@ -598,7 +619,7 @@ class _ManageTile extends StatelessWidget {
                     data.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                       color: cs.onSurface,
@@ -611,7 +632,7 @@ class _ManageTile extends StatelessWidget {
                     data.sub,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       color: cs.onSurfaceVariant,
                       height: 1.4,
@@ -708,7 +729,7 @@ class _ToolCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -720,7 +741,7 @@ class _ToolCard extends StatelessWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 11.5,
                           color: cs.onSurfaceVariant,
                           height: 1.35,
@@ -747,8 +768,8 @@ class _ToolCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(KuberRadius.sm),
                     ),
                     child: Text(
-                      'BETA',
-                      style: GoogleFonts.inter(
+                      context.l10n.betaBadge,
+                      style: localeFont(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                         color: accentColor,
@@ -844,7 +865,7 @@ class _CompactRow extends StatelessWidget {
                 children: [
                   Text(
                     data.label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -854,7 +875,7 @@ class _CompactRow extends StatelessWidget {
                   const SizedBox(height: 1),
                   Text(
                     data.sub,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       color: cs.onSurfaceVariant,
                     ),
@@ -937,7 +958,7 @@ class _DenseRow extends StatelessWidget {
             Expanded(
               child: Text.rich(
                 TextSpan(
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                     color: cs.onSurface,
@@ -948,7 +969,7 @@ class _DenseRow extends StatelessWidget {
                       const TextSpan(text: '  '),
                       TextSpan(
                         text: suffix,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: cs.onSurfaceVariant,
@@ -1052,7 +1073,7 @@ class _HelpTile extends StatelessWidget {
               Text(
                 action.label,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
@@ -1078,16 +1099,28 @@ class _MadeInIndiaFooter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final version = ref.watch(appVersionProvider).valueOrNull;
+
+    final String fullText;
+    if (version != null) {
+      fullText = context.l10n.madeInIndiaVersion('{heart}', version);
+    } else {
+      fullText = context.l10n.madeInIndia('{heart}');
+    }
+
+    final parts = fullText.split('{heart}');
+    final beforeText = parts.first;
+    final afterText = parts.length > 1 ? parts.last : '';
+
     return RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 11.5,
           fontWeight: FontWeight.w500,
           color: cs.onSurfaceVariant,
         ),
         children: [
-          const TextSpan(text: 'Made with '),
+          TextSpan(text: beforeText),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Icon(
@@ -1096,9 +1129,7 @@ class _MadeInIndiaFooter extends ConsumerWidget {
               size: 13,
             ),
           ),
-          TextSpan(
-            text: version != null ? ' in India · v$version' : ' in India',
-          ),
+          TextSpan(text: afterText),
         ],
       ),
     );

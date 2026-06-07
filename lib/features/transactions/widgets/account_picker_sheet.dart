@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../shared/widgets/add_new_button.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -59,7 +60,7 @@ class AccountPickerSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Select Account',
+                        context.l10n.selectAccountTitle,
                         style: textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: cs.onSurface,
@@ -67,7 +68,7 @@ class AccountPickerSheet extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Choose the account for this transaction',
+                        context.l10n.chooseAccountSubtitle,
                         style: textTheme.bodySmall?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
@@ -94,7 +95,7 @@ class AccountPickerSheet extends ConsumerWidget {
               child: CircularProgressIndicator(),
             ),
             error: (e, _) => Center(
-              child: Text('Error: $e'),
+              child: Text('${context.l10n.errorLabel}: $e'),
             ),
             data: (allAccs) {
               final accs = excludeAccountId != null
@@ -103,7 +104,7 @@ class AccountPickerSheet extends ConsumerWidget {
               if (accs.isEmpty) {
                 return Center(
                   child: Text(
-                    'No accounts yet',
+                    context.l10n.noAccountsYet,
                     style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
@@ -126,7 +127,15 @@ class AccountPickerSheet extends ConsumerWidget {
 
                   return _AccountTile(
                     name: acc.name,
-                    type: acc.isCreditCard ? 'CREDIT CARD' : acc.type.toUpperCase(),
+                    type: (acc.isCreditCard
+                            ? context.l10n.creditCardLabel
+                            : switch (acc.type.toLowerCase()) {
+                                'bank' => context.l10n.bankLabel,
+                                'wallet' => context.l10n.walletLabel,
+                                'cash' => context.l10n.cashLabel,
+                                _ => acc.type,
+                              })
+                        .toUpperCase(),
                     icon: resolveAccountIcon(acc),
                     color: color,
                     selected: selected,
@@ -144,7 +153,7 @@ class AccountPickerSheet extends ConsumerWidget {
 
         // Add new account button
         AddNewButton(
-          label: 'Add new account',
+          label: context.l10n.addNewAccount,
           onTap: () {
             Navigator.pop(context); // Close picker
             showModalBottomSheet(

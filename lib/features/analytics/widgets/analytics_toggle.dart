@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AnalyticsCardSmallTabs extends StatelessWidget {
   final List<String> labels;
@@ -48,7 +48,7 @@ class AnalyticsCardSmallTabs extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 labels[i],
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected ? cs.onSurface : cs.onSurfaceVariant,

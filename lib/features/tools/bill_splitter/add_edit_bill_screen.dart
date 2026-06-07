@@ -1,8 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'widgets/bs_squircle_shape.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -288,7 +288,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
         ),
         title: Text(
           isEdit ? 'Edit Split' : 'New Split',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -329,7 +329,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
               controller: _nameCtrl,
               textCapitalization: TextCapitalization.words,
               onChanged: (_) => setState(() {}),
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
@@ -377,7 +377,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                 children: [
                   Text(
                     currency.symbol,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 26,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
@@ -392,7 +392,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                         decimal: true,
                       ),
                       onChanged: (_) => setState(() {}),
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 36,
                         fontWeight: FontWeight.w800,
                         color: cs.onSurface,
@@ -401,7 +401,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                       ),
                       decoration: InputDecoration(
                         hintText: '0',
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: localeFont(
                           fontSize: 36,
                           fontWeight: FontWeight.w800,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.4),
@@ -480,7 +480,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                             const SizedBox(width: 4),
                             Text(
                               'ADD / EDIT',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.4,
@@ -513,7 +513,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                         name == kYouName
                                             ? 'You'
                                             : name.split(' ').first,
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w600,
                                           color: cs.onSurfaceVariant,
@@ -585,7 +585,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               canPickPayer
                                   ? (_paidBy ?? 'Select person')
                                   : 'Add participants first',
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 15,
                                 fontWeight: _paidBy != null && canPickPayer
                                     ? FontWeight.w600
@@ -656,7 +656,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               alignment: Alignment.center,
                               child: Text(
                                 tab.label,
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.3,
@@ -702,7 +702,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                           Expanded(
                             child: Text(
                               _breakdownHeader(total),
-                              style: GoogleFonts.inter(
+                              style: localeFont(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.8,
@@ -712,7 +712,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                           ),
                           Text(
                             balance.label,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: balance.balanced
@@ -752,7 +752,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                 children: [
                                   Text(
                                     name,
-                                    style: GoogleFonts.inter(
+                                    style: localeFont(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: cs.onSurface,
@@ -762,7 +762,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                   if (_splitType != 'equal')
                                     Text(
                                       '≈ ${computed.toStringAsFixed(0)}',
-                                      style: GoogleFonts.inter(
+                                      style: localeFont(
                                         fontSize: 11,
                                         color: cs.onSurfaceVariant,
                                         fontFeatures: const [
@@ -778,7 +778,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                             if (_splitType == 'equal')
                               Text(
                                 computed.toStringAsFixed(0),
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: cs.onSurface,
@@ -848,7 +848,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               : _splitType == 'percentage'
                               ? 'Percentages must add up to 100%. Computed amounts update live.'
                               : 'Each person gets a share proportional to their parts.',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11.5,
                             color: cs.onSurface,
                             height: 1.4,
@@ -922,7 +922,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Who Paid?',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: cs.onSurface,
@@ -935,7 +935,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                   leading: BsAvatar(name: name, size: 36),
                   title: Text(
                     name,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -995,7 +995,7 @@ class _ProgressiveSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     message,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       height: 1.25,
                       color: cs.onSurfaceVariant,
@@ -1035,7 +1035,7 @@ class _LockedRow extends StatelessWidget {
           const SizedBox(width: KuberSpacing.sm),
           Text(
             text,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -1073,7 +1073,7 @@ class _LendBorrowPrompt extends StatelessWidget {
           Expanded(
             child: Text(
               'Do you want to add this to your Lend/Borrow section for easier transaction tracking?',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 12,
                 height: 1.35,
                 fontWeight: FontWeight.w600,
@@ -1125,7 +1125,7 @@ class _LendBorrowSummary extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'LEND / BORROW',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.8,
@@ -1155,7 +1155,7 @@ class _LendBorrowSummary extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'No Lend/Borrow entry is needed because You are not part of what is owed.',
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         height: 1.35,
                         color: cs.onSurfaceVariant,
@@ -1196,7 +1196,7 @@ class _LendBorrowSummary extends StatelessWidget {
                         children: [
                           Text(
                             label,
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: color,
@@ -1209,7 +1209,7 @@ class _LendBorrowSummary extends StatelessWidget {
                               debt.amount,
                               symbol: currencySymbol,
                             ),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: cs.onSurface,
@@ -1237,7 +1237,7 @@ class _LendBorrowSummary extends StatelessWidget {
                         ),
                         child: Text(
                           'ADD',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
@@ -1263,7 +1263,7 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: GoogleFonts.inter(
+      style: localeFont(
         fontSize: 11,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.1,
@@ -1297,7 +1297,7 @@ class _SplitInput extends StatelessWidget {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         onChanged: (_) => onChanged(),
         textAlign: TextAlign.right,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 14,
           fontWeight: FontWeight.w700,
           color: cs.onSurface,
@@ -1307,7 +1307,7 @@ class _SplitInput extends StatelessWidget {
           filled: true,
           fillColor: cs.surfaceContainerHigh,
           suffixText: suffix,
-          suffixStyle: GoogleFonts.inter(
+          suffixStyle: localeFont(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,

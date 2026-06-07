@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -56,8 +57,8 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Text(
-            'Error: $e',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            context.l10n.errorWithDetails(e.toString()),
+            style: localeFont(color: cs.onSurfaceVariant),
           ),
         ),
         data: (ledgers) {
@@ -93,9 +94,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
               ),
               SliverToBoxAdapter(
                 child: KuberPageHeader(
-                  title: 'Lent &\nBorrowed',
+                  title: context.l10n.lentBorrowedTitle,
                   description: '',
-                  actionTooltip: 'Add Entry',
+                  actionTooltip: context.l10n.addEntry,
                   onAction: () => context.push('/ledger/add'),
                 ),
               ),
@@ -133,9 +134,9 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.handshake_outlined,
-                    title: 'No ledger entries yet',
-                    description: 'Tap + to record a lend or borrow',
-                    actionLabel: 'Add Entry',
+                    title: context.l10n.noLedgerEntries,
+                    description: context.l10n.ledgerEmptyDesc,
+                    actionLabel: context.l10n.addEntry,
                     onAction: () => context.push('/ledger/add'),
                   ),
                 ),
@@ -153,8 +154,8 @@ class _LedgerScreenState extends ConsumerState<LedgerScreen> {
                   ),
                 ),
               if (settled.isNotEmpty) ...[
-                const SliverToBoxAdapter(
-                  child: _SectionHeader(label: 'SETTLED'),
+                SliverToBoxAdapter(
+                  child: _SectionHeader(label: context.l10n.settledUpper),
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(
@@ -234,8 +235,8 @@ class _FilterRow extends StatelessWidget {
         child: Row(
           children: [
             Text(
-              'FILTERS',
-              style: GoogleFonts.inter(
+              context.l10n.filtersUpper,
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.2,
@@ -244,13 +245,13 @@ class _FilterRow extends StatelessWidget {
             ),
             const Spacer(),
             _FilterChip(
-              label: 'Lent',
+              label: context.l10n.lentLabel,
               isSelected: selected == 'lent',
               onTap: () => onChanged(selected == 'lent' ? null : 'lent'),
             ),
             const SizedBox(width: 8),
             _FilterChip(
-              label: 'Borrowed',
+              label: context.l10n.borrowedLabel,
               isSelected: selected == 'borrowed',
               onTap: () =>
                   onChanged(selected == 'borrowed' ? null : 'borrowed'),
@@ -314,7 +315,7 @@ class _FilterChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 13,
             fontWeight: FontWeight.w800,
             color: isSelected ? Colors.white : cs.onSurfaceVariant,
@@ -342,7 +343,7 @@ class _SectionHeader extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: cs.onSurfaceVariant,

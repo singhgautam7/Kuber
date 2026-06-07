@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../tags/data/tag.dart';
 
 /// Shared tags display and selector tile used by both normal and transfer forms.
@@ -52,7 +53,7 @@ class TagsTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TAGS',
+                      context.l10n.tagsUpper,
                       style: textTheme.labelSmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         letterSpacing: 1.2,
@@ -61,8 +62,8 @@ class TagsTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       selectedTags.isEmpty
-                          ? 'No tags selected'
-                          : '${selectedTags.length} tags selected',
+                          ? context.l10n.noTagsSelected
+                          : context.l10n.tagsSelectedCount('${selectedTags.length}'),
                       style: textTheme.bodyMedium?.copyWith(
                         color: selectedTags.isEmpty
                             ? cs.onSurfaceVariant

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/l10n_ext.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -98,8 +99,8 @@ class StoryRing extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(
-          title: 'MONEY STORIES',
+        KuberHomeWidgetTitle(
+          title: context.l10n.moneyStoriesTitle.toUpperCase(),
           infoConfig: InfoConstants.moneyStories,
         ),
         SizedBox(
@@ -188,7 +189,7 @@ class _StoryAvatar extends StatelessWidget {
             ),
             const SizedBox(height: 7),
             Text(
-              bubble.label,
+              _localizeBubbleLabel(context, bubble.label),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.inter.copyWith(
@@ -201,6 +202,31 @@ class _StoryAvatar extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _localizeBubbleLabel(BuildContext context, String label) {
+    switch (label.toLowerCase()) {
+      case 'welcome':
+        return context.l10n.bubbleWelcome;
+      case 'daily':
+        return context.l10n.bubbleDaily;
+      case 'weekly':
+        return context.l10n.bubbleWeekly;
+      case 'monthly':
+        return context.l10n.bubbleMonthly;
+      case 'yearly':
+        return context.l10n.bubbleYearly;
+      case 'loans':
+        return context.l10n.bubbleLoans;
+      case 'investments':
+        return context.l10n.bubbleInvestments;
+      case 'ledger':
+        return context.l10n.bubbleLedger;
+      case 'insights':
+        return context.l10n.bubbleInsights;
+      default:
+        return label;
+    }
   }
 }
 
@@ -277,8 +303,8 @@ class _StoryRingEmpty extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(
-          title: 'MONEY STORIES',
+        KuberHomeWidgetTitle(
+          title: context.l10n.moneyStoriesTitle.toUpperCase(),
           infoConfig: InfoConstants.moneyStories,
         ),
         Container(
@@ -293,7 +319,7 @@ class _StoryRingEmpty extends StatelessWidget {
           ),
           alignment: Alignment.center,
           child: Text(
-            'Keep spending to see your money stories soon.',
+            context.l10n.moneyStoriesEmpty,
             textAlign: TextAlign.center,
             style: AppTextStyles.inter.copyWith(
               fontSize: 12,
@@ -314,8 +340,8 @@ class _StoryRingSkeleton extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(
-          title: 'MONEY STORIES',
+        KuberHomeWidgetTitle(
+          title: context.l10n.moneyStoriesTitle.toUpperCase(),
           infoConfig: InfoConstants.moneyStories,
         ),
         SizedBox(

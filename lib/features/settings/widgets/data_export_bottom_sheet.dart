@@ -1,3 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -5,7 +7,6 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
@@ -141,8 +142,8 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
       children: [
         Center(
           child: Text(
-            'Export Data',
-            style: GoogleFonts.inter(
+            context.l10n.dataExportTitle,
+            style: localeFont(
               fontSize: 22,
               fontWeight: FontWeight.w800,
               color: cs.onSurface,
@@ -154,7 +155,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
 
         Text(
           'SELECT FORMAT',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             color: cs.onSurfaceVariant,
@@ -163,17 +164,17 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         SettingsCardSelector<_ExportFmt>(
-          options: const [
+          options: [
             SelectorOption(
               value: _ExportFmt.csv,
               label: 'CSV',
-              subtitle: 'SPREADSHEET',
+              subtitle: context.l10n.spreadsheetLabel,
               icon: Icons.description_outlined,
             ),
             SelectorOption(
               value: _ExportFmt.json,
               label: 'JSON',
-              subtitle: 'BACKUP',
+              subtitle: context.l10n.backupUpper,
               icon: Icons.data_object_rounded,
             ),
           ],
@@ -198,9 +199,9 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
               Expanded(
                 child: Text(
                   isCsv
-                      ? 'Exports transactions, categories, accounts and tags. Does not include recurring automations, budgets, loans, investments, or attachments.'
-                      : 'Complete app backup (excluding attachments). Can be used to restore all your data on a new device or after reinstalling.',
-                  style: GoogleFonts.inter(
+                      ? context.l10n.exportCsvDesc
+                      : context.l10n.exportJsonDesc,
+                  style: localeFont(
                     fontSize: 12,
                     color: cs.onSurfaceVariant,
                     height: 1.45,
@@ -213,7 +214,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: KuberSpacing.xl),
 
         AppButton(
-          label: 'Export',
+          label: context.l10n.exportLabel,
           icon: Icons.upload_rounded,
           type: AppButtonType.primary,
           fullWidth: true,
@@ -234,7 +235,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
           const SizedBox(height: KuberSpacing.xl),
           Text(
             'Preparing your export…',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 15,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
@@ -278,8 +279,8 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
-          'Export Successful',
-          style: GoogleFonts.inter(
+          context.l10n.exportSuccessful,
+          style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -287,8 +288,8 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Your file is ready.',
-          style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
+          context.l10n.fileReady,
+          style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: KuberSpacing.xl),
@@ -323,7 +324,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                   children: [
                     Text(
                       fileName,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         color: cs.onSurface,
@@ -334,7 +335,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                     const SizedBox(height: 2),
                     Text(
                       sizeText,
-                      style: GoogleFonts.inter(fontSize: 12, color: cs.onSurfaceVariant),
+                      style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -345,7 +346,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: KuberSpacing.xl),
 
         AppButton(
-          label: 'Open File',
+          label: context.l10n.openFile,
           icon: Icons.open_in_new_rounded,
           type: AppButtonType.primary,
           fullWidth: true,
@@ -353,7 +354,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         AppButton(
-          label: _isSaving ? 'Saving…' : 'Save to Folder',
+          label: _isSaving ? context.l10n.savingEllipsis : context.l10n.saveToFolder,
           icon: Icons.save_alt_rounded,
           type: AppButtonType.normal,
           fullWidth: true,
@@ -361,7 +362,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.md),
         AppButton(
-          label: 'Share',
+          label: context.l10n.shareLabel,
           icon: Icons.share_outlined,
           type: AppButtonType.normal,
           fullWidth: true,
@@ -387,8 +388,8 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
-          'Export Failed',
-          style: GoogleFonts.inter(
+          context.l10n.exportFailed,
+          style: localeFont(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: cs.onSurface,
@@ -397,19 +398,19 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         const SizedBox(height: KuberSpacing.sm),
         Text(
           _errorMessage,
-          style: GoogleFonts.inter(fontSize: 14, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: KuberSpacing.xl),
         AppButton(
-          label: 'Try Again',
+          label: context.l10n.tryAgain,
           type: AppButtonType.primary,
           fullWidth: true,
           onPressed: () => setState(() => _stage = _Stage.options),
         ),
         const SizedBox(height: KuberSpacing.md),
         AppButton(
-          label: 'Cancel',
+          label: context.l10n.cancelLabel,
           type: AppButtonType.normal,
           fullWidth: true,
           onPressed: () => Navigator.pop(context),
@@ -454,7 +455,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Unable to generate file. Please try again.';
+        _errorMessage = context.l10n.exportGenerateFailed;
         _stage = _Stage.error;
       });
     }
@@ -469,7 +470,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
         : 'text/csv';
     final result = await OpenFilex.open(file.path, type: mimeType);
     if (result.type != ResultType.done && mounted) {
-      showKuberSnackBar(context, 'No app found to open this file type.');
+      showKuberSnackBar(context, context.l10n.noAppToOpen);
     }
   }
 
@@ -482,16 +483,16 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
       final fileName = file.path.split('/').last;
       final isJson = fileName.toLowerCase().endsWith('.json');
       final saved = await FilePicker.saveFile(
-        dialogTitle: 'Save a copy',
+        dialogTitle: context.l10n.saveACopy,
         fileName: fileName,
         bytes: bytes,
         type: isJson ? FileType.any : FileType.custom,
         allowedExtensions: isJson ? null : ['csv'],
       );
       if (!mounted) return;
-      if (saved != null) showKuberSnackBar(context, 'File saved successfully.');
+      if (saved != null) showKuberSnackBar(context, context.l10n.fileSaved);
     } catch (_) {
-      if (mounted) showKuberSnackBar(context, 'Failed to save file.');
+      if (mounted) showKuberSnackBar(context, context.l10n.failedToSaveFile);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }

@@ -1,14 +1,18 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/breakpoints.dart';
 import '../../core/utils/prefs_keys.dart';
+import '../../core/utils/l10n_ext.dart';
+import '../../core/constants/tools_l10n.dart';
 import '../../shared/widgets/kuber_app_bar.dart';
 import '../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../shared/widgets/kuber_page_header.dart';
+
 
 // ── View mode ─────────────────────────────────────────────────────────────────
 
@@ -192,6 +196,7 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
       _kGroups.expand((g) => g.tools).toList();
 
   void _showViewModeSheet(BuildContext context, ToolsViewMode current) {
+    final lang = Localizations.localeOf(context).languageCode;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -199,13 +204,13 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => KuberBottomSheet(
-        title: 'View Mode',
+        title: tL10n('View Mode', lang),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _ViewModeOption(
               icon: Icons.grid_view_rounded,
-              label: 'Grid',
+              label: tL10n('Grid', lang),
               selected: current == ToolsViewMode.grid,
               onTap: () {
                 ref.read(_toolsViewModeProvider.notifier).setMode(ToolsViewMode.grid);
@@ -215,7 +220,7 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
             const SizedBox(height: KuberSpacing.sm),
             _ViewModeOption(
               icon: Icons.list_rounded,
-              label: 'List',
+              label: tL10n('List', lang),
               selected: current == ToolsViewMode.list,
               onTap: () {
                 ref.read(_toolsViewModeProvider.notifier).setMode(ToolsViewMode.list);
@@ -234,9 +239,17 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
     final cs = Theme.of(context).colorScheme;
     final viewMode = ref.watch(_toolsViewModeProvider);
     final isSearching = _query.isNotEmpty;
+    final lang = Localizations.localeOf(context).languageCode;
     final filtered = _allTools
-        .where((t) => t.name.toLowerCase().contains(_query.toLowerCase()) ||
-            t.description.toLowerCase().contains(_query.toLowerCase()))
+        .where((t) {
+          final translatedName = tL10n(t.name, lang).toLowerCase();
+          final translatedDesc = tL10n(t.description, lang).toLowerCase();
+          final queryLower = _query.toLowerCase();
+          return t.name.toLowerCase().contains(queryLower) ||
+              t.description.toLowerCase().contains(queryLower) ||
+              translatedName.contains(queryLower) ||
+              translatedDesc.contains(queryLower);
+        })
         .toList();
 
     return Scaffold(
@@ -252,10 +265,10 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
           ),
           SliverToBoxAdapter(
             child: KuberPageHeader(
-              title: 'Tools',
-              description: 'Calculators and utilities',
+              title: context.l10n.moreToolsTitle,
+              description: tL10n('Calculators and utilities', lang),
               actionIcon: Icons.tune_rounded,
-              actionTooltip: 'View mode',
+              actionTooltip: tL10n('View Mode', lang),
               onAction: () => _showViewModeSheet(context, viewMode),
             ),
           ),
@@ -269,10 +282,10 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
               ),
               child: TextField(
                 onChanged: (v) => setState(() => _query = v),
-                style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+                style: localeFont(fontSize: 14, color: cs.onSurface),
                 decoration: InputDecoration(
-                  hintText: 'Search tools...',
-                  hintStyle: GoogleFonts.inter(
+                  hintText: tL10n('Search tools...', lang),
+                  hintStyle: localeFont(
                     fontSize: 14,
                     color: cs.onSurfaceVariant,
                   ),
@@ -304,16 +317,16 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
             ),
           ),
           if (isSearching)
-            ..._buildSearchResults(cs, filtered, viewMode)
+            ..._buildSearchResults(cs, filtered, viewMode, lang)
           else
-            ..._buildGroupedList(cs, viewMode),
+            ..._buildGroupedList(cs, viewMode, lang),
         ],
       ),
       ),
     );
   }
 
-  List<Widget> _buildGroupedList(ColorScheme cs, ToolsViewMode viewMode) {
+  List<Widget> _buildGroupedList(ColorScheme cs, ToolsViewMode viewMode, String lang) {
     return [
       SliverList(
         delegate: SliverChildBuilderDelegate(
@@ -332,8 +345,8 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: KuberSpacing.sm),
                     child: Text(
-                      group.title.toUpperCase(),
-                      style: GoogleFonts.inter(
+                      tL10n(group.title, lang).toUpperCase(),
+                      style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.8,
@@ -368,18 +381,22 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
           childCount: _kGroups.length,
         ),
       ),
-      const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.xl)),
+      SliverToBoxAdapter(
+        child: Builder(
+          builder: (context) => SizedBox(height: KuberSpacing.xl + systemNavBarInset(context)),
+        ),
+      ),
     ];
   }
 
-  List<Widget> _buildSearchResults(ColorScheme cs, List<_ToolEntry> results, ToolsViewMode viewMode) {
+  List<Widget> _buildSearchResults(ColorScheme cs, List<_ToolEntry> results, ToolsViewMode viewMode, String lang) {
     if (results.isEmpty) {
       return [
         SliverFillRemaining(
           child: Center(
             child: Text(
-              'No tools found',
-              style: GoogleFonts.inter(
+              tL10n('No tools found', lang),
+              style: localeFont(
                 fontSize: 15,
                 color: cs.onSurfaceVariant,
               ),
@@ -467,7 +484,7 @@ class _ViewModeOption extends StatelessWidget {
             const SizedBox(width: KuberSpacing.md),
             Text(
               label,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 14,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                 color: selected ? cs.primary : cs.onSurface,
@@ -493,6 +510,7 @@ class _ToolListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
     return InkWell(
       onTap: () => context.push('/more/tools/${tool.route}'),
       borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -526,8 +544,8 @@ class _ToolListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tool.name,
-                    style: GoogleFonts.inter(
+                    tL10n(tool.name, lang),
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -536,8 +554,8 @@ class _ToolListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    tool.description,
-                    style: GoogleFonts.inter(
+                    tL10n(tool.description, lang),
+                    style: localeFont(
                       fontSize: 12,
                       color: cs.onSurfaceVariant,
                     ),
@@ -563,6 +581,7 @@ class _ToolCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
 
     return InkWell(
       onTap: () => context.push('/more/tools/${tool.route}'),
@@ -591,8 +610,8 @@ class _ToolCard extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              tool.name,
-              style: GoogleFonts.inter(
+              tL10n(tool.name, lang),
+              style: localeFont(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurface,
@@ -603,8 +622,8 @@ class _ToolCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              tool.description,
-              style: GoogleFonts.inter(
+              tL10n(tool.description, lang),
+              style: localeFont(
                 fontSize: 11,
                 color: cs.onSurfaceVariant,
               ),

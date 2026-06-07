@@ -1,4 +1,6 @@
 import 'package:isar_community/isar.dart';
+import 'package:kuber/core/utils/locale_font.dart' show AppLocale;
+import 'package:kuber/l10n/app_localizations.dart' show lookupAppLocalizations;
 
 import '../../notifications/data/app_notification.dart';
 import '../../notifications/data/notification_repository.dart';
@@ -50,13 +52,10 @@ class LedgerReminderProcessor {
       if (expectedDay.isAfter(today)) continue;
 
       final isLent = l.type == 'lent';
-      final title = isLent ? 'Money to collect' : 'Money to repay';
+      final loc = lookupAppLocalizations(AppLocale.current);
+      final title = isLent ? loc.notifMoneyToCollect : loc.notifMoneyToRepay;
       final daysOverdue = today.difference(expectedDay).inDays;
-      final body = daysOverdue == 0
-          ? '${l.personName} - due today'
-          : daysOverdue == 1
-              ? '${l.personName} - 1 day overdue'
-              : '${l.personName} - $daysOverdue days overdue';
+      final body = loc.notifLedgerReminderBody(l.personName, daysOverdue);
 
       final payload = 'ledger:${l.uid}';
       final inserted = await notificationRepo.add(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -20,7 +21,7 @@ class SpendingStatsCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const KuberHomeWidgetTitle(title: 'SPENDING PATTERN'),
+        KuberHomeWidgetTitle(title: context.l10n.spendingPattern),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -38,7 +39,7 @@ class SpendingStatsCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('AVG DAILY', style: _captionStyle(context)),
+                    Text(context.l10n.avgDaily, style: _captionStyle(context)),
                     const SizedBox(height: 4),
                     Text(
                       maskAmount(ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()), ref.watch(privacyModeProvider)),
@@ -46,7 +47,7 @@ class SpendingStatsCard extends ConsumerWidget {
                             fontWeight: FontWeight.w700,
                           ),
                     ),
-                    Text('last 90 days', style: _captionStyle(context)),
+                    Text(context.l10n.last90Days, style: _captionStyle(context)),
                   ],
                 ),
               ),
@@ -56,7 +57,7 @@ class SpendingStatsCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('THIS MONTH', style: _captionStyle(context)),
+                    Text(context.l10n.statThisMonth, style: _captionStyle(context)),
                     const SizedBox(height: 4),
                     Text(
                       maskAmount(ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()), ref.watch(privacyModeProvider)),
@@ -64,7 +65,7 @@ class SpendingStatsCard extends ConsumerWidget {
                             fontWeight: FontWeight.w700,
                           ),
                     ),
-                    Text('${stats.daysElapsed} days', style: _captionStyle(context)),
+                    Text(context.l10n.statDays('${stats.daysElapsed}'), style: _captionStyle(context)),
                   ],
                 ),
               ),
@@ -74,7 +75,7 @@ class SpendingStatsCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('PROJECTED', style: _captionStyle(context)),
+                    Text(context.l10n.projectedLabel, style: _captionStyle(context)),
                     const SizedBox(height: 4),
                     Text(
                       maskAmount(ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()), ref.watch(privacyModeProvider)),
@@ -83,7 +84,7 @@ class SpendingStatsCard extends ConsumerWidget {
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                     ),
-                    Text('end of month', style: _captionStyle(context)),
+                    Text(context.l10n.endOfMonth, style: _captionStyle(context)),
                   ],
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../insights/models/insight.dart';
 import '../../insights/providers/insight_provider.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -43,7 +44,7 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           KuberHomeWidgetTitle(
-            title: 'SMART INSIGHTS',
+            title: context.l10n.smartInsights,
             trailing: insights.isNotEmpty
                 ? Text(
                     '${_currentIndex + 1}/${insights.length}',
@@ -187,7 +188,7 @@ class _InsightsEmptyState extends StatelessWidget {
               color: cs.onSurfaceVariant, size: 32),
           const SizedBox(height: 12),
           Text(
-            'Keep adding transactions to unlock\ninsights about your finances.',
+            context.l10n.smartInsightsEmpty,
             textAlign: TextAlign.center,
             style: tt.bodyMedium?.copyWith(
               color: cs.onSurfaceVariant,

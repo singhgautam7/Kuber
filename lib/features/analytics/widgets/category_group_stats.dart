@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/category_icon.dart';
@@ -48,7 +49,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
               children: [
                 Expanded(
                   child: Text(
-                    'Spending Distribution',
+                    context.l10n.spendingDistribution,
                     style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -56,7 +57,7 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
                 ),
                 const SizedBox(width: KuberSpacing.md),
                 AnalyticsCardSmallTabs(
-                  labels: const ['Category', 'Group'],
+                  labels: [context.l10n.categoryLabel, context.l10n.groupLabel],
                   selectedIndex: _isGroupView ? 1 : 0,
                   onChanged: (i) => setState(() {
                     _isGroupView = i == 1;
@@ -68,15 +69,15 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
           ),
           statsAsync.when(
             loading: () => _buildLoading(context),
-            error: (e, _) => const Padding(
-              padding: EdgeInsets.all(KuberSpacing.lg),
-              child: _EmptyState(message: 'Error loading data'),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(KuberSpacing.lg),
+              child: _EmptyState(message: context.l10n.errorLoadingData),
             ),
             data: (stats) {
               if (stats.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(KuberSpacing.lg),
-                  child: _EmptyState(message: 'No data available'),
+                return Padding(
+                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  child: _EmptyState(message: context.l10n.noDataAvailable),
                 );
               }
 

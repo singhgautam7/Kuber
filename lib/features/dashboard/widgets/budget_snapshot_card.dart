@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -31,7 +32,7 @@ class BudgetSnapshotCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const KuberHomeWidgetTitle(title: 'BUDGET SNAPSHOT'),
+              KuberHomeWidgetTitle(title: context.l10n.budgetSnapshot),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(KuberSpacing.md),
@@ -58,7 +59,7 @@ class BudgetSnapshotCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const KuberHomeWidgetTitle(title: 'BUDGET SNAPSHOT'),
+          KuberHomeWidgetTitle(title: context.l10n.budgetSnapshot),
           Shimmer.fromColors(
             baseColor: cs.surfaceContainerHigh,
             highlightColor: cs.surfaceContainerLowest,
@@ -101,16 +102,16 @@ class _BudgetRow extends ConsumerWidget {
     String statusLabel;
     if (progress.percentage >= 100) {
       badgeColor = cs.error;
-      statusLabel = 'Exceeded';
+      statusLabel = context.l10n.budgetExceeded;
     } else if (progress.percentage >= 80) {
       badgeColor = cs.error;
-      statusLabel = 'High usage';
+      statusLabel = context.l10n.budgetHighUsage;
     } else if (progress.percentage >= 50) {
       badgeColor = Colors.orange.shade600;
-      statusLabel = 'Near limit';
+      statusLabel = context.l10n.budgetNearLimit;
     } else {
       badgeColor = Colors.green.shade600;
-      statusLabel = 'On track';
+      statusLabel = context.l10n.budgetOnTrack;
     }
 
     final remaining = (progress.limit - progress.spent).clamp(0.0, double.infinity);
@@ -156,7 +157,7 @@ class _BudgetRow extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category?.name ?? 'Category',
+                      category?.name ?? context.l10n.categoryLabel,
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -185,7 +186,8 @@ class _BudgetRow extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${maskAmount(fmt.formatCurrency(remaining), isPrivate)} remaining',
+                      context.l10n.budgetRemaining(
+                          maskAmount(fmt.formatCurrency(remaining), isPrivate)),
                       style: textTheme.labelSmall?.copyWith(
                         color: cs.onSurfaceVariant,
                         fontSize: 10,

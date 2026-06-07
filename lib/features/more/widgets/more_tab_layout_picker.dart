@@ -30,22 +30,24 @@
 // in the file; nothing custom is needed.
 
 import 'package:flutter/material.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../settings/widgets/settings_choice_sheet.dart';
 import '../../settings/providers/settings_provider.dart';
 
 /// Pass this to `SettingsChoiceSheet<MoreTabLayout>(choices: ...)`.
-const moreTabLayoutChoices = <SettingsChoice<MoreTabLayout>>[
+List<SettingsChoice<MoreTabLayout>> moreTabLayoutChoices(
+  BuildContext context,
+) => [
   SettingsChoice(
     value: MoreTabLayout.simple,
-    label: 'Simple',
-    subtitle: 'Uniform list of cards. Familiar and predictable.',
+    label: context.l10n.simpleLabel,
+    subtitle: context.l10n.moreTabSimpleSubtitle,
     icon: Icons.view_list_rounded,
   ),
   SettingsChoice(
     value: MoreTabLayout.modern,
-    label: 'Modern',
-    subtitle:
-        'Hero items, tile grid and compact lists. Differentiated by section.',
+    label: context.l10n.navModernChoice,
+    subtitle: context.l10n.moreTabModernSubtitle,
     icon: Icons.grid_view_rounded,
   ),
 ];

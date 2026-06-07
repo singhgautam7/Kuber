@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kuber/l10n/app_localizations.dart';
 
 import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
+import 'features/backups/providers/backup_provider.dart';
 import 'features/budgets/services/budget_service.dart';
 import 'features/history/providers/selection_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
@@ -24,13 +26,11 @@ class KuberApp extends ConsumerStatefulWidget {
 
 class _KuberAppState extends ConsumerState<KuberApp>
     with WidgetsBindingObserver {
-  // Built once. AppTheme.light()/dark() construct a fresh ThemeData each call;
-  // passing new instances on every KuberApp rebuild makes MaterialApp's internal
-  // AnimatedTheme animate a (visually identical) theme transition over ~200ms,
-  // rebuilding every Theme.of dependent (the whole tab tree) once per frame —
-  // the tab-switch jank. Stable instances make that a no-op.
-  final ThemeData _lightTheme = AppTheme.light();
-  final ThemeData _darkTheme = AppTheme.dark();
+  // Stable cached instances of theme to prevent tab-switch rebuild animations/jank,
+  // refreshed only when the active Locale is updated.
+  Locale? _cachedLocale;
+  ThemeData? _lightTheme;
+  ThemeData? _darkTheme;
 
   @override
   void initState() {
@@ -42,7 +42,46 @@ class _KuberAppState extends ConsumerState<KuberApp>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(budgetServiceProvider).checkAllOnAppOpen();
       _runOnOpenLedgerReminders();
+      _runDueBackup();
     });
+  }
+
+  // Date (y/m/d) of the last scheduled-backup check, so resume doesn't re-check
+  // on every foreground. The shortest backup interval is 1 day, so checking at
+  // most once per calendar day is sufficient and cheap.
+  DateTime? _lastBackupCheckDay;
+
+  /// Runs a scheduled backup if one is due. Called on first frame (cold start)
+  /// and on the first resume of each new day, because Android usually keeps the
+  /// process warm — the cold-start loader path alone almost never fires
+  /// day-to-day, so "daily" would never trigger. Silent + best-effort +
+  /// internally guarded against concurrent runs (can't double-fire with the
+  /// cold-start loader).
+  Future<void> _runDueBackup() async {
+    final now = DateTime.now();
+    _lastBackupCheckDay = DateTime(now.year, now.month, now.day);
+    try {
+      await ref.read(backupSettingsProvider.notifier).runDueBackup();
+    } catch (e, stack) {
+      debugPrint('Kuber: on-open backup check failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state != AppLifecycleState.resumed) return;
+    // Already checked today? A daily (or longer) backup can't be due again, so
+    // skip — avoids a DB read on every foreground.
+    final now = DateTime.now();
+    final last = _lastBackupCheckDay;
+    if (last != null &&
+        last.year == now.year &&
+        last.month == now.month &&
+        last.day == now.day) {
+      return;
+    }
+    _runDueBackup();
   }
 
   /// On-open ledger reminder pass (in-app records + dedupe-gated OS
@@ -134,6 +173,13 @@ class _KuberAppState extends ConsumerState<KuberApp>
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final router = ref.watch(routerProvider);
+    final locale = ref.watch(localeProvider);
+
+    if (_cachedLocale != locale || _lightTheme == null || _darkTheme == null) {
+      _cachedLocale = locale;
+      _lightTheme = AppTheme.light(locale);
+      _darkTheme = AppTheme.dark(locale);
+    }
 
     // Watch these so the widget rebuilds (and the notification listener
     // re-evaluates) when tab or selection state changes.
@@ -147,6 +193,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
       darkTheme: _darkTheme,
       themeMode: themeMode,
       routerConfig: router,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
         final isDark = brightness == Brightness.dark;

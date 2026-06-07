@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -31,11 +32,11 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
     return Column(
       children: [
         KuberHomeWidgetTitle(
-          title: 'RECENT TRANSACTIONS',
+          title: context.l10n.recentTransactions,
           trailing: GestureDetector(
             onTap: () => context.go('/history'),
             child: Text(
-              'VIEW ALL',
+              context.l10n.viewAll,
               style: textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.0,
@@ -46,7 +47,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
         ),
         recentAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
           data: (transactions) {
             if (transactions.isEmpty) {
               return Container(
@@ -58,7 +59,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'No transactions yet',
+                    context.l10n.noTransactionsYet,
                     style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),

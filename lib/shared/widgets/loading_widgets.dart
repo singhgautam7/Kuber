@@ -1,6 +1,6 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 
 class SweepRingWidget extends AnimatedWidget {
@@ -65,7 +65,7 @@ class StatusPill extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -75,7 +75,7 @@ class StatusPill extends StatelessWidget {
           const SizedBox(width: KuberSpacing.sm),
           Text(
             value,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: cs.onSurface,

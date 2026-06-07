@@ -1,14 +1,17 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
+import '../../../core/constants/tools_l10n.dart';
 import '../../dev/providers/dev_mode_provider.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import 'more_screen.dart';
+
 
 class _SearchableItem {
   final String label;
@@ -52,275 +55,274 @@ class _SearchableItem {
   }
 }
 
-List<_SearchableItem> _buildItems(bool isDevMode) => [
+List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevMode) => [
   // AI Assistant
   _SearchableItem(
-    label: 'Ask Kuber',
-    subtitle: 'On-device spending insights',
+    label: context.l10n.menuAskKuber,
+    subtitle: context.l10n.menuAskKuberDesc,
     icon: Icons.auto_awesome_rounded,
-    section: 'AI',
+    section: context.l10n.askKuber,
     route: '/more/ask-kuber',
     color: const Color(0xFFFFB300),
   ),
   // Manage
   _SearchableItem(
-    label: 'Accounts',
-    subtitle: 'Your wallets and bank accounts',
+    label: context.l10n.menuAccounts,
+    subtitle: context.l10n.menuAccountsDesc,
     icon: Icons.account_balance_wallet_outlined,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/accounts',
   ),
   _SearchableItem(
-    label: 'Categories',
-    subtitle: 'Organize your transactions',
+    label: context.l10n.menuCategories,
+    subtitle: context.l10n.menuCategoriesDesc,
     icon: Icons.category_outlined,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/categories',
   ),
   _SearchableItem(
-    label: 'Tags',
-    subtitle: 'Organize the labels for your transactions',
+    label: context.l10n.menuTags,
+    subtitle: context.l10n.menuTagsDesc,
     icon: Icons.label_outlined,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/tags',
   ),
   _SearchableItem(
-    label: 'Budgets',
-    subtitle: 'Track and control your monthly spending',
+    label: context.l10n.menuBudgets,
+    subtitle: context.l10n.menuBudgetsDesc,
     icon: Icons.account_balance_rounded,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/budgets',
   ),
   _SearchableItem(
-    label: 'Recurring Transactions',
-    subtitle: 'Automated scheduled transactions',
+    label: context.l10n.menuRecurring,
+    subtitle: context.l10n.menuRecurringDesc,
     icon: Icons.sync_rounded,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/recurring',
   ),
   _SearchableItem(
-    label: 'Lend / Borrow',
-    subtitle: 'Track money you lent or borrowed',
+    label: context.l10n.menuLedger,
+    subtitle: context.l10n.menuLedgerDesc,
     icon: Icons.handshake_outlined,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/ledger',
   ),
   _SearchableItem(
-    label: 'Loans',
-    subtitle: 'Track EMIs and repayment progress',
+    label: context.l10n.menuLoans,
+    subtitle: context.l10n.menuLoansDesc,
     icon: Icons.account_balance_outlined,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/loans',
   ),
   _SearchableItem(
-    label: 'Investments',
-    subtitle: 'Track portfolio value and growth',
+    label: context.l10n.menuInvestments,
+    subtitle: context.l10n.menuInvestmentsDesc,
     icon: Icons.show_chart,
-    section: 'Manage',
+    section: context.l10n.moreManageTitle,
     route: '/more/investments',
   ),
   // Tools hub
   _SearchableItem(
-    label: 'Calculators & Tools',
-    subtitle: 'EMI, SIP, salary, GST, split & more',
+    label: context.l10n.menuCalculators,
+    subtitle: context.l10n.menuCalculatorsDesc,
     icon: Icons.calculate_outlined,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools',
   ),
   _SearchableItem(
-    label: 'App Tutorial',
-    subtitle: 'Replay the feature walkthrough',
+    label: context.l10n.menuTutorial,
+    subtitle: context.l10n.menuTutorialDesc,
     icon: Icons.school_rounded,
-    section: 'Tutorial',
+    section: context.l10n.moreTutorialTitle,
     onRefAction: launchTutorialFromMore,
   ),
   _SearchableItem(
-    label: 'Welcome Tour',
-    subtitle: 'Replay the onboarding screens',
+    label: context.l10n.menuWelcomeTour,
+    subtitle: context.l10n.menuWelcomeTourDesc,
     icon: Icons.auto_stories_rounded,
-    section: 'Tutorial',
+    section: context.l10n.moreTutorialTitle,
     route: '/onboarding?replay=true',
   ),
   // Individual tools
   _SearchableItem(
-    label: 'EMI Calculator',
-    subtitle: 'Loan repayments',
+    label: tL10n('EMI Calculator', lang),
+    subtitle: tL10n('Loan repayments', lang),
     icon: Icons.account_balance_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/emi-calculator',
   ),
   _SearchableItem(
-    label: 'Investment Returns',
-    subtitle: 'SIP & lump-sum growth',
+    label: tL10n('Investment Returns', lang),
+    subtitle: tL10n('SIP & lump-sum growth', lang),
     icon: Icons.trending_up_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/sip-calculator',
   ),
   _SearchableItem(
-    label: 'SIP Amount',
-    subtitle: 'Find monthly investment',
+    label: tL10n('SIP Amount', lang),
+    subtitle: tL10n('Find monthly investment', lang),
     icon: Icons.savings_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/sip-amount-finder',
   ),
   _SearchableItem(
-    label: 'FD / RD',
-    subtitle: 'Fixed & recurring deposits',
+    label: tL10n('FD / RD', lang),
+    subtitle: tL10n('Fixed & recurring deposits', lang),
     icon: Icons.account_balance_wallet_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/fd-rd-calculator',
   ),
   _SearchableItem(
-    label: 'PPF Calculator',
-    subtitle: '15-year provident fund',
+    label: tL10n('PPF Calculator', lang),
+    subtitle: tL10n('15-year provident fund', lang),
     icon: Icons.shield_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/ppf-calculator',
   ),
   _SearchableItem(
-    label: 'Inflation',
-    subtitle: 'Future purchasing power',
+    label: tL10n('Inflation', lang),
+    subtitle: tL10n('Future purchasing power', lang),
     icon: Icons.trending_down_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/inflation-calculator',
   ),
   _SearchableItem(
-    label: 'Salary Breakdown',
-    subtitle: 'CTC → in-hand',
+    label: tL10n('Salary Breakdown', lang),
+    subtitle: tL10n('CTC → in-hand', lang),
     icon: Icons.work_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/salary-calculator',
   ),
   _SearchableItem(
-    label: 'GST Calculator',
-    subtitle: 'Add or remove GST',
+    label: tL10n('GST Calculator', lang),
+    subtitle: tL10n('Add or remove GST', lang),
     icon: Icons.percent_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/gst-calculator',
   ),
   _SearchableItem(
-    label: 'HRA Exemption',
-    subtitle: 'Old regime tax',
+    label: tL10n('HRA Exemption', lang),
+    subtitle: tL10n('Old regime tax', lang),
     icon: Icons.home_work_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/hra-calculator',
   ),
   _SearchableItem(
-    label: 'Tip Calculator',
-    subtitle: 'Bills & gratuity',
+    label: tL10n('Tip Calculator', lang),
+    subtitle: tL10n('Bills & gratuity', lang),
     icon: Icons.receipt_long_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/tip-calculator',
   ),
   _SearchableItem(
-    label: 'Discount Calculator',
-    subtitle: 'Find the best deal',
+    label: tL10n('Discount Calculator', lang),
+    subtitle: tL10n('Find the best deal', lang),
     icon: Icons.local_offer_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/discount-calculator',
   ),
   _SearchableItem(
-    label: 'Break-even',
-    subtitle: 'Months to recover',
+    label: tL10n('Break-even', lang),
+    subtitle: tL10n('Months to recover', lang),
     icon: Icons.timeline_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/breakeven-calculator',
   ),
   _SearchableItem(
-    label: 'Split Calculator',
-    subtitle: 'Split expenses between people',
+    label: tL10n('Split Calculator', lang),
+    subtitle: tL10n('Split expenses between people', lang),
     icon: Icons.people_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/split-calculator',
   ),
   _SearchableItem(
-    label: 'Currency Converter',
-    subtitle: 'Convert currencies',
+    label: tL10n('Currency Converter', lang),
+    subtitle: tL10n('Convert currencies', lang),
     icon: Icons.currency_exchange_rounded,
-    section: 'Tools',
+    section: context.l10n.moreToolsTitle,
     route: '/more/tools/currency-converter',
   ),
   // App
   _SearchableItem(
-    label: 'Settings',
-    subtitle: 'Theme, currency, and profile',
+    label: context.l10n.menuSettings,
+    subtitle: context.l10n.menuSettingsDesc,
     icon: Icons.settings_outlined,
-    section: 'App',
+    section: context.l10n.moreAppTitle,
     route: '/more/settings',
   ),
   _SearchableItem(
-    label: 'Data',
-    subtitle: 'Export, import, automatic backups',
+    label: context.l10n.menuData,
+    subtitle: context.l10n.menuDataDesc,
     icon: Icons.storage_rounded,
-    section: 'App',
+    section: context.l10n.moreAppTitle,
     route: '/more/data',
   ),
   _SearchableItem(
-    label: 'Money Stories Archive',
-    subtitle: 'Every recap, newest first',
+    label: context.l10n.menuStoriesArchive,
+    subtitle: context.l10n.menuStoriesArchiveDesc,
     icon: Icons.auto_stories_rounded,
-    section: 'App',
+    section: context.l10n.moreAppTitle,
     route: '/more/stories-archive',
   ),
   _SearchableItem(
-    label: 'Troubleshoot',
-    subtitle: 'Fix data and suggestion issues',
+    label: context.l10n.menuTroubleshoot,
+    subtitle: context.l10n.menuTroubleshootDesc,
     icon: Icons.build_outlined,
-    section: 'App',
+    section: context.l10n.moreAppTitle,
     route: '/more/troubleshoot',
   ),
   // About
   _SearchableItem(
-    label: 'About Kuber',
-    subtitle: 'Vision, origin, and developer',
+    label: context.l10n.menuAbout,
+    subtitle: context.l10n.menuAboutDesc,
     icon: Icons.info_outline_rounded,
-    section: 'About',
+    section: context.l10n.moreAboutTitle,
     namedRoute: 'about',
   ),
   _SearchableItem(
-    label: 'Permissions',
-    subtitle: 'App limits and security',
+    label: context.l10n.menuPermissions,
+    subtitle: context.l10n.menuPermissionsDesc,
     icon: Icons.security_outlined,
-    section: 'About',
+    section: context.l10n.moreAboutTitle,
     namedRoute: 'permissions',
   ),
   // Contact Us
   _SearchableItem(
-    label: 'Rate Us on Play Store',
-    subtitle: 'Enjoying Kuber? Leave a review',
+    label: context.l10n.menuRateUs,
+    subtitle: context.l10n.menuRateUsDesc,
     icon: Icons.star_rate_rounded,
-    section: 'Contact Us',
+    section: context.l10n.moreHelpUsTitle,
     onAction: () => launchUrl(
       Uri.parse('https://play.google.com/store/apps/details?id=com.grs.kuber'),
       mode: LaunchMode.externalApplication,
     ),
   ),
   _SearchableItem(
-    label: 'Share This App',
-    subtitle: 'Recommend Kuber to friends and family',
+    label: context.l10n.menuShareApp,
+    subtitle: context.l10n.menuShareAppDesc,
     icon: Icons.share_rounded,
-    section: 'Contact Us',
+    section: context.l10n.moreHelpUsTitle,
     onAction: () => SharePlus.instance.share(
       ShareParams(
-        text:
-            'Manage your expenses like never before. Kuber is a beautifully simple expense manager, made with love in India. Download it here: https://play.google.com/store/apps/details?id=com.grs.kuber',
+        text: context.l10n.shareMessage,
       ),
     ),
   ),
   _SearchableItem(
-    label: 'Submit a Feedback',
-    subtitle: 'Report a bug or suggest a feature',
+    label: context.l10n.menuFeedback,
+    subtitle: context.l10n.menuFeedbackDesc,
     icon: Icons.feedback_outlined,
-    section: 'Contact Us',
+    section: context.l10n.moreHelpUsTitle,
     route: '/more/feedback',
   ),
   // Dev Tools (conditional)
   if (isDevMode)
     _SearchableItem(
-      label: 'Dev Tools',
-      subtitle: 'Developer-only tools',
+      label: context.l10n.menuDevTools,
+      subtitle: context.l10n.menuDevToolsDesc,
       icon: Icons.bug_report_outlined,
-      section: 'Dev',
+      section: context.l10n.menuDevTools,
       route: '/more/dev-tools',
     ),
 ];
@@ -355,11 +357,35 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
     super.dispose();
   }
 
+  String _noResultsLabel(String query, String lang) {
+    switch (lang) {
+      case 'hi':
+        return '"$query" के लिए कोई परिणाम नहीं';
+      case 'kn':
+        return '"$query" ಗೆ ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ';
+      case 'ml':
+        return '"$query" എന്നതിനായി ഫലങ്ങളൊന്നുമില്ല';
+      case 'ta':
+        return '"$query" க்கான முடிவுகள் இல்லை';
+      case 'te':
+        return '"$query" కోసం ఫలితాలు లేవు';
+      case 'mr':
+        return '"$query" साठी कोणतेही परिणाम नाहीत';
+      case 'bn':
+        return '"$query"-এর জন্য কোনো ফলাফল পাওয়া যায়নি';
+      case 'pa':
+        return '"$query" ਲਈ ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ';
+      default:
+        return 'No results for "$query"';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
-    final allItems = _buildItems(isDevMode);
+    final lang = Localizations.localeOf(context).languageCode;
+    final allItems = _buildItems(context, lang, isDevMode);
     final filtered = _query.isEmpty
         ? allItems
         : allItems.where((item) => item.matches(_query)).toList();
@@ -392,13 +418,13 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                     child: TextField(
                       controller: _controller,
                       focusNode: _focusNode,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 14,
                         color: cs.onSurface,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Search More...',
-                        hintStyle: GoogleFonts.inter(
+                        hintText: '${context.l10n.search}...',
+                        hintStyle: localeFont(
                           fontSize: 14,
                           color: cs.onSurfaceVariant,
                         ),
@@ -452,8 +478,8 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
               child: filtered.isEmpty
                   ? Center(
                       child: Text(
-                        'No results for "$_query"',
-                        style: GoogleFonts.inter(
+                        _noResultsLabel(_query, lang),
+                        style: localeFont(
                           fontSize: 14,
                           color: cs.onSurfaceVariant,
                         ),
@@ -501,7 +527,7 @@ class _SearchResultItem extends ConsumerWidget {
                 children: [
                   Text(
                     item.label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -521,7 +547,7 @@ class _SearchResultItem extends ConsumerWidget {
                         ),
                         child: Text(
                           item.section,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: cs.onPrimaryContainer,
@@ -532,7 +558,7 @@ class _SearchResultItem extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           item.subtitle,
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 12,
                             color: cs.onSurfaceVariant,
                           ),

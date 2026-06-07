@@ -4,10 +4,11 @@
 // Drop-in replacement for lib/features/loans/screens/add_loan_screen.dart.
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -117,8 +118,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEditing ? 'Edit loan' : 'New loan',
-          style: GoogleFonts.inter(
+          _isEditing ? context.l10n.editLoan : context.l10n.newLoan,
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -134,11 +135,11 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             KuberFormSection(
-              label: 'Loan amount',
+              label: context.l10n.loanAmount,
               topGap: 0,
               children: [
                 KuberHeroAmountInput(
-                  label: 'Total principal',
+                  label: context.l10n.totalPrincipal,
                   currencySymbol: symbol,
                   controller: _principalController,
                   inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
@@ -149,76 +150,76 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
               ],
             ),
             KuberFormSection(
-              label: 'Loan type',
+              label: context.l10n.loanType,
               children: [
                 KuberChipGrid<String>(
                   columns: 3,
                   selected: _loanType,
                   onChanged: (v) => setState(() => _loanType = v),
-                  options: const [
+                  options: [
                     KuberChipOption(
-                        value: 'home', label: 'Home', icon: Icons.home_outlined),
+                        value: 'home', label: context.l10n.loanTypeHome, icon: Icons.home_outlined),
                     KuberChipOption(
                         value: 'vehicle',
-                        label: 'Vehicle',
+                        label: context.l10n.loanTypeVehicle,
                         icon: Icons.directions_car_outlined),
                     KuberChipOption(
                         value: 'personal',
-                        label: 'Personal',
+                        label: context.l10n.loanTypePersonal,
                         icon: Icons.person_outline_rounded),
                     KuberChipOption(
                         value: 'education',
-                        label: 'Education',
+                        label: context.l10n.loanTypeEducation,
                         icon: Icons.school_outlined),
                     KuberChipOption(
                         value: 'credit_card',
-                        label: 'Credit Card',
+                        label: context.l10n.creditCardLabel,
                         icon: Icons.credit_card_outlined),
                     KuberChipOption(
                         value: 'other',
-                        label: 'Other',
+                        label: context.l10n.loanTypeOther,
                         icon: Icons.more_horiz_rounded),
                   ],
                 ),
               ],
             ),
             KuberFormSection(
-              label: 'Identity',
+              label: context.l10n.identity,
               children: [
-                const KuberFieldLabel('Loan name'),
+                KuberFieldLabel(context.l10n.loanName),
                 TextField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                  decoration: const InputDecoration(hintText: 'e.g. Maruti Brezza'),
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(hintText: context.l10n.loanNameHint),
                 ),
-                const KuberFieldLabel('Lender'),
+                KuberFieldLabel(context.l10n.lenderField),
                 TextField(
                   controller: _lenderController,
                   textCapitalization: TextCapitalization.words,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                  decoration: const InputDecoration(hintText: 'e.g. HDFC Bank'),
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(hintText: context.l10n.lenderHint),
                 ),
-                const KuberFieldLabel('Reference number', optional: true),
+                KuberFieldLabel(context.l10n.referenceNumber, optional: true),
                 TextField(
                   controller: _refController,
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                  decoration: const InputDecoration(hintText: 'Sanction / loan ID'),
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(hintText: context.l10n.referenceNumberHint),
                 ),
               ],
             ),
             KuberFormSection(
-              label: 'Terms',
+              label: context.l10n.termsLabel,
               children: [
-                const KuberFieldLabel('Monthly EMI'),
+                KuberFieldLabel(context.l10n.monthlyEmi),
                 _amountFieldWithCalc(
                     controller: _emiController, symbol: symbol, isIndian: isIndian),
-                const KuberFieldLabel('Interest rate', optional: true),
+                KuberFieldLabel(context.l10n.interestRate, optional: true),
                 Row(
                   children: [
                     Expanded(
@@ -228,7 +229,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                             decimal: true),
                         onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                         onChanged: (_) => setState(() {}),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                             color: cs.onSurface, fontSize: 15),
                         decoration: const InputDecoration(
                           hintText: 'e.g. 8.45',
@@ -237,9 +238,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    _ratePill('Fixed', 'fixed'),
+                    _ratePill(context.l10n.rateFixed, 'fixed'),
                     const SizedBox(width: 6),
-                    _ratePill('Floating', 'floating'),
+                    _ratePill(context.l10n.rateFloating, 'floating'),
                   ],
                 ),
               ],
@@ -250,22 +251,22 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 22),
                 child: KuberAnswerCard(
-                  labelText: 'Monthly outflow',
+                  labelText: context.l10n.monthlyOutflow,
                   labelIcon: Icons.bolt_rounded,
                   amountText: '$symbol${_formatThousands(_emiAmount)}',
-                  unitText: 'per month',
+                  unitText: context.l10n.perMonth,
                   meta: _principalAmount > 0
                       ? [
                           KuberAnswerMeta(
-                            key: 'Principal',
+                            key: context.l10n.principal,
                             value: '$symbol${_compactL(_principalAmount)}',
                           ),
-                          const KuberAnswerMeta(
-                            key: 'Tenure',
+                          KuberAnswerMeta(
+                            key: context.l10n.tenure,
                             value: '— mo',
                           ),
-                          const KuberAnswerMeta(
-                            key: 'Interest',
+                          KuberAnswerMeta(
+                            key: context.l10n.interestLabel,
                             value: '—',
                           ),
                         ]
@@ -275,15 +276,15 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
 
             // ── SCHEDULE (tinted) ────────────────────────────────────
             KuberFormSection(
-              label: 'Schedule',
+              label: context.l10n.schedule,
               tinted: true,
               children: [
-                const KuberFieldLabel('Loan start date',
+                KuberFieldLabel(context.l10n.loanStartDate,
                     optional: true),
                 _loanStartDateRow(),
-                const KuberFieldLabel('Repayment start'),
+                KuberFieldLabel(context.l10n.repaymentStart),
                 _dateRow(
-                  label: 'First EMI on',
+                  label: context.l10n.firstEmiOn,
                   date: _startDate,
                   onTap: () async {
                     final picked = await showDatePicker(
@@ -297,7 +298,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                     }
                   },
                 ),
-                const KuberFieldLabel('Monthly bill date'),
+                KuberFieldLabel(context.l10n.monthlyBillDate),
                 KuberDayGrid(
                   selected: _billDate,
                   onChanged: (v) => setState(() => _billDate = v),
@@ -306,13 +307,13 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             ),
 
             KuberFormSection(
-              label: 'Source account',
+              label: context.l10n.sourceAccount,
               children: [
                 _accountPickerRow(),
                 KuberSwitchRow(
                   icon: Icons.bolt_rounded,
-                  name: 'Auto-add transactions',
-                  sub: 'Post each EMI to "Loan EMI" category on its bill date',
+                  name: context.l10n.autoAddTransactions,
+                  sub: context.l10n.autoAddTransactionsSub,
                   value: _autoAddTransaction,
                   onChanged: (v) => setState(() => _autoAddTransaction = v),
                 ),
@@ -320,7 +321,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
             ),
 
             KuberFormSection(
-              label: 'Notes',
+              label: context.l10n.notesLabel,
               children: [
                 TextField(
                   controller: _notesController,
@@ -328,9 +329,9 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
                   minLines: 1,
                   textCapitalization: TextCapitalization.sentences,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
-                  decoration: const InputDecoration(
-                    hintText: 'Documentation · sanction letter ref · anything',
+                  style: localeFont(color: cs.onSurface, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.loanNotesHint,
                   ),
                 ),
               ],
@@ -340,7 +341,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       ),
     ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEditing ? 'Save changes' : 'Confirm & add loan',
+        label: _isEditing ? context.l10n.saveChanges : context.l10n.confirmAddLoan,
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -359,10 +360,10 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
       onChanged: (_) => setState(() {}),
-      style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
+      style: localeFont(color: cs.onSurface, fontSize: 15),
       decoration: InputDecoration(
         prefixText: '$symbol ',
-        prefixStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
+        prefixStyle: localeFont(color: cs.onSurfaceVariant),
         suffixIcon: IconButton(
           icon: Icon(Icons.calculate_outlined,
               size: 18, color: cs.onSurfaceVariant),
@@ -396,7 +397,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           ),
           child: Text(
             label.toUpperCase(),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1,
@@ -417,8 +418,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
           icon: Icons.calendar_today_rounded,
           empty: true,
         ),
-        label: 'Disbursed on',
-        value: 'Not set · tap to add',
+        label: context.l10n.disbursedOn,
+        value: context.l10n.notSetTapToAdd,
         valueIsPlaceholder: true,
         onTap: _pickLoanStartDate,
       );
@@ -433,7 +434,7 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
         child: Icon(Icons.calendar_today_rounded,
             size: 16, color: cs.onSurface),
       ),
-      label: 'Disbursed on',
+      label: context.l10n.disbursedOn,
       value: DateFormat('d MMM yyyy').format(_loanStartDate!),
       onTap: _pickLoanStartDate,
       clearable: true,
@@ -481,8 +482,8 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
               color: Color(acc.colorValue ?? 0xFF3B82F6),
               icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
             ),
-      label: 'EMI debited from',
-      value: acc?.name ?? 'Select account',
+      label: context.l10n.emiDebitedFrom,
+      value: acc?.name ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: () {
         showModalBottomSheet(

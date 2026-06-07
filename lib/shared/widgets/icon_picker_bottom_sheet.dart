@@ -1,5 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/icon_mapper.dart';
@@ -95,10 +95,10 @@ class _IconPickerSheetState extends State<_IconPickerSheet> {
             autofocus: false,
             onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
             onChanged: _onSearch,
-            style: GoogleFonts.inter(fontSize: 14, color: cs.onSurface),
+            style: localeFont(fontSize: 14, color: cs.onSurface),
             decoration: InputDecoration(
               hintText: 'Search by name or tag',
-              hintStyle: GoogleFonts.inter(
+              hintStyle: localeFont(
                 fontSize: 14,
                 color: cs.onSurfaceVariant,
               ),
@@ -219,7 +219,7 @@ class _IconCell extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected ? cs.primary : cs.onSurfaceVariant,
@@ -259,14 +259,14 @@ class _IconPickerEmpty extends StatelessWidget {
               children: [
                 TextSpan(
                   text: 'No icons match ',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     color: cs.onSurfaceVariant,
                   ),
                 ),
                 TextSpan(
                   text: '"$query"',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -279,7 +279,7 @@ class _IconPickerEmpty extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Try a different word, or clear the search.',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 12.5,
               color: cs.onSurfaceVariant.withValues(alpha: 0.8),
             ),

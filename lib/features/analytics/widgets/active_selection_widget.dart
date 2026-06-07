@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/l10n_ext.dart';
 import 'package:intl/intl.dart';
 
 
@@ -41,7 +42,7 @@ class ActiveSelectionWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'ACTIVE SELECTION',
+              context.l10n.activeSelection,
               style: tt.labelSmall?.copyWith(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w800,

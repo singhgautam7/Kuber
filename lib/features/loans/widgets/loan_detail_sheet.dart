@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -63,7 +64,7 @@ class LoanDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Pay EMI',
+                  label: context.l10n.payEmi,
                   icon: Icons.payments_outlined,
                   type: AppButtonType.primary,
                   onPressed: loan.isCompleted
@@ -77,7 +78,7 @@ class LoanDetailSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Pay Extra',
+                  label: context.l10n.payExtra,
                   icon: Icons.add_circle_outline,
                   type: AppButtonType.normal,
                   onPressed: loan.isCompleted
@@ -95,7 +96,7 @@ class LoanDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  label: 'Edit',
+                  label: context.l10n.editLabel,
                   icon: Icons.edit_rounded,
                   type: AppButtonType.normal,
                   onPressed: () {
@@ -107,7 +108,7 @@ class LoanDetailSheet extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: AppButton(
-                  label: 'Close Loan',
+                  label: context.l10n.closeLoan,
                   icon: Icons.lock_outline,
                   type: AppButtonType.normal,
                   onPressed: loan.isCompleted
@@ -122,7 +123,7 @@ class LoanDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           AppButton(
-            label: 'Delete',
+            label: context.l10n.deleteLabel,
             icon: Icons.delete_outline_rounded,
             type: AppButtonType.danger,
             fullWidth: true,
@@ -138,8 +139,8 @@ class LoanDetailSheet extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'PROGRESS',
-                style: GoogleFonts.inter(
+                context.l10n.progressUpper,
+                style: localeFont(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant,
@@ -147,8 +148,8 @@ class LoanDetailSheet extends ConsumerWidget {
                 ),
               ),
               Text(
-                '${(progress * 100).toInt()}% Paid',
-                style: GoogleFonts.inter(
+                context.l10n.percentPaid('${(progress * 100).toInt()}'),
+                style: localeFont(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   color: cs.primary,
@@ -176,21 +177,21 @@ class LoanDetailSheet extends ConsumerWidget {
             children: [
               Expanded(
                 child: _StatColumn(
-                  label: 'TOTAL',
+                  label: context.l10n.totalUpper,
                   value: fmt.formatCurrency(loan.principalAmount),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
-                  label: 'PAID',
+                  label: context.l10n.paidUpper,
                   value: fmt.formatCurrency(totalPaid),
                   color: cs.onSurface,
                 ),
               ),
               Expanded(
                 child: _StatColumn(
-                  label: 'REMAINING',
+                  label: context.l10n.remainingUpper,
                   value: fmt.formatCurrency(remaining.clamp(0, double.infinity)),
                   color: remaining > 0 ? cs.error : cs.tertiary,
                 ),
@@ -203,8 +204,8 @@ class LoanDetailSheet extends ConsumerWidget {
           // Next EMI section
           if (!loan.isCompleted) ...[
             Text(
-              'NEXT EMI DUE',
-              style: GoogleFonts.inter(
+              context.l10n.nextEmiDue,
+              style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: cs.onSurfaceVariant,
@@ -217,7 +218,7 @@ class LoanDetailSheet extends ConsumerWidget {
               children: [
                 Text(
                   fmt.formatCurrency(loan.emiAmount),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: cs.onSurface,
@@ -226,7 +227,7 @@ class LoanDetailSheet extends ConsumerWidget {
                 if (nextDue != null)
                   Text(
                     DateFormat('MMM d, yyyy').format(nextDue),
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: isOverdue ? cs.error : cs.primary,
@@ -242,7 +243,7 @@ class LoanDetailSheet extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Text(
                     'Auto-pay via $accountName',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       color: cs.onSurfaceVariant,
                     ),
@@ -260,8 +261,8 @@ class LoanDetailSheet extends ConsumerWidget {
                 Icon(Icons.percent, size: 14, color: cs.onSurfaceVariant),
                 const SizedBox(width: 8),
                 Text(
-                  'INTEREST RATE',
-                  style: GoogleFonts.inter(
+                  context.l10n.interestRateUpper,
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurfaceVariant,
@@ -271,7 +272,7 @@ class LoanDetailSheet extends ConsumerWidget {
                 const Spacer(),
                 Text(
                   '${loan.interestRate!.toStringAsFixed(2)}% p.a.${loan.rateType != null ? ' (${loan.rateType})' : ''}',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -294,8 +295,8 @@ class LoanDetailSheet extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'NOTES',
-                        style: GoogleFonts.inter(
+                        context.l10n.notesUpper,
+                        style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant,
@@ -305,7 +306,7 @@ class LoanDetailSheet extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         loan.notes!,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 13,
                           color: cs.onSurface,
                         ),
@@ -320,8 +321,8 @@ class LoanDetailSheet extends ConsumerWidget {
 
           // Payment history
           Text(
-            'PAYMENT HISTORY',
-            style: GoogleFonts.inter(
+            context.l10n.paymentHistory,
+            style: localeFont(
               fontSize: 11,
               fontWeight: FontWeight.w700,
               color: cs.onSurfaceVariant,
@@ -336,8 +337,8 @@ class LoanDetailSheet extends ConsumerWidget {
             data: (payments) {
               if (payments.isEmpty) {
                 return Text(
-                  'No payments recorded',
-                  style: GoogleFonts.inter(
+                  context.l10n.noPaymentsRecorded,
+                  style: localeFont(
                     fontSize: 13,
                     color: cs.onSurfaceVariant,
                   ),
@@ -355,7 +356,7 @@ class LoanDetailSheet extends ConsumerWidget {
           Center(
             child: Text(
               'CREATED ${DateFormat('MMM d, yyyy').format(loan.createdAt).toUpperCase()}',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
@@ -404,19 +405,19 @@ class LoanDetailSheet extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('Delete Loan?',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        title: Text(context.l10n.deleteLoanConfirm,
+            style: localeFont(fontWeight: FontWeight.bold)),
         content: Text(
-          'This will delete the loan and ALL linked payment transactions. This cannot be undone.',
-          style: GoogleFonts.inter(),
+          context.l10n.deleteLoanBody,
+          style: localeFont(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: GoogleFonts.inter()),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
           ),
           AppButton(
-            label: 'Delete',
+            label: context.l10n.deleteLabel,
             type: AppButtonType.danger,
             onPressed: () {
               ref.read(loanListProvider.notifier).deleteLoan(loan);
@@ -463,7 +464,7 @@ class _StatColumn extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -473,7 +474,7 @@ class _StatColumn extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w800,
             color: color,
@@ -495,10 +496,10 @@ class _PaymentRow extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
 
     final label = transaction.name.startsWith('EMI')
-        ? 'EMI Paid'
+        ? context.l10n.emiPaid
         : transaction.name.startsWith('Extra')
-            ? 'Extra Payment'
-            : 'Loan Closure';
+            ? context.l10n.extraPayment
+            : context.l10n.loanClosure;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -512,7 +513,7 @@ class _PaymentRow extends ConsumerWidget {
               children: [
                 Text(
                   label,
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -520,7 +521,7 @@ class _PaymentRow extends ConsumerWidget {
                 ),
                 Text(
                   DateFormat('MMM d, yyyy').format(transaction.createdAt),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     color: cs.onSurfaceVariant,
                   ),
@@ -530,7 +531,7 @@ class _PaymentRow extends ConsumerWidget {
           ),
           Text(
             fmt.formatCurrency(transaction.amount),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,

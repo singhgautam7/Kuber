@@ -120,11 +120,22 @@ class BackupSettingsNotifier extends AsyncNotifier<BackupSettings> {
     }
   }
 
+  // Guards against the cold-start loader and the on-resume check both firing a
+  // scheduled backup at the same instant (both could pass isDue before either
+  // writes lastBackupAt).
+  bool _scheduledBackupRunning = false;
+
   Future<bool> runDueBackup() async {
-    final config = await ref.read(backupRepositoryProvider).getOrCreate();
-    if (!isDue(config, DateTime.now())) return false;
-    await runBackup(config);
-    return true;
+    if (_scheduledBackupRunning) return false;
+    _scheduledBackupRunning = true;
+    try {
+      final config = await ref.read(backupRepositoryProvider).getOrCreate();
+      if (!isDue(config, DateTime.now())) return false;
+      await runBackup(config);
+      return true;
+    } finally {
+      _scheduledBackupRunning = false;
+    }
   }
 
   Future<void> runBackup(BackupConfig config, {bool manual = false}) async {

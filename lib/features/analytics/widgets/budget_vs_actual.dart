@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../budgets/data/budget.dart';
 import '../../settings/providers/settings_provider.dart'
@@ -34,16 +35,16 @@ class BudgetVsActualCard extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(KuberSpacing.lg),
             child: Text(
-              'Budget vs Actual',
+              context.l10n.budgetVsActual,
               style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
           const Divider(height: 1),
           budgetsAsync.when(
             loading: () => _buildLoading(context),
-            error: (e, _) => const Padding(
-              padding: EdgeInsets.all(KuberSpacing.lg),
-              child: _EmptyState(message: 'Error loading budgets'),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(KuberSpacing.lg),
+              child: _EmptyState(message: context.l10n.errorLoadingBudgets),
             ),
             data: (results) {
               // Filter: show top 5 OR budgets >= 60% usage
@@ -51,9 +52,9 @@ class BudgetVsActualCard extends ConsumerWidget {
               final displayList = filtered.length >= 3 ? filtered : results.take(5).toList();
 
               if (displayList.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(KuberSpacing.lg),
-                  child: _EmptyState(message: 'No active budgets'),
+                return Padding(
+                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  child: _EmptyState(message: context.l10n.noActiveBudgets),
                 );
               }
 
@@ -111,16 +112,16 @@ class _BudgetVsActualRow extends ConsumerWidget {
     String statusLabel;
     if (progress.percentage >= 100) {
       badgeColor = cs.error;
-      statusLabel = 'Exceeded';
+      statusLabel = context.l10n.budgetExceeded;
     } else if (progress.percentage >= 80) {
       badgeColor = cs.error;
-      statusLabel = 'High usage';
+      statusLabel = context.l10n.budgetHighUsage;
     } else if (progress.percentage >= 50) {
       badgeColor = Colors.orange.shade600;
-      statusLabel = 'Near limit';
+      statusLabel = context.l10n.budgetNearLimit;
     } else {
       badgeColor = Colors.green.shade600;
-      statusLabel = 'On track';
+      statusLabel = context.l10n.budgetOnTrack;
     }
 
     final remaining = (progress.limit - progress.spent).clamp(0.0, double.infinity);
@@ -155,7 +156,7 @@ class _BudgetVsActualRow extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        category?.name ?? 'Category',
+                        category?.name ?? context.l10n.categoryLabel,
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           fontSize: 15,

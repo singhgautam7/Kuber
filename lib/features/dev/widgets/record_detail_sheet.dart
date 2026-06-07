@@ -1,3 +1,4 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,7 +50,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
               backgroundColor: cs.surfaceContainerHigh,
               selectedBackgroundColor: cs.primary.withValues(alpha: 0.15),
               selectedForegroundColor: cs.primary,
-              textStyle: GoogleFonts.inter(
+              textStyle: localeFont(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -100,7 +101,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
     if (value == null) {
       return Text(
         'null',
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 14,
           fontStyle: FontStyle.italic,
           color: cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -147,7 +148,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
 
       return SelectableText(
         displayStr,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: cs.onSurface,

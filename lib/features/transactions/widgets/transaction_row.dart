@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -166,7 +167,7 @@ class TransactionRow extends ConsumerWidget {
   }
 
   /// Builds a styled TextSpan with tags in accent color and attachment/notes chips.
-  InlineSpan _buildIndicatorSpan(ColorScheme cs) {
+  InlineSpan _buildIndicatorSpan(BuildContext context, ColorScheme cs) {
     final hasAttachments = transaction.attachmentPaths.isNotEmpty;
     final hasNotes = transaction.notes?.isNotEmpty == true;
     final hasTags = tagNames.isNotEmpty;
@@ -252,7 +253,9 @@ class TransactionRow extends ConsumerWidget {
       spans.add(TextSpan(text: visible, style: tagStyle));
       final remaining = tagNames.length - 2;
       if (remaining > 0) {
-        spans.add(TextSpan(text: ' +$remaining more', style: baseStyle));
+        spans.add(TextSpan(
+            text: ' ${context.l10n.tagsMoreCount('$remaining')}',
+            style: baseStyle));
       }
     }
 
@@ -298,14 +301,16 @@ class TransactionRow extends ConsumerWidget {
       iconData = Icons.account_balance_rounded;
       iconColor = cs.onSurfaceVariant;
       displayName = transaction.name;
-      subtitle = 'Account correction · excluded from analytics';
+      subtitle = context.l10n.accountCorrectionSubtitle;
       amountColor = cs.onSurface;
       amountPrefix = isIncome ? '+' : '-';
     } else if (isTransfer) {
       iconData = Icons.swap_horiz_rounded;
       iconColor = const Color(0xFF78909C);
-      displayName = '${fromName ?? "Unknown"} → ${toName ?? "Unknown"}';
-      subtitle = 'Transfer · ${toName ?? "Unknown"}';
+      displayName =
+          '${fromName ?? context.l10n.unknownLabel} → ${toName ?? context.l10n.unknownLabel}';
+      subtitle =
+          '${context.l10n.transferLabel} · ${toName ?? context.l10n.unknownLabel}';
       amountColor = cs.onSurface;
       amountPrefix = '';
     } else {
@@ -317,7 +322,7 @@ class TransactionRow extends ConsumerWidget {
           : cs.primary;
       displayName = transaction.name;
       subtitle =
-          '${category?.name ?? "Unknown"} · ${account?.name ?? "Unknown"}';
+          '${category?.name ?? context.l10n.unknownLabel} · ${account?.name ?? context.l10n.unknownLabel}';
       amountColor = isIncome ? cs.tertiary : cs.onSurface;
       amountPrefix = isIncome ? '+' : '-';
     }
@@ -430,7 +435,7 @@ class TransactionRow extends ConsumerWidget {
                               ),
                             ),
                             child: Text(
-                              'ADJUSTMENT',
+                              context.l10n.adjustmentLabel,
                               style: Theme.of(context)
                                   .textTheme
                                   .labelSmall
@@ -448,7 +453,7 @@ class TransactionRow extends ConsumerWidget {
                     if (_hasIndicator()) ...[
                       const SizedBox(height: 2),
                       Text.rich(
-                        _buildIndicatorSpan(cs),
+                        _buildIndicatorSpan(context, cs),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

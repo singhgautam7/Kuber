@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/utils/locale_font.dart';
 import '../../../core/utils/prefs_keys.dart';
+import '../../../l10n/app_localizations.dart';
 import '../data/insight_story.dart';
 import '../data/story_repository.dart';
 import '../models/story_models.dart';
@@ -19,40 +21,40 @@ import 'story_ttl.dart';
 /// palette (plum -> blue -> emerald -> amber) for a refreshing intro. Welcome is
 /// the only story allowed to vary `background` slide to slide.
 InsightStory buildWelcomeStory(DateTime now) {
-  const slides = <StorySlide>[
+  final l10n = lookupAppLocalizations(AppLocale.current);
+  final slides = <StorySlide>[
     StorySlide(
       variant: SlideVariant.statement,
       background: StoryColorKey.plum,
       icon: 'sparkle',
-      header: 'Welcome',
-      title: 'Welcome to Kuber',
-      subtitle: 'Thanks for installing. Your money, beautifully tracked.',
-      emphasis: [Emphasis('Kuber', EmphasisStyle.primary)],
+      header: l10n.welcomeHeader,
+      title: l10n.welcomeTitle,
+      subtitle: l10n.welcomeSubtitle,
+      emphasis: const [Emphasis('Kuber', EmphasisStyle.primary)],
     ),
     StorySlide(
       variant: SlideVariant.statement,
       background: StoryColorKey.blue,
       icon: 'wallet',
-      header: 'The basics',
-      title: 'Track every rupee',
-      subtitle: 'Expenses, income, transfers, and budgets, all in one place.',
+      header: l10n.basicsHeader,
+      title: l10n.basicsTitle,
+      subtitle: l10n.basicsSubtitle,
     ),
     StorySlide(
       variant: SlideVariant.statement,
       background: StoryColorKey.emerald,
       icon: 'savings',
-      header: 'Beyond the basics',
-      title: 'There is more in here',
-      subtitle: 'Lend and borrow, EMIs, investments, and handy calculators.',
+      header: l10n.beyondBasicsHeader,
+      title: l10n.beyondBasicsTitle,
+      subtitle: l10n.beyondBasicsSubtitle,
     ),
     StorySlide(
       variant: SlideVariant.statement,
       background: StoryColorKey.amber,
       icon: 'chart',
-      header: 'This space is yours',
-      title: 'Your money stories',
-      subtitle:
-          'Recaps and highlights about your spending will appear right here.',
+      header: l10n.spaceIsYoursHeader,
+      title: l10n.spaceIsYoursTitle,
+      subtitle: l10n.spaceIsYoursSubtitle,
     ),
   ];
 

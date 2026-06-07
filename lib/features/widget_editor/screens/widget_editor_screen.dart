@@ -1,10 +1,13 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import '../models/home_widget_config.dart';
+import '../data/widget_catalog.dart';
 import '../providers/widget_editor_provider.dart';
 
 /// Full-screen modal for re-ordering and enabling/disabling widgets on
@@ -59,7 +62,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       if (remaining <= 1) {
         showKuberSnackBar(
           context,
-          'At least one widget must be enabled',
+          context.l10n.atLeastOneWidget,
           isError: true,
         );
         return;
@@ -75,27 +78,26 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
-          'Discard changes?',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w800),
+          context.l10n.discardChangesConfirm,
+          style: localeFont(fontWeight: FontWeight.w800),
         ),
         content: Text(
-          'You have unsaved changes to your widgets. '
-          'Leaving now will discard them.',
-          style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+          context.l10n.discardChangesBody,
+          style: localeFont(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
-              'Keep editing',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+              context.l10n.keepEditing,
+              style: localeFont(fontWeight: FontWeight.w700),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Discard',
-              style: GoogleFonts.inter(
+              context.l10n.discardLabel,
+              style: localeFont(
                 fontWeight: FontWeight.w700,
                 color: cs.error,
               ),
@@ -166,7 +168,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                         Expanded(
                           child: Text(
                             'Drag the handle to reorder. Toggle to show/hide.',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 12,
                               color: cs.onSurfaceVariant,
                             ),
@@ -221,11 +223,10 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
               )
             : const Center(child: CircularProgressIndicator()),
         bottomSheet: loaded
-            ? SafeArea(
-                top: false,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(
-                      KuberSpacing.lg, 12, KuberSpacing.lg, 12),
+            ? Container(
+                  padding: EdgeInsets.fromLTRB(
+                      KuberSpacing.lg, 12, KuberSpacing.lg,
+                      12 + systemNavBarInset(context)),
                   decoration: BoxDecoration(
                     color: cs.surface,
                     border: Border(
@@ -250,8 +251,8 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                         ),
                       ),
                       child: Text(
-                        'Save Changes',
-                        style: GoogleFonts.inter(
+                        context.l10n.saveChanges,
+                        style: localeFont(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.3,
@@ -259,8 +260,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                       ),
                     ),
                   ),
-                ),
-              )
+                )
             : null,
       ),
     );
@@ -314,8 +314,8 @@ class _WidgetRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.name,
-                    style: GoogleFonts.inter(
+                    localizedWidgetName(context, widget.id),
+                    style: localeFont(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -324,10 +324,10 @@ class _WidgetRow extends StatelessWidget {
                   if (widget.description != null) ...[
                     const SizedBox(height: 2),
                     Text(
-                      widget.description!,
+                      localizedWidgetDesc(context, widget.id) ?? widget.description!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         color: cs.onSurfaceVariant,
                       ),

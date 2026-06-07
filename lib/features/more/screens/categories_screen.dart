@@ -1,3 +1,5 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -159,7 +161,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: categoriesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
           data: (categories) {
             final groups = groupsAsync.valueOrNull ?? [];
 
@@ -178,9 +180,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 // Page header
                 SliverToBoxAdapter(
                   child: KuberPageHeader(
-                    title: 'Manage\nCategories',
+                    title: context.l10n.categoriesTitle,
                     description: '',
-                    actionTooltip: 'Add Category/Group',
+                    actionTooltip: context.l10n.addCategoryGroup,
                     onAction: () => _showAddSelectionSheet(context),
                   ),
                 ),
@@ -232,10 +234,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     hasScrollBody: false,
                     child: KuberEmptyState(
                       icon: Icons.category_outlined,
-                      title: 'No categories yet',
-                      description:
-                          'Create categories to organize your expenses',
-                      actionLabel: 'Add Category',
+                      title: context.l10n.noCategories,
+                      description: context.l10n.categoriesEmptyDesc,
+                      actionLabel: context.l10n.addCategory,
                       onAction: () => _showAddSelectionSheet(context),
                     ),
                   )
@@ -255,13 +256,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       child: TextField(
                         controller: _searchController,
                         onChanged: (v) => setState(() => _query = v),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 14,
                           color: cs.onSurface,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Search categories and groups...',
-                          hintStyle: GoogleFonts.inter(
+                          hintText: context.l10n.searchCategoriesHint,
+                          hintStyle: localeFont(
                             fontSize: 14,
                             color: cs.onSurfaceVariant,
                           ),
@@ -357,9 +358,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                             sliver: SliverToBoxAdapter(
                               child: KuberEmptyState(
                                 icon: Icons.search_off_rounded,
-                                title: 'No matches',
-                                description:
-                                    'No categories or groups match "${_query.trim()}".',
+                                title: context.l10n.noMatches,
+                                description: context.l10n.noCategoryMatches(_query.trim()),
                               ),
                             ),
                           ),
@@ -384,7 +384,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               // "Ungrouped". Otherwise an orphan category
                               // looks identical to a grouped one and the
                               // user can't tell why it matched.
-                              final searchTag = realGname ?? 'Ungrouped';
+                              final searchTag = realGname ?? context.l10n.ungroupedLabel;
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: CategoryListItem(
@@ -579,8 +579,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Add New',
-                  style: GoogleFonts.inter(
+                  context.l10n.addNew,
+                  style: localeFont(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -608,8 +608,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             _buildAddOption(
               context,
               icon: Icons.category_rounded,
-              title: 'Add Category',
-              description: 'Classify your transactions for better tracking',
+              title: context.l10n.addCategory,
+              description: context.l10n.addCategoryDesc,
               onTap: () {
                 Navigator.pop(context);
                 context.push(
@@ -622,9 +622,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             _buildAddOption(
               context,
               icon: Icons.grid_view_rounded,
-              title: 'Add Group',
-              description:
-                  'Organize categories into sections for better clarity',
+              title: context.l10n.addGroup,
+              description: context.l10n.addGroupDesc,
               onTap: () {
                 Navigator.pop(context);
                 _showAddGroupDialog(context);
@@ -670,7 +669,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                       color: cs.onSurface,
@@ -678,7 +677,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   ),
                   Text(
                     description,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 12,
                       color: cs.onSurfaceVariant,
                     ),
@@ -695,7 +694,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
   void _showAddGroupDialog(BuildContext context) {
     final controller = TextEditingController();
-    _showGroupDialog(context, controller, 'Add Group', (ref, name) {
+    _showGroupDialog(context, controller, context.l10n.addGroup, (ref, name) {
       final group = CategoryGroup()..name = name;
       ref.read(categoryGroupListProvider.notifier).add(group);
     }, null);
@@ -707,7 +706,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     CategoryGroup group,
   ) {
     final controller = TextEditingController(text: group.name);
-    _showGroupDialog(context, controller, 'Edit Group', (ref, name) {
+    _showGroupDialog(context, controller, context.l10n.editGroup, (ref, name) {
       group.name = name;
       ref.read(categoryGroupRepositoryProvider).save(group);
       ref.invalidate(categoryGroupListProvider);
@@ -730,13 +729,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => KuberBottomSheet(
         title: group.name,
-        subtitle: 'Category group',
+        subtitle: context.l10n.categoryGroupSubtitle,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             AppButton(
-              label: 'Edit group',
+              label: context.l10n.editGroupLabel,
               icon: Icons.edit_outlined,
               type: AppButtonType.normal,
               fullWidth: true,
@@ -747,7 +746,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
             const SizedBox(height: KuberSpacing.sm),
             AppButton(
-              label: 'Delete group',
+              label: context.l10n.deleteGroupLabel,
               icon: Icons.delete_outline_rounded,
               type: AppButtonType.danger,
               fullWidth: true,
@@ -793,16 +792,16 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
               String? errorText;
               if (raw.trim().isNotEmpty && isDuplicate) {
-                errorText = 'This group already exists';
+                errorText = context.l10n.groupAlreadyExists;
               } else if (raw.isNotEmpty && normalized.isEmpty) {
-                errorText = 'Group name cannot be empty';
+                errorText = context.l10n.groupNameEmpty;
               }
 
               return AlertDialog(
                 backgroundColor: cs.surfaceContainer,
                 title: Text(
                   title,
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  style: localeFont(fontWeight: FontWeight.w600),
                 ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -814,10 +813,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       maxLength: 15,
                       textCapitalization: TextCapitalization.words,
                       decoration: InputDecoration(
-                        hintText: 'Group name (e.g. Food, Transport)',
+                        hintText: context.l10n.groupNameHint,
                         errorText: errorText,
                         counterText: '${raw.length} / 15',
-                        counterStyle: GoogleFonts.inter(
+                        counterStyle: localeFont(
                           fontSize: 10,
                           color: raw.length >= 15
                               ? cs.error
@@ -831,10 +830,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.cancelLabel),
                   ),
                   AppButton(
-                    label: 'Save',
+                    label: context.l10n.saveLabel,
                     type: AppButtonType.primary,
                     onPressed: canSave
                         ? () {
@@ -863,19 +862,19 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: cs.surfaceContainer,
         title: Text(
-          'Delete Group?',
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          context.l10n.deleteGroupConfirm,
+          style: localeFont(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Categories in "${group.name}" will be moved to "Ungrouped".',
+          context.l10n.deleteGroupBody(group.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancelLabel),
           ),
           AppButton(
-            label: 'Delete',
+            label: context.l10n.deleteLabel,
             type: AppButtonType.primary,
             onPressed: () {
               ref.read(categoryGroupListProvider.notifier).delete(group.id);
@@ -902,14 +901,14 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => KuberBottomSheet(
         title: cat.name,
-        subtitle: 'Category Detail',
+        subtitle: context.l10n.categoryDetail,
         leadingIcon: CategoryIcon.square(
           icon: IconMapper.fromString(cat.icon),
           rawColor: Color(cat.colorValue),
           size: 48,
         ),
         actions: AppButton(
-          label: 'View Transactions',
+          label: context.l10n.viewTransactions,
           icon: Icons.receipt_long_rounded,
           type: AppButtonType.primary,
           fullWidth: true,
@@ -943,9 +942,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       const SizedBox(width: 6),
                       Text(
                         txn != null
-                            ? 'Last transaction ${DateFormatter.timeAgo(txn.createdAt)}'
-                            : 'No transactions yet',
-                        style: GoogleFonts.inter(
+                            ? context.l10n.lastTransaction(DateFormatter.timeAgo(txn.createdAt))
+                            : context.l10n.noTransactionsYet,
+                        style: localeFont(
                           fontSize: 12,
                           color: cs.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
@@ -961,17 +960,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             const SizedBox(height: 32),
             _buildDetailItem(
               context,
-              label: 'GROUP',
-              value: groupName ?? 'None',
+              label: context.l10n.groupUpper,
+              value: groupName ?? context.l10n.noneLabel,
             ),
             const SizedBox(height: 16),
             _buildDetailItem(
               context,
-              label: 'TYPE',
+              label: context.l10n.typeUpper,
               value: cat.effectiveType == 'both'
-                  ? 'Income & Expense'
-                  : cat.effectiveType[0].toUpperCase() +
-                        cat.effectiveType.substring(1),
+                  ? context.l10n.incomeAndExpense
+                  : cat.effectiveType == 'income'
+                      ? context.l10n.incomeLabel
+                      : context.l10n.expenseLabel,
             ),
             const SizedBox(height: 24),
             _BudgetStatusSection(category: cat),
@@ -980,7 +980,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               children: [
                 Expanded(
                   child: AppButton(
-                    label: 'Edit',
+                    label: context.l10n.editLabel,
                     icon: Icons.edit_outlined,
                     type: AppButtonType.normal,
                     onPressed: () {
@@ -995,7 +995,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: AppButton(
-                    label: 'Delete',
+                    label: context.l10n.deleteLabel,
                     icon: Icons.delete_outline_rounded,
                     type: AppButtonType.danger,
                     onPressed: () {
@@ -1023,7 +1023,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -1033,7 +1033,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 15,
             color: cs.onSurface,
             fontWeight: FontWeight.w500,
@@ -1060,20 +1060,19 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             side: BorderSide(color: cs.outline, width: 1),
           ),
           title: Text(
-            'Cannot delete category',
-            style: GoogleFonts.inter(
+            context.l10n.cannotDeleteCategory,
+            style: localeFont(
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
           content: Text(
-            'This category has transactions linked to it. '
-            'To delete this category, delete the linked transactions first.',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            context.l10n.cannotDeleteCategoryBody,
+            style: localeFont(color: cs.onSurfaceVariant),
           ),
           actions: [
             AppButton(
-              label: 'OK',
+              label: context.l10n.okLabel,
               type: AppButtonType.primary,
               onPressed: () => Navigator.of(dialogCtx).pop(),
             ),
@@ -1090,26 +1089,26 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             side: BorderSide(color: cs.outline, width: 1),
           ),
           title: Text(
-            'Delete category?',
-            style: GoogleFonts.inter(
+            context.l10n.deleteCategoryConfirm,
+            style: localeFont(
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
           content: Text(
-            '"${cat.name}" will be permanently deleted.',
-            style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+            context.l10n.deleteCategoryBody(cat.name),
+            style: localeFont(color: cs.onSurfaceVariant),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogCtx).pop(),
               child: Text(
-                'Cancel',
-                style: GoogleFonts.inter(color: cs.onSurfaceVariant),
+                context.l10n.cancelLabel,
+                style: localeFont(color: cs.onSurfaceVariant),
               ),
             ),
             AppButton(
-              label: 'Delete',
+              label: context.l10n.deleteLabel,
               type: AppButtonType.danger,
               onPressed: () async {
                 await ref.read(categoryRepositoryProvider).delete(cat.id);
@@ -1158,7 +1157,7 @@ class _GroupHeader extends StatelessWidget {
           ],
           Text(
             name.toUpperCase(),
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: cs.primary,
@@ -1169,7 +1168,7 @@ class _GroupHeader extends StatelessWidget {
           if (count != null)
             Text(
               count == 1 ? '1 category' : '$count categories',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 11,
                 color: cs.onSurfaceVariant,
               ),
@@ -1259,7 +1258,7 @@ class _CategoryKpisGrid extends ConsumerWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.1,
@@ -1271,7 +1270,7 @@ class _CategoryKpisGrid extends ConsumerWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 20,
               fontWeight: FontWeight.w700,
               color: cs.onSurface,
@@ -1337,7 +1336,7 @@ class _CategoryListItem extends ConsumerWidget {
                         category.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -1346,7 +1345,7 @@ class _CategoryListItem extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         category.effectiveType.toUpperCase(),
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.8),
@@ -1361,7 +1360,7 @@ class _CategoryListItem extends ConsumerWidget {
                   stats.transactionCount == 1
                       ? '1 transaction'
                       : '${stats.transactionCount} transactions',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: cs.onSurfaceVariant,
@@ -1402,7 +1401,7 @@ class _CategoryListItem extends ConsumerWidget {
               const SizedBox(width: 4),
               Text(
                 'NO BUDGET',
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -1464,7 +1463,7 @@ class _CategoryListItem extends ConsumerWidget {
                   const SizedBox(width: 4),
                   Text(
                     'BUDGET',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       color: barColor,
@@ -1520,7 +1519,7 @@ class _CategoryListItem extends ConsumerWidget {
               child: Text(
                 '${p.percentage.round()}%',
                 textAlign: TextAlign.right,
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: barColor,
@@ -1555,7 +1554,7 @@ class _BudgetStatusSection extends ConsumerWidget {
       children: [
         Text(
           'BUDGET STATUS',
-          style: GoogleFonts.inter(
+          style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: cs.onSurfaceVariant,
@@ -1591,7 +1590,7 @@ class _BudgetStatusSection extends ConsumerWidget {
                       const SizedBox(width: 12),
                       Text(
                         'Set a budget for this category',
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: cs.primary,
@@ -1632,7 +1631,7 @@ class _BudgetStatusSection extends ConsumerWidget {
                         children: [
                           Text(
                             '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)}',
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -1641,7 +1640,7 @@ class _BudgetStatusSection extends ConsumerWidget {
                             ref
                                 .watch(formatterProvider)
                                 .formatPercentage(p.percentage),
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: p.percentage >= 100

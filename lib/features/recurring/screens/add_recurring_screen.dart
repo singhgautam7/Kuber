@@ -5,11 +5,12 @@
 //   lib/features/recurring/screens/add_recurring_screen.dart
 // =============================================================================
 
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -119,8 +120,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          _isEdit ? 'Edit recurring' : 'New recurring',
-          style: GoogleFonts.inter(
+          _isEdit ? context.l10n.editRecurring : context.l10n.newRecurring,
+          style: localeFont(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
@@ -137,7 +138,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
           children: [
             // ── TRANSACTION ──────────────────────────────────────────
             KuberFormSection(
-              label: 'Transaction',
+              label: context.l10n.transactionLabel,
               topGap: 0,
               children: [
                 KuberSegmented<String>(
@@ -147,23 +148,23 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     // PRESERVED: nulling category when type flips
                     _selectedCategoryId = null;
                   }),
-                  segments: const [
+                  segments: [
                     KuberSegment(
                       value: 'expense',
-                      label: 'Expense',
+                      label: context.l10n.expenseLabel,
                       icon: Icons.arrow_outward_rounded,
                       tone: SegmentTone.expense,
                     ),
                     KuberSegment(
                       value: 'income',
-                      label: 'Income',
+                      label: context.l10n.incomeLabel,
                       icon: Icons.south_west_rounded,
                       tone: SegmentTone.income,
                     ),
                   ],
                 ),
                 KuberHeroAmountInput(
-                  label: 'Amount',
+                  label: context.l10n.amountTitle,
                   currencySymbol: symbol,
                   controller: _amountController,
                   tone: _type == 'income'
@@ -176,9 +177,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                   textCapitalization: TextCapitalization.words,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   onChanged: (_) => setState(() {}),
-                  style: GoogleFonts.inter(color: cs.onSurface, fontSize: 15),
-                  decoration: const InputDecoration(
-                    hintText: "Name (e.g. Netflix, Rent)",
+                  style: localeFont(color: cs.onSurface, fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.recurringNameHint,
                   ),
                 ),
               ],
@@ -186,7 +187,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
 
             // ── WHERE ────────────────────────────────────────────────
             KuberFormSection(
-              label: 'Where',
+              label: context.l10n.whereLabel,
               children: [
                 _categoryRow(context, ref),
                 _accountRow(context, ref),
@@ -195,18 +196,18 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
 
             // ── SCHEDULE (tinted) ────────────────────────────────────
             KuberFormSection(
-              label: 'Schedule',
-              sublabel: 'When this transaction repeats',
+              label: context.l10n.schedule,
+              sublabel: context.l10n.scheduleSublabel,
               tinted: true,
               children: [
-                const KuberFieldLabel('Frequency'),
+                KuberFieldLabel(context.l10n.frequencyLabel),
                 KuberChipGrid<String>(
                   columns: 3,
                   selected: _frequency,
                   onChanged: (v) => setState(() => _frequency = v),
                   options: [
-                    for (final (val, lbl) in _frequencies)
-                      KuberChipOption(value: val, label: lbl),
+                    for (final (val, _) in _frequencies)
+                      KuberChipOption(value: val, label: _freqTitle(context, val)),
                   ],
                 ),
                 // PRESERVED — Every-X-days only when frequency == 'custom'
@@ -219,8 +220,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                           padding: const EdgeInsets.only(top: 10),
                           child: Row(
                             children: [
-                              Text('Every',
-                                  style: GoogleFonts.inter(
+                              Text(context.l10n.everyLabel,
+                                  style: localeFont(
                                       color: cs.onSurfaceVariant)),
                               const SizedBox(width: 10),
                               SizedBox(
@@ -233,34 +234,34 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                                     FilteringTextInputFormatter.digitsOnly,
                                   ],
                                   textAlign: TextAlign.center,
-                                  style: GoogleFonts.inter(
+                                  style: localeFont(
                                     color: cs.onSurface,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Text('days',
-                                  style: GoogleFonts.inter(
+                              Text(context.l10n.daysLabel,
+                                  style: localeFont(
                                       color: cs.onSurfaceVariant)),
                             ],
                           ),
                         ),
                 ),
-                const KuberFieldLabel('Starts on'),
+                KuberFieldLabel(context.l10n.startsOn),
                 _dateRow(
-                  label: 'Start date',
+                  label: context.l10n.startDate,
                   date: _startDate,
                   onTap: _pickStartDate,
                 ),
-                const KuberFieldLabel('Ends'),
+                KuberFieldLabel(context.l10n.endsLabel),
                 KuberSegmented<String>(
                   groupValue: _endType,
                   onChanged: (v) => setState(() => _endType = v),
-                  segments: const [
-                    KuberSegment(value: 'never', label: 'Never'),
-                    KuberSegment(value: 'occurrences', label: 'After N'),
-                    KuberSegment(value: 'date', label: 'On date'),
+                  segments: [
+                    KuberSegment(value: 'never', label: context.l10n.neverLabel),
+                    KuberSegment(value: 'occurrences', label: context.l10n.afterN),
+                    KuberSegment(value: 'date', label: context.l10n.onDate),
                   ],
                 ),
                 // PRESERVED — conditional end-type fields
@@ -272,8 +273,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                         padding: const EdgeInsets.only(top: 10),
                         child: Row(
                           children: [
-                            Text('After',
-                                style: GoogleFonts.inter(
+                            Text(context.l10n.afterLabel,
+                                style: localeFont(
                                     color: cs.onSurfaceVariant)),
                             const SizedBox(width: 10),
                             SizedBox(
@@ -286,15 +287,15 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                                   FilteringTextInputFormatter.digitsOnly,
                                 ],
                                 textAlign: TextAlign.center,
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   color: cs.onSurface,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 10),
-                            Text('occurrences',
-                                style: GoogleFonts.inter(
+                            Text(context.l10n.occurrencesLabel,
+                                style: localeFont(
                                     color: cs.onSurfaceVariant)),
                           ],
                         ),
@@ -302,7 +303,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                     'date' => Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: _dateRow(
-                          label: 'End date',
+                          label: context.l10n.endDate,
                           date: _endDate ?? _startDate,
                           onTap: _pickEndDate,
                         ),
@@ -321,7 +322,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
 
             // ── NOTES ────────────────────────────────────────────────
             KuberFormSection(
-              label: 'Notes',
+              label: context.l10n.notesLabel,
               children: [
                 TextField(
                   controller: _notesController,
@@ -330,9 +331,9 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
                   textCapitalization: TextCapitalization.sentences,
                   onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
                   style:
-                      GoogleFonts.inter(color: cs.onSurface, fontSize: 14),
-                  decoration: const InputDecoration(
-                    hintText: 'Optional · context, reference, anything',
+                      localeFont(color: cs.onSurface, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.recurringNotesHint,
                   ),
                 ),
               ],
@@ -342,7 +343,7 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
       ),
     ),
       bottomNavigationBar: KuberSaveButton(
-        label: _isEdit ? 'Save changes' : 'Save recurring',
+        label: _isEdit ? context.l10n.saveChanges : context.l10n.saveRecurring,
         onPressed: _canSave ? _save : null,
       ),
     );
@@ -365,8 +366,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
               color: Color(cat.colorValue),
               icon: IconMapper.fromString(cat.icon),
             ),
-      label: 'Category',
-      value: cat?.name ?? 'Select category',
+      label: context.l10n.categoryLabel,
+      value: cat?.name ?? context.l10n.selectCategoryTitle,
       valueIsPlaceholder: cat == null,
       onTap: _openCategoryPicker,
     );
@@ -389,8 +390,8 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
               color: Color(acc.colorValue ?? 0xFF3B82F6),
               icon: IconMapper.fromString(acc.icon ?? 'account_balance'),
             ),
-      label: 'Account',
-      value: acc?.name ?? 'Select account',
+      label: context.l10n.accountTitle,
+      value: acc?.name ?? context.l10n.selectAccountTitle,
       valueIsPlaceholder: acc == null,
       onTap: _openAccountPicker,
     );
@@ -509,6 +510,20 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   }
 }
 
+// Localized title-case frequency label by value.
+String _freqTitle(BuildContext context, String value) {
+  final l = context.l10n;
+  return switch (value) {
+    'daily' => l.freqDaily,
+    'weekly' => l.freqWeekly,
+    'biweekly' => l.freqBiweekly,
+    'yearly' => l.freqYearly,
+    'quarterly' => l.freqQuarterly,
+    'custom' => l.freqCustom,
+    _ => l.freqMonthly,
+  };
+}
+
 // ─── Next-occurrence preview strip ──────────────────────────────────
 class _NextOccurrencePreview extends StatelessWidget {
   final DateTime startDate;
@@ -523,14 +538,15 @@ class _NextOccurrencePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l = context.l10n;
     final next = DateFormat('d MMM yyyy').format(startDate);
     final cadence = switch (frequency) {
-      'daily' => 'then every day',
-      'weekly' => 'then every week',
-      'biweekly' => 'then every 2 weeks',
-      'monthly' => 'then every month',
-      'yearly' => 'then every year',
-      'custom' => 'then every custom interval',
+      'daily' => l.cadenceDaily,
+      'weekly' => l.cadenceWeekly,
+      'biweekly' => l.cadenceBiweekly,
+      'monthly' => l.cadenceMonthly,
+      'yearly' => l.cadenceYearly,
+      'custom' => l.cadenceCustom,
       _ => '',
     };
     return Container(
@@ -553,13 +569,13 @@ class _NextOccurrencePreview extends StatelessWidget {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: 'Next occurrence ',
-                    style: GoogleFonts.inter(
+                    text: '${l.nextOccurrenceLabel} ',
+                    style: localeFont(
                         fontSize: 12, color: cs.onSurface),
                   ),
                   TextSpan(
                     text: next,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: cs.primary,
@@ -567,7 +583,7 @@ class _NextOccurrencePreview extends StatelessWidget {
                   ),
                   TextSpan(
                     text: ' · $cadence',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 12,
                       color: cs.onSurface,
                     ),

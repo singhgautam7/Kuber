@@ -1,7 +1,8 @@
+import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -72,7 +73,7 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
                 children: [
                   _HeaderIconButton(
                     icon: Icons.notifications_none_rounded,
-                    tooltip: 'Notifications',
+                    tooltip: context.l10n.notificationsTooltip,
                     onTap: widget.onTapNotifications,
                   ),
                   if (widget.unreadCount > 0)
@@ -126,8 +127,8 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
                               size: 13, color: gold),
                           const SizedBox(width: 5),
                           Text(
-                            'Ask Kuber',
-                            style: GoogleFonts.inter(
+                            context.l10n.askKuber,
+                            style: localeFont(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: gold,
@@ -146,8 +147,9 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
                     ? Icons.visibility_off_rounded
                     : Icons.visibility_rounded,
                 accentBorder: isPrivate,
-                tooltip:
-                    isPrivate ? 'Privacy mode: On' : 'Privacy mode: Off',
+                tooltip: isPrivate
+                    ? context.l10n.privacyModeOn
+                    : context.l10n.privacyModeOff,
                 onTap: () =>
                     ref.read(settingsProvider.notifier).togglePrivacyMode(),
               ),
@@ -225,7 +227,7 @@ class _UnreadBadge extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         label,
-        style: GoogleFonts.inter(
+        style: localeFont(
           fontSize: 9,
           fontWeight: FontWeight.w800,
           color: cs.onError,

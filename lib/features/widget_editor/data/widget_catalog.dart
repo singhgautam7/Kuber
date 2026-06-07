@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import '../models/home_widget_config.dart';
 
 /// Canonical list of toggleable widgets for the home dashboard. The order
@@ -106,6 +108,54 @@ const List<HomeWidgetConfig> kAnalyticsWidgetCatalog = [
     enabled: true,
   ),
 ];
+
+/// Localized display name for a widget catalog [id]. Falls back to the id.
+String localizedWidgetName(BuildContext context, String id) {
+  final l = context.l10n;
+  return switch (id) {
+    'balance_hero' => l.wgtBalanceHeroName,
+    'insight_stories' => l.wgtInsightStoriesName,
+    'quick_add' => l.wgtQuickAddName,
+    'spending_stats' => l.wgtSpendingStatsName,
+    'home_accounts' => l.wgtHomeAccountsName,
+    'seven_day_chart' => l.wgtSevenDayChartName,
+    'budget_snapshot' => l.wgtBudgetSnapshotName,
+    'upcoming_recurring' => l.wgtUpcomingRecurringName,
+    'recent_transactions' => l.wgtRecentTransactionsName,
+    'summary_card' => l.wgtSummaryCardName,
+    'spending_trend' => l.wgtSpendingTrendName,
+    'weekly_heatmap' => l.wgtWeeklyHeatmapName,
+    'size_distribution' => l.wgtSizeDistributionName,
+    'category_breakdown' => l.wgtCategoryBreakdownName,
+    'tag_analytics' => l.wgtTagAnalyticsName,
+    'biggest_transactions' => l.wgtBiggestTransactionsName,
+    _ => id,
+  };
+}
+
+/// Localized description for a widget catalog [id]. Returns null if unknown.
+String? localizedWidgetDesc(BuildContext context, String id) {
+  final l = context.l10n;
+  return switch (id) {
+    'balance_hero' => l.wgtBalanceHeroDesc,
+    'insight_stories' => l.wgtInsightStoriesDesc,
+    'quick_add' => l.wgtQuickAddDesc,
+    'spending_stats' => l.wgtSpendingStatsDesc,
+    'home_accounts' => l.wgtHomeAccountsDesc,
+    'seven_day_chart' => l.wgtSevenDayChartDesc,
+    'budget_snapshot' => l.wgtBudgetSnapshotDesc,
+    'upcoming_recurring' => l.wgtUpcomingRecurringDesc,
+    'recent_transactions' => l.wgtRecentTransactionsDesc,
+    'summary_card' => l.wgtSummaryCardDesc,
+    'spending_trend' => l.wgtSpendingTrendDesc,
+    'weekly_heatmap' => l.wgtWeeklyHeatmapDesc,
+    'size_distribution' => l.wgtSizeDistributionDesc,
+    'category_breakdown' => l.wgtCategoryBreakdownDesc,
+    'tag_analytics' => l.wgtTagAnalyticsDesc,
+    'biggest_transactions' => l.wgtBiggestTransactionsDesc,
+    _ => null,
+  };
+}
 
 List<HomeWidgetConfig> defaultsForScope(WidgetEditorScope scope) {
   switch (scope) {

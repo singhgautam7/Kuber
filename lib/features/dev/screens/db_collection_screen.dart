@@ -1,3 +1,4 @@
+import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -288,7 +289,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
               children: [
                 Text(
                   '${_allRecords.length} records',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
@@ -298,7 +299,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                   value: _pageSize,
                   underline: const SizedBox(),
                   icon: Icon(Icons.arrow_drop_down, color: cs.primary),
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.primary,
@@ -335,7 +336,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                         const SizedBox(height: KuberSpacing.lg),
                         Text(
                           'Collection is empty',
-                          style: GoogleFonts.inter(
+                          style: localeFont(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: cs.onSurfaceVariant,
@@ -398,7 +399,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
                 ),
                 Text(
                   'Page $_currentPage of $_totalPages',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -478,7 +479,7 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           return DataCell(
             Text(
               displayVal,
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13,
                 fontStyle: val == null ? FontStyle.italic : FontStyle.normal,
                 color: val == null
