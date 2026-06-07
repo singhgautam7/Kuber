@@ -46,12 +46,20 @@ class _KuberAppState extends ConsumerState<KuberApp>
     });
   }
 
+  // Date (y/m/d) of the last scheduled-backup check, so resume doesn't re-check
+  // on every foreground. The shortest backup interval is 1 day, so checking at
+  // most once per calendar day is sufficient and cheap.
+  DateTime? _lastBackupCheckDay;
+
   /// Runs a scheduled backup if one is due. Called on first frame (cold start)
-  /// and on every resume, because Android usually keeps the process warm — the
-  /// cold-start loader path alone almost never fires day-to-day, so "daily"
-  /// would never trigger. Silent + best-effort + internally guarded against
-  /// concurrent runs (so it can't double-fire with the cold-start loader).
+  /// and on the first resume of each new day, because Android usually keeps the
+  /// process warm — the cold-start loader path alone almost never fires
+  /// day-to-day, so "daily" would never trigger. Silent + best-effort +
+  /// internally guarded against concurrent runs (can't double-fire with the
+  /// cold-start loader).
   Future<void> _runDueBackup() async {
+    final now = DateTime.now();
+    _lastBackupCheckDay = DateTime(now.year, now.month, now.day);
     try {
       await ref.read(backupSettingsProvider.notifier).runDueBackup();
     } catch (e, stack) {
@@ -62,9 +70,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      _runDueBackup();
+    if (state != AppLifecycleState.resumed) return;
+    // Already checked today? A daily (or longer) backup can't be due again, so
+    // skip — avoids a DB read on every foreground.
+    final now = DateTime.now();
+    final last = _lastBackupCheckDay;
+    if (last != null &&
+        last.year == now.year &&
+        last.month == now.month &&
+        last.day == now.day) {
+      return;
     }
+    _runDueBackup();
   }
 
   /// On-open ledger reminder pass (in-app records + dedupe-gated OS

@@ -3,6 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 
 class HowToUseScreen extends StatelessWidget {
@@ -23,9 +24,11 @@ class HowToUseScreen extends StatelessWidget {
       backgroundColor: cs.surface,
       appBar: KuberAppBar(showBack: true, showHome: true, title: ''),
       body: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.lg,
+        padding: EdgeInsets.only(
+          left: KuberSpacing.lg,
+          right: KuberSpacing.lg,
+          top: KuberSpacing.lg,
+          bottom: KuberSpacing.lg + systemNavBarInset(context),
         ),
         children: [
           Text(

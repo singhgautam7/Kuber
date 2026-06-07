@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import '../models/home_widget_config.dart';
@@ -225,7 +226,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
             ? Container(
                   padding: EdgeInsets.fromLTRB(
                       KuberSpacing.lg, 12, KuberSpacing.lg,
-                      12 + MediaQuery.viewPaddingOf(context).bottom),
+                      12 + systemNavBarInset(context)),
                   decoration: BoxDecoration(
                     color: cs.surface,
                     border: Border(

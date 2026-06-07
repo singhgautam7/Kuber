@@ -10,6 +10,7 @@ import '../../features/analytics/widgets/manual_date_range_bottom_sheet.dart';
 import '../../features/analytics/widgets/month_picker_bottom_sheet.dart';
 import '../../features/analytics/widgets/quick_filter_chips_row.dart';
 import '../../features/transactions/providers/transaction_provider.dart';
+import '../../core/utils/breakpoints.dart';
 import 'horizontal_fade_wrapper.dart';
 
 class KuberDateRangeResult {
@@ -263,10 +264,11 @@ class _StickyPrimary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    // Use viewPadding (raw system inset, never zeroed by an ancestor SafeArea)
-    // so the sticky button always clears the system navigation bar in
-    // edge-to-edge mode, including 3-button navigation.
-    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    // Read the OS nav-bar inset from the root view: this button lives in
+    // Scaffold.bottomSheet, where Flutter zeroes MediaQuery padding/viewPadding,
+    // so viewPaddingOf would return 0 and the button slides under the system
+    // nav bar (incl. 3-button navigation) in edge-to-edge mode.
+    final bottomInset = systemNavBarInset(context);
     return Container(
       padding: EdgeInsets.fromLTRB(20, 16, 20, 12 + bottomInset),
         decoration: BoxDecoration(

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
@@ -216,7 +217,7 @@ class DataManagementScreen extends ConsumerWidget {
                       destructive: true,
                       onPressed: () => _confirmClearData(context, ref),
                     ),
-                    const SizedBox(height: KuberSpacing.xxl),
+                    SizedBox(height: KuberSpacing.xxl + systemNavBarInset(context)),
                   ]),
                 ),
               ),

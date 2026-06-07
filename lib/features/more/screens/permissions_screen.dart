@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../providers/permission_provider.dart';
 import '../../backups/providers/backup_provider.dart';
@@ -340,7 +341,7 @@ class PermissionsScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: KuberSpacing.xxl),
+                  SizedBox(height: KuberSpacing.xxl + systemNavBarInset(context)),
                 ]),
               ),
               loading: () => const SliverFillRemaining(

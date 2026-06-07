@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/breakpoints.dart';
 import '../../core/utils/prefs_keys.dart';
 import '../../core/utils/l10n_ext.dart';
 import '../../core/constants/tools_l10n.dart';
@@ -380,7 +381,11 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
           childCount: _kGroups.length,
         ),
       ),
-      const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.xl)),
+      SliverToBoxAdapter(
+        child: Builder(
+          builder: (context) => SizedBox(height: KuberSpacing.xl + systemNavBarInset(context)),
+        ),
+      ),
     ];
   }
 

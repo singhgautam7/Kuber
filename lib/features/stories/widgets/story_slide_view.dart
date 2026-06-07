@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../models/story_icons.dart';
 import '../models/story_models.dart';
 
@@ -36,7 +37,7 @@ class StorySlideView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(26, 64, 26, 40),
+            padding: EdgeInsets.fromLTRB(26, 64, 26, 40 + systemNavBarInset(context)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

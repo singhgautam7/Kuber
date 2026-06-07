@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../core/constants/about_l10n.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -147,7 +148,7 @@ class AboutScreen extends ConsumerWidget {
                     _MadeInIndiaFooter(),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.xxl),
+                SizedBox(height: KuberSpacing.xxl + systemNavBarInset(context)),
               ]),
             ),
           ),

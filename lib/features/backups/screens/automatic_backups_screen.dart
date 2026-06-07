@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
@@ -41,7 +42,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
               ),
             ),
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 40 + systemNavBarInset(context)),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _sectionLabel(context, context.l10n.statusSectionLabel),
