@@ -16,8 +16,10 @@ partially-filled file still merges what it can.
 """
 import json, os, sys
 
-L10N = os.path.dirname(os.path.abspath(__file__))
-src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(L10N, "TRANSLATIONS_TODO.json")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# ARBs live in <repo>/lib/l10n; this script lives in <repo>/scripts.
+L10N = os.path.join(os.path.dirname(SCRIPT_DIR), "lib", "l10n")
+src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(SCRIPT_DIR, "TRANSLATIONS_TODO.json")
 rows = json.load(open(src, encoding="utf-8"))
 
 # language column -> ARB locale code

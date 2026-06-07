@@ -49,17 +49,17 @@ the terminal/agent.
   only change a string and the existing style already uses `localeFont` or
   `Theme.of(context).textTheme`, leave the style alone.
 
-## 2. The translation pipeline (scripts in `lib/l10n/`)
+## 2. The translation pipeline (scripts in `scripts/`; ARBs in `lib/l10n/`)
 
 - `merge_arb.py` — append English-only keys to `app_en.arb`.
-  `python3 lib/l10n/merge_arb.py lib/l10n <patch.json>` where patch is
+  `python3 scripts/merge_arb.py lib/l10n <patch.json>` where patch is
   `{"en": { "keyName": "English text", "@keyName": {"placeholders": {...}} }}`.
   Raises on duplicate keys (check existing keys first — reuse them!).
 - `gen_translations_json.py` — writes `TRANSLATIONS_TODO.json` = every key in
   `app_en.arb` missing from `app_hi.arb` (i.e. English-only). This is the file the
-  user translates. `python3 lib/l10n/gen_translations_json.py`
+  user translates. `python3 scripts/gen_translations_json.py`
 - `apply_translations.py` — merges a filled translations file back into all 8
-  non-English ARBs by `key`. `python3 lib/l10n/apply_translations.py <filled.json>`
+  non-English ARBs by `key`. `python3 scripts/apply_translations.py <filled.json>`
   Re-runnable; skips keys already present; ignores empty cells.
 - `TRANSLATION_PROMPT.md` — the prompt to hand a translation LLM.
 
@@ -68,8 +68,8 @@ The human does the translating in a separate LLM; you only produce + apply files
 Per batch:
 1. **You wire** a feature English-first (add English keys via `merge_arb.py`, wire
    call sites) so the build stays green.
-2. **You generate the to-translate file:** `python3 lib/l10n/gen_translations_json.py`
-   → writes `lib/l10n/TRANSLATIONS_TODO.json` (every key still English-only).
+2. **You generate the to-translate file:** `python3 scripts/gen_translations_json.py`
+   → writes `scripts/TRANSLATIONS_TODO.json` (every key still English-only).
 3. **You hand the human two things:** the path to `TRANSLATIONS_TODO.json` and the
    path to `TRANSLATION_PROMPT.md`. Tell them: "paste `TRANSLATION_PROMPT.md` into
    any LLM, attach `TRANSLATIONS_TODO.json`, and return the filled file." They will
@@ -77,7 +77,7 @@ Per batch:
    unchanged). They may rename it (e.g. `TRANSLATIONS_DONE.json`) and place it in
    `~/Downloads/`.
 4. **You apply what they return:**
-   - `python3 lib/l10n/apply_translations.py /path/to/their_filled.json`
+   - `python3 scripts/apply_translations.py /path/to/their_filled.json`
    - `~/Documents/SDK/flutter/bin/flutter gen-l10n`
    - `~/Documents/SDK/flutter/bin/flutter analyze` → expect only the 7 known
      pre-existing `about_screen.dart` / `about_l10n.dart` infos (interpolation /
