@@ -1,9 +1,11 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/tutorial_chapter.dart';
+import '../models/tutorial_l10n.dart';
 import '../providers/tutorial_provider.dart';
 
 class TutorialTooltipCard extends ConsumerWidget {
@@ -137,7 +139,6 @@ class _TooltipContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chapter = state.chapter;
-    final step = state.step;
 
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.lg),
@@ -161,7 +162,7 @@ class _TooltipContent extends StatelessWidget {
               ),
             ),
             child: Text(
-              '● Chapter ${state.chapterIndex + 1} of ${tutorialChapters.length} · ${chapter.title}',
+              '● ${context.l10n.chapterXofY('${state.chapterIndex + 1}', '${tutorialChapters.length}')} · ${tutChapterTitle(context, state.chapterIndex)}',
               style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -172,7 +173,7 @@ class _TooltipContent extends StatelessWidget {
           ),
           const SizedBox(height: KuberSpacing.md),
           Text(
-            step.title,
+            tutStepTitle(context, state.chapterIndex, state.stepIndex),
             style: localeFont(
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -182,7 +183,7 @@ class _TooltipContent extends StatelessWidget {
           ),
           const SizedBox(height: KuberSpacing.sm),
           Text(
-            step.description,
+            tutStepDesc(context, state.chapterIndex, state.stepIndex),
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
             style: localeFont(
@@ -220,7 +221,7 @@ class _TooltipContent extends StatelessWidget {
               TextButton(
                 onPressed: onSkip,
                 child: Text(
-                  'Skip tour',
+                  context.l10n.skipTour,
                   style: localeFont(
                     color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w700,
@@ -235,7 +236,7 @@ class _TooltipContent extends StatelessWidget {
               ],
               FilledButton(
                 onPressed: onNext,
-                child: Text(state.isLastStep ? 'Done' : 'Next ›'),
+                child: Text(state.isLastStep ? context.l10n.doneLabel : context.l10n.nextArrow),
               ),
             ],
           ),

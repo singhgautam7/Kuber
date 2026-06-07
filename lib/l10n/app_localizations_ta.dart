@@ -4326,4 +4326,274 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get splashTagline => 'Your personal money diary';
+
+  @override
+  String get tutCh0Title => 'Transactions';
+
+  @override
+  String get tutCh0Desc =>
+      'Add income, expenses, transfers, notes, receipts and tags.';
+
+  @override
+  String get tutCh0St0Title => 'Enter amount';
+
+  @override
+  String get tutCh0St0Desc =>
+      'Type the amount directly. Tap the calculator icon to open the built-in expression calculator.';
+
+  @override
+  String get tutCh0St1Title => 'Transaction type';
+
+  @override
+  String get tutCh0St1Desc =>
+      'Choose Income, Expense, or Transfer between your accounts.';
+
+  @override
+  String get tutCh0St2Title => 'Pick a category';
+
+  @override
+  String get tutCh0St2Desc =>
+      'Categories organize your spending. Tap to choose an existing one or create your own.';
+
+  @override
+  String get tutCh0St3Title => 'Pick an account';
+
+  @override
+  String get tutCh0St3Desc =>
+      'Choose which wallet or bank account this belongs to.';
+
+  @override
+  String get tutCh0St4Title => 'Name it';
+
+  @override
+  String get tutCh0St4Desc =>
+      'Start typing and Kuber will suggest from your past transactions automatically.';
+
+  @override
+  String get tutCh0St5Title => 'Smart suggestions';
+
+  @override
+  String get tutCh0St5Desc =>
+      'Tap a suggestion to auto-fill the name, category, and account in one tap.';
+
+  @override
+  String get tutCh0St6Title => 'Notes & attachments';
+
+  @override
+  String get tutCh0St6Desc => 'Add context or attach a photo of your receipt.';
+
+  @override
+  String get tutCh0St7Title => 'Add tags';
+
+  @override
+  String get tutCh0St7Desc =>
+      'Tags are custom labels that group transactions across categories.';
+
+  @override
+  String get tutCh1Title => 'Home';
+
+  @override
+  String get tutCh1Desc => 'Read your monthly snapshot and use quick actions.';
+
+  @override
+  String get tutCh1St0Title => 'Your monthly snapshot';
+
+  @override
+  String get tutCh1St0Desc =>
+      'Net flow for this month at a glance. Green is income, red is expense. Tap to drill down.';
+
+  @override
+  String get tutCh1St1Title => 'Privacy mode';
+
+  @override
+  String get tutCh1St1Desc =>
+      'Tap the eye icon to instantly hide every balance. Perfect for public places.';
+
+  @override
+  String get tutCh1St2Title => 'Quick Add';
+
+  @override
+  String get tutCh1St2Desc =>
+      'Log a transaction in seconds without opening the full form. Just type and go.';
+
+  @override
+  String get tutCh1St3Title => 'Recent transactions';
+
+  @override
+  String get tutCh1St3Desc =>
+      'Your last few transactions appear below the balance card. Tap any to view or edit.';
+
+  @override
+  String get tutCh1St4Title => 'Navigation';
+
+  @override
+  String get tutCh1St4Desc =>
+      'Use the bottom bar to switch between Home, History, Analytics, and More.';
+
+  @override
+  String get tutCh2Title => 'History';
+
+  @override
+  String get tutCh2Desc => 'Find, filter, inspect and edit past transactions.';
+
+  @override
+  String get tutCh2St0Title => 'Transaction timeline';
+
+  @override
+  String get tutCh2St0Desc =>
+      'All your transactions, grouped by date. Most recent at the top.';
+
+  @override
+  String get tutCh2St1Title => 'Quick filters';
+
+  @override
+  String get tutCh2St1Desc =>
+      'Filter by Income, Expense, or Transfer instantly using these chips.';
+
+  @override
+  String get tutCh2St2Title => 'Advanced filters';
+
+  @override
+  String get tutCh2St2Desc =>
+      'Tap the filter icon to search by date range, account, category, or tags simultaneously.';
+
+  @override
+  String get tutCh2St3Title => 'Tap to edit';
+
+  @override
+  String get tutCh2St3Desc =>
+      'Tap any transaction to view full details, edit fields, or delete it.';
+
+  @override
+  String get tutCh3Title => 'Analytics';
+
+  @override
+  String get tutCh3Desc => 'Spot trends and understand where your money goes.';
+
+  @override
+  String get tutCh3St0Title => 'Set the date range first';
+
+  @override
+  String get tutCh3St0Desc =>
+      'By default only today\'s data is shown. Tap this pill and pick \"All time\" so the charts below have something to graph.';
+
+  @override
+  String get tutCh3St1Title => 'Your financial snapshot';
+
+  @override
+  String get tutCh3St1Desc =>
+      'Visual breakdowns of where your money goes each month.';
+
+  @override
+  String get tutCh3St2Title => 'Spending trends';
+
+  @override
+  String get tutCh3St2Desc =>
+      'A bar chart showing daily spending. Switch between 7-day and custom time ranges.';
+
+  @override
+  String get tutCh3St3Title => 'Category breakdown';
+
+  @override
+  String get tutCh3St3Desc =>
+      'See which categories consume the most of your budget at a glance.';
+
+  @override
+  String get tutCh3St4Title => 'Filters carry over';
+
+  @override
+  String get tutCh3St4Desc =>
+      'Any filters you set on the History page also update your analytics view.';
+
+  @override
+  String get tutCh4Title => 'More & Settings';
+
+  @override
+  String get tutCh4Desc =>
+      'Customize Kuber, manage data and explore deeper tools.';
+
+  @override
+  String get tutCh4St0Title => 'Budgets';
+
+  @override
+  String get tutCh4St0Desc =>
+      'Set monthly spending limits per category. Kuber tracks your progress automatically.';
+
+  @override
+  String get tutCh4St1Title => 'Ask Kuber';
+
+  @override
+  String get tutCh4St1Desc =>
+      'Your on-device AI assistant. Ask questions about your spending privately.';
+
+  @override
+  String get tutCh4St2Title => 'Your data';
+
+  @override
+  String get tutCh4St2Desc =>
+      'Export as CSV, import from backup, or generate sample data. Everything stays on your device.';
+
+  @override
+  String get tutorialUpper => 'TUTORIAL';
+
+  @override
+  String get pickChapter => 'Pick a chapter.';
+
+  @override
+  String get pickChapterSubtitle =>
+      'Five quick chapters, about 2 minutes each. Jump in anywhere.';
+
+  @override
+  String get startFromBeginning => 'Start from beginning →';
+
+  @override
+  String get skipTutorialConfirm => 'Skip tutorial?';
+
+  @override
+  String get keepGoing => 'Keep going';
+
+  @override
+  String get skipLabel => 'Skip';
+
+  @override
+  String get replayHint => 'You can always replay it from More → Tutorial.';
+
+  @override
+  String get replayHintApp =>
+      'You can always replay it from More → App Tutorial.';
+
+  @override
+  String tutStepsAndMin(String count, String mins) {
+    return '$count steps · ~$mins min';
+  }
+
+  @override
+  String chapterDoneTitle(String num) {
+    return 'Chapter $num done! 🎉';
+  }
+
+  @override
+  String get endTutorial => 'End tutorial';
+
+  @override
+  String readyToStart(String title) {
+    return 'Ready to start \"$title\"?';
+  }
+
+  @override
+  String get exitTutorialConfirm => 'Exit tutorial?';
+
+  @override
+  String get exitLabel => 'Exit';
+
+  @override
+  String chapterXofY(String current, String total) {
+    return 'Chapter $current of $total';
+  }
+
+  @override
+  String get skipTour => 'Skip tour';
+
+  @override
+  String get nextArrow => 'Next ›';
 }

@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/brand_icon.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../models/tutorial_chapter.dart';
+import '../models/tutorial_l10n.dart';
 import '../providers/tutorial_provider.dart';
 import '../providers/tutorial_sandbox_provider.dart';
 
@@ -37,7 +39,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                   const BrandIcon(size: 36),
                   const SizedBox(width: KuberSpacing.md),
                   Text(
-                    'TUTORIAL',
+                    context.l10n.tutorialUpper,
                     style: localeFont(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -67,7 +69,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Pick a chapter.',
+                            context.l10n.pickChapter,
                             style: localeFont(
                               fontSize: 32,
                               fontWeight: FontWeight.w800,
@@ -77,7 +79,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: KuberSpacing.sm),
                           Text(
-                            'Five quick chapters, about 2 minutes each. Jump in anywhere.',
+                            context.l10n.pickChapterSubtitle,
                             style: localeFont(
                               fontSize: 14,
                               color: cs.onSurfaceVariant,
@@ -90,6 +92,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                     final chapterIndex = index - 1;
                     return _ChapterCard(
                       chapter: chapter,
+                      chapterIndex: chapterIndex,
                       selected:
                           state.isActive && state.chapterIndex == chapterIndex,
                       completed:
@@ -108,7 +111,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                   height: 48,
                   child: FilledButton(
                     onPressed: () => _startChapter(context, ref, 0),
-                    child: const Text('Start from beginning →'),
+                    child: Text(context.l10n.startFromBeginning),
                   ),
                 ),
               ),
@@ -132,7 +135,7 @@ class TutorialChapterScreen extends ConsumerWidget {
       builder: (sheetCtx) {
         final cs = Theme.of(sheetCtx).colorScheme;
         return KuberBottomSheet(
-          title: 'Skip tutorial?',
+          title: context.l10n.skipTutorialConfirm,
           actions: Row(
             children: [
               Expanded(
@@ -143,7 +146,7 @@ class TutorialChapterScreen extends ConsumerWidget {
                       sheetCtx,
                       rootNavigator: true,
                     ).pop(false),
-                    child: const Text('Keep going'),
+                    child: Text(context.l10n.keepGoing),
                   ),
                 ),
               ),
@@ -156,14 +159,14 @@ class TutorialChapterScreen extends ConsumerWidget {
                       sheetCtx,
                       rootNavigator: true,
                     ).pop(true),
-                    child: const Text('Skip'),
+                    child: Text(context.l10n.skipLabel),
                   ),
                 ),
               ),
             ],
           ),
           child: Text(
-            'You can always replay it from More → Tutorial.',
+            context.l10n.replayHint,
             style: localeFont(
               fontSize: 14,
               height: 1.5,
@@ -189,12 +192,14 @@ class TutorialChapterScreen extends ConsumerWidget {
 
 class _ChapterCard extends StatelessWidget {
   final TutorialChapter chapter;
+  final int chapterIndex;
   final bool selected;
   final bool completed;
   final VoidCallback onTap;
 
   const _ChapterCard({
     required this.chapter,
+    required this.chapterIndex,
     required this.selected,
     required this.completed,
     required this.onTap,
@@ -243,7 +248,7 @@ class _ChapterCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            chapter.title,
+                            tutChapterTitle(context, chapterIndex),
                             style: localeFont(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
@@ -261,7 +266,7 @@ class _ChapterCard extends StatelessWidget {
                     ),
                     const SizedBox(height: KuberSpacing.xs),
                     Text(
-                      chapter.description,
+                      tutChapterDesc(context, chapterIndex),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: localeFont(
@@ -272,7 +277,8 @@ class _ChapterCard extends StatelessWidget {
                     ),
                     const SizedBox(height: KuberSpacing.xs),
                     Text(
-                      '${chapter.steps.length} steps · ${chapter.estimate}',
+                      context.l10n.tutStepsAndMin(
+                          '${chapter.steps.length}', chapter.steps.length <= 4 ? '1' : '2'),
                       style: localeFont(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,

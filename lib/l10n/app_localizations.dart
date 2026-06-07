@@ -7783,6 +7783,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your personal money diary'**
   String get splashTagline;
+
+  /// No description provided for @tutCh0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get tutCh0Title;
+
+  /// No description provided for @tutCh0Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add income, expenses, transfers, notes, receipts and tags.'**
+  String get tutCh0Desc;
+
+  /// No description provided for @tutCh0St0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter amount'**
+  String get tutCh0St0Title;
+
+  /// No description provided for @tutCh0St0Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the amount directly. Tap the calculator icon to open the built-in expression calculator.'**
+  String get tutCh0St0Desc;
+
+  /// No description provided for @tutCh0St1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction type'**
+  String get tutCh0St1Title;
+
+  /// No description provided for @tutCh0St1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Income, Expense, or Transfer between your accounts.'**
+  String get tutCh0St1Desc;
+
+  /// No description provided for @tutCh0St2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a category'**
+  String get tutCh0St2Title;
+
+  /// No description provided for @tutCh0St2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories organize your spending. Tap to choose an existing one or create your own.'**
+  String get tutCh0St2Desc;
+
+  /// No description provided for @tutCh0St3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an account'**
+  String get tutCh0St3Title;
+
+  /// No description provided for @tutCh0St3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which wallet or bank account this belongs to.'**
+  String get tutCh0St3Desc;
+
+  /// No description provided for @tutCh0St4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Name it'**
+  String get tutCh0St4Title;
+
+  /// No description provided for @tutCh0St4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start typing and Kuber will suggest from your past transactions automatically.'**
+  String get tutCh0St4Desc;
+
+  /// No description provided for @tutCh0St5Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart suggestions'**
+  String get tutCh0St5Title;
+
+  /// No description provided for @tutCh0St5Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a suggestion to auto-fill the name, category, and account in one tap.'**
+  String get tutCh0St5Desc;
+
+  /// No description provided for @tutCh0St6Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes & attachments'**
+  String get tutCh0St6Title;
+
+  /// No description provided for @tutCh0St6Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add context or attach a photo of your receipt.'**
+  String get tutCh0St6Desc;
+
+  /// No description provided for @tutCh0St7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tags'**
+  String get tutCh0St7Title;
+
+  /// No description provided for @tutCh0St7Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags are custom labels that group transactions across categories.'**
+  String get tutCh0St7Desc;
+
+  /// No description provided for @tutCh1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get tutCh1Title;
+
+  /// No description provided for @tutCh1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Read your monthly snapshot and use quick actions.'**
+  String get tutCh1Desc;
+
+  /// No description provided for @tutCh1St0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly snapshot'**
+  String get tutCh1St0Title;
+
+  /// No description provided for @tutCh1St0Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Net flow for this month at a glance. Green is income, red is expense. Tap to drill down.'**
+  String get tutCh1St0Desc;
+
+  /// No description provided for @tutCh1St1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy mode'**
+  String get tutCh1St1Title;
+
+  /// No description provided for @tutCh1St1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the eye icon to instantly hide every balance. Perfect for public places.'**
+  String get tutCh1St1Desc;
+
+  /// No description provided for @tutCh1St2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Add'**
+  String get tutCh1St2Title;
+
+  /// No description provided for @tutCh1St2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Log a transaction in seconds without opening the full form. Just type and go.'**
+  String get tutCh1St2Desc;
+
+  /// No description provided for @tutCh1St3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent transactions'**
+  String get tutCh1St3Title;
+
+  /// No description provided for @tutCh1St3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your last few transactions appear below the balance card. Tap any to view or edit.'**
+  String get tutCh1St3Desc;
+
+  /// No description provided for @tutCh1St4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get tutCh1St4Title;
+
+  /// No description provided for @tutCh1St4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the bottom bar to switch between Home, History, Analytics, and More.'**
+  String get tutCh1St4Desc;
+
+  /// No description provided for @tutCh2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get tutCh2Title;
+
+  /// No description provided for @tutCh2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Find, filter, inspect and edit past transactions.'**
+  String get tutCh2Desc;
+
+  /// No description provided for @tutCh2St0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction timeline'**
+  String get tutCh2St0Title;
+
+  /// No description provided for @tutCh2St0Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'All your transactions, grouped by date. Most recent at the top.'**
+  String get tutCh2St0Desc;
+
+  /// No description provided for @tutCh2St1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick filters'**
+  String get tutCh2St1Title;
+
+  /// No description provided for @tutCh2St1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Income, Expense, or Transfer instantly using these chips.'**
+  String get tutCh2St1Desc;
+
+  /// No description provided for @tutCh2St2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced filters'**
+  String get tutCh2St2Title;
+
+  /// No description provided for @tutCh2St2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the filter icon to search by date range, account, category, or tags simultaneously.'**
+  String get tutCh2St2Desc;
+
+  /// No description provided for @tutCh2St3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to edit'**
+  String get tutCh2St3Title;
+
+  /// No description provided for @tutCh2St3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any transaction to view full details, edit fields, or delete it.'**
+  String get tutCh2St3Desc;
+
+  /// No description provided for @tutCh3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get tutCh3Title;
+
+  /// No description provided for @tutCh3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Spot trends and understand where your money goes.'**
+  String get tutCh3Desc;
+
+  /// No description provided for @tutCh3St0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the date range first'**
+  String get tutCh3St0Title;
+
+  /// No description provided for @tutCh3St0Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'By default only today\'s data is shown. Tap this pill and pick \"All time\" so the charts below have something to graph.'**
+  String get tutCh3St0Desc;
+
+  /// No description provided for @tutCh3St1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your financial snapshot'**
+  String get tutCh3St1Title;
+
+  /// No description provided for @tutCh3St1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual breakdowns of where your money goes each month.'**
+  String get tutCh3St1Desc;
+
+  /// No description provided for @tutCh3St2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending trends'**
+  String get tutCh3St2Title;
+
+  /// No description provided for @tutCh3St2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'A bar chart showing daily spending. Switch between 7-day and custom time ranges.'**
+  String get tutCh3St2Desc;
+
+  /// No description provided for @tutCh3St3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Category breakdown'**
+  String get tutCh3St3Title;
+
+  /// No description provided for @tutCh3St3Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'See which categories consume the most of your budget at a glance.'**
+  String get tutCh3St3Desc;
+
+  /// No description provided for @tutCh3St4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters carry over'**
+  String get tutCh3St4Title;
+
+  /// No description provided for @tutCh3St4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Any filters you set on the History page also update your analytics view.'**
+  String get tutCh3St4Desc;
+
+  /// No description provided for @tutCh4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'More & Settings'**
+  String get tutCh4Title;
+
+  /// No description provided for @tutCh4Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Kuber, manage data and explore deeper tools.'**
+  String get tutCh4Desc;
+
+  /// No description provided for @tutCh4St0Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get tutCh4St0Title;
+
+  /// No description provided for @tutCh4St0Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Set monthly spending limits per category. Kuber tracks your progress automatically.'**
+  String get tutCh4St0Desc;
+
+  /// No description provided for @tutCh4St1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Kuber'**
+  String get tutCh4St1Title;
+
+  /// No description provided for @tutCh4St1Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Your on-device AI assistant. Ask questions about your spending privately.'**
+  String get tutCh4St1Desc;
+
+  /// No description provided for @tutCh4St2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get tutCh4St2Title;
+
+  /// No description provided for @tutCh4St2Desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as CSV, import from backup, or generate sample data. Everything stays on your device.'**
+  String get tutCh4St2Desc;
+
+  /// No description provided for @tutorialUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'TUTORIAL'**
+  String get tutorialUpper;
+
+  /// No description provided for @pickChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a chapter.'**
+  String get pickChapter;
+
+  /// No description provided for @pickChapterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Five quick chapters, about 2 minutes each. Jump in anywhere.'**
+  String get pickChapterSubtitle;
+
+  /// No description provided for @startFromBeginning.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from beginning →'**
+  String get startFromBeginning;
+
+  /// No description provided for @skipTutorialConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip tutorial?'**
+  String get skipTutorialConfirm;
+
+  /// No description provided for @keepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get keepGoing;
+
+  /// No description provided for @skipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skipLabel;
+
+  /// No description provided for @replayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can always replay it from More → Tutorial.'**
+  String get replayHint;
+
+  /// No description provided for @replayHintApp.
+  ///
+  /// In en, this message translates to:
+  /// **'You can always replay it from More → App Tutorial.'**
+  String get replayHintApp;
+
+  /// No description provided for @tutStepsAndMin.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps · ~{mins} min'**
+  String tutStepsAndMin(String count, String mins);
+
+  /// No description provided for @chapterDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter {num} done! 🎉'**
+  String chapterDoneTitle(String num);
+
+  /// No description provided for @endTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'End tutorial'**
+  String get endTutorial;
+
+  /// No description provided for @readyToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to start \"{title}\"?'**
+  String readyToStart(String title);
+
+  /// No description provided for @exitTutorialConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit tutorial?'**
+  String get exitTutorialConfirm;
+
+  /// No description provided for @exitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit'**
+  String get exitLabel;
+
+  /// No description provided for @chapterXofY.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter {current} of {total}'**
+  String chapterXofY(String current, String total);
+
+  /// No description provided for @skipTour.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip tour'**
+  String get skipTour;
+
+  /// No description provided for @nextArrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Next ›'**
+  String get nextArrow;
 }
 
 class _AppLocalizationsDelegate

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:isar_community/isar.dart';
+import 'package:kuber/core/utils/l10n_ext.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_loader.dart';
 import '../models/tutorial_chapter.dart';
+import '../models/tutorial_l10n.dart';
 import '../providers/tutorial_provider.dart';
 import '../providers/tutorial_sandbox_provider.dart';
 import '../services/tutorial_mock_data_service.dart';
@@ -230,7 +232,9 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
 
   Future<void> _showChapterCompleteSheet(TutorialState state) async {
     final nextChapterIndex = state.chapterIndex + 1;
-    final nextChapter = tutorialChapters[nextChapterIndex];
+    final l = context.l10n;
+    final doneTitle = l.chapterDoneTitle('${state.chapterIndex + 1}');
+    final nextTitle = tutChapterTitle(context, nextChapterIndex);
 
     final proceed = await showModalBottomSheet<bool>(
       context: context,
@@ -239,7 +243,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
       builder: (sheetCtx) {
         final cs = Theme.of(sheetCtx).colorScheme;
         return KuberBottomSheet(
-          title: 'Chapter ${state.chapterIndex + 1} done! 🎉',
+          title: doneTitle,
           actions: Row(
             children: [
               Expanded(
@@ -248,7 +252,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
                   child: OutlinedButton(
                     onPressed: () =>
                         Navigator.of(sheetCtx, rootNavigator: true).pop(false),
-                    child: const Text('End tutorial'),
+                    child: Text(l.endTutorial),
                   ),
                 ),
               ),
@@ -259,14 +263,14 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
                   child: FilledButton(
                     onPressed: () =>
                         Navigator.of(sheetCtx, rootNavigator: true).pop(true),
-                    child: Text('${nextChapter.title} →'),
+                    child: Text('$nextTitle →'),
                   ),
                 ),
               ),
             ],
           ),
           child: Text(
-            'Ready to start "${nextChapter.title}"?',
+            l.readyToStart(nextTitle),
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
@@ -296,6 +300,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
   /// Shared confirm-and-exit flow used by both the device back button
   /// (via [BackButtonListener]) and the tooltip's "Skip tour" button.
   Future<void> _confirmExit() async {
+    final l = context.l10n;
     final confirmed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -303,7 +308,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
       builder: (sheetCtx) {
         final cs = Theme.of(sheetCtx).colorScheme;
         return KuberBottomSheet(
-          title: 'Exit tutorial?',
+          title: l.exitTutorialConfirm,
           actions: Row(
             children: [
               Expanded(
@@ -312,7 +317,7 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
                   child: OutlinedButton(
                     onPressed: () =>
                         Navigator.of(sheetCtx, rootNavigator: true).pop(false),
-                    child: const Text('Keep going'),
+                    child: Text(l.keepGoing),
                   ),
                 ),
               ),
@@ -323,14 +328,14 @@ class _TutorialOverlayState extends ConsumerState<TutorialOverlay>
                   child: FilledButton(
                     onPressed: () =>
                         Navigator.of(sheetCtx, rootNavigator: true).pop(true),
-                    child: const Text('Exit'),
+                    child: Text(l.exitLabel),
                   ),
                 ),
               ),
             ],
           ),
           child: Text(
-            'You can always replay it from More → App Tutorial.',
+            l.replayHintApp,
             style: TextStyle(
               fontSize: 14,
               height: 1.5,
