@@ -8,6 +8,7 @@ import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
+import 'features/backups/providers/backup_provider.dart';
 import 'features/budgets/services/budget_service.dart';
 import 'features/history/providers/selection_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
@@ -41,7 +42,29 @@ class _KuberAppState extends ConsumerState<KuberApp>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(budgetServiceProvider).checkAllOnAppOpen();
       _runOnOpenLedgerReminders();
+      _runDueBackup();
     });
+  }
+
+  /// Runs a scheduled backup if one is due. Called on first frame (cold start)
+  /// and on every resume, because Android usually keeps the process warm — the
+  /// cold-start loader path alone almost never fires day-to-day, so "daily"
+  /// would never trigger. Silent + best-effort + internally guarded against
+  /// concurrent runs (so it can't double-fire with the cold-start loader).
+  Future<void> _runDueBackup() async {
+    try {
+      await ref.read(backupSettingsProvider.notifier).runDueBackup();
+    } catch (e, stack) {
+      debugPrint('Kuber: on-open backup check failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _runDueBackup();
+    }
   }
 
   /// On-open ledger reminder pass (in-app records + dedupe-gated OS
