@@ -222,11 +222,10 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
               )
             : const Center(child: CircularProgressIndicator()),
         bottomSheet: loaded
-            ? SafeArea(
-                top: false,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(
-                      KuberSpacing.lg, 12, KuberSpacing.lg, 12),
+            ? Container(
+                  padding: EdgeInsets.fromLTRB(
+                      KuberSpacing.lg, 12, KuberSpacing.lg,
+                      12 + MediaQuery.viewPaddingOf(context).bottom),
                   decoration: BoxDecoration(
                     color: cs.surface,
                     border: Border(
@@ -260,8 +259,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
                       ),
                     ),
                   ),
-                ),
-              )
+                )
             : null,
       ),
     );

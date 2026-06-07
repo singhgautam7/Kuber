@@ -263,10 +263,12 @@ class _StickyPrimary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+    // Use viewPadding (raw system inset, never zeroed by an ancestor SafeArea)
+    // so the sticky button always clears the system navigation bar in
+    // edge-to-edge mode, including 3-button navigation.
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    return Container(
+      padding: EdgeInsets.fromLTRB(20, 16, 20, 12 + bottomInset),
         decoration: BoxDecoration(
           color: cs.surface,
           border: Border(
@@ -295,7 +297,6 @@ class _StickyPrimary extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
