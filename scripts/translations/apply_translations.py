@@ -17,8 +17,19 @@ partially-filled file still merges what it can.
 import json, os, sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# ARBs live in <repo>/lib/l10n; this script lives in <repo>/scripts.
-L10N = os.path.join(os.path.dirname(SCRIPT_DIR), "lib", "l10n")
+
+
+def _repo_root(start):
+    d = start
+    while d != os.path.dirname(d):
+        if os.path.exists(os.path.join(d, "pubspec.yaml")):
+            return d
+        d = os.path.dirname(d)
+    raise SystemExit("Could not locate repo root (pubspec.yaml) above " + start)
+
+
+# ARBs live in <repo>/lib/l10n; this script may live at any depth under scripts/.
+L10N = os.path.join(_repo_root(SCRIPT_DIR), "lib", "l10n")
 src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(SCRIPT_DIR, "TRANSLATIONS_TODO.json")
 rows = json.load(open(src, encoding="utf-8"))
 

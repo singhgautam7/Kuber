@@ -52,6 +52,6 @@ kannada=ಕನ್ನಡ.
 ## Then what
 
 Return the filled JSON. The maintainer runs
-`python3 scripts/apply_translations.py <filled.json>` which merges each
+`python3 scripts/translations/apply_translations.py <filled.json>` which merges each
 translation into the matching `app_<code>.arb` file by `key`. Re-runnable and
 order-independent; partially-filled files merge what's present.
