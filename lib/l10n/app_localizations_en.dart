@@ -134,7 +134,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get theme => 'THEME';
 
   @override
-  String get language => 'LANGUAGE';
+  String get language => 'Language';
 
   @override
   String get namePlaceholder => 'Your name';

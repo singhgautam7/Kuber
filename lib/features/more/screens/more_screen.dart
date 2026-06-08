@@ -17,6 +17,7 @@ import '../../tutorial/providers/tutorial_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
+import '../../ask_kuber/screen/kuber_mark.dart';
 import 'more_screen_modern.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -133,7 +134,7 @@ class MoreScreenSimple extends ConsumerWidget {
                       icon: Icons.auto_awesome_rounded,
                       label: context.l10n.menuAskKuber,
                       subtitle: context.l10n.menuAskKuberDesc,
-                      color: const Color(0xFFFFB300),
+                      iconWidget: const KuberMarkWidget(size: 20, bare: true),
                       onTap: () => context.push('/more/ask-kuber'),
                     ),
                     _MenuItem(
@@ -381,7 +382,7 @@ class _MenuItem extends StatelessWidget {
   final String label;
   final String subtitle;
   final VoidCallback onTap;
-  final Color? color;
+  final Widget? iconWidget;
 
   const _MenuItem({
     super.key,
@@ -389,7 +390,7 @@ class _MenuItem extends StatelessWidget {
     required this.label,
     required this.subtitle,
     required this.onTap,
-    this.color,
+    this.iconWidget,
   });
 
   @override
@@ -405,7 +406,7 @@ class _MenuItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            SquircleIcon(icon: icon, color: color ?? cs.primary),
+            SquircleIcon(icon: icon, glyph: iconWidget),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Column(

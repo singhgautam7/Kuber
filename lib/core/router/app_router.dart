@@ -45,7 +45,7 @@ import '../../features/investments/data/investment.dart';
 import '../../features/investments/screens/investments_screen.dart';
 import '../../features/investments/screens/add_investment_screen.dart';
 import '../../features/more/screens/charts_screen.dart';
-import '../../features/more/screens/ask_kuber_screen.dart';
+import '../../features/ask_kuber/screen/ask_kuber_screen.dart';
 import '../../features/more/screens/troubleshoot_screen.dart';
 import '../../features/budgets/data/budget.dart';
 import '../../features/dev/screens/dev_tools_screen.dart';
@@ -258,7 +258,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/more/feedback',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const FeedbackScreen(),
+        builder: (_, state) =>
+            FeedbackScreen(prefill: state.uri.queryParameters['prefill']),
       ),
       StatefulShellRoute(
         builder: (context, state, navigationShell) =>

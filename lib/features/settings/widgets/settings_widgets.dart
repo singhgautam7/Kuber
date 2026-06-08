@@ -7,19 +7,24 @@ class SquircleIcon extends StatelessWidget {
   final double size;
   final double padding;
 
+  /// Optional custom glyph rendered in place of [icon] (e.g. the Ask Kuber
+  /// mark). The squircle container itself is unchanged.
+  final Widget? glyph;
+
   const SquircleIcon({
     super.key,
     required this.icon,
     this.color,
     this.size = 20,
     this.padding = 10,
+    this.glyph,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final iconColor = color ?? cs.primary;
-    
+
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
@@ -30,7 +35,7 @@ class SquircleIcon extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Icon(icon, color: iconColor, size: size),
+      child: glyph ?? Icon(icon, color: iconColor, size: size),
     );
   }
 }

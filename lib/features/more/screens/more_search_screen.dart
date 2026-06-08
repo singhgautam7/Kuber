@@ -10,6 +10,7 @@ import '../../../core/utils/l10n_ext.dart';
 import '../../../core/constants/tools_l10n.dart';
 import '../../dev/providers/dev_mode_provider.dart';
 import '../../settings/widgets/settings_widgets.dart';
+import '../../ask_kuber/screen/kuber_mark.dart';
 import 'more_screen.dart';
 
 
@@ -20,7 +21,7 @@ class _SearchableItem {
   final String section;
   final String? route;
   final String? namedRoute;
-  final Color? color;
+  final Widget? iconWidget;
   final VoidCallback? onAction;
   final Future<void> Function(BuildContext, WidgetRef)? onRefAction;
 
@@ -31,7 +32,7 @@ class _SearchableItem {
     required this.section,
     this.route,
     this.namedRoute,
-    this.color,
+    this.iconWidget,
     this.onAction,
     this.onRefAction,
   });
@@ -63,7 +64,7 @@ List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevM
     icon: Icons.auto_awesome_rounded,
     section: context.l10n.askKuber,
     route: '/more/ask-kuber',
-    color: const Color(0xFFFFB300),
+    iconWidget: const KuberMarkWidget(size: 20, bare: true),
   ),
   // Manage
   _SearchableItem(
@@ -519,7 +520,7 @@ class _SearchResultItem extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            SquircleIcon(icon: item.icon, color: item.color ?? cs.primary),
+            SquircleIcon(icon: item.icon, glyph: item.iconWidget),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Column(
