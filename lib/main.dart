@@ -140,7 +140,11 @@ Future<bool> _isAutomaticBackupDue(Isar isar) async {
     'monthly' => 30,
     _ => 7,
   };
-  return DateTime.now().difference(last).inDays >= days;
+  final lastLocal = last.toLocal();
+  final lastMidnight = DateTime(lastLocal.year, lastLocal.month, lastLocal.day);
+  final now = DateTime.now();
+  final nowMidnight = DateTime(now.year, now.month, now.day);
+  return nowMidnight.difference(lastMidnight).inDays >= days;
 }
 
 /// Shown when the database cannot be opened/migrated. Offers a retry that

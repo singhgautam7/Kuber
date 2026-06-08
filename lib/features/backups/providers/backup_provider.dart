@@ -171,7 +171,10 @@ class BackupSettingsNotifier extends AsyncNotifier<BackupSettings> {
       BackupFrequency.weekly => 7,
       BackupFrequency.monthly => 30,
     };
-    return now.difference(last).inDays >= days;
+    final lastLocal = last.toLocal();
+    final lastMidnight = DateTime(lastLocal.year, lastLocal.month, lastLocal.day);
+    final nowMidnight = DateTime(now.year, now.month, now.day);
+    return nowMidnight.difference(lastMidnight).inDays >= days;
   }
 
   Future<void> _recordFailure(
