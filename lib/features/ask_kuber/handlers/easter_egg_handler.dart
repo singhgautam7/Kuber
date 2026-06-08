@@ -5,6 +5,8 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import 'query_handler.dart';
 
+final _rng = Random();
+
 /// Light, high-precision easter eggs. Runs before the how-to and data handlers,
 /// so every entry matches only specific phrases (never bare substrings that
 /// could appear in a real question). English-only, no thinking metadata.
@@ -61,7 +63,7 @@ class EasterEggHandler extends QueryHandler {
           followUps: _nudges,
         ));
       }
-      return options[Random().nextInt(options.length)];
+      return options[_rng.nextInt(options.length)];
     }
     if (any(['meaning of life', 'meaning of money'])) {
       return const HandlerResult(

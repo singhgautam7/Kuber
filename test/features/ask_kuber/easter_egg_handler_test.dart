@@ -16,6 +16,16 @@ void main() {
     }
   });
 
+  test('something-interesting varies across repeated asks', () async {
+    final ctx = QueryContext.forTest(raw: 'tell me something interesting');
+    final seen = <String>{};
+    for (var i = 0; i < 60; i++) {
+      seen.add((await handler.tryHandle(ctx))!.text);
+    }
+    // Proof the response is randomized, not a fixed string.
+    expect(seen.length, greaterThan(1));
+  });
+
   test('the dynamic fact can surface category count + oldest age', () async {
     final ctx = QueryContext.forTest(
       raw: 'surprise me',
