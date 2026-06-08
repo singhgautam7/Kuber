@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
@@ -71,15 +72,25 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
     final repo = ref.read(askKuberRepositoryProvider);
     final history = await repo.loadAll();
     final settings = await ref.read(settingsProvider.future);
+    final greeting = await _pickGreeting(settings.userName);
     if (!mounted) return;
     setState(() {
       _messages
         ..clear()
         ..addAll(history);
-      _greeting = composeAskGreeting(settings.userName, DateTime.now().hour);
+      _greeting = greeting;
       _isInitializing = false;
     });
     if (_messages.isNotEmpty) _scrollToBottom();
+  }
+
+  /// Randomized opener per session, avoiding the immediately previous one.
+  Future<String> _pickGreeting(String userName) async {
+    final prefs = await SharedPreferences.getInstance();
+    final last = prefs.getString(lastAskKuberGreetingKey);
+    final word = selectGreetingWord(DateTime.now().hour, last);
+    await prefs.setString(lastAskKuberGreetingKey, word);
+    return composeCompactGreeting(word, userName);
   }
 
   /// Single pulse controller; swaps to the faster, deeper "thinking" pulse.
@@ -181,11 +192,18 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
 
   void _navigate(String route) {
     try {
-      context.go(route);
+      // Feedback pushes (so the user returns to the chat); other deep links go.
+      if (route.startsWith('/more/feedback')) {
+        context.push(route);
+      } else {
+        context.go(route);
+      }
     } catch (_) {
       showKuberSnackBar(context, "That's no longer available", isError: true);
     }
   }
+
+  void _openFeedback() => _navigate('/more/feedback');
 
   void _howItWorks() =>
       KuberInfoBottomSheet.show(context, askKuberInfoConfig);
@@ -255,6 +273,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
             canCopy: lastKuber != null,
             onHowItWorks: _howItWorks,
             onCopy: _copyLast,
+            onFeedback: _openFeedback,
             onClear: _clearChat,
           ),
           Divider(height: 1, color: cs.outline.withValues(alpha: 0.3)),

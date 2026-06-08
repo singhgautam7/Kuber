@@ -11,7 +11,12 @@ class FallbackHandler extends QueryHandler {
 
   @override
   Future<HandlerResult?> tryHandle(QueryContext ctx) async {
-    return const HandlerResult(
+    // Prefill the feedback form with the unanswered query so the user can send
+    // it with one tap. Encoded as a query param so it survives chat reload.
+    final prefill = Uri.encodeQueryComponent(
+        'Ask Kuber could not answer my question: "${ctx.raw}"\n\nMy feedback: ');
+
+    return HandlerResult(
       text: 'I can answer questions about your spending, income, balances, and categories.\n\n'
           'Try:\n'
           '• "How much have I spent this month?"\n'
@@ -20,7 +25,7 @@ class FallbackHandler extends QueryHandler {
           '• "What\'s my top category?"\n'
           '• "How much do I owe on loans?"\n'
           '• "What\'s my portfolio value?"',
-      thinking: ThinkingInfo(
+      thinking: const ThinkingInfo(
         dateFilter: 'N/A',
         scanned: [],
         steps: [
@@ -29,9 +34,10 @@ class FallbackHandler extends QueryHandler {
         ],
       ),
       followUps: [
-        AskChipAction('How much did I spend this month?'),
-        AskChipAction('What\'s my net worth?'),
-        AskChipAction('Top spending category'),
+        const AskChipAction('How much did I spend this month?'),
+        const AskChipAction('What\'s my net worth?'),
+        NavChipAction(
+            label: 'Share your feedback', route: '/more/feedback?prefill=$prefill'),
       ],
     );
   }

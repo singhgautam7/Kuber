@@ -9,6 +9,7 @@ import '../handlers/fallback_handler.dart';
 import '../handlers/how_to_handler.dart';
 import '../handlers/income_handler.dart';
 import '../handlers/investments_handler.dart';
+import '../handlers/language_handler.dart';
 import '../handlers/ledger_handler.dart';
 import '../handlers/loans_handler.dart';
 import '../handlers/query_handler.dart';
@@ -44,6 +45,7 @@ class QueryOrchestrator {
           EasterEggHandler(),
           // Functional help.
           HowToHandler(),
+          LanguageHandler(),
           // Data handlers - same precedence as the original monolith.
           SpendingHandler(),
           TopCategoryHandler(),

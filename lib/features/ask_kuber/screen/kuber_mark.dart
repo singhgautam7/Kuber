@@ -15,15 +15,57 @@ class KuberMarkWidget extends StatelessWidget {
   final double size;
   final KuberMarkVariant variant;
 
+  /// Flat icon mode: just the rupee + twinkle glyph in [color] (no glowing
+  /// circle, border or halo). For entry-point icon slots elsewhere in the app.
+  final bool bare;
+
+  /// Glyph colour in [bare] mode. Defaults to the theme primary.
+  final Color? color;
+
   const KuberMarkWidget({
     super.key,
     required this.size,
     this.variant = KuberMarkVariant.spark,
+    this.bare = false,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
+    if (bare) {
+      final c = color ?? cs.primary;
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Text(
+              '₹',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w800,
+                fontSize: size * 0.92,
+                height: 1.0,
+                color: c,
+              ),
+            ),
+            if (variant != KuberMarkVariant.plain)
+              Positioned(
+                top: -size * 0.06,
+                right: -size * 0.02,
+                child: CustomPaint(
+                  size: Size.square(size * 0.34),
+                  painter: _TwinklePainter(c),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
     // The halo extends beyond the circle; reserve room for it.
     final box = size * 1.34;
     final twinkle = size * 0.26;

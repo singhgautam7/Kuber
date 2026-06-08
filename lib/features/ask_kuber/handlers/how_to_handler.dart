@@ -118,7 +118,7 @@ class HowToHandler extends QueryHandler {
       ['where do i change language', 'how to change language',
         'change language', 'set language', 'switch language'],
       HowToResponse(
-        'More, Settings, Language. Kuber supports English, Hindi, Marathi, Punjabi, and Bengali.',
+        'More, Settings, Language. Kuber supports English, Hindi, Marathi, Punjabi, Bengali, Tamil, Telugu, Malayalam and Kannada',
         deepLinkRoute: '/more/settings',
         deepLinkLabel: 'Take me there',
       ),

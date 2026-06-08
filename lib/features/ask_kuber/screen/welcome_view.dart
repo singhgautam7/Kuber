@@ -49,7 +49,7 @@ class _WelcomeViewState extends State<WelcomeView>
     _StarterPrompt('Am I overspending anywhere?', Icons.warning_amber_rounded),
     _StarterPrompt('How do I set a budget?', Icons.flag_outlined),
     _StarterPrompt("What's my biggest expense?", Icons.trending_up_rounded),
-    _StarterPrompt('What did I spend this week?', Icons.calendar_today_rounded),
+    _StarterPrompt('How much did I spend this week?', Icons.calendar_today_rounded),
   ];
 
   late final List<_StarterPrompt> _cards;
@@ -126,14 +126,15 @@ class _WelcomeViewState extends State<WelcomeView>
                               widget.greeting,
                               textAlign: TextAlign.center,
                               style: localeFont(
-                                fontSize: 34,
+                                // Compressed: large body title, not a screen header.
+                                fontSize: 22,
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurface,
-                                letterSpacing: -1.1,
+                                letterSpacing: -0.4,
                               ),
                             ),
                           ),
-                          const SizedBox(height: KuberSpacing.sm),
+                          const SizedBox(height: 6),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 280),
                             child: Text(

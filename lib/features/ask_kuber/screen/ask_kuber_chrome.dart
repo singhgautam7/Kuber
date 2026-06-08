@@ -14,6 +14,7 @@ class AskKuberHeader extends StatelessWidget {
   final bool canCopy;
   final VoidCallback onHowItWorks;
   final VoidCallback onCopy;
+  final VoidCallback onFeedback;
   final VoidCallback onClear;
 
   const AskKuberHeader({
@@ -23,6 +24,7 @@ class AskKuberHeader extends StatelessWidget {
     required this.canCopy,
     required this.onHowItWorks,
     required this.onCopy,
+    required this.onFeedback,
     required this.onClear,
   });
 
@@ -65,14 +67,16 @@ class AskKuberHeader extends StatelessWidget {
               onSelected: (v) => switch (v) {
                 0 => onHowItWorks(),
                 1 => onCopy(),
+                2 => onFeedback(),
                 _ => onClear(),
               },
               itemBuilder: (context) => [
                 _item(cs, 0, Icons.info_outline_rounded, 'How it works'),
                 _item(cs, 1, Icons.content_copy_rounded, 'Copy last response',
                     enabled: canCopy),
+                _item(cs, 2, Icons.feedback_outlined, 'Share Feedback'),
                 const PopupMenuDivider(height: 9),
-                _item(cs, 2, Icons.delete_outline_rounded, 'Clear chat',
+                _item(cs, 3, Icons.delete_outline_rounded, 'Clear chat',
                     danger: true),
               ],
             ),

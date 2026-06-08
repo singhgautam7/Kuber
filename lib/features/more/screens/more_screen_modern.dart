@@ -47,6 +47,7 @@ import '../../tutorial/models/tutorial_step_keys.dart';
 // declared in more_screen.dart — export it from there or move it into a
 // shared helper file in lib/features/more/.
 import '../screens/more_screen.dart' show launchTutorialFromMore;
+import '../../ask_kuber/screen/kuber_mark.dart';
 
 class MoreScreenModern extends ConsumerWidget {
   const MoreScreenModern({super.key});
@@ -174,7 +175,8 @@ class MoreScreenModern extends ConsumerWidget {
                         icon: Icons.auto_awesome_rounded,
                         title: context.l10n.askKuber,
                         subtitle: context.l10n.menuAskKuberDesc,
-                        accent: _ToolAccent.warning,
+                        accent: _ToolAccent.primary,
+                        iconWidget: const KuberMarkWidget(size: 22, bare: true),
                         showBetaPill: true,
                         onTap: () => context.push('/more/ask-kuber'),
                       ),
@@ -661,6 +663,7 @@ class _ToolCard extends StatelessWidget {
   final _ToolAccent accent;
   final bool showBetaPill;
   final VoidCallback onTap;
+  final Widget? iconWidget;
   const _ToolCard({
     super.key,
     required this.icon,
@@ -669,6 +672,7 @@ class _ToolCard extends StatelessWidget {
     required this.onTap,
     required this.accent,
     this.showBetaPill = false,
+    this.iconWidget,
   });
 
   @override
@@ -722,7 +726,7 @@ class _ToolCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(KuberRadius.md + 4),
                     ),
                     alignment: Alignment.center,
-                    child: Icon(icon, size: 22, color: accentColor),
+                    child: iconWidget ?? Icon(icon, size: 22, color: accentColor),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

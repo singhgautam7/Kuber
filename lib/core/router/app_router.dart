@@ -258,7 +258,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/more/feedback',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const FeedbackScreen(),
+        builder: (_, state) =>
+            FeedbackScreen(prefill: state.uri.queryParameters['prefill']),
       ),
       StatefulShellRoute(
         builder: (context, state, navigationShell) =>

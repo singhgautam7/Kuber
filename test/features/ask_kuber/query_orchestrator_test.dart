@@ -46,7 +46,7 @@ void main() {
   });
 
   test('spending this month answers from transactions', () async {
-    final r = await orchestrator.process(ctx('what did I spend this month'));
+    final r = await orchestrator.process(ctx('how much did I spend this month'));
     expect(r.thinking, isNotNull);
     expect(r.text, contains('₹400'));
     expect(r.text, contains('across 2 transactions'));
@@ -80,5 +80,17 @@ void main() {
     );
     expect(r.text, contains('I can answer questions'));
     expect(logged, 'zxcvbnm qwerty');
+
+    // Fallback offers a feedback chip prefilled with the unanswered query.
+    final nav = r.followUps.whereType<NavChipAction>().single;
+    expect(nav.label, 'Share your feedback');
+    expect(nav.route, startsWith('/more/feedback?prefill='));
+    expect(nav.route, contains('zxcvbnm'));
+  });
+
+  test('non-English input routes to the language handler, not fallback', () async {
+    final r = await orchestrator.process(ctx('मेरा खर्च कितना है'));
+    expect(r.text, contains('9 languages'));
+    expect((r.followUps.single as NavChipAction).route, '/more/settings');
   });
 }

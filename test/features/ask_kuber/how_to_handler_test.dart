@@ -33,9 +33,9 @@ void main() {
   });
 
   test('does not claim data queries that merely share a topic word', () async {
-    // "show my budgets" / "what did I spend" must fall through to data handlers.
+    // "show my budgets" / "how much did I spend" must fall through to data handlers.
     expect(await handler.tryHandle(ctx('show my budgets')), isNull);
-    expect(await handler.tryHandle(ctx('what did I spend this month')), isNull);
+    expect(await handler.tryHandle(ctx('how much did I spend this month')), isNull);
     expect(await handler.tryHandle(ctx('top spending category')), isNull);
   });
 }

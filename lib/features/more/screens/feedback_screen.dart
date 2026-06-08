@@ -63,7 +63,11 @@ String _getMailErrorMsg(String lang) {
 }
 
 class FeedbackScreen extends ConsumerStatefulWidget {
-  const FeedbackScreen({super.key});
+  /// Optional text to pre-fill the message field with (e.g. an unanswered Ask
+  /// Kuber query routed here via a "Share your feedback" chip).
+  final String? prefill;
+
+  const FeedbackScreen({super.key, this.prefill});
 
   @override
   ConsumerState<FeedbackScreen> createState() => _FeedbackScreenState();
@@ -73,6 +77,17 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   String _selectedType = _feedbackTypes.first;
   final _feedbackCtrl = TextEditingController();
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final prefill = widget.prefill;
+    if (prefill != null && prefill.isNotEmpty) {
+      _feedbackCtrl.text = prefill;
+      _feedbackCtrl.selection =
+          TextSelection.collapsed(offset: prefill.length);
+    }
+  }
 
   @override
   void dispose() {

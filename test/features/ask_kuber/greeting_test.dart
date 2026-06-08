@@ -2,31 +2,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kuber/features/ask_kuber/screen/greeting.dart';
 
 void main() {
-  group('composeAskGreeting', () {
-    test('time-of-day buckets with a name', () {
-      expect(composeAskGreeting('Gautam', 8), 'Good morning, Gautam.');
-      expect(composeAskGreeting('Gautam', 14), 'Good afternoon, Gautam.');
-      expect(composeAskGreeting('Gautam', 19), 'Good evening, Gautam.');
-      expect(composeAskGreeting('Gautam', 23), 'Hi, Gautam.');
-      expect(composeAskGreeting('Gautam', 2), 'Hi, Gautam.');
-    });
-
-    test('bucket boundaries', () {
-      expect(composeAskGreeting('A', 5), startsWith('Good morning'));
-      expect(composeAskGreeting('A', 11), startsWith('Good morning'));
-      expect(composeAskGreeting('A', 12), startsWith('Good afternoon'));
-      expect(composeAskGreeting('A', 16), startsWith('Good afternoon'));
-      expect(composeAskGreeting('A', 17), startsWith('Good evening'));
-      expect(composeAskGreeting('A', 21), startsWith('Good evening'));
-      expect(composeAskGreeting('A', 22), startsWith('Hi'));
-      expect(composeAskGreeting('A', 4), startsWith('Hi'));
+  group('composeCompactGreeting', () {
+    test('includes the name with a comma and trailing period', () {
+      expect(composeCompactGreeting('Hello', 'Gautam'), 'Hello, Gautam.');
+      expect(composeCompactGreeting('Welcome back', 'G'), 'Welcome back, G.');
     });
 
     test('empty name drops the comma and name but keeps the period', () {
-      expect(composeAskGreeting('', 8), 'Good morning.');
-      expect(composeAskGreeting('   ', 14), 'Good afternoon.');
-      expect(composeAskGreeting('', 19), 'Good evening.');
-      expect(composeAskGreeting('', 23), 'Hi.');
+      expect(composeCompactGreeting('Hi', ''), 'Hi.');
+      expect(composeCompactGreeting('Namaste', '   '), 'Namaste.');
+    });
+  });
+
+  group('selectGreetingWord', () {
+    const all = {'Hi', 'Hello', 'Hey', 'Namaste', 'Welcome back', 'Ssup'};
+
+    test('always returns a word from the list', () {
+      for (var i = 0; i < 100; i++) {
+        expect(all.contains(selectGreetingWord(20, null)), isTrue);
+      }
+    });
+
+    test('"Ssup" only appears from 17:00 onward', () {
+      for (var i = 0; i < 300; i++) {
+        expect(selectGreetingWord(10, null), isNot('Ssup'));
+        expect(selectGreetingWord(16, null), isNot('Ssup'));
+      }
+      // From the evening it becomes eligible (statistically certain over 500 draws).
+      final evening = {for (var i = 0; i < 500; i++) selectGreetingWord(20, null)};
+      expect(evening.contains('Ssup'), isTrue);
+    });
+
+    test('never repeats the immediately previous greeting when avoidable', () {
+      for (var i = 0; i < 300; i++) {
+        expect(selectGreetingWord(20, 'Hi'), isNot('Hi'));
+      }
     });
   });
 }

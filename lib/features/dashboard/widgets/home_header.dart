@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
+import '../../ask_kuber/screen/kuber_mark.dart';
 
 /// Replaces the brand wordmark + actions row on the dashboard. Other screens
 /// keep `KuberAppBar`. Layout: shimmer "Ask Kuber" pill — spacer — privacy
@@ -89,7 +90,8 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
                 animation: _shimmerAnim,
                 builder: (_, __) {
                   final t = _shimmerAnim.value;
-                  const gold = Color(0xFFFFB300);
+                  // Ask Kuber brand colour is the theme primary (was amber).
+                  final gold = Theme.of(context).colorScheme.primary;
                   return GestureDetector(
                     onTap: () => context.push('/more/ask-kuber'),
                     child: Container(
@@ -123,8 +125,7 @@ class _HomeHeaderState extends ConsumerState<HomeHeader>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.auto_awesome_rounded,
-                              size: 13, color: gold),
+                          KuberMarkWidget(size: 14, bare: true, color: gold),
                           const SizedBox(width: 5),
                           Text(
                             context.l10n.askKuber,
