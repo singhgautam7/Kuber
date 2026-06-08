@@ -20,6 +20,7 @@ import '../../features/notifications/data/app_notification.dart';
 import '../../features/widget_editor/data/widget_preference.dart';
 import '../../features/stories/data/insight_story.dart';
 import '../../features/backups/data/backup_config.dart';
+import '../../features/ask_kuber/data/ask_kuber_message.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -47,6 +48,7 @@ class IsarService {
       WidgetPreferenceSchema,
       InsightStorySchema,
       BackupConfigSchema,
+      AskKuberMessageSchema,
     ], directory: dir.path);
   }
 }

@@ -18,6 +18,7 @@ import 'package:kuber/features/tools/bill_splitter/data/person.dart';
 import 'package:kuber/features/tools/bill_splitter/data/bill.dart';
 import 'package:kuber/features/stories/data/insight_story.dart';
 import 'package:kuber/features/backups/data/backup_config.dart';
+import 'package:kuber/features/ask_kuber/data/ask_kuber_message.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -38,6 +39,7 @@ const _allSchemas = [
   BillSchema,
   InsightStorySchema,
   BackupConfigSchema,
+  AskKuberMessageSchema,
 ];
 
 bool _isarInitialized = false;
