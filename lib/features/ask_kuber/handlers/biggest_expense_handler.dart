@@ -3,6 +3,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// The single largest expense on record. Ported verbatim.
 class BiggestExpenseHandler extends QueryHandler {
@@ -24,7 +25,15 @@ class BiggestExpenseHandler extends QueryHandler {
     if (expenses.isEmpty) {
       return HandlerResult(
         text: 'No expenses found.',
-        thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+        thinking: ThinkingInfo(
+          dateFilter: 'All time',
+          scanned: const ['Transactions'],
+          steps: [
+            intentStep('largest expense', 'all time'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('No expenses on record.'),
+          ],
+        ),
       );
     }
 
@@ -32,7 +41,16 @@ class BiggestExpenseHandler extends QueryHandler {
     return HandlerResult(
       text:
           'Your biggest expense is "${top.name}" (${ctx.money(top.amount)}) on ${ctx.fmtDate(top.createdAt)}.',
-      thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+      thinking: ThinkingInfo(
+        dateFilter: 'All time',
+        scanned: const ['Transactions'],
+        steps: [
+          intentStep('largest expense', 'all time'),
+          scannedStep(ctx.txns.length, 'transactions'),
+          resultStep(
+              '**${top.name}** is the largest at **${ctx.money(top.amount)}**.'),
+        ],
+      ),
     );
   }
 }

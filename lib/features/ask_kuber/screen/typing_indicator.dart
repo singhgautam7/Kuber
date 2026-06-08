@@ -2,34 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 
-/// Three-dot "Kuber is thinking" bubble. No avatar - Kuber's identity lives in
-/// the AppBar mark, which pulses faster while this is showing.
+/// "Kuber is thinking" indicator: three bare dots at the left edge, no bubble
+/// box (matches the avatarless, box-less Kuber message treatment).
 class TypingIndicator extends StatelessWidget {
   const TypingIndicator({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Align(
+    return const Align(
       alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-        padding:
-            const EdgeInsets.symmetric(horizontal: KuberSpacing.md, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Dot(delay: 0),
-            SizedBox(width: 4),
-            _Dot(delay: 150),
-            SizedBox(width: 4),
-            _Dot(delay: 300),
-          ],
+      child: Padding(
+        padding: EdgeInsets.only(top: 4, bottom: KuberSpacing.md),
+        child: SizedBox(
+          height: 18,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _Dot(delay: 0),
+              SizedBox(width: 5),
+              _Dot(delay: 150),
+              SizedBox(width: 5),
+              _Dot(delay: 300),
+            ],
+          ),
         ),
       ),
     );
@@ -75,8 +70,8 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, __) => Container(
-        width: 7,
-        height: 7,
+        width: 6,
+        height: 6,
         decoration: BoxDecoration(
           color: cs.onSurfaceVariant.withValues(alpha: 0.3 + 0.7 * _anim.value),
           shape: BoxShape.circle,

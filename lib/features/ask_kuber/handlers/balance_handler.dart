@@ -3,6 +3,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Account-specific balance and overall net worth. Ported verbatim, including
 /// the per-account balance loop. Balances come from [accountBalanceProvider].
@@ -26,8 +27,15 @@ class BalanceHandler extends QueryHandler {
         final balance = await ctx.read(accountBalanceProvider(a.id).future);
         return HandlerResult(
           text: '${a.name} balance: ${ctx.money(balance)}.',
-          thinking:
-              const ThinkingInfo(dateFilter: 'Current balance', scanned: ['Accounts']),
+          thinking: ThinkingInfo(
+            dateFilter: 'Current balance',
+            scanned: const ['Accounts'],
+            steps: [
+              intentStep('account balance', 'current'),
+              scannedStep(ctx.accounts.length, 'accounts'),
+              resultStep('**${a.name}** balance is **${ctx.money(balance)}**.'),
+            ],
+          ),
         );
       }
     }
@@ -41,11 +49,20 @@ class BalanceHandler extends QueryHandler {
       for (final a in ctx.accounts) {
         total += await ctx.read(accountBalanceProvider(a.id).future);
       }
+      final n = ctx.accounts.length;
       return HandlerResult(
         text:
-            'Your total net worth across ${ctx.accounts.length} account${ctx.accounts.length == 1 ? '' : 's'} is ${ctx.money(total)}.',
-        thinking:
-            const ThinkingInfo(dateFilter: 'Current balances', scanned: ['Accounts']),
+            'Your total net worth across $n account${n == 1 ? '' : 's'} is ${ctx.money(total)}.',
+        thinking: ThinkingInfo(
+          dateFilter: 'Current balances',
+          scanned: const ['Accounts'],
+          steps: [
+            intentStep('net worth', 'current'),
+            scannedStep(n, 'accounts'),
+            resultStep(
+                'Sum of balances across **$n account${n == 1 ? '' : 's'}** is **${ctx.money(total)}**.'),
+          ],
+        ),
       );
     }
 

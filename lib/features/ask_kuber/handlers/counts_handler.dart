@@ -2,13 +2,27 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
-/// "How many …" counts: transactions (today/week/month/total), expense/income
+/// "How many ..." counts: transactions (today/week/month/total), expense/income
 /// transaction counts, account count, category count. Ported verbatim - note
 /// these use the raw list (transfers included, balance adjustments excluded),
 /// not `validForCalculations`.
 class CountsHandler extends QueryHandler {
   const CountsHandler();
+
+  ThinkingInfo _think(String range, int n, String item) => ThinkingInfo(
+        dateFilter: range,
+        scanned: const ['Transactions'],
+        steps: [
+          intentStep('count', range),
+          scannedStep(n, item),
+          resultStep('Counted **$n ${n == 1 ? _singular(item) : item}**.'),
+        ],
+      );
+
+  static String _singular(String w) =>
+      w.endsWith('ies') ? '${w.substring(0, w.length - 3)}y' : (w.endsWith('s') ? w.substring(0, w.length - 1) : w);
 
   @override
   Future<HandlerResult?> tryHandle(QueryContext ctx) async {
@@ -26,8 +40,7 @@ class CountsHandler extends QueryHandler {
           .length;
       return HandlerResult(
         text: 'You made $count transaction${count == 1 ? '' : 's'} today.',
-        thinking:
-            ThinkingInfo(dateFilter: ctx.fmtDate(ctx.today), scanned: const ['Transactions']),
+        thinking: _think(ctx.fmtDate(ctx.today), count, 'transactions'),
       );
     }
 
@@ -41,10 +54,10 @@ class CountsHandler extends QueryHandler {
           .length;
       return HandlerResult(
         text: 'You made $count transaction${count == 1 ? '' : 's'} this week.',
-        thinking: ThinkingInfo(
-          dateFilter: '${ctx.fmtDate(ctx.weekStart)} – ${ctx.fmtDate(ctx.today)}',
-          scanned: const ['Transactions'],
-        ),
+        thinking: _think(
+            '${ctx.fmtDate(ctx.weekStart)} – ${ctx.fmtDate(ctx.today)}',
+            count,
+            'transactions'),
       );
     }
 
@@ -58,10 +71,10 @@ class CountsHandler extends QueryHandler {
           .length;
       return HandlerResult(
         text: 'You made $count transaction${count == 1 ? '' : 's'} this month.',
-        thinking: ThinkingInfo(
-          dateFilter: '${ctx.fmtDate(ctx.monthStart)} – ${ctx.fmtDate(ctx.today)}',
-          scanned: const ['Transactions'],
-        ),
+        thinking: _think(
+            '${ctx.fmtDate(ctx.monthStart)} – ${ctx.fmtDate(ctx.today)}',
+            count,
+            'transactions'),
       );
     }
 
@@ -70,7 +83,7 @@ class CountsHandler extends QueryHandler {
       final count = txns.where((t) => !t.isBalanceAdjustment).length;
       return HandlerResult(
         text: 'You have $count transactions in total.',
-        thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+        thinking: _think('All time', count, 'transactions'),
       );
     }
 
@@ -80,7 +93,7 @@ class CountsHandler extends QueryHandler {
           txns.where((t) => t.type == 'expense' && !t.isBalanceAdjustment).length;
       return HandlerResult(
         text: 'You have $count expense transaction${count == 1 ? '' : 's'} in total.',
-        thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+        thinking: _think('All time', count, 'expense transactions'),
       );
     }
 
@@ -90,7 +103,7 @@ class CountsHandler extends QueryHandler {
           txns.where((t) => t.type == 'income' && !t.isBalanceAdjustment).length;
       return HandlerResult(
         text: 'You have $count income transaction${count == 1 ? '' : 's'} in total.',
-        thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+        thinking: _think('All time', count, 'income transactions'),
       );
     }
 
@@ -98,7 +111,16 @@ class CountsHandler extends QueryHandler {
     if (lower.contains('account')) {
       return HandlerResult(
         text: 'You have ${ctx.accounts.length} account${ctx.accounts.length == 1 ? '' : 's'}.',
-        thinking: const ThinkingInfo(dateFilter: 'Current', scanned: ['Accounts']),
+        thinking: ThinkingInfo(
+          dateFilter: 'Current',
+          scanned: const ['Accounts'],
+          steps: [
+            intentStep('account count', 'current'),
+            scannedStep(ctx.accounts.length, 'accounts'),
+            resultStep(
+                'Counted **${ctx.accounts.length} ${ctx.accounts.length == 1 ? 'account' : 'accounts'}**.'),
+          ],
+        ),
       );
     }
 
@@ -107,7 +129,16 @@ class CountsHandler extends QueryHandler {
       return HandlerResult(
         text:
             'You have ${ctx.categories.length} categor${ctx.categories.length == 1 ? 'y' : 'ies'} set up.',
-        thinking: const ThinkingInfo(dateFilter: 'Current', scanned: ['Categories']),
+        thinking: ThinkingInfo(
+          dateFilter: 'Current',
+          scanned: const ['Categories'],
+          steps: [
+            intentStep('category count', 'current'),
+            scannedStep(ctx.categories.length, 'categories'),
+            resultStep(
+                'Counted **${ctx.categories.length} categor${ctx.categories.length == 1 ? 'y' : 'ies'}**.'),
+          ],
+        ),
       );
     }
 

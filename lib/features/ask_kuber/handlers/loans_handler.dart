@@ -3,6 +3,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Loan outstanding + total paid. Ported verbatim.
 class LoansHandler extends QueryHandler {
@@ -23,13 +24,30 @@ class LoansHandler extends QueryHandler {
     if (summary.outstanding == 0 && summary.totalPaid == 0) {
       return HandlerResult(
         text: 'You have no active loans tracked.',
-        thinking: const ThinkingInfo(dateFilter: 'Current', scanned: ['Loans']),
+        thinking: ThinkingInfo(
+          dateFilter: 'Current',
+          scanned: const ['Loans'],
+          steps: [
+            intentStep('loan summary', 'current'),
+            const ThinkingStep('Scanned your **loan records**.'),
+            resultStep('No active loans on record.'),
+          ],
+        ),
       );
     }
     return HandlerResult(
       text:
           'Loan summary:\n• Outstanding: ${ctx.money(summary.outstanding)}\n• Total paid so far: ${ctx.money(summary.totalPaid)}',
-      thinking: const ThinkingInfo(dateFilter: 'Active loans', scanned: ['Loans']),
+      thinking: ThinkingInfo(
+        dateFilter: 'Active loans',
+        scanned: const ['Loans'],
+        steps: [
+          intentStep('loan summary', 'active loans'),
+          const ThinkingStep('Scanned your **active loans**.'),
+          resultStep(
+              'Outstanding principal is **${ctx.money(summary.outstanding)}**, paid so far **${ctx.money(summary.totalPaid)}**.'),
+        ],
+      ),
     );
   }
 }

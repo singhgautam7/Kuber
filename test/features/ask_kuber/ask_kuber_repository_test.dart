@@ -29,7 +29,13 @@ void main() {
         isUser: false,
         time: DateTime(2026, 6, 1, 9, 1),
         thinking: const ThinkingInfo(
-            dateFilter: 'All time', scanned: ['Transactions', 'Categories']),
+          dateFilter: 'All time',
+          scanned: ['Transactions', 'Categories'],
+          steps: [
+            ThinkingStep('Detected intent: **top expense category**.'),
+            ThinkingStep('**Food** ranks first at **₹300**.'),
+          ],
+        ),
         vizPayload: const TopCategoriesViz([
           CategoryVizRow(
               name: 'Food',
@@ -64,6 +70,10 @@ void main() {
     expect(k.text, contains('Food'));
     expect(k.thinking?.dateFilter, 'All time');
     expect(k.thinking?.scanned, ['Transactions', 'Categories']);
+    expect(k.thinking?.steps.map((s) => s.text).toList(), [
+      'Detected intent: **top expense category**.',
+      '**Food** ranks first at **₹300**.',
+    ]);
 
     expect(k.vizPayload, isA<TopCategoriesViz>());
     final viz = k.vizPayload as TopCategoriesViz;

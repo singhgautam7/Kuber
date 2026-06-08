@@ -5,11 +5,13 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Spending queries: category-specific spend, relative ranges, and the
 /// today/week/last-month/this-month/this-year period totals. Ported verbatim
 /// from `_processQuery` (preserving order and fall-through), currency rounded
-/// to whole numbers via [QueryContext.money].
+/// to whole numbers via [QueryContext.money]. Each branch also emits reasoning
+/// steps for the thinking panel.
 class SpendingHandler extends QueryHandler {
   const SpendingHandler();
 
@@ -21,13 +23,10 @@ class SpendingHandler extends QueryHandler {
   @override
   Future<HandlerResult?> tryHandle(QueryContext ctx) async {
     final lower = ctx.lower;
-    // Budget-intent queries ("am I overspending on food", "over budget on X")
-    // defer to BudgetsHandler, which renders a budget-status visualization.
-    // Without this, "overspending" (contains "spend") would be swallowed here
-    // as plain category spend.
     if (lower.contains('overspend') ||
         lower.contains('budget') ||
         lower.contains('spending limit')) {
+      // Budget-intent queries defer to the budgets handler.
       return null;
     }
     if (!_mentionsSpend(lower)) return null;
@@ -113,6 +112,15 @@ class SpendingHandler extends QueryHandler {
           thinking: ThinkingInfo(
             dateFilter: thinkingDate,
             scanned: ['Transactions', 'Categories (${matchedCat.name})'],
+            steps: [
+              intentStep('category spending', dateLabel),
+              scannedStep(ctx.txns.length, 'transactions',
+                  groups: ctx.categories.length,
+                  groupType: 'categories',
+                  dimension: 'category'),
+              resultStep(
+                  '**${matchedCat.name}** spending is **${ctx.money(total)}**.'),
+            ],
           ),
         );
       }
@@ -128,6 +136,11 @@ class SpendingHandler extends QueryHandler {
           dateFilter:
               '${ctx.fmtDate(customRange.from)} – ${ctx.fmtDate(customRange.to)}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('spending', 'past ${customRange.label}'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('Sum across the period is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }
@@ -140,6 +153,11 @@ class SpendingHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: ctx.fmtDate(ctx.today),
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('spending', 'today'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('Sum across the period is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }
@@ -155,6 +173,11 @@ class SpendingHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: '${ctx.fmtDate(ctx.weekStart)} – ${ctx.fmtDate(ctx.today)}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('spending', 'this week'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('Sum across the period is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }
@@ -169,6 +192,11 @@ class SpendingHandler extends QueryHandler {
           dateFilter:
               '${ctx.fmtDate(ctx.lastMonthStart)} – ${ctx.fmtDate(ctx.lastMonthEnd.subtract(const Duration(days: 1)))}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('spending', 'last month'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('Sum across the period is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }
@@ -189,6 +217,12 @@ class SpendingHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: '${ctx.fmtDate(ctx.monthStart)} – ${ctx.fmtDate(ctx.today)}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('spending', 'this month'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep(
+                'Sum across **$count transactions** is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }
@@ -208,6 +242,12 @@ class SpendingHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: '${ctx.fmtDate(ctx.yearStart)} – ${ctx.fmtDate(ctx.today)}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('spending', 'this year'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep(
+                'Sum across **$count transactions** is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }

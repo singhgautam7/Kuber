@@ -2,6 +2,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Income totals for this month / this year. Ported verbatim from `_processQuery`.
 class IncomeHandler extends QueryHandler {
@@ -21,6 +22,11 @@ class IncomeHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: '${ctx.fmtDate(ctx.monthStart)} – ${ctx.fmtDate(ctx.today)}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('income total', 'this month'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('Total income is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }
@@ -33,6 +39,11 @@ class IncomeHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: '${ctx.fmtDate(ctx.yearStart)} – ${ctx.fmtDate(ctx.today)}',
           scanned: const ['Transactions'],
+          steps: [
+            intentStep('income total', 'this year'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('Total income is **${ctx.money(total)}**.'),
+          ],
         ),
       );
     }

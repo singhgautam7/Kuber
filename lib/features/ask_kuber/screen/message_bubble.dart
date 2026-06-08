@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -6,23 +7,28 @@ import '../../../core/utils/locale_font.dart';
 import '../models/chat_message.dart';
 import '../models/viz_payload.dart';
 import 'budget_status_viz.dart';
+import 'thinking_panel.dart';
 import 'top_categories_viz.dart';
 
-/// Dispatches to the user or Kuber bubble. No avatar on either side - Kuber's
-/// identity lives in the AppBar mark.
+/// Dispatches to the user or Kuber message. No avatar on either side. When
+/// [stream] is supplied (the actively-typing Kuber message), the text is read
+/// from it and a blinking caret is shown; meta/viz/thinking are withheld until
+/// streaming completes.
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
-  const MessageBubble({super.key, required this.message});
+  final ValueListenable<String>? stream;
+
+  const MessageBubble({super.key, required this.message, this.stream});
 
   @override
   Widget build(BuildContext context) {
     return message.isUser
         ? _UserBubble(message: message)
-        : _KuberBubble(message: message);
+        : _KuberMessage(message: message, stream: stream);
   }
 }
 
-/// Day divider inserted above the first message of each calendar day.
+/// Day divider: thin lines flanking a muted centered label.
 class DateSeparator extends StatelessWidget {
   final DateTime date;
   const DateSeparator({super.key, required this.date});
@@ -44,21 +50,22 @@ class DateSeparator extends StatelessWidget {
       label = DateFormat('d MMM yyyy').format(date);
     }
 
+    Widget line() =>
+        Expanded(child: Divider(color: cs.outline.withValues(alpha: 0.45)));
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
       child: Row(children: [
-        Expanded(child: Divider(color: cs.outline.withValues(alpha: 0.3))),
+        line(),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
-          child: Text(
-            label,
-            style: localeFont(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-                fontWeight: FontWeight.w600),
-          ),
+          child: Text(label,
+              style: localeFont(
+                  fontSize: 11,
+                  color: cs.onSurfaceVariant,
+                  fontWeight: FontWeight.w500)),
         ),
-        Expanded(child: Divider(color: cs.outline.withValues(alpha: 0.3))),
+        line(),
       ]),
     );
   }
@@ -75,32 +82,27 @@ class _UserBubble extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
         constraints:
-            BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.75),
+            BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.78),
         child: Container(
-          margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-          padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.md, vertical: KuberSpacing.sm),
+          margin: const EdgeInsets.only(bottom: KuberSpacing.md),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 7),
           decoration: BoxDecoration(
-            color: cs.primary,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(4),
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            ),
+            // Primary-tinted fill with a subtle primary border (per design CSS).
+            color: cs.primary.withValues(alpha: 0.10),
+            border: Border.all(color: cs.primary.withValues(alpha: 0.22)),
+            borderRadius: BorderRadius.circular(KuberRadius.lg),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                message.text,
-                style: localeFont(fontSize: 14, color: cs.onPrimary),
-              ),
+              Text(message.text,
+                  style: localeFont(
+                      fontSize: 14, color: cs.onSurface, height: 1.45)),
               const SizedBox(height: 3),
               Text(
                 DateFormat('h:mm a').format(message.time),
                 style: localeFont(
-                    fontSize: 10, color: cs.onPrimary.withValues(alpha: 0.7)),
+                    fontSize: 10, color: cs.onSurfaceVariant.withValues(alpha: 0.85)),
               ),
             ],
           ),
@@ -110,10 +112,10 @@ class _UserBubble extends StatelessWidget {
   }
 }
 
-/// Builds a [TextSpan] that highlights currency/number tokens in [highlight].
-TextSpan buildRichText(String text, TextStyle base, Color highlight) {
+/// Currency/number highlight spans for Kuber text.
+List<InlineSpan> buildRichSpans(String text, TextStyle base, Color highlight) {
   final pattern = RegExp(r'[₹$€£]?[\d,]+(?:\.\d+)?', caseSensitive: false);
-  final spans = <TextSpan>[];
+  final spans = <InlineSpan>[];
   int last = 0;
   for (final m in pattern.allMatches(text)) {
     final matched = m.group(0)!;
@@ -122,26 +124,27 @@ TextSpan buildRichText(String text, TextStyle base, Color highlight) {
       spans.add(TextSpan(text: text.substring(last, m.start), style: base));
     }
     spans.add(TextSpan(
-      text: matched,
-      style: base.copyWith(fontWeight: FontWeight.w700, color: highlight),
-    ));
+        text: matched,
+        style: base.copyWith(fontWeight: FontWeight.w600, color: highlight)));
     last = m.end;
   }
   if (last < text.length) {
     spans.add(TextSpan(text: text.substring(last), style: base));
   }
-  return TextSpan(children: spans);
+  return spans;
 }
 
-class _KuberBubble extends StatefulWidget {
+/// Kuber message: bare editorial text on the chat surface, no bubble box.
+class _KuberMessage extends StatefulWidget {
   final ChatMessage message;
-  const _KuberBubble({required this.message});
+  final ValueListenable<String>? stream;
+  const _KuberMessage({required this.message, this.stream});
 
   @override
-  State<_KuberBubble> createState() => _KuberBubbleState();
+  State<_KuberMessage> createState() => _KuberMessageState();
 }
 
-class _KuberBubbleState extends State<_KuberBubble>
+class _KuberMessageState extends State<_KuberMessage>
     with SingleTickerProviderStateMixin {
   bool _expanded = false;
   late final AnimationController _ctrl;
@@ -151,7 +154,7 @@ class _KuberBubbleState extends State<_KuberBubble>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250));
+        vsync: this, duration: const Duration(milliseconds: 200));
     _sizeAnim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
   }
 
@@ -166,120 +169,77 @@ class _KuberBubbleState extends State<_KuberBubble>
     _expanded ? _ctrl.forward() : _ctrl.reverse();
   }
 
+  TextStyle get _textStyle =>
+      localeFont(fontSize: 15, color: Theme.of(context).colorScheme.onSurface, height: 1.5);
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final msg = widget.message;
+    final maxW = MediaQuery.sizeOf(context).width * 0.86;
+
+    // Streaming: bare growing text + blinking caret, nothing else yet.
+    if (widget.stream != null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxW),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+            child: ValueListenableBuilder<String>(
+              valueListenable: widget.stream!,
+              builder: (context, text, _) => Text.rich(
+                TextSpan(children: [
+                  ...buildRichSpans(text, _textStyle, cs.primary),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: RepaintBoundary(child: BlinkingCaret(color: cs.primary)),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final thinking = msg.thinking;
     final viz = msg.vizPayload;
-    final maxW = MediaQuery.sizeOf(context).width * 0.82;
 
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxW),
-        child: Container(
-          // Full width when a visualization is present so its bars have room.
-          width: viz != null ? maxW : null,
-          margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(4),
-              topRight: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            ),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.md, vertical: KuberSpacing.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    RichText(
-                      text: buildRichText(
-                        msg.text,
-                        localeFont(fontSize: 14, color: cs.onSurface),
-                        cs.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      DateFormat('h:mm a').format(msg.time),
+              Text.rich(TextSpan(
+                  children: buildRichSpans(msg.text, _textStyle, cs.primary))),
+              if (viz != null) ...[
+                const SizedBox(height: KuberSpacing.sm),
+                _buildViz(viz),
+              ],
+              if (thinking != null)
+                ThinkingMetaRow(
+                  time: DateFormat('h:mm a').format(msg.time),
+                  expanded: _expanded,
+                  onToggle: _toggle,
+                ),
+              if (thinking == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(DateFormat('h:mm a').format(msg.time),
                       style:
-                          localeFont(fontSize: 10, color: cs.onSurfaceVariant),
-                    ),
-                    if (viz != null) ...[
-                      const SizedBox(height: KuberSpacing.sm),
-                      _buildViz(viz),
-                    ],
-                  ],
+                          localeFont(fontSize: 11, color: cs.onSurfaceVariant)),
                 ),
-              ),
-              if (thinking != null) ...[
-                Divider(height: 1, color: cs.outline.withValues(alpha: 0.2)),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _toggle,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: KuberSpacing.md, vertical: 6),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedRotation(
-                          turns: _expanded ? 0.25 : 0,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                          child: Icon(Icons.chevron_right_rounded,
-                              size: 14, color: cs.onSurfaceVariant),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'SHOW THINKING',
-                          style: localeFont(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              if (thinking != null)
                 SizeTransition(
                   sizeFactor: _sizeAnim,
                   axisAlignment: -1,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(KuberSpacing.md, 0,
-                        KuberSpacing.md, KuberSpacing.sm),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Divider(
-                            height: 1,
-                            color: cs.outline.withValues(alpha: 0.15)),
-                        const SizedBox(height: 6),
-                        _ThinkingRow(
-                            label: 'Date filter',
-                            value: thinking.dateFilter,
-                            cs: cs),
-                        if (thinking.scanned.isNotEmpty)
-                          _ThinkingRow(
-                              label: 'Scanned',
-                              value: thinking.scanned.join(', '),
-                              cs: cs),
-                      ],
-                    ),
-                  ),
+                  child: ThinkingPanel(thinking: thinking),
                 ),
-              ],
             ],
           ),
         ),
@@ -287,36 +247,8 @@ class _KuberBubbleState extends State<_KuberBubble>
     );
   }
 
-  Widget _buildViz(VizPayload viz) {
-    return switch (viz) {
-      TopCategoriesViz() => TopCategoriesVizView(data: viz),
-      BudgetStatusViz() => BudgetStatusVizView(data: viz),
-    };
-  }
-}
-
-class _ThinkingRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final ColorScheme cs;
-  const _ThinkingRow(
-      {required this.label, required this.value, required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 3),
-      child: RichText(
-        text: TextSpan(
-          style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
-          children: [
-            TextSpan(
-                text: '$label: ',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            TextSpan(text: value),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildViz(VizPayload viz) => switch (viz) {
+        TopCategoriesViz() => TopCategoriesVizView(data: viz),
+        BudgetStatusViz() => BudgetStatusVizView(data: viz),
+      };
 }

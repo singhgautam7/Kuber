@@ -10,6 +10,7 @@ import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import '../models/viz_payload.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Budget queries. Aggregate questions ("show my budgets") return the original
 /// text list. A query that names a category with an active budget ("am I
@@ -31,7 +32,15 @@ class BudgetsHandler extends QueryHandler {
     if (budgets.isEmpty) {
       return HandlerResult(
         text: 'No active budgets set up.',
-        thinking: const ThinkingInfo(dateFilter: 'Current period', scanned: ['Budgets']),
+        thinking: ThinkingInfo(
+          dateFilter: 'Current period',
+          scanned: const ['Budgets'],
+          steps: [
+            intentStep('budget status', 'current period'),
+            const ThinkingStep('Scanned your **active budgets**.'),
+            resultStep('No active budgets set up.'),
+          ],
+        ),
       );
     }
 
@@ -57,9 +66,15 @@ class BudgetsHandler extends QueryHandler {
     }).join('\n');
     return HandlerResult(
       text: 'Your budgets this period:\n$lines',
-      thinking: const ThinkingInfo(
+      thinking: ThinkingInfo(
         dateFilter: 'Current period',
-        scanned: ['Budgets', 'Transactions'],
+        scanned: const ['Budgets', 'Transactions'],
+        steps: [
+          intentStep('budget status', 'current period'),
+          scannedStep(budgets.length, 'budgets'),
+          resultStep(
+              'Compared spend against **${budgets.length} budget${budgets.length == 1 ? '' : 's'}** this period.'),
+        ],
       ),
     );
   }
@@ -77,23 +92,33 @@ class BudgetsHandler extends QueryHandler {
 
     final BudgetStatus status;
     final String closing;
+    final String stateWord;
     if (pct > 100) {
       status = BudgetStatus.over;
       closing = "You're over by ${ctx.money(spent - limit)}.";
+      stateWord = 'over budget';
     } else if (pct >= 80) {
       status = BudgetStatus.approaching;
       closing = "You're getting close to the limit.";
+      stateWord = 'approaching the limit';
     } else {
       status = BudgetStatus.withinBudget;
       closing = "You're within budget.";
+      stateWord = 'within budget';
     }
 
     return HandlerResult(
       text:
           "You've spent ${ctx.money(spent)} of your ${ctx.money(limit)} $catName budget this period ($pctLabel%). $closing",
-      thinking: const ThinkingInfo(
+      thinking: ThinkingInfo(
         dateFilter: 'Current period',
-        scanned: ['Budgets', 'Transactions'],
+        scanned: const ['Budgets', 'Transactions'],
+        steps: [
+          intentStep('budget status for $catName', 'current period'),
+          const ThinkingStep('Scanned your **active budgets** and matching spend.'),
+          resultStep(
+              '**$catName** is at **$pctLabel%** of its **${ctx.money(limit)}** budget, $stateWord.'),
+        ],
       ),
       vizPayload: BudgetStatusViz(
         spent: spent,

@@ -3,6 +3,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Lend / borrow (ledger) summary. Ported verbatim, including the owe-vs-lent
 /// branch selection.
@@ -22,11 +23,20 @@ class LedgerHandler extends QueryHandler {
     }
 
     final summary = await ctx.read(ledgerSummaryProvider.future);
+    const scanLedger = ThinkingStep('Scanned your **lend / borrow ledger**.');
     if (lower.contains('borrow') || lower.contains('owe')) {
       return HandlerResult(
         text:
             'You currently owe ${ctx.money(summary.owed)} in total (money you borrowed).',
-        thinking: const ThinkingInfo(dateFilter: 'Current', scanned: ['Ledger']),
+        thinking: ThinkingInfo(
+          dateFilter: 'Current',
+          scanned: const ['Ledger'],
+          steps: [
+            intentStep('money borrowed', 'current'),
+            scanLedger,
+            resultStep('You owe **${ctx.money(summary.owed)}** in total.'),
+          ],
+        ),
       );
     }
     if (lower.contains('lent') ||
@@ -35,13 +45,30 @@ class LedgerHandler extends QueryHandler {
       return HandlerResult(
         text:
             'People owe you ${ctx.money(summary.toReceive)} in total (money you lent).',
-        thinking: const ThinkingInfo(dateFilter: 'Current', scanned: ['Ledger']),
+        thinking: ThinkingInfo(
+          dateFilter: 'Current',
+          scanned: const ['Ledger'],
+          steps: [
+            intentStep('money lent', 'current'),
+            scanLedger,
+            resultStep('You are owed **${ctx.money(summary.toReceive)}** in total.'),
+          ],
+        ),
       );
     }
     return HandlerResult(
       text:
           'Lend/Borrow summary:\n• You are owed: ${ctx.money(summary.toReceive)}\n• You owe: ${ctx.money(summary.owed)}',
-      thinking: const ThinkingInfo(dateFilter: 'Current', scanned: ['Ledger']),
+      thinking: ThinkingInfo(
+        dateFilter: 'Current',
+        scanned: const ['Ledger'],
+        steps: [
+          intentStep('lend / borrow summary', 'current'),
+          scanLedger,
+          resultStep(
+              'You are owed **${ctx.money(summary.toReceive)}** and you owe **${ctx.money(summary.owed)}**.'),
+        ],
+      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// The three most recent non-transfer transactions. Ported verbatim.
 class RecentTransactionsHandler extends QueryHandler {
@@ -24,7 +25,15 @@ class RecentTransactionsHandler extends QueryHandler {
     if (top.isEmpty) {
       return HandlerResult(
         text: 'No transactions found.',
-        thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+        thinking: ThinkingInfo(
+          dateFilter: 'All time',
+          scanned: const ['Transactions'],
+          steps: [
+            intentStep('recent transactions', 'all time'),
+            scannedStep(ctx.txns.length, 'transactions'),
+            resultStep('No transactions on record.'),
+          ],
+        ),
       );
     }
 
@@ -33,7 +42,15 @@ class RecentTransactionsHandler extends QueryHandler {
         .join('\n');
     return HandlerResult(
       text: 'Your 3 most recent transactions:\n$lines',
-      thinking: const ThinkingInfo(dateFilter: 'All time', scanned: ['Transactions']),
+      thinking: ThinkingInfo(
+        dateFilter: 'All time',
+        scanned: const ['Transactions'],
+        steps: [
+          intentStep('recent transactions', 'all time'),
+          scannedStep(ctx.txns.length, 'transactions'),
+          resultStep('Sorted by date; showing the **${top.length}** most recent.'),
+        ],
+      ),
     );
   }
 }

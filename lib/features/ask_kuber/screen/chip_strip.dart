@@ -83,20 +83,24 @@ class _AskChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.fromLTRB(12, 7, 12, 7),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.full),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Text(
-          label,
-          style: localeFont(
-              fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Material(
+        color: cs.surfaceContainer,
+        shape: StadiumBorder(side: BorderSide(color: cs.outline)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: cs.primary.withValues(alpha: 0.12),
+          highlightColor: cs.primary.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 7, 12, 7),
+            child: Text(
+              label,
+              style: localeFont(
+                  fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface),
+            ),
+          ),
         ),
       ),
     );
@@ -111,27 +115,33 @@ class _NavChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.fromLTRB(12, 7, 9, 7),
-        decoration: BoxDecoration(
-          color: cs.primary,
-          borderRadius: BorderRadius.circular(KuberRadius.full),
-          border: Border.all(color: cs.primary),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: localeFont(
-                  fontSize: 13, fontWeight: FontWeight.w500, color: cs.onPrimary),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Material(
+        color: cs.primary,
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: cs.onPrimary.withValues(alpha: 0.18),
+          highlightColor: cs.onPrimary.withValues(alpha: 0.10),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 7, 9, 7),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: localeFont(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: cs.onPrimary),
+                ),
+                const SizedBox(width: 6),
+                Icon(Icons.arrow_forward_rounded, size: 13, color: cs.onPrimary),
+              ],
             ),
-            const SizedBox(width: 6),
-            Icon(Icons.arrow_forward_rounded, size: 13, color: cs.onPrimary),
-          ],
+          ),
         ),
       ),
     );

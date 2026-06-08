@@ -11,6 +11,7 @@ import 'kuber_mark.dart';
 class AskKuberHeader extends StatelessWidget {
   final Animation<double> pulse;
   final bool thinking;
+  final bool canCopy;
   final VoidCallback onHowItWorks;
   final VoidCallback onCopy;
   final VoidCallback onClear;
@@ -19,6 +20,7 @@ class AskKuberHeader extends StatelessWidget {
     super.key,
     required this.pulse,
     required this.thinking,
+    required this.canCopy,
     required this.onHowItWorks,
     required this.onCopy,
     required this.onClear,
@@ -54,15 +56,24 @@ class AskKuberHeader extends StatelessWidget {
             PopupMenuButton<int>(
               icon: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant),
               color: cs.surfaceContainer,
+              elevation: 0,
+              menuPadding: const EdgeInsets.symmetric(vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                side: BorderSide(color: cs.outline),
+              ),
               onSelected: (v) => switch (v) {
                 0 => onHowItWorks(),
                 1 => onCopy(),
                 _ => onClear(),
               },
               itemBuilder: (context) => [
-                _item(cs, 0, 'How it works'),
-                _item(cs, 1, 'Copy last response'),
-                _item(cs, 2, 'Clear chat'),
+                _item(cs, 0, Icons.info_outline_rounded, 'How it works'),
+                _item(cs, 1, Icons.content_copy_rounded, 'Copy last response',
+                    enabled: canCopy),
+                const PopupMenuDivider(height: 9),
+                _item(cs, 2, Icons.delete_outline_rounded, 'Clear chat',
+                    danger: true),
               ],
             ),
           ],
@@ -71,16 +82,43 @@ class AskKuberHeader extends StatelessWidget {
     );
   }
 
-  PopupMenuItem<int> _item(ColorScheme cs, int value, String label) {
+  PopupMenuItem<int> _item(
+    ColorScheme cs,
+    int value,
+    IconData icon,
+    String label, {
+    bool enabled = true,
+    bool danger = false,
+  }) {
+    final color = !enabled
+        ? cs.onSurfaceVariant.withValues(alpha: 0.4)
+        : danger
+            ? cs.error
+            : cs.onSurface;
+    final iconColor = !enabled
+        ? cs.onSurfaceVariant.withValues(alpha: 0.4)
+        : danger
+            ? cs.error
+            : cs.onSurfaceVariant;
     return PopupMenuItem(
       value: value,
-      child: Text(label, style: localeFont(fontSize: 14, color: cs.onSurface)),
+      enabled: enabled,
+      height: 36,
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: iconColor),
+          const SizedBox(width: 10),
+          Text(label,
+              style: localeFont(
+                  fontSize: 13.5, fontWeight: FontWeight.w500, color: color)),
+        ],
+      ),
     );
   }
 }
 
-/// The pill input row with a send button that animates colour on text changes
-/// and shows a spinner while a query is processing.
+/// The pill input row. Send button animates colour on text changes (150ms) and
+/// shows a spinner while a query is processing. The field fades while loading.
 class ChatInputBar extends StatelessWidget {
   final TextEditingController controller;
   final bool isProcessing;
@@ -108,24 +146,44 @@ class ChatInputBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: TextField(
-              controller: controller,
-              enabled: !isProcessing,
-              maxLines: 4,
-              minLines: 1,
-              style: localeFont(fontSize: 15, color: cs.onSurface),
-              onTapOutside: (_) =>
-                  FocusManager.instance.primaryFocus?.unfocus(),
-              decoration: InputDecoration(
-                hintText: 'Ask about your spending...',
-                hintStyle: localeFont(
-                    fontSize: 15,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
+            child: Opacity(
+              opacity: isProcessing ? 0.6 : 1.0,
+              child: Container(
+                constraints: const BoxConstraints(minHeight: 46),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainer,
+                  borderRadius: BorderRadius.circular(KuberRadius.lg),
+                  border: Border.all(color: cs.outline),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                alignment: Alignment.centerLeft,
+                child: TextField(
+                  controller: controller,
+                  enabled: !isProcessing,
+                  maxLines: 4,
+                  minLines: 1,
+                  style: localeFont(
+                      fontSize: 14, fontWeight: FontWeight.w500, color: cs.onSurface),
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 13),
+                    hintText: 'Ask about your money...',
+                    hintStyle:
+                        localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+                  ),
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) {
+                    if (controller.text.trim().isNotEmpty) onSend();
+                  },
+                ),
               ),
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) {
-                if (controller.text.trim().isNotEmpty) onSend();
-              },
             ),
           ),
           const SizedBox(width: KuberSpacing.sm),
@@ -133,32 +191,30 @@ class ChatInputBar extends StatelessWidget {
             valueListenable: controller,
             builder: (context, value, child) {
               final isEmpty = value.text.trim().isEmpty;
-              final isDisabled = isProcessing || isEmpty;
+              final active = !isProcessing && !isEmpty;
               return GestureDetector(
-                onTap: isDisabled ? null : onSend,
+                onTap: active ? onSend : null,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  width: 52,
-                  height: 52,
+                  width: 46,
+                  height: 46,
                   decoration: BoxDecoration(
-                    color: isDisabled
-                        ? cs.onSurfaceVariant.withValues(alpha: 0.2)
-                        : cs.primary,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    color: active ? cs.primary : cs.surfaceContainer,
+                    borderRadius: BorderRadius.circular(KuberRadius.lg),
+                    border: Border.all(
+                        color: active ? cs.primary : cs.outline),
                   ),
                   child: Center(
                     child: isProcessing
                         ? SizedBox(
-                            width: 20,
-                            height: 20,
+                            width: 18,
+                            height: 18,
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: cs.onSurfaceVariant),
                           )
                         : Icon(Icons.send_rounded,
-                            size: 22,
-                            color: isDisabled
-                                ? cs.onSurfaceVariant.withValues(alpha: 0.5)
-                                : cs.onPrimary),
+                            size: 18,
+                            color: active ? cs.onPrimary : cs.onSurfaceVariant),
                   ),
                 ),
               );

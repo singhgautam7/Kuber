@@ -61,6 +61,17 @@ void main() {
     expect(viz.rows.length, 2);
   });
 
+  test('handlers emit an intent / scanned / result reasoning trace', () async {
+    final r = await orchestrator.process(ctx('top spending category'));
+    final steps = r.thinking!.steps;
+    expect(steps.length, 3);
+    expect(steps[0].text, contains('Detected intent'));
+    expect(steps[1].text, contains('Scanned'));
+    // Result step names the top category and its share, with bold markers.
+    expect(steps[2].text, contains('**Food**'));
+    expect(steps[2].text, contains('ranks first'));
+  });
+
   test('unknown query falls through to the fallback and is logged', () async {
     String? logged;
     final r = await orchestrator.process(

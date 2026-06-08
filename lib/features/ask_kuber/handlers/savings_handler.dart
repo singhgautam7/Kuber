@@ -2,6 +2,7 @@ import '../models/handler_result.dart';
 import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// This-month net savings (income minus expense). Ported verbatim.
 class SavingsHandler extends QueryHandler {
@@ -26,6 +27,12 @@ class SavingsHandler extends QueryHandler {
       thinking: ThinkingInfo(
         dateFilter: '${ctx.fmtDate(ctx.monthStart)} – ${ctx.fmtDate(ctx.today)}',
         scanned: const ['Transactions'],
+        steps: [
+          intentStep('net savings', 'this month'),
+          scannedStep(ctx.txns.length, 'transactions'),
+          resultStep(
+              'Income **${ctx.money(income)}** minus expenses **${ctx.money(expense)}** is **${ctx.money(savings.abs())}**${savings < 0 ? ' (deficit)' : ''}.'),
+        ],
       ),
     );
   }

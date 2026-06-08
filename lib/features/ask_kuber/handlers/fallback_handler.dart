@@ -20,7 +20,14 @@ class FallbackHandler extends QueryHandler {
           '• "What\'s my top category?"\n'
           '• "How much do I owe on loans?"\n'
           '• "What\'s my portfolio value?"',
-      thinking: ThinkingInfo(dateFilter: 'N/A', scanned: []),
+      thinking: ThinkingInfo(
+        dateFilter: 'N/A',
+        scanned: [],
+        steps: [
+          ThinkingStep(
+              'No matching data query was found. Showing example questions you can ask.'),
+        ],
+      ),
       followUps: [
         AskChipAction('How much did I spend this month?'),
         AskChipAction('What\'s my net worth?'),

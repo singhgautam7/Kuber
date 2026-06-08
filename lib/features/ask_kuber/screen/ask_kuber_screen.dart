@@ -43,6 +43,9 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
   Timer? _typingTimer;
   String _greeting = 'Hello.';
 
+  // Drives the streaming text so only the typing bubble rebuilds (not the list).
+  final ValueNotifier<String> _streamText = ValueNotifier<String>('');
+
   late final AnimationController _pulseCtrl;
 
   @override
@@ -57,6 +60,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
   @override
   void dispose() {
     _typingTimer?.cancel();
+    _streamText.dispose();
     _pulseCtrl.dispose();
     _controller.dispose();
     _scrollController.dispose();
@@ -150,6 +154,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
 
   void _startTyping(ChatMessage msg, String full) {
     int i = 0;
+    _streamText.value = '';
     _typingTimer?.cancel();
     _typingTimer = Timer.periodic(const Duration(milliseconds: 16), (timer) {
       if (!mounted) {
@@ -157,10 +162,15 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
         return;
       }
       i = math.min(i + 4, full.length);
-      setState(() => msg.text = full.substring(0, i));
+      // Update only the notifier: the ListView and other bubbles do not rebuild.
+      _streamText.value = full.substring(0, i);
       if (i >= full.length) {
         timer.cancel();
-        setState(() => _isTyping = false);
+        // One rebuild to swap the streaming bubble for the finalized message.
+        setState(() {
+          msg.text = full;
+          _isTyping = false;
+        });
         _applyPulse(false);
         // Persist the Kuber message once, with its final text.
         unawaited(ref.read(askKuberRepositoryProvider).append(msg));
@@ -242,6 +252,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
           AskKuberHeader(
             pulse: _pulseCtrl,
             thinking: thinking,
+            canCopy: lastKuber != null,
             onHowItWorks: _howItWorks,
             onCopy: _copyLast,
             onClear: _clearChat,
@@ -249,17 +260,24 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
           Divider(height: 1, color: cs.outline.withValues(alpha: 0.3)),
           Expanded(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 300),
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeOutCubic,
-              transitionBuilder: (child, anim) => FadeTransition(
-                opacity: anim,
-                child: SlideTransition(
-                  position: Tween(begin: const Offset(0, 0.02), end: Offset.zero)
-                      .animate(anim),
-                  child: child,
-                ),
-              ),
+              transitionBuilder: (child, anim) {
+                // Welcome fades + translates up on its way out; the chat (and
+                // its first user bubble) fades up from just below.
+                final isWelcome = child.key == const ValueKey('welcome');
+                final begin =
+                    isWelcome ? const Offset(0, -0.05) : const Offset(0, 0.04);
+                return FadeTransition(
+                  opacity: anim,
+                  child: SlideTransition(
+                    position:
+                        Tween(begin: begin, end: Offset.zero).animate(anim),
+                    child: child,
+                  ),
+                );
+              },
               child: _isInitializing
                   ? const SizedBox.shrink()
                   : showWelcome
@@ -315,10 +333,15 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
         final msg = _messages[i];
         final showDate =
             i == 0 || !_isSameDay(_messages[i - 1].time, msg.time);
+        final isStreaming =
+            _isTyping && !msg.isUser && i == _messages.length - 1;
         return Column(
           children: [
             if (showDate) DateSeparator(date: msg.time),
-            MessageBubble(message: msg),
+            MessageBubble(
+              message: msg,
+              stream: isStreaming ? _streamText : null,
+            ),
           ],
         );
       },

@@ -7,6 +7,7 @@ import '../models/query_context.dart';
 import '../models/thinking_info.dart';
 import '../models/viz_payload.dart';
 import 'query_handler.dart';
+import 'thinking_steps.dart';
 
 /// Top spending category over a period. Ports `_processQuery`'s ranked-category
 /// branch verbatim and augments the answer with a [TopCategoriesViz] of the top
@@ -65,6 +66,14 @@ class TopCategoryHandler extends QueryHandler {
         thinking: ThinkingInfo(
           dateFilter: thinkingDateFilter,
           scanned: const ['Transactions', 'Categories'],
+          steps: [
+            intentStep('top expense category', periodLabel),
+            scannedStep(ctx.txns.length, 'transactions',
+                groups: ctx.categories.length,
+                groupType: 'categories',
+                dimension: 'category'),
+            resultStep('No expense data in this period.'),
+          ],
         ),
       );
     }
@@ -72,13 +81,25 @@ class TopCategoryHandler extends QueryHandler {
     final topEntry = byCat.entries.reduce((a, b) => a.value > b.value ? a : b);
     final topCat =
         ctx.categories.where((c) => c.id.toString() == topEntry.key).firstOrNull;
+    final topName = topCat?.name ?? 'Unknown';
+    final total = byCat.values.fold(0.0, (s, v) => s + v);
+    final pct = total > 0 ? (topEntry.value / total * 100).round() : 0;
 
     return HandlerResult(
       text:
-          'Your top spending category $periodLabel is ${topCat?.name ?? "Unknown"} at ${ctx.money(topEntry.value)}.',
+          'Your top spending category $periodLabel is $topName at ${ctx.money(topEntry.value)}.',
       thinking: ThinkingInfo(
         dateFilter: thinkingDateFilter,
         scanned: const ['Transactions', 'Categories'],
+        steps: [
+          intentStep('top expense category', periodLabel),
+          scannedStep(ctx.txns.length, 'transactions',
+              groups: ctx.categories.length,
+              groupType: 'categories',
+              dimension: 'category'),
+          resultStep(
+              '**$topName** ranks first at **${ctx.money(topEntry.value)}**, **$pct%** of spend $periodLabel.'),
+        ],
       ),
       vizPayload: _buildViz(ctx, byCat),
     );
