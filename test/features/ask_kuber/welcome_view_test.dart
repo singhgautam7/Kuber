@@ -21,10 +21,10 @@ void main() {
     // Greeting renders.
     expect(find.text('Good morning.'), findsOneWidget);
 
-    // Six starter cards are shown.
+    // Six starter cards are shown (each an InkWell for the ripple).
     final cards = find.descendant(
       of: find.byType(WelcomeView),
-      matching: find.byType(GestureDetector),
+      matching: find.byType(InkWell),
     );
     expect(cards, findsNWidgets(6));
 

@@ -113,13 +113,16 @@ class _WelcomeViewState extends State<WelcomeView>
                   constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: Center(
                     child: Padding(
+                      // Compact vertical rhythm so the full set fits a small
+                      // phone without scrolling; the scroll view stays as a
+                      // safety net for very short screens / large text scale.
                       padding: const EdgeInsets.symmetric(
-                          horizontal: KuberSpacing.lg, vertical: KuberSpacing.xl),
+                          horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          PulsingKuberMark(size: 84, pulse: widget.pulse),
-                          const SizedBox(height: KuberSpacing.lg),
+                          PulsingKuberMark(size: 76, pulse: widget.pulse),
+                          const SizedBox(height: KuberSpacing.md),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 320),
                             child: Text(
@@ -144,10 +147,11 @@ class _WelcomeViewState extends State<WelcomeView>
                                   fontSize: 13.5, color: cs.onSurfaceVariant),
                             ),
                           ),
-                          const SizedBox(height: KuberSpacing.xl),
+                          const SizedBox(height: KuberSpacing.lg),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 360),
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 for (final card in _cards)
                                   _StarterCard(
@@ -182,40 +186,47 @@ class _StarterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer.withValues(alpha: 0.72),
-            borderRadius: BorderRadius.circular(KuberRadius.full),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.4)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: cs.primary.withValues(alpha: 0.22)),
+      padding: const EdgeInsets.only(bottom: 7),
+      child: Material(
+        // Material + InkWell gives the pill a primary-tinted ripple, clipped to
+        // the stadium shape; the border lives on the shape.
+        color: cs.surfaceContainer.withValues(alpha: 0.72),
+        shape: StadiumBorder(
+            side: BorderSide(color: cs.outline.withValues(alpha: 0.4))),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: cs.primary.withValues(alpha: 0.12),
+          highlightColor: cs.primary.withValues(alpha: 0.07),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
+                    border:
+                        Border.all(color: cs.primary.withValues(alpha: 0.22)),
+                  ),
+                  child: Icon(prompt.icon, size: 16, color: cs.primary),
                 ),
-                child: Icon(prompt.icon, size: 16, color: cs.primary),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Text(
-                  prompt.text,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                      fontSize: 13.5, fontWeight: FontWeight.w500, color: cs.onSurface),
+                const SizedBox(width: KuberSpacing.md),
+                Expanded(
+                  child: Text(
+                    prompt.text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: localeFont(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
+                        color: cs.onSurface),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

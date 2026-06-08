@@ -216,7 +216,7 @@ class ChatInputBar extends StatelessWidget {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: cs.onSurfaceVariant),
                           )
-                        : Icon(Icons.send_rounded,
+                        : KuberSendIcon(
                             size: 18,
                             color: active ? cs.onPrimary : cs.onSurfaceVariant),
                   ),
@@ -228,4 +228,47 @@ class ChatInputBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The Ask Kuber send glyph from the design set: a filled paper-plane pointing
+/// up-right. Material's `Icons.send_rounded` points horizontally, so we draw the
+/// design's exact path (`M3 12l18-8-7 18-3-8-8-2z` on a 24x24 viewBox).
+class KuberSendIcon extends StatelessWidget {
+  final Color color;
+  final double size;
+  const KuberSendIcon({super.key, required this.color, this.size = 18});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.square(size),
+      painter: _SendIconPainter(color),
+    );
+  }
+}
+
+class _SendIconPainter extends CustomPainter {
+  final Color color;
+  const _SendIconPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.width / 24.0; // scale from the 24x24 design viewBox
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    // M3 12 l18 -8 l-7 18 l-3 -8 (closes back to 3,12)
+    final path = Path()
+      ..moveTo(3 * s, 12 * s)
+      ..lineTo(21 * s, 4 * s)
+      ..lineTo(14 * s, 22 * s)
+      ..lineTo(11 * s, 14 * s)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_SendIconPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
