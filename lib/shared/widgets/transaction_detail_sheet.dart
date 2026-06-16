@@ -111,7 +111,7 @@ class TransactionDetailSheet extends ConsumerWidget {
       ),
     ));
 
-    final account = ref.watch(accountListProvider.select(
+    final account = ref.watch(allAccountsProvider.select(
       (async) => async.whenOrNull(
         data: (accs) => accs.firstWhereOrNull(
           (a) => a.id.toString() == transaction.accountId,
@@ -134,7 +134,7 @@ class TransactionDetailSheet extends ConsumerWidget {
         ),
       ));
       toAccountName = pairAccountId != null
-          ? ref.watch(accountListProvider.select(
+          ? ref.watch(allAccountsProvider.select(
               (async) => async.whenOrNull(
                 data: (accs) => accs.firstWhereOrNull(
                   (a) => a.id.toString() == pairAccountId,

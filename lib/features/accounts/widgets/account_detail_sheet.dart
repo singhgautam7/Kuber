@@ -155,14 +155,6 @@ class AccountDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           AppButton(
-            label: context.l10n.deleteAccount,
-            icon: Icons.delete_outline_rounded,
-            type: AppButtonType.danger,
-            fullWidth: true,
-            onPressed: () => _confirmDelete(context, ref),
-          ),
-          const SizedBox(height: 12),
-          AppButton(
             label: isDefault ? context.l10n.removeDefault : context.l10n.setAsDefaultLabel,
             icon: isDefault
                 ? Icons.check_circle_rounded
@@ -181,10 +173,91 @@ class AccountDetailSheet extends ConsumerWidget {
               );
             },
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  label: context.l10n.deleteAccount,
+                  icon: Icons.delete_outline_rounded,
+                  type: AppButtonType.danger,
+                  onPressed: () => _confirmDelete(context, ref),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                // Secondary action: hide/restore without deleting.
+                child: AppButton(
+                  label: account.isDisabled
+                      ? context.l10n.enableAccount
+                      : context.l10n.disableAccount,
+                  icon: account.isDisabled
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  type: AppButtonType.dotted,
+                  onPressed: () => _toggleDisabled(context, ref),
+                ),
+              ),
+            ],
+          ),
       ],
     ),
   );
 }
+
+  void _toggleDisabled(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(allAccountsProvider.notifier);
+    // The snackbar must outlive the sheet, so anchor it to the root navigator's
+    // context rather than this sheet's (which is torn down on pop).
+    final rootContext = Navigator.of(context, rootNavigator: true).context;
+    final id = account.id;
+
+    if (account.isDisabled) {
+      // Re-enable: no confirmation needed.
+      notifier.setDisabled(id, false);
+      Navigator.pop(context);
+      showKuberSnackBar(rootContext, rootContext.l10n.accountRestored);
+      return;
+    }
+
+    final cs = Theme.of(context).colorScheme;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surface,
+        title: Text(context.l10n.disableAccount,
+            style: localeFont(fontWeight: FontWeight.bold)),
+        content: Text(context.l10n.disableAccountConfirm, style: localeFont()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.l10n.cancelLabel, style: localeFont()),
+          ),
+          AppButton(
+            label: context.l10n.confirmLabel,
+            type: AppButtonType.primary,
+            onPressed: () {
+              notifier.setDisabled(id, true);
+              Navigator.pop(ctx); // close dialog
+              Navigator.pop(context); // close sheet
+              showKuberSnackBar(
+                rootContext,
+                rootContext.l10n.accountHidden,
+                actionLabel: rootContext.l10n.undoLabel,
+                onAction: () {
+                  notifier.setDisabled(id, false);
+                  showKuberSnackBar(
+                    rootContext,
+                    rootContext.l10n.accountRestored,
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildBankSection(BuildContext context, WidgetRef ref, double balance) {
     final cs = Theme.of(context).colorScheme;
@@ -362,7 +435,7 @@ class AccountDetailSheet extends ConsumerWidget {
               label: context.l10n.deleteLabel,
               type: AppButtonType.primary,
               onPressed: () {
-                ref.read(accountListProvider.notifier).delete(account.id);
+                ref.read(allAccountsProvider.notifier).delete(account.id);
                 Navigator.pop(ctx); // Close dialog
                 Navigator.pop(context); // Close sheet
               },

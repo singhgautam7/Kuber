@@ -126,7 +126,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ? _last4Controller.text
           : null;
 
-    ref.read(accountListProvider.notifier).add(account).then((id) {
+    ref.read(allAccountsProvider.notifier).add(account).then((id) {
       if (!_isEditing) {
         ref.read(pendingAccountSelectionProvider.notifier).state = id;
       }

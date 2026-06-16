@@ -7,6 +7,7 @@ enum AppButtonType {
   normal,    // default neutral
   outline,   // bordered
   danger,    // red (delete)
+  dotted,    // dashed neutral border (secondary, low-emphasis)
 }
 
 class AppButton extends StatelessWidget {
@@ -63,6 +64,12 @@ class AppButton extends StatelessWidget {
         foregroundColor = cs.error;
         borderSide = BorderSide(color: cs.error.withValues(alpha: 0.5));
         break;
+      case AppButtonType.dotted:
+        // Solid border omitted here; a dashed border is painted below.
+        backgroundColor = Colors.transparent;
+        foregroundColor = cs.onSurface;
+        borderSide = null;
+        break;
     }
 
     final buttonStyle = ElevatedButton.styleFrom(
@@ -118,7 +125,7 @@ class AppButton extends StatelessWidget {
       ],
     );
 
-    return SizedBox(
+    final button = SizedBox(
       width: fullWidth ? double.infinity : width,
       height: height,
       child: ElevatedButton(
@@ -127,5 +134,50 @@ class AppButton extends StatelessWidget {
         child: content,
       ),
     );
+
+    if (type == AppButtonType.dotted) {
+      return CustomPaint(
+        foregroundPainter: _DashedBorderPainter(
+          color: cs.outline,
+          radius: KuberRadius.md,
+        ),
+        child: button,
+      );
+    }
+    return button;
   }
+}
+
+/// Paints a dashed rounded-rectangle border, used by [AppButtonType.dotted].
+class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+  _DashedBorderPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
+      Radius.circular(radius),
+    );
+    final path = Path()..addRRect(rrect);
+    const dashWidth = 4.0;
+    const dashGap = 3.0;
+    for (final metric in path.computeMetrics()) {
+      double dist = 0;
+      while (dist < metric.length) {
+        final next = (dist + dashWidth).clamp(0, metric.length).toDouble();
+        canvas.drawPath(metric.extractPath(dist, next), paint);
+        dist = next + dashGap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter old) =>
+      old.color != color || old.radius != radius;
 }

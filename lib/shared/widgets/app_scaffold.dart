@@ -53,7 +53,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     );
     // Pre-warm keepAlive providers so form sheets find data in cache
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(accountListProvider.future).ignore();
+      ref.read(allAccountsProvider.future).ignore();
       ref.read(categoryListProvider.future).ignore();
     });
   }

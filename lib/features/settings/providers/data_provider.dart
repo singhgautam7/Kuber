@@ -365,7 +365,7 @@ class DataController extends StateNotifier<DataState> {
     }
 
     _ref.invalidate(transactionListProvider);
-    _ref.invalidate(accountListProvider);
+    _ref.invalidate(allAccountsProvider);
     _ref.invalidate(categoryListProvider);
     _ref.invalidate(recurringListProvider);
     // These derived providers will automatically update because they watch transactionListProvider

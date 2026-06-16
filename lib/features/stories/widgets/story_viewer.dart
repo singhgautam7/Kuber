@@ -1,10 +1,20 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/story_icons.dart';
 import '../models/story_models.dart';
 import 'story_slide_view.dart';
+
+// Matches `applicationId` in android/app/build.gradle.kts. Appended to text
+// shares so recipients can download Kuber directly.
+const _playStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.grs.kuber';
 
 const _slideDuration = Duration(seconds: 5);
 const _bubbleTransition = Duration(milliseconds: 300);
@@ -56,6 +66,10 @@ class _StoryViewerState extends State<StoryViewer>
   List<_FlatSlide> _slides = const [];
   int _slideIndex = 0;
 
+  /// Wraps the active slide so it can be captured to an image for sharing.
+  final GlobalKey _shareBoundaryKey = GlobalKey();
+  bool _sharing = false;
+
   _FlatSlide get _current => _slides[_slideIndex];
 
   @override
@@ -103,6 +117,74 @@ class _StoryViewerState extends State<StoryViewer>
   void _markSeen() {
     if (_slides.isEmpty) return;
     widget.onSeen?.call(_current.story.id.toString(), _current.localIndex);
+  }
+
+  // ── Sharing ──────────────────────────────────────────────────────────
+  /// Composes a plain-text summary of the current story (one line per slide)
+  /// plus the Play Store link.
+  String _composeShareText(StoryViewData story) {
+    final buf = StringBuffer();
+    final header = story.timeLabel.trim().isEmpty
+        ? story.label
+        : '${story.label} · ${story.timeLabel}';
+    buf.writeln(header);
+    buf.writeln();
+    for (final s in story.slides) {
+      final title = s.title.trim();
+      final subtitle = s.subtitle?.trim() ?? '';
+      if (title.isEmpty && subtitle.isEmpty) continue;
+      buf.writeln(subtitle.isEmpty ? title : '$title: $subtitle');
+    }
+    buf.writeln();
+    buf.write('Track your finances with Kuber: $_playStoreUrl');
+    return buf.toString();
+  }
+
+  /// Captures the active slide's [RepaintBoundary] to PNG bytes.
+  Future<Uint8List?> _captureSlideImage() async {
+    final boundary = _shareBoundaryKey.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary) return null;
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    final image = await boundary.toImage(pixelRatio: dpr);
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    return data?.buffer.asUint8List();
+  }
+
+  /// Shares the current slide as an image with the text summary as caption.
+  /// share_plus accepts both in one invocation, so the system sheet lets the
+  /// recipient app use whichever it supports. Falls back to text-only if the
+  /// capture fails. Progress is paused while the share sheet is open.
+  Future<void> _shareCurrentStory() async {
+    if (_sharing || _slides.isEmpty) return;
+    _sharing = true;
+    _progress.stop();
+    final story = _current.story;
+    final text = _composeShareText(story);
+    try {
+      final bytes = await _captureSlideImage();
+      final params = bytes != null
+          ? ShareParams(
+              text: text,
+              files: [
+                XFile.fromData(
+                  bytes,
+                  name: 'kuber_story.png',
+                  mimeType: 'image/png',
+                ),
+              ],
+            )
+          : ShareParams(text: text);
+      await SharePlus.instance.share(params);
+    } catch (_) {
+      try {
+        await SharePlus.instance.share(ShareParams(text: text));
+      } catch (_) {
+        // Sharing unavailable; nothing more we can do.
+      }
+    } finally {
+      _sharing = false;
+      if (mounted) _progress.forward();
+    }
   }
 
   void _restartProgress() => _progress
@@ -228,13 +310,20 @@ class _StoryViewerState extends State<StoryViewer>
                           : _flatten(widget.bubbles[i]);
                       if (flat.isEmpty) return const ColoredBox(color: Colors.black);
                       final slideIndex = isActive ? _slideIndex : 0;
-                      return AnimatedSwitcher(
+                      final switcher = AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
                         child: StorySlideView(
                           key: ValueKey('${i}_$slideIndex'),
                           slide: flat[slideIndex].slide,
                         ),
                       );
+                      // Only the active page is captured for sharing.
+                      return isActive
+                          ? RepaintBoundary(
+                              key: _shareBoundaryKey,
+                              child: switcher,
+                            )
+                          : switcher;
                     },
                   ),
                   _ProgressBars(
@@ -245,6 +334,7 @@ class _StoryViewerState extends State<StoryViewer>
                   _TopChrome(
                     story: _current.story,
                     onClose: () => Navigator.of(context).maybePop(),
+                    onShare: _shareCurrentStory,
                   ),
                 ],
               ),
@@ -315,8 +405,13 @@ class _ProgressBars extends StatelessWidget {
 class _TopChrome extends StatelessWidget {
   final StoryViewData story;
   final VoidCallback onClose;
+  final VoidCallback onShare;
 
-  const _TopChrome({required this.story, required this.onClose});
+  const _TopChrome({
+    required this.story,
+    required this.onClose,
+    required this.onShare,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -364,6 +459,24 @@ class _TopChrome extends StatelessWidget {
               ],
             ),
           ),
+          GestureDetector(
+            onTap: onShare,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.ios_share_rounded,
+                size: 18,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           GestureDetector(
             onTap: onClose,
             behavior: HitTestBehavior.opaque,

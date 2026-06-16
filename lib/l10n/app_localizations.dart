@@ -8275,6 +8275,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'EMI debited from'**
   String get emiDebitedFrom;
+
+  /// No description provided for @searchAccountsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search accounts...'**
+  String get searchAccountsHint;
+
+  /// No description provided for @noAccountsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts match \'{query}\''**
+  String noAccountsMatch(String query);
+
+  /// No description provided for @monthlyNetAutomation.
+  ///
+  /// In en, this message translates to:
+  /// **'MONTHLY NET'**
+  String get monthlyNetAutomation;
+
+  /// No description provided for @disableAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable account'**
+  String get disableAccount;
+
+  /// No description provided for @enableAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable account'**
+  String get enableAccount;
+
+  /// No description provided for @accountHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Account hidden'**
+  String get accountHidden;
+
+  /// No description provided for @accountRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Account restored'**
+  String get accountRestored;
+
+  /// No description provided for @disableAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This account will be hidden from pickers and home cards. You can re-enable it anytime.'**
+  String get disableAccountConfirm;
+
+  /// No description provided for @hiddenChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get hiddenChip;
+
+  /// No description provided for @shareStory.
+  ///
+  /// In en, this message translates to:
+  /// **'Share story'**
+  String get shareStory;
+
+  /// No description provided for @shareAsImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as image'**
+  String get shareAsImage;
+
+  /// No description provided for @shareAsText.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as text'**
+  String get shareAsText;
+
+  /// No description provided for @confirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirmLabel;
 }
 
 class _AppLocalizationsDelegate

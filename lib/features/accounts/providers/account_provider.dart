@@ -19,7 +19,11 @@ final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository(ref.watch(tutorialAwareIsarProvider));
 });
 
-final accountListProvider =
+/// Source of truth: every account, including disabled (archived) ones. Used by
+/// the Manage Accounts screen, balance/name lookups, and exports. Most of the
+/// app should watch [accountListProvider] instead, which filters out disabled
+/// accounts.
+final allAccountsProvider =
     AsyncNotifierProvider<AccountListNotifier, List<Account>>(
       AccountListNotifier.new,
     );
@@ -41,11 +45,33 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
     await ref.read(accountRepositoryProvider).delete(id);
     ref.invalidateSelf();
   }
+
+  /// Hides (or restores) an account without deleting it. Existing transactions
+  /// keep referencing it; it just stops appearing in pickers and home cards.
+  Future<void> setDisabled(int id, bool disabled) async {
+    final repo = ref.read(accountRepositoryProvider);
+    final account = await repo.getById(id);
+    if (account == null) return;
+    account.isDisabled = disabled;
+    await repo.save(account);
+    ref.invalidateSelf();
+  }
 }
 
-/// Provides a map of account id -> Account for quick lookup
+/// Enabled accounts only — the default for pickers, home cards, and net worth.
+/// Derived from [allAccountsProvider] so every existing consumer benefits from
+/// the disabled filter without changes.
+final accountListProvider = Provider<AsyncValue<List<Account>>>((ref) {
+  return ref
+      .watch(allAccountsProvider)
+      .whenData((accounts) => accounts.where((a) => !a.isDisabled).toList());
+});
+
+/// Provides a map of account id -> Account for quick lookup. Uses the full list
+/// (including disabled) so historical transactions on a disabled account still
+/// resolve their account name.
 final accountMapProvider = FutureProvider<Map<int, Account>>((ref) async {
-  final accounts = await ref.watch(accountListProvider.future);
+  final accounts = await ref.watch(allAccountsProvider.future);
   return {for (final a in accounts) a.id: a};
 });
 
@@ -55,7 +81,7 @@ final accountMapProvider = FutureProvider<Map<int, Account>>((ref) async {
 /// accounts). CC initial balance is stored negative, so a negative balance is
 /// debt. Computing every balance at once avoids an N+1 query per account.
 final accountBalancesProvider = FutureProvider<Map<int, double>>((ref) async {
-  final accounts = await ref.watch(accountListProvider.future);
+  final accounts = await ref.watch(allAccountsProvider.future);
   final txns = await ref.watch(transactionListProvider.future);
 
   final balances = <int, double>{
