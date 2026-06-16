@@ -6,7 +6,9 @@ import '../handlers/conversational_handler.dart';
 import '../handlers/counts_handler.dart';
 import '../handlers/easter_egg_handler.dart';
 import '../handlers/fallback_handler.dart';
+import '../handlers/frequency_handler.dart';
 import '../handlers/how_to_handler.dart';
+import '../handlers/last_spent_handler.dart';
 import '../handlers/income_handler.dart';
 import '../handlers/investments_handler.dart';
 import '../handlers/language_handler.dart';
@@ -46,6 +48,10 @@ class QueryOrchestrator {
           // Functional help.
           HowToHandler(),
           LanguageHandler(),
+          // Entity-scoped lookups run before the spending/counts handlers so
+          // "how many times…" and "when did I last…" aren't swallowed by them.
+          FrequencyHandler(),
+          LastSpentHandler(),
           // Data handlers - same precedence as the original monolith.
           SpendingHandler(),
           TopCategoryHandler(),

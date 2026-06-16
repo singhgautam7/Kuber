@@ -38,13 +38,18 @@ const AccountSchema = CollectionSchema(
       name: r'isCreditCard',
       type: IsarType.bool,
     ),
-    r'last4Digits': PropertySchema(
+    r'isDisabled': PropertySchema(
       id: 5,
+      name: r'isDisabled',
+      type: IsarType.bool,
+    ),
+    r'last4Digits': PropertySchema(
+      id: 6,
       name: r'last4Digits',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 6, name: r'name', type: IsarType.string),
-    r'type': PropertySchema(id: 7, name: r'type', type: IsarType.string),
+    r'name': PropertySchema(id: 7, name: r'name', type: IsarType.string),
+    r'type': PropertySchema(id: 8, name: r'type', type: IsarType.string),
   },
 
   estimateSize: _accountEstimateSize,
@@ -96,9 +101,10 @@ void _accountSerialize(
   writer.writeString(offsets[2], object.icon);
   writer.writeDouble(offsets[3], object.initialBalance);
   writer.writeBool(offsets[4], object.isCreditCard);
-  writer.writeString(offsets[5], object.last4Digits);
-  writer.writeString(offsets[6], object.name);
-  writer.writeString(offsets[7], object.type);
+  writer.writeBool(offsets[5], object.isDisabled);
+  writer.writeString(offsets[6], object.last4Digits);
+  writer.writeString(offsets[7], object.name);
+  writer.writeString(offsets[8], object.type);
 }
 
 Account _accountDeserialize(
@@ -114,9 +120,10 @@ Account _accountDeserialize(
   object.id = id;
   object.initialBalance = reader.readDouble(offsets[3]);
   object.isCreditCard = reader.readBool(offsets[4]);
-  object.last4Digits = reader.readStringOrNull(offsets[5]);
-  object.name = reader.readString(offsets[6]);
-  object.type = reader.readString(offsets[7]);
+  object.isDisabled = reader.readBool(offsets[5]);
+  object.last4Digits = reader.readStringOrNull(offsets[6]);
+  object.name = reader.readString(offsets[7]);
+  object.type = reader.readString(offsets[8]);
   return object;
 }
 
@@ -138,10 +145,12 @@ P _accountDeserializeProp<P>(
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -709,6 +718,16 @@ extension AccountQueryFilter
     });
   }
 
+  QueryBuilder<Account, Account, QAfterFilterCondition> isDisabledEqualTo(
+    bool value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isDisabled', value: value),
+      );
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterFilterCondition> last4DigitsIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1232,6 +1251,18 @@ extension AccountQuerySortBy on QueryBuilder<Account, Account, QSortBy> {
     });
   }
 
+  QueryBuilder<Account, Account, QAfterSortBy> sortByIsDisabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDisabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy> sortByIsDisabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDisabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterSortBy> sortByLast4Digits() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'last4Digits', Sort.asc);
@@ -1343,6 +1374,18 @@ extension AccountQuerySortThenBy
     });
   }
 
+  QueryBuilder<Account, Account, QAfterSortBy> thenByIsDisabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDisabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy> thenByIsDisabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDisabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterSortBy> thenByLast4Digits() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'last4Digits', Sort.asc);
@@ -1414,6 +1457,12 @@ extension AccountQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Account, Account, QDistinct> distinctByIsDisabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDisabled');
+    });
+  }
+
   QueryBuilder<Account, Account, QDistinct> distinctByLast4Digits({
     bool caseSensitive = true,
   }) {
@@ -1474,6 +1523,12 @@ extension AccountQueryProperty
   QueryBuilder<Account, bool, QQueryOperations> isCreditCardProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isCreditCard');
+    });
+  }
+
+  QueryBuilder<Account, bool, QQueryOperations> isDisabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDisabled');
     });
   }
 

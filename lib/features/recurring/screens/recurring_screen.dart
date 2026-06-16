@@ -26,7 +26,7 @@ import '../widgets/recurring_widgets.dart';
 
 final recurringMonthlyCostProvider =
     FutureProvider<
-      ({double total, int activeCount, List<UpcomingCharge> upcoming})
+      ({double net, int activeCount, List<UpcomingCharge> upcoming})
     >((ref) async {
       final rules = await ref.watch(recurringListProvider.future);
       final active = rules
@@ -59,8 +59,18 @@ final recurringMonthlyCostProvider =
               .toList()
             ..sort((a, b) => a.on.compareTo(b.on));
 
+      // Net monthly automation = recurring income - recurring expenses.
+      // A positive value means net income, negative means net expense.
+      final recurringIncome = active
+          .where((r) => r.type == 'income')
+          .fold<double>(0, (sum, r) => sum + monthlyEquivalent(r));
+      final recurringExpenses = active
+          .where((r) => r.type == 'expense')
+          .fold<double>(0, (sum, r) => sum + monthlyEquivalent(r));
+      final netAutomationCost = recurringIncome - recurringExpenses;
+
       return (
-        total: active.fold<double>(0, (sum, r) => sum + monthlyEquivalent(r)),
+        net: netAutomationCost,
         activeCount: active.length,
         upcoming: upcoming.take(3).toList(),
       );
@@ -144,7 +154,7 @@ class RecurringScreen extends ConsumerWidget {
                           .watch(recurringMonthlyCostProvider)
                           .when(
                             data: (summary) => RecurringHero(
-                              monthlyCost: summary.total,
+                              monthlyNet: summary.net,
                               activeCount: summary.activeCount,
                               upcoming: summary.upcoming,
                             ),

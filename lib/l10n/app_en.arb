@@ -2620,5 +2620,25 @@
   "incShort": "INC",
   "expShort": "EXP",
   "disbursedOn": "Disbursed on",
-  "emiDebitedFrom": "EMI debited from"
+  "emiDebitedFrom": "EMI debited from",
+  "searchAccountsHint": "Search accounts...",
+  "noAccountsMatch": "No accounts match '{query}'",
+  "@noAccountsMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyNetAutomation": "MONTHLY NET",
+  "disableAccount": "Disable account",
+  "enableAccount": "Enable account",
+  "accountHidden": "Account hidden",
+  "accountRestored": "Account restored",
+  "disableAccountConfirm": "This account will be hidden from pickers and home cards. You can re-enable it anytime.",
+  "hiddenChip": "Hidden",
+  "shareStory": "Share story",
+  "shareAsImage": "Share as image",
+  "shareAsText": "Share as text",
+  "confirmLabel": "Confirm"
 }

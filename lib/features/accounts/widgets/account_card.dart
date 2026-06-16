@@ -70,7 +70,12 @@ class AccountCard extends ConsumerWidget {
     final outstanding = isCC ? balance.abs() : balance.abs();
     final showAsNeg = isCC ? balance < 0 : balance < 0;
 
-    final amountColor = (isCC || !showAsNeg) ? cs.onSurface : cs.error;
+    final dimmed = account.isDisabled;
+    final baseAmountColor = (isCC || !showAsNeg) ? cs.onSurface : cs.error;
+    final amountColor =
+        dimmed ? baseAmountColor.withValues(alpha: 0.5) : baseAmountColor;
+    final nameColor =
+        dimmed ? cs.onSurface.withValues(alpha: 0.5) : cs.onSurface;
     final amountString = maskAmount(
       '${(!isCC && showAsNeg) ? '−' : ''}${fmt.formatCurrency(outstanding)}',
       masked,
@@ -114,11 +119,15 @@ class AccountCard extends ConsumerWidget {
                                 style: localeFont(
                                   fontSize: 15.5,
                                   fontWeight: FontWeight.w700,
-                                  color: cs.onSurface,
+                                  color: nameColor,
                                   letterSpacing: -0.2,
                                 ),
                               ),
                             ),
+                            if (account.isDisabled) ...[
+                              const SizedBox(width: 8),
+                              const _HiddenChip(),
+                            ],
                             if (isDefault) ...[
                               const SizedBox(width: 8),
                               const _DefaultPill(),
@@ -265,6 +274,32 @@ class _DefaultPill extends StatelessWidget {
           fontSize: 9,
           fontWeight: FontWeight.w700,
           color: cs.primary,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+  }
+}
+
+class _HiddenChip extends StatelessWidget {
+  const _HiddenChip();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // Muted outlined pill (not a warning colour) per the disabled treatment.
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
+      ),
+      child: Text(
+        context.l10n.hiddenChip,
+        style: localeFont(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          color: cs.onSurfaceVariant,
           letterSpacing: 0.6,
         ),
       ),

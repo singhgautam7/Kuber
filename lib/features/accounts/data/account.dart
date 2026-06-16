@@ -15,6 +15,11 @@ class Account {
   int? colorValue; // color as int (e.g. 0xFF5C6BC0)
   String? last4Digits; // last 4 digits for bank/credit accounts
 
+  /// Hidden (archived) accounts are excluded from pickers, home cards, and net
+  /// worth but kept in the database so they can be re-enabled. Defaults to
+  /// false, so existing rows migrate safely.
+  bool isDisabled = false;
+
   Map<String, dynamic> toMap() => {
     'id': id,
     'name': name,
@@ -25,5 +30,6 @@ class Account {
     'icon': icon,
     'colorValue': colorValue,
     'last4Digits': last4Digits,
+    'isDisabled': isDisabled,
   };
 }

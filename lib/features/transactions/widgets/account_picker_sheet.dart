@@ -9,7 +9,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_form.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
 
-class AccountPickerSheet extends ConsumerWidget {
+class AccountPickerSheet extends ConsumerStatefulWidget {
   final int? selectedAccountId;
   final ValueChanged<int> onSelected;
   final int? excludeAccountId;
@@ -22,7 +22,23 @@ class AccountPickerSheet extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountPickerSheet> createState() => _AccountPickerSheetState();
+}
+
+class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
+  final _searchController = TextEditingController();
+  // Search query is reset on every open because the controller (and this state)
+  // is created fresh each time the sheet is shown.
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final accounts = ref.watch(accountListProvider);
@@ -83,6 +99,29 @@ class AccountPickerSheet extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: KuberSpacing.md),
+
+              // Search field. Not autofocused (matches the category picker) so
+              // the keyboard doesn't pop up with the sheet. List is small, so
+              // no debounce is needed once the user does type.
+              TextField(
+                controller: _searchController,
+                autofocus: false,
+                onTapOutside: (_) =>
+                    FocusManager.instance.primaryFocus?.unfocus(),
+                style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
+                decoration: InputDecoration(
+                  hintText: context.l10n.searchAccountsHint,
+                  hintStyle: textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                  prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
+                  filled: true,
+                  fillColor: cs.surfaceContainerHigh,
+                ),
+                onChanged: (v) =>
+                    setState(() => _query = v.trim().toLowerCase()),
+              ),
               const SizedBox(height: KuberSpacing.lg),
             ],
           ),
@@ -98,8 +137,10 @@ class AccountPickerSheet extends ConsumerWidget {
               child: Text('${context.l10n.errorLabel}: $e'),
             ),
             data: (allAccs) {
-              final accs = excludeAccountId != null
-                  ? allAccs.where((a) => a.id != excludeAccountId).toList()
+              var accs = widget.excludeAccountId != null
+                  ? allAccs
+                        .where((a) => a.id != widget.excludeAccountId)
+                        .toList()
                   : allAccs;
               if (accs.isEmpty) {
                 return Center(
@@ -107,6 +148,27 @@ class AccountPickerSheet extends ConsumerWidget {
                     context.l10n.noAccountsYet,
                     style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              }
+
+              if (_query.isNotEmpty) {
+                accs = accs
+                    .where((a) => a.name.toLowerCase().contains(_query))
+                    .toList();
+              }
+
+              if (accs.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(KuberSpacing.lg),
+                    child: Text(
+                      context.l10n.noAccountsMatch(_searchController.text),
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 );
@@ -122,7 +184,7 @@ class AccountPickerSheet extends ConsumerWidget {
                     const SizedBox(height: KuberSpacing.sm),
                 itemBuilder: (context, index) {
                   final acc = accs[index];
-                  final selected = acc.id == selectedAccountId;
+                  final selected = acc.id == widget.selectedAccountId;
                   final color = resolveAccountColor(acc);
 
                   return _AccountTile(
@@ -143,7 +205,7 @@ class AccountPickerSheet extends ConsumerWidget {
                     isCreditCard: acc.isCreditCard,
                     creditLimit: acc.creditLimit,
                     currencySymbol: ref.watch(currencyProvider).symbol,
-                    onTap: () => onSelected(acc.id),
+                    onTap: () => widget.onSelected(acc.id),
                   );
                 },
               );

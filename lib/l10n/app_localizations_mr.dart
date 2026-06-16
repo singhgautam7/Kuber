@@ -4562,4 +4562,46 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get emiDebitedFrom => 'येथून EMI कपात झाली';
+
+  @override
+  String get searchAccountsHint => 'Search accounts...';
+
+  @override
+  String noAccountsMatch(String query) {
+    return 'No accounts match \'$query\'';
+  }
+
+  @override
+  String get monthlyNetAutomation => 'MONTHLY NET';
+
+  @override
+  String get disableAccount => 'Disable account';
+
+  @override
+  String get enableAccount => 'Enable account';
+
+  @override
+  String get accountHidden => 'Account hidden';
+
+  @override
+  String get accountRestored => 'Account restored';
+
+  @override
+  String get disableAccountConfirm =>
+      'This account will be hidden from pickers and home cards. You can re-enable it anytime.';
+
+  @override
+  String get hiddenChip => 'Hidden';
+
+  @override
+  String get shareStory => 'Share story';
+
+  @override
+  String get shareAsImage => 'Share as image';
+
+  @override
+  String get shareAsText => 'Share as text';
+
+  @override
+  String get confirmLabel => 'Confirm';
 }

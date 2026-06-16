@@ -47,7 +47,9 @@ class AccountsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final accountsAsync = ref.watch(accountListProvider);
+    // Manage Accounts shows every account, including disabled ones, so the user
+    // can re-enable them. Net worth still excludes disabled balances (below).
+    final accountsAsync = ref.watch(allAccountsProvider);
 
     // Existing listener: add-account trigger from nav bar
     ref.listen<bool>(triggerAddAccountProvider, (_, triggered) {
@@ -106,6 +108,9 @@ class _AccountsBody extends ConsumerWidget {
           ref.watch(accountBalanceProvider(a.id)).valueOrNull ??
           a.initialBalance;
       balances[a.id] = b;
+      // Disabled accounts stay in the list (muted) but don't contribute to net
+      // worth, assets, or debt.
+      if (a.isDisabled) continue;
       if (b > 0) {
         totalAssets += b;
       } else if (b < 0) {

@@ -41,7 +41,9 @@ TransactionExportData buildTransactionExportData(
   final allTransactions = ref.read(transactionListProvider).valueOrNull ?? [];
   final filter = ref.read(historyFilterProvider);
   final categoryMap = ref.read(categoryMapProvider).valueOrNull ?? {};
-  final accounts = ref.read(accountListProvider).valueOrNull ?? [];
+  // Full list (including disabled) so exported transactions on a hidden
+  // account still resolve their account name.
+  final accounts = ref.read(allAccountsProvider).valueOrNull ?? [];
   final txnTagsMap = ref.read(transactionTagsMapProvider).valueOrNull ?? {};
   final settings = ref.read(settingsProvider).valueOrNull;
   final currency = ref.read(currencyProvider);

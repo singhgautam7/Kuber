@@ -46,13 +46,13 @@ class UpcomingCharge {
 // ---------------------------------------------------------------------------
 
 class RecurringHero extends ConsumerWidget {
-  final double monthlyCost;
+  final double monthlyNet; // recurring income - recurring expenses
   final int activeCount;
   final List<UpcomingCharge> upcoming; // first 3 will be shown
 
   const RecurringHero({
     super.key,
-    required this.monthlyCost,
+    required this.monthlyNet,
     required this.activeCount,
     required this.upcoming,
   });
@@ -62,6 +62,17 @@ class RecurringHero extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
+    // Signed display: negative = net expense (error color), positive = net
+    // income (tertiary). Zero stays neutral.
+    final isNetExpense = monthlyNet < 0;
+    final netColor = monthlyNet == 0
+        ? cs.onSurface
+        : isNetExpense
+        ? cs.error
+        : cs.tertiary;
+    final sign = monthlyNet > 0 ? '+' : (isNetExpense ? '-' : '');
+    final netText =
+        '$sign${fmt.formatCurrency(monthlyNet.abs())}';
     final next = upcoming.take(3).toList();
     final nextLabel = next.isEmpty
         ? null
@@ -96,7 +107,7 @@ class RecurringHero extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              context.l10n.monthlyAutomationCost,
+              context.l10n.monthlyNetAutomation,
               style: localeFont(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
@@ -109,11 +120,11 @@ class RecurringHero extends ConsumerWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                maskAmount(fmt.formatCurrency(monthlyCost), masked),
+                maskAmount(netText, masked),
                 style: localeFont(
                   fontSize: 30,
                   fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
+                  color: netColor,
                   letterSpacing: -0.7,
                   height: 1.1,
                 ),
