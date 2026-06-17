@@ -61,6 +61,22 @@ Since all data is stored locally:
 - You are responsible for securing your device
 - We recommend enabling device-level security (PIN, fingerprint, etc.)
 
+**SMS Access (READ_SMS)**
+
+Kuber may request permission to read SMS messages stored on your device. This permission is used solely to detect bank and payment transaction notifications - such as debit and credit alerts sent by your bank — and to suggest them for import into your expense tracker.
+
+**What we read:** Only SMS messages from recognised Indian bank and payment service sender IDs (for example, HDFCBK, SBIINB, ICICIB, AXISBK). We filter for transaction-related content only. We do not read personal messages, OTPs, or messages from unknown senders.
+
+**What we do with it:** Detected transaction details (amount, type, date, and merchant name where available) are parsed locally on your device and displayed to you for review. You choose which transactions to import. Nothing is imported without your explicit approval.
+
+**What we do not do:**
+- We do not transmit any SMS content off your device.
+- We do not store raw SMS messages anywhere in the app or its database.
+- We do not share any SMS content with third parties, advertisers, or analytics services.
+- We do not read SMS in the background. SMS reading happens only when you actively open the SMS Import screen.
+
+**How to revoke:** You can revoke this permission at any time via Android Settings → Apps → Kuber → Permissions → SMS. Revoking this permission disables the SMS import feature but does not affect any other Kuber functionality.
+
 ---
 
 ## Data Deletion
