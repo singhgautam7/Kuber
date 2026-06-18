@@ -603,4 +603,36 @@ class InfoConstants {
       ),
     ],
   );
+
+  static const smsImport = KuberInfoConfig(
+    title: 'Importing from SMS',
+    description:
+        'Kuber reads bank transaction SMS on your device and suggests them for import.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.content_paste_rounded,
+        title: 'Paste an SMS',
+        description:
+            'Tap the paste button at the top to add a single message by hand. Kuber parses it locally.',
+      ),
+      KuberInfoItem(
+        icon: Icons.refresh_rounded,
+        title: 'Pull down to refresh',
+        description:
+            'Pull down on the list to scan your inbox again for any new bank messages.',
+      ),
+      KuberInfoItem(
+        icon: Icons.fact_check_outlined,
+        title: 'Review before adding',
+        description:
+            'Nothing is added until you confirm it. Tap a card to check the details first.',
+      ),
+      KuberInfoItem(
+        icon: Icons.lock_outline_rounded,
+        title: 'Private by design',
+        description:
+            'Messages are parsed on your phone. OTP and verification messages are always skipped.',
+      ),
+    ],
+  );
 }

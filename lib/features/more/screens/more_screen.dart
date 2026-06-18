@@ -137,6 +137,13 @@ class MoreScreenSimple extends ConsumerWidget {
                       iconWidget: const KuberMarkWidget(size: 20, bare: true),
                       onTap: () => context.push('/more/ask-kuber'),
                     ),
+                    // SMS import (English-only feature, like Ask Kuber).
+                    _MenuItem(
+                      icon: Icons.sms_outlined,
+                      label: 'Import from SMS',
+                      subtitle: 'Read bank SMS for transactions',
+                      onTap: () => context.push('/more/sms-import'),
+                    ),
                     _MenuItem(
                       icon: Icons.calculate_rounded,
                       label: context.l10n.menuCalculators,

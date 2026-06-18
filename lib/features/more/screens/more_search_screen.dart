@@ -66,6 +66,14 @@ List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevM
     route: '/more/ask-kuber',
     iconWidget: const KuberMarkWidget(size: 20, bare: true),
   ),
+  // SMS import (English-only feature). Keywords: SMS, import, bank.
+  _SearchableItem(
+    label: 'Import from SMS',
+    subtitle: 'Read bank SMS for transactions',
+    icon: Icons.sms_outlined,
+    section: context.l10n.moreToolsTitle,
+    route: '/more/sms-import',
+  ),
   // Manage
   _SearchableItem(
     label: context.l10n.menuAccounts,

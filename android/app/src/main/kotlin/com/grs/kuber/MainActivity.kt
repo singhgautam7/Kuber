@@ -4,17 +4,31 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.provider.Telephony
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterFragmentActivity() {
     private val channelName = "com.grs.kuber/saf_backups"
+    private val smsChannelName = "com.grs.kuber/sms"
     private val pickFolderRequest = 24017
     private var pendingPickResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            smsChannelName
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getInboxMessages" -> {
+                    val sinceMillis = (call.argument<Number>("sinceMillis"))?.toLong() ?: 0L
+                    readInbox(sinceMillis, result)
+                }
+                else -> result.notImplemented()
+            }
+        }
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             channelName
@@ -50,6 +64,52 @@ class MainActivity : FlutterFragmentActivity() {
                 }
                 else -> result.notImplemented()
             }
+        }
+    }
+
+    /**
+     * Reads the SMS inbox (read-only) for messages received on or after
+     * [sinceMillis]. Returns a list of {address, body, date} maps. Sender
+     * filtering and parsing happen on the Dart side, which keeps the known
+     * bank-sender list as the single source of truth. Requires the READ_SMS
+     * runtime permission (requested from Dart); without it the query throws and
+     * we return an error.
+     */
+    private fun readInbox(sinceMillis: Long, result: MethodChannel.Result) {
+        try {
+            val messages = mutableListOf<Map<String, Any?>>()
+            val projection = arrayOf(
+                Telephony.Sms.ADDRESS,
+                Telephony.Sms.BODY,
+                Telephony.Sms.DATE
+            )
+            val selection = "${Telephony.Sms.DATE} >= ?"
+            val selectionArgs = arrayOf(sinceMillis.toString())
+            contentResolver.query(
+                Telephony.Sms.Inbox.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                "${Telephony.Sms.DATE} DESC"
+            )?.use { cursor ->
+                val addressIdx = cursor.getColumnIndex(Telephony.Sms.ADDRESS)
+                val bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY)
+                val dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE)
+                while (cursor.moveToNext()) {
+                    messages.add(
+                        mapOf(
+                            "address" to cursor.getString(addressIdx),
+                            "body" to cursor.getString(bodyIdx),
+                            "date" to cursor.getLong(dateIdx)
+                        )
+                    )
+                }
+            }
+            result.success(messages)
+        } catch (security: SecurityException) {
+            result.error("permission_denied", security.message, null)
+        } catch (error: Throwable) {
+            result.error("read_error", error.message, null)
         }
     }
 

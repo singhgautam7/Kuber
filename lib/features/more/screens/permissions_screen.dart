@@ -280,6 +280,19 @@ class PermissionsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: KuberSpacing.lg),
                   _PermissionCard(
+                    icon: Icons.sms_outlined,
+                    title: 'SMS',
+                    description:
+                        'Used to detect your bank\'s transaction messages and '
+                        'suggest them for import. Read-only. Nothing is stored '
+                        'or transmitted without your approval.',
+                    status: state.sms,
+                    lang: lang,
+                    onTap: () =>
+                        ref.read(permissionProvider.notifier).requestSms(),
+                  ),
+                  const SizedBox(height: KuberSpacing.lg),
+                  _PermissionCard(
                     icon: Icons.folder_special_outlined,
                     title: _getFilesTitle(lang),
                     description: backupSettings?.folderPath == null

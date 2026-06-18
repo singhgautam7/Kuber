@@ -14,12 +14,14 @@ enum AppPermissionStatus {
 class PermissionStates {
   final AppPermissionStatus notifications;
   final AppPermissionStatus storage;
+  final AppPermissionStatus sms;
   final bool isBiometricAvailable;
   final bool isBiometricEnabled;
 
   const PermissionStates({
     required this.notifications,
     required this.storage,
+    required this.sms,
     required this.isBiometricAvailable,
     required this.isBiometricEnabled,
   });
@@ -27,12 +29,14 @@ class PermissionStates {
   PermissionStates copyWith({
     AppPermissionStatus? notifications,
     AppPermissionStatus? storage,
+    AppPermissionStatus? sms,
     bool? isBiometricAvailable,
     bool? isBiometricEnabled,
   }) {
     return PermissionStates(
       notifications: notifications ?? this.notifications,
       storage: storage ?? this.storage,
+      sms: sms ?? this.sms,
       isBiometricAvailable: isBiometricAvailable ?? this.isBiometricAvailable,
       isBiometricEnabled: isBiometricEnabled ?? this.isBiometricEnabled,
     );
@@ -73,15 +77,27 @@ class PermissionNotifier extends AsyncNotifier<PermissionStates> {
       storageStatus = AppPermissionStatus.notRequired;
     }
 
+    // Check SMS (read-only; used by the Import from SMS feature). Android only.
+    AppPermissionStatus smsStatus;
+    if (Platform.isAndroid) {
+      final status = await Permission.sms.status;
+      smsStatus = status.isGranted
+          ? AppPermissionStatus.granted
+          : AppPermissionStatus.denied;
+    } else {
+      smsStatus = AppPermissionStatus.notRequired;
+    }
+
     // Check Biometrics
     final isAvailable = await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
     final isEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
 
     return PermissionStates(
-      notifications: notificationStatus.isGranted 
-          ? AppPermissionStatus.granted 
+      notifications: notificationStatus.isGranted
+          ? AppPermissionStatus.granted
           : AppPermissionStatus.denied,
       storage: storageStatus,
+      sms: smsStatus,
       isBiometricAvailable: isAvailable,
       isBiometricEnabled: isEnabled,
     );
@@ -99,6 +115,11 @@ class PermissionNotifier extends AsyncNotifier<PermissionStates> {
 
   Future<void> requestStorage() async {
     await Permission.storage.request();
+    await refresh();
+  }
+
+  Future<void> requestSms() async {
+    await Permission.sms.request();
     await refresh();
   }
 }

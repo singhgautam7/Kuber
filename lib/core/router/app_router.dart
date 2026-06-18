@@ -45,6 +45,7 @@ import '../../features/investments/data/investment.dart';
 import '../../features/investments/screens/investments_screen.dart';
 import '../../features/investments/screens/add_investment_screen.dart';
 import '../../features/more/screens/charts_screen.dart';
+import '../../features/sms_import/screens/sms_import_screen.dart';
 import '../../features/ask_kuber/screen/ask_kuber_screen.dart';
 import '../../features/more/screens/troubleshoot_screen.dart';
 import '../../features/budgets/data/budget.dart';
@@ -378,6 +379,18 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'ask-kuber',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const AskKuberScreen(),
+                  ),
+                  GoRoute(
+                    path: 'sms-import',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, state) => SmsImportScreen(
+                      initialTab: switch (
+                          state.uri.queryParameters['tab']) {
+                        'imported' => SmsImportTab.imported,
+                        'dismissed' => SmsImportTab.dismissed,
+                        _ => SmsImportTab.unreviewed,
+                      },
+                    ),
                   ),
                   GoRoute(
                     path: 'troubleshoot',

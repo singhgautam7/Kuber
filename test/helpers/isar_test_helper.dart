@@ -19,6 +19,8 @@ import 'package:kuber/features/tools/bill_splitter/data/bill.dart';
 import 'package:kuber/features/stories/data/insight_story.dart';
 import 'package:kuber/features/backups/data/backup_config.dart';
 import 'package:kuber/features/ask_kuber/data/ask_kuber_message.dart';
+import 'package:kuber/features/sms_import/data/sms_transaction.dart';
+import 'package:kuber/features/sms_import/data/sms_account_mapping.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -40,6 +42,8 @@ const _allSchemas = [
   InsightStorySchema,
   BackupConfigSchema,
   AskKuberMessageSchema,
+  SmsTransactionSchema,
+  SmsAccountMappingSchema,
 ];
 
 bool _isarInitialized = false;

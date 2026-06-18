@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 
@@ -271,6 +272,47 @@ class TransactionDetailSheet extends ConsumerWidget {
               fullWidth: true,
               icon: Icons.flash_on_rounded,
               iconColor: cs.primary,
+            ),
+          ],
+
+          // ── Imported from SMS ───────────────────────────────────────
+          if (transaction.importSource == 'sms' &&
+              transaction.importedFromSms != null &&
+              transaction.importedFromSms!.isNotEmpty) ...[
+            const SizedBox(height: KuberSpacing.lg),
+            Row(
+              children: [
+                Icon(Icons.sms_outlined, size: 13, color: cs.onSurfaceVariant),
+                const SizedBox(width: 6),
+                Text(
+                  'ORIGINAL SMS',
+                  style: localeFont(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(KuberSpacing.md),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border: Border.all(color: cs.outline),
+              ),
+              child: Text(
+                transaction.importedFromSms!,
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 12,
+                  height: 1.55,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: -0.1,
+                ),
+              ),
             ),
           ],
 

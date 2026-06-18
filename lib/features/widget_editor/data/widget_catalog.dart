@@ -61,6 +61,12 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     description: 'Latest activity at a glance',
     enabled: true,
   ),
+  HomeWidgetConfig(
+    id: 'sms_import_widget',
+    name: 'SMS Import',
+    description: 'Pending bank SMS transactions to review',
+    enabled: true,
+  ),
 ];
 
 /// Canonical list of toggleable widgets for the analytics screen.
@@ -122,6 +128,8 @@ String localizedWidgetName(BuildContext context, String id) {
     'budget_snapshot' => l.wgtBudgetSnapshotName,
     'upcoming_recurring' => l.wgtUpcomingRecurringName,
     'recent_transactions' => l.wgtRecentTransactionsName,
+    // SMS import is an English-only feature (see Ask Kuber precedent).
+    'sms_import_widget' => 'SMS Import',
     'summary_card' => l.wgtSummaryCardName,
     'spending_trend' => l.wgtSpendingTrendName,
     'weekly_heatmap' => l.wgtWeeklyHeatmapName,
@@ -146,6 +154,7 @@ String? localizedWidgetDesc(BuildContext context, String id) {
     'budget_snapshot' => l.wgtBudgetSnapshotDesc,
     'upcoming_recurring' => l.wgtUpcomingRecurringDesc,
     'recent_transactions' => l.wgtRecentTransactionsDesc,
+    'sms_import_widget' => 'Pending bank SMS transactions to review',
     'summary_card' => l.wgtSummaryCardDesc,
     'spending_trend' => l.wgtSpendingTrendDesc,
     'weekly_heatmap' => l.wgtWeeklyHeatmapDesc,

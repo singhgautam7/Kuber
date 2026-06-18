@@ -26,6 +26,8 @@ import '../../notifications/data/app_notification.dart';
 import '../../widget_editor/data/widget_preference.dart';
 import '../../stories/data/insight_story.dart';
 import '../../backups/data/backup_config.dart';
+import '../../sms_import/data/sms_transaction.dart';
+import '../../sms_import/data/sms_account_mapping.dart';
 
 class CollectionMeta {
   final String name;
@@ -84,6 +86,14 @@ class DbExplorerScreen extends ConsumerWidget {
       CollectionMeta(
         'BackupConfig',
         (i) => i.collection<BackupConfig>().count(),
+      ),
+      CollectionMeta(
+        'SmsTransaction',
+        (i) => i.collection<SmsTransaction>().count(),
+      ),
+      CollectionMeta(
+        'SmsAccountMapping',
+        (i) => i.collection<SmsAccountMapping>().count(),
       ),
     ]..sort((a, b) => a.name.compareTo(b.name));
 

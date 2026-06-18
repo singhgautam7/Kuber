@@ -41,6 +41,12 @@ class Transaction {
 
   List<String> attachmentPaths = []; // file paths on disk
 
+  // SMS import provenance. null = entered manually; 'sms' = imported from a
+  // bank SMS via the SMS import flow. Both nullable so existing rows migrate
+  // safely with a null default.
+  String? importSource;     // null | 'sms'
+  String? importedFromSms;  // raw SMS body, stored only for SMS-imported txns
+
   @ignore
   String? tempTags; // temporary storage for import
 
@@ -62,5 +68,7 @@ class Transaction {
     'updatedAt': updatedAt.toIso8601String(),
     'nameLower': nameLower,
     'attachmentPaths': attachmentPaths,
+    'importSource': importSource,
+    'importedFromSms': importedFromSms,
   };
 }

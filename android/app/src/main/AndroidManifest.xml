@@ -3,6 +3,10 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- Read-only access to the SMS inbox, used solely to detect bank
+         transaction messages for the Import from SMS feature. Read-only;
+         nothing is stored or transmitted without the user's approval. -->
+    <uses-permission android:name="android.permission.READ_SMS"/>
 
     <!-- Strip image, video, and audio permissions injected by dependencies -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
