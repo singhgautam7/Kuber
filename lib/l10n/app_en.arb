@@ -2640,5 +2640,38 @@
   "shareStory": "Share story",
   "shareAsImage": "Share as image",
   "shareAsText": "Share as text",
-  "confirmLabel": "Confirm"
+  "confirmLabel": "Confirm",
+  "sourceLabel": "Source",
+  "sourceSms": "SMS import",
+  "sourceRecurring": "Recurring",
+  "sourceLentBorrowed": "Lent or Borrowed",
+  "sourceLoan": "Loan",
+  "sourceInvestment": "Investment / SIP",
+  "sourceQuickAdd": "Quick add",
+  "sourceManual": "Entered by you",
+  "sourceBalanceAdjustment": "Balance adjustment",
+  "viewOriginalSms": "View original SMS",
+  "accountTypeLabel": "Account Type",
+  "accountNumberLabel": "Account Number",
+  "defaultAccountLabel": "Default Account",
+  "yesLabel": "Yes",
+  "noLabel": "No",
+  "lastTransactionLabel": "Last Transaction",
+  "budgetStatusLabel": "Budget Status",
+  "setBudgetForCategory": "Set a budget for this category",
+  "usageCountLabel": "Usage Count",
+  "firstUsedLabel": "First Used",
+  "lastUsedLabel": "Last Used",
+  "viewTaggedTransactions": "View Tagged Transactions",
+  "accountLabel": "Account",
+  "dateTimeTitle": "Date & Time",
+  "originalSmsLabel": "Original SMS",
+  "transactionsCountValue": "{count} transactions",
+  "@transactionsCountValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

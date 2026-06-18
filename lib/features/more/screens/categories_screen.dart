@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -12,6 +13,8 @@ import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/info_table.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../categories/data/category.dart';
 import '../../categories/data/category_group.dart';
@@ -892,7 +895,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     Category cat,
     String? groupName,
   ) {
-    final cs = Theme.of(context).colorScheme;
+    final typeValue = cat.effectiveType == 'both'
+        ? context.l10n.incomeAndExpense
+        : cat.effectiveType == 'income'
+            ? context.l10n.incomeLabel
+            : context.l10n.expenseLabel;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -907,139 +915,75 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           rawColor: Color(cat.colorValue),
           size: 48,
         ),
-        actions: AppButton(
-          label: context.l10n.viewTransactions,
-          icon: Icons.receipt_long_rounded,
-          type: AppButtonType.primary,
-          fullWidth: true,
-          onPressed: () {
-            ref.read(historyFilterProvider.notifier).clearAll();
-            ref
-                .read(historyFilterProvider.notifier)
-                .setFilters(categoryIds: {cat.id.toString()});
-            context.go('/history');
-          },
+        actions: SheetButtonSection(
+          padding: EdgeInsets.zero,
+          primary: SheetAction(
+            label: context.l10n.viewTransactions,
+            icon: Icons.receipt_long_rounded,
+            onPressed: () {
+              ref.read(historyFilterProvider.notifier).clearAll();
+              ref
+                  .read(historyFilterProvider.notifier)
+                  .setFilters(categoryIds: {cat.id.toString()});
+              context.go('/history');
+            },
+          ),
+          actions: [
+            SheetAction(
+              label: context.l10n.editLabel,
+              icon: Icons.edit_outlined,
+              onPressed: () {
+                Navigator.pop(context);
+                context.push(
+                  '/category/add',
+                  extra: CategoryRouteArgs(category: cat),
+                );
+              },
+            ),
+            SheetAction(
+              label: context.l10n.deleteLabel,
+              icon: Icons.delete_outline_rounded,
+              destructive: true,
+              onPressed: () {
+                Navigator.pop(context);
+                _confirmDelete(context, ref, cat);
+              },
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 24),
-            // Last Transaction Activity
             Consumer(
               builder: (context, ref, _) {
-                final latestTxnAsync = ref.watch(
-                  categoryRecentTransactionProvider(cat.id),
-                );
-
-                return latestTxnAsync.when(
-                  data: (txn) => Row(
-                    children: [
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: 14,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        txn != null
-                            ? context.l10n.lastTransaction(DateFormatter.timeAgo(txn.createdAt))
-                            : context.l10n.noTransactionsYet,
-                        style: localeFont(
-                          fontSize: 12,
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                final lastTxn = ref
+                    .watch(categoryRecentTransactionProvider(cat.id))
+                    .valueOrNull;
+                final rows = <InfoTableRow>[
+                  InfoTableDataRow(
+                    label: context.l10n.typeLabel,
+                    value: typeValue,
                   ),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                );
+                  if (groupName != null)
+                    InfoTableDataRow(
+                      label: context.l10n.groupLabel,
+                      value: groupName,
+                    ),
+                  if (lastTxn != null)
+                    InfoTableDataRow(
+                      label: context.l10n.lastTransactionLabel,
+                      value:
+                          '${DateFormat('MMM d').format(lastTxn.createdAt)} • ${DateFormatter.time(lastTxn.createdAt)}',
+                    ),
+                ];
+                return InfoTable(rows: rows);
               },
             ),
-            const SizedBox(height: 32),
-            _buildDetailItem(
-              context,
-              label: context.l10n.groupUpper,
-              value: groupName ?? context.l10n.noneLabel,
-            ),
-            const SizedBox(height: 16),
-            _buildDetailItem(
-              context,
-              label: context.l10n.typeUpper,
-              value: cat.effectiveType == 'both'
-                  ? context.l10n.incomeAndExpense
-                  : cat.effectiveType == 'income'
-                      ? context.l10n.incomeLabel
-                      : context.l10n.expenseLabel,
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 22),
             _BudgetStatusSection(category: cat),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: AppButton(
-                    label: context.l10n.editLabel,
-                    icon: Icons.edit_outlined,
-                    type: AppButtonType.normal,
-                    onPressed: () {
-                      Navigator.pop(context);
-                      context.push(
-                        '/category/add',
-                        extra: CategoryRouteArgs(category: cat),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: AppButton(
-                    label: context.l10n.deleteLabel,
-                    icon: Icons.delete_outline_rounded,
-                    type: AppButtonType.danger,
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _confirmDelete(context, ref, cat);
-                    },
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDetailItem(
-    BuildContext context, {
-    required String label,
-    required String value,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.1,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: localeFont(
-            fontSize: 15,
-            color: cs.onSurface,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 
@@ -1553,7 +1497,7 @@ class _BudgetStatusSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'BUDGET STATUS',
+          context.l10n.budgetStatusLabel.toUpperCase(),
           style: localeFont(
             fontSize: 10,
             fontWeight: FontWeight.w700,
@@ -1570,14 +1514,14 @@ class _BudgetStatusSection extends ConsumerWidget {
                   Navigator.pop(context);
                   context.push('/budgets/add', extra: category);
                 },
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(KuberRadius.md),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(12),
+                    color: cs.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
                     border: Border.all(
-                      color: cs.outline.withValues(alpha: 0.5),
+                      color: cs.primary.withValues(alpha: 0.25),
                     ),
                   ),
                   child: Row(
@@ -1587,12 +1531,12 @@ class _BudgetStatusSection extends ConsumerWidget {
                         size: 20,
                         color: cs.primary,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 11),
                       Text(
-                        'Set a budget for this category',
+                        context.l10n.setBudgetForCategory,
                         style: localeFont(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                           color: cs.primary,
                         ),
                       ),

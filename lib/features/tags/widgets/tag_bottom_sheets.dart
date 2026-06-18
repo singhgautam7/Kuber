@@ -10,7 +10,9 @@ import '../data/tag.dart';
 import '../providers/tag_providers.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/info_table.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../../history/providers/history_filter_provider.dart';
 
 class AddEditTagBottomSheet extends ConsumerStatefulWidget {
@@ -204,6 +206,35 @@ class ViewTagBottomSheet extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final dateStr = DateFormat('MMM dd, yyyy').format(tag.createdAt);
 
+    final count = ref.watch(tagTransactionCountProvider(tag.id)).valueOrNull;
+    final firstTxn = ref.watch(tagFirstTransactionProvider(tag.id)).valueOrNull;
+    final lastTxn = ref.watch(tagRecentTransactionProvider(tag.id)).valueOrNull;
+
+    String fmtDate(DateTime dt) {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final d = DateTime(dt.year, dt.month, dt.day);
+      if (d == today) return 'Today • ${DateFormatter.time(dt)}';
+      return DateFormat('MMM d, yyyy').format(dt);
+    }
+
+    final rows = <InfoTableRow>[
+      InfoTableDataRow(
+        label: context.l10n.usageCountLabel,
+        value: context.l10n.transactionsCountValue(count ?? 0),
+      ),
+      if (firstTxn != null)
+        InfoTableDataRow(
+          label: context.l10n.firstUsedLabel,
+          value: fmtDate(firstTxn.createdAt),
+        ),
+      if (lastTxn != null)
+        InfoTableDataRow(
+          label: context.l10n.lastUsedLabel,
+          value: fmtDate(lastTxn.createdAt),
+        ),
+    ];
+
     return KuberBottomSheet(
       title: tag.name,
       subtitle: context.l10n.createdOnUpper(dateStr.toUpperCase()),
@@ -224,78 +255,46 @@ class ViewTagBottomSheet extends ConsumerWidget {
           ),
         ),
       ),
-      actions: AppButton(
-        label: context.l10n.viewTransactions,
-        icon: Icons.receipt_long_rounded,
-        type: AppButtonType.primary,
-        fullWidth: true,
-        onPressed: () {
-          ref.read(historyFilterProvider.notifier).clearAll();
-          ref.read(historyFilterProvider.notifier).setFilters(
-                tagIds: {tag.id},
-              );
-          context.go('/history');
-        },
+      actions: SheetButtonSection(
+        padding: EdgeInsets.zero,
+        primary: SheetAction(
+          label: context.l10n.viewTaggedTransactions,
+          icon: Icons.receipt_long_rounded,
+          onPressed: () {
+            ref.read(historyFilterProvider.notifier).clearAll();
+            ref.read(historyFilterProvider.notifier).setFilters(
+                  tagIds: {tag.id},
+                );
+            context.go('/history');
+          },
+        ),
+        actions: [
+          SheetAction(
+            label: context.l10n.editLabel,
+            icon: Icons.edit_outlined,
+            onPressed: () => _edit(context),
+          ),
+          SheetAction(
+            label: tag.isEnabled
+                ? context.l10n.disableLabel
+                : context.l10n.enableLabel,
+            icon: tag.isEnabled
+                ? Icons.block_flipped
+                : Icons.check_circle_outline_rounded,
+            onPressed: () => _toggleEnabled(context, ref),
+          ),
+          SheetAction(
+            label: context.l10n.deleteTag,
+            icon: Icons.delete_outline_rounded,
+            destructive: true,
+            onPressed: () => _confirmDelete(context, ref),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Last Transaction Activity
-          Consumer(
-            builder: (context, ref, _) {
-              final latestTxnAsync = ref.watch(tagRecentTransactionProvider(tag.id));
-              return latestTxnAsync.when(
-                data: (txn) => Row(
-                  children: [
-                    Icon(Icons.access_time_rounded, size: 14, color: cs.onSurfaceVariant),
-                    const SizedBox(width: 6),
-                    Text(
-                      txn != null
-                          ? context.l10n.lastTransaction(DateFormatter.timeAgo(txn.createdAt))
-                          : context.l10n.noTransactionsYet,
-                      style: localeFont(
-                        fontSize: 12,
-                        color: cs.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
-          const SizedBox(height: 32),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.editLabel,
-                  icon: Icons.edit_outlined,
-                  type: AppButtonType.normal,
-                  onPressed: () => _edit(context),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  label: tag.isEnabled ? context.l10n.disableLabel : context.l10n.enableLabel,
-                  icon: tag.isEnabled ? Icons.block_flipped : Icons.check_circle_outline_rounded,
-                  type: tag.isEnabled ? AppButtonType.danger : AppButtonType.normal,
-                  onPressed: () => _toggleEnabled(context, ref),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          AppButton(
-            label: context.l10n.deleteTag,
-            icon: Icons.delete_outline_rounded,
-            type: AppButtonType.danger,
-            fullWidth: true,
-            onPressed: () => _confirmDelete(context, ref),
-          ),
+          InfoTable(rows: rows),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -12,7 +13,9 @@ import '../../../shared/widgets/timed_snackbar.dart';
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/info_table.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -22,14 +25,6 @@ class AccountDetailSheet extends ConsumerWidget {
   final Account account;
 
   const AccountDetailSheet({super.key, required this.account});
-
-  String _accountTypeLabel(BuildContext context, Account account) {
-    String label = account.isCreditCard ? context.l10n.creditCardLabel : context.l10n.savingsAccount;
-    if (account.last4Digits != null) {
-      label += ' • **** ${account.last4Digits}';
-    }
-    return label;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,168 +37,174 @@ class AccountDetailSheet extends ConsumerWidget {
     );
     final isDefault = defaultAccountId == account.id.toString();
 
+    final lastTxn = latestTxnAsync.valueOrNull;
+    final lastTxnLabel = lastTxn != null
+        ? '${DateFormat('MMM d, yyyy').format(lastTxn.createdAt)} • ${DateFormatter.time(lastTxn.createdAt)}'
+        : null;
+
+    final rows = <InfoTableRow>[
+      InfoTableDataRow(
+        label: context.l10n.accountTypeLabel,
+        value: account.isCreditCard
+            ? context.l10n.creditCardLabel
+            : context.l10n.savingsAccount,
+      ),
+      if (account.last4Digits != null && account.last4Digits!.isNotEmpty)
+        InfoTableDataRow(
+          label: context.l10n.accountNumberLabel,
+          value: '•••• ${account.last4Digits}',
+        ),
+      InfoTableDataRow(
+        label: context.l10n.defaultAccountLabel,
+        value: isDefault ? context.l10n.yesLabel : context.l10n.noLabel,
+        valueColor: isDefault ? null : cs.onSurfaceVariant,
+      ),
+      if (lastTxnLabel != null)
+        InfoTableDataRow(
+          label: context.l10n.lastTransactionLabel,
+          value: lastTxnLabel,
+        ),
+    ];
+
     return KuberBottomSheet(
       title: account.name,
-      subtitle: _accountTypeLabel(context, account),
+      subtitle: account.isCreditCard
+          ? context.l10n.creditCardLabel
+          : context.l10n.savingsAccount,
       leadingIcon: CategoryIcon.square(
-        icon: account.icon != null ? IconMapper.fromString(account.icon!) : Icons.account_balance,
-        rawColor: account.colorValue != null ? Color(account.colorValue!) : cs.primary,
+        icon: account.icon != null
+            ? IconMapper.fromString(account.icon!)
+            : Icons.account_balance,
+        rawColor: account.colorValue != null
+            ? Color(account.colorValue!)
+            : cs.primary,
         size: 48,
       ),
-      actions: AppButton(
-        label: context.l10n.viewTransactions,
-        icon: Icons.receipt_long_rounded,
-        type: AppButtonType.primary,
-        fullWidth: true,
-        onPressed: () {
-          Navigator.of(context).pop();
-          ref.read(historyFilterProvider.notifier).clearAll();
-          ref.read(historyFilterProvider.notifier).setFilters(
-                accountIds: {account.id.toString()},
-              );
-          context.go('/history');
-        },
+      actions: SheetButtonSection(
+        padding: EdgeInsets.zero,
+        primary: SheetAction(
+          label: context.l10n.viewTransactions,
+          icon: Icons.receipt_long_rounded,
+          onPressed: () {
+            Navigator.of(context).pop();
+            ref.read(historyFilterProvider.notifier).clearAll();
+            ref.read(historyFilterProvider.notifier).setFilters(
+                  accountIds: {account.id.toString()},
+                );
+            context.go('/history');
+          },
+        ),
+        actions: [
+          SheetAction(
+            label: account.isCreditCard
+                ? context.l10n.editLimitSpent
+                : context.l10n.balanceLabel,
+            icon: Icons.account_balance_wallet_rounded,
+            onPressed: () => _editBalance(context, ref, balanceAsync),
+          ),
+          SheetAction(
+            label: account.isDisabled
+                ? context.l10n.enableAccount
+                : context.l10n.disableAccount,
+            icon: account.isDisabled
+                ? Icons.visibility_rounded
+                : Icons.visibility_off_rounded,
+            onPressed: () => _toggleDisabled(context, ref),
+          ),
+          SheetAction(
+            label: context.l10n.editAccount,
+            icon: Icons.edit_rounded,
+            onPressed: () {
+              Navigator.pop(context);
+              context.push('/accounts/edit', extra: account);
+            },
+          ),
+          SheetAction(
+            label: isDefault
+                ? context.l10n.removeDefault
+                : context.l10n.setAsDefaultLabel,
+            icon: isDefault
+                ? Icons.check_circle_rounded
+                : Icons.star_outline_rounded,
+            onPressed: () => _toggleDefault(context, ref, isDefault),
+          ),
+          SheetAction(
+            label: context.l10n.deleteAccount,
+            icon: Icons.delete_outline_rounded,
+            destructive: true,
+            onPressed: () => _confirmDelete(context, ref),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Primary Value Section
           balanceAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: SizedBox(
+                height: 32,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
             error: (e, _) => Text(context.l10n.errorLoadingBalance,
                 style: localeFont(color: cs.error)),
             data: (balance) {
               if (account.isCreditCard) {
                 return _buildCreditCardSection(context, ref, balance);
-              } else {
-                return _buildBankSection(context, ref, balance);
               }
-            },
-          ),
-
-          const SizedBox(height: 24),
-
-          // Last Transaction Activity
-          latestTxnAsync.when(
-            loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (txn) {
-              return Row(
-                children: [
-                  Icon(Icons.access_time_rounded,
-                      size: 14, color: cs.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                  Text(
-                    txn != null
-                        ? context.l10n.lastTransaction(DateFormatter.timeAgo(txn.createdAt))
-                        : context.l10n.noTransactionsYet,
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+              return SheetAmountHero(
+                caption: context.l10n.currentAvailableBalance,
+                amount: ref.watch(formatterProvider).formatCurrency(balance),
+                amountColor: balance < 0
+                    ? cs.error
+                    : (balance > 0 ? cs.tertiary : cs.onSurface),
               );
             },
           ),
+          const SizedBox(height: 18),
+          InfoTable(rows: rows),
+        ],
+      ),
+    );
+  }
 
-          const SizedBox(height: 32),
+  void _editBalance(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<double> balanceAsync,
+  ) {
+    Navigator.pop(context);
+    final balance = balanceAsync.valueOrNull ?? 0.0;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberRadius.lg),
+        ),
+      ),
+      builder: (_) => EditBalanceSheet(
+        account: account,
+        currentValue: balance,
+        isCredit: account.isCreditCard,
+      ),
+    );
+  }
 
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.editAccount,
-                  icon: Icons.edit_rounded,
-                  type: AppButtonType.normal,
-                  onPressed: () {
-                    Navigator.pop(context);
-                    context.push('/accounts/edit', extra: account);
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  label: account.isCreditCard ? context.l10n.editLimitSpent : context.l10n.editBalance,
-                  icon: Icons.account_balance_wallet_rounded,
-                  type: AppButtonType.normal,
-                  onPressed: () {
-                    Navigator.pop(context);
-                    final balance = balanceAsync.valueOrNull ?? 0.0;
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(KuberRadius.lg),
-                        ),
-                      ),
-                      builder: (_) => EditBalanceSheet(
-                        account: account,
-                        currentValue: balance,
-                        isCredit: account.isCreditCard,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          AppButton(
-            label: isDefault ? context.l10n.removeDefault : context.l10n.setAsDefaultLabel,
-            icon: isDefault
-                ? Icons.check_circle_rounded
-                : Icons.star_outline_rounded,
-            type: isDefault ? AppButtonType.outline : AppButtonType.normal,
-            fullWidth: true,
-            onPressed: () {
-              ref.read(settingsProvider.notifier).setDefaultAccountId(
-                    isDefault ? null : account.id.toString(),
-                  );
-              showKuberSnackBar(
-                context,
-                isDefault
-                    ? context.l10n.defaultAccountCleared
-                    : context.l10n.setAsDefault(account.name),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.deleteAccount,
-                  icon: Icons.delete_outline_rounded,
-                  type: AppButtonType.danger,
-                  onPressed: () => _confirmDelete(context, ref),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                // Secondary action: hide/restore without deleting.
-                child: AppButton(
-                  label: account.isDisabled
-                      ? context.l10n.enableAccount
-                      : context.l10n.disableAccount,
-                  icon: account.isDisabled
-                      ? Icons.visibility_rounded
-                      : Icons.visibility_off_rounded,
-                  type: AppButtonType.dotted,
-                  onPressed: () => _toggleDisabled(context, ref),
-                ),
-              ),
-            ],
-          ),
-      ],
-    ),
-  );
-}
+  void _toggleDefault(BuildContext context, WidgetRef ref, bool isDefault) {
+    ref.read(settingsProvider.notifier).setDefaultAccountId(
+          isDefault ? null : account.id.toString(),
+        );
+    showKuberSnackBar(
+      context,
+      isDefault
+          ? context.l10n.defaultAccountCleared
+          : context.l10n.setAsDefault(account.name),
+    );
+  }
 
   void _toggleDisabled(BuildContext context, WidgetRef ref) {
     final notifier = ref.read(allAccountsProvider.notifier);
@@ -256,37 +257,6 @@ class AccountDetailSheet extends ConsumerWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBankSection(BuildContext context, WidgetRef ref, double balance) {
-    final cs = Theme.of(context).colorScheme;
-    final formatter = ref.watch(formatterProvider);
-    final color = balance < 0 ? cs.error : cs.onSurface;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.currentAvailableBalance,
-          style: localeFont(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          formatter.formatCurrency(balance),
-          style: localeFont(
-            fontSize: 32,
-            fontWeight: FontWeight.w800,
-            color: color,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ],
     );
   }
 
@@ -354,7 +324,7 @@ class AccountDetailSheet extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -445,5 +415,4 @@ class AccountDetailSheet extends ConsumerWidget {
       );
     }
   }
-
 }

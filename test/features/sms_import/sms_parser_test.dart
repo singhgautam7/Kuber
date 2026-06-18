@@ -165,6 +165,48 @@ void main() {
     });
   });
 
+  group('ignore filter vs real transactions', () {
+    test('completed debit mentioning mandate/autopay still parses', () {
+      const body =
+          'Rs 799 debited from ICICI Bank Savings Account XX510 on 17-Jun-26 '
+          'towards Zee5 for UPI Mandate AutoPay Retrieval Ref No.653401485421';
+      final r = parser.parse(body, 'VM-ICICIT-S', ts)!;
+      expect(r.type, 'expense');
+      expect(r.amount, 799.0);
+    });
+
+    test('bill / statement notices are ignored', () {
+      expect(
+        parser.parse(
+          'Total amount due Rs 12,500 for HDFC Card XX1234. Payment due by '
+          '20-Jun-26.',
+          'HDFCBK',
+          ts,
+        ),
+        isNull,
+      );
+      expect(
+        parser.parse(
+          'Your e-statement for ICICI Bank A/c XX510 is now ready.',
+          'ICICIB',
+          ts,
+        ),
+        isNull,
+      );
+    });
+
+    test('mandate setup notice (no completed verb) is ignored', () {
+      expect(
+        parser.parse(
+          'UPI Mandate of Rs 799 to Zee5 has been successfully registered.',
+          'ICICIB',
+          ts,
+        ),
+        isNull,
+      );
+    });
+  });
+
   group('unparseable', () {
     test('statement-ready message returns null', () {
       const body =

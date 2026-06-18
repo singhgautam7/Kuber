@@ -8353,6 +8353,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirmLabel;
+
+  /// No description provided for @sourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get sourceLabel;
+
+  /// No description provided for @sourceSms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS import'**
+  String get sourceSms;
+
+  /// No description provided for @sourceRecurring.
+  ///
+  /// In en, this message translates to:
+  /// **'Recurring'**
+  String get sourceRecurring;
+
+  /// No description provided for @sourceLentBorrowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Lent or Borrowed'**
+  String get sourceLentBorrowed;
+
+  /// No description provided for @sourceLoan.
+  ///
+  /// In en, this message translates to:
+  /// **'Loan'**
+  String get sourceLoan;
+
+  /// No description provided for @sourceInvestment.
+  ///
+  /// In en, this message translates to:
+  /// **'Investment / SIP'**
+  String get sourceInvestment;
+
+  /// No description provided for @sourceQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick add'**
+  String get sourceQuickAdd;
+
+  /// No description provided for @sourceManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered by you'**
+  String get sourceManual;
+
+  /// No description provided for @sourceBalanceAdjustment.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance adjustment'**
+  String get sourceBalanceAdjustment;
+
+  /// No description provided for @viewOriginalSms.
+  ///
+  /// In en, this message translates to:
+  /// **'View original SMS'**
+  String get viewOriginalSms;
+
+  /// No description provided for @accountTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Type'**
+  String get accountTypeLabel;
+
+  /// No description provided for @accountNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Number'**
+  String get accountNumberLabel;
+
+  /// No description provided for @yesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yesLabel;
+
+  /// No description provided for @noLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get noLabel;
+
+  /// No description provided for @lastTransactionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Transaction'**
+  String get lastTransactionLabel;
+
+  /// No description provided for @budgetStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget Status'**
+  String get budgetStatusLabel;
+
+  /// No description provided for @setBudgetForCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a budget for this category'**
+  String get setBudgetForCategory;
+
+  /// No description provided for @usageCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Count'**
+  String get usageCountLabel;
+
+  /// No description provided for @firstUsedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'First Used'**
+  String get firstUsedLabel;
+
+  /// No description provided for @lastUsedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Used'**
+  String get lastUsedLabel;
+
+  /// No description provided for @viewTaggedTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'View Tagged Transactions'**
+  String get viewTaggedTransactions;
+
+  /// No description provided for @accountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get accountLabel;
+
+  /// No description provided for @dateTimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get dateTimeTitle;
+
+  /// No description provided for @originalSmsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Original SMS'**
+  String get originalSmsLabel;
+
+  /// No description provided for @transactionsCountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} transactions'**
+  String transactionsCountValue(int count);
 }
 
 class _AppLocalizationsDelegate
