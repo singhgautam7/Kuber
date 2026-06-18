@@ -20,15 +20,21 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     enabled: true,
   ),
   HomeWidgetConfig(
+    id: 'spending_stats',
+    name: 'Spending Stats',
+    description: 'Spent vs received this month',
+    enabled: true,
+  ),
+  HomeWidgetConfig(
     id: 'quick_add',
     name: 'Quick Add',
     description: 'One-tap expense / income / transfer entry',
     enabled: true,
   ),
   HomeWidgetConfig(
-    id: 'spending_stats',
-    name: 'Spending Stats',
-    description: 'Spent vs received this month',
+    id: 'sms_import_widget',
+    name: 'SMS Import',
+    description: 'Pending bank SMS transactions to review',
     enabled: true,
   ),
   HomeWidgetConfig(
@@ -47,25 +53,19 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     id: 'budget_snapshot',
     name: 'Budget Snapshot',
     description: 'Progress against active budgets',
-    enabled: true,
+    enabled: false,
   ),
   HomeWidgetConfig(
     id: 'upcoming_recurring',
     name: 'Upcoming Recurring',
     description: 'Next recurring transactions due',
-    enabled: true,
+    enabled: false,
   ),
   HomeWidgetConfig(
     id: 'recent_transactions',
     name: 'Recent Transactions',
     description: 'Latest activity at a glance',
-    enabled: true,
-  ),
-  HomeWidgetConfig(
-    id: 'sms_import_widget',
-    name: 'SMS Import',
-    description: 'Pending bank SMS transactions to review',
-    enabled: true,
+    enabled: false,
   ),
 ];
 

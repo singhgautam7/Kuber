@@ -177,6 +177,8 @@ class DataManagementScreen extends ConsumerWidget {
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
+                    const _SectionLabel(label: 'IMPORT / EXPORT'),
+                    const SizedBox(height: KuberSpacing.sm),
                     DataActionRow(
                       icon: Icons.upload_file_rounded,
                       title: context.l10n.exportData,
@@ -202,7 +204,9 @@ class DataManagementScreen extends ConsumerWidget {
                       onPressed: () =>
                           context.push('/more/data/automatic-backups'),
                     ),
-                    const SizedBox(height: KuberSpacing.md),
+                    const SizedBox(height: KuberSpacing.xl),
+                    _SectionLabel(label: 'DANGER ZONE', color: cs.error),
+                    const SizedBox(height: KuberSpacing.sm),
                     DataActionRow(
                       icon: Icons.science_outlined,
                       title: _getMockDataTitle(lang),
@@ -263,6 +267,29 @@ class DataManagementScreen extends ConsumerWidget {
         warnDescription: true,
         onConfirm: () =>
             ref.read(dataControllerProvider.notifier).generateMockData(),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String label;
+  final Color? color;
+  const _SectionLabel({required this.label, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, top: KuberSpacing.md),
+      child: Text(
+        label,
+        style: localeFont(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.8,
+          color: color ?? cs.primary,
+        ),
       ),
     );
   }

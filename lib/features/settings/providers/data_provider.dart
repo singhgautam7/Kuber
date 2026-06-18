@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kuber/core/utils/locale_font.dart' show AppLocale;
@@ -377,7 +378,8 @@ class DataController extends StateNotifier<DataState> {
       if (freshStart) {
         await reseedWelcomeStory(_service.isar);
       }
-      await _ref.read(storyGenerationProvider.notifier).regenerate();
+      // Run unawaited so background isolate work doesn't block the UI loading indicator
+      unawaited(_ref.read(storyGenerationProvider.notifier).regenerate());
     } catch (_) {
       // Swallowed: stories are non-critical to the data operation result.
     }
