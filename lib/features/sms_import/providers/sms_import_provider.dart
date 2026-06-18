@@ -99,6 +99,7 @@ final smsImportProvider =
 class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
   SmsScanController? _controller;
   DateTime? _lastScannedAt;
+  bool _scanInProgress = false;
 
   @override
   FutureOr<SmsImportState> build() async {
@@ -139,7 +140,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
   // ── Scan orchestration ────────────────────────────────────────────────────
 
-  bool get isScanning => _controller != null;
+  bool get isScanning => _scanInProgress;
 
   /// Whether a fresh first-load scan is warranted: granted, supported, the
   /// staging collection is empty and no scan has ever run.
@@ -155,7 +156,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
   /// True if a background refresh is due (a prior scan exists and it was more
   /// than [minInterval] ago).
   bool backgroundRefreshDue({Duration minInterval = const Duration(minutes: 30)}) {
-    if (_lastScannedAt == null) return true;
+    if (_lastScannedAt == null) return false;
     return DateTime.now().difference(_lastScannedAt!) > minInterval;
   }
 
@@ -179,82 +180,89 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
   }
 
   Future<void> _runScan(ScanTrigger trigger) async {
-    final service = ref.read(smsInboxServiceProvider);
-    if (!service.isSupported || !await Permission.sms.isGranted) {
-      state = AsyncData(await _load());
-      return;
-    }
-    if (_controller != null) return;
+    if (_scanInProgress) return;
+    _scanInProgress = true;
 
-    // Indeterminate "preparing" state while we read the inbox.
-    _emit(ScanProgress(
-      totalMessages: 0,
-      scannedMessages: 0,
-      bankMessagesFound: 0,
-      isComplete: false,
-      trigger: trigger,
-    ));
-
-    List<RawInboxSms> raw;
     try {
-      raw = await service.readRawInbox(days: 90);
-    } catch (_) {
-      state = AsyncData(await _load());
-      return;
-    }
+      final service = ref.read(smsInboxServiceProvider);
+      if (!service.isSupported || !await Permission.sms.isGranted) {
+        state = AsyncData(await _load());
+        return;
+      }
+      if (_controller != null) return;
 
-    // Total is known now; bar becomes determinate.
-    _emit(ScanProgress(
-      totalMessages: raw.length,
-      scannedMessages: 0,
-      bankMessagesFound: 0,
-      isComplete: false,
-      trigger: trigger,
-    ));
+      // Indeterminate "preparing" state while we read the inbox.
+      _emit(ScanProgress(
+        totalMessages: 0,
+        scannedMessages: 0,
+        bankMessagesFound: 0,
+        isComplete: false,
+        trigger: trigger,
+      ));
 
-    final controller = SmsScanController();
-    _controller = controller;
-    final sub = controller.progress.listen(_emit);
-    final results = await controller.run(raw, trigger);
-    await sub.cancel();
-    _controller = null;
+      List<RawInboxSms> raw;
+      try {
+        raw = await service.readRawInbox(days: 90);
+      } catch (_) {
+        state = AsyncData(await _load());
+        return;
+      }
 
-    if (results == null) {
-      // Cancelled — discard partial work, clear progress.
-      state = AsyncData(await _load());
-      return;
-    }
+      // Total is known now; bar becomes determinate.
+      _emit(ScanProgress(
+        totalMessages: raw.length,
+        scannedMessages: 0,
+        bankMessagesFound: 0,
+        isComplete: false,
+        trigger: trigger,
+      ));
 
-    var inserted = 0;
-    try {
-      final rows = await _toStagingRows(results);
-      inserted = await ref.read(smsImportRepositoryProvider).insertNew(rows);
-    } catch (_) {
-      // Persist failure is non-fatal; the scan simply adds nothing.
-    }
+      final controller = SmsScanController();
+      _controller = controller;
+      final sub = controller.progress.listen(_emit);
+      final results = await controller.run(raw, trigger);
+      await sub.cancel();
+      _controller = null;
 
-    _lastScannedAt = DateTime.now();
-    await _writeLastScannedAt(_lastScannedAt!);
+      if (results == null) {
+        // Cancelled — discard partial work, clear progress.
+        state = AsyncData(await _load());
+        return;
+      }
 
-    // Final state: bankMessagesFound carries the count of *new* rows added.
-    final done = ScanProgress(
-      totalMessages: raw.length,
-      scannedMessages: raw.length,
-      bankMessagesFound: inserted,
-      isComplete: true,
-      trigger: trigger,
-    );
-    state = AsyncData((await _load()).copyWith(scanProgress: done));
+      var inserted = 0;
+      try {
+        final rows = await _toStagingRows(results);
+        inserted = await ref.read(smsImportRepositoryProvider).insertNew(rows);
+      } catch (_) {
+        // Persist failure is non-fatal; the scan simply adds nothing.
+      }
 
-    // The background strip fades itself out after 2s; the first-load screen
-    // clears progress itself once it transitions.
-    if (trigger == ScanTrigger.backgroundRefresh) {
-      Future.delayed(const Duration(seconds: 2), () {
-        final s = state.valueOrNull;
-        if (s != null && identical(s.scanProgress, done)) {
-          state = AsyncData(s.copyWith(scanProgress: null));
-        }
-      });
+      _lastScannedAt = DateTime.now();
+      await _writeLastScannedAt(_lastScannedAt!);
+
+      // Final state: bankMessagesFound carries the count of *new* rows added.
+      final done = ScanProgress(
+        totalMessages: raw.length,
+        scannedMessages: raw.length,
+        bankMessagesFound: inserted,
+        isComplete: true,
+        trigger: trigger,
+      );
+      state = AsyncData((await _load()).copyWith(scanProgress: done));
+
+      // The background strip fades itself out after 2s; the first-load screen
+      // clears progress itself once it transitions.
+      if (trigger == ScanTrigger.backgroundRefresh) {
+        Future.delayed(const Duration(seconds: 2), () {
+          final s = state.valueOrNull;
+          if (s != null && identical(s.scanProgress, done)) {
+            state = AsyncData(s.copyWith(scanProgress: null));
+          }
+        });
+      }
+    } finally {
+      _scanInProgress = false;
     }
   }
 

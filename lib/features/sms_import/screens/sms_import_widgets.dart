@@ -10,6 +10,8 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../data/sms_transaction.dart';
+import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/icon_mapper.dart';
 
 /// Signed, currency-formatted amount string (e.g. "-₹648.50", "+₹65,000").
 String signedAmount(WidgetRef ref, double amount, String type) {
@@ -55,6 +57,7 @@ class SmsChip extends StatelessWidget {
   final IconData? icon; // shown leading (account card icon)
   final bool dashed; // empty "pick category" placeholder
   final bool accent; // primary-tinted (category)
+  final Color? customColor; // custom tinted color for background, border, and text
 
   const SmsChip({
     super.key,
@@ -63,6 +66,7 @@ class SmsChip extends StatelessWidget {
     this.icon,
     this.dashed = false,
     this.accent = false,
+    this.customColor,
   });
 
   @override
@@ -75,6 +79,10 @@ class SmsChip extends StatelessWidget {
       bg = Colors.transparent;
       border = cs.onSurfaceVariant.withValues(alpha: 0.5);
       fg = cs.onSurfaceVariant;
+    } else if (customColor != null) {
+      bg = customColor!.withValues(alpha: 0.10);
+      border = customColor!.withValues(alpha: 0.25);
+      fg = customColor!;
     } else if (accent) {
       bg = cs.primary.withValues(alpha: 0.10);
       border = cs.primary.withValues(alpha: 0.25);
@@ -196,19 +204,20 @@ class SmsImportCard extends ConsumerWidget {
     final accounts = ref.watch(accountMapProvider).valueOrNull;
     final categories = ref.watch(categoryMapProvider).valueOrNull;
 
-    String? accountName;
     final accId = int.tryParse(sms.suggestedAccountId ?? '');
-    if (accId != null) accountName = accounts?[accId]?.name;
+    final account = accId == null ? null : accounts?[accId];
+    final accountName = account?.name;
+    final accountIcon = account != null ? resolveAccountIcon(account) : null;
+    final accountColor = account != null ? resolveAccountColor(account) : null;
 
-    String? categoryName;
-    Color? categoryColor;
     final catId = int.tryParse(sms.suggestedCategoryId ?? '');
-    if (catId != null) {
-      final cat = categories?[catId];
-      if (cat != null) {
-        categoryName = cat.name;
-        categoryColor = harmonizeCategory(context, Color(cat.colorValue));
-      }
+    final category = catId == null ? null : categories?[catId];
+    final categoryName = category?.name;
+    Color? categoryColor;
+    IconData? categoryIcon;
+    if (category != null) {
+      categoryColor = harmonizeCategory(context, Color(category.colorValue));
+      categoryIcon = IconMapper.fromString(category.icon);
     }
 
     final card = AnimatedContainer(
@@ -284,14 +293,15 @@ class SmsImportCard extends ConsumerWidget {
                   children: [
                     SmsChip(
                       label: accountName ?? 'Pick account',
-                      icon: Icons.credit_card_rounded,
+                      icon: accountIcon ?? Icons.credit_card_rounded,
                       dashed: accountName == null,
+                      customColor: accountColor,
                     ),
                     if (categoryName != null)
                       SmsChip(
                         label: categoryName,
-                        dotColor: categoryColor,
-                        accent: true,
+                        icon: categoryIcon,
+                        customColor: categoryColor,
                       )
                     else
                       const SmsChip(label: 'Pick category', dashed: true),

@@ -240,7 +240,7 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
               child: KuberPageHeader(
                 title: 'Import from\nSMS',
                 description:
-                    'Review bank messages and add them as transactions.',
+                    'Review bank messages from last 90 days and add them as transactions.',
                 actionIcon: Icons.content_paste_rounded,
                 actionTooltip: 'Paste an SMS',
                 onAction: () => showPasteSmsSheet(context),

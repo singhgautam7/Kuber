@@ -30,7 +30,7 @@ void main() {
       expect(r.type, 'expense');
       expect(r.amount, 648.50);
       expect(r.accountSuffix, '4521');
-      expect(r.date, DateTime(2026, 6, 5));
+      expect(r.date, DateTime(2026, 6, 5, ts.hour, ts.minute));
       expect(r.merchant?.toLowerCase(), 'swiggy');
     });
 
@@ -40,7 +40,7 @@ void main() {
       expect(r.type, 'income');
       expect(r.amount, 65000.0);
       expect(r.accountSuffix, '7842');
-      expect(r.date, DateTime(2026, 6, 1));
+      expect(r.date, DateTime(2026, 6, 1, ts.hour, ts.minute));
     });
   });
 
@@ -171,6 +171,38 @@ void main() {
           'Dear customer, your statement is now ready. Login to net-banking '
           'to view. - HDFC Bank';
       expect(parser.parse(body, 'HDFCBK', ts), isNull);
+    });
+
+    test('statement/bill notification messages return null', () {
+      // User's exact SBI Credit Card statement SMS
+      const sbiStatement =
+          'E-statement of SBI Credit Card ending XX97 dated 16/06/2026 has been mailed. '
+          'If not received, SMS ENRS to 5676791. Total Amt Due Rs 1313; Min Amt Due Rs 200; '
+          'Payable by 06/07/2026. Click https://sbicard.com/';
+      expect(parser.parse(sbiStatement, 'JM-MYSBIC-S', ts), isNull);
+
+      // ICICI Credit Card bill generation alert
+      const iciciStatement =
+          'Dear Customer, the statement for your ICICI Bank Credit Card ending XX1005 '
+          'is generated. Total amount due: INR 5,432.00, Minimum amount due: INR 500.00, '
+          'payment due date is 25-Jun-26.';
+      expect(parser.parse(iciciStatement, 'ICICIB', ts), isNull);
+    });
+
+    test('standing instruction and auto-debit alerts return null', () {
+      // User's exact standing instruction SMS
+      const iciciStandingInstruction =
+          'We have successfully processed payment of INR 299.00 to Merchant Google Play, '
+          'as per Standing Instruction XzgUd1n7mv on 18/06/2026 for ICICI Bank Credit Card 6004. '
+          'To manage your Standing Instructions, visit www.icici.bank.in - Personal - Cards - '
+          'Manage Standing Instructions. Call 1800 1080 for queries.';
+      expect(parser.parse(iciciStandingInstruction, 'JM-ICICIT-T', ts), isNull);
+
+      // Generic UPI Autopay / Mandate execution alert
+      const upiMandate =
+          'UPI AutoPay Mandate of Rs. 199.00 executed successfully to Spotify India. '
+          'Ref: UPI123456789.';
+      expect(parser.parse(upiMandate, 'PAYTM', ts), isNull);
     });
 
     test('date fallback to sms timestamp when no date in body', () {

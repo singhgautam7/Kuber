@@ -48,7 +48,7 @@ class _TransactionReviewSheetState
   int? _accountId;
   int? _categoryId;
   late DateTime _date;
-  bool _smsExpanded = false;
+  bool _smsExpanded = true;
   bool _saving = false;
 
   late final TextEditingController _amountController;
