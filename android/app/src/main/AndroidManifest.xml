@@ -8,6 +8,13 @@
          nothing is stored or transmitted without the user's approval. -->
     <uses-permission android:name="android.permission.READ_SMS"/>
 
+    <!-- READ_SMS implicitly requires android.hardware.telephony, which would
+         drop tablets, Android TV and Chromebooks from the supported-device set
+         on the Play Store. The SMS import feature is optional (the rest of the
+         app works without it, and the code degrades gracefully when no inbox is
+         available), so telephony is explicitly NOT required. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false"/>
+
     <!-- Strip image, video, and audio permissions injected by dependencies -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove"/>
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" tools:node="remove"/>

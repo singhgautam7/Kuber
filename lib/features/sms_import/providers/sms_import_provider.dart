@@ -513,8 +513,11 @@ class SmsImportDraft {
   });
 }
 
-/// Cheap unreviewed-count provider for the home widget badge.
+/// Cheap unreviewed-count provider for the home widget badge. Selects just the
+/// count so a scan's per-batch progress emissions (which leave the unreviewed
+/// list untouched) never re-run this provider or its listeners.
 final smsUnreviewedCountProvider = Provider<int>((ref) {
-  final state = ref.watch(smsImportProvider).valueOrNull;
-  return state?.unreviewedCount ?? 0;
+  return ref.watch(
+    smsImportProvider.select((s) => s.valueOrNull?.unreviewedCount ?? 0),
+  );
 });

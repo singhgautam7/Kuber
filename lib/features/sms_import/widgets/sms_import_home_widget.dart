@@ -56,36 +56,52 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final state = ref.watch(smsImportProvider).valueOrNull;
-
-    final scanning = state?.scanProgress != null &&
-        state!.scanProgress!.trigger == ScanTrigger.backgroundRefresh &&
-        !state.scanProgress!.isComplete;
+    // Watch a narrow projection rather than the whole state object. A
+    // background scan emits a fresh ScanProgress every 50 messages; this
+    // widget only cares whether a scan is running (a bool), the permission
+    // flag, the unreviewed rows and the imported count — none of which change
+    // mid-scan. Selecting them keeps progress-count emissions from rebuilding
+    // the card (the indeterminate bar is driven by [_anim], not the counts).
+    final vm = ref.watch(
+      smsImportProvider.select((async) {
+        final s = async.valueOrNull;
+        final scanning = s?.scanProgress != null &&
+            s!.scanProgress!.trigger == ScanTrigger.backgroundRefresh &&
+            !s.scanProgress!.isComplete;
+        return (
+          loaded: s != null,
+          scanning: scanning,
+          hasPermission: s?.hasPermission ?? false,
+          unreviewed: s?.unreviewed ?? const <SmsTransaction>[],
+          importedCount: s?.imported.length ?? 0,
+        );
+      }),
+    );
 
     // Run the State D animation only while it is showing.
-    if (scanning) {
+    if (vm.scanning) {
       if (!_anim.isAnimating) _anim.repeat();
     } else {
       if (_anim.isAnimating) _anim.stop();
     }
 
     final Widget card;
-    if (state == null) {
+    if (!vm.loaded) {
       card = const SizedBox(key: ValueKey('loading'), height: 84);
-    } else if (scanning) {
+    } else if (vm.scanning) {
       card = _ScanningCard(key: const ValueKey('scanning'), anim: _anim);
-    } else if (!state.hasPermission) {
+    } else if (!vm.hasPermission) {
       card = const _PermissionNeededCard(key: ValueKey('perm'));
-    } else if (state.unreviewedCount > 0) {
+    } else if (vm.unreviewed.isNotEmpty) {
       card = _ActiveCard(
         key: const ValueKey('active'),
-        count: state.unreviewedCount,
-        banks: _bankSummary(state.unreviewed),
+        count: vm.unreviewed.length,
+        banks: _bankSummary(vm.unreviewed),
       );
     } else {
       card = _CaughtUpCard(
         key: const ValueKey('caught'),
-        importedCount: state.imported.length,
+        importedCount: vm.importedCount,
       );
     }
 
