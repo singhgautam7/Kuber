@@ -183,6 +183,21 @@ class MoreScreenModern extends ConsumerWidget {
                     ),
                     const SizedBox(width: KuberSpacing.sm),
                     Expanded(
+                      // SMS import (English-only feature, like Ask Kuber).
+                      child: _ToolCard(
+                        icon: Icons.sms_outlined,
+                        title: 'Import from SMS',
+                        subtitle: 'Read bank SMS for transactions',
+                        accent: _ToolAccent.primary,
+                        onTap: () => context.push('/more/sms-import'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
                       child: _ToolCard(
                         icon: Icons.calculate_rounded,
                         title: context.l10n.menuCalculators,
@@ -191,6 +206,8 @@ class MoreScreenModern extends ConsumerWidget {
                         onTap: () => context.push('/more/tools'),
                       ),
                     ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    const Expanded(child: SizedBox.shrink()),
                   ],
                 ),
 

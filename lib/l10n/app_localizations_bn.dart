@@ -4608,4 +4608,81 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get confirmLabel => 'Confirm';
+
+  @override
+  String get sourceLabel => 'Source';
+
+  @override
+  String get sourceSms => 'SMS import';
+
+  @override
+  String get sourceRecurring => 'Recurring';
+
+  @override
+  String get sourceLentBorrowed => 'Lent or Borrowed';
+
+  @override
+  String get sourceLoan => 'Loan';
+
+  @override
+  String get sourceInvestment => 'Investment / SIP';
+
+  @override
+  String get sourceQuickAdd => 'Quick add';
+
+  @override
+  String get sourceManual => 'Entered by you';
+
+  @override
+  String get sourceBalanceAdjustment => 'Balance adjustment';
+
+  @override
+  String get viewOriginalSms => 'View original SMS';
+
+  @override
+  String get accountTypeLabel => 'Account Type';
+
+  @override
+  String get accountNumberLabel => 'Account Number';
+
+  @override
+  String get yesLabel => 'Yes';
+
+  @override
+  String get noLabel => 'No';
+
+  @override
+  String get lastTransactionLabel => 'Last Transaction';
+
+  @override
+  String get budgetStatusLabel => 'Budget Status';
+
+  @override
+  String get setBudgetForCategory => 'Set a budget for this category';
+
+  @override
+  String get usageCountLabel => 'Usage Count';
+
+  @override
+  String get firstUsedLabel => 'First Used';
+
+  @override
+  String get lastUsedLabel => 'Last Used';
+
+  @override
+  String get viewTaggedTransactions => 'View Tagged Transactions';
+
+  @override
+  String get accountLabel => 'Account';
+
+  @override
+  String get dateTimeTitle => 'Date & Time';
+
+  @override
+  String get originalSmsLabel => 'Original SMS';
+
+  @override
+  String transactionsCountValue(int count) {
+    return '$count transactions';
+  }
 }

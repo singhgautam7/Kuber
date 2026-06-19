@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../settings/providers/settings_provider.dart' show formatterProvider;
@@ -58,75 +59,54 @@ class LoanDetailSheet extends ConsumerWidget {
           color: cs.onSurfaceVariant,
         ),
       ),
-      actions: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.payEmi,
-                  icon: Icons.payments_outlined,
-                  type: AppButtonType.primary,
-                  onPressed: loan.isCompleted
-                      ? null
-                      : () {
-                          Navigator.pop(context);
-                          _openPaymentSheet(context, loan, isEmi: true);
-                        },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.payExtra,
-                  icon: Icons.add_circle_outline,
-                  type: AppButtonType.normal,
-                  onPressed: loan.isCompleted
-                      ? null
-                      : () {
-                          Navigator.pop(context);
-                          _openPaymentSheet(context, loan, isEmi: false);
-                        },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.editLabel,
-                  icon: Icons.edit_rounded,
-                  type: AppButtonType.normal,
-                  onPressed: () {
+      // Five actions previously stacked across three rows. Per the sheet
+      // redesign's overflow rule, the extras collapse into the ⋯ menu so the
+      // section is at most two rows: PayEmi (primary) + [PayExtra · Edit · ⋯].
+      actions: SheetButtonSection(
+        padding: EdgeInsets.zero,
+        primary: SheetAction(
+          label: context.l10n.payEmi,
+          icon: Icons.payments_outlined,
+          onPressed: loan.isCompleted
+              ? null
+              : () {
+                  Navigator.pop(context);
+                  _openPaymentSheet(context, loan, isEmi: true);
+                },
+        ),
+        actions: [
+          SheetAction(
+            label: context.l10n.payExtra,
+            icon: Icons.add_circle_outline,
+            onPressed: loan.isCompleted
+                ? null
+                : () {
                     Navigator.pop(context);
-                    context.push('/loans/edit', extra: loan);
+                    _openPaymentSheet(context, loan, isEmi: false);
                   },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.closeLoan,
-                  icon: Icons.lock_outline,
-                  type: AppButtonType.normal,
-                  onPressed: loan.isCompleted
-                      ? null
-                      : () {
-                          Navigator.pop(context);
-                          _openClosureSheet(context, loan);
-                        },
-                ),
-              ),
-            ],
           ),
-          const SizedBox(height: 12),
-          AppButton(
+          SheetAction(
+            label: context.l10n.editLabel,
+            icon: Icons.edit_rounded,
+            onPressed: () {
+              Navigator.pop(context);
+              context.push('/loans/edit', extra: loan);
+            },
+          ),
+          SheetAction(
+            label: context.l10n.closeLoan,
+            icon: Icons.lock_outline,
+            onPressed: loan.isCompleted
+                ? null
+                : () {
+                    Navigator.pop(context);
+                    _openClosureSheet(context, loan);
+                  },
+          ),
+          SheetAction(
             label: context.l10n.deleteLabel,
             icon: Icons.delete_outline_rounded,
-            type: AppButtonType.danger,
-            fullWidth: true,
+            destructive: true,
             onPressed: () => _confirmDelete(context, ref),
           ),
         ],

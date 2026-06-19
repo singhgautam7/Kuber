@@ -14,6 +14,7 @@ import 'features/history/providers/selection_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
+import 'features/sms_import/providers/sms_import_provider.dart';
 import 'features/tutorial/widgets/tutorial_overlay.dart';
 import 'shared/widgets/app_scaffold.dart';
 
@@ -43,6 +44,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(budgetServiceProvider).checkAllOnAppOpen();
       _runOnOpenLedgerReminders();
       _runDueBackup();
+      _runSmsCleanup();
     });
   }
 
@@ -82,6 +84,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
       return;
     }
     _runDueBackup();
+  }
+
+  /// Prunes reviewed (imported / dismissed) SMS staging rows older than 90
+  /// days. Unreviewed rows are kept regardless of age. Best-effort and
+  /// post-first-frame so it never blocks the home render.
+  Future<void> _runSmsCleanup() async {
+    try {
+      final cutoff = DateTime.now().subtract(const Duration(days: 90));
+      await ref.read(smsImportRepositoryProvider).cleanupOlderThan(cutoff);
+    } catch (e, stack) {
+      debugPrint('Kuber: on-open SMS cleanup failed (non-fatal): $e\n$stack');
+    }
   }
 
   /// On-open ledger reminder pass (in-app records + dedupe-gated OS

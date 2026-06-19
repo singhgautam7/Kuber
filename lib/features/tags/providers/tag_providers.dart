@@ -56,6 +56,26 @@ final tagRecentTransactionProvider =
   return validTxns.first;
 });
 
+/// The earliest transaction tagged with [tagId] (for the tag's "First Used"
+/// row), or null when the tag has never been used.
+final tagFirstTransactionProvider =
+    FutureProvider.family<Transaction?, int>((ref, tagId) async {
+  ref.watch(transactionListProvider);
+  final isar = ref.watch(isarProvider);
+
+  final junctions =
+      await isar.transactionTags.filter().tagIdEqualTo(tagId).findAll();
+  if (junctions.isEmpty) return null;
+
+  final txIds = junctions.map((j) => j.transactionId).toList();
+  final txns = await isar.transactions.getAll(txIds);
+  final validTxns = txns.whereType<Transaction>().toList();
+  if (validTxns.isEmpty) return null;
+
+  validTxns.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  return validTxns.first;
+});
+
 final tagTransactionCountProvider = StreamProvider.family<int, int>((ref, tagId) {
   final isar = ref.watch(isarProvider);
   return isar.transactionTags

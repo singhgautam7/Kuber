@@ -21,10 +21,15 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.showHome = false,
     this.horizontalPadding,
     this.infoConfig,
+    this.onBack,
   });
 
   final bool showHome;
   final KuberInfoConfig? infoConfig;
+
+  /// Overrides the default back behavior (pop). Used e.g. to clear a
+  /// multi-select instead of leaving the screen.
+  final VoidCallback? onBack;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -47,7 +52,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 _AppBarButton(
                   icon: Icons.arrow_back_rounded,
                   tooltip: 'Back',
-                  onTap: () => Navigator.pop(context),
+                  onTap: onBack ?? () => Navigator.pop(context),
                   cs: cs,
                 ),
                 const SizedBox(width: KuberSpacing.sm),

@@ -30,6 +30,7 @@ import '../widgets/home_accounts_card.dart';
 import '../widgets/home_recurring_card.dart';
 import '../widgets/home_recent_transactions.dart';
 import '../widgets/quick_add_widget.dart';
+import '../../sms_import/widgets/sms_import_home_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 List<String> _homeSubtitles(AppLocalizations l10n) => [
@@ -131,6 +132,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return const RepaintBoundary(child: HomeRecurringCard());
       case 'recent_transactions':
         return const RepaintBoundary(child: HomeRecentTransactionsCard());
+      case 'sms_import_widget':
+        return const RepaintBoundary(child: SmsImportHomeWidget());
       default:
         return const SizedBox.shrink();
     }

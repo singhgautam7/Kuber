@@ -13,6 +13,7 @@ import '../../accounts/data/account.dart';
 import '../../categories/data/category.dart';
 import '../../history/providers/selection_provider.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../../sms_import/widgets/sms_badge.dart';
 import '../data/transaction.dart';
 
 class DateGroupHeader extends ConsumerWidget {
@@ -393,15 +394,35 @@ class TransactionRow extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      displayName,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurface,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                        ),
+                        if (transaction.importSource == 'sms') ...[
+                          const SizedBox(width: 6),
+                          SmsBadge(
+                            onTap: transaction.importedFromSms == null
+                                ? null
+                                : () => showRawSmsSheet(
+                                      context,
+                                      rawSms: transaction.importedFromSms!,
+                                    ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
                     Row(

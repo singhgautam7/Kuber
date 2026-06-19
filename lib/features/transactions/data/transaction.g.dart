@@ -38,46 +38,56 @@ const TransactionSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'isBalanceAdjustment': PropertySchema(
+    r'importSource': PropertySchema(
       id: 5,
+      name: r'importSource',
+      type: IsarType.string,
+    ),
+    r'importedFromSms': PropertySchema(
+      id: 6,
+      name: r'importedFromSms',
+      type: IsarType.string,
+    ),
+    r'isBalanceAdjustment': PropertySchema(
+      id: 7,
       name: r'isBalanceAdjustment',
       type: IsarType.bool,
     ),
     r'isTransfer': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'isTransfer',
       type: IsarType.bool,
     ),
     r'linkedRuleId': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'linkedRuleId',
       type: IsarType.string,
     ),
     r'linkedRuleType': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'linkedRuleType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 9, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 11, name: r'name', type: IsarType.string),
     r'nameLower': PropertySchema(
-      id: 10,
+      id: 12,
       name: r'nameLower',
       type: IsarType.string,
     ),
-    r'notes': PropertySchema(id: 11, name: r'notes', type: IsarType.string),
+    r'notes': PropertySchema(id: 13, name: r'notes', type: IsarType.string),
     r'quickAddNote': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'quickAddNote',
       type: IsarType.string,
     ),
     r'transferId': PropertySchema(
-      id: 13,
+      id: 15,
       name: r'transferId',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 14, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 16, name: r'type', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 15,
+      id: 17,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -190,6 +200,18 @@ int _transactionEstimateSize(
   }
   bytesCount += 3 + object.categoryId.length * 3;
   {
+    final value = object.importSource;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.importedFromSms;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.linkedRuleId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -236,17 +258,19 @@ void _transactionSerialize(
   writer.writeStringList(offsets[2], object.attachmentPaths);
   writer.writeString(offsets[3], object.categoryId);
   writer.writeDateTime(offsets[4], object.createdAt);
-  writer.writeBool(offsets[5], object.isBalanceAdjustment);
-  writer.writeBool(offsets[6], object.isTransfer);
-  writer.writeString(offsets[7], object.linkedRuleId);
-  writer.writeString(offsets[8], object.linkedRuleType);
-  writer.writeString(offsets[9], object.name);
-  writer.writeString(offsets[10], object.nameLower);
-  writer.writeString(offsets[11], object.notes);
-  writer.writeString(offsets[12], object.quickAddNote);
-  writer.writeString(offsets[13], object.transferId);
-  writer.writeString(offsets[14], object.type);
-  writer.writeDateTime(offsets[15], object.updatedAt);
+  writer.writeString(offsets[5], object.importSource);
+  writer.writeString(offsets[6], object.importedFromSms);
+  writer.writeBool(offsets[7], object.isBalanceAdjustment);
+  writer.writeBool(offsets[8], object.isTransfer);
+  writer.writeString(offsets[9], object.linkedRuleId);
+  writer.writeString(offsets[10], object.linkedRuleType);
+  writer.writeString(offsets[11], object.name);
+  writer.writeString(offsets[12], object.nameLower);
+  writer.writeString(offsets[13], object.notes);
+  writer.writeString(offsets[14], object.quickAddNote);
+  writer.writeString(offsets[15], object.transferId);
+  writer.writeString(offsets[16], object.type);
+  writer.writeDateTime(offsets[17], object.updatedAt);
 }
 
 Transaction _transactionDeserialize(
@@ -262,17 +286,19 @@ Transaction _transactionDeserialize(
   object.categoryId = reader.readString(offsets[3]);
   object.createdAt = reader.readDateTime(offsets[4]);
   object.id = id;
-  object.isBalanceAdjustment = reader.readBool(offsets[5]);
-  object.isTransfer = reader.readBool(offsets[6]);
-  object.linkedRuleId = reader.readStringOrNull(offsets[7]);
-  object.linkedRuleType = reader.readStringOrNull(offsets[8]);
-  object.name = reader.readString(offsets[9]);
-  object.nameLower = reader.readString(offsets[10]);
-  object.notes = reader.readStringOrNull(offsets[11]);
-  object.quickAddNote = reader.readStringOrNull(offsets[12]);
-  object.transferId = reader.readStringOrNull(offsets[13]);
-  object.type = reader.readString(offsets[14]);
-  object.updatedAt = reader.readDateTime(offsets[15]);
+  object.importSource = reader.readStringOrNull(offsets[5]);
+  object.importedFromSms = reader.readStringOrNull(offsets[6]);
+  object.isBalanceAdjustment = reader.readBool(offsets[7]);
+  object.isTransfer = reader.readBool(offsets[8]);
+  object.linkedRuleId = reader.readStringOrNull(offsets[9]);
+  object.linkedRuleType = reader.readStringOrNull(offsets[10]);
+  object.name = reader.readString(offsets[11]);
+  object.nameLower = reader.readString(offsets[12]);
+  object.notes = reader.readStringOrNull(offsets[13]);
+  object.quickAddNote = reader.readStringOrNull(offsets[14]);
+  object.transferId = reader.readStringOrNull(offsets[15]);
+  object.type = reader.readString(offsets[16]);
+  object.updatedAt = reader.readDateTime(offsets[17]);
   return object;
 }
 
@@ -294,26 +320,30 @@ P _transactionDeserializeProp<P>(
     case 4:
       return (reader.readDateTime(offset)) as P;
     case 5:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 9:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 10:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 11:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 12:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 13:
       return (reader.readStringOrNull(offset)) as P;
     case 14:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
+      return (reader.readString(offset)) as P;
+    case 17:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1664,6 +1694,324 @@ extension TransactionQueryFilter
           upper: upper,
           includeUpper: includeUpper,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'importSource'),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'importSource'),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'importSource',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'importSource',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'importSource',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'importSource',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'importSource',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'importSource',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'importSource',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'importSource',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'importSource', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importSourceIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'importSource', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'importedFromSms'),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'importedFromSms'),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'importedFromSms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'importedFromSms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'importedFromSms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'importedFromSms',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'importedFromSms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'importedFromSms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'importedFromSms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'importedFromSms',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'importedFromSms', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterFilterCondition>
+  importedFromSmsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'importedFromSms', value: ''),
       );
     });
   }
@@ -3034,6 +3382,32 @@ extension TransactionQuerySortBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByImportSource() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importSource', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  sortByImportSourceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importSource', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> sortByImportedFromSms() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importedFromSms', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  sortByImportedFromSmsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importedFromSms', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy>
   sortByIsBalanceAdjustment() {
     return QueryBuilder.apply(this, (query) {
@@ -3234,6 +3608,32 @@ extension TransactionQuerySortThenBy
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByImportSource() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importSource', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  thenByImportSourceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importSource', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy> thenByImportedFromSms() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importedFromSms', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QAfterSortBy>
+  thenByImportedFromSmsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'importedFromSms', Sort.desc);
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QAfterSortBy>
   thenByIsBalanceAdjustment() {
     return QueryBuilder.apply(this, (query) {
@@ -3409,6 +3809,25 @@ extension TransactionQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Transaction, Transaction, QDistinct> distinctByImportSource({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'importSource', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Transaction, Transaction, QDistinct> distinctByImportedFromSms({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(
+        r'importedFromSms',
+        caseSensitive: caseSensitive,
+      );
+    });
+  }
+
   QueryBuilder<Transaction, Transaction, QDistinct>
   distinctByIsBalanceAdjustment() {
     return QueryBuilder.apply(this, (query) {
@@ -3532,6 +3951,19 @@ extension TransactionQueryProperty
   QueryBuilder<Transaction, DateTime, QQueryOperations> createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<Transaction, String?, QQueryOperations> importSourceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'importSource');
+    });
+  }
+
+  QueryBuilder<Transaction, String?, QQueryOperations>
+  importedFromSmsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'importedFromSms');
     });
   }
 

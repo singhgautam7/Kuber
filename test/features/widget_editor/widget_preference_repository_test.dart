@@ -27,7 +27,15 @@ void main() {
       final list = await repo.readForScope(WidgetEditorScope.home);
       expect(list.map((c) => c.id).toList(),
           kHomeWidgetCatalog.map((c) => c.id).toList());
-      expect(list.every((c) => c.enabled), isTrue);
+      
+      final disabledIds = {'budget_snapshot', 'upcoming_recurring', 'recent_transactions'};
+      for (final c in list) {
+        if (disabledIds.contains(c.id)) {
+          expect(c.enabled, isFalse);
+        } else {
+          expect(c.enabled, isTrue);
+        }
+      }
 
       // Rows are persisted.
       final stored = await isar.widgetPreferences.where().findAll();
@@ -61,7 +69,7 @@ void main() {
       final next = await repo.readForScope(WidgetEditorScope.home);
       expect(next[2].enabled, isFalse);
       expect(next.where((c) => c.enabled).length,
-          initial.length - 1);
+          initial.where((c) => c.enabled).length - 1);
     });
   });
 
@@ -98,18 +106,18 @@ void main() {
       // Seed defaults, then simulate "older" storage where one widget is absent.
       await repo.readForScope(WidgetEditorScope.home);
       await isar.writeTxn(() async {
-        // Remove the LAST catalog widget from storage.
+        // Remove the FIRST catalog widget from storage.
         await isar.widgetPreferences
             .filter()
             .scopeEqualTo('home')
             .and()
-            .widgetKeyEqualTo(kHomeWidgetCatalog.last.id)
+            .widgetKeyEqualTo(kHomeWidgetCatalog.first.id)
             .deleteAll();
       });
 
       final reconciled = await repo.readForScope(WidgetEditorScope.home);
       // It's back — and at the end of the order, enabled.
-      expect(reconciled.last.id, kHomeWidgetCatalog.last.id);
+      expect(reconciled.last.id, kHomeWidgetCatalog.first.id);
       expect(reconciled.last.enabled, isTrue);
     });
   });

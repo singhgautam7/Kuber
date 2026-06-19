@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 
@@ -18,11 +19,13 @@ import '../../features/categories/providers/category_provider.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
 import '../../features/transactions/providers/transaction_provider.dart';
+import '../../features/recurring/providers/recurring_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
 import '../../features/tags/providers/tag_providers.dart';
+import 'info_table.dart';
 import 'kuber_bottom_sheet.dart';
-import 'app_button.dart';
+import 'sheet_button_section.dart';
 
 /// Shows the transaction detail bottom sheet with edit/delete actions.
 void showTransactionDetailSheet(
@@ -74,7 +77,7 @@ void deleteTransactionWithUndo(BuildContext context, WidgetRef ref, Transaction 
   );
 }
 
-class TransactionDetailSheet extends ConsumerWidget {
+class TransactionDetailSheet extends ConsumerStatefulWidget {
   final Transaction transaction;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -85,6 +88,15 @@ class TransactionDetailSheet extends ConsumerWidget {
     required this.onEdit,
     required this.onDelete,
   });
+
+  @override
+  ConsumerState<TransactionDetailSheet> createState() =>
+      _TransactionDetailSheetState();
+}
+
+class _TransactionDetailSheetState
+    extends ConsumerState<TransactionDetailSheet> {
+  Transaction get transaction => widget.transaction;
 
   String _formatDetailDatetime(DateTime dt) {
     final now = DateTime.now();
@@ -97,12 +109,52 @@ class TransactionDetailSheet extends ConsumerWidget {
     return '${DateFormat('EEE, d MMM').format(dt)} • $timeStr';
   }
 
+  /// Derives the human Source label + icon from the transaction's provenance.
+  ///
+  /// The source is one of six values, decided from stored fields:
+  ///  * `importSource == 'sms'` → SMS
+  ///  * `linkedRuleType == 'recurring'` → Recurring
+  ///  * `linkedRuleType == 'loan'` → Loan
+  ///  * `linkedRuleType == 'investment'` → Investment / SIP
+  ///  * `linkedRuleType == 'lent' | 'borrowed'` → Lent or Borrowed
+  ///  * everything else → Entered by you
+  ///
+  /// Older auto-created rows may carry a `linkedRuleId` but a null
+  /// `linkedRuleType` (the type field was added later). For those we resolve
+  /// the id against the recurring rules so they still read as "Recurring".
+  ({String label, IconData icon}) _source(BuildContext context) {
+    final t = transaction;
+    if (t.importSource == 'sms') {
+      return (label: context.l10n.sourceSms, icon: Icons.sms_outlined);
+    }
+
+    var type = t.linkedRuleType;
+    if (type == null && t.linkedRuleId != null) {
+      final rules = ref.read(recurringListProvider).valueOrNull ?? const [];
+      if (rules.any((r) => r.id.toString() == t.linkedRuleId)) {
+        type = 'recurring';
+      }
+    }
+
+    switch (type) {
+      case 'recurring':
+        return (label: context.l10n.sourceRecurring, icon: Icons.repeat_rounded);
+      case 'loan':
+        return (label: context.l10n.sourceLoan, icon: Icons.account_balance_rounded);
+      case 'investment':
+        return (label: context.l10n.sourceInvestment, icon: Icons.trending_up_rounded);
+      case 'lent':
+      case 'borrowed':
+        return (label: context.l10n.sourceLentBorrowed, icon: Icons.swap_horiz_rounded);
+    }
+    return (label: context.l10n.sourceManual, icon: Icons.edit_outlined);
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isTransfer = transaction.isTransfer;
 
-    // Only rebuild when THIS specific category/account changes
     final category = ref.watch(categoryListProvider.select(
       (async) => async.whenOrNull(
         data: (cats) => cats.firstWhereOrNull(
@@ -124,7 +176,6 @@ class TransactionDetailSheet extends ConsumerWidget {
     String? toAccountName;
     if (isTransfer) {
       fromAccountName = account?.name;
-      // Only extract the paired transaction's accountId
       final pairAccountId = ref.watch(transactionListProvider.select(
         (async) => async.whenOrNull(
           data: (txns) => txns
@@ -148,10 +199,10 @@ class TransactionDetailSheet extends ConsumerWidget {
     final amountColor = isTransfer
         ? cs.onSurface
         : (isIncome ? cs.tertiary : cs.error);
-    
+
     final formattedAmount = ref.watch(formatterProvider).formatCurrency(transaction.amount);
-    final amountText = isTransfer 
-        ? formattedAmount 
+    final amountText = isTransfer
+        ? formattedAmount
         : (isIncome ? '+$formattedAmount' : '−$formattedAmount');
     final iconData = isTransfer
         ? Icons.swap_horiz_rounded
@@ -170,8 +221,46 @@ class TransactionDetailSheet extends ConsumerWidget {
     if (account?.last4Digits != null && account!.last4Digits!.isNotEmpty) {
       accountDisplay += ' •••• ${account.last4Digits}';
     }
+    final accountIcon = account?.icon != null
+        ? IconMapper.fromString(account!.icon!)
+        : Icons.account_balance_wallet_rounded;
+    final accountColor = account?.colorValue != null
+        ? Color(account!.colorValue!)
+        : cs.primary;
 
     final dateLabel = _formatDetailDatetime(transaction.createdAt);
+    final source = _source(context);
+    final hasSms = transaction.importSource == 'sms' &&
+        transaction.importedFromSms != null &&
+        transaction.importedFromSms!.isNotEmpty;
+
+    final tags = ref.watch(transactionTagsProvider(transaction.id)).valueOrNull ?? [];
+
+    // ── InfoTable rows ──────────────────────────────────────────────────────
+    final rows = <InfoTableRow>[
+      InfoTableDataRow(label: context.l10n.dateTimeTitle, value: dateLabel),
+      InfoTableDataRow(
+        label: context.l10n.accountLabel,
+        value: accountDisplay,
+        valueLeadingIcon: accountIcon,
+        valueIconColor: accountColor,
+      ),
+      InfoTableDataRow(
+        label: context.l10n.categoryLabel,
+        value: isTransfer
+            ? context.l10n.transferLabel
+            : (category?.name ??
+                (isIncome ? context.l10n.incomeLabel : context.l10n.noneLabel)),
+        valueLeadingIcon: iconData,
+        valueIconColor: iconColor,
+      ),
+      InfoTableDataRow(
+        label: context.l10n.sourceLabel,
+        value: source.label,
+        valueLeadingIcon: source.icon,
+        valueIconColor: cs.onSurfaceVariant,
+      ),
+    ];
 
     return KuberBottomSheet(
       title: displayName,
@@ -196,262 +285,191 @@ class TransactionDetailSheet extends ConsumerWidget {
               rawColor: iconColor,
               size: 48,
             ),
+      actions: SheetButtonSection(
+        padding: EdgeInsets.zero,
+        actions: [
+          SheetAction(
+            label: context.l10n.editLabel,
+            icon: Icons.edit_outlined,
+            onPressed: widget.onEdit,
+          ),
+          SheetAction(
+            label: context.l10n.deleteLabel,
+            icon: Icons.delete_outline_rounded,
+            destructive: true,
+            onPressed: widget.onDelete,
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Amount ────────────────────────────────────────────────────
-          Text(
-            context.l10n.transactionAmount,
-            style: localeFont(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
+          SheetAmountHero(
+            caption: context.l10n.transactionAmount,
+            amount: amountText,
+            amountColor: amountColor,
           ),
-          const SizedBox(height: KuberSpacing.xs),
-          Text(
-            amountText,
-            style: localeFont(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: amountColor,
-              letterSpacing: -1,
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: 18),
+          InfoTable(rows: rows),
 
-          // ── Details Grid ─────────────────────────────────────────────
-          _DetailCell(
-            label: context.l10n.dateTimeLabel,
-            value: dateLabel.toUpperCase(),
-            fullWidth: true,
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _DetailCell(
-                  label: context.l10n.accountUpper,
-                  value: accountDisplay.toUpperCase(),
-                  icon: Icons.account_balance_wallet_rounded,
-                  iconColor: cs.primary,
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Expanded(
-                child: _DetailCell(
-                  label: context.l10n.categoryUpper,
-                  value: transaction.type == 'income'
-                      ? context.l10n.incomeLabel.toUpperCase()
-                      : (category?.name.toUpperCase() ?? context.l10n.noneLabel.toUpperCase()),
-                  icon: isTransfer ? Icons.swap_horiz_rounded : (category != null ? IconMapper.fromString(category.icon) : Icons.category_rounded),
-                  iconColor: iconColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-
-          if (transaction.notes != null && transaction.notes!.isNotEmpty) ...[
-            const SizedBox(height: KuberSpacing.sm),
-            _DetailCell(
+          // ── Notes ────────────────────────────────────────────────────────
+          if (transaction.notes != null && transaction.notes!.isNotEmpty)
+            _LabeledBlock(
               label: context.l10n.notesUpper,
-              value: transaction.notes!,
-              fullWidth: true,
+              child: Text(
+                transaction.notes!,
+                style: localeFont(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: cs.onSurface,
+                  height: 1.5,
+                ),
+              ),
             ),
-          ],
 
-          if (transaction.quickAddNote != null && transaction.quickAddNote!.isNotEmpty) ...[
-            const SizedBox(height: KuberSpacing.sm),
-            _DetailCell(
+          if (transaction.quickAddNote != null &&
+              transaction.quickAddNote!.isNotEmpty)
+            _LabeledBlock(
               label: context.l10n.addedUsingPrompt,
-              value: transaction.quickAddNote!,
-              fullWidth: true,
-              icon: Icons.flash_on_rounded,
-              iconColor: cs.primary,
-            ),
-          ],
-
-          // ── Attachments ────────────────────────────────────────────
-          if (transaction.attachmentPaths.isNotEmpty) ...[
-            const SizedBox(height: KuberSpacing.xl),
-            Text(
-              context.l10n.attachmentsLabel,
-              style: localeFont(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.0,
+              child: Text(
+                transaction.quickAddNote!,
+                style: localeFont(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: cs.onSurface,
+                  height: 1.5,
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 72,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: transaction.attachmentPaths.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(width: KuberSpacing.sm),
-                itemBuilder: (context, index) {
-                  final path = transaction.attachmentPaths[index];
-                  final isImage =
-                      AttachmentService.getFileType(path) == 'image';
 
-                  return GestureDetector(
-                    onTap: () => OpenFilex.open(path),
-                    child: Container(
-                      width: 72,
-                      height: 72,
+          // ── Tags ─────────────────────────────────────────────────────────
+          if (tags.isNotEmpty)
+            _LabeledBlock(
+              label: context.l10n.attachedTags,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final tag in tags)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: cs.surfaceContainerLow,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline),
+                        color: cs.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(KuberRadius.sm),
+                        border: Border.all(
+                            color: cs.primary.withValues(alpha: 0.2)),
                       ),
-                      clipBehavior: Clip.antiAlias,
-                      child: isImage
-                          ? Image.file(
-                              File(path),
-                              fit: BoxFit.cover,
-                              width: 72,
-                              height: 72,
-                              errorBuilder: (_, __, ___) => Icon(
-                                Icons.broken_image_outlined,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            )
-                          : Center(
-                              child: Icon(
-                                Icons.picture_as_pdf,
-                                color: cs.primary,
-                                size: 32,
-                              ),
-                            ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-
-          const SizedBox(height: KuberSpacing.xl),
-
-          // ── Tags ─────────────────────────────────────────────────────
-          Consumer(
-            builder: (context, ref, _) {
-              final tagsAsync = ref.watch(transactionTagsProvider(transaction.id));
-              return tagsAsync.when(
-                data: (tags) {
-                  if (tags.isEmpty) return const SizedBox.shrink();
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.attachedTags,
+                      child: Text(
+                        '#${tag.name}',
                         style: localeFont(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 1.0,
+                          color: cs.primary,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: tags.map((tag) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: cs.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: cs.primary.withValues(alpha: 0.2)),
-                          ),
-                          child: Text(
-                            '#${tag.name}',
-                            style: localeFont(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: cs.primary,
-                            ),
-                          ),
-                        )).toList(),
-                      ),
-                      const SizedBox(height: KuberSpacing.xl),
-                    ],
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
-              );
-            },
-          ),
+                    ),
+                ],
+              ),
+            ),
 
-          // ── Actions ──────────────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.editLabel,
-                  icon: Icons.edit_outlined,
-                  type: AppButtonType.normal,
-                  onPressed: onEdit,
+          // ── Original SMS ───────────────────────────────────────────────
+          if (hasSms)
+            _LabeledBlock(
+              label: context.l10n.originalSmsLabel,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(KuberSpacing.md),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: cs.outline),
+                ),
+                child: Text(
+                  transaction.importedFromSms!,
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12,
+                    height: 1.55,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: -0.1,
+                  ),
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.deleteLabel,
-                  icon: Icons.delete_outline_rounded,
-                  type: AppButtonType.danger,
-                  onPressed: onDelete,
+            ),
+
+          // ── Attachments ────────────────────────────────────────────────
+          if (transaction.attachmentPaths.isNotEmpty)
+            _LabeledBlock(
+              label: context.l10n.attachmentsLabel,
+              child: SizedBox(
+                height: 64,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: transaction.attachmentPaths.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: KuberSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final path = transaction.attachmentPaths[index];
+                    final isImage =
+                        AttachmentService.getFileType(path) == 'image';
+                    return GestureDetector(
+                      onTap: () => OpenFilex.open(path),
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: isImage
+                            ? Image.file(
+                                File(path),
+                                fit: BoxFit.cover,
+                                width: 64,
+                                height: 64,
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.broken_image_outlined,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              )
+                            : Center(
+                                child: Icon(
+                                  Icons.picture_as_pdf,
+                                  color: cs.error,
+                                  size: 28,
+                                ),
+                              ),
+                      ),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.xl),
+            ),
         ],
       ),
     );
   }
 }
 
-class _DetailCell extends StatelessWidget {
+/// Small uppercase-label block used for Notes / Attachments sections below the
+/// info table.
+class _LabeledBlock extends StatelessWidget {
   final String label;
-  final String value;
-  final bool fullWidth;
-  final IconData? icon;
-  final Color? iconColor;
-
-  const _DetailCell({
-    required this.label,
-    required this.value,
-    this.fullWidth = false,
-    this.icon,
-    this.iconColor,
-  });
+  final Widget child;
+  const _LabeledBlock({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: fullWidth ? double.infinity : null,
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: KuberSpacing.md,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            label,
+            label.toUpperCase(),
             style: localeFont(
               fontSize: 10,
               fontWeight: FontWeight.w600,
@@ -459,27 +477,8 @@ class _DetailCell extends StatelessWidget {
               letterSpacing: 1.0,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xs),
-          Row(
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 14, color: iconColor ?? cs.onSurfaceVariant),
-                const SizedBox(width: 6),
-              ],
-              Expanded(
-                child: Text(
-                  value,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                  overflow: fullWidth ? TextOverflow.visible : TextOverflow.ellipsis,
-                  maxLines: fullWidth ? null : 1,
-                ),
-              ),
-            ],
-          ),
+          const SizedBox(height: 8),
+          child,
         ],
       ),
     );

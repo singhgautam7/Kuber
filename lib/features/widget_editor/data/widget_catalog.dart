@@ -20,15 +20,21 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     enabled: true,
   ),
   HomeWidgetConfig(
+    id: 'spending_stats',
+    name: 'Spending Stats',
+    description: 'Spent vs received this month',
+    enabled: true,
+  ),
+  HomeWidgetConfig(
     id: 'quick_add',
     name: 'Quick Add',
     description: 'One-tap expense / income / transfer entry',
     enabled: true,
   ),
   HomeWidgetConfig(
-    id: 'spending_stats',
-    name: 'Spending Stats',
-    description: 'Spent vs received this month',
+    id: 'sms_import_widget',
+    name: 'SMS Import',
+    description: 'Pending bank SMS transactions to review',
     enabled: true,
   ),
   HomeWidgetConfig(
@@ -47,19 +53,19 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     id: 'budget_snapshot',
     name: 'Budget Snapshot',
     description: 'Progress against active budgets',
-    enabled: true,
+    enabled: false,
   ),
   HomeWidgetConfig(
     id: 'upcoming_recurring',
     name: 'Upcoming Recurring',
     description: 'Next recurring transactions due',
-    enabled: true,
+    enabled: false,
   ),
   HomeWidgetConfig(
     id: 'recent_transactions',
     name: 'Recent Transactions',
     description: 'Latest activity at a glance',
-    enabled: true,
+    enabled: false,
   ),
 ];
 
@@ -122,6 +128,8 @@ String localizedWidgetName(BuildContext context, String id) {
     'budget_snapshot' => l.wgtBudgetSnapshotName,
     'upcoming_recurring' => l.wgtUpcomingRecurringName,
     'recent_transactions' => l.wgtRecentTransactionsName,
+    // SMS import is an English-only feature (see Ask Kuber precedent).
+    'sms_import_widget' => 'SMS Import',
     'summary_card' => l.wgtSummaryCardName,
     'spending_trend' => l.wgtSpendingTrendName,
     'weekly_heatmap' => l.wgtWeeklyHeatmapName,
@@ -146,6 +154,7 @@ String? localizedWidgetDesc(BuildContext context, String id) {
     'budget_snapshot' => l.wgtBudgetSnapshotDesc,
     'upcoming_recurring' => l.wgtUpcomingRecurringDesc,
     'recent_transactions' => l.wgtRecentTransactionsDesc,
+    'sms_import_widget' => 'Pending bank SMS transactions to review',
     'summary_card' => l.wgtSummaryCardDesc,
     'spending_trend' => l.wgtSpendingTrendDesc,
     'weekly_heatmap' => l.wgtWeeklyHeatmapDesc,

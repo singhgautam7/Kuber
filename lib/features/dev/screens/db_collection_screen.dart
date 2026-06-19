@@ -27,6 +27,8 @@ import '../../notifications/data/app_notification.dart';
 import '../../widget_editor/data/widget_preference.dart';
 import '../../stories/data/insight_story.dart';
 import '../../backups/data/backup_config.dart';
+import '../../sms_import/data/sms_transaction.dart';
+import '../../sms_import/data/sms_account_mapping.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -141,6 +143,20 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           break;
         case 'BackupConfig':
           final list = await isar.collection<BackupConfig>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'SmsTransaction':
+          final list = await isar
+              .collection<SmsTransaction>()
+              .where()
+              .findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'SmsAccountMapping':
+          final list = await isar
+              .collection<SmsAccountMapping>()
+              .where()
+              .findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }
