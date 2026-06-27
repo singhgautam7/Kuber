@@ -4750,4 +4750,141 @@ class AppLocalizationsTa extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'கணக்கு விவரங்களைப் புதுப்பிக்கவும்';
+
+  @override
+  String get accountNameLabel => 'கணக்கு பெயர்';
+
+  @override
+  String get accountNameHint => 'கணக்கு பெயர்';
+
+  @override
+  String get accountTypeBank => 'வங்கி';
+
+  @override
+  String get accountTypeCash => 'பணம்';
+
+  @override
+  String get accountTypeCreditCard => 'கிரெடிட் கார்டு';
+
+  @override
+  String get accountTypeLockedTitle => 'கணக்கு வகை நிர்ணயிக்கப்பட்டது';
+
+  @override
+  String get accountTypeLockedBody =>
+      'உருவாக்கிய பிறகு கணக்கு வகையை மாற்ற முடியாது. வேறு வகையைப் பயன்படுத்த, புதிய கணக்கை உருவாக்கவும்.';
+
+  @override
+  String get accountTypeLockedTooltip => 'இது ஏன் பூட்டப்பட்டுள்ளது?';
+
+  @override
+  String get accountIdentifierLabel => 'கணக்கு எண் / அடையாளங்காட்டி';
+
+  @override
+  String get accountIdentifierHint => 'கடைசி 4 இலக்கங்கள் அல்லது முழு எண்';
+
+  @override
+  String get accountIdentifierHelper =>
+      'கடைசி 4 இலக்கங்கள் அல்லது முழு எண். SMS இறக்குமதிகளைப் பொருத்தப் பயன்படுகிறது.';
+
+  @override
+  String get makeDefaultAccount => 'இதை இயல்புநிலை கணக்காக்கவும்';
+
+  @override
+  String get makeDefaultAccountSub =>
+      'பரிவர்த்தனைகளைச் சேர்க்கும்போது முன்கூட்டியே தேர்ந்தெடுக்கப்பட்டது.';
+
+  @override
+  String get currentBalanceLabel => 'தற்போதைய இருப்பு';
+
+  @override
+  String get limitSpentLabel => 'செலவழித்த வரம்பு';
+
+  @override
+  String get totalLimitLabel => 'மொத்த வரம்பு';
+
+  @override
+  String get totalLimitHelper =>
+      'கார்டின் ஒட்டுமொத்த கிரெடிட் வரம்பு. இதைத் திருத்துவது எந்த சரிசெய்தலையும் உருவாக்காது.';
+
+  @override
+  String get balanceAdjustHelper =>
+      'இதை மாற்றுவது வித்தியாசத்திற்கான இருப்பு சரிசெய்தல் பரிவர்த்தனையை உருவாக்கும்.';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount இன் இருப்பு சரிசெய்தல் வரவு வைக்கப்படும்.';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount இன் இருப்பு சரிசெய்தல் பற்று வைக்கப்படும்.';
+  }
+
+  @override
+  String get disableAccountToggle => 'கணக்கை முடக்கு';
+
+  @override
+  String get disableAccountHelper =>
+      'தேர்வுகள் மற்றும் முகப்பு கார்டுகளில் இருந்து மறைக்கப்பட்டது. தற்போதுள்ள பரிவர்த்தனைகள் இருக்கும்.';
+
+  @override
+  String get accountDisabledToggle => 'கணக்கு முடக்கப்பட்டது';
+
+  @override
+  String get accountDisabledHelper =>
+      'இந்தக் கணக்கு மறைக்கப்பட்டுள்ளது. மீண்டும் காட்ட அணைக்கவும்.';
+
+  @override
+  String get accountUpdated => 'கணக்கு புதுப்பிக்கப்பட்டது';
+
+  @override
+  String get couldntLoadBalance => 'இருப்பை ஏற்ற முடியவில்லை';
+
+  @override
+  String get pickNewDefaultTitle =>
+      'புதிய இயல்புநிலை கணக்கைத் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get pickNewDefaultBody =>
+      'இது உங்கள் இயல்புநிலை கணக்கு. இதை நீக்குவதற்கு முன் ஒரு மாற்றைத் தேர்ந்தெடுக்கவும்.';
+
+  @override
+  String get adjustmentModalTitle => 'சரிசெய்தல் பரிவர்த்தனையை உருவாக்கவா?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from இலிருந்து $to ஆக மாறுகிறது. $diff க்கான இருப்பு சரிசெய்தல் பரிவர்த்தனை உருவாக்கப்படும்.';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction. இது வருமானமாகவோ செலவாகவோ கணக்கிடப்படாது.';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'உருவாக்கி சேமிக்கவும்';
+
+  @override
+  String get valueNounBalance => 'இருப்பு';
+
+  @override
+  String get valueNounLimitSpent => 'செலவழித்த வரம்பு';
+
+  @override
+  String get valueNounBalanceCap => 'இருப்பு';
+
+  @override
+  String get valueNounLimitSpentCap => 'செலவழித்த வரம்பு';
+
+  @override
+  String get adjustmentIncreasedBy => 'அதிகரித்தது';
+
+  @override
+  String get adjustmentDecreasedBy => 'குறைந்தது';
+
+  @override
+  String get dangerZone => 'ஆபத்து மண்டலம்';
 }

@@ -4715,4 +4715,140 @@ class AppLocalizationsTe extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'ఖాతా వివరాలను నవీకరించండి';
+
+  @override
+  String get accountNameLabel => 'ఖాతా పేరు';
+
+  @override
+  String get accountNameHint => 'ఖాతా పేరు';
+
+  @override
+  String get accountTypeBank => 'బ్యాంక్';
+
+  @override
+  String get accountTypeCash => 'నగదు';
+
+  @override
+  String get accountTypeCreditCard => 'క్రెడిట్ కార్డ్';
+
+  @override
+  String get accountTypeLockedTitle => 'ఖాతా రకం నిర్ణయించబడింది';
+
+  @override
+  String get accountTypeLockedBody =>
+      'సృష్టించిన తర్వాత ఖాతా రకాన్ని మార్చలేరు. వేరే రకాన్ని ఉపయోగించడానికి, కొత్త ఖాతాను సృష్టించండి.';
+
+  @override
+  String get accountTypeLockedTooltip => 'ఇది ఎందుకు లాక్ చేయబడింది?';
+
+  @override
+  String get accountIdentifierLabel => 'ఖాతా సంఖ్య / గుర్తింపుదారు';
+
+  @override
+  String get accountIdentifierHint => 'చివరి 4 అంకెలు లేదా పూర్తి సంఖ్య';
+
+  @override
+  String get accountIdentifierHelper =>
+      'చివరి 4 అంకెలు లేదా పూర్తి సంఖ్య. SMS దిగుమతులను సరిపోల్చడానికి ఉపయోగించబడుతుంది.';
+
+  @override
+  String get makeDefaultAccount => 'దీన్ని డిఫాల్ట్ ఖాతాగా చేయండి';
+
+  @override
+  String get makeDefaultAccountSub =>
+      'లావాదేవీలను జోడించేటప్పుడు ముందుగా ఎంపిక చేయబడుతుంది.';
+
+  @override
+  String get currentBalanceLabel => 'ప్రస్తుత బ్యాలెన్స్';
+
+  @override
+  String get limitSpentLabel => 'ఖర్చు చేసిన పరిమితి';
+
+  @override
+  String get totalLimitLabel => 'మొత్తం పరిమితి';
+
+  @override
+  String get totalLimitHelper =>
+      'కార్డ్ యొక్క మొత్తం క్రెడిట్ పరిమితి. దీన్ని సవరించడం వల్ల ఎటువంటి సర్దుబాటు సృష్టించబడదు.';
+
+  @override
+  String get balanceAdjustHelper =>
+      'దీన్ని మార్చడం వల్ల తేడా కోసం బ్యాలెన్స్ సర్దుబాటు లావాదేవీ సృష్టించబడుతుంది.';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount యొక్క బ్యాలెన్స్ సర్దుబాటు జమ చేయబడుతుంది.';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount యొక్క బ్యాలెన్స్ సర్దుబాటు తీసివేయబడుతుంది.';
+  }
+
+  @override
+  String get disableAccountToggle => 'ఖాతాను నిలిపివేయండి';
+
+  @override
+  String get disableAccountHelper =>
+      'పికర్‌లు మరియు హోమ్ కార్డ్‌ల నుండి దాచబడింది. ఉన్న లావాదేవీలు అలాగే ఉంటాయి.';
+
+  @override
+  String get accountDisabledToggle => 'ఖాతా నిలిపివేయబడింది';
+
+  @override
+  String get accountDisabledHelper =>
+      'ఈ ఖాతా దాచబడింది. మళ్లీ చూపించడానికి ఆఫ్ చేయండి.';
+
+  @override
+  String get accountUpdated => 'ఖాతా నవీకరించబడింది';
+
+  @override
+  String get couldntLoadBalance => 'బ్యాలెన్స్ లోడ్ చేయడం సాధ్యపడలేదు';
+
+  @override
+  String get pickNewDefaultTitle => 'కొత్త డిఫాల్ట్ ఖాతాను ఎంచుకోండి';
+
+  @override
+  String get pickNewDefaultBody =>
+      'ఇది మీ డిఫాల్ట్ ఖాతా. దీన్ని తొలగించే ముందు ప్రత్యామ్నాయాన్ని ఎంచుకోండి.';
+
+  @override
+  String get adjustmentModalTitle => 'సర్దుబాటు లావాదేవీని సృష్టించాలా?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from నుండి $to కు మారుతోంది. $diff కోసం బ్యాలెన్స్ సర్దుబాటు లావాదేవీ సృష్టించబడుతుంది.';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction. ఇది ఆదాయం లేదా ఖర్చుగా లెక్కించబడదు.';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'సృష్టించి సేవ్ చేయండి';
+
+  @override
+  String get valueNounBalance => 'బ్యాలెన్స్';
+
+  @override
+  String get valueNounLimitSpent => 'ఖర్చు చేసిన పరిమితి';
+
+  @override
+  String get valueNounBalanceCap => 'బ్యాలెన్స్';
+
+  @override
+  String get valueNounLimitSpentCap => 'ఖర్చు చేసిన పరిమితి';
+
+  @override
+  String get adjustmentIncreasedBy => 'పెరిగింది';
+
+  @override
+  String get adjustmentDecreasedBy => 'తగ్గింది';
+
+  @override
+  String get dangerZone => 'ప్రమాద జోన్';
 }

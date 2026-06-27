@@ -4694,4 +4694,140 @@ class AppLocalizationsBn extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'অ্যাকাউন্টের বিবরণ আপডেট করুন';
+
+  @override
+  String get accountNameLabel => 'অ্যাকাউন্টের নাম';
+
+  @override
+  String get accountNameHint => 'অ্যাকাউন্টের নাম';
+
+  @override
+  String get accountTypeBank => 'ব্যাঙ্ক';
+
+  @override
+  String get accountTypeCash => 'নগদ';
+
+  @override
+  String get accountTypeCreditCard => 'ক্রেডিট কার্ড';
+
+  @override
+  String get accountTypeLockedTitle => 'অ্যাকাউন্টের ধরন নির্দিষ্ট';
+
+  @override
+  String get accountTypeLockedBody =>
+      'তৈরির পরে অ্যাকাউন্টের ধরন পরিবর্তন করা যায় না। অন্য ধরন ব্যবহার করতে, একটি নতুন অ্যাকাউন্ট তৈরি করুন।';
+
+  @override
+  String get accountTypeLockedTooltip => 'এটি কেন লক করা?';
+
+  @override
+  String get accountIdentifierLabel => 'অ্যাকাউন্ট নম্বর / শনাক্তকারী';
+
+  @override
+  String get accountIdentifierHint => 'শেষ 4 সংখ্যা বা পুরো নম্বর';
+
+  @override
+  String get accountIdentifierHelper =>
+      'শেষ 4 সংখ্যা বা পুরো নম্বর। SMS ইম্পোর্ট মেলাতে ব্যবহৃত হয়।';
+
+  @override
+  String get makeDefaultAccount => 'এটিকে ডিফল্ট অ্যাকাউন্ট করুন';
+
+  @override
+  String get makeDefaultAccountSub =>
+      'লেনদেন যোগ করার সময় আগে থেকে নির্বাচিত।';
+
+  @override
+  String get currentBalanceLabel => 'বর্তমান ব্যালেন্স';
+
+  @override
+  String get limitSpentLabel => 'ব্যবহৃত সীমা';
+
+  @override
+  String get totalLimitLabel => 'মোট সীমা';
+
+  @override
+  String get totalLimitHelper =>
+      'কার্ডের সামগ্রিক ক্রেডিট সীমা। এটি সম্পাদনা করলে কোনো সমন্বয় তৈরি হবে না।';
+
+  @override
+  String get balanceAdjustHelper =>
+      'এটি পরিবর্তন করলে পার্থক্যের জন্য একটি ব্যালেন্স সমন্বয় লেনদেন তৈরি হবে।';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount এর একটি ব্যালেন্স সমন্বয় জমা করা হবে।';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount এর একটি ব্যালেন্স সমন্বয় কাটা হবে।';
+  }
+
+  @override
+  String get disableAccountToggle => 'অ্যাকাউন্ট নিষ্ক্রিয় করুন';
+
+  @override
+  String get disableAccountHelper =>
+      'পিকার এবং হোম কার্ড থেকে লুকানো। বিদ্যমান লেনদেন থেকে যায়।';
+
+  @override
+  String get accountDisabledToggle => 'অ্যাকাউন্ট নিষ্ক্রিয়';
+
+  @override
+  String get accountDisabledHelper =>
+      'এই অ্যাকাউন্টটি লুকানো। আবার দেখাতে বন্ধ করুন।';
+
+  @override
+  String get accountUpdated => 'অ্যাকাউন্ট আপডেট হয়েছে';
+
+  @override
+  String get couldntLoadBalance => 'ব্যালেন্স লোড করা যায়নি';
+
+  @override
+  String get pickNewDefaultTitle => 'একটি নতুন ডিফল্ট অ্যাকাউন্ট বেছে নিন';
+
+  @override
+  String get pickNewDefaultBody =>
+      'এটি আপনার ডিফল্ট অ্যাকাউন্ট। এটি মুছে ফেলার আগে একটি বিকল্প বেছে নিন।';
+
+  @override
+  String get adjustmentModalTitle => 'সমন্বয় লেনদেন তৈরি করবেন?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from থেকে $to এ পরিবর্তিত হচ্ছে। $diff এর জন্য একটি ব্যালেন্স সমন্বয় লেনদেন তৈরি করা হবে।';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction। এটি আয় বা ব্যয় হিসাবে গণ্য হবে না।';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'তৈরি করুন এবং সংরক্ষণ করুন';
+
+  @override
+  String get valueNounBalance => 'ব্যালেন্স';
+
+  @override
+  String get valueNounLimitSpent => 'ব্যবহৃত সীমা';
+
+  @override
+  String get valueNounBalanceCap => 'ব্যালেন্স';
+
+  @override
+  String get valueNounLimitSpentCap => 'ব্যবহৃত সীমা';
+
+  @override
+  String get adjustmentIncreasedBy => 'বেড়েছে';
+
+  @override
+  String get adjustmentDecreasedBy => 'কমেছে';
+
+  @override
+  String get dangerZone => 'বিপজ্জনক অঞ্চল';
 }

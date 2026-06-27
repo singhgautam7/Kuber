@@ -4669,4 +4669,139 @@ class AppLocalizationsEn extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'Update account details';
+
+  @override
+  String get accountNameLabel => 'Account Name';
+
+  @override
+  String get accountNameHint => 'Account name';
+
+  @override
+  String get accountTypeBank => 'Bank';
+
+  @override
+  String get accountTypeCash => 'Cash';
+
+  @override
+  String get accountTypeCreditCard => 'Credit Card';
+
+  @override
+  String get accountTypeLockedTitle => 'Account type is fixed';
+
+  @override
+  String get accountTypeLockedBody =>
+      'Account type cannot be changed after creation. To use a different type, create a new account.';
+
+  @override
+  String get accountTypeLockedTooltip => 'Why is this locked?';
+
+  @override
+  String get accountIdentifierLabel => 'Account Number / Identifier';
+
+  @override
+  String get accountIdentifierHint => 'Last 4 digits or full number';
+
+  @override
+  String get accountIdentifierHelper =>
+      'Last 4 digits or full number. Used to match SMS imports.';
+
+  @override
+  String get makeDefaultAccount => 'Make this the default account';
+
+  @override
+  String get makeDefaultAccountSub => 'Pre-selected when adding transactions.';
+
+  @override
+  String get currentBalanceLabel => 'Current Balance';
+
+  @override
+  String get limitSpentLabel => 'Limit Spent';
+
+  @override
+  String get totalLimitLabel => 'Total Limit';
+
+  @override
+  String get totalLimitHelper =>
+      'The card\'s overall credit limit. Editing this won\'t create an adjustment.';
+
+  @override
+  String get balanceAdjustHelper =>
+      'Changing this will create a balance adjustment transaction for the difference.';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return 'A balance adjustment of $amount will be credited.';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return 'A balance adjustment of $amount will be debited.';
+  }
+
+  @override
+  String get disableAccountToggle => 'Disable Account';
+
+  @override
+  String get disableAccountHelper =>
+      'Hidden from pickers and home cards. Existing transactions remain.';
+
+  @override
+  String get accountDisabledToggle => 'Account disabled';
+
+  @override
+  String get accountDisabledHelper =>
+      'This account is hidden. Turn off to show it again.';
+
+  @override
+  String get accountUpdated => 'Account updated';
+
+  @override
+  String get couldntLoadBalance => 'Couldn\'t load balance';
+
+  @override
+  String get pickNewDefaultTitle => 'Pick a new default account';
+
+  @override
+  String get pickNewDefaultBody =>
+      'This is your default account. Choose a replacement before deleting it.';
+
+  @override
+  String get adjustmentModalTitle => 'Create adjustment transaction?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return 'The $noun is changing from $from to $to. A balance adjustment transaction for $diff will be created.';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $direction $diff. This won\'t count as income or expense.';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'Create and save';
+
+  @override
+  String get valueNounBalance => 'balance';
+
+  @override
+  String get valueNounLimitSpent => 'limit spent';
+
+  @override
+  String get valueNounBalanceCap => 'Balance';
+
+  @override
+  String get valueNounLimitSpentCap => 'Limit spent';
+
+  @override
+  String get adjustmentIncreasedBy => 'increased by';
+
+  @override
+  String get adjustmentDecreasedBy => 'decreased by';
+
+  @override
+  String get dangerZone => 'Danger Zone';
 }

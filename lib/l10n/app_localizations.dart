@@ -8521,6 +8521,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} transactions'**
   String transactionsCountValue(int count);
+
+  /// No description provided for @editAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update account details'**
+  String get editAccountSubtitle;
+
+  /// No description provided for @accountNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Name'**
+  String get accountNameLabel;
+
+  /// No description provided for @accountNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get accountNameHint;
+
+  /// No description provided for @accountTypeBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get accountTypeBank;
+
+  /// No description provided for @accountTypeCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get accountTypeCash;
+
+  /// No description provided for @accountTypeCreditCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit Card'**
+  String get accountTypeCreditCard;
+
+  /// No description provided for @accountTypeLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account type is fixed'**
+  String get accountTypeLockedTitle;
+
+  /// No description provided for @accountTypeLockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Account type cannot be changed after creation. To use a different type, create a new account.'**
+  String get accountTypeLockedBody;
+
+  /// No description provided for @accountTypeLockedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Why is this locked?'**
+  String get accountTypeLockedTooltip;
+
+  /// No description provided for @accountIdentifierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Number / Identifier'**
+  String get accountIdentifierLabel;
+
+  /// No description provided for @accountIdentifierHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 4 digits or full number'**
+  String get accountIdentifierHint;
+
+  /// No description provided for @accountIdentifierHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 4 digits or full number. Used to match SMS imports.'**
+  String get accountIdentifierHelper;
+
+  /// No description provided for @makeDefaultAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this the default account'**
+  String get makeDefaultAccount;
+
+  /// No description provided for @makeDefaultAccountSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pre-selected when adding transactions.'**
+  String get makeDefaultAccountSub;
+
+  /// No description provided for @currentBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Balance'**
+  String get currentBalanceLabel;
+
+  /// No description provided for @limitSpentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit Spent'**
+  String get limitSpentLabel;
+
+  /// No description provided for @totalLimitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Limit'**
+  String get totalLimitLabel;
+
+  /// No description provided for @totalLimitHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The card\'s overall credit limit. Editing this won\'t create an adjustment.'**
+  String get totalLimitHelper;
+
+  /// No description provided for @balanceAdjustHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing this will create a balance adjustment transaction for the difference.'**
+  String get balanceAdjustHelper;
+
+  /// No description provided for @adjustmentWillBeCredited.
+  ///
+  /// In en, this message translates to:
+  /// **'A balance adjustment of {amount} will be credited.'**
+  String adjustmentWillBeCredited(String amount);
+
+  /// No description provided for @adjustmentWillBeDebited.
+  ///
+  /// In en, this message translates to:
+  /// **'A balance adjustment of {amount} will be debited.'**
+  String adjustmentWillBeDebited(String amount);
+
+  /// No description provided for @disableAccountToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Account'**
+  String get disableAccountToggle;
+
+  /// No description provided for @disableAccountHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden from pickers and home cards. Existing transactions remain.'**
+  String get disableAccountHelper;
+
+  /// No description provided for @accountDisabledToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account disabled'**
+  String get accountDisabledToggle;
+
+  /// No description provided for @accountDisabledHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is hidden. Turn off to show it again.'**
+  String get accountDisabledHelper;
+
+  /// No description provided for @accountUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Account updated'**
+  String get accountUpdated;
+
+  /// No description provided for @couldntLoadBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load balance'**
+  String get couldntLoadBalance;
+
+  /// No description provided for @pickNewDefaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a new default account'**
+  String get pickNewDefaultTitle;
+
+  /// No description provided for @pickNewDefaultBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your default account. Choose a replacement before deleting it.'**
+  String get pickNewDefaultBody;
+
+  /// No description provided for @adjustmentModalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create adjustment transaction?'**
+  String get adjustmentModalTitle;
+
+  /// No description provided for @adjustmentModalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The {noun} is changing from {from} to {to}. A balance adjustment transaction for {diff} will be created.'**
+  String adjustmentModalBody(String noun, String from, String to, String diff);
+
+  /// No description provided for @adjustmentModalChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{nounCap} {direction} {diff}. This won\'t count as income or expense.'**
+  String adjustmentModalChip(String nounCap, String direction, String diff);
+
+  /// No description provided for @adjustmentCreateAndSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and save'**
+  String get adjustmentCreateAndSave;
+
+  /// No description provided for @valueNounBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'balance'**
+  String get valueNounBalance;
+
+  /// No description provided for @valueNounLimitSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'limit spent'**
+  String get valueNounLimitSpent;
+
+  /// No description provided for @valueNounBalanceCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get valueNounBalanceCap;
+
+  /// No description provided for @valueNounLimitSpentCap.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit spent'**
+  String get valueNounLimitSpentCap;
+
+  /// No description provided for @adjustmentIncreasedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'increased by'**
+  String get adjustmentIncreasedBy;
+
+  /// No description provided for @adjustmentDecreasedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'decreased by'**
+  String get adjustmentDecreasedBy;
+
+  /// No description provided for @dangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get dangerZone;
 }
 
 class _AppLocalizationsDelegate

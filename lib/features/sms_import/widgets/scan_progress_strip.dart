@@ -115,7 +115,7 @@ class _StripContent extends StatelessWidget {
       return Text.rich(
         TextSpan(
           children: [
-            const TextSpan(text: 'Up to date — '),
+            const TextSpan(text: 'Up to date - '),
             TextSpan(
               text:
                   '$newCount new transaction${newCount == 1 ? '' : 's'}',
@@ -128,7 +128,7 @@ class _StripContent extends StatelessWidget {
       );
     }
     return Text(
-      'Up to date — nothing new',
+      'Up to date. Nothing new',
       style: localeFont(fontSize: 12, color: cs.onSurface),
     );
   }
