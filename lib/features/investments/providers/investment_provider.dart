@@ -38,6 +38,7 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
     required String categoryId,
     String? notes,
     double initialAmount = 0,
+    bool deductedFromAccount = true,
   }) async {
     final uid = const Uuid().v4();
     final now = DateTime.now();
@@ -54,13 +55,14 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
       ..accountId = accountId
       ..categoryId = categoryId
       ..notes = notes
+      ..deductedFromAccount = deductedFromAccount
       ..createdAt = now
       ..updatedAt = now;
 
     final id = await ref.read(investmentRepositoryProvider).save(investment);
 
-    // Create initial contribution if amount > 0
-    if (initialAmount > 0 && accountId != null) {
+    // Create initial contribution if amount > 0 AND deductedFromAccount is true
+    if (initialAmount > 0 && accountId != null && deductedFromAccount) {
       final txnName = 'Contribution - ${name.trim()}';
       final txn = Transaction()
         ..name = txnName
@@ -102,11 +104,13 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
     final isar = ref.read(isarProvider);
     final attachments = ref.read(attachmentServiceProvider);
 
-    final linkedTxns = await isar.transactions
-        .filter()
-        .linkedRuleIdEqualTo(investment.uid)
-        .linkedRuleTypeEqualTo('investment')
-        .findAll();
+    final linkedTxns = investment.deductedFromAccount
+        ? await isar.transactions
+            .filter()
+            .linkedRuleIdEqualTo(investment.uid)
+            .linkedRuleTypeEqualTo('investment')
+            .findAll()
+        : const <Transaction>[];
 
     // Delete attachment files for linked transactions
     for (final txn in linkedTxns) {
@@ -114,7 +118,9 @@ class InvestmentListNotifier extends AsyncNotifier<List<Investment>> {
     }
 
     await isar.writeTxn(() async {
-      await isar.transactions.deleteAll(linkedTxns.map((t) => t.id).toList());
+      if (linkedTxns.isNotEmpty) {
+        await isar.transactions.deleteAll(linkedTxns.map((t) => t.id).toList());
+      }
       await isar.investments.delete(investment.id);
     });
 

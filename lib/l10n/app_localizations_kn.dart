@@ -3259,6 +3259,15 @@ class AppLocalizationsKn extends AppLocalizations {
   String get invTypeRealEstate => 'ರಿಯಲ್ ಎಸ್ಟೇಟ್';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'ಇತರೆ';
 
   @override
@@ -4710,4 +4719,140 @@ class AppLocalizationsKn extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'ಖಾತೆ ವಿವರಗಳನ್ನು ನವೀಕರಿಸಿ';
+
+  @override
+  String get accountNameLabel => 'ಖಾತೆ ಹೆಸರು';
+
+  @override
+  String get accountNameHint => 'ಖಾತೆ ಹೆಸರು';
+
+  @override
+  String get accountTypeBank => 'ಬ್ಯಾಂಕ್';
+
+  @override
+  String get accountTypeCash => 'ನಗದು';
+
+  @override
+  String get accountTypeCreditCard => 'ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್';
+
+  @override
+  String get accountTypeLockedTitle => 'ಖಾತೆ ಪ್ರಕಾರ ನಿಗದಿತವಾಗಿದೆ';
+
+  @override
+  String get accountTypeLockedBody =>
+      'ರಚಿಸಿದ ನಂತರ ಖಾತೆ ಪ್ರಕಾರವನ್ನು ಬದಲಾಯಿಸಲಾಗುವುದಿಲ್ಲ. ಬೇರೆ ಪ್ರಕಾರ ಬಳಸಲು, ಹೊಸ ಖಾತೆಯನ್ನು ರಚಿಸಿ.';
+
+  @override
+  String get accountTypeLockedTooltip => 'ಇದು ಏಕೆ ಲಾಕ್ ಆಗಿದೆ?';
+
+  @override
+  String get accountIdentifierLabel => 'ಖಾತೆ ಸಂಖ್ಯೆ / ಗುರುತಿಸುವಿಕೆ';
+
+  @override
+  String get accountIdentifierHint => 'ಕೊನೆಯ 4 ಅಂಕೆಗಳು ಅಥವಾ ಪೂರ್ಣ ಸಂಖ್ಯೆ';
+
+  @override
+  String get accountIdentifierHelper =>
+      'ಕೊನೆಯ 4 ಅಂಕೆಗಳು ಅಥವಾ ಪೂರ್ಣ ಸಂಖ್ಯೆ. SMS ಆಮದುಗಳನ್ನು ಹೊಂದಿಸಲು ಬಳಸಲಾಗುತ್ತದೆ.';
+
+  @override
+  String get makeDefaultAccount => 'ಇದನ್ನು ಡೀಫಾಲ್ಟ್ ಖಾತೆಯನ್ನಾಗಿ ಮಾಡಿ';
+
+  @override
+  String get makeDefaultAccountSub =>
+      'ವಹಿವಾಟುಗಳನ್ನು ಸೇರಿಸುವಾಗ ಮೊದಲೇ ಆಯ್ಕೆಯಾಗಿರುತ್ತದೆ.';
+
+  @override
+  String get currentBalanceLabel => 'ಪ್ರಸ್ತುತ ಬ್ಯಾಲೆನ್ಸ್';
+
+  @override
+  String get limitSpentLabel => 'ಖರ್ಚು ಮಾಡಿದ ಮಿತಿ';
+
+  @override
+  String get totalLimitLabel => 'ಒಟ್ಟು ಮಿತಿ';
+
+  @override
+  String get totalLimitHelper =>
+      'ಕಾರ್ಡ್‌ನ ಒಟ್ಟಾರೆ ಕ್ರೆಡಿಟ್ ಮಿತಿ. ಇದನ್ನು ಸಂಪಾದಿಸುವುದರಿಂದ ಯಾವುದೇ ಹೊಂದಾಣಿಕೆ ರಚನೆಯಾಗುವುದಿಲ್ಲ.';
+
+  @override
+  String get balanceAdjustHelper =>
+      'ಇದನ್ನು ಬದಲಾಯಿಸುವುದರಿಂದ ವ್ಯತ್ಯಾಸಕ್ಕಾಗಿ ಬ್ಯಾಲೆನ್ಸ್ ಹೊಂದಾಣಿಕೆ ವಹಿವಾಟು ರಚನೆಯಾಗುತ್ತದೆ.';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount ನ ಬ್ಯಾಲೆನ್ಸ್ ಹೊಂದಾಣಿಕೆಯನ್ನು ಜಮಾ ಮಾಡಲಾಗುತ್ತದೆ.';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount ನ ಬ್ಯಾಲೆನ್ಸ್ ಹೊಂದಾಣಿಕೆಯನ್ನು ಕಡಿತಗೊಳಿಸಲಾಗುತ್ತದೆ.';
+  }
+
+  @override
+  String get disableAccountToggle => 'ಖಾತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ';
+
+  @override
+  String get disableAccountHelper =>
+      'ಪಿಕರ್‌ಗಳು ಮತ್ತು ಹೋಮ್ ಕಾರ್ಡ್‌ಗಳಿಂದ ಮರೆಮಾಡಲಾಗಿದೆ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ವಹಿವಾಟುಗಳು ಉಳಿಯುತ್ತವೆ.';
+
+  @override
+  String get accountDisabledToggle => 'ಖಾತೆ ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ';
+
+  @override
+  String get accountDisabledHelper =>
+      'ಈ ಖಾತೆ ಮರೆಮಾಡಲಾಗಿದೆ. ಮತ್ತೆ ತೋರಿಸಲು ಆಫ್ ಮಾಡಿ.';
+
+  @override
+  String get accountUpdated => 'ಖಾತೆ ನವೀಕರಿಸಲಾಗಿದೆ';
+
+  @override
+  String get couldntLoadBalance => 'ಬ್ಯಾಲೆನ್ಸ್ ಲೋಡ್ ಮಾಡಲಾಗಲಿಲ್ಲ';
+
+  @override
+  String get pickNewDefaultTitle => 'ಹೊಸ ಡೀಫಾಲ್ಟ್ ಖಾತೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ';
+
+  @override
+  String get pickNewDefaultBody =>
+      'ಇದು ನಿಮ್ಮ ಡೀಫಾಲ್ಟ್ ಖಾತೆ. ಅದನ್ನು ಅಳಿಸುವ ಮೊದಲು ಬದಲಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.';
+
+  @override
+  String get adjustmentModalTitle => 'ಹೊಂದಾಣಿಕೆ ವಹಿವಾಟು ರಚಿಸಬೇಕೆ?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from ನಿಂದ $to ಗೆ ಬದಲಾಗುತ್ತಿದೆ. $diff ಗಾಗಿ ಬ್ಯಾಲೆನ್ಸ್ ಹೊಂದಾಣಿಕೆ ವಹಿವಾಟು ರಚಿಸಲಾಗುತ್ತದೆ.';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction. ಇದನ್ನು ಆದಾಯ ಅಥವಾ ವೆಚ್ಚವಾಗಿ ಪರಿಗಣಿಸಲಾಗುವುದಿಲ್ಲ.';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'ರಚಿಸಿ ಮತ್ತು ಉಳಿಸಿ';
+
+  @override
+  String get valueNounBalance => 'ಬ್ಯಾಲೆನ್ಸ್';
+
+  @override
+  String get valueNounLimitSpent => 'ಖರ್ಚು ಮಾಡಿದ ಮಿತಿ';
+
+  @override
+  String get valueNounBalanceCap => 'ಬ್ಯಾಲೆನ್ಸ್';
+
+  @override
+  String get valueNounLimitSpentCap => 'ಖರ್ಚು ಮಾಡಿದ ಮಿತಿ';
+
+  @override
+  String get adjustmentIncreasedBy => 'ಹೆಚ್ಚಾಗಿದೆ';
+
+  @override
+  String get adjustmentDecreasedBy => 'ಕಡಿಮೆಯಾಗಿದೆ';
+
+  @override
+  String get dangerZone => 'ಅಪಾಯಕಾರಿ ವಲಯ';
 }

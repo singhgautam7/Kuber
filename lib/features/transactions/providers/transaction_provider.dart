@@ -44,6 +44,32 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
     return id;
   }
 
+  /// Creates a balance-adjustment transaction for a changed account balance or
+  /// credit-card limit spent. Moved verbatim from the old EditBalanceSheet so
+  /// the behavior (name, sign, type) is identical — do not change it.
+  ///
+  /// [diff] is signed: positive raises the balance (income), negative lowers it
+  /// (expense). [isCredit] selects the adjustment name used for credit cards.
+  Future<void> addBalanceAdjustment({
+    required int accountId,
+    required double diff,
+    required bool isCredit,
+  }) async {
+    final isPositive = diff > 0;
+    final adjustment = Transaction()
+      ..name = isCredit ? 'Limit Spent Adjustment' : 'Balance Adjustment'
+      ..amount = diff.abs()
+      ..type = isPositive ? 'income' : 'expense'
+      ..accountId = accountId.toString()
+      ..categoryId = ''
+      ..isBalanceAdjustment = true
+      ..createdAt = DateTime.now()
+      ..updatedAt = DateTime.now()
+      ..nameLower =
+          isCredit ? 'limit spent adjustment' : 'balance adjustment';
+    await add(adjustment);
+  }
+
   Future<int> updateTransaction(Transaction t) async {
     final id = await ref.read(transactionRepositoryProvider).save(t);
     ref.invalidateSelf();

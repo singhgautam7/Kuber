@@ -1966,12 +1966,15 @@
   "invTypeSip": "SIP",
   "invTypeMutualFund": "Mutual Fund",
   "invTypeStocks": "Stocks",
-  "invTypeGold": "Gold",
+  "invTypeGold": "Gold/Silver",
   "invTypeFd": "FD",
   "invTypeRd": "RD",
   "invTypeCrypto": "Crypto",
   "invTypeTrading": "Trading",
   "invTypeRealEstate": "Real Estate",
+  "invTypeEtf": "ETF",
+  "invTypeBonds": "Bonds",
+  "invTypeCollectible": "Collectible",
   "invTypeOther": "Other",
   "editInvestment": "Edit investment",
   "newInvestment": "New investment",
@@ -2673,5 +2676,88 @@
         "type": "int"
       }
     }
-  }
+  },
+  "editAccountSubtitle": "Update account details",
+  "accountNameLabel": "Account Name",
+  "accountNameHint": "Account name",
+  "accountTypeBank": "Bank",
+  "accountTypeCash": "Cash",
+  "accountTypeCreditCard": "Credit Card",
+  "accountTypeLockedTitle": "Account type is fixed",
+  "accountTypeLockedBody": "Account type cannot be changed after creation. To use a different type, create a new account.",
+  "accountTypeLockedTooltip": "Why is this locked?",
+  "accountIdentifierLabel": "Account Number / Identifier",
+  "accountIdentifierHint": "Last 4 digits or full number",
+  "accountIdentifierHelper": "Last 4 digits or full number. Used to match SMS imports.",
+  "makeDefaultAccount": "Make this the default account",
+  "makeDefaultAccountSub": "Pre-selected when adding transactions.",
+  "currentBalanceLabel": "Current Balance",
+  "limitSpentLabel": "Limit Spent",
+  "totalLimitLabel": "Total Limit",
+  "totalLimitHelper": "The card's overall credit limit. Editing this won't create an adjustment.",
+  "balanceAdjustHelper": "Changing this will create a balance adjustment transaction for the difference.",
+  "adjustmentWillBeCredited": "A balance adjustment of {amount} will be credited.",
+  "@adjustmentWillBeCredited": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "adjustmentWillBeDebited": "A balance adjustment of {amount} will be debited.",
+  "@adjustmentWillBeDebited": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "disableAccountToggle": "Disable Account",
+  "disableAccountHelper": "Hidden from pickers and home cards. Existing transactions remain.",
+  "accountDisabledToggle": "Account disabled",
+  "accountDisabledHelper": "This account is hidden. Turn off to show it again.",
+  "accountUpdated": "Account updated",
+  "couldntLoadBalance": "Couldn't load balance",
+  "pickNewDefaultTitle": "Pick a new default account",
+  "pickNewDefaultBody": "This is your default account. Choose a replacement before deleting it.",
+  "adjustmentModalTitle": "Create adjustment transaction?",
+  "adjustmentModalBody": "The {noun} is changing from {from} to {to}. A balance adjustment transaction for {diff} will be created.",
+  "@adjustmentModalBody": {
+    "placeholders": {
+      "noun": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "adjustmentModalChip": "{nounCap} {direction} {diff}. This won't count as income or expense.",
+  "@adjustmentModalChip": {
+    "placeholders": {
+      "nounCap": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      }
+    }
+  },
+  "adjustmentCreateAndSave": "Create and save",
+  "valueNounBalance": "balance",
+  "valueNounLimitSpent": "limit spent",
+  "valueNounBalanceCap": "Balance",
+  "valueNounLimitSpentCap": "Limit spent",
+  "adjustmentIncreasedBy": "increased by",
+  "adjustmentDecreasedBy": "decreased by",
+  "dangerZone": "Danger Zone"
 }

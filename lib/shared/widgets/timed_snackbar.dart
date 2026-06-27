@@ -45,6 +45,7 @@ void showKuberSnackBar(
   VoidCallback? onAction,
   String? secondaryActionLabel,
   VoidCallback? onSecondaryAction,
+  Duration? duration,
 }) {
   // Clear any currently showing snackbar first.
   _dismissCurrent();
@@ -62,6 +63,7 @@ void showKuberSnackBar(
       secondaryActionLabel: secondaryActionLabel,
       onSecondaryAction: onSecondaryAction,
       onRequestClose: _dismissCurrent,
+      duration: duration,
     ),
   );
 
@@ -69,7 +71,7 @@ void showKuberSnackBar(
   _currentEntry = entry;
   overlay.insert(entry);
 
-  _currentTimer = Timer(_kSnackDuration, _dismissCurrent);
+  _currentTimer = Timer(duration ?? _kSnackDuration, _dismissCurrent);
 }
 
 // ---------------------------------------------------------------------------
@@ -101,6 +103,7 @@ class _KuberSnackBarWidget extends StatefulWidget {
   final String? secondaryActionLabel;
   final VoidCallback? onSecondaryAction;
   final VoidCallback onRequestClose;
+  final Duration? duration;
 
   const _KuberSnackBarWidget({
     required this.controller,
@@ -111,6 +114,7 @@ class _KuberSnackBarWidget extends StatefulWidget {
     this.onAction,
     this.secondaryActionLabel,
     this.onSecondaryAction,
+    this.duration,
   });
 
   @override
@@ -141,7 +145,7 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
       parent: _slideCtrl,
       curve: Curves.easeOutCubic,
     );
-    _progressCtrl = AnimationController(vsync: this, duration: _kSnackDuration);
+    _progressCtrl = AnimationController(vsync: this, duration: widget.duration ?? _kSnackDuration);
     widget.controller._attach(this);
     _slideCtrl.forward();
     _progressCtrl.forward();

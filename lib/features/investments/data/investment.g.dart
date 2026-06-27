@@ -42,27 +42,32 @@ const InvestmentSchema = CollectionSchema(
       name: r'currentValue',
       type: IsarType.double,
     ),
-    r'investedAmount': PropertySchema(
+    r'deductedFromAccount': PropertySchema(
       id: 5,
+      name: r'deductedFromAccount',
+      type: IsarType.bool,
+    ),
+    r'investedAmount': PropertySchema(
+      id: 6,
       name: r'investedAmount',
       type: IsarType.double,
     ),
     r'investmentType': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'investmentType',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 7, name: r'name', type: IsarType.string),
-    r'notes': PropertySchema(id: 8, name: r'notes', type: IsarType.string),
+    r'name': PropertySchema(id: 8, name: r'name', type: IsarType.string),
+    r'notes': PropertySchema(id: 9, name: r'notes', type: IsarType.string),
     r'sipAmount': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'sipAmount',
       type: IsarType.double,
     ),
-    r'sipDate': PropertySchema(id: 10, name: r'sipDate', type: IsarType.long),
-    r'uid': PropertySchema(id: 11, name: r'uid', type: IsarType.string),
+    r'sipDate': PropertySchema(id: 11, name: r'sipDate', type: IsarType.long),
+    r'uid': PropertySchema(id: 12, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -119,14 +124,15 @@ void _investmentSerialize(
   writer.writeString(offsets[2], object.categoryId);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeDouble(offsets[4], object.currentValue);
-  writer.writeDouble(offsets[5], object.investedAmount);
-  writer.writeString(offsets[6], object.investmentType);
-  writer.writeString(offsets[7], object.name);
-  writer.writeString(offsets[8], object.notes);
-  writer.writeDouble(offsets[9], object.sipAmount);
-  writer.writeLong(offsets[10], object.sipDate);
-  writer.writeString(offsets[11], object.uid);
-  writer.writeDateTime(offsets[12], object.updatedAt);
+  writer.writeBool(offsets[5], object.deductedFromAccount);
+  writer.writeDouble(offsets[6], object.investedAmount);
+  writer.writeString(offsets[7], object.investmentType);
+  writer.writeString(offsets[8], object.name);
+  writer.writeString(offsets[9], object.notes);
+  writer.writeDouble(offsets[10], object.sipAmount);
+  writer.writeLong(offsets[11], object.sipDate);
+  writer.writeString(offsets[12], object.uid);
+  writer.writeDateTime(offsets[13], object.updatedAt);
 }
 
 Investment _investmentDeserialize(
@@ -141,15 +147,16 @@ Investment _investmentDeserialize(
   object.categoryId = reader.readString(offsets[2]);
   object.createdAt = reader.readDateTime(offsets[3]);
   object.currentValue = reader.readDoubleOrNull(offsets[4]);
+  object.deductedFromAccount = reader.readBool(offsets[5]);
   object.id = id;
-  object.investedAmount = reader.readDoubleOrNull(offsets[5]);
-  object.investmentType = reader.readString(offsets[6]);
-  object.name = reader.readString(offsets[7]);
-  object.notes = reader.readStringOrNull(offsets[8]);
-  object.sipAmount = reader.readDoubleOrNull(offsets[9]);
-  object.sipDate = reader.readLongOrNull(offsets[10]);
-  object.uid = reader.readString(offsets[11]);
-  object.updatedAt = reader.readDateTime(offsets[12]);
+  object.investedAmount = reader.readDoubleOrNull(offsets[6]);
+  object.investmentType = reader.readString(offsets[7]);
+  object.name = reader.readString(offsets[8]);
+  object.notes = reader.readStringOrNull(offsets[9]);
+  object.sipAmount = reader.readDoubleOrNull(offsets[10]);
+  object.sipDate = reader.readLongOrNull(offsets[11]);
+  object.uid = reader.readString(offsets[12]);
+  object.updatedAt = reader.readDateTime(offsets[13]);
   return object;
 }
 
@@ -171,20 +178,22 @@ P _investmentDeserializeProp<P>(
     case 4:
       return (reader.readDoubleOrNull(offset)) as P;
     case 5:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
-    case 9:
-      return (reader.readDoubleOrNull(offset)) as P;
-    case 10:
-      return (reader.readLongOrNull(offset)) as P;
-    case 11:
       return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 11:
+      return (reader.readLongOrNull(offset)) as P;
     case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -750,6 +759,15 @@ extension InvestmentQueryFilter
 
           epsilon: epsilon,
         ),
+      );
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterFilterCondition>
+  deductedFromAccountEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'deductedFromAccount', value: value),
       );
     });
   }
@@ -1795,6 +1813,20 @@ extension InvestmentQuerySortBy
     });
   }
 
+  QueryBuilder<Investment, Investment, QAfterSortBy>
+  sortByDeductedFromAccount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deductedFromAccount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterSortBy>
+  sortByDeductedFromAccountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deductedFromAccount', Sort.desc);
+    });
+  }
+
   QueryBuilder<Investment, Investment, QAfterSortBy> sortByInvestedAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'investedAmount', Sort.asc);
@@ -1956,6 +1988,20 @@ extension InvestmentQuerySortThenBy
     });
   }
 
+  QueryBuilder<Investment, Investment, QAfterSortBy>
+  thenByDeductedFromAccount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deductedFromAccount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Investment, Investment, QAfterSortBy>
+  thenByDeductedFromAccountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'deductedFromAccount', Sort.desc);
+    });
+  }
+
   QueryBuilder<Investment, Investment, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -2103,6 +2149,13 @@ extension InvestmentQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Investment, Investment, QDistinct>
+  distinctByDeductedFromAccount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'deductedFromAccount');
+    });
+  }
+
   QueryBuilder<Investment, Investment, QDistinct> distinctByInvestedAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'investedAmount');
@@ -2198,6 +2251,13 @@ extension InvestmentQueryProperty
   QueryBuilder<Investment, double?, QQueryOperations> currentValueProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentValue');
+    });
+  }
+
+  QueryBuilder<Investment, bool, QQueryOperations>
+  deductedFromAccountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'deductedFromAccount');
     });
   }
 

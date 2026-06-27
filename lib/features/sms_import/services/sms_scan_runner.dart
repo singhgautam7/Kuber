@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:isolate';
 
 import '../engine/scan_progress.dart';
-import '../engine/sender_ids.dart';
 import '../engine/sms_parser.dart';
 
 /// Drives a single inbox scan on a background worker isolate, streaming
@@ -29,10 +28,26 @@ class SmsScanController {
   ) async {
     final port = ReceivePort();
     _port = port;
-    _isolate = await Isolate.spawn(
-      _scanIsolateEntry,
-      _ScanParams(port.sendPort, raw, trigger),
-    );
+    final errorPort = ReceivePort();
+
+    try {
+      _isolate = await Isolate.spawn(
+        _scanIsolateEntry,
+        _ScanParams(port.sendPort, raw, trigger),
+      );
+
+      _isolate!.addErrorListener(errorPort.sendPort);
+      errorPort.listen((message) {
+        _finish(null);
+        errorPort.close();
+      });
+    } catch (_) {
+      _finish(null);
+      port.close();
+      errorPort.close();
+      return null;
+    }
+
     port.listen((msg) {
       if (_finished) return;
       if (msg is ScanProgress) {
@@ -40,6 +55,7 @@ class SmsScanController {
       } else if (msg is _ScanDone) {
         if (!_progress.isClosed) _progress.add(msg.progress);
         _finish(msg.results);
+        errorPort.close();
       }
     });
     return _completer.future;
@@ -76,48 +92,63 @@ class _ScanDone {
 /// Worker isolate entry: parses [raw] in batches of 50, emitting progress after
 /// each batch and a final [_ScanDone] when finished.
 void _scanIsolateEntry(_ScanParams p) {
-  const parser = SmsParser();
-  final total = p.raw.length;
-  final results = <SmsParseResult>[];
-  var scanned = 0;
-  var found = 0;
+  try {
+    const parser = SmsParser();
+    final total = p.raw.length;
+    final results = <SmsParseResult>[];
+    var scanned = 0;
+    var found = 0;
 
-  for (final r in p.raw) {
-    scanned++;
-    if (r.body.isNotEmpty && isKnownBankSender(r.address)) {
-      final res = parser.parse(
-        r.body,
-        r.address,
-        DateTime.fromMillisecondsSinceEpoch(r.dateMillis),
-      );
-      if (res != null) {
-        results.add(res);
-        found++;
+    for (final r in p.raw) {
+      scanned++;
+      if (r.body.isNotEmpty && isAllowedSender(r.address)) {
+        final res = parser.parse(
+          r.body,
+          r.address,
+          DateTime.fromMillisecondsSinceEpoch(r.dateMillis),
+        );
+        if (res != null) {
+          results.add(res);
+          found++;
+        }
+      }
+      if (scanned % 50 == 0) {
+        p.sendPort.send(
+          ScanProgress(
+            totalMessages: total,
+            scannedMessages: scanned,
+            bankMessagesFound: found,
+            isComplete: false,
+            trigger: p.trigger,
+          ),
+        );
       }
     }
-    if (scanned % 50 == 0) {
-      p.sendPort.send(
+
+    p.sendPort.send(
+      _ScanDone(
         ScanProgress(
           totalMessages: total,
           scannedMessages: scanned,
           bankMessagesFound: found,
-          isComplete: false,
+          isComplete: true,
           trigger: p.trigger,
         ),
-      );
-    }
-  }
-
-  p.sendPort.send(
-    _ScanDone(
-      ScanProgress(
-        totalMessages: total,
-        scannedMessages: scanned,
-        bankMessagesFound: found,
-        isComplete: true,
-        trigger: p.trigger,
+        results,
       ),
-      results,
-    ),
-  );
+    );
+  } catch (e) {
+    p.sendPort.send(
+      _ScanDone(
+        ScanProgress(
+          totalMessages: p.raw.length,
+          scannedMessages: p.raw.length,
+          bankMessagesFound: 0,
+          isComplete: true,
+          trigger: p.trigger,
+        ),
+        const [],
+      ),
+    );
+  }
 }

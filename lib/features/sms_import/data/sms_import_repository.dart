@@ -19,6 +19,22 @@ class SmsImportRepository extends BaseRepository<SmsTransaction> {
     return isar.smsTransactions.where().sortBySmsDateDesc().findAll();
   }
 
+  Future<List<SmsTransaction>> getByStatus(String status) {
+    if (status == SmsReviewStatus.imported) {
+      return isar.smsTransactions
+          .filter()
+          .reviewStatusEqualTo(status)
+          .sortByImportedAtDesc()
+          .findAll();
+    } else {
+      return isar.smsTransactions
+          .filter()
+          .reviewStatusEqualTo(status)
+          .sortBySmsDateDesc()
+          .findAll();
+    }
+  }
+
   Future<SmsTransaction?> getByHash(String hash) {
     return isar.smsTransactions
         .filter()
@@ -32,18 +48,29 @@ class SmsImportRepository extends BaseRepository<SmsTransaction> {
     return isar.writeTxn(() => isar.smsTransactions.put(s));
   }
 
-  /// Inserts only rows whose hash is not already staged, so re-scanning never
-  /// resets an existing row's review status.
+  /// Inserts only rows whose hash is not already staged, so re-scanning
+  /// resets an existing row's review status. Also checks (senderId, smsDate, parsedAmount) triple.
   Future<int> insertNew(List<SmsTransaction> rows) async {
     if (rows.isEmpty) return 0;
     return isar.writeTxn(() async {
       var inserted = 0;
       for (final row in rows) {
-        final existing = await isar.smsTransactions
+        final existingHash = await isar.smsTransactions
             .filter()
             .rawSmsHashEqualTo(row.rawSmsHash)
             .findFirst();
-        if (existing != null) continue;
+        if (existingHash != null) continue;
+
+        final existingTriple = await isar.smsTransactions
+            .filter()
+            .senderIdEqualTo(row.senderId)
+            .and()
+            .smsDateEqualTo(row.smsDate)
+            .and()
+            .parsedAmountEqualTo(row.parsedAmount)
+            .findFirst();
+        if (existingTriple != null) continue;
+
         await isar.smsTransactions.put(row);
         inserted++;
       }
@@ -109,6 +136,30 @@ class SmsImportRepository extends BaseRepository<SmsTransaction> {
       if (row == null) return;
       row.reviewStatus = SmsReviewStatus.dismissed;
       await isar.smsTransactions.put(row);
+    });
+  }
+
+  Future<void> markDismissedBatch(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await isar.writeTxn(() async {
+      for (final id in ids) {
+        final row = await isar.smsTransactions.get(id);
+        if (row == null) continue;
+        row.reviewStatus = SmsReviewStatus.dismissed;
+        await isar.smsTransactions.put(row);
+      }
+    });
+  }
+
+  Future<void> markUnreviewedBatch(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await isar.writeTxn(() async {
+      for (final id in ids) {
+        final row = await isar.smsTransactions.get(id);
+        if (row == null) continue;
+        row.reviewStatus = SmsReviewStatus.unreviewed;
+        await isar.smsTransactions.put(row);
+      }
     });
   }
 

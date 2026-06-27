@@ -8,7 +8,8 @@ import 'package:kuber/features/sms_import/providers/sms_import_provider.dart';
 import 'package:kuber/features/transactions/data/transaction.dart';
 import 'package:kuber/features/transactions/providers/transaction_provider.dart';
 import 'package:kuber/features/tutorial/providers/tutorial_sandbox_provider.dart';
-
+import 'package:kuber/features/sms_import/services/sms_inbox_service.dart';
+import 'package:kuber/features/sms_import/engine/scan_progress.dart';
 import '../../helpers/isar_test_helper.dart';
 
 SmsTransaction _staged({
@@ -183,4 +184,65 @@ void main() {
     // Same hash again -> not inserted.
     expect(await repo.insertNew([_staged()]), 0);
   });
+
+  test('background refresh scan only inserts new SMS and surfaces correct count', () async {
+    final now = DateTime.now();
+    final mockService = MockSmsInboxService([
+      RawInboxSms(address: 'HDFCBK', body: 'INR 100 debited from A/c XX4521 on 05-Jun-26', dateMillis: now.millisecondsSinceEpoch),
+    ]);
+
+    // Override the inbox service
+    final testContainer = ProviderContainer(
+      overrides: [
+        isarProvider.overrideWithValue(isar),
+        tutorialAwareIsarProvider.overrideWithValue(isar),
+        smsInboxServiceProvider.overrideWithValue(mockService),
+      ],
+    );
+
+    addTearDown(testContainer.dispose);
+
+    final notifier = testContainer.read(smsImportProvider.notifier);
+    await testContainer.read(smsImportProvider.future);
+
+    // Initial first-load scan
+    await notifier.startFirstLoadScan();
+    var state = testContainer.read(smsImportProvider).value!;
+    expect(state.unreviewed.length, 1);
+    expect(state.scanProgress?.bankMessagesFound, 1);
+
+    // Now modify mockService to contain a second message
+    mockService.messages.add(
+      RawInboxSms(address: 'HDFCBK', body: 'INR 200 debited from A/c XX4521 on 06-Jun-26', dateMillis: now.millisecondsSinceEpoch),
+    );
+
+    // Run background scan refresh
+    await notifier.startBackgroundScan();
+    state = testContainer.read(smsImportProvider).value!;
+
+    // Total unreviewed should now be 2
+    expect(state.unreviewed.length, 2);
+    // Newly inserted count in this scan should be exactly 1
+    expect(state.scanProgress?.bankMessagesFound, 1);
+  });
+}
+
+class MockSmsInboxService extends SmsInboxService {
+  final List<RawInboxSms> messages;
+  MockSmsInboxService(this.messages);
+
+  @override
+  bool get isSupported => true;
+
+  @override
+  Future<bool> checkPermission() async => true;
+
+  @override
+  Future<List<RawInboxSms>> readRawInbox({int? days, DateTime? since}) async {
+    if (since != null) {
+      return messages.where((m) => m.dateMillis >= since.millisecondsSinceEpoch).toList();
+    }
+    final cutoff = DateTime.now().subtract(Duration(days: days ?? 90)).millisecondsSinceEpoch;
+    return messages.where((m) => m.dateMillis >= cutoff).toList();
+  }
 }

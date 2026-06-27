@@ -514,8 +514,35 @@ class _TransactionReviewSheetState
   }
 
   Future<void> _dismiss() async {
-    await ref.read(smsImportProvider.notifier).dismiss(widget.sms);
-    if (mounted) Navigator.pop(context, false);
+    final cs = Theme.of(context).colorScheme;
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surfaceContainer,
+        title: Text('Dismiss message?',
+            style: localeFont(fontWeight: FontWeight.bold)),
+        content: Text(
+          'Are you sure you want to dismiss this message? You can find it later under the "Dismissed" tab.',
+          style: localeFont(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          AppButton(
+            label: 'Dismiss',
+            type: AppButtonType.danger,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+
+    if (proceed == true && mounted) {
+      await ref.read(smsImportProvider.notifier).dismiss(widget.sms);
+      if (mounted) Navigator.pop(context, false);
+    }
   }
 
   Future<bool?> _showDuplicateDialog(dynamic existing) {

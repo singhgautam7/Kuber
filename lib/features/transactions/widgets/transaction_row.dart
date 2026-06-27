@@ -303,7 +303,9 @@ class TransactionRow extends ConsumerWidget {
       iconColor = cs.onSurfaceVariant;
       displayName = transaction.name;
       subtitle = context.l10n.accountCorrectionSubtitle;
-      amountColor = cs.onSurface;
+      // Income (+) adjustments read green like any other inflow; expense stays
+      // neutral.
+      amountColor = isIncome ? cs.tertiary : cs.onSurface;
       amountPrefix = isIncome ? '+' : '-';
     } else if (isTransfer) {
       iconData = Icons.swap_horiz_rounded;

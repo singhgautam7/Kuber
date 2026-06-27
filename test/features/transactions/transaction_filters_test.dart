@@ -69,7 +69,7 @@ void main() {
       expect(kept.single.amount, 100);
     });
 
-    test('validForFeed keeps the expense transfer leg, drops the income leg',
+    test('validForFeed keeps the expense transfer leg, drops the income leg, keeps balance adjustments',
         () {
       final txns = [
         makeTransaction(type: 'expense', amount: 50, isTransfer: true),
@@ -78,9 +78,9 @@ void main() {
         makeTransaction(type: 'expense', amount: 100),
       ];
       final kept = txns.validForFeed.toList();
-      expect(kept.length, 2); // expense transfer leg + the normal expense
+      expect(kept.length, 3); // expense transfer leg + the normal expense + balance adjustment
       expect(kept.where((t) => t.isTransfer).length, 1);
-      expect(kept.any((t) => t.isBalanceAdjustment), isFalse);
+      expect(kept.any((t) => t.isBalanceAdjustment), isTrue);
     });
   });
 

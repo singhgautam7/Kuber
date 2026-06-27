@@ -10,7 +10,7 @@ class Investment {
 
   late String name; // e.g. "Bitcoin", "HDFC Index Fund"
 
-  late String investmentType; // 'sip' | 'mutual_fund' | 'stocks' | 'crypto' | 'trading' | 'other'
+  late String investmentType; // 'sip' | 'mutual_fund' | 'stocks' | 'etf' | 'bonds' | 'gold' | 'real_estate' | 'crypto' | 'fd' | 'rd' | 'collectible' | 'other'
 
   double? currentValue; // User-updated manually, for P&L display
 
@@ -27,6 +27,8 @@ class Investment {
   late String categoryId; // Auto-selected 'Investment' system category
 
   String? notes;
+
+  bool deductedFromAccount = true;
 
   late DateTime createdAt;
 
@@ -45,6 +47,7 @@ class Investment {
     'accountId': accountId,
     'categoryId': categoryId,
     'notes': notes,
+    'deductedFromAccount': deductedFromAccount,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };

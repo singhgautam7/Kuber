@@ -432,7 +432,19 @@ class _InvestmentDetailSheetState
       case 'trading':
         return Icons.trending_up;
       case 'real_estate':
-        return Icons.apartment_outlined;
+        return Icons.home_work_outlined;
+      case 'gold':
+        return Icons.diamond_outlined;
+      case 'etf':
+        return Icons.layers_outlined;
+      case 'bonds':
+        return Icons.description_outlined;
+      case 'fd':
+        return Icons.account_balance_outlined;
+      case 'rd':
+        return Icons.savings_rounded;
+      case 'collectible':
+        return Icons.palette_outlined;
       default:
         return Icons.show_chart;
     }
@@ -447,6 +459,12 @@ class _InvestmentDetailSheetState
       'crypto' => l.invTypeCrypto,
       'trading' => l.invTypeTrading,
       'real_estate' => l.invTypeRealEstate,
+      'gold' => l.invTypeGold,
+      'etf' => l.invTypeEtf,
+      'bonds' => l.invTypeBonds,
+      'collectible' => l.invTypeCollectible,
+      'fd' => l.invTypeFd,
+      'rd' => l.invTypeRd,
       _ => l.invTypeOther,
     };
     return label.toUpperCase();

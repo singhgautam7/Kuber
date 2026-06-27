@@ -44,6 +44,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
   int? _sipDate;
   String? _selectedAccountId;
   bool _isEditing = false;
+  bool _deductedFromAccount = true;
 
   @override
   void initState() {
@@ -66,6 +67,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
       _sipDate = e.sipDate;
       _selectedAccountId = e.accountId;
       _notesController.text = e.notes ?? '';
+      _deductedFromAccount = e.deductedFromAccount;
     }
   }
 
@@ -93,9 +95,13 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
   bool get _canSave {
     if (_nameController.text.trim().isEmpty) return false;
     if (_autoDebit) {
-      if (_sipAmount <= 0 || _sipDate == null || _selectedAccountId == null) {
+      if (_sipAmount <= 0 || _sipDate == null) {
         return false;
       }
+    }
+    final showAccountPicker = _autoDebit || (_deductedFromAccount && _invested > 0);
+    if (showAccountPicker && _selectedAccountId == null) {
+      return false;
     }
     return true;
   }
@@ -172,9 +178,25 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                         label: context.l10n.invTypeStocks,
                         icon: Icons.show_chart_rounded),
                     KuberChipOption(
+                        value: 'etf',
+                        label: context.l10n.invTypeEtf,
+                        icon: Icons.layers_outlined),
+                    KuberChipOption(
+                        value: 'bonds',
+                        label: context.l10n.invTypeBonds,
+                        icon: Icons.description_outlined),
+                    KuberChipOption(
                         value: 'gold',
                         label: context.l10n.invTypeGold,
                         icon: Icons.diamond_outlined),
+                    KuberChipOption(
+                        value: 'real_estate',
+                        label: context.l10n.invTypeRealEstate,
+                        icon: Icons.home_work_outlined),
+                    KuberChipOption(
+                        value: 'crypto',
+                        label: context.l10n.invTypeCrypto,
+                        icon: Icons.currency_bitcoin_rounded),
                     KuberChipOption(
                         value: 'fd',
                         label: context.l10n.invTypeFd,
@@ -183,6 +205,10 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                         value: 'rd',
                         label: context.l10n.invTypeRd,
                         icon: Icons.savings_rounded),
+                    KuberChipOption(
+                        value: 'collectible',
+                        label: context.l10n.invTypeCollectible,
+                        icon: Icons.palette_outlined),
                     KuberChipOption(
                         value: 'other',
                         label: context.l10n.invTypeOther,
@@ -225,68 +251,105 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   onCalculatorTap: () =>
                       _openCalculatorFor(_currentValueController),
                 ),
-                if (_invested > 0 && _current > 0) _GainLossChip(
-                  invested: _invested,
-                  current: _current,
-                  symbol: symbol,
-                ),
+                // Moved "Already invested?" toggle to Auto-debit & Account section below
+                if (_invested > 0 && _current > 0) ...[
+                  const SizedBox(height: 10),
+                  _GainLossChip(
+                    invested: _invested,
+                    current: _current,
+                    symbol: symbol,
+                  ),
+                ],
               ],
             ),
 
             KuberFormSection(
-              label: context.l10n.autoDebitSip,
+              label: "Automation & Account",
               children: [
-                KuberSwitchRow(
-                  icon: Icons.repeat_rounded,
-                  name: context.l10n.enableAutoDebitSip,
-                  sub: context.l10n.automateMonthlyContrib,
-                  value: _autoDebit,
-                  onChanged: (v) => setState(() => _autoDebit = v),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOutCubic,
-                  child: !_autoDebit
-                      ? const SizedBox.shrink()
-                      : Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              KuberFieldLabel(context.l10n.monthlySipAmount),
-                              TextField(
-                                controller: _sipAmountController,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
-                                onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                                onChanged: (_) => setState(() {}),
-                                style: localeFont(
-                                    color: cs.onSurface, fontSize: 15),
-                                decoration: InputDecoration(
-                                  prefixText: '$symbol ',
-                                  prefixStyle: localeFont(
-                                      color: cs.onSurfaceVariant),
-                                  suffixIcon: IconButton(
-                                    onPressed: () => _openCalculatorFor(
-                                        _sipAmountController),
-                                    icon: Icon(Icons.calculate_outlined,
-                                        size: 18,
-                                        color: cs.onSurfaceVariant),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    KuberSwitchRow(
+                      icon: Icons.repeat_rounded,
+                      name: context.l10n.enableAutoDebitSip,
+                      sub: context.l10n.automateMonthlyContrib,
+                      value: _autoDebit,
+                      onChanged: (v) => setState(() => _autoDebit = v),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      child: !_autoDebit
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  KuberFieldLabel(context.l10n.monthlySipAmount),
+                                  TextField(
+                                    controller: _sipAmountController,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
+                                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                                    onChanged: (_) => setState(() {}),
+                                    style: localeFont(
+                                        color: cs.onSurface, fontSize: 15),
+                                    decoration: InputDecoration(
+                                      prefixText: '$symbol ',
+                                      prefixStyle: localeFont(
+                                          color: cs.onSurfaceVariant),
+                                      suffixIcon: IconButton(
+                                        onPressed: () => _openCalculatorFor(
+                                            _sipAmountController),
+                                        icon: Icon(Icons.calculate_outlined,
+                                            size: 18,
+                                            color: cs.onSurfaceVariant),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  const SizedBox(height: 10),
+                                  KuberFieldLabel(context.l10n.sipDate),
+                                  KuberDayGrid(
+                                    selected: _sipDate,
+                                    onChanged: (v) => setState(() => _sipDate = v),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 10),
-                              KuberFieldLabel(context.l10n.sipDate),
-                              KuberDayGrid(
-                                selected: _sipDate,
-                                onChanged: (v) => setState(() => _sipDate = v),
+                            ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    KuberSwitchRow(
+                      icon: Icons.check_circle_outline_rounded,
+                      name: "Already invested?",
+                      sub: _isEditing
+                          ? "Set at creation. To change, delete and re-add."
+                          : "If turned on, the amount won't be deducted from your selected account. Use this for investments you made before adding Kuber.",
+                      value: !_deductedFromAccount,
+                      enabled: !_isEditing,
+                      onChanged: (v) => setState(() => _deductedFromAccount = !v),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      child: !(_autoDebit || (_deductedFromAccount && _invested > 0))
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  KuberFieldLabel(context.l10n.debitedFrom),
+                                  _accountPickerRow(),
+                                ],
                               ),
-                              const SizedBox(height: 10),
-                              KuberFieldLabel(context.l10n.debitedFrom),
-                              _accountPickerRow(),
-                            ],
-                          ),
-                        ),
+                            ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -298,26 +361,15 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                   controller: _notesController,
                   maxLines: 3,
                   minLines: 1,
+                  textCapitalization: TextCapitalization.sentences,
+                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+                  style: localeFont(color: cs.onSurface, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.optionalContext,
                   ),
-                ],
-              ),
-
-              KuberFormSection(
-                label: context.l10n.notesLabel,
-                children: [
-                  TextField(
-                    controller: _notesController,
-                    maxLines: 3,
-                    minLines: 1,
-                    textCapitalization: TextCapitalization.sentences,
-                    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                    style: localeFont(color: cs.onSurface, fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.optionalContext,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -447,6 +499,7 @@ class _AddInvestmentScreenState extends ConsumerState<AddInvestmentScreen> {
                 ? null
                 : _notesController.text.trim(),
             initialAmount: initialAmount,
+            deductedFromAccount: _deductedFromAccount,
           );
     }
     if (mounted) context.pop();

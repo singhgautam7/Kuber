@@ -244,8 +244,14 @@ String _assetLabel(String type) {
     'sip' => 'SIP',
     'mutual_fund' => 'Mutual Fund',
     'stocks' => 'Stocks',
+    'gold' => 'Gold/Silver',
+    'real_estate' => 'Real Estate',
     'crypto' => 'Crypto',
-    'trading' => 'Trading',
+    'etf' => 'ETF',
+    'bonds' => 'Bonds',
+    'fd' => 'FD',
+    'rd' => 'RD',
+    'collectible' => 'Collectible',
     _ => 'Other',
   };
 }
@@ -257,8 +263,14 @@ String _assetDisplay(BuildContext context, String englishLabel) {
     'SIP' => l.invTypeSip,
     'Mutual Fund' => l.invTypeMutualFund,
     'Stocks' => l.invTypeStocks,
+    'Gold/Silver' => l.invTypeGold,
+    'Real Estate' => l.invTypeRealEstate,
     'Crypto' => l.invTypeCrypto,
-    'Trading' => l.invTypeTrading,
+    'ETF' => l.invTypeEtf,
+    'Bonds' => l.invTypeBonds,
+    'FD' => l.invTypeFd,
+    'RD' => l.invTypeRd,
+    'Collectible' => l.invTypeCollectible,
     _ => l.invTypeOther,
   };
 }
@@ -270,6 +282,13 @@ IconData _investmentIcon(String type) {
     'stocks' => Icons.show_chart_rounded,
     'crypto' => Icons.currency_bitcoin_rounded,
     'trading' => Icons.candlestick_chart_rounded,
+    'gold' => Icons.diamond_outlined,
+    'real_estate' => Icons.home_work_outlined,
+    'etf' => Icons.layers_outlined,
+    'bonds' => Icons.description_outlined,
+    'collectible' => Icons.palette_outlined,
+    'fd' => Icons.account_balance_outlined,
+    'rd' => Icons.savings_rounded,
     _ => Icons.account_balance_wallet_outlined,
   };
 }
@@ -283,6 +302,13 @@ Color _assetColor(BuildContext context, String label) {
     'SIP' => const Color(0xFF22C55E),
     'Crypto' => const Color(0xFF14B8A6),
     'Trading' => const Color(0xFFF59E0B),
+    'Gold/Silver' => const Color(0xFFEAB308),
+    'Real Estate' => const Color(0xFFEC4899),
+    'ETF' => const Color(0xFF3B82F6),
+    'Bonds' => const Color(0xFF10B981),
+    'FD' => const Color(0xFF6B7280),
+    'RD' => const Color(0xFF9CA3AF),
+    'Collectible' => const Color(0xFF6366F1),
     _ => Theme.of(context).colorScheme.onSurfaceVariant,
   };
 }

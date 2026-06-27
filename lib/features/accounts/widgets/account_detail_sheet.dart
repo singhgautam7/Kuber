@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, settingsProvider;
@@ -19,7 +18,6 @@ import '../../../shared/widgets/sheet_button_section.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/utils/icon_mapper.dart';
-import 'edit_balance_sheet.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -95,22 +93,8 @@ class AccountDetailSheet extends ConsumerWidget {
           },
         ),
         actions: [
-          SheetAction(
-            label: account.isCreditCard
-                ? context.l10n.editLimitSpent
-                : context.l10n.balanceLabel,
-            icon: Icons.account_balance_wallet_rounded,
-            onPressed: () => _editBalance(context, ref, balanceAsync),
-          ),
-          SheetAction(
-            label: account.isDisabled
-                ? context.l10n.enableAccount
-                : context.l10n.disableAccount,
-            icon: account.isDisabled
-                ? Icons.visibility_rounded
-                : Icons.visibility_off_rounded,
-            onPressed: () => _toggleDisabled(context, ref),
-          ),
+          // Row shows the first two (Edit, Delete); the rest fall into the
+          // overflow (⋯) menu: Set as Default, Disable.
           SheetAction(
             label: context.l10n.editAccount,
             icon: Icons.edit_rounded,
@@ -118,6 +102,12 @@ class AccountDetailSheet extends ConsumerWidget {
               Navigator.pop(context);
               context.push('/accounts/edit', extra: account);
             },
+          ),
+          SheetAction(
+            label: context.l10n.deleteAccount,
+            icon: Icons.delete_outline_rounded,
+            destructive: true,
+            onPressed: () => _confirmDelete(context, ref),
           ),
           SheetAction(
             label: isDefault
@@ -129,10 +119,13 @@ class AccountDetailSheet extends ConsumerWidget {
             onPressed: () => _toggleDefault(context, ref, isDefault),
           ),
           SheetAction(
-            label: context.l10n.deleteAccount,
-            icon: Icons.delete_outline_rounded,
-            destructive: true,
-            onPressed: () => _confirmDelete(context, ref),
+            label: account.isDisabled
+                ? context.l10n.enableAccount
+                : context.l10n.disableAccount,
+            icon: account.isDisabled
+                ? Icons.visibility_rounded
+                : Icons.visibility_off_rounded,
+            onPressed: () => _toggleDisabled(context, ref),
           ),
         ],
       ),
@@ -165,31 +158,6 @@ class AccountDetailSheet extends ConsumerWidget {
           const SizedBox(height: 18),
           InfoTable(rows: rows),
         ],
-      ),
-    );
-  }
-
-  void _editBalance(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue<double> balanceAsync,
-  ) {
-    Navigator.pop(context);
-    final balance = balanceAsync.valueOrNull ?? 0.0;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
-      builder: (_) => EditBalanceSheet(
-        account: account,
-        currentValue: balance,
-        isCredit: account.isCreditCard,
       ),
     );
   }

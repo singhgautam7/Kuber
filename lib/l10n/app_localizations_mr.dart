@@ -3233,6 +3233,15 @@ class AppLocalizationsMr extends AppLocalizations {
   String get invTypeRealEstate => 'रिअल इस्टेट';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'इतर';
 
   @override
@@ -4681,4 +4690,139 @@ class AppLocalizationsMr extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'खाते तपशील अद्यतनित करा';
+
+  @override
+  String get accountNameLabel => 'खाते नाव';
+
+  @override
+  String get accountNameHint => 'खाते नाव';
+
+  @override
+  String get accountTypeBank => 'बँक';
+
+  @override
+  String get accountTypeCash => 'रोख';
+
+  @override
+  String get accountTypeCreditCard => 'क्रेडिट कार्ड';
+
+  @override
+  String get accountTypeLockedTitle => 'खाते प्रकार निश्चित आहे';
+
+  @override
+  String get accountTypeLockedBody =>
+      'तयार केल्यानंतर खाते प्रकार बदलता येत नाही. वेगळा प्रकार वापरण्यासाठी, नवीन खाते तयार करा.';
+
+  @override
+  String get accountTypeLockedTooltip => 'हे का लॉक केले आहे?';
+
+  @override
+  String get accountIdentifierLabel => 'खाते क्रमांक / ओळखकर्ता';
+
+  @override
+  String get accountIdentifierHint => 'शेवटचे 4 अंक किंवा पूर्ण क्रमांक';
+
+  @override
+  String get accountIdentifierHelper =>
+      'शेवटचे 4 अंक किंवा पूर्ण क्रमांक. SMS आयात जुळवण्यासाठी वापरला जातो.';
+
+  @override
+  String get makeDefaultAccount => 'हे डीफॉल्ट खाते बनवा';
+
+  @override
+  String get makeDefaultAccountSub => 'व्यवहार जोडताना आधीच निवडलेले.';
+
+  @override
+  String get currentBalanceLabel => 'सध्याची शिल्लक';
+
+  @override
+  String get limitSpentLabel => 'खर्च केलेली मर्यादा';
+
+  @override
+  String get totalLimitLabel => 'एकूण मर्यादा';
+
+  @override
+  String get totalLimitHelper =>
+      'कार्डची एकूण क्रेडिट मर्यादा. हे संपादित केल्याने कोणतेही समायोजन तयार होणार नाही.';
+
+  @override
+  String get balanceAdjustHelper =>
+      'हे बदलल्याने फरकासाठी शिल्लक समायोजन व्यवहार तयार होईल.';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount चे शिल्लक समायोजन जमा केले जाईल.';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount चे शिल्लक समायोजन वजा केले जाईल.';
+  }
+
+  @override
+  String get disableAccountToggle => 'खाते अक्षम करा';
+
+  @override
+  String get disableAccountHelper =>
+      'पिकर आणि होम कार्डांमधून लपवलेले. विद्यमान व्यवहार राहतात.';
+
+  @override
+  String get accountDisabledToggle => 'खाते अक्षम आहे';
+
+  @override
+  String get accountDisabledHelper =>
+      'हे खाते लपवलेले आहे. पुन्हा दाखवण्यासाठी बंद करा.';
+
+  @override
+  String get accountUpdated => 'खाते अद्यतनित केले';
+
+  @override
+  String get couldntLoadBalance => 'शिल्लक लोड करता आली नाही';
+
+  @override
+  String get pickNewDefaultTitle => 'नवीन डीफॉल्ट खाते निवडा';
+
+  @override
+  String get pickNewDefaultBody =>
+      'हे तुमचे डीफॉल्ट खाते आहे. ते हटवण्यापूर्वी पर्याय निवडा.';
+
+  @override
+  String get adjustmentModalTitle => 'समायोजन व्यवहार तयार करायचा?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from वरून $to मध्ये बदलत आहे. $diff साठी शिल्लक समायोजन व्यवहार तयार केला जाईल.';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction. हे उत्पन्न किंवा खर्च म्हणून मोजले जाणार नाही.';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'तयार करा आणि जतन करा';
+
+  @override
+  String get valueNounBalance => 'शिल्लक';
+
+  @override
+  String get valueNounLimitSpent => 'खर्च केलेली मर्यादा';
+
+  @override
+  String get valueNounBalanceCap => 'शिल्लक';
+
+  @override
+  String get valueNounLimitSpentCap => 'खर्च केलेली मर्यादा';
+
+  @override
+  String get adjustmentIncreasedBy => 'ने वाढली';
+
+  @override
+  String get adjustmentDecreasedBy => 'ने घटली';
+
+  @override
+  String get dangerZone => 'धोकादायक विभाग';
 }

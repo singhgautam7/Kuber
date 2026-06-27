@@ -3230,6 +3230,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get invTypeRealEstate => 'रियल एस्टेट';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'अन्य';
 
   @override
@@ -4673,4 +4682,139 @@ class AppLocalizationsHi extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'खाता विवरण अपडेट करें';
+
+  @override
+  String get accountNameLabel => 'खाता नाम';
+
+  @override
+  String get accountNameHint => 'खाता नाम';
+
+  @override
+  String get accountTypeBank => 'बैंक';
+
+  @override
+  String get accountTypeCash => 'नकद';
+
+  @override
+  String get accountTypeCreditCard => 'क्रेडिट कार्ड';
+
+  @override
+  String get accountTypeLockedTitle => 'खाता प्रकार निश्चित है';
+
+  @override
+  String get accountTypeLockedBody =>
+      'खाता बनने के बाद उसका प्रकार नहीं बदला जा सकता। किसी अन्य प्रकार के लिए, एक नया खाता बनाएँ।';
+
+  @override
+  String get accountTypeLockedTooltip => 'यह लॉक क्यों है?';
+
+  @override
+  String get accountIdentifierLabel => 'खाता संख्या / पहचानकर्ता';
+
+  @override
+  String get accountIdentifierHint => 'अंतिम 4 अंक या पूरा नंबर';
+
+  @override
+  String get accountIdentifierHelper =>
+      'अंतिम 4 अंक या पूरा नंबर। SMS आयात मिलान के लिए उपयोग किया जाता है।';
+
+  @override
+  String get makeDefaultAccount => 'इसे डिफ़ॉल्ट खाता बनाएँ';
+
+  @override
+  String get makeDefaultAccountSub => 'लेन-देन जोड़ते समय पहले से चयनित।';
+
+  @override
+  String get currentBalanceLabel => 'वर्तमान शेष';
+
+  @override
+  String get limitSpentLabel => 'खर्च की गई सीमा';
+
+  @override
+  String get totalLimitLabel => 'कुल सीमा';
+
+  @override
+  String get totalLimitHelper =>
+      'कार्ड की कुल क्रेडिट सीमा। इसे बदलने से कोई समायोजन नहीं बनेगा।';
+
+  @override
+  String get balanceAdjustHelper =>
+      'इसे बदलने से अंतर के लिए एक शेष समायोजन लेन-देन बनेगा।';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount का एक शेष समायोजन जमा किया जाएगा।';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount का एक शेष समायोजन काटा जाएगा।';
+  }
+
+  @override
+  String get disableAccountToggle => 'खाता अक्षम करें';
+
+  @override
+  String get disableAccountHelper =>
+      'पिकर और होम कार्ड से छिपा हुआ। मौजूदा लेन-देन बने रहते हैं।';
+
+  @override
+  String get accountDisabledToggle => 'खाता अक्षम है';
+
+  @override
+  String get accountDisabledHelper =>
+      'यह खाता छिपा हुआ है। इसे फिर से दिखाने के लिए बंद करें।';
+
+  @override
+  String get accountUpdated => 'खाता अपडेट किया गया';
+
+  @override
+  String get couldntLoadBalance => 'शेष लोड नहीं हो सका';
+
+  @override
+  String get pickNewDefaultTitle => 'एक नया डिफ़ॉल्ट खाता चुनें';
+
+  @override
+  String get pickNewDefaultBody =>
+      'यह आपका डिफ़ॉल्ट खाता है। इसे हटाने से पहले एक विकल्प चुनें।';
+
+  @override
+  String get adjustmentModalTitle => 'समायोजन लेन-देन बनाएँ?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from से $to में बदल रहा है। $diff के लिए एक शेष समायोजन लेन-देन बनाया जाएगा।';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction। यह आय या व्यय के रूप में नहीं गिना जाएगा।';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'बनाएँ और सहेजें';
+
+  @override
+  String get valueNounBalance => 'शेष';
+
+  @override
+  String get valueNounLimitSpent => 'खर्च की गई सीमा';
+
+  @override
+  String get valueNounBalanceCap => 'शेष';
+
+  @override
+  String get valueNounLimitSpentCap => 'खर्च की गई सीमा';
+
+  @override
+  String get adjustmentIncreasedBy => 'से बढ़ा';
+
+  @override
+  String get adjustmentDecreasedBy => 'से घटा';
+
+  @override
+  String get dangerZone => 'खतरनाक क्षेत्र';
 }

@@ -3262,6 +3262,15 @@ class AppLocalizationsMl extends AppLocalizations {
   String get invTypeRealEstate => 'റിയൽ എസ്റ്റേറ്റ്';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'മറ്റുള്ളവ';
 
   @override
@@ -4721,4 +4730,143 @@ class AppLocalizationsMl extends AppLocalizations {
   String transactionsCountValue(int count) {
     return '$count transactions';
   }
+
+  @override
+  String get editAccountSubtitle => 'അക്കൗണ്ട് വിശദാംശങ്ങൾ അപ്ഡേറ്റ് ചെയ്യുക';
+
+  @override
+  String get accountNameLabel => 'അക്കൗണ്ട് പേര്';
+
+  @override
+  String get accountNameHint => 'അക്കൗണ്ട് പേര്';
+
+  @override
+  String get accountTypeBank => 'ബാങ്ക്';
+
+  @override
+  String get accountTypeCash => 'പണം';
+
+  @override
+  String get accountTypeCreditCard => 'ക്രെഡിറ്റ് കാർഡ്';
+
+  @override
+  String get accountTypeLockedTitle => 'അക്കൗണ്ട് തരം നിശ്ചയിച്ചതാണ്';
+
+  @override
+  String get accountTypeLockedBody =>
+      'സൃഷ്ടിച്ചതിന് ശേഷം അക്കൗണ്ട് തരം മാറ്റാനാകില്ല. മറ്റൊരു തരം ഉപയോഗിക്കാൻ, ഒരു പുതിയ അക്കൗണ്ട് സൃഷ്ടിക്കുക.';
+
+  @override
+  String get accountTypeLockedTooltip =>
+      'ഇത് എന്തുകൊണ്ട് ലോക്ക് ചെയ്തിരിക്കുന്നു?';
+
+  @override
+  String get accountIdentifierLabel => 'അക്കൗണ്ട് നമ്പർ / ഐഡന്റിഫയർ';
+
+  @override
+  String get accountIdentifierHint =>
+      'അവസാന 4 അക്കങ്ങൾ അല്ലെങ്കിൽ പൂർണ്ണ നമ്പർ';
+
+  @override
+  String get accountIdentifierHelper =>
+      'അവസാന 4 അക്കങ്ങൾ അല്ലെങ്കിൽ പൂർണ്ണ നമ്പർ. SMS ഇമ്പോർട്ടുകൾ പൊരുത്തപ്പെടുത്താൻ ഉപയോഗിക്കുന്നു.';
+
+  @override
+  String get makeDefaultAccount => 'ഇത് ഡിഫോൾട്ട് അക്കൗണ്ട് ആക്കുക';
+
+  @override
+  String get makeDefaultAccountSub =>
+      'ഇടപാടുകൾ ചേർക്കുമ്പോൾ മുൻകൂട്ടി തിരഞ്ഞെടുത്തത്.';
+
+  @override
+  String get currentBalanceLabel => 'നിലവിലെ ബാലൻസ്';
+
+  @override
+  String get limitSpentLabel => 'ചെലവഴിച്ച പരിധി';
+
+  @override
+  String get totalLimitLabel => 'ആകെ പരിധി';
+
+  @override
+  String get totalLimitHelper =>
+      'കാർഡിന്റെ മൊത്തം ക്രെഡിറ്റ് പരിധി. ഇത് എഡിറ്റ് ചെയ്യുന്നത് ഒരു ക്രമീകരണവും സൃഷ്ടിക്കില്ല.';
+
+  @override
+  String get balanceAdjustHelper =>
+      'ഇത് മാറ്റുന്നത് വ്യത്യാസത്തിനായി ഒരു ബാലൻസ് ക്രമീകരണ ഇടപാട് സൃഷ്ടിക്കും.';
+
+  @override
+  String adjustmentWillBeCredited(String amount) {
+    return '$amount ന്റെ ഒരു ബാലൻസ് ക്രമീകരണം ക്രെഡിറ്റ് ചെയ്യപ്പെടും.';
+  }
+
+  @override
+  String adjustmentWillBeDebited(String amount) {
+    return '$amount ന്റെ ഒരു ബാലൻസ് ക്രമീകരണം ഡെബിറ്റ് ചെയ്യപ്പെടും.';
+  }
+
+  @override
+  String get disableAccountToggle => 'അക്കൗണ്ട് പ്രവർത്തനരഹിതമാക്കുക';
+
+  @override
+  String get disableAccountHelper =>
+      'പിക്കറുകളിൽ നിന്നും ഹോം കാർഡുകളിൽ നിന്നും മറച്ചിരിക്കുന്നു. നിലവിലുള്ള ഇടപാടുകൾ നിലനിൽക്കും.';
+
+  @override
+  String get accountDisabledToggle => 'അക്കൗണ്ട് പ്രവർത്തനരഹിതമാണ്';
+
+  @override
+  String get accountDisabledHelper =>
+      'ഈ അക്കൗണ്ട് മറച്ചിരിക്കുന്നു. വീണ്ടും കാണിക്കാൻ ഓഫ് ചെയ്യുക.';
+
+  @override
+  String get accountUpdated => 'അക്കൗണ്ട് അപ്ഡേറ്റ് ചെയ്തു';
+
+  @override
+  String get couldntLoadBalance => 'ബാലൻസ് ലോഡ് ചെയ്യാനായില്ല';
+
+  @override
+  String get pickNewDefaultTitle =>
+      'ഒരു പുതിയ ഡിഫോൾട്ട് അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക';
+
+  @override
+  String get pickNewDefaultBody =>
+      'ഇത് നിങ്ങളുടെ ഡിഫോൾട്ട് അക്കൗണ്ടാണ്. ഇത് ഇല്ലാതാക്കുന്നതിന് മുമ്പ് ഒരു പകരക്കാരനെ തിരഞ്ഞെടുക്കുക.';
+
+  @override
+  String get adjustmentModalTitle => 'ക്രമീകരണ ഇടപാട് സൃഷ്ടിക്കണോ?';
+
+  @override
+  String adjustmentModalBody(String noun, String from, String to, String diff) {
+    return '$noun $from ൽ നിന്ന് $to ലേക്ക് മാറുന്നു. $diff നായി ഒരു ബാലൻസ് ക്രമീകരണ ഇടപാട് സൃഷ്ടിക്കപ്പെടും.';
+  }
+
+  @override
+  String adjustmentModalChip(String nounCap, String direction, String diff) {
+    return '$nounCap $diff $direction. ഇത് വരുമാനമോ ചെലവോ ആയി കണക്കാക്കില്ല.';
+  }
+
+  @override
+  String get adjustmentCreateAndSave => 'സൃഷ്ടിച്ച് സംരക്ഷിക്കുക';
+
+  @override
+  String get valueNounBalance => 'ബാലൻസ്';
+
+  @override
+  String get valueNounLimitSpent => 'ചെലവഴിച്ച പരിധി';
+
+  @override
+  String get valueNounBalanceCap => 'ബാലൻസ്';
+
+  @override
+  String get valueNounLimitSpentCap => 'ചെലവഴിച്ച പരിധി';
+
+  @override
+  String get adjustmentIncreasedBy => 'വർദ്ധിച്ചു';
+
+  @override
+  String get adjustmentDecreasedBy => 'കുറഞ്ഞു';
+
+  @override
+  String get dangerZone => 'അപകട മേഖല';
 }
