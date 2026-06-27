@@ -28,48 +28,7 @@ class MessageBubble extends StatelessWidget {
   }
 }
 
-/// Day divider: thin lines flanking a muted centered label.
-class DateSeparator extends StatelessWidget {
-  final DateTime date;
-  const DateSeparator({super.key, required this.date});
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final d = DateTime(date.year, date.month, date.day);
-
-    final String label;
-    if (d == today) {
-      label = 'Today';
-    } else if (d == yesterday) {
-      label = 'Yesterday';
-    } else {
-      label = DateFormat('d MMM yyyy').format(date);
-    }
-
-    Widget line() =>
-        Expanded(child: Divider(color: cs.outline.withValues(alpha: 0.45)));
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-      child: Row(children: [
-        line(),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
-          child: Text(label,
-              style: localeFont(
-                  fontSize: 11,
-                  color: cs.onSurfaceVariant,
-                  fontWeight: FontWeight.w500)),
-        ),
-        line(),
-      ]),
-    );
-  }
-}
 
 class _UserBubble extends StatelessWidget {
   final ChatMessage message;

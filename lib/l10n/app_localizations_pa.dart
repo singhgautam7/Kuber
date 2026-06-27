@@ -3232,6 +3232,15 @@ class AppLocalizationsPa extends AppLocalizations {
   String get invTypeRealEstate => 'ਰੀਅਲ ਅਸਟੇਟ';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'ਹੋਰ';
 
   @override

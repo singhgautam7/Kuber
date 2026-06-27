@@ -3262,6 +3262,15 @@ class AppLocalizationsMl extends AppLocalizations {
   String get invTypeRealEstate => 'റിയൽ എസ്റ്റേറ്റ്';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'മറ്റുള്ളവ';
 
   @override

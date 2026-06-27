@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../engine/scan_progress.dart';
 
@@ -15,19 +16,29 @@ class SmsInboxService {
 
   bool get isSupported => !kIsWeb && Platform.isAndroid;
 
-  /// Reads every inbox message from the last [days] days as plain data. Sender
-  /// filtering and parsing happen later on the worker isolate. The READ_SMS
+  Future<bool> checkPermission() async {
+    if (!isSupported) return false;
+    return Permission.sms.isGranted;
+  }
+
+  /// Reads every inbox message from the last [days] days or since [since] as plain data.
+  /// Sender filtering and parsing happen later on the worker isolate. The READ_SMS
   /// permission must already be granted.
-  Future<List<RawInboxSms>> readRawInbox({int days = 90}) async {
+  Future<List<RawInboxSms>> readRawInbox({int? days, DateTime? since}) async {
     if (!isSupported) return const [];
 
-    final since = DateTime.now()
-        .subtract(Duration(days: days))
-        .millisecondsSinceEpoch;
+    final int sinceMillis;
+    if (since != null) {
+      sinceMillis = since.millisecondsSinceEpoch;
+    } else {
+      sinceMillis = DateTime.now()
+          .subtract(Duration(days: days ?? 90))
+          .millisecondsSinceEpoch;
+    }
 
     final raw = await _channel.invokeListMethod<Map<dynamic, dynamic>>(
       'getInboxMessages',
-      {'sinceMillis': since},
+      {'sinceMillis': sinceMillis},
     );
     if (raw == null || raw.isEmpty) return const [];
 

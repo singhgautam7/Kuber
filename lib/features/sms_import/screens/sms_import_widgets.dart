@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -12,6 +11,7 @@ import '../../settings/providers/settings_provider.dart';
 import '../data/sms_transaction.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/utils/date_formatter.dart';
 
 /// Signed, currency-formatted amount string (e.g. "-₹648.50", "+₹65,000").
 String signedAmount(WidgetRef ref, double amount, String type) {
@@ -311,7 +311,7 @@ class SmsImportCard extends ConsumerWidget {
                 Row(
                   children: [
                     Text(
-                      DateFormat('d MMM · h:mm a').format(sms.smsDate),
+                      DateFormatter.relativeSmsDate(sms.smsDate),
                       style: localeFont(
                         fontSize: 10.5,
                         color: cs.onSurfaceVariant,

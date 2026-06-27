@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../accounts/providers/account_provider.dart';
@@ -110,18 +109,15 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
   }
 
   Future<SmsImportState> _load({ScanProgress? scanProgress}) async {
-    final rows = await ref.read(smsImportRepositoryProvider).getAll();
+    final repo = ref.read(smsImportRepositoryProvider);
+    final unreviewed = await repo.getByStatus(SmsReviewStatus.unreviewed);
+    final imported = await repo.getByStatus(SmsReviewStatus.imported);
+    final dismissed = await repo.getByStatus(SmsReviewStatus.dismissed);
     final hasPermission = await _checkPermission();
     return SmsImportState(
-      unreviewed: rows
-          .where((r) => r.reviewStatus == SmsReviewStatus.unreviewed)
-          .toList(),
-      imported: rows
-          .where((r) => r.reviewStatus == SmsReviewStatus.imported)
-          .toList(),
-      dismissed: rows
-          .where((r) => r.reviewStatus == SmsReviewStatus.dismissed)
-          .toList(),
+      unreviewed: unreviewed,
+      imported: imported,
+      dismissed: dismissed,
       hasPermission: hasPermission,
       scanProgress: scanProgress,
       lastScannedAt: _lastScannedAt,
@@ -130,8 +126,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
   Future<bool> _checkPermission() async {
     final service = ref.read(smsInboxServiceProvider);
-    if (!service.isSupported) return false;
-    return Permission.sms.isGranted;
+    return service.checkPermission();
   }
 
   Future<int> getUnreviewedCount() {
@@ -185,7 +180,7 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
     try {
       final service = ref.read(smsInboxServiceProvider);
-      if (!service.isSupported || !await Permission.sms.isGranted) {
+      if (!service.isSupported || !await service.checkPermission()) {
         state = AsyncData(await _load());
         return;
       }
@@ -202,7 +197,12 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
       List<RawInboxSms> raw;
       try {
-        raw = await service.readRawInbox(days: 90);
+        if (trigger == ScanTrigger.backgroundRefresh && _lastScannedAt != null) {
+          final since = _lastScannedAt!.subtract(const Duration(hours: 1));
+          raw = await service.readRawInbox(since: since);
+        } else {
+          raw = await service.readRawInbox(days: 90);
+        }
       } catch (_) {
         state = AsyncData(await _load());
         return;
@@ -460,6 +460,16 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
 
   Future<void> dismiss(SmsTransaction sms) async {
     await ref.read(smsImportRepositoryProvider).markDismissed(sms.id);
+    state = AsyncData(await _load());
+  }
+
+  Future<void> dismissBatch(List<int> ids) async {
+    await ref.read(smsImportRepositoryProvider).markDismissedBatch(ids);
+    state = AsyncData(await _load());
+  }
+
+  Future<void> undoDismissBatch(List<int> ids) async {
+    await ref.read(smsImportRepositoryProvider).markUnreviewedBatch(ids);
     state = AsyncData(await _load());
   }
 

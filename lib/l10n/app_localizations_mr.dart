@@ -3233,6 +3233,15 @@ class AppLocalizationsMr extends AppLocalizations {
   String get invTypeRealEstate => 'रिअल इस्टेट';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'इतर';
 
   @override

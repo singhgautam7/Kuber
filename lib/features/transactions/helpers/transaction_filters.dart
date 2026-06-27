@@ -21,7 +21,7 @@ extension TransactionFilterX on Iterable<Transaction> {
   /// - Balance Adjustments
   Iterable<Transaction> get validForFeed {
     return where(
-      (t) => !(t.isTransfer && t.type == 'income') && !t.isBalanceAdjustment,
+      (t) => !(t.isTransfer && t.type == 'income'),
     );
   }
 }

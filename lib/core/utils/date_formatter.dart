@@ -60,6 +60,16 @@ class DateFormatter {
     }
   }
 
+  static String relativeSmsDate(DateTime date) {
+    final now = DateTime.now();
+    final timeStr = time(date);
+    if (date.year == now.year) {
+      return '${DateFormat('d MMM').format(date)} · $timeStr';
+    } else {
+      return '${DateFormat('d MMM yyyy').format(date)} · $timeStr';
+    }
+  }
+
   static String full(DateTime date, {String format = 'dd/MM/yyyy'}) {
     return DateFormat(format).format(date);
   }

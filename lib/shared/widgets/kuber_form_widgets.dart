@@ -390,6 +390,7 @@ class KuberSwitchRow extends StatelessWidget {
   final String sub;
   final bool value;
   final ValueChanged<bool> onChanged;
+  final bool enabled;
 
   const KuberSwitchRow({
     super.key,
@@ -398,64 +399,73 @@ class KuberSwitchRow extends StatelessWidget {
     required this.sub,
     required this.value,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: () => onChanged(!value),
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Ink(
-        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
+    final rowBody = Ink(
+      padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36, height: 36,
+            decoration: BoxDecoration(
+              color: value
+                  ? cs.primary.withValues(alpha: 0.15)
+                  : cs.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: value ? cs.primary : cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: localeFont(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  sub,
+                  style: localeFont(
+                    fontSize: 11.5,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(value: value, onChanged: enabled ? onChanged : null),
+        ],
+      ),
+    );
+
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: InkWell(
+          onTap: () => onChanged(!value),
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36, height: 36,
-              decoration: BoxDecoration(
-                color: value
-                    ? cs.primary.withValues(alpha: 0.15)
-                    : cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-              ),
-              child: Icon(
-                icon,
-                size: 18,
-                color: value ? cs.primary : cs.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    name,
-                    style: localeFont(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    sub,
-                    style: localeFont(
-                      fontSize: 11.5,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Switch(value: value, onChanged: onChanged),
-          ],
+          child: rowBody,
         ),
       ),
     );

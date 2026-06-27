@@ -3230,6 +3230,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get invTypeRealEstate => 'रियल एस्टेट';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'अन्य';
 
   @override

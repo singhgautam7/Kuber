@@ -3259,6 +3259,15 @@ class AppLocalizationsKn extends AppLocalizations {
   String get invTypeRealEstate => 'ರಿಯಲ್ ಎಸ್ಟೇಟ್';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'ಇತರೆ';
 
   @override

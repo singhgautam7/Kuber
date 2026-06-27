@@ -3205,7 +3205,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invTypeStocks => 'Stocks';
 
   @override
-  String get invTypeGold => 'Gold';
+  String get invTypeGold => 'Gold/Silver';
 
   @override
   String get invTypeFd => 'FD';
@@ -3221,6 +3221,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invTypeRealEstate => 'Real Estate';
+
+  @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
 
   @override
   String get invTypeOther => 'Other';

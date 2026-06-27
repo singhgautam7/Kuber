@@ -3238,6 +3238,15 @@ class AppLocalizationsBn extends AppLocalizations {
   String get invTypeRealEstate => 'রিয়েল এস্টেট';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'অন্যান্য';
 
   @override

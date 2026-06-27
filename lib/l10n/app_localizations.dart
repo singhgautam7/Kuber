@@ -5885,7 +5885,7 @@ abstract class AppLocalizations {
   /// No description provided for @invTypeGold.
   ///
   /// In en, this message translates to:
-  /// **'Gold'**
+  /// **'Gold/Silver'**
   String get invTypeGold;
 
   /// No description provided for @invTypeFd.
@@ -5917,6 +5917,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Real Estate'**
   String get invTypeRealEstate;
+
+  /// No description provided for @invTypeEtf.
+  ///
+  /// In en, this message translates to:
+  /// **'ETF'**
+  String get invTypeEtf;
+
+  /// No description provided for @invTypeBonds.
+  ///
+  /// In en, this message translates to:
+  /// **'Bonds'**
+  String get invTypeBonds;
+
+  /// No description provided for @invTypeCollectible.
+  ///
+  /// In en, this message translates to:
+  /// **'Collectible'**
+  String get invTypeCollectible;
 
   /// No description provided for @invTypeOther.
   ///

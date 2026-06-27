@@ -43,7 +43,7 @@ double parseAmount(String raw) {
 /// Words that mark money leaving the account, and money coming in.
 const _debitWords = [
   'debited', 'debit', 'spent', 'paid', 'withdrawn', 'purchase', 'deducted',
-  'sent',
+  'sent', 'used',
 ];
 const _creditWords = [
   'credited', 'credit', 'received', 'deposited', 'refund', 'added',
@@ -55,11 +55,21 @@ const _creditWords = [
 /// (the message is not a transaction).
 String? inferTypeFromBody(String body) {
   final lower = body.toLowerCase();
+  
+  // Clean up terms containing "credit" that don't mean an income credit.
+  final cleanBody = lower
+      .replaceAll(RegExp(r'credit\s*card', caseSensitive: false), 'card')
+      .replaceAll(RegExp(r'credit\s*limit', caseSensitive: false), 'limit');
+
   int earliest(List<String> words) {
     var min = -1;
     for (final w in words) {
-      final i = lower.indexOf(w);
-      if (i >= 0 && (min < 0 || i < min)) min = i;
+      final reg = RegExp('\\b${RegExp.escape(w)}\\b');
+      final match = reg.firstMatch(cleanBody);
+      if (match != null) {
+        final i = match.start;
+        if (min < 0 || i < min) min = i;
+      }
     }
     return min;
   }

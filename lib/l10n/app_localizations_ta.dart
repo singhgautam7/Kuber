@@ -3278,6 +3278,15 @@ class AppLocalizationsTa extends AppLocalizations {
   String get invTypeRealEstate => 'ரியல் எஸ்டேட்';
 
   @override
+  String get invTypeEtf => 'ETF';
+
+  @override
+  String get invTypeBonds => 'Bonds';
+
+  @override
+  String get invTypeCollectible => 'Collectible';
+
+  @override
   String get invTypeOther => 'மற்றவை';
 
   @override
