@@ -180,4 +180,9 @@ class SmsImportRepository extends BaseRepository<SmsTransaction> {
           .deleteAll();
     });
   }
+
+  /// Clears all SMS import transaction entries.
+  Future<void> clearAll() async {
+    await isar.writeTxn(() => isar.smsTransactions.clear());
+  }
 }

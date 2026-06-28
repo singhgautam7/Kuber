@@ -442,18 +442,18 @@ class _DeveloperLetter extends StatelessWidget {
                     children: [
                       TextSpan(
                         text: name.isNotEmpty
-                            ? abL10n("Hey {name},", lang).replaceAll("{name}", name) + "\n\n"
-                            : abL10n("Hey there,", lang) + "\n\n",
+                            ? "${abL10n("Hey {name},", lang).replaceAll("{name}", name)}\n\n"
+                            : "${abL10n("Hey there,", lang)}\n\n",
                         style: textStyleSemiBold,
                       ),
                       TextSpan(
-                        text: abL10n('dev_letter_p1', lang) + "\n\n",
+                        text: "${abL10n('dev_letter_p1', lang)}\n\n",
                       ),
                       TextSpan(
-                        text: abL10n('dev_letter_p2', lang) + "\n\n",
+                        text: "${abL10n('dev_letter_p2', lang)}\n\n",
                       ),
                       TextSpan(
-                        text: abL10n('dev_letter_p3', lang) + "\n\n",
+                        text: "${abL10n('dev_letter_p3', lang)}\n\n",
                         style: textStyleSemiBold,
                       ),
                       TextSpan(

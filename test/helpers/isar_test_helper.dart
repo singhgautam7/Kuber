@@ -64,5 +64,14 @@ Future<Isar> openTestIsar() async {
 }
 
 Future<void> closeAndCleanIsar(Isar isar) async {
-  await isar.close(deleteFromDisk: true);
+  final path = isar.directory;
+  await isar.close(deleteFromDisk: false);
+  if (path != null) {
+    try {
+      final dir = Directory(path);
+      if (dir.existsSync()) {
+        dir.deleteSync(recursive: true);
+      }
+    } catch (_) {}
+  }
 }

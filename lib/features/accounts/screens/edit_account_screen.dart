@@ -220,11 +220,18 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
 
   void _finish() {
     if (!mounted) return;
-    final messengerContext =
-        Navigator.of(context, rootNavigator: true).context;
+    final rootNav = Navigator.maybeOf(context, rootNavigator: true);
+    final hasRootOverlay = rootNav != null && Overlay.maybeOf(rootNav.context) != null;
     final message = context.l10n.accountUpdated;
-    Navigator.pop(context);
-    showKuberSnackBar(messengerContext, message);
+
+    if (hasRootOverlay) {
+      final messengerContext = rootNav.context;
+      Navigator.pop(context);
+      showKuberSnackBar(messengerContext, message);
+    } else {
+      showKuberSnackBar(context, message);
+      Navigator.pop(context);
+    }
   }
 
   // ── TYPE INFO MODAL ──────────────────────────────────────────────────────

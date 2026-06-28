@@ -5,6 +5,8 @@ import '../../core/theme/app_theme.dart';
 import '../../features/settings/providers/settings_provider.dart';
 import '../../core/utils/icon_mapper.dart';
 import '../../core/models/info_config.dart';
+import '../../core/models/overflow_config.dart';
+import '../../core/utils/locale_font.dart';
 import 'kuber_info_bottom_sheet.dart';
 
 class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -12,6 +14,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final bool showBack;
   final double? horizontalPadding;
+  final KuberOverflowConfig? overflowConfig;
 
   const KuberAppBar({
     super.key,
@@ -21,6 +24,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.showHome = false,
     this.horizontalPadding,
     this.infoConfig,
+    this.overflowConfig,
     this.onBack,
   });
 
@@ -109,6 +113,50 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   tooltip: 'Help',
                   onTap: () => KuberInfoBottomSheet.show(context, infoConfig!),
                   cs: cs,
+                ),
+                const SizedBox(width: 4),
+              ],
+              if (overflowConfig != null && overflowConfig!.items.isNotEmpty) ...[
+                PopupMenuButton<KuberOverflowItem>(
+                  onSelected: (item) => item.onTap(),
+                  offset: const Offset(0, 40),
+                  color: cs.surfaceContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    side: BorderSide(color: cs.outline.withValues(alpha: 0.15)),
+                  ),
+                  itemBuilder: (ctx) => overflowConfig!.items.map((item) {
+                    final color = item.isDestructive ? cs.error : cs.onSurface;
+                    return PopupMenuItem<KuberOverflowItem>(
+                      value: item,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(item.icon, color: color, size: 18),
+                          const SizedBox(width: 10),
+                          Text(
+                            item.label,
+                            style: localeFont(
+                              color: color,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  child: Tooltip(
+                    message: 'More options',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
+                      ),
+                      child: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant, size: 18),
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 4),
               ],

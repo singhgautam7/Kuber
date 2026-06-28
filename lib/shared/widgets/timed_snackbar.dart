@@ -152,8 +152,8 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
   }
 
   Future<void> _animateOut() async {
-    _progressCtrl.stop();
     if (!mounted) return;
+    _progressCtrl.stop();
     await _slideCtrl.reverse();
   }
 

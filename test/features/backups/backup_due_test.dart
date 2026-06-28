@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:isar_community/isar.dart';
 import 'package:kuber/features/backups/data/backup_config.dart';
-import 'package:kuber/features/backups/providers/backup_provider.dart';
 import '../../helpers/isar_test_helper.dart';
 
 Future<bool> isAutomaticBackupDue(Isar isar) async {

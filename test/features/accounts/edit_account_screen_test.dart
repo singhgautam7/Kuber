@@ -22,14 +22,19 @@ void main() {
 
   late Isar isar;
 
-  setUpAll(() async => initialiseIsarForTests());
-
-  setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+  setUpAll(() async {
+    await initialiseIsarForTests();
     isar = await openTestIsar();
   });
 
-  tearDown(() async => closeAndCleanIsar(isar));
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    await isar.writeTxn(() => isar.clear());
+  });
+
+  tearDownAll(() async {
+    await closeAndCleanIsar(isar);
+  });
 
   // The hero amount field autofocuses, so its blinking cursor is a perpetual
   // animation that would stall pumpAndSettle. Pump a bounded number of frames
@@ -40,7 +45,7 @@ void main() {
     }
   }
 
-  Future<ProviderContainer> buildContainer({String? defaultAccountId}) async {
+  Future<ProviderContainer> buildContainer(WidgetTester tester, {String? defaultAccountId}) async {
     final container = ProviderContainer(
       overrides: [
         isarProvider.overrideWithValue(isar),
@@ -51,8 +56,10 @@ void main() {
     );
     // Warm the async providers the screen reads synchronously in initState /
     // callbacks, so valueOrNull is populated by the time the widget builds.
-    await container.read(settingsProvider.future);
-    await container.read(allAccountsProvider.future);
+    await tester.runAsync(() async {
+      await container.read(settingsProvider.future);
+      await container.read(allAccountsProvider.future);
+    });
     return container;
   }
 
@@ -60,7 +67,7 @@ void main() {
       WidgetTester tester, ProviderContainer container, Account account) async {
     // Resolve the balance up front so the screen never shows its loading
     // spinner (a continuous animation that would stall pumpAndSettle).
-    await container.read(accountBalanceProvider(account.id).future);
+    await tester.runAsync(() => container.read(accountBalanceProvider(account.id).future));
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -76,21 +83,42 @@ void main() {
     await settle(tester);
   }
 
-  Future<Account> seedBankAccount({double initialBalance = 1000}) async {
+  Future<Account> seedBankAccount(WidgetTester tester, {double initialBalance = 1000}) async {
     final account = makeAccount(initialBalance: initialBalance);
-    await isar.writeTxn(() => isar.accounts.put(account));
+    await tester.runAsync(() => isar.writeTxn(() => isar.accounts.put(account)));
     return account;
   }
 
-  Future<int> adjustmentCount() => isar.transactions
-      .filter()
-      .isBalanceAdjustmentEqualTo(true)
-      .count();
+  Future<int> adjustmentCount(WidgetTester tester) async {
+    final count = await tester.runAsync(() => isar.transactions
+        .filter()
+        .isBalanceAdjustmentEqualTo(true)
+        .count());
+    return count ?? 0;
+  }
+
+  Future<void> cleanTearDown(WidgetTester tester) async {
+    await tester.runAsync(() async {
+      await Future.delayed(const Duration(milliseconds: 200));
+    });
+  }
+
+  Future<void> tapAndWaitForPop(WidgetTester tester, Finder finder) async {
+    await tester.runAsync(() async {
+      await tester.tap(finder);
+    });
+    for (var i = 0; i < 200; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+      if (find.byType(EditAccountScreen).evaluate().isEmpty) {
+        break;
+      }
+      await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 10)));
+    }
+  }
 
   testWidgets('blank name shows error and does not save', (tester) async {
-    final account = await seedBankAccount();
-    final container = await buildContainer();
-    addTearDown(container.dispose);
+    final account = await seedBankAccount(tester);
+    final container = await buildContainer(tester);
     await pumpScreen(tester, container, account);
 
     await tester.enterText(find.byType(TextField).first, '');
@@ -99,27 +127,33 @@ void main() {
 
     expect(find.text('Please enter an account name'), findsOneWidget);
     expect(find.text('Create adjustment transaction?'), findsNothing);
+
+    await tester.pump(const Duration(seconds: 8));
+    container.dispose();
+    await cleanTearDown(tester);
   });
 
   testWidgets('unchanged balance creates no adjustment', (tester) async {
-    final account = await seedBankAccount();
-    final container = await buildContainer();
-    addTearDown(container.dispose);
+    final account = await seedBankAccount(tester);
+    final container = await buildContainer(tester);
     await pumpScreen(tester, container, account);
 
     // Do not touch the hero — it is seeded with the computed balance (1000).
-    await tester.tap(find.text('Save changes'));
+    await tapAndWaitForPop(tester, find.text('Save changes'));
     await settle(tester);
 
     expect(find.text('Create adjustment transaction?'), findsNothing);
-    expect(await adjustmentCount(), 0);
+    expect(await adjustmentCount(tester), 0);
+
+    await tester.pump(const Duration(seconds: 8));
+    container.dispose();
+    await cleanTearDown(tester);
   });
 
   testWidgets('changed balance shows modal and creates the adjustment',
       (tester) async {
-    final account = await seedBankAccount(initialBalance: 1000);
-    final container = await buildContainer();
-    addTearDown(container.dispose);
+    final account = await seedBankAccount(tester, initialBalance: 1000);
+    final container = await buildContainer(tester);
     await pumpScreen(tester, container, account);
 
     // Fields order for a bank account: name, identifier, hero.
@@ -130,38 +164,46 @@ void main() {
     await settle(tester);
     expect(find.text('Create adjustment transaction?'), findsOneWidget);
 
-    await tester.tap(find.text('Create and save'));
+    await tapAndWaitForPop(tester, find.text('Create and save'));
     await settle(tester);
 
-    final adjustments = await isar.transactions
+    final adjustments = await tester.runAsync(() => isar.transactions
         .filter()
         .isBalanceAdjustmentEqualTo(true)
-        .findAll();
-    expect(adjustments.length, 1);
+        .findAll());
+    expect(adjustments!.length, 1);
     expect(adjustments.first.name, 'Balance Adjustment');
     expect(adjustments.first.type, 'income');
     expect(adjustments.first.amount, 500);
     expect(adjustments.first.accountId, account.id.toString());
+
+    await tester.pump(const Duration(seconds: 8));
+    container.dispose();
+    await cleanTearDown(tester);
   });
 
   testWidgets('deleting the default account prompts to pick a new default',
       (tester) async {
-    final account = await seedBankAccount();
+    final account = await seedBankAccount(tester);
     // A second account so a replacement default exists.
-    await isar.writeTxn(
-        () => isar.accounts.put(makeAccount(name: 'Second')));
+    await tester.runAsync(() => isar.writeTxn(
+        () => isar.accounts.put(makeAccount(name: 'Second'))));
     final container =
-        await buildContainer(defaultAccountId: account.id.toString());
-    addTearDown(container.dispose);
+        await buildContainer(tester, defaultAccountId: account.id.toString());
     await pumpScreen(tester, container, account);
 
     // Delete now lives in the scrollable "Danger Zone" at the end of the form.
     await tester.ensureVisible(find.text('Delete Account'));
     await tester.pump();
-    await tester.tap(find.text('Delete Account'));
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Delete Account'));
+      await Future.delayed(const Duration(milliseconds: 200));
+    });
     await settle(tester);
 
     expect(find.text('Pick a new default account'), findsOneWidget);
+    container.dispose();
+    await cleanTearDown(tester);
   });
 }
 

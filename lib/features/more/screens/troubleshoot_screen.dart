@@ -8,6 +8,7 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/data_provider.dart';
 import '../../settings/widgets/data_action_widgets.dart';
+import '../../sms_import/providers/sms_import_provider.dart';
 
 class TroubleshootScreen extends ConsumerWidget {
   const TroubleshootScreen({super.key});
@@ -74,6 +75,14 @@ class TroubleshootScreen extends ConsumerWidget {
                       description: context.l10n.rebuildSuggestionsDesc,
                       onPressed: () => _confirmRebuild(context, ref),
                     ),
+                    const SizedBox(height: KuberSpacing.lg),
+                    DataActionRow(
+                      icon: Icons.delete_outline_rounded,
+                      title: 'Reset SMS Imports',
+                      description: 'Clears all currently tracked SMS records and runs a full re-scan of the SMS inbox.',
+                      destructive: true,
+                      onPressed: () => _confirmResetSms(context, ref),
+                    ),
                     const SizedBox(height: KuberSpacing.xxl),
                   ]),
                 ),
@@ -99,6 +108,23 @@ class TroubleshootScreen extends ConsumerWidget {
         description: context.l10n.rebuildSuggestionsDesc,
         confirmLabel: context.l10n.rebuildSuggestions,
         onConfirm: () => ref.read(dataControllerProvider.notifier).rebuildSuggestions(),
+      ),
+    );
+  }
+
+  void _confirmResetSms(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ConfirmActionSheet(
+        icon: Icons.delete_outline_rounded,
+        title: 'Reset SMS imports?',
+        description: 'This will clear all the SMS imports we have right now and re-read all the SMS again with the parser. Are you sure you want to proceed?',
+        confirmLabel: 'Reset',
+        destructive: true,
+        onConfirm: () => ref.read(smsImportProvider.notifier).resetSmsImports(),
       ),
     );
   }

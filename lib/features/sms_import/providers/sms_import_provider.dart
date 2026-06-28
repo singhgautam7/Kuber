@@ -500,6 +500,26 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
       // Non-fatal maintenance.
     }
   }
+
+  /// Clears the repository, resets scan progress/last-scanned timestamp, and optionally runs a scan.
+  Future<void> resetSmsImports({bool runBackgroundScan = true}) async {
+    _controller?.cancel();
+    _controller = null;
+    _scanInProgress = false;
+
+    await ref.read(smsImportRepositoryProvider).clearAll();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_kLastScannedAtKey);
+    } catch (_) {}
+    _lastScannedAt = null;
+
+    state = AsyncData(await _load());
+    if (runBackgroundScan) {
+      await _runScan(ScanTrigger.backgroundRefresh);
+    }
+  }
 }
 
 /// Confirmed values for a single transaction in a batch import.

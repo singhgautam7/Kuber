@@ -7,6 +7,7 @@ import '../../../shared/widgets/date_separator.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../core/models/overflow_config.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
@@ -217,6 +218,47 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
     );
   }
 
+  Future<void> _confirmReset() async {
+    final cs = Theme.of(context).colorScheme;
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: cs.surfaceContainer,
+        title: Text('Reset SMS imports?',
+            style: localeFont(fontWeight: FontWeight.bold)),
+        content: Text(
+          'This will clear all the SMS imports we have right now and re-read all the SMS again with the parser. Are you sure you want to proceed?',
+          style: localeFont(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          AppButton(
+            label: 'Reset',
+            type: AppButtonType.danger,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
+    );
+
+    if (proceed == true && mounted) {
+      await ref.read(smsImportProvider.notifier).resetSmsImports(runBackgroundScan: false);
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const SmsFirstLoadScreen(),
+            transitionsBuilder: (_, animation, __, child) =>
+                FadeTransition(opacity: animation, child: child),
+            transitionDuration: const Duration(milliseconds: 200),
+          ),
+        );
+      }
+    }
+  }
+
   /// App bar. Not sticky in the list view (it scrolls with the content). In
   /// selection mode the back arrow clears the selection.
   KuberAppBar _topAppBar(ColorScheme cs) {
@@ -226,6 +268,18 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
       title: '',
       infoConfig: InfoConstants.smsImport,
       onBack: _selectionMode ? _exitSelection : null,
+      overflowConfig: _selectionMode
+          ? null
+          : KuberOverflowConfig(
+              items: [
+                KuberOverflowItem(
+                  icon: Icons.delete_outline_rounded,
+                  label: 'Reset SMS Imports',
+                  isDestructive: true,
+                  onTap: _confirmReset,
+                ),
+              ],
+            ),
     );
   }
 
