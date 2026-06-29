@@ -1,28 +1,41 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../engine/emi_engine.dart';
+import '../engine/monthly_schedules.dart';
+import '../widgets/calculator_donut_breakdown.dart';
+import '../widgets/calculator_hero_result.dart';
+import '../widgets/calculator_line_chart.dart';
+import '../widgets/calculator_schedule_table.dart';
+import '../widgets/calculator_screen_scaffold.dart';
+import '../widgets/calculator_support.dart';
 import '../widgets/calculator_widgets.dart';
 
 class EmiCalculatorScreen extends ConsumerStatefulWidget {
-  const EmiCalculatorScreen({super.key});
+  final int? savedId;
+  const EmiCalculatorScreen({super.key, this.savedId});
 
   @override
   ConsumerState<EmiCalculatorScreen> createState() =>
       _EmiCalculatorScreenState();
 }
 
-class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
+class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
+    with CalculatorSupport {
   final _principalCtrl = TextEditingController();
   final _rateCtrl = TextEditingController();
   final _tenureCtrl = TextEditingController();
-  int _tenureIndex = 0; // 0 = Years, 1 = Months
+  int _tenureUnit = 0; // 0 = Years, 1 = Months
+  int _scheduleMode = 0; // 0 = Yearly, 1 = Monthly
+
+  @override
+  void initState() {
+    super.initState();
+    initCalculatorSupport();
+  }
 
   @override
   void dispose() {
@@ -32,19 +45,54 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
     super.dispose();
   }
 
-  ({double emi, double totalPayable, double totalInterest})? _compute() {
-    final p = double.tryParse(_principalCtrl.text.replaceAll(',', ''));
-    final annualRate = double.tryParse(_rateCtrl.text);
-    final tenure = double.tryParse(_tenureCtrl.text);
-    if (p == null || annualRate == null || tenure == null) return null;
-    if (p <= 0 || annualRate <= 0 || tenure <= 0) return null;
+  @override
+  String get toolKey => 'emi-calculator';
+  @override
+  int? get initialSavedId => widget.savedId;
+  @override
+  String get defaultSaveName => 'Home loan';
+  @override
+  String get savePlaceholder => 'e.g. Home loan Mumbai';
 
-    final n = _tenureIndex == 0 ? tenure * 12 : tenure;
-    final r = annualRate / 12 / 100;
-    final emi = p * r * pow(1 + r, n) / (pow(1 + r, n) - 1);
-    final totalPayable = emi * n;
-    final totalInterest = totalPayable - p;
-    return (emi: emi, totalPayable: totalPayable, totalInterest: totalInterest);
+  int get _tenureMonths {
+    final t = parseNum(_tenureCtrl.text);
+    return (_tenureUnit == 0 ? t * 12 : t).round();
+  }
+
+  @override
+  Map<String, dynamic> collectInputs() => {
+        'principal': _principalCtrl.text,
+        'rate': _rateCtrl.text,
+        'tenure': _tenureCtrl.text,
+        'tenureUnit': _tenureUnit,
+      };
+
+  @override
+  void applyInputs(Map<String, dynamic> json) {
+    _principalCtrl.text = json['principal']?.toString() ?? '';
+    _rateCtrl.text = json['rate']?.toString() ?? '';
+    _tenureCtrl.text = json['tenure']?.toString() ?? '';
+    _tenureUnit = json['tenureUnit'] as int? ?? 0;
+  }
+
+  EmiResult? _compute() {
+    final p = parseAmount(_principalCtrl.text);
+    final rate = parseNum(_rateCtrl.text);
+    final months = _tenureMonths;
+    if (p <= 0 || rate <= 0 || months <= 0) return null;
+    return computeEmiSchedule(p, rate, months);
+  }
+
+  @override
+  String buildSummary() {
+    final formatter = ref.read(formatterProvider);
+    final currency = ref.read(currencyProvider);
+    final r = _compute();
+    final years = (_tenureMonths / 12).toStringAsFixed(0);
+    final p = formatter.formatCurrency(parseAmount(_principalCtrl.text),
+        symbol: currency.symbol);
+    if (r == null) return '$p loan';
+    return '$p @ ${_rateCtrl.text}% for ${years}y → EMI ${formatter.formatCurrency(r.emi, symbol: currency.symbol)}';
   }
 
   @override
@@ -52,129 +100,165 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen> {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
+    String money(double v) =>
+        formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
+    void recompute(_) => scheduleRecompute();
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.emiCalculator,
-            ),
+    return ToolScreenScaffold(
+      title: 'EMI Calculator',
+      subtitle: 'Monthly payment and total interest over the life of your loan',
+      infoConfig: InfoConstants.emiCalculator,
+      overflowConfig: savedOverflowConfig('EMI'),
+      banner: buildSavedBanner(),
+      onSave: openSaveSheet,
+      canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
+      sections: [
+        ToolInputCard(children: [
+          ToolSliderField(
+            controller: _principalCtrl,
+            label: 'LOAN AMOUNT',
+            prefix: currency.symbol,
+            formatAsAmount: true,
+            onChanged: recompute,
+            min: 50000,
+            max: 10000000,
           ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'EMI Calculator',
-              description: 'Plan your loan repayments',
-            ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _rateCtrl,
+            label: 'ANNUAL INTEREST RATE',
+            suffix: '%',
+            helper: 'Annual rate, as a percentage',
+            onChanged: recompute,
+            min: 1,
+            max: 20,
+            divisions: 190,
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ToolInputCard(
+          const SizedBox(height: KuberSpacing.lg),
+          const ToolInputLabel('TENURE'),
+          const SizedBox(height: KuberSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: ToolTextField(
+                    controller: _tenureCtrl, onChanged: recompute),
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: ToolSegmentedControl(
+                  labels: const ['Years', 'Months'],
+                  selectedIndex: _tenureUnit,
+                  onChanged: (i) => setState(() => _tenureUnit = i),
+                ),
+              ),
+            ],
+          ),
+        ]),
+        ToolSection(
+          title: 'Result',
+          child: result == null
+              ? const ToolEmptyResult()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ToolTextField(
-                      label: 'LOAN AMOUNT',
-                      controller: _principalCtrl,
-                      prefix: currency.symbol,
-                      onChanged: (_) => setState(() {}),
-                      formatAsAmount: true,
+                    ToolHero(
+                      label: 'Monthly EMI',
+                      value: money(result.emi),
+                      color: cs.primary,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: 'ANNUAL INTEREST RATE',
-                      controller: _rateCtrl,
-                      suffix: '%',
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('TENURE'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ToolTextField(
-                            controller: _tenureCtrl,
-                            onChanged: (_) => setState(() {}),
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Expanded(
-                          child: ToolSegmentedControl(
-                            labels: const ['Years', 'Months'],
-                            selectedIndex: _tenureIndex,
-                            onChanged: (i) => setState(() => _tenureIndex = i),
-                          ),
-                        ),
-                      ],
-                    ),
+                    ToolStatCols(items: [
+                      StatCol('Total Interest', money(result.totalInterest),
+                          color: cs.error),
+                      StatCol('Total Payable', money(result.totalPayable)),
+                      StatCol('Interest / Principal',
+                          '${(result.totalInterest / result.principal * 100).round()}%'),
+                    ]),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                ToolResultCard(
-                  children: result == null
-                      ? [const ToolEmptyResult()]
-                      : [
-                          ToolHeroResult(
-                            label: 'Monthly EMI',
-                            value: formatter.formatCurrency(result.emi,
-                                symbol: currency.symbol),
-                            color: cs.primary,
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          ToolStatRow(
-                            label: 'Total Interest',
-                            value: formatter.formatCurrency(
-                                result.totalInterest,
-                                symbol: currency.symbol),
-                            valueColor: cs.error,
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'Total Payable',
-                            value: formatter.formatCurrency(
-                                result.totalPayable,
-                                symbol: currency.symbol),
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          // SizedBox(
-                          //   width: double.infinity,
-                          //   child: OutlinedButton(
-                          //     onPressed: () => context.push('/recurring/add'),
-                          //     style: OutlinedButton.styleFrom(
-                          //       foregroundColor: cs.primary,
-                          //       side: BorderSide(color: cs.primary),
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(KuberRadius.md),
-                          //       ),
-                          //       padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-                          //     ),
-                          //     child: Text(
-                          //       'Add as Recurring Transaction',
-                          //       style: localeFont(
-                          //         fontSize: 14,
-                          //         fontWeight: FontWeight.w600,
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
+        ),
+        if (result != null) ...[
+          ToolSection(
+            title: 'Breakdown',
+            subtitle: 'Principal vs interest',
+            child: ToolDonutBreakdown(
+              segments: [
+                BreakdownSegment('Principal', result.principal, cs.primary),
+                BreakdownSegment('Interest', result.totalInterest, cs.error),
+              ],
+              centerBig: formatter.formatCompactCurrency(result.totalPayable,
+                  symbol: currency.symbol),
+              centerSmall: 'TOTAL',
+            ),
+          ),
+          ToolSection(
+            title: 'Balance over time',
+            subtitle: 'Outstanding vs cumulative interest',
+            child: ToolLineChart(
+              series: [
+                ChartSeries(
+                    name: 'Outstanding balance',
+                    points: result.balanceSeries,
+                    color: cs.primary),
+                ChartSeries(
+                    name: 'Cumulative interest',
+                    points: result.interestSeries,
+                    color: cs.error),
+              ],
+              xLabels: [
+                for (var i = 0; i < result.balanceSeries.length; i++) 'Y$i',
+              ],
+            ),
+          ),
+          ToolSection(
+            title: 'Amortization schedule',
+            child: ToolScheduleTable(
+              columns: const [
+                ScheduleColumn('Period', numeric: false),
+                ScheduleColumn('Opening'),
+                ScheduleColumn('Total Paid'),
+                ScheduleColumn('Principal'),
+                ScheduleColumn('Interest'),
+                ScheduleColumn('Closing'),
+              ],
+              toggleLabels: const ['Yearly', 'Monthly'],
+              toggleIndex: _scheduleMode,
+              onToggle: (i) => setState(() => _scheduleMode = i),
+              note: 'Scroll horizontally for all columns.',
+              rows: _scheduleMode == 0
+                  ? [
+                      for (final y in result.yearly)
+                        [
+                          'Y${y.year}',
+                          money(y.opening),
+                          money(y.totalPaid),
+                          money(y.principal),
+                          money(y.interest),
+                          money(y.closing),
                         ],
-                ),
-              ]),
+                    ]
+                  : [
+                      for (final m in emiMonthlyRows(
+                          result.principal,
+                          parseNum(_rateCtrl.text),
+                          _tenureMonths))
+                        [
+                          'M${m[0].toInt()}',
+                          money(m[1]),
+                          money(m[2]),
+                          money(m[3]),
+                          money(m[4]),
+                          money(m[5]),
+                        ],
+                    ],
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }

@@ -1,5 +1,14 @@
 
 final Map<String, Map<String, String>> toolsL10n = {
+  // New tools & landing strings (English anchors; translate as needed).
+  // tL10n() falls back to English, then to the key itself, so untranslated
+  // entries render correctly in English on every locale.
+  'Planning': {'en': 'Planning'},
+  'Loan Prepayment Impact': {'en': 'Loan Prepayment Impact'},
+  'Lumpsum vs SIP': {'en': 'Lumpsum vs SIP'},
+  'Goal Planner': {'en': 'Goal Planner'},
+  'Retirement Corpus': {'en': 'Retirement Corpus'},
+  'Saved Calculations': {'en': 'Saved Calculations'},
   // Group titles
   'Finance Calculators': {
     'en': 'Finance Calculators',

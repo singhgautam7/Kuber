@@ -80,6 +80,16 @@ import '../../features/tools/breakeven_calculator/breakeven_calculator_screen.da
 import '../../features/tools/hra_calculator/hra_calculator_screen.dart';
 import '../../features/tools/bill_splitter/add_edit_bill_screen.dart';
 import '../../features/tools/bill_splitter/bill_splitter_screen.dart';
+import '../../features/tools/loan_prepayment/loan_prepayment_screen.dart';
+import '../../features/tools/lumpsum_vs_sip/lumpsum_vs_sip_screen.dart';
+import '../../features/tools/goal_planner/goal_planner_screen.dart';
+import '../../features/tools/retirement_corpus/retirement_corpus_screen.dart';
+import '../../features/tools/saved/saved_calculations_screen.dart';
+
+/// Parses the optional `?savedId=` query param used to open a calculator
+/// pre-filled from a SavedCalculation.
+int? _savedId(GoRouterState state) =>
+    int.tryParse(state.uri.queryParameters['savedId'] ?? '');
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'dashboard');
@@ -417,18 +427,20 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/emi-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const EmiCalculatorScreen(),
+                    builder: (_, s) =>
+                        EmiCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/sip-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) =>
-                        const InvestmentReturnsCalculatorScreen(),
+                    builder: (_, s) =>
+                        InvestmentReturnsCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/sip-amount-finder',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const SipAmountFinderScreen(),
+                    builder: (_, s) =>
+                        SipAmountFinderScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/tip-calculator',
@@ -443,27 +455,59 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/gst-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const GstCalculatorScreen(),
+                    builder: (_, s) => GstCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/fd-rd-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const FdRdCalculatorScreen(),
+                    builder: (_, s) =>
+                        FdRdCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/ppf-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const PpfCalculatorScreen(),
+                    builder: (_, s) => PpfCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/salary-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const SalaryCalculatorScreen(),
+                    builder: (_, s) =>
+                        SalaryCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/inflation-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const InflationCalculatorScreen(),
+                    builder: (_, s) =>
+                        InflationCalculatorScreen(savedId: _savedId(s)),
+                  ),
+                  GoRoute(
+                    path: 'tools/loan-prepayment',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, s) =>
+                        LoanPrepaymentScreen(savedId: _savedId(s)),
+                  ),
+                  GoRoute(
+                    path: 'tools/lumpsum-vs-sip',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, s) => LumpsumVsSipScreen(savedId: _savedId(s)),
+                  ),
+                  GoRoute(
+                    path: 'tools/goal-planner',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, s) => GoalPlannerScreen(savedId: _savedId(s)),
+                  ),
+                  GoRoute(
+                    path: 'tools/retirement-corpus',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, s) =>
+                        RetirementCorpusScreen(savedId: _savedId(s)),
+                  ),
+                  GoRoute(
+                    path: 'tools/saved-calculations',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, s) => SavedCalculationsScreen(
+                      initialTool: s.uri.queryParameters['tool'],
+                    ),
                   ),
                   GoRoute(
                     path: 'tools/breakeven-calculator',
@@ -473,7 +517,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/hra-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const HraCalculatorScreen(),
+                    builder: (_, s) => HraCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/split-calculator',

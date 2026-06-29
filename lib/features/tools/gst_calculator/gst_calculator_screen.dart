@@ -1,30 +1,39 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../engine/gst_engine.dart';
+import '../widgets/calculator_hero_result.dart';
+import '../widgets/calculator_screen_scaffold.dart';
+import '../widgets/calculator_support.dart';
 import '../widgets/calculator_widgets.dart';
-
-const _kGstPresets = [5.0, 12.0, 18.0, 28.0];
+import '../widgets/tool_accents.dart';
 
 class GstCalculatorScreen extends ConsumerStatefulWidget {
-  const GstCalculatorScreen({super.key});
+  final int? savedId;
+  const GstCalculatorScreen({super.key, this.savedId});
 
   @override
   ConsumerState<GstCalculatorScreen> createState() =>
       _GstCalculatorScreenState();
 }
 
-class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
+class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen>
+    with CalculatorSupport {
   final _amountCtrl = TextEditingController();
   final _customRateCtrl = TextEditingController();
-  double? _selectedPreset = 18.0;
-  bool _isCustom = false;
-  int _modeIndex = 0; // 0 = Add GST, 1 = Remove GST
+  int _mode = 0; // 0 = Add, 1 = Remove
+  int _rateChip = 2; // index into _rates; last = custom
+  static const _rates = [5.0, 12.0, 18.0, 28.0];
+
+  @override
+  void initState() {
+    super.initState();
+    initCalculatorSupport();
+  }
 
   @override
   void dispose() {
@@ -33,34 +42,50 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
     super.dispose();
   }
 
-  double? get _rate {
-    if (_isCustom) return double.tryParse(_customRateCtrl.text);
-    return _selectedPreset;
+  @override
+  String get toolKey => 'gst-calculator';
+  @override
+  int? get initialSavedId => widget.savedId;
+  @override
+  String get defaultSaveName => 'GST calc';
+  @override
+  String get savePlaceholder => 'e.g. Invoice GST';
+
+  bool get _isCustom => _rateChip == _rates.length;
+  double get _rate => _isCustom ? parseNum(_customRateCtrl.text) : _rates[_rateChip];
+
+  @override
+  Map<String, dynamic> collectInputs() => {
+        'amount': _amountCtrl.text,
+        'mode': _mode,
+        'rateChip': _rateChip,
+        'customRate': _customRateCtrl.text,
+      };
+
+  @override
+  void applyInputs(Map<String, dynamic> json) {
+    _amountCtrl.text = json['amount']?.toString() ?? '';
+    _mode = json['mode'] as int? ?? 0;
+    _rateChip = json['rateChip'] as int? ?? 2;
+    _customRateCtrl.text = json['customRate']?.toString() ?? '';
   }
 
-  ({double gstAmount, double baseAmount, double cgst, double sgst})? _compute() {
-    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', ''));
-    final rate = _rate;
-    if (amount == null || rate == null) return null;
-    if (amount <= 0 || rate <= 0) return null;
+  GstResult? _compute() {
+    final amount = parseAmount(_amountCtrl.text);
+    if (amount <= 0 || _rate <= 0) return null;
+    return _mode == 0 ? addGst(amount, _rate) : removeGst(amount, _rate);
+  }
 
-    double gstAmount;
-    double baseAmount;
-
-    if (_modeIndex == 0) {
-      gstAmount = amount * rate / 100;
-      baseAmount = amount;
-    } else {
-      baseAmount = amount * 100 / (100 + rate);
-      gstAmount = amount - baseAmount;
-    }
-
-    return (
-      gstAmount: gstAmount,
-      baseAmount: baseAmount,
-      cgst: gstAmount / 2,
-      sgst: gstAmount / 2,
-    );
+  @override
+  String buildSummary() {
+    final formatter = ref.read(formatterProvider);
+    final currency = ref.read(currencyProvider);
+    final r = _compute();
+    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
+        symbol: currency.symbol);
+    final dir = _mode == 0 ? 'add' : 'remove';
+    if (r == null) return 'GST $amt';
+    return '$amt $dir ${_rate.toStringAsFixed(0)}% → GST ${formatter.formatCurrency(r.gstAmount, symbol: currency.symbol)}';
   }
 
   @override
@@ -68,191 +93,134 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen> {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
+    String money(double v) =>
+        formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
+    final half = (_rate / 2).toStringAsFixed(_rate % 2 == 0 ? 0 : 1);
+    void recompute(_) => scheduleRecompute();
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.gstCalculator,
-            ),
+    return ToolScreenScaffold(
+      title: 'GST Calculator',
+      subtitle: 'Add or remove GST from any amount',
+      infoConfig: InfoConstants.gstCalculator,
+      overflowConfig: savedOverflowConfig('GST'),
+      banner: buildSavedBanner(),
+      onSave: openSaveSheet,
+      canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
+      sections: [
+        ToolInputCard(children: [
+          const ToolInputLabel('CALCULATION TYPE'),
+          const SizedBox(height: KuberSpacing.sm),
+          ToolSegmentedControl(
+            labels: const ['Add GST', 'Remove GST'],
+            selectedIndex: _mode,
+            onChanged: (i) => setState(() => _mode = i),
           ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'GST Calculator',
-              description: 'Add or remove GST instantly',
-            ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolTextField(
+            controller: _amountCtrl,
+            label: 'AMOUNT',
+            prefix: currency.symbol,
+            formatAsAmount: true,
+            onChanged: recompute,
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+          const SizedBox(height: KuberSpacing.lg),
+          const ToolInputLabel('GST RATE'),
+          const SizedBox(height: KuberSpacing.sm),
+          Wrap(
+            spacing: KuberSpacing.sm,
+            runSpacing: KuberSpacing.sm,
+            children: [
+              for (var i = 0; i < _rates.length; i++)
+                _Chip(
+                  label: '${_rates[i].toStringAsFixed(0)}%',
+                  selected: _rateChip == i,
+                  onTap: () => setState(() => _rateChip = i),
+                ),
+              _Chip(
+                label: 'Custom',
+                selected: _isCustom,
+                onTap: () => setState(() => _rateChip = _rates.length),
+              ),
+            ],
+          ),
+          if (_isCustom) ...[
+            const SizedBox(height: KuberSpacing.md),
+            ToolTextField(
+              controller: _customRateCtrl,
+              label: 'CUSTOM RATE',
+              suffix: '%',
+              onChanged: recompute,
             ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ToolInputCard(
+          ],
+        ]),
+        ToolSection(
+          title: 'Result',
+          child: result == null
+              ? const ToolEmptyResult()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ToolTextField(
-                      label: 'AMOUNT',
-                      controller: _amountCtrl,
-                      prefix: currency.symbol,
-                      onChanged: (_) => setState(() {}),
-                      formatAsAmount: true,
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('GST RATE'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    Row(
-                      children: [
-                        ..._kGstPresets.map((preset) {
-                          final selected =
-                              !_isCustom && _selectedPreset == preset;
-                          return Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  right: KuberSpacing.xs),
-                              child: GestureDetector(
-                                onTap: () => setState(() {
-                                  _isCustom = false;
-                                  _selectedPreset = preset;
-                                }),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 150),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: KuberSpacing.sm,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: selected
-                                        ? cs.primary
-                                        : cs.surfaceContainerHigh,
-                                    borderRadius:
-                                        BorderRadius.circular(KuberRadius.md),
-                                    border: Border.all(
-                                      color: selected ? cs.primary : cs.outline,
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '${preset.toStringAsFixed(0)}%',
-                                    style: localeFont(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: selected
-                                          ? Colors.white
-                                          : cs.onSurface,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() {
-                              _isCustom = true;
-                              _selectedPreset = null;
-                            }),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: KuberSpacing.sm,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _isCustom
-                                    ? cs.primary
-                                    : cs.surfaceContainerHigh,
-                                borderRadius:
-                                    BorderRadius.circular(KuberRadius.md),
-                                border: Border.all(
-                                  color: _isCustom ? cs.primary : cs.outline,
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Custom',
-                                style: localeFont(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color:
-                                      _isCustom ? Colors.white : cs.onSurface,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (_isCustom) ...[
-                      const SizedBox(height: KuberSpacing.md),
-                      ToolTextField(
-                        label: 'CUSTOM RATE',
-                        controller: _customRateCtrl,
-                        suffix: '%',
-                        onChanged: (_) => setState(() {}),
+                    ToolDualHero(
+                      left: HeroSide(
+                        label: 'GST Amount',
+                        value: money(result.gstAmount),
+                        color: ToolAccents.amber,
                       ),
-                    ],
-                    const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('MODE'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    ToolSegmentedControl(
-                      labels: const ['EXCL. GST', 'INCL. GST'],
-                      selectedIndex: _modeIndex,
-                      onChanged: (i) => setState(() => _modeIndex = i),
+                      right: HeroSide(
+                        label: _mode == 0 ? 'Final Amount' : 'Pre-GST Amount',
+                        value: money(
+                            _mode == 0 ? result.grossAmount : result.preGst),
+                        color: cs.onSurface,
+                      ),
                     ),
+                    const SizedBox(height: KuberSpacing.lg),
+                    ToolStatCols(items: [
+                      StatCol(_mode == 0 ? 'Pre-GST' : 'Gross',
+                          money(_mode == 0 ? result.preGst : result.grossAmount)),
+                      StatCol('CGST ($half%)', money(result.cgst)),
+                      StatCol('SGST ($half%)', money(result.sgst)),
+                    ]),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                ToolResultCard(
-                  children: result == null
-                      ? [const ToolEmptyResult()]
-                      : [
-                          ToolHeroResult(
-                            label: 'Final Amount',
-                            value: formatter.formatCurrency(
-                              result.baseAmount + result.gstAmount,
-                              symbol: currency.symbol,
-                            ),
-                            color: cs.primary,
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          ToolStatRow(
-                            label: 'Base Amount',
-                            value: formatter.formatCurrency(result.baseAmount,
-                                symbol: currency.symbol),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'GST Amount',
-                            value: formatter.formatCurrency(result.gstAmount,
-                                symbol: currency.symbol),
-                            valueColor: cs.error,
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'CGST',
-                            value: formatter.formatCurrency(result.cgst,
-                                symbol: currency.symbol),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'SGST',
-                            value: formatter.formatCurrency(result.sgst,
-                                symbol: currency.symbol),
-                          ),
-                        ],
-                ),
-              ]),
-            ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _Chip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(KuberRadius.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.12)
+              : cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: selected ? cs.primary : cs.outline),
+        ),
+        child: Text(
+          label,
+          style: localeFont(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: selected ? cs.primary : cs.onSurfaceVariant,
           ),
-        ],
+        ),
       ),
     );
   }

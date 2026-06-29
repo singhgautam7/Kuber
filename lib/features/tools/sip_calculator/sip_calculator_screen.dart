@@ -1,17 +1,22 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../engine/investment_engine.dart';
+import '../engine/monthly_schedules.dart';
+import '../widgets/calculator_donut_breakdown.dart';
+import '../widgets/calculator_hero_result.dart';
+import '../widgets/calculator_line_chart.dart';
+import '../widgets/calculator_schedule_table.dart';
+import '../widgets/calculator_screen_scaffold.dart';
+import '../widgets/calculator_support.dart';
 import '../widgets/calculator_widgets.dart';
 
 class InvestmentReturnsCalculatorScreen extends ConsumerStatefulWidget {
-  const InvestmentReturnsCalculatorScreen({super.key});
+  final int? savedId;
+  const InvestmentReturnsCalculatorScreen({super.key, this.savedId});
 
   @override
   ConsumerState<InvestmentReturnsCalculatorScreen> createState() =>
@@ -19,41 +24,76 @@ class InvestmentReturnsCalculatorScreen extends ConsumerStatefulWidget {
 }
 
 class _InvestmentReturnsCalculatorScreenState
-    extends ConsumerState<InvestmentReturnsCalculatorScreen> {
+    extends ConsumerState<InvestmentReturnsCalculatorScreen>
+    with CalculatorSupport {
   final _amountCtrl = TextEditingController();
   final _rateCtrl = TextEditingController();
-  final _periodCtrl = TextEditingController();
-  int _periodIndex = 0; // 0 = Years, 1 = Months
-  int _modeIndex = 0; // 0 = Monthly SIP, 1 = One Time
+  final _tenureCtrl = TextEditingController();
+  int _type = 1; // 0 = Lumpsum, 1 = SIP
+  int _scheduleMode = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    initCalculatorSupport();
+  }
 
   @override
   void dispose() {
     _amountCtrl.dispose();
     _rateCtrl.dispose();
-    _periodCtrl.dispose();
+    _tenureCtrl.dispose();
     super.dispose();
   }
 
-  ({double fv, double invested, double returns})? _compute() {
-    final p = double.tryParse(_amountCtrl.text.replaceAll(',', ''));
-    final annualRate = double.tryParse(_rateCtrl.text);
-    final period = double.tryParse(_periodCtrl.text);
-    if (p == null || annualRate == null || period == null) return null;
-    if (p <= 0 || annualRate <= 0 || period <= 0) return null;
+  @override
+  String get toolKey => 'sip-calculator';
+  @override
+  int? get initialSavedId => widget.savedId;
+  @override
+  String get defaultSaveName => _type == 1 ? 'Monthly SIP' : 'Lumpsum invest';
+  @override
+  String get savePlaceholder => 'e.g. Retirement SIP';
 
-    final n = _periodIndex == 0 ? period * 12 : period;
-    final r = annualRate / 12 / 100;
+  int get _years => parseNum(_tenureCtrl.text).round();
+  bool get _isSip => _type == 1;
 
-    if (_modeIndex == 0) {
-      final fv = p * ((pow(1 + r, n) - 1) / r) * (1 + r);
-      final invested = p * n;
-      return (fv: fv, invested: invested, returns: fv - invested);
-    } else {
-      final annualR = annualRate / 100;
-      final years = _periodIndex == 0 ? period : period / 12.0;
-      final fv = p * pow(1 + annualR, years);
-      return (fv: fv, invested: p, returns: fv - p);
-    }
+  @override
+  Map<String, dynamic> collectInputs() => {
+        'amount': _amountCtrl.text,
+        'rate': _rateCtrl.text,
+        'tenure': _tenureCtrl.text,
+        'type': _type,
+      };
+
+  @override
+  void applyInputs(Map<String, dynamic> json) {
+    _amountCtrl.text = json['amount']?.toString() ?? '';
+    _rateCtrl.text = json['rate']?.toString() ?? '';
+    _tenureCtrl.text = json['tenure']?.toString() ?? '';
+    _type = json['type'] as int? ?? 1;
+  }
+
+  InvestmentResult? _compute() {
+    final amount = parseAmount(_amountCtrl.text);
+    final rate = parseNum(_rateCtrl.text);
+    final years = _years;
+    if (amount <= 0 || rate <= 0 || years <= 0) return null;
+    return _isSip
+        ? computeSip(amount, rate, years)
+        : computeLumpsum(amount, rate, years);
+  }
+
+  @override
+  String buildSummary() {
+    final formatter = ref.read(formatterProvider);
+    final currency = ref.read(currencyProvider);
+    final r = _compute();
+    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
+        symbol: currency.symbol);
+    final kind = _isSip ? 'SIP' : 'Lumpsum';
+    if (r == null) return '$kind $amt';
+    return '$kind $amt @ ${_rateCtrl.text}% for ${_years}y → ${formatter.formatCurrency(r.futureValue, symbol: currency.symbol)}';
   }
 
   @override
@@ -61,138 +101,162 @@ class _InvestmentReturnsCalculatorScreenState
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
+    String money(double v) =>
+        formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
-    final isMonthly = _modeIndex == 0;
+    void recompute(_) => scheduleRecompute();
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.investmentReturnsCalculator,
-            ),
+    return ToolScreenScaffold(
+      title: 'Investment Returns',
+      subtitle: 'How your investment grows over the years',
+      infoConfig: InfoConstants.investmentReturnsCalculator,
+      overflowConfig: savedOverflowConfig('investment'),
+      banner: buildSavedBanner(),
+      onSave: openSaveSheet,
+      canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
+      sections: [
+        ToolInputCard(children: [
+          ToolSliderField(
+            controller: _amountCtrl,
+            label: _isSip ? 'INVESTMENT AMOUNT (PER MONTH)' : 'INVESTMENT AMOUNT',
+            prefix: currency.symbol,
+            formatAsAmount: true,
+            onChanged: recompute,
+            min: 500,
+            max: _isSip ? 200000 : 10000000,
           ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'Investment Returns',
-              description: 'Estimate SIP & lump-sum growth',
-            ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _rateCtrl,
+            label: 'EXPECTED ANNUAL RETURN',
+            suffix: '%',
+            onChanged: recompute,
+            min: 1,
+            max: 30,
+            divisions: 290,
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ToolInputCard(
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _tenureCtrl,
+            label: 'TENURE',
+            suffix: 'years',
+            onChanged: recompute,
+            min: 1,
+            max: 40,
+            divisions: 39,
+          ),
+          const SizedBox(height: KuberSpacing.lg),
+          const ToolInputLabel('INVESTMENT TYPE'),
+          const SizedBox(height: KuberSpacing.sm),
+          ToolSegmentedControl(
+            labels: const ['Lumpsum', 'SIP'],
+            selectedIndex: _type,
+            onChanged: (i) => setState(() => _type = i),
+          ),
+        ]),
+        ToolSection(
+          title: 'Result',
+          child: result == null
+              ? const ToolEmptyResult()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const ToolInputLabel('INVESTMENT TYPE'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    ToolSegmentedControl(
-                      labels: const ['MONTHLY', 'ONE TIME'],
-                      selectedIndex: _modeIndex,
-                      onChanged: (i) => setState(() => _modeIndex = i),
+                    ToolHero(
+                      label: 'Future Value',
+                      value: money(result.futureValue),
+                      color: cs.tertiary,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: isMonthly
-                          ? 'MONTHLY INVESTMENT'
-                          : 'INVESTMENT AMOUNT',
-                      controller: _amountCtrl,
-                      prefix: currency.symbol,
-                      onChanged: (_) => setState(() {}),
-                      formatAsAmount: true,
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: 'EXPECTED ANNUAL RETURN',
-                      controller: _rateCtrl,
-                      suffix: '%',
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('TIME PERIOD'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ToolTextField(
-                            controller: _periodCtrl,
-                            onChanged: (_) => setState(() {}),
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Expanded(
-                          child: ToolSegmentedControl(
-                            labels: const ['Years', 'Months'],
-                            selectedIndex: _periodIndex,
-                            onChanged: (i) => setState(() => _periodIndex = i),
-                          ),
-                        ),
-                      ],
-                    ),
+                    ToolStatCols(items: [
+                      StatCol('Total Invested', money(result.totalInvested)),
+                      StatCol('Total Gains', money(result.totalGains),
+                          color: cs.tertiary),
+                      StatCol('Abs. Return',
+                          '${result.absoluteReturnPercent.round()}%'),
+                    ]),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                ToolResultCard(
-                  children: result == null
-                      ? [const ToolEmptyResult()]
-                      : isMonthly
-                          ? [
-                              ToolHeroResult(
-                                label: 'Estimated Returns',
-                                value: formatter.formatCurrency(result.returns,
-                                    symbol: currency.symbol),
-                                color: cs.tertiary,
-                              ),
-                              const SizedBox(height: KuberSpacing.lg),
-                              ToolStatRow(
-                                label: 'Total Invested',
-                                value: formatter.formatCurrency(result.invested,
-                                    symbol: currency.symbol),
-                              ),
-                              const SizedBox(height: KuberSpacing.sm),
-                              ToolStatRow(
-                                label: 'Total Value',
-                                value: formatter.formatCurrency(result.fv,
-                                    symbol: currency.symbol),
-                                valueColor: cs.tertiary,
-                              ),
-                            ]
-                          : [
-                              ToolHeroResult(
-                                label: 'Total Value',
-                                value: formatter.formatCurrency(result.fv,
-                                    symbol: currency.symbol),
-                                color: cs.primary,
-                              ),
-                              const SizedBox(height: KuberSpacing.lg),
-                              ToolStatRow(
-                                label: 'Estimated Returns',
-                                value: formatter.formatCurrency(result.returns,
-                                    symbol: currency.symbol),
-                                valueColor: cs.tertiary,
-                              ),
-                              const SizedBox(height: KuberSpacing.sm),
-                              ToolStatRow(
-                                label: 'Principal',
-                                value: formatter.formatCurrency(result.invested,
-                                    symbol: currency.symbol),
-                              ),
-                            ],
-                ),
-              ]),
+        ),
+        if (result != null) ...[
+          ToolSection(
+            title: 'Breakdown',
+            subtitle: 'Invested vs returns',
+            child: ToolDonutBreakdown(
+              segments: [
+                BreakdownSegment('Invested', result.totalInvested, cs.primary),
+                BreakdownSegment('Returns', result.totalGains, cs.tertiary),
+              ],
+              centerBig: formatter.formatCompactCurrency(result.futureValue,
+                  symbol: currency.symbol),
+              centerSmall: 'VALUE',
+            ),
+          ),
+          ToolSection(
+            title: 'Growth over time',
+            subtitle: 'Invested vs portfolio value',
+            child: ToolLineChart(
+              series: [
+                ChartSeries(
+                    name: 'Portfolio value',
+                    points: result.valueSeries,
+                    color: cs.tertiary,
+                    fill: true),
+                ChartSeries(
+                    name: 'Invested',
+                    points: result.investedSeries,
+                    color: cs.primary,
+                    dashed: true),
+              ],
+              xLabels: [
+                for (var i = 0; i < result.valueSeries.length; i++) 'Y$i',
+              ],
+            ),
+          ),
+          ToolSection(
+            title: 'Year-by-year',
+            child: ToolScheduleTable(
+              columns: const [
+                ScheduleColumn('Period', numeric: false),
+                ScheduleColumn('Invested'),
+                ScheduleColumn('Portfolio Value'),
+                ScheduleColumn('Gains'),
+                ScheduleColumn('Return %'),
+              ],
+              toggleLabels: _isSip ? const ['Yearly', 'Monthly'] : null,
+              toggleIndex: _scheduleMode,
+              onToggle: (i) => setState(() => _scheduleMode = i),
+              rows: (_isSip && _scheduleMode == 1)
+                  ? [
+                      for (final m in sipMonthlyRows(
+                          parseAmount(_amountCtrl.text),
+                          parseNum(_rateCtrl.text),
+                          _years))
+                        [
+                          'M${m[0].toInt()}',
+                          money(m[1]),
+                          money(m[2]),
+                          money(m[3]),
+                          '${m[4].round()}%',
+                        ],
+                    ]
+                  : [
+                      for (var y = 1; y < result.valueSeries.length; y++)
+                        [
+                          'Y$y',
+                          money(result.investedSeries[y]),
+                          money(result.valueSeries[y]),
+                          money(result.valueSeries[y] -
+                              result.investedSeries[y]),
+                          '${result.investedSeries[y] == 0 ? 0 : ((result.valueSeries[y] - result.investedSeries[y]) / result.investedSeries[y] * 100).round()}%',
+                        ],
+                    ],
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }

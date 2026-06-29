@@ -312,7 +312,21 @@ class DataController extends StateNotifier<DataState> {
     try {
       ImportResult result;
       if (isJson) {
-        result = await _service.importJson(content);
+        result = await _service.importJson(
+          content,
+          onProgress: (label, current, total) {
+            if (!mounted) return;
+            final String msg;
+            if (label == 'suggestions') {
+              msg = 'Rebuilding suggestions…';
+            } else if (total >= 20) {
+              msg = 'Importing $current/$total $label…';
+            } else {
+              msg = 'Importing $label…';
+            }
+            state = state.copyWith(loadingMessage: msg);
+          },
+        );
       } else {
         result = await _service.importData(content, override: override);
       }

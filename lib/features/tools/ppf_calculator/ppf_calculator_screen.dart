@@ -1,59 +1,91 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../engine/ppf_engine.dart';
+import '../widgets/calculator_donut_breakdown.dart';
+import '../widgets/calculator_hero_result.dart';
+import '../widgets/calculator_line_chart.dart';
+import '../widgets/calculator_schedule_table.dart';
+import '../widgets/calculator_screen_scaffold.dart';
+import '../widgets/calculator_support.dart';
 import '../widgets/calculator_widgets.dart';
+import '../widgets/tool_accents.dart';
 
 class PpfCalculatorScreen extends ConsumerStatefulWidget {
-  const PpfCalculatorScreen({super.key});
+  final int? savedId;
+  const PpfCalculatorScreen({super.key, this.savedId});
 
   @override
   ConsumerState<PpfCalculatorScreen> createState() =>
       _PpfCalculatorScreenState();
 }
 
-class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen> {
-  final _investmentCtrl = TextEditingController();
+class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
+    with CalculatorSupport {
+  final _depositCtrl = TextEditingController();
+  final _tenureCtrl = TextEditingController(text: '15');
   final _rateCtrl = TextEditingController(text: '7.1');
-  int _durationYears = 15; // 15, 20, or 25
+
+  @override
+  void initState() {
+    super.initState();
+    initCalculatorSupport();
+  }
 
   @override
   void dispose() {
-    _investmentCtrl.dispose();
+    _depositCtrl.dispose();
+    _tenureCtrl.dispose();
     _rateCtrl.dispose();
     super.dispose();
   }
 
-  ({double maturity, double totalInvested, double totalInterest})? _compute() {
-    final yearly =
-        double.tryParse(_investmentCtrl.text.replaceAll(',', ''));
-    final rate = double.tryParse(_rateCtrl.text);
-    if (yearly == null || rate == null) return null;
-    if (yearly <= 0 || rate <= 0) return null;
+  @override
+  String get toolKey => 'ppf-calculator';
+  @override
+  int? get initialSavedId => widget.savedId;
+  @override
+  String get defaultSaveName => 'PPF account';
+  @override
+  String get savePlaceholder => 'e.g. PPF 15-year plan';
 
-    double balance = 0;
-    // First 15 years: invest + compound annually
-    for (int y = 1; y <= 15; y++) {
-      balance = (balance + yearly) * (1 + rate / 100);
-    }
-    // Extension blocks (no new investment after year 15)
-    if (_durationYears > 15) {
-      for (int y = 16; y <= _durationYears; y++) {
-        balance = balance * (1 + rate / 100);
-      }
-    }
+  int get _years => parseNum(_tenureCtrl.text).round();
+  double get _rawDeposit => parseAmount(_depositCtrl.text);
 
-    final totalInvested = yearly * 15;
-    return (
-      maturity: balance,
-      totalInvested: totalInvested,
-      totalInterest: balance - totalInvested,
-    );
+  @override
+  Map<String, dynamic> collectInputs() => {
+        'deposit': _depositCtrl.text,
+        'tenure': _tenureCtrl.text,
+        'rate': _rateCtrl.text,
+      };
+
+  @override
+  void applyInputs(Map<String, dynamic> json) {
+    _depositCtrl.text = json['deposit']?.toString() ?? '';
+    _tenureCtrl.text = json['tenure']?.toString() ?? '15';
+    _rateCtrl.text = json['rate']?.toString() ?? '7.1';
+  }
+
+  PpfResult? _compute() {
+    final deposit = clampPpfDeposit(_rawDeposit);
+    final rate = parseNum(_rateCtrl.text);
+    if (deposit <= 0 || _years <= 0 || rate <= 0) return null;
+    return computePpf(deposit, _years, ratePercent: rate);
+  }
+
+  @override
+  String buildSummary() {
+    final formatter = ref.read(formatterProvider);
+    final currency = ref.read(currencyProvider);
+    final r = _compute();
+    final dep = formatter.formatCurrency(clampPpfDeposit(_rawDeposit),
+        symbol: currency.symbol);
+    if (r == null) return 'PPF $dep/yr';
+    return '$dep/yr × ${_years}y → ${formatter.formatCurrency(r.maturity, symbol: currency.symbol)}';
   }
 
   @override
@@ -61,144 +93,148 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen> {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
+    String money(double v) =>
+        formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
+    final outOfRange = _rawDeposit > 0 &&
+        (_rawDeposit < kPpfMinDeposit || _rawDeposit > kPpfMaxDeposit);
+    void recompute(_) => scheduleRecompute();
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.ppfCalculator,
-            ),
+    return ToolScreenScaffold(
+      title: 'PPF Calculator',
+      subtitle: 'Tax-free maturity built over 15 years',
+      infoConfig: InfoConstants.ppfCalculator,
+      overflowConfig: savedOverflowConfig('PPF'),
+      banner: buildSavedBanner(),
+      onSave: openSaveSheet,
+      canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
+      sections: [
+        ToolInputCard(children: [
+          ToolSliderField(
+            controller: _depositCtrl,
+            label: 'YEARLY DEPOSIT',
+            prefix: currency.symbol,
+            helper: '₹500 – ₹1,50,000 per year',
+            formatAsAmount: true,
+            onChanged: recompute,
+            min: kPpfMinDeposit,
+            max: kPpfMaxDeposit,
           ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'PPF Calculator',
-              description: 'Public Provident Fund returns',
+          if (outOfRange)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                'Deposit clamped to the ₹500 – ₹1,50,000 limit.',
+                style: localeFont(fontSize: 11.5, color: cs.error),
+              ),
             ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolTextField(
+            controller: _tenureCtrl,
+            label: 'TENURE',
+            suffix: 'years',
+            onChanged: recompute,
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ToolInputCard(
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text('Extendable in 5-year blocks',
+                style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
+          ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolTextField(
+            controller: _rateCtrl,
+            label: 'INTEREST RATE',
+            suffix: '%',
+            onChanged: recompute,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+                'Current PPF rate is 7.1% (subject to govt revision)',
+                style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
+          ),
+        ]),
+        ToolSection(
+          title: 'Result',
+          child: result == null
+              ? const ToolEmptyResult()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ToolTextField(
-                      label: 'YEARLY INVESTMENT',
-                      controller: _investmentCtrl,
-                      prefix: currency.symbol,
-                      onChanged: (_) => setState(() {}),
-                      formatAsAmount: true,
-                    ),
-                    const SizedBox(height: KuberSpacing.xs),
-                    Text(
-                      'Max ${currency.symbol}1,50,000 per year',
-                      style: localeFont(
-                        fontSize: 11,
-                        color: cs.onSurfaceVariant,
-                      ),
+                    ToolHero(
+                      label: 'Maturity Amount',
+                      value: money(result.maturity),
+                      color: ToolAccents.emerald,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: 'INTEREST RATE',
-                      controller: _rateCtrl,
-                      suffix: '%',
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('DURATION'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    Row(
-                      children: [15, 20, 25].map((years) {
-                        final selected = _durationYears == years;
-                        return Expanded(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.only(right: KuberSpacing.xs),
-                            child: GestureDetector(
-                              onTap: () =>
-                                  setState(() => _durationYears = years),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: KuberSpacing.sm),
-                                decoration: BoxDecoration(
-                                  color: selected
-                                      ? cs.primary
-                                      : cs.surfaceContainerHigh,
-                                  borderRadius:
-                                      BorderRadius.circular(KuberRadius.md),
-                                  border: Border.all(
-                                    color:
-                                        selected ? cs.primary : cs.outline,
-                                  ),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '$years yrs',
-                                  style: localeFont(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: selected
-                                        ? Colors.white
-                                        : cs.onSurface,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                    ToolStatCols(items: [
+                      StatCol('Total Deposited', money(result.totalDeposited)),
+                      StatCol('Interest Earned', money(result.interestEarned),
+                          color: cs.tertiary),
+                      const StatCol('Returns', 'Tax-free'),
+                    ]),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                ToolResultCard(
-                  children: result == null
-                      ? [const ToolEmptyResult()]
-                      : [
-                          ToolHeroResult(
-                            label: 'Maturity Amount',
-                            value: formatter.formatCurrency(result.maturity,
-                                symbol: currency.symbol),
-                            color: cs.primary,
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          ToolStatRow(
-                            label: 'Total Invested',
-                            value: formatter.formatCurrency(
-                                result.totalInvested,
-                                symbol: currency.symbol),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'Total Interest',
-                            value: formatter.formatCurrency(
-                                result.totalInterest,
-                                symbol: currency.symbol),
-                            valueColor: cs.tertiary,
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'Duration',
-                            value: '$_durationYears Years',
-                          ),
-                        ],
-                ),
-              ]),
+        ),
+        if (result != null) ...[
+          ToolSection(
+            title: 'Breakdown',
+            subtitle: 'Deposited vs interest',
+            child: ToolDonutBreakdown(
+              segments: [
+                BreakdownSegment(
+                    'Deposited', result.totalDeposited, cs.primary),
+                BreakdownSegment(
+                    'Interest', result.interestEarned, ToolAccents.emerald),
+              ],
+              centerBig: formatter.formatCompactCurrency(result.maturity,
+                  symbol: currency.symbol),
+              centerSmall: 'MATURITY',
+            ),
+          ),
+          ToolSection(
+            title: 'PPF balance over years',
+            child: ToolLineChart(
+              series: [
+                ChartSeries(
+                    name: 'PPF balance',
+                    points: result.balanceSeries,
+                    color: ToolAccents.emerald,
+                    fill: true),
+              ],
+              xLabels: [
+                for (var i = 0; i < result.balanceSeries.length; i++) 'Y$i',
+              ],
+            ),
+          ),
+          ToolSection(
+            title: 'Year-by-year',
+            child: ToolScheduleTable(
+              columns: const [
+                ScheduleColumn('Year', numeric: false),
+                ScheduleColumn('Opening'),
+                ScheduleColumn('Deposit'),
+                ScheduleColumn('Interest'),
+                ScheduleColumn('Closing'),
+              ],
+              note: 'Interest credited at year-end on the closing balance.',
+              rows: [
+                for (final y in result.yearly)
+                  [
+                    'Y${y.year}',
+                    money(y.opening),
+                    money(y.deposit),
+                    money(y.interest),
+                    money(y.closing),
+                  ],
+              ],
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }

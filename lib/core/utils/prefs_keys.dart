@@ -46,9 +46,6 @@ class PrefsKeys {
   static const navBarStyle = 'nav_bar_style';
   static const moreTabLayout = 'more_tab_layout';
 
-  // Tools hub
-  static const toolsViewMode = 'kuber_tools_view_mode';
-
   // Analytics filter
   static const analyticsFilterType = 'kuber_analytics_filter_type';
   static const analyticsFilterFrom = 'kuber_analytics_filter_from';

@@ -21,4 +21,14 @@ class AskKuberMessage {
   String? thinkingJson;
   String? vizJson;
   String? metadataJson;
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'text': text,
+    'isUser': isUser,
+    'time': time.toIso8601String(),
+    'thinkingJson': thinkingJson,
+    'vizJson': vizJson,
+    'metadataJson': metadataJson,
+  };
 }

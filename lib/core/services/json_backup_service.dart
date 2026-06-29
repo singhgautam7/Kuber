@@ -23,10 +23,19 @@ import '../../features/widget_editor/data/widget_preference.dart';
 import '../../features/backups/services/backup_rotation.dart';
 import '../../features/backups/services/saf_backup_store.dart';
 import '../../features/backups/data/backup_config.dart';
+import '../../features/ask_kuber/data/ask_kuber_message.dart';
+import '../../features/sms_import/data/sms_transaction.dart';
+import '../../features/sms_import/data/sms_account_mapping.dart';
+import '../../features/tools/saved/data/saved_calculation.dart';
+import '../../features/tools/saved/data/calculator_recent_use.dart';
 import 'data_service.dart';
 
 /// Top-level so it can run on a background isolate via [compute].
 String _encodeBackupData(Map<String, dynamic> data) => jsonEncode(data);
+
+/// Reports import progress: `(collectionLabel, recordsDone, recordsTotal)`.
+typedef ImportProgressCallback = void Function(
+    String label, int current, int total);
 
 class JsonBackupService {
   static const _version = 1;
@@ -85,6 +94,11 @@ class JsonBackupService {
     final widgetPreferences = await isar.widgetPreferences.where().findAll();
     final stories = await isar.insightStorys.where().findAll();
     final backupConfigs = await isar.backupConfigs.where().findAll();
+    final savedCalculations = await isar.savedCalculations.where().findAll();
+    final recentUses = await isar.calculatorRecentUses.where().findAll();
+    final askKuberMessages = await isar.askKuberMessages.where().findAll();
+    final smsTransactions = await isar.smsTransactions.where().findAll();
+    final smsAccountMappings = await isar.smsAccountMappings.where().findAll();
 
     final data = {
       'version': _version,
@@ -107,6 +121,11 @@ class JsonBackupService {
       'widgetPreferences': widgetPreferences.map((w) => w.toMap()).toList(),
       'insightStories': stories.map((s) => s.toMap()).toList(),
       'backupConfigs': backupConfigs.map((b) => b.toMap()).toList(),
+      'savedCalculations': savedCalculations.map((s) => s.toMap()).toList(),
+      'calculatorRecentUses': recentUses.map((r) => r.toMap()).toList(),
+      'askKuberMessages': askKuberMessages.map((a) => a.toMap()).toList(),
+      'smsTransactions': smsTransactions.map((s) => s.toMap()).toList(),
+      'smsAccountMappings': smsAccountMappings.map((s) => s.toMap()).toList(),
     };
 
     // Encoding the whole database into one string is the heaviest part of a
@@ -117,63 +136,83 @@ class JsonBackupService {
     return compute(_encodeBackupData, data);
   }
 
-  Future<ImportResult> importJson(Isar isar, String jsonContent) async {
+  Future<ImportResult> importJson(
+    Isar isar,
+    String jsonContent, {
+    ImportProgressCallback? onProgress,
+  }) async {
     try {
       final data = jsonDecode(jsonContent) as Map<String, dynamic>;
 
       await isar.writeTxn(() => isar.clear());
 
-      int count = 0;
+      var count = 0;
 
-      await isar.writeTxn(() async {
-        for (final m in _list(data, 'categoryGroups')) {
-          await isar.categoryGroups.put(_mapToGroup(m));
-          count++;
+      // Restores one collection using chunked bulk inserts. Each chunk is its
+      // own write transaction: `putAll` is far faster than per-record `put`,
+      // and the await boundary between chunks lets the import overlay repaint
+      // with live "<done>/<total> <label>" progress (a single mega-transaction
+      // never yields a frame, so the indicator would otherwise freeze).
+      Future<void> restore<T>(
+        String key,
+        String label,
+        IsarCollection<T> collection,
+        T Function(Map<String, dynamic>) fromMap,
+      ) async {
+        final list = _list(data, key);
+        final total = list.length;
+        if (total == 0) return;
+        const chunkSize = 500;
+        onProgress?.call(label, 0, total);
+        for (var start = 0; start < total; start += chunkSize) {
+          final end = start + chunkSize < total ? start + chunkSize : total;
+          final batch = [
+            for (var i = start; i < end; i++) fromMap(list[i]),
+          ];
+          await isar.writeTxn(() => collection.putAll(batch));
+          count += batch.length;
+          onProgress?.call(label, end, total);
         }
-        for (final m in _list(data, 'categories')) {
-          await isar.categorys.put(_mapToCat(m));
-          count++;
-        }
-        for (final m in _list(data, 'accounts')) {
-          await isar.accounts.put(_mapToAccount(m));
-          count++;
-        }
-        for (final m in _list(data, 'tags')) {
-          await isar.tags.put(_mapToTag(m));
-          count++;
-        }
-        for (final m in _list(data, 'transactions')) {
-          await isar.transactions.put(_mapToTx(m));
-          count++;
-        }
-        for (final m in _list(data, 'transactionTags')) {
-          await isar.transactionTags.put(_mapToTxTag(m));
-          count++;
-        }
-        for (final m in _list(data, 'recurringRules')) {
-          await isar.recurringRules.put(_mapToRecurring(m));
-          count++;
-        }
-        for (final m in _list(data, 'budgets')) {
-          await isar.budgets.put(_mapToBudget(m));
-          count++;
-        }
-        for (final m in _list(data, 'ledgers')) {
-          await isar.ledgers.put(_mapToLedger(m));
-          count++;
-        }
-        for (final m in _list(data, 'loans')) {
-          await isar.loans.put(_mapToLoan(m));
-          count++;
-        }
-        for (final m in _list(data, 'investments')) {
-          await isar.investments.put(_mapToInvestment(m));
-          count++;
-        }
-      });
+      }
+
+      await restore('categoryGroups', 'category groups', isar.categoryGroups,
+          _mapToGroup);
+      await restore('categories', 'categories', isar.categorys, _mapToCat);
+      await restore('accounts', 'accounts', isar.accounts, _mapToAccount);
+      await restore('tags', 'tags', isar.tags, _mapToTag);
+      await restore(
+          'transactions', 'transactions', isar.transactions, _mapToTx);
+      await restore('transactionTags', 'transaction tags', isar.transactionTags,
+          _mapToTxTag);
+      await restore('recurringRules', 'recurring rules', isar.recurringRules,
+          _mapToRecurring);
+      await restore('budgets', 'budgets', isar.budgets, _mapToBudget);
+      await restore('ledgers', 'ledger entries', isar.ledgers, _mapToLedger);
+      await restore('loans', 'loans', isar.loans, _mapToLoan);
+      await restore(
+          'investments', 'investments', isar.investments, _mapToInvestment);
+      await restore('savedCalculations', 'saved calculations',
+          isar.savedCalculations, _mapToSavedCalculation);
+      await restore('calculatorRecentUses', 'recent calculators',
+          isar.calculatorRecentUses, _mapToRecentUse);
+      await restore('askKuberMessages', 'chat history', isar.askKuberMessages,
+          _mapToAskKuberMessage);
+      await restore('smsAccountMappings', 'SMS mappings',
+          isar.smsAccountMappings, _mapToSmsAccountMapping);
+      await restore('smsTransactions', 'SMS transactions', isar.smsTransactions,
+          _mapToSmsTransaction);
 
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {
+      // A chunk failed after the up-front clear(), so the database is now
+      // partially restored. Reset it to a clean-empty state so the user isn't
+      // left with half a backup (the previous single-transaction import rolled
+      // back to empty on failure; this preserves that guarantee).
+      try {
+        await isar.writeTxn(() => isar.clear());
+      } catch (_) {
+        // Best-effort cleanup; surface the original import error regardless.
+      }
       return ImportResult(
         successCount: 0,
         failureCount: 0,
@@ -241,6 +280,7 @@ class JsonBackupService {
     'icon': a.icon,
     'colorValue': a.colorValue,
     'last4Digits': a.last4Digits,
+    'isDisabled': a.isDisabled,
   };
 
   Map<String, dynamic> _tagToMap(Tag t) => {
@@ -406,7 +446,8 @@ class JsonBackupService {
     ..isCreditCard = (m['isCreditCard'] as bool?) ?? false
     ..icon = m['icon'] as String?
     ..colorValue = m['colorValue'] as int?
-    ..last4Digits = m['last4Digits'] as String?;
+    ..last4Digits = m['last4Digits'] as String?
+    ..isDisabled = (m['isDisabled'] as bool?) ?? false;
 
   Tag _mapToTag(Map<String, dynamic> m) => Tag()
     ..id = m['id'] as int
@@ -542,4 +583,59 @@ class JsonBackupService {
     ..notes = m['notes'] as String?
     ..createdAt = DateTime.parse(m['createdAt'] as String)
     ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+
+  SavedCalculation _mapToSavedCalculation(Map<String, dynamic> m) =>
+      SavedCalculation()
+        ..id = m['id'] as int
+        ..tool = m['tool'] as String
+        ..name = m['name'] as String
+        ..inputsJson = m['inputsJson'] as String
+        ..summary = m['summary'] as String
+        ..savedAt = DateTime.parse(m['savedAt'] as String)
+        ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+
+  CalculatorRecentUse _mapToRecentUse(Map<String, dynamic> m) =>
+      CalculatorRecentUse()
+        ..id = m['id'] as int
+        ..calculatorType = m['calculatorType'] as String
+        ..lastUsed = DateTime.parse(m['lastUsed'] as String)
+        ..useCount = (m['useCount'] as int?) ?? 0;
+
+  AskKuberMessage _mapToAskKuberMessage(Map<String, dynamic> m) =>
+      AskKuberMessage()
+        ..id = m['id'] as int
+        ..text = m['text'] as String
+        ..isUser = m['isUser'] as bool
+        ..time = DateTime.parse(m['time'] as String)
+        ..thinkingJson = m['thinkingJson'] as String?
+        ..vizJson = m['vizJson'] as String?
+        ..metadataJson = m['metadataJson'] as String?;
+
+  SmsAccountMapping _mapToSmsAccountMapping(Map<String, dynamic> m) =>
+      SmsAccountMapping()
+        ..id = m['id'] as int
+        ..senderId = m['senderId'] as String
+        ..accountId = m['accountId'] as String
+        ..usageCount = (m['usageCount'] as int?) ?? 0
+        ..lastUsed = DateTime.parse(m['lastUsed'] as String);
+
+  SmsTransaction _mapToSmsTransaction(Map<String, dynamic> m) => SmsTransaction()
+    ..id = m['id'] as int
+    ..rawSms = m['rawSms'] as String
+    ..senderId = m['senderId'] as String
+    ..rawSmsHash = m['rawSmsHash'] as String
+    ..parsedDate = DateTime.parse(m['parsedDate'] as String)
+    ..parsedAmount = (m['parsedAmount'] as num).toDouble()
+    ..parsedType = m['parsedType'] as String
+    ..parsedMerchant = m['parsedMerchant'] as String?
+    ..parsedAccountSuffix = m['parsedAccountSuffix'] as String?
+    ..suggestedAccountId = m['suggestedAccountId'] as String?
+    ..suggestedCategoryId = m['suggestedCategoryId'] as String?
+    ..reviewStatus = m['reviewStatus'] as String
+    ..smsDate = DateTime.parse(m['smsDate'] as String)
+    ..importedAt = m['importedAt'] != null
+        ? DateTime.parse(m['importedAt'] as String)
+        : null
+    ..importedTransactionId = m['importedTransactionId'] as String?
+    ..patternMatched = m['patternMatched'] as String?;
 }

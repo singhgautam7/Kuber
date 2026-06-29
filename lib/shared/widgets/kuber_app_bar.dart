@@ -120,10 +120,11 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 PopupMenuButton<KuberOverflowItem>(
                   onSelected: (item) => item.onTap(),
                   offset: const Offset(0, 40),
-                  color: cs.surfaceContainer,
+                  color: cs.surfaceContainerHigh,
+                  elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(KuberRadius.md),
-                    side: BorderSide(color: cs.outline.withValues(alpha: 0.15)),
+                    side: BorderSide(color: cs.outline),
                   ),
                   itemBuilder: (ctx) => overflowConfig!.items.map((item) {
                     final color = item.isDestructive ? cs.error : cs.onSurface;
@@ -148,13 +149,16 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   child: Tooltip(
                     message: 'More options',
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHigh,
                         borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
+                        border: Border.all(
+                            color: cs.outline.withValues(alpha: 0.25)),
                       ),
-                      child: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant, size: 18),
+                      child: Icon(Icons.more_vert_rounded,
+                          color: cs.onSurfaceVariant, size: 18),
                     ),
                   ),
                 ),

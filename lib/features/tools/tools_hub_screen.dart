@@ -2,185 +2,15 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
-import '../../core/utils/prefs_keys.dart';
 import '../../core/utils/l10n_ext.dart';
 import '../../core/constants/tools_l10n.dart';
 import '../../shared/widgets/kuber_app_bar.dart';
-import '../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../shared/widgets/kuber_page_header.dart';
-
-
-// ── View mode ─────────────────────────────────────────────────────────────────
-
-enum ToolsViewMode { grid, list }
-
-class _ToolsViewNotifier extends StateNotifier<ToolsViewMode> {
-  _ToolsViewNotifier() : super(ToolsViewMode.grid) {
-    _load();
-  }
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt(PrefsKeys.toolsViewMode) ?? 0;
-    if (index < ToolsViewMode.values.length) {
-      state = ToolsViewMode.values[index];
-    }
-  }
-
-  Future<void> setMode(ToolsViewMode mode) async {
-    state = mode;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(PrefsKeys.toolsViewMode, mode.index);
-  }
-}
-
-final _toolsViewModeProvider =
-    StateNotifierProvider<_ToolsViewNotifier, ToolsViewMode>(
-  (_) => _ToolsViewNotifier(),
-);
-
-class _ToolEntry {
-  final String name;
-  final String description;
-  final IconData icon;
-  final String route;
-  final Color accentColor;
-
-  const _ToolEntry({
-    required this.name,
-    required this.description,
-    required this.icon,
-    required this.route,
-    required this.accentColor,
-  });
-}
-
-class _ToolGroup {
-  final String title;
-  final List<_ToolEntry> tools;
-
-  const _ToolGroup({required this.title, required this.tools});
-}
-
-// Aliased to the Vault tokens where one exists, so the palette stays in sync.
-const _kBlue = KuberColors.primary;
-const _kGreen = KuberColors.income;
-const _kAmber = KuberColors.warning;
-const _kPurple = Color(0xFFA855F7);
-const _kEmerald = Color(0xFF10B981);
-const _kPink = Color(0xFFEC4899);
-const _kRed = KuberColors.expense;
-
-const _kGroups = [
-  _ToolGroup(title: 'Finance Calculators', tools: [
-    _ToolEntry(
-      name: 'EMI Calculator',
-      description: 'Loan repayments',
-      icon: Icons.account_balance_rounded,
-      route: 'emi-calculator',
-      accentColor: _kBlue,
-    ),
-    _ToolEntry(
-      name: 'Investment Returns',
-      description: 'SIP & lump-sum growth',
-      icon: Icons.trending_up_rounded,
-      route: 'sip-calculator',
-      accentColor: _kGreen,
-    ),
-    _ToolEntry(
-      name: 'SIP Amount',
-      description: 'Find monthly investment',
-      icon: Icons.savings_rounded,
-      route: 'sip-amount-finder',
-      accentColor: _kPurple,
-    ),
-    _ToolEntry(
-      name: 'FD / RD',
-      description: 'Fixed & recurring deposits',
-      icon: Icons.account_balance_wallet_rounded,
-      route: 'fd-rd-calculator',
-      accentColor: _kAmber,
-    ),
-    _ToolEntry(
-      name: 'PPF Calculator',
-      description: '15-year provident fund',
-      icon: Icons.shield_rounded,
-      route: 'ppf-calculator',
-      accentColor: _kEmerald,
-    ),
-    _ToolEntry(
-      name: 'Inflation',
-      description: 'Future purchasing power',
-      icon: Icons.trending_down_rounded,
-      route: 'inflation-calculator',
-      accentColor: _kPink,
-    ),
-  ]),
-  _ToolGroup(title: 'Tax & Salary', tools: [
-    _ToolEntry(
-      name: 'Salary Breakdown',
-      description: 'CTC → in-hand',
-      icon: Icons.work_rounded,
-      route: 'salary-calculator',
-      accentColor: _kBlue,
-    ),
-    _ToolEntry(
-      name: 'GST Calculator',
-      description: 'Add or remove GST',
-      icon: Icons.percent_rounded,
-      route: 'gst-calculator',
-      accentColor: _kAmber,
-    ),
-    _ToolEntry(
-      name: 'HRA Exemption',
-      description: 'Old regime tax',
-      icon: Icons.home_work_rounded,
-      route: 'hra-calculator',
-      accentColor: _kPurple,
-    ),
-  ]),
-  _ToolGroup(title: 'Quick Calculators', tools: [
-    _ToolEntry(
-      name: 'Bill Splitter',
-      description: 'Split expenses between people',
-      icon: Icons.people_rounded,
-      route: 'split-calculator',
-      accentColor: _kBlue,
-    ),
-    _ToolEntry(
-      name: 'Currency Converter',
-      description: 'Convert currencies',
-      icon: Icons.currency_exchange_rounded,
-      route: 'currency-converter',
-      accentColor: _kEmerald,
-    ),
-    _ToolEntry(
-      name: 'Break-even',
-      description: 'Months to recover',
-      icon: Icons.timeline_rounded,
-      route: 'breakeven-calculator',
-      accentColor: _kGreen,
-    ),
-    _ToolEntry(
-      name: 'Tip Calculator',
-      description: 'Bills & gratuity',
-      icon: Icons.receipt_long_rounded,
-      route: 'tip-calculator',
-      accentColor: _kBlue,
-    ),
-    _ToolEntry(
-      name: 'Discount Calculator',
-      description: 'Find the best deal',
-      icon: Icons.local_offer_rounded,
-      route: 'discount-calculator',
-      accentColor: _kRed,
-    ),
-  ]),
-];
+import 'saved/providers/recent_use_provider.dart';
+import 'tool_catalog.dart';
 
 class ToolsHubScreen extends ConsumerStatefulWidget {
   const ToolsHubScreen({super.key});
@@ -192,231 +22,140 @@ class ToolsHubScreen extends ConsumerStatefulWidget {
 class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
   String _query = '';
 
-  List<_ToolEntry> get _allTools =>
-      _kGroups.expand((g) => g.tools).toList();
-
-  void _showViewModeSheet(BuildContext context, ToolsViewMode current) {
-    final lang = Localizations.localeOf(context).languageCode;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => KuberBottomSheet(
-        title: tL10n('View Mode', lang),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _ViewModeOption(
-              icon: Icons.grid_view_rounded,
-              label: tL10n('Grid', lang),
-              selected: current == ToolsViewMode.grid,
-              onTap: () {
-                ref.read(_toolsViewModeProvider.notifier).setMode(ToolsViewMode.grid);
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-            _ViewModeOption(
-              icon: Icons.list_rounded,
-              label: tL10n('List', lang),
-              selected: current == ToolsViewMode.list,
-              onTap: () {
-                ref.read(_toolsViewModeProvider.notifier).setMode(ToolsViewMode.list);
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            ),
-            const SizedBox(height: KuberSpacing.md),
-          ],
-        ),
-      ),
-    );
+  bool _matches(ToolMeta t, String lang) {
+    final q = _query.toLowerCase();
+    return t.name.toLowerCase().contains(q) ||
+        t.subtitle.toLowerCase().contains(q) ||
+        tL10n(t.name, lang).toLowerCase().contains(q) ||
+        tL10n(t.subtitle, lang).toLowerCase().contains(q);
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final viewMode = ref.watch(_toolsViewModeProvider);
-    final isSearching = _query.isNotEmpty;
     final lang = Localizations.localeOf(context).languageCode;
-    final filtered = _allTools
-        .where((t) {
-          final translatedName = tL10n(t.name, lang).toLowerCase();
-          final translatedDesc = tL10n(t.description, lang).toLowerCase();
-          final queryLower = _query.toLowerCase();
-          return t.name.toLowerCase().contains(queryLower) ||
-              t.description.toLowerCase().contains(queryLower) ||
-              translatedName.contains(queryLower) ||
-              translatedDesc.contains(queryLower);
-        })
-        .toList();
+    final isSearching = _query.isNotEmpty;
+    final recentKeys = ref.watch(topRecentCalculatorsProvider);
+    final recents = [
+      for (final k in recentKeys)
+        if (ToolCatalog.byKey(k) != null) ToolCatalog.byKey(k)!,
+    ];
 
     return Scaffold(
       backgroundColor: cs.surface,
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.translucent,
-        child: CustomScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(title: '', showBack: true, showHome: true),
-          ),
-          SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: context.l10n.moreToolsTitle,
-              description: tL10n('Calculators and utilities', lang),
-              actionIcon: Icons.tune_rounded,
-              actionTooltip: tL10n('View Mode', lang),
-              onAction: () => _showViewModeSheet(context, viewMode),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg,
-                0,
-                KuberSpacing.lg,
-                KuberSpacing.md,
+        child: ScrollConfiguration(
+          behavior:
+              ScrollConfiguration.of(context).copyWith(overscroll: false),
+          child: CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              const SliverToBoxAdapter(
+                child: KuberAppBar(title: '', showBack: true, showHome: true),
               ),
-              child: TextField(
-                onChanged: (v) => setState(() => _query = v),
-                style: localeFont(fontSize: 14, color: cs.onSurface),
-                decoration: InputDecoration(
-                  hintText: tL10n('Search tools...', lang),
-                  hintStyle: localeFont(
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search_rounded,
-                    color: cs.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  filled: true,
-                  fillColor: cs.surfaceContainer,
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: KuberSpacing.md,
-                    horizontal: KuberSpacing.lg,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    borderSide: BorderSide(color: cs.outline),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    borderSide: BorderSide(color: cs.outline),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    borderSide: BorderSide(color: cs.primary),
-                  ),
-                ),
+            SliverToBoxAdapter(
+              child: KuberPageHeader(
+                title: context.l10n.moreToolsTitle,
+                description: tL10n(
+                    'Quick calculations for everyday financial decisions', lang),
               ),
             ),
+            SliverToBoxAdapter(child: _searchField(cs, lang)),
+            if (isSearching)
+              ..._buildSearchResults(cs, lang)
+            else ...[
+              SliverToBoxAdapter(child: _savedTile(cs, lang)),
+              if (recents.isNotEmpty)
+                SliverToBoxAdapter(child: _RecentPills(tools: recents)),
+              for (final g in ToolCatalog.groups)
+                _buildGroupSliver(cs, lang, tL10n(g.title, lang), g.tools),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                    height: KuberSpacing.xl + systemNavBarInset(context)),
+              ),
+            ],
+          ],
           ),
-          if (isSearching)
-            ..._buildSearchResults(cs, filtered, viewMode, lang)
-          else
-            ..._buildGroupedList(cs, viewMode, lang),
-        ],
-      ),
+        ),
       ),
     );
   }
 
-  List<Widget> _buildGroupedList(ColorScheme cs, ToolsViewMode viewMode, String lang) {
-    return [
-      SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, i) {
-            final group = _kGroups[i];
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg,
-                KuberSpacing.sm,
-                KuberSpacing.lg,
-                KuberSpacing.lg,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4, bottom: KuberSpacing.sm),
-                    child: Text(
-                      tL10n(group.title, lang).toUpperCase(),
-                      style: localeFont(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  if (viewMode == ToolsViewMode.grid)
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: KuberSpacing.sm,
-                        crossAxisSpacing: KuberSpacing.sm,
-                        childAspectRatio: 1.1,
-                      ),
-                      itemCount: group.tools.length,
-                      itemBuilder: (context, index) =>
-                          _ToolCard(tool: group.tools[index]),
-                    )
-                  else
-                    Column(
-                      children: group.tools
-                          .map((t) => _ToolListItem(tool: t))
-                          .toList(),
-                    ),
-                ],
-              ),
-            );
-          },
-          childCount: _kGroups.length,
+  Widget _searchField(ColorScheme cs, String lang) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.md),
+      child: TextField(
+        onChanged: (v) => setState(() => _query = v),
+        style: localeFont(fontSize: 14, color: cs.onSurface),
+        decoration: InputDecoration(
+          hintText: tL10n('Search tools...', lang),
+          hintStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+          prefixIcon:
+              Icon(Icons.search_rounded, color: cs.onSurfaceVariant, size: 20),
+          filled: true,
+          fillColor: cs.surfaceContainer,
+          contentPadding: const EdgeInsets.symmetric(
+              vertical: KuberSpacing.md, horizontal: KuberSpacing.lg),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderSide: BorderSide(color: cs.outline),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderSide: BorderSide(color: cs.outline),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderSide: BorderSide(color: cs.primary),
+          ),
         ),
       ),
-      SliverToBoxAdapter(
-        child: Builder(
-          builder: (context) => SizedBox(height: KuberSpacing.xl + systemNavBarInset(context)),
-        ),
-      ),
-    ];
+    );
   }
 
-  List<Widget> _buildSearchResults(ColorScheme cs, List<_ToolEntry> results, ToolsViewMode viewMode, String lang) {
+  Widget _buildGroupSliver(
+      ColorScheme cs, String lang, String title, List<ToolMeta> tools) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+            KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: KuberSpacing.sm),
+              child: Text(
+                title.toUpperCase(),
+                style: localeFont(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+            for (final t in tools) _ToolRow(tool: t),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildSearchResults(ColorScheme cs, String lang) {
+    final results = [
+      for (final t in ToolCatalog.all)
+        if (_matches(t, lang)) t,
+    ];
     if (results.isEmpty) {
       return [
         SliverFillRemaining(
+          hasScrollBody: false,
           child: Center(
-            child: Text(
-              tL10n('No tools found', lang),
-              style: localeFont(
-                fontSize: 15,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ),
-      ];
-    }
-    if (viewMode == ToolsViewMode.list) {
-      return [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.lg,
-            0,
-            KuberSpacing.lg,
-            KuberSpacing.xl,
-          ),
-          sliver: SliverList.builder(
-            itemCount: results.length,
-            itemBuilder: (context, index) => _ToolListItem(tool: results[index]),
+            child: Text(tL10n('No tools found', lang),
+                style: localeFont(fontSize: 15, color: cs.onSurfaceVariant)),
           ),
         ),
       ];
@@ -424,75 +163,161 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
     return [
       SliverPadding(
         padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.lg,
-          0,
-          KuberSpacing.lg,
-          KuberSpacing.xl,
-        ),
-        sliver: SliverGrid.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: KuberSpacing.sm,
-            crossAxisSpacing: KuberSpacing.sm,
-            childAspectRatio: 1.1,
-          ),
+            KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.xl),
+        sliver: SliverList.builder(
           itemCount: results.length,
-          itemBuilder: (context, index) => _ToolCard(tool: results[index]),
+          itemBuilder: (_, i) => _ToolRow(tool: results[i]),
         ),
       ),
     ];
   }
+
+  Widget _savedTile(ColorScheme cs, String lang) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.lg, KuberSpacing.xs, KuberSpacing.lg, 0),
+      child: InkWell(
+        onTap: () => context.push('/more/tools/saved-calculations'),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        child: Container(
+          padding: const EdgeInsets.all(KuberSpacing.md),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(color: cs.outlineVariant),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: cs.outline),
+                ),
+                alignment: Alignment.center,
+                child: Icon(Icons.bookmark_outline_rounded,
+                    color: cs.onSurface, size: 20),
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tL10n('Saved Calculations', lang),
+                      style: localeFont(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w700,
+                          color: cs.onSurface),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      tL10n('Revisit calculations you saved', lang),
+                      style:
+                          localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  size: 18, color: cs.onSurfaceVariant),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-// ── View mode option row in the bottom sheet ──────────────────────────────────
-
-class _ViewModeOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ViewModeOption({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+/// Horizontally-scrollable compact pills for the "Recently used" section:
+/// icon + tool name only, tinted with the tool's accent, no description.
+class _RecentPills extends StatelessWidget {
+  final List<ToolMeta> tools;
+  const _RecentPills({required this.tools});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md,
-          vertical: KuberSpacing.md,
-        ),
-        decoration: BoxDecoration(
-          color: selected ? cs.primary.withValues(alpha: 0.08) : Colors.transparent,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: selected ? cs.primary : cs.outline,
-            width: selected ? 1.5 : 0.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: selected ? cs.primary : cs.onSurfaceVariant),
-            const SizedBox(width: KuberSpacing.md),
-            Text(
-              label,
+    final lang = Localizations.localeOf(context).languageCode;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.lg, KuberSpacing.md, 0, KuberSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: KuberSpacing.sm),
+            child: Text(
+              tL10n('Recently used', lang).toUpperCase(),
               style: localeFont(
-                fontSize: 14,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                color: selected ? cs.primary : cs.onSurface,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+                color: cs.onSurfaceVariant,
               ),
             ),
-            const Spacer(),
-            if (selected)
-              Icon(Icons.check_rounded, size: 18, color: cs.primary),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final t in tools) ...[
+                  _RecentPill(tool: t),
+                  const SizedBox(width: KuberSpacing.sm),
+                ],
+                const SizedBox(width: KuberSpacing.sm),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecentPill extends ConsumerWidget {
+  final ToolMeta tool;
+  const _RecentPill({required this.tool});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final lang = Localizations.localeOf(context).languageCode;
+    return InkWell(
+      onTap: () => openTool(context, ref, tool.key),
+      borderRadius: BorderRadius.circular(KuberRadius.full),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(8, 7, 14, 7),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          borderRadius: BorderRadius.circular(KuberRadius.full),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                color: tool.accent.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(tool.icon, color: tool.accent, size: 15),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              tL10n(tool.name, lang),
+              style: localeFont(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+                letterSpacing: -0.2,
+              ),
+            ),
           ],
         ),
       ),
@@ -500,26 +325,27 @@ class _ViewModeOption extends StatelessWidget {
   }
 }
 
-// ── List-mode tool row ────────────────────────────────────────────────────────
+/// Records the tool as recently used (so Quick Calculators, whose screens lack
+/// the calculator-support mixin, are tracked too) and navigates to it.
+void openTool(BuildContext context, WidgetRef ref, String key) {
+  ref.read(recentCalculatorsProvider.notifier).touch(key);
+  context.push('/more/tools/$key');
+}
 
-class _ToolListItem extends StatelessWidget {
-  final _ToolEntry tool;
-
-  const _ToolListItem({required this.tool});
+class _ToolRow extends ConsumerWidget {
+  final ToolMeta tool;
+  const _ToolRow({required this.tool});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final lang = Localizations.localeOf(context).languageCode;
     return InkWell(
-      onTap: () => context.push('/more/tools/${tool.route}'),
+      onTap: () => openTool(context, ref, tool.key),
       borderRadius: BorderRadius.circular(KuberRadius.md),
       child: Container(
         margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md,
-          vertical: KuberSpacing.md,
-        ),
+        padding: const EdgeInsets.all(KuberSpacing.md),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
@@ -528,15 +354,15 @@ class _ToolListItem extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: tool.accentColor.withValues(alpha: 0.12),
+                color: tool.accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: tool.accentColor.withValues(alpha: 0.18)),
+                border: Border.all(color: tool.accent.withValues(alpha: 0.18)),
               ),
               alignment: Alignment.center,
-              child: Icon(tool.icon, color: tool.accentColor, size: 20),
+              child: Icon(tool.icon, color: tool.accent, size: 21),
             ),
             const SizedBox(width: KuberSpacing.md),
             Expanded(
@@ -546,90 +372,24 @@ class _ToolListItem extends StatelessWidget {
                   Text(
                     tL10n(tool.name, lang),
                     style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w700,
                       color: cs.onSurface,
                       letterSpacing: -0.2,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    tL10n(tool.description, lang),
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    tL10n(tool.subtitle, lang),
+                    style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, size: 18, color: cs.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Grid-mode tool card ───────────────────────────────────────────────────────
-
-class _ToolCard extends StatelessWidget {
-  final _ToolEntry tool;
-
-  const _ToolCard({required this.tool});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final lang = Localizations.localeOf(context).languageCode;
-
-    return InkWell(
-      onTap: () => context.push('/more/tools/${tool.route}'),
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md + 2),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: tool.accentColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(
-                    color: tool.accentColor.withValues(alpha: 0.18)),
-              ),
-              alignment: Alignment.center,
-              child: Icon(tool.icon, color: tool.accentColor, size: 20),
-            ),
-            const Spacer(),
-            Text(
-              tL10n(tool.name, lang),
-              style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-                letterSpacing: -0.2,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              tL10n(tool.description, lang),
-              style: localeFont(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Icon(Icons.chevron_right_rounded,
+                size: 18, color: cs.onSurfaceVariant),
           ],
         ),
       ),

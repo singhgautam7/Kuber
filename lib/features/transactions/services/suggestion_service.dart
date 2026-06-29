@@ -35,16 +35,47 @@ class SuggestionService {
     });
   }
 
-  /// Rebuilds the suggestion table from every transaction. Batched with
-  /// event-loop yields so a large dataset (migration backfill, JSON restore,
-  /// mock-data generation) doesn't block the UI isolate. Transfers and empty
-  /// names are skipped inside [upsertSuggestion].
-  Future<void> rebuildAll({int batchSize = 50}) async {
+  /// Rebuilds the suggestion table from every transaction. One suggestion per
+  /// distinct (lower-cased) name, the most recent transaction winning. Computes
+  /// the deduped set in memory then writes it with chunked bulk `putAll` — far
+  /// faster than a query + write transaction per transaction on a large restore
+  /// — yielding the event loop between chunks so the UI stays responsive.
+  /// Transfers and empty names are skipped.
+  Future<void> rebuildAll({int batchSize = 500}) async {
     final all = await isar.transactions.where().findAll();
-    for (int i = 0; i < all.length; i += batchSize) {
-      for (final txn in all.skip(i).take(batchSize)) {
-        await upsertSuggestion(txn);
-      }
+
+    // Dedup to one suggestion per lower-cased name (most recent wins, since
+    // findAll() is id-ascending and later writes overwrite the map entry).
+    final byName = <String, TransactionSuggestion>{};
+    final now = DateTime.now();
+    for (final txn in all) {
+      if (txn.isTransfer || txn.name.trim().isEmpty) continue;
+      final key = txn.name.toLowerCase().trim();
+      byName[key] = TransactionSuggestion()
+        ..nameLower = key
+        ..displayName = txn.name.trim()
+        ..categoryId = txn.categoryId.isEmpty ? null : txn.categoryId
+        ..accountId = txn.accountId.isEmpty ? null : txn.accountId
+        ..amount = txn.amount
+        ..type = txn.type
+        ..createdAt = now
+        ..updatedAt = now;
+    }
+
+    // Replace the whole derived table (a fresh rebuild), then bulk-insert in
+    // chunks — far faster than a query + write per transaction, and yielding
+    // the event loop between chunks keeps the UI responsive. Clearing first
+    // means every row is a fresh insert, so the unique nameLower index can
+    // never collide regardless of any pre-existing rows.
+    await isar.writeTxn(() => isar.transactionSuggestions.clear());
+    final suggestions = byName.values.toList();
+    for (var start = 0; start < suggestions.length; start += batchSize) {
+      final end = start + batchSize < suggestions.length
+          ? start + batchSize
+          : suggestions.length;
+      await isar.writeTxn(
+        () => isar.transactionSuggestions.putAll(suggestions.sublist(start, end)),
+      );
       await Future<void>.delayed(Duration.zero);
     }
   }
