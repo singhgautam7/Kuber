@@ -111,6 +111,9 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           ToolSliderField(
@@ -153,8 +156,6 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
                     ToolHero(
                       label: 'Monthly SIP Required',
                       value: money(result.monthlyAmount),
-                      numericValue: result.monthlyAmount,
-                      format: money,
                       color: ToolAccents.purple,
                     ),
                     const SizedBox(height: KuberSpacing.lg),

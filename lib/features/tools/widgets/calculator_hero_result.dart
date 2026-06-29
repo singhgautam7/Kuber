@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
-import '../../../shared/widgets/animated_amount.dart';
 
-/// A single large hero number with a small-caps label. Animates between values
-/// via [AnimatedAmount] when [animate] is true and a [numericValue] is given.
+/// A single large hero number with a small-caps label, auto-shrinking to fit.
 class ToolHero extends StatelessWidget {
   final String label;
   final String value;
   final Color color;
-  final double? numericValue;
-  final String Function(double)? format;
   final String? sub;
 
   const ToolHero({
@@ -19,8 +15,6 @@ class ToolHero extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
-    this.numericValue,
-    this.format,
     this.sub,
   });
 
@@ -51,13 +45,10 @@ class ToolHero extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: (numericValue != null && format != null)
-              ? AnimatedAmount(
-                  value: numericValue!,
-                  format: format!,
-                  style: valueStyle,
-                )
-              : Text(value, style: valueStyle),
+          // Plain Text (no rolling animation): the hero is inside a lazily-built
+          // SliverList, so an implicit animation would re-trigger every time the
+          // card scrolls back into view.
+          child: Text(value, style: valueStyle),
         ),
         if (sub != null) ...[
           const SizedBox(height: 3),

@@ -87,4 +87,38 @@ void main() {
     expect((await isar.smsTransactions.where().findAll()).single.parsedAmount,
         500);
   });
+
+  test('import reports progress per collection with counts', () async {
+    final now = DateTime.now();
+    await isar.writeTxn(() async {
+      for (var i = 0; i < 250; i++) {
+        await isar.savedCalculations.put(SavedCalculation()
+          ..tool = 'emi-calculator'
+          ..name = 'calc $i'
+          ..inputsJson = '{}'
+          ..summary = ''
+          ..savedAt = now
+          ..updatedAt = now);
+      }
+      await isar.accounts.put(Account()
+        ..name = 'A'
+        ..type = 'bank');
+    });
+
+    final json = await JsonBackupService().exportJson(isar);
+    final events = <(String, int, int)>[];
+    await JsonBackupService().importJson(
+      isar,
+      json,
+      onProgress: (label, current, total) => events.add((label, current, total)),
+    );
+
+    // The big collection reports incremental counts up to its total.
+    final savedEvents =
+        events.where((e) => e.$1 == 'saved calculations').toList();
+    expect(savedEvents.isNotEmpty, isTrue);
+    expect(savedEvents.last.$2, 250); // current
+    expect(savedEvents.last.$3, 250); // total
+    expect(events.any((e) => e.$1 == 'accounts'), isTrue);
+  });
 }

@@ -157,9 +157,15 @@ class DataService {
   }
 
   /// Imports data from a JSON backup string (clears all existing data).
-  Future<ImportResult> importJson(String jsonContent) async {
-    final result = await JsonBackupService().importJson(isar, jsonContent);
+  /// [onProgress] reports live restore progress per collection.
+  Future<ImportResult> importJson(
+    String jsonContent, {
+    ImportProgressCallback? onProgress,
+  }) async {
+    final result = await JsonBackupService()
+        .importJson(isar, jsonContent, onProgress: onProgress);
     // Rebuild suggestions from the restored transactions
+    onProgress?.call('suggestions', 0, 0);
     await _rebuildSuggestions();
     return result;
   }

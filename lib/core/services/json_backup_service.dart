@@ -33,6 +33,10 @@ import 'data_service.dart';
 /// Top-level so it can run on a background isolate via [compute].
 String _encodeBackupData(Map<String, dynamic> data) => jsonEncode(data);
 
+/// Reports import progress: `(collectionLabel, recordsDone, recordsTotal)`.
+typedef ImportProgressCallback = void Function(
+    String label, int current, int total);
+
 class JsonBackupService {
   static const _version = 1;
 
@@ -132,80 +136,71 @@ class JsonBackupService {
     return compute(_encodeBackupData, data);
   }
 
-  Future<ImportResult> importJson(Isar isar, String jsonContent) async {
+  Future<ImportResult> importJson(
+    Isar isar,
+    String jsonContent, {
+    ImportProgressCallback? onProgress,
+  }) async {
     try {
       final data = jsonDecode(jsonContent) as Map<String, dynamic>;
 
       await isar.writeTxn(() => isar.clear());
 
-      int count = 0;
+      var count = 0;
 
-      await isar.writeTxn(() async {
-        for (final m in _list(data, 'categoryGroups')) {
-          await isar.categoryGroups.put(_mapToGroup(m));
-          count++;
+      // Restores one collection using chunked bulk inserts. Each chunk is its
+      // own write transaction: `putAll` is far faster than per-record `put`,
+      // and the await boundary between chunks lets the import overlay repaint
+      // with live "<done>/<total> <label>" progress (a single mega-transaction
+      // never yields a frame, so the indicator would otherwise freeze).
+      Future<void> restore<T>(
+        String key,
+        String label,
+        IsarCollection<T> collection,
+        T Function(Map<String, dynamic>) fromMap,
+      ) async {
+        final list = _list(data, key);
+        final total = list.length;
+        if (total == 0) return;
+        const chunkSize = 500;
+        onProgress?.call(label, 0, total);
+        for (var start = 0; start < total; start += chunkSize) {
+          final end = start + chunkSize < total ? start + chunkSize : total;
+          final batch = [
+            for (var i = start; i < end; i++) fromMap(list[i]),
+          ];
+          await isar.writeTxn(() => collection.putAll(batch));
+          count += batch.length;
+          onProgress?.call(label, end, total);
         }
-        for (final m in _list(data, 'categories')) {
-          await isar.categorys.put(_mapToCat(m));
-          count++;
-        }
-        for (final m in _list(data, 'accounts')) {
-          await isar.accounts.put(_mapToAccount(m));
-          count++;
-        }
-        for (final m in _list(data, 'tags')) {
-          await isar.tags.put(_mapToTag(m));
-          count++;
-        }
-        for (final m in _list(data, 'transactions')) {
-          await isar.transactions.put(_mapToTx(m));
-          count++;
-        }
-        for (final m in _list(data, 'transactionTags')) {
-          await isar.transactionTags.put(_mapToTxTag(m));
-          count++;
-        }
-        for (final m in _list(data, 'recurringRules')) {
-          await isar.recurringRules.put(_mapToRecurring(m));
-          count++;
-        }
-        for (final m in _list(data, 'budgets')) {
-          await isar.budgets.put(_mapToBudget(m));
-          count++;
-        }
-        for (final m in _list(data, 'ledgers')) {
-          await isar.ledgers.put(_mapToLedger(m));
-          count++;
-        }
-        for (final m in _list(data, 'loans')) {
-          await isar.loans.put(_mapToLoan(m));
-          count++;
-        }
-        for (final m in _list(data, 'investments')) {
-          await isar.investments.put(_mapToInvestment(m));
-          count++;
-        }
-        for (final m in _list(data, 'savedCalculations')) {
-          await isar.savedCalculations.put(_mapToSavedCalculation(m));
-          count++;
-        }
-        for (final m in _list(data, 'calculatorRecentUses')) {
-          await isar.calculatorRecentUses.put(_mapToRecentUse(m));
-          count++;
-        }
-        for (final m in _list(data, 'askKuberMessages')) {
-          await isar.askKuberMessages.put(_mapToAskKuberMessage(m));
-          count++;
-        }
-        for (final m in _list(data, 'smsAccountMappings')) {
-          await isar.smsAccountMappings.put(_mapToSmsAccountMapping(m));
-          count++;
-        }
-        for (final m in _list(data, 'smsTransactions')) {
-          await isar.smsTransactions.put(_mapToSmsTransaction(m));
-          count++;
-        }
-      });
+      }
+
+      await restore('categoryGroups', 'category groups', isar.categoryGroups,
+          _mapToGroup);
+      await restore('categories', 'categories', isar.categorys, _mapToCat);
+      await restore('accounts', 'accounts', isar.accounts, _mapToAccount);
+      await restore('tags', 'tags', isar.tags, _mapToTag);
+      await restore(
+          'transactions', 'transactions', isar.transactions, _mapToTx);
+      await restore('transactionTags', 'transaction tags', isar.transactionTags,
+          _mapToTxTag);
+      await restore('recurringRules', 'recurring rules', isar.recurringRules,
+          _mapToRecurring);
+      await restore('budgets', 'budgets', isar.budgets, _mapToBudget);
+      await restore('ledgers', 'ledger entries', isar.ledgers, _mapToLedger);
+      await restore('loans', 'loans', isar.loans, _mapToLoan);
+      await restore(
+          'investments', 'investments', isar.investments, _mapToInvestment);
+      await restore('savedCalculations', 'saved calculations',
+          isar.savedCalculations, _mapToSavedCalculation);
+      await restore('calculatorRecentUses', 'recent calculators',
+          isar.calculatorRecentUses, _mapToRecentUse);
+      await restore('askKuberMessages', 'chat history', isar.askKuberMessages,
+          _mapToAskKuberMessage);
+      await restore('smsAccountMappings', 'SMS mappings',
+          isar.smsAccountMappings, _mapToSmsAccountMapping);
+      await restore('smsTransactions', 'SMS transactions', isar.smsTransactions,
+          _mapToSmsTransaction);
 
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {

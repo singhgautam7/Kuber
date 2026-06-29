@@ -277,16 +277,16 @@ class _RecentPills extends StatelessWidget {
   }
 }
 
-class _RecentPill extends StatelessWidget {
+class _RecentPill extends ConsumerWidget {
   final ToolMeta tool;
   const _RecentPill({required this.tool});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final lang = Localizations.localeOf(context).languageCode;
     return InkWell(
-      onTap: () => context.push('/more/tools/${tool.key}'),
+      onTap: () => openTool(context, ref, tool.key),
       borderRadius: BorderRadius.circular(KuberRadius.full),
       child: Container(
         padding: const EdgeInsets.fromLTRB(8, 7, 14, 7),
@@ -325,16 +325,23 @@ class _RecentPill extends StatelessWidget {
   }
 }
 
-class _ToolRow extends StatelessWidget {
+/// Records the tool as recently used (so Quick Calculators, whose screens lack
+/// the calculator-support mixin, are tracked too) and navigates to it.
+void openTool(BuildContext context, WidgetRef ref, String key) {
+  ref.read(recentCalculatorsProvider.notifier).touch(key);
+  context.push('/more/tools/$key');
+}
+
+class _ToolRow extends ConsumerWidget {
   final ToolMeta tool;
   const _ToolRow({required this.tool});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final lang = Localizations.localeOf(context).languageCode;
     return InkWell(
-      onTap: () => context.push('/more/tools/${tool.key}'),
+      onTap: () => openTool(context, ref, tool.key),
       borderRadius: BorderRadius.circular(KuberRadius.md),
       child: Container(
         margin: const EdgeInsets.only(bottom: KuberSpacing.sm),

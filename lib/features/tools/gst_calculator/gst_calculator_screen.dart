@@ -107,6 +107,9 @@ class _GstCalculatorScreenState extends ConsumerState<GstCalculatorScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           const ToolInputLabel('CALCULATION TYPE'),

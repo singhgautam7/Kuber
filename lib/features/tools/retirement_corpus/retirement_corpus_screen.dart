@@ -153,6 +153,9 @@ class _RetirementCorpusScreenState extends ConsumerState<RetirementCorpusScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           Row(

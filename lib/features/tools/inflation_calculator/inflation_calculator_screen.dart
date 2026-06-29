@@ -102,6 +102,9 @@ class _InflationCalculatorScreenState
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           ToolSliderField(

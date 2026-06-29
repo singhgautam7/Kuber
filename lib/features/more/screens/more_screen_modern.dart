@@ -138,7 +138,7 @@ class MoreScreenModern extends ConsumerWidget {
                     ),
                     _ManageTileData(
                       icon: Icons.sync_rounded,
-                      label: context.l10n.recurringHeader,
+                      label: context.l10n.menuRecurring,
                       sub: context.l10n.menuRecurringDesc,
                       onTap: () => context.push('/more/recurring'),
                     ),

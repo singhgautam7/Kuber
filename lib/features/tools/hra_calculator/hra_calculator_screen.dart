@@ -104,6 +104,9 @@ class _HraCalculatorScreenState extends ConsumerState<HraCalculatorScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           ToolTextField(

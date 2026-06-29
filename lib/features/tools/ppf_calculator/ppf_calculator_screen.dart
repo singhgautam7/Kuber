@@ -108,6 +108,9 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           ToolSliderField(
@@ -164,8 +167,6 @@ class _PpfCalculatorScreenState extends ConsumerState<PpfCalculatorScreen>
                     ToolHero(
                       label: 'Maturity Amount',
                       value: money(result.maturity),
-                      numericValue: result.maturity,
-                      format: money,
                       color: ToolAccents.emerald,
                     ),
                     const SizedBox(height: KuberSpacing.lg),

@@ -152,6 +152,9 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           const ToolInputLabel('DEPOSIT TYPE'),
@@ -224,8 +227,6 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
                     ToolHero(
                       label: 'Maturity Amount',
                       value: money(result.maturity),
-                      numericValue: result.maturity,
-                      format: money,
                       color: ToolAccents.amber,
                     ),
                     const SizedBox(height: KuberSpacing.lg),

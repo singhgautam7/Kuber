@@ -121,6 +121,9 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           const ToolInputLabel('GOAL NAME'),
@@ -204,8 +207,6 @@ class _GoalPlannerScreenState extends ConsumerState<GoalPlannerScreen>
                     ToolHero(
                       label: 'Monthly Investment Needed',
                       value: money(result.monthlyInvestment),
-                      numericValue: result.monthlyInvestment,
-                      format: money,
                       color: ToolAccents.amber,
                     ),
                     if (result.alreadyOnTrack)

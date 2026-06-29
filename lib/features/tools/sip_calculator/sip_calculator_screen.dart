@@ -114,6 +114,9 @@ class _InvestmentReturnsCalculatorScreenState
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           ToolSliderField(
@@ -164,8 +167,6 @@ class _InvestmentReturnsCalculatorScreenState
                     ToolHero(
                       label: 'Future Value',
                       value: money(result.futureValue),
-                      numericValue: result.futureValue,
-                      format: money,
                       color: cs.tertiary,
                     ),
                     const SizedBox(height: KuberSpacing.lg),

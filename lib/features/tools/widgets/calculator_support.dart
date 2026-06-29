@@ -95,7 +95,8 @@ mixin CalculatorSupport<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     );
   }
 
-  Future<void> _updateSaved() async {
+  /// Overwrite the loaded saved record with the current inputs.
+  Future<void> updateSaved() async {
     final id = _savedId;
     if (id == null) return;
     await ref.read(savedCalculationsProvider.notifier).updateRecord(
@@ -107,23 +108,11 @@ mixin CalculatorSupport<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     setState(() => _loadedJson = currentInputsJson());
   }
 
-  void _discard() {
-    final j = _loadedJson;
-    if (j == null) return;
-    applyInputs(jsonDecode(j) as Map<String, dynamic>);
-    setState(() {});
-  }
-
-  /// The saved-indicator banner, or null when this is a fresh calculation.
+  /// The saved-indicator banner (informational only), or null when this is a
+  /// fresh calculation.
   Widget? buildSavedBanner() {
     if (!hasSaved) return null;
-    return SavedIndicatorBanner(
-      name: _loadedName,
-      isModified: isModified,
-      onUpdate: _updateSaved,
-      onSaveAsNew: openSaveSheet,
-      onDiscard: _discard,
-    );
+    return SavedIndicatorBanner(name: _loadedName, isModified: isModified);
   }
 
   /// Overflow config exposing "View saved {label} calculations".

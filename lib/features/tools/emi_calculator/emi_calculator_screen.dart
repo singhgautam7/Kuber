@@ -113,6 +113,9 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
       banner: buildSavedBanner(),
       onSave: openSaveSheet,
       canSave: result != null,
+      isSavedView: hasSaved,
+      isModified: isModified,
+      onUpdate: updateSaved,
       sections: [
         ToolInputCard(children: [
           ToolSliderField(
@@ -165,8 +168,6 @@ class _EmiCalculatorScreenState extends ConsumerState<EmiCalculatorScreen>
                     ToolHero(
                       label: 'Monthly EMI',
                       value: money(result.emi),
-                      numericValue: result.emi,
-                      format: money,
                       color: cs.primary,
                     ),
                     const SizedBox(height: KuberSpacing.lg),

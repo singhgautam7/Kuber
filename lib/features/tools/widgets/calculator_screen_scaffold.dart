@@ -21,6 +21,13 @@ class ToolScreenScaffold extends ConsumerWidget {
 
   /// When false, the Save action is disabled (inputs incomplete / invalid).
   final bool canSave;
+
+  /// True when the screen was opened from a saved calculation. The bottom bar
+  /// then shows "Update this calculation" (enabled only when [isModified]).
+  final bool isSavedView;
+  final bool isModified;
+  final VoidCallback? onUpdate;
+
   final KuberInfoConfig? infoConfig;
   final KuberOverflowConfig? overflowConfig;
   final Widget? banner;
@@ -32,6 +39,9 @@ class ToolScreenScaffold extends ConsumerWidget {
     required this.sections,
     required this.onSave,
     this.canSave = true,
+    this.isSavedView = false,
+    this.isModified = false,
+    this.onUpdate,
     this.infoConfig,
     this.overflowConfig,
     this.banner,
@@ -42,10 +52,10 @@ class ToolScreenScaffold extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     // Save lives at the top of the overflow menu (the AppBar keeps just the
-    // info button + overflow). The Save item only appears once inputs are
-    // valid; "View saved …" is always available.
+    // info button + overflow). The Save item only appears for a fresh, valid
+    // calculation; "View saved …" is always available.
     final mergedOverflow = KuberOverflowConfig(items: [
-      if (canSave)
+      if (canSave && !isSavedView)
         KuberOverflowItem(
           icon: Icons.bookmark_outline_rounded,
           label: 'Save this calculation',
@@ -96,7 +106,20 @@ class ToolScreenScaffold extends ConsumerWidget {
                     const SizedBox(height: KuberSpacing.lg),
                 itemBuilder: (context, i) {
                   if (i < sections.length) return sections[i];
-                  return _SaveBar(onTap: onSave, enabled: canSave);
+                  if (isSavedView) {
+                    return _SaveBar(
+                      onTap: onUpdate ?? () {},
+                      enabled: isModified,
+                      label: 'Update this calculation',
+                      disabledLabel: 'No changes to update',
+                    );
+                  }
+                  return _SaveBar(
+                    onTap: onSave,
+                    enabled: canSave,
+                    label: 'Save this calculation',
+                    disabledLabel: 'Enter values to save',
+                  );
                 },
               ),
             ),
@@ -115,7 +138,14 @@ class ToolScreenScaffold extends ConsumerWidget {
 class _SaveBar extends StatelessWidget {
   final VoidCallback onTap;
   final bool enabled;
-  const _SaveBar({required this.onTap, this.enabled = true});
+  final String label;
+  final String disabledLabel;
+  const _SaveBar({
+    required this.onTap,
+    required this.label,
+    required this.disabledLabel,
+    this.enabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -139,9 +169,7 @@ class _SaveBar extends StatelessWidget {
             Icon(Icons.bookmark_outline_rounded, color: color, size: 18),
             const SizedBox(width: 9),
             Text(
-              enabled
-                  ? 'Save this calculation'
-                  : 'Enter values to save',
+              enabled ? label : disabledLabel,
               style: localeFont(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
@@ -155,22 +183,17 @@ class _SaveBar extends StatelessWidget {
   }
 }
 
-/// Thin banner shown under the header when a calculator was opened from a saved
-/// item. Switches between the "Viewing" and "Modified" states.
+/// Thin informational banner shown under the header when a calculator was
+/// opened from a saved item. Pure status (no action buttons) — the bottom bar
+/// handles updating.
 class SavedIndicatorBanner extends StatelessWidget {
   final String name;
   final bool isModified;
-  final VoidCallback onUpdate;
-  final VoidCallback onSaveAsNew;
-  final VoidCallback? onDiscard;
 
   const SavedIndicatorBanner({
     super.key,
     required this.name,
     required this.isModified,
-    required this.onUpdate,
-    required this.onSaveAsNew,
-    this.onDiscard,
   });
 
   @override
@@ -178,20 +201,20 @@ class SavedIndicatorBanner extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final accent = isModified ? cs.tertiary : cs.primary;
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.md, KuberSpacing.sm, KuberSpacing.sm, KuberSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpacing.md, vertical: 10),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(KuberRadius.md),
         border: Border.all(color: accent.withValues(alpha: 0.3)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 2, top: 2, bottom: 4),
+          Icon(Icons.bookmark_rounded, size: 15, color: accent),
+          const SizedBox(width: 8),
+          Expanded(
             child: Text(
-              isModified ? 'Modified — update saved?' : 'Viewing: $name',
+              'Viewing: $name',
               style: localeFont(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
@@ -201,47 +224,16 @@ class SavedIndicatorBanner extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          Wrap(
-            spacing: KuberSpacing.xs,
-            children: [
-              _BannerAction(label: 'Update', onTap: onUpdate, color: accent),
-              _BannerAction(
-                  label: 'Save as new', onTap: onSaveAsNew, color: accent),
-              if (isModified && onDiscard != null)
-                _BannerAction(
-                    label: 'Discard changes',
-                    onTap: onDiscard!,
-                    color: cs.onSurfaceVariant),
-            ],
-          ),
+          if (isModified)
+            Text(
+              'Unsaved changes',
+              style: localeFont(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
         ],
-      ),
-    );
-  }
-}
-
-class _BannerAction extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  final Color color;
-  const _BannerAction(
-      {required this.label, required this.onTap, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.sm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Text(
-          label,
-          style: localeFont(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: color,
-          ),
-        ),
       ),
     );
   }

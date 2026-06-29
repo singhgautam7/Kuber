@@ -83,29 +83,32 @@ class _SavedCalculationsScreenState
       _filter = 'all';
     }
 
-    return Scaffold(
+    return PopScope(
+      // While selecting, the system/back gesture cancels the selection instead
+      // of leaving the screen.
+      canPop: !_selecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _clearSelection();
+      },
+      child: Scaffold(
       backgroundColor: cs.surface,
+      // History-style multi-select bar (KuberAppBar stays untouched).
+      bottomNavigationBar: _selecting
+          ? _SelectionBar(
+              count: _selected.length,
+              onCancel: _clearSelection,
+              onDelete: _confirmDelete,
+            )
+          : null,
       body: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
         child: CustomScrollView(
           slivers: [
           SliverToBoxAdapter(
             child: KuberAppBar(
-              title: _selecting
-                  ? '${_selected.length} selected'
-                  : 'Saved Calculations',
+              title: 'Saved Calculations',
               showBack: true,
               onBack: _selecting ? _clearSelection : null,
-              actions: _selecting
-                  ? [
-                      IconButton(
-                        tooltip: 'Delete',
-                        onPressed: _confirmDelete,
-                        icon: Icon(Icons.delete_outline_rounded,
-                            color: cs.error, size: 20),
-                      ),
-                    ]
-                  : null,
             ),
           ),
           ...async.when(
@@ -181,6 +184,92 @@ class _SavedCalculationsScreenState
           ),
           ],
         ),
+      ),
+      ),
+    );
+  }
+}
+
+/// History-style bottom multi-select bar: Cancel · count · Delete.
+class _SelectionBar extends StatelessWidget {
+  final int count;
+  final VoidCallback onCancel;
+  final VoidCallback onDelete;
+  const _SelectionBar({
+    required this.count,
+    required this.onCancel,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      elevation: 8,
+      color: cs.surfaceContainerHigh,
+      child: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpacing.sm, vertical: KuberSpacing.md),
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: cs.outline)),
+          ),
+          child: Row(
+            children: [
+              _BarButton(
+                icon: Icons.close_rounded,
+                color: cs.onSurface,
+                borderColor: cs.outline.withValues(alpha: 0.3),
+                onTap: onCancel,
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              Expanded(
+                child: Text(
+                  '$count selected',
+                  style: localeFont(
+                      fontWeight: FontWeight.w700, color: cs.onSurface),
+                ),
+              ),
+              _BarButton(
+                icon: Icons.delete_outline_rounded,
+                color: cs.error,
+                borderColor: cs.error.withValues(alpha: 0.5),
+                onTap: onDelete,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BarButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final Color borderColor;
+  final VoidCallback onTap;
+  const _BarButton({
+    required this.icon,
+    required this.color,
+    required this.borderColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: borderColor),
+        ),
+        child: Icon(icon, size: 18, color: color),
       ),
     );
   }
