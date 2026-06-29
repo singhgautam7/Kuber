@@ -1,17 +1,20 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../engine/inflation_engine.dart';
+import '../widgets/calculator_hero_result.dart';
+import '../widgets/calculator_line_chart.dart';
+import '../widgets/calculator_screen_scaffold.dart';
+import '../widgets/calculator_support.dart';
 import '../widgets/calculator_widgets.dart';
+import '../widgets/tool_accents.dart';
 
 class InflationCalculatorScreen extends ConsumerStatefulWidget {
-  const InflationCalculatorScreen({super.key});
+  final int? savedId;
+  const InflationCalculatorScreen({super.key, this.savedId});
 
   @override
   ConsumerState<InflationCalculatorScreen> createState() =>
@@ -19,10 +22,16 @@ class InflationCalculatorScreen extends ConsumerStatefulWidget {
 }
 
 class _InflationCalculatorScreenState
-    extends ConsumerState<InflationCalculatorScreen> {
+    extends ConsumerState<InflationCalculatorScreen> with CalculatorSupport {
   final _amountCtrl = TextEditingController();
-  final _rateCtrl = TextEditingController(text: '6');
+  final _rateCtrl = TextEditingController();
   final _yearsCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    initCalculatorSupport();
+  }
 
   @override
   void dispose() {
@@ -32,22 +41,47 @@ class _InflationCalculatorScreenState
     super.dispose();
   }
 
-  ({double futureValue, double valueLost, double purchasingPower})? _compute() {
-    final amount = double.tryParse(_amountCtrl.text.replaceAll(',', ''));
-    final rate = double.tryParse(_rateCtrl.text);
-    final years = double.tryParse(_yearsCtrl.text);
-    if (amount == null || rate == null || years == null) return null;
-    if (amount <= 0 || rate <= 0 || years <= 0) return null;
+  @override
+  String get toolKey => 'inflation-calculator';
+  @override
+  int? get initialSavedId => widget.savedId;
+  @override
+  String get defaultSaveName => 'Inflation impact';
+  @override
+  String get savePlaceholder => 'e.g. Retirement target';
 
-    final futureValue = amount / pow(1 + rate / 100, years);
-    final valueLost = amount - futureValue;
-    // Future equivalent: how much you'd need in future to maintain today's purchasing power
-    final purchasingPower = amount * pow(1 + rate / 100, years);
-    return (
-      futureValue: futureValue,
-      valueLost: valueLost,
-      purchasingPower: purchasingPower,
-    );
+  int get _years => parseNum(_yearsCtrl.text).round();
+
+  @override
+  Map<String, dynamic> collectInputs() => {
+        'amount': _amountCtrl.text,
+        'rate': _rateCtrl.text,
+        'years': _yearsCtrl.text,
+      };
+
+  @override
+  void applyInputs(Map<String, dynamic> json) {
+    _amountCtrl.text = json['amount']?.toString() ?? '';
+    _rateCtrl.text = json['rate']?.toString() ?? '';
+    _yearsCtrl.text = json['years']?.toString() ?? '';
+  }
+
+  InflationResult? _compute() {
+    final amount = parseAmount(_amountCtrl.text);
+    final rate = parseNum(_rateCtrl.text);
+    if (amount <= 0 || rate <= 0 || _years <= 0) return null;
+    return computeInflation(amount, rate, _years);
+  }
+
+  @override
+  String buildSummary() {
+    final formatter = ref.read(formatterProvider);
+    final currency = ref.read(currencyProvider);
+    final r = _compute();
+    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
+        symbol: currency.symbol);
+    if (r == null) return 'Inflation $amt';
+    return '$amt @ ${_rateCtrl.text}% / ${_years}y → ${formatter.formatCurrency(r.futureValueRequired, symbol: currency.symbol)} needed';
   }
 
   @override
@@ -55,102 +89,93 @@ class _InflationCalculatorScreenState
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
+    String money(double v) =>
+        formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
-    final amount =
-        double.tryParse(_amountCtrl.text.replaceAll(',', '')) ?? 0;
-    final years = double.tryParse(_yearsCtrl.text) ?? 0;
+    void recompute(_) => scheduleRecompute();
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.inflationCalculator,
-            ),
+    return ToolScreenScaffold(
+      title: 'Inflation',
+      subtitle: 'What your money will be worth in the future',
+      infoConfig: InfoConstants.inflationCalculator,
+      overflowConfig: savedOverflowConfig('inflation'),
+      banner: buildSavedBanner(),
+      onSave: openSaveSheet,
+      canSave: result != null,
+      sections: [
+        ToolInputCard(children: [
+          ToolSliderField(
+            controller: _amountCtrl,
+            label: 'CURRENT AMOUNT',
+            prefix: currency.symbol,
+            formatAsAmount: true,
+            onChanged: recompute,
+            min: 10000,
+            max: 50000000,
           ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'Inflation Calculator',
-              description: 'See how inflation erodes value',
-            ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _rateCtrl,
+            label: 'INFLATION RATE',
+            suffix: '%',
+            helper: 'Long-term average for India ≈ 6%',
+            onChanged: recompute,
+            min: 1,
+            max: 15,
+            divisions: 140,
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ToolInputCard(
-                  children: [
-                    ToolTextField(
-                      label: 'CURRENT AMOUNT',
-                      controller: _amountCtrl,
-                      prefix: currency.symbol,
-                      onChanged: (_) => setState(() {}),
-                      formatAsAmount: true,
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: 'ANNUAL INFLATION RATE',
-                      controller: _rateCtrl,
-                      suffix: '%',
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: 'TIME PERIOD (YEARS)',
-                      controller: _yearsCtrl,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                  ],
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _yearsCtrl,
+            label: 'YEARS',
+            suffix: 'years',
+            onChanged: recompute,
+            min: 1,
+            max: 40,
+            divisions: 39,
+          ),
+        ]),
+        ToolSection(
+          title: 'Result',
+          child: result == null
+              ? const ToolEmptyResult()
+              : ToolDualHero(
+                  left: HeroSide(
+                    label: 'Future Value Required',
+                    value: money(result.futureValueRequired),
+                    color: ToolAccents.pink,
+                    sub: "to keep today's purchasing power",
+                  ),
+                  right: HeroSide(
+                    label: "Real Value of Today's ₹",
+                    value: money(result.realValueOfToday),
+                    color: cs.onSurfaceVariant,
+                    sub: 'what it buys after $_years years',
+                  ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                ToolResultCard(
-                  children: result == null
-                      ? [const ToolEmptyResult()]
-                      : [
-                          ToolHeroResult(
-                            label: 'Future Value',
-                            value: formatter.formatCurrency(result.futureValue,
-                                symbol: currency.symbol),
-                            color: cs.error,
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          ToolStatRow(
-                            label: 'Value Lost to Inflation',
-                            value: formatter.formatCurrency(result.valueLost,
-                                symbol: currency.symbol),
-                            valueColor: cs.error,
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'Future Equivalent Needed',
-                            value: formatter.formatCurrency(
-                                result.purchasingPower,
-                                symbol: currency.symbol),
-                            valueColor: cs.onSurfaceVariant,
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label:
-                                'Today\'s ${formatter.formatCurrency(amount, symbol: currency.symbol)} = in ${years.toInt()} yrs',
-                            value: formatter.formatCurrency(result.futureValue,
-                                symbol: currency.symbol),
-                          ),
-                        ],
-                ),
-              ]),
+        ),
+        if (result != null)
+          ToolSection(
+            title: 'Purchasing power over time',
+            subtitle: 'Future value required vs real value',
+            child: ToolLineChart(
+              series: [
+                ChartSeries(
+                    name: 'Future value required',
+                    points: result.futureSeries,
+                    color: ToolAccents.pink),
+                ChartSeries(
+                    name: 'Real value of money',
+                    points: result.realSeries,
+                    color: cs.primary,
+                    dashed: true),
+              ],
+              xLabels: [
+                for (var i = 0; i < result.futureSeries.length; i++) 'Y$i',
+              ],
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 }

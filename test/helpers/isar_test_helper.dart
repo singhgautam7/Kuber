@@ -21,6 +21,8 @@ import 'package:kuber/features/backups/data/backup_config.dart';
 import 'package:kuber/features/ask_kuber/data/ask_kuber_message.dart';
 import 'package:kuber/features/sms_import/data/sms_transaction.dart';
 import 'package:kuber/features/sms_import/data/sms_account_mapping.dart';
+import 'package:kuber/features/tools/saved/data/saved_calculation.dart';
+import 'package:kuber/features/tools/saved/data/calculator_recent_use.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -44,6 +46,8 @@ const _allSchemas = [
   AskKuberMessageSchema,
   SmsTransactionSchema,
   SmsAccountMappingSchema,
+  SavedCalculationSchema,
+  CalculatorRecentUseSchema,
 ];
 
 bool _isarInitialized = false;

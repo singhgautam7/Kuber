@@ -28,6 +28,9 @@ import '../../stories/data/insight_story.dart';
 import '../../backups/data/backup_config.dart';
 import '../../sms_import/data/sms_transaction.dart';
 import '../../sms_import/data/sms_account_mapping.dart';
+import '../../tools/saved/data/saved_calculation.dart';
+import '../../tools/saved/data/calculator_recent_use.dart';
+import '../../ask_kuber/data/ask_kuber_message.dart';
 
 class CollectionMeta {
   final String name;
@@ -94,6 +97,18 @@ class DbExplorerScreen extends ConsumerWidget {
       CollectionMeta(
         'SmsAccountMapping',
         (i) => i.collection<SmsAccountMapping>().count(),
+      ),
+      CollectionMeta(
+        'SavedCalculation',
+        (i) => i.collection<SavedCalculation>().count(),
+      ),
+      CollectionMeta(
+        'CalculatorRecentUse',
+        (i) => i.collection<CalculatorRecentUse>().count(),
+      ),
+      CollectionMeta(
+        'AskKuberMessage',
+        (i) => i.collection<AskKuberMessage>().count(),
       ),
     ]..sort((a, b) => a.name.compareTo(b.name));
 

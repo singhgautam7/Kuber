@@ -5,66 +5,133 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../engine/fd_rd_engine.dart';
+import '../widgets/calculator_donut_breakdown.dart';
+import '../widgets/calculator_hero_result.dart';
+import '../widgets/calculator_line_chart.dart';
+import '../widgets/calculator_schedule_table.dart';
+import '../widgets/calculator_screen_scaffold.dart';
+import '../widgets/calculator_support.dart';
 import '../widgets/calculator_widgets.dart';
+import '../widgets/tool_accents.dart';
 
 class FdRdCalculatorScreen extends ConsumerStatefulWidget {
-  const FdRdCalculatorScreen({super.key});
+  final int? savedId;
+  const FdRdCalculatorScreen({super.key, this.savedId});
 
   @override
   ConsumerState<FdRdCalculatorScreen> createState() =>
       _FdRdCalculatorScreenState();
 }
 
-class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen> {
-  final _principalCtrl = TextEditingController();
+class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen>
+    with CalculatorSupport {
+  final _amountCtrl = TextEditingController();
   final _rateCtrl = TextEditingController();
-  final _durationCtrl = TextEditingController();
-  int _typeIndex = 0; // 0 = FD, 1 = RD
-  int _durationUnitIndex = 0; // 0 = Years, 1 = Months
-  int _compoundingIndex = 0; // 0 = Monthly, 1 = Quarterly, 2 = Yearly
+  final _tenureCtrl = TextEditingController();
+  int _type = 0; // 0 = FD, 1 = RD
+  int _freq = 2; // 0 yearly, 1 half-yearly, 2 quarterly, 3 monthly
+  int _scheduleMode = 0;
+
+  static const _freqs = [
+    CompoundingFrequency.yearly,
+    CompoundingFrequency.halfYearly,
+    CompoundingFrequency.quarterly,
+    CompoundingFrequency.monthly,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    initCalculatorSupport();
+  }
 
   @override
   void dispose() {
-    _principalCtrl.dispose();
+    _amountCtrl.dispose();
     _rateCtrl.dispose();
-    _durationCtrl.dispose();
+    _tenureCtrl.dispose();
     super.dispose();
   }
 
-  ({double maturity, double principal, double interest})? _compute() {
-    final p = double.tryParse(_principalCtrl.text.replaceAll(',', ''));
-    final rate = double.tryParse(_rateCtrl.text);
-    final duration = double.tryParse(_durationCtrl.text);
-    if (p == null || rate == null || duration == null) return null;
-    if (p <= 0 || rate <= 0 || duration <= 0) return null;
+  @override
+  String get toolKey => 'fd-rd-calculator';
+  @override
+  int? get initialSavedId => widget.savedId;
+  @override
+  String get defaultSaveName => _type == 0 ? 'Fixed deposit' : 'Recurring deposit';
+  @override
+  String get savePlaceholder => 'e.g. Emergency FD';
 
-    final months = _durationUnitIndex == 0 ? duration * 12 : duration;
-    final years = months / 12;
-    final r = rate / 100;
+  bool get _isFd => _type == 0;
+  int get _years => parseNum(_tenureCtrl.text).round();
 
-    if (_typeIndex == 0) {
-      // FD: A = P * (1 + r/n)^(n*t)
-      final n = [12, 4, 1][_compoundingIndex].toDouble();
-      final maturity = p * pow(1 + r / n, n * years);
-      return (maturity: maturity, principal: p, interest: maturity - p);
-    } else {
-      // RD: each monthly installment compounds for its remaining period
-      double maturity = 0;
-      final n = 12.0; // monthly compounding for RD
-      for (int i = 1; i <= months.toInt(); i++) {
-        final t = (months - i + 1) / 12;
-        maturity += p * pow(1 + r / n, n * t);
+  @override
+  Map<String, dynamic> collectInputs() => {
+        'amount': _amountCtrl.text,
+        'rate': _rateCtrl.text,
+        'tenure': _tenureCtrl.text,
+        'type': _type,
+        'freq': _freq,
+      };
+
+  @override
+  void applyInputs(Map<String, dynamic> json) {
+    _amountCtrl.text = json['amount']?.toString() ?? '';
+    _rateCtrl.text = json['rate']?.toString() ?? '';
+    _tenureCtrl.text = json['tenure']?.toString() ?? '';
+    _type = json['type'] as int? ?? 0;
+    _freq = json['freq'] as int? ?? 2;
+  }
+
+  DepositResult? _compute() {
+    final amount = parseAmount(_amountCtrl.text);
+    final rate = parseNum(_rateCtrl.text);
+    if (amount <= 0 || rate <= 0 || _years <= 0) return null;
+    return _isFd
+        ? computeFd(amount, rate, _years, _freqs[_freq])
+        : computeRd(amount, rate, _years);
+  }
+
+  @override
+  String buildSummary() {
+    final formatter = ref.read(formatterProvider);
+    final currency = ref.read(currencyProvider);
+    final r = _compute();
+    final amt = formatter.formatCurrency(parseAmount(_amountCtrl.text),
+        symbol: currency.symbol);
+    final kind = _isFd ? 'FD' : 'RD';
+    if (r == null) return '$kind $amt';
+    return '$kind $amt @ ${_rateCtrl.text}% for ${_years}y → ${formatter.formatCurrency(r.maturity, symbol: currency.symbol)}';
+  }
+
+  // Monthly schedule rows: [opening, interest, closing] per month.
+  List<List<double>> _monthlyRows() {
+    final amount = parseAmount(_amountCtrl.text);
+    final rate = parseNum(_rateCtrl.text);
+    final months = _years * 12;
+    final rows = <List<double>>[];
+    if (_isFd) {
+      final f = _freqs[_freq].perYear;
+      final pr = rate / 100 / f;
+      double prev = amount;
+      for (var m = 1; m <= months; m++) {
+        final bal = amount * pow(1 + pr, f * m / 12);
+        rows.add([m.toDouble(), prev, bal - prev, bal]);
+        prev = bal.toDouble();
       }
-      final totalPrincipal = p * months.toInt();
-      return (
-        maturity: maturity,
-        principal: totalPrincipal,
-        interest: maturity - totalPrincipal,
-      );
+    } else {
+      final r = rate / 100 / 12;
+      double bal = 0;
+      for (var m = 1; m <= months; m++) {
+        final opening = bal;
+        bal = (bal + amount) * (1 + r);
+        rows.add([m.toDouble(), opening, bal - opening - amount, bal]);
+      }
     }
+    return rows;
   }
 
   @override
@@ -72,125 +139,206 @@ class _FdRdCalculatorScreenState extends ConsumerState<FdRdCalculatorScreen> {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final currency = ref.watch(currencyProvider);
+    String money(double v) =>
+        formatter.formatCurrency(v.roundToDouble(), symbol: currency.symbol);
     final result = _compute();
-    final isFd = _typeIndex == 0;
+    void recompute(_) => scheduleRecompute();
 
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.fdRdCalculator,
-            ),
+    return ToolScreenScaffold(
+      title: 'FD / RD',
+      subtitle: 'Maturity value of a fixed or recurring deposit',
+      infoConfig: InfoConstants.fdRdCalculator,
+      overflowConfig: savedOverflowConfig('FD/RD'),
+      banner: buildSavedBanner(),
+      onSave: openSaveSheet,
+      canSave: result != null,
+      sections: [
+        ToolInputCard(children: [
+          const ToolInputLabel('DEPOSIT TYPE'),
+          const SizedBox(height: KuberSpacing.sm),
+          ToolSegmentedControl(
+            labels: const ['Fixed (FD)', 'Recurring (RD)'],
+            selectedIndex: _type,
+            onChanged: (i) => setState(() => _type = i),
           ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'FD / RD Calculator',
-              description: 'Fixed & recurring deposit returns',
-            ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _amountCtrl,
+            label: _isFd ? 'PRINCIPAL AMOUNT' : 'MONTHLY DEPOSIT',
+            prefix: currency.symbol,
+            formatAsAmount: true,
+            onChanged: recompute,
+            min: _isFd ? 10000 : 500,
+            max: _isFd ? 10000000 : 100000,
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _rateCtrl,
+            label: 'INTEREST RATE',
+            suffix: '%',
+            onChanged: recompute,
+            min: 1,
+            max: 12,
+            divisions: 110,
+          ),
+          const SizedBox(height: KuberSpacing.lg),
+          ToolSliderField(
+            controller: _tenureCtrl,
+            label: 'TENURE',
+            suffix: 'years',
+            onChanged: recompute,
+            min: 1,
+            max: 20,
+            divisions: 19,
+          ),
+          if (_isFd) ...[
+            const SizedBox(height: KuberSpacing.lg),
+            const ToolInputLabel('COMPOUNDING FREQUENCY'),
+            const SizedBox(height: KuberSpacing.sm),
+            Wrap(
+              spacing: KuberSpacing.sm,
+              runSpacing: KuberSpacing.sm,
+              children: [
+                for (var i = 0; i < 4; i++)
+                  _Chip(
+                    label: const [
+                      'Yearly',
+                      'Half-yearly',
+                      'Quarterly',
+                      'Monthly'
+                    ][i],
+                    selected: _freq == i,
+                    onTap: () => setState(() => _freq = i),
+                  ),
+              ],
             ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                ToolInputCard(
+          ],
+        ]),
+        ToolSection(
+          title: 'Result',
+          child: result == null
+              ? const ToolEmptyResult()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const ToolInputLabel('DEPOSIT TYPE'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    ToolSegmentedControl(
-                      labels: const ['FD', 'RD'],
-                      selectedIndex: _typeIndex,
-                      onChanged: (i) => setState(() => _typeIndex = i),
+                    ToolHero(
+                      label: 'Maturity Amount',
+                      value: money(result.maturity),
+                      numericValue: result.maturity,
+                      format: money,
+                      color: ToolAccents.amber,
                     ),
                     const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: isFd ? 'PRINCIPAL AMOUNT' : 'MONTHLY INSTALLMENT',
-                      controller: _principalCtrl,
-                      prefix: currency.symbol,
-                      onChanged: (_) => setState(() {}),
-                      formatAsAmount: true,
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolTextField(
-                      label: 'ANNUAL INTEREST RATE',
-                      controller: _rateCtrl,
-                      suffix: '%',
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    const ToolInputLabel('DURATION'),
-                    const SizedBox(height: KuberSpacing.sm),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ToolTextField(
-                            controller: _durationCtrl,
-                            onChanged: (_) => setState(() {}),
-                          ),
-                        ),
-                        const SizedBox(width: KuberSpacing.md),
-                        Expanded(
-                          child: ToolSegmentedControl(
-                            labels: const ['Years', 'Months'],
-                            selectedIndex: _durationUnitIndex,
-                            onChanged: (i) =>
-                                setState(() => _durationUnitIndex = i),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (isFd) ...[
-                      const SizedBox(height: KuberSpacing.lg),
-                      const ToolInputLabel('COMPOUNDING'),
-                      const SizedBox(height: KuberSpacing.sm),
-                      ToolSegmentedControl(
-                        labels: const ['Monthly', 'Quarterly', 'Yearly'],
-                        selectedIndex: _compoundingIndex,
-                        onChanged: (i) =>
-                            setState(() => _compoundingIndex = i),
-                      ),
-                    ],
+                    ToolStatCols(items: [
+                      StatCol('Total Invested', money(result.totalInvested)),
+                      StatCol('Interest Earned', money(result.interestEarned),
+                          color: cs.tertiary),
+                      StatCol('Eff. Yield',
+                          '${result.effectiveYieldPercent.toStringAsFixed(2)}%'),
+                    ]),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                ToolResultCard(
-                  children: result == null
-                      ? [const ToolEmptyResult()]
-                      : [
-                          ToolHeroResult(
-                            label: 'Maturity Amount',
-                            value: formatter.formatCurrency(result.maturity,
-                                symbol: currency.symbol),
-                            color: cs.primary,
-                          ),
-                          const SizedBox(height: KuberSpacing.lg),
-                          ToolStatRow(
-                            label: 'Principal',
-                            value: formatter.formatCurrency(result.principal,
-                                symbol: currency.symbol),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          ToolStatRow(
-                            label: 'Interest Earned',
-                            value: formatter.formatCurrency(result.interest,
-                                symbol: currency.symbol),
-                            valueColor: cs.tertiary,
-                          ),
+        ),
+        if (result != null) ...[
+          ToolSection(
+            title: 'Breakdown',
+            subtitle: 'Principal vs interest',
+            child: ToolDonutBreakdown(
+              segments: [
+                BreakdownSegment(
+                    'Principal', result.totalInvested, cs.primary),
+                BreakdownSegment(
+                    'Interest', result.interestEarned, ToolAccents.amber),
+              ],
+              centerBig: formatter.formatCompactCurrency(result.maturity,
+                  symbol: currency.symbol),
+              centerSmall: 'MATURITY',
+            ),
+          ),
+          ToolSection(
+            title: 'Balance over time',
+            child: ToolLineChart(
+              series: [
+                ChartSeries(
+                    name: 'Balance',
+                    points: result.balanceSeries,
+                    color: ToolAccents.amber,
+                    fill: true),
+              ],
+              xLabels: [
+                for (var i = 0; i < result.balanceSeries.length; i++) 'Y$i',
+              ],
+            ),
+          ),
+          ToolSection(
+            title: 'Period-by-period',
+            child: ToolScheduleTable(
+              columns: const [
+                ScheduleColumn('Period', numeric: false),
+                ScheduleColumn('Opening'),
+                ScheduleColumn('Interest'),
+                ScheduleColumn('Closing'),
+              ],
+              toggleLabels: const ['Yearly', 'Monthly'],
+              toggleIndex: _scheduleMode,
+              onToggle: (i) => setState(() => _scheduleMode = i),
+              note: _isFd ? null : 'For RD, contributions are added monthly.',
+              rows: _scheduleMode == 1
+                  ? [
+                      for (final m in _monthlyRows())
+                        [
+                          'M${m[0].toInt()}',
+                          money(m[1]),
+                          money(m[2]),
+                          money(m[3]),
                         ],
-                ),
-              ]),
+                    ]
+                  : [
+                      for (final p in result.yearly)
+                        [
+                          'Y${p.period}',
+                          money(p.opening),
+                          money(p.interest),
+                          money(p.closing),
+                        ],
+                    ],
             ),
           ),
         ],
+      ],
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _Chip({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(KuberRadius.md),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected
+              ? cs.primary.withValues(alpha: 0.12)
+              : cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: selected ? cs.primary : cs.outline),
+        ),
+        child: Text(
+          label,
+          style: localeFont(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: selected ? cs.primary : cs.onSurfaceVariant,
+          ),
+        ),
       ),
     );
   }

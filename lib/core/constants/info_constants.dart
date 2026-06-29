@@ -635,4 +635,80 @@ class InfoConstants {
       ),
     ],
   );
+
+  static const loanPrepayment = KuberInfoConfig(
+    title: 'Loan Prepayment Impact',
+    description: 'See how extra payments shorten your loan and cut interest.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.content_cut_rounded,
+        title: 'Tenure & interest saved',
+        description:
+            'Extra payments go straight to principal, so the loan closes earlier and total interest drops.',
+      ),
+      KuberInfoItem(
+        icon: Icons.calendar_today_rounded,
+        title: 'One-time or yearly',
+        description:
+            'Model a single lump-sum prepayment or a recurring yearly amount from a chosen start year.',
+      ),
+    ],
+  );
+
+  static const lumpsumVsSip = KuberInfoConfig(
+    title: 'Lumpsum vs SIP',
+    description: 'Compare investing the same money upfront vs spread monthly.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.compare_arrows_rounded,
+        title: 'Same money, two ways',
+        description:
+            'Lumpsum invests the full amount on day one; SIP spreads it across equal monthly instalments.',
+      ),
+      KuberInfoItem(
+        icon: Icons.trending_up_rounded,
+        title: 'Why lumpsum often wins',
+        description:
+            'In a steadily rising market the full amount compounds from the start, so lumpsum tends to lead.',
+      ),
+    ],
+  );
+
+  static const goalPlanner = KuberInfoConfig(
+    title: 'Goal Planner',
+    description: 'Find the monthly investment to reach a financial goal.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.flag_outlined,
+        title: 'Work backwards from a target',
+        description:
+            'Enter your goal, timeline and expected return to get the monthly SIP required.',
+      ),
+      KuberInfoItem(
+        icon: Icons.savings_outlined,
+        title: 'Existing savings count',
+        description:
+            'Current savings grow too, reducing how much you need to invest each month.',
+      ),
+    ],
+  );
+
+  static const retirementCorpus = KuberInfoConfig(
+    title: 'Retirement Corpus',
+    description: 'Estimate the corpus you need and how to build it.',
+    items: [
+      KuberInfoItem(
+        icon: Icons.elderly_rounded,
+        title: 'Two linked calculations',
+        description:
+            'First the corpus to fund inflation-adjusted expenses through retirement, then the SIP to build it.',
+      ),
+      KuberInfoItem(
+        icon: Icons.percent_rounded,
+        title: 'Pre & post-retirement returns',
+        description:
+            'Money usually grows faster while you work and is invested more conservatively after you retire.',
+      ),
+    ],
+  );
 }

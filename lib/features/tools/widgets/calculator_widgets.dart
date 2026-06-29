@@ -280,19 +280,194 @@ class ToolStatRow extends StatelessWidget {
 }
 
 class ToolEmptyResult extends StatelessWidget {
-  const ToolEmptyResult({super.key});
+  final String message;
+  const ToolEmptyResult({super.key, this.message = 'Enter values to calculate'});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
-        child: Text(
-          'Fill in the inputs to see results',
-          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+        padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
+        child: Column(
+          children: [
+            Text(
+              '—',
+              style: localeFont(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              message,
+              style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// A titled card section matching the mockup `section()` primitive: bordered,
+/// zero-elevation, with a title + optional subtitle above the [child].
+class ToolSection extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final Widget child;
+
+  const ToolSection({
+    super.key,
+    required this.title,
+    this.subtitle,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: localeFont(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+              letterSpacing: -0.2,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle!,
+              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+            ),
+          ],
+          const SizedBox(height: KuberSpacing.md),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// A labelled numeric field with an optional slider bound to the same value.
+/// Dragging the slider updates the text and vice-versa. While dragging, the
+/// thumb tracks a local value for instant feedback, so the parent's (debounced)
+/// recompute never makes the slider feel laggy.
+class ToolSliderField extends ConsumerStatefulWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? prefix;
+  final String? suffix;
+  final String? helper;
+  final bool formatAsAmount;
+  final ValueChanged<String> onChanged;
+
+  /// Slider range. When null the slider is hidden (plain field).
+  final double? min;
+  final double? max;
+  final int? divisions;
+
+  const ToolSliderField({
+    super.key,
+    required this.controller,
+    required this.label,
+    required this.onChanged,
+    this.prefix,
+    this.suffix,
+    this.helper,
+    this.formatAsAmount = false,
+    this.min,
+    this.max,
+    this.divisions,
+  });
+
+  @override
+  ConsumerState<ToolSliderField> createState() => _ToolSliderFieldState();
+}
+
+class _ToolSliderFieldState extends ConsumerState<ToolSliderField> {
+  double? _dragValue; // non-null while the user is dragging
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final showSlider = widget.min != null && widget.max != null;
+    final raw =
+        double.tryParse(widget.controller.text.replaceAll(',', '')) ??
+            widget.min ??
+            0;
+    final sliderValue = showSlider
+        ? (_dragValue ?? raw).clamp(widget.min!, widget.max!).toDouble()
+        : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ToolTextField(
+          controller: widget.controller,
+          label: widget.label,
+          prefix: widget.prefix,
+          suffix: widget.suffix,
+          formatAsAmount: widget.formatAsAmount,
+          onChanged: widget.onChanged,
+        ),
+        if (widget.helper != null) ...[
+          const SizedBox(height: 5),
+          Text(widget.helper!,
+              style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
+        ],
+        if (showSlider)
+          Padding(
+            padding: const EdgeInsets.only(top: KuberSpacing.sm),
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 4,
+                overlayShape: SliderComponentShape.noOverlay,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                activeTrackColor: cs.primary,
+                inactiveTrackColor: cs.surfaceContainerHigh,
+                thumbColor: cs.primary,
+                padding: EdgeInsets.zero,
+              ),
+              child: Slider(
+                value: sliderValue,
+                min: widget.min!,
+                max: widget.max!,
+                divisions: widget.divisions,
+                onChanged: (v) {
+                  final text = widget.formatAsAmount
+                      ? v.round().toString()
+                      : (v == v.roundToDouble()
+                          ? v.round().toString()
+                          : v.toStringAsFixed(1));
+                  widget.controller.text = text;
+                  widget.controller.selection = TextSelection.collapsed(
+                    offset: widget.controller.text.length,
+                  );
+                  // Local setState keeps the thumb smooth; parent recompute is
+                  // debounced via onChanged.
+                  setState(() => _dragValue = v);
+                  widget.onChanged(text);
+                },
+                onChangeEnd: (_) => setState(() => _dragValue = null),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

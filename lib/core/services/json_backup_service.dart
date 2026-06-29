@@ -23,6 +23,11 @@ import '../../features/widget_editor/data/widget_preference.dart';
 import '../../features/backups/services/backup_rotation.dart';
 import '../../features/backups/services/saf_backup_store.dart';
 import '../../features/backups/data/backup_config.dart';
+import '../../features/ask_kuber/data/ask_kuber_message.dart';
+import '../../features/sms_import/data/sms_transaction.dart';
+import '../../features/sms_import/data/sms_account_mapping.dart';
+import '../../features/tools/saved/data/saved_calculation.dart';
+import '../../features/tools/saved/data/calculator_recent_use.dart';
 import 'data_service.dart';
 
 /// Top-level so it can run on a background isolate via [compute].
@@ -85,6 +90,11 @@ class JsonBackupService {
     final widgetPreferences = await isar.widgetPreferences.where().findAll();
     final stories = await isar.insightStorys.where().findAll();
     final backupConfigs = await isar.backupConfigs.where().findAll();
+    final savedCalculations = await isar.savedCalculations.where().findAll();
+    final recentUses = await isar.calculatorRecentUses.where().findAll();
+    final askKuberMessages = await isar.askKuberMessages.where().findAll();
+    final smsTransactions = await isar.smsTransactions.where().findAll();
+    final smsAccountMappings = await isar.smsAccountMappings.where().findAll();
 
     final data = {
       'version': _version,
@@ -107,6 +117,11 @@ class JsonBackupService {
       'widgetPreferences': widgetPreferences.map((w) => w.toMap()).toList(),
       'insightStories': stories.map((s) => s.toMap()).toList(),
       'backupConfigs': backupConfigs.map((b) => b.toMap()).toList(),
+      'savedCalculations': savedCalculations.map((s) => s.toMap()).toList(),
+      'calculatorRecentUses': recentUses.map((r) => r.toMap()).toList(),
+      'askKuberMessages': askKuberMessages.map((a) => a.toMap()).toList(),
+      'smsTransactions': smsTransactions.map((s) => s.toMap()).toList(),
+      'smsAccountMappings': smsAccountMappings.map((s) => s.toMap()).toList(),
     };
 
     // Encoding the whole database into one string is the heaviest part of a
@@ -168,6 +183,26 @@ class JsonBackupService {
         }
         for (final m in _list(data, 'investments')) {
           await isar.investments.put(_mapToInvestment(m));
+          count++;
+        }
+        for (final m in _list(data, 'savedCalculations')) {
+          await isar.savedCalculations.put(_mapToSavedCalculation(m));
+          count++;
+        }
+        for (final m in _list(data, 'calculatorRecentUses')) {
+          await isar.calculatorRecentUses.put(_mapToRecentUse(m));
+          count++;
+        }
+        for (final m in _list(data, 'askKuberMessages')) {
+          await isar.askKuberMessages.put(_mapToAskKuberMessage(m));
+          count++;
+        }
+        for (final m in _list(data, 'smsAccountMappings')) {
+          await isar.smsAccountMappings.put(_mapToSmsAccountMapping(m));
+          count++;
+        }
+        for (final m in _list(data, 'smsTransactions')) {
+          await isar.smsTransactions.put(_mapToSmsTransaction(m));
           count++;
         }
       });
@@ -241,6 +276,7 @@ class JsonBackupService {
     'icon': a.icon,
     'colorValue': a.colorValue,
     'last4Digits': a.last4Digits,
+    'isDisabled': a.isDisabled,
   };
 
   Map<String, dynamic> _tagToMap(Tag t) => {
@@ -406,7 +442,8 @@ class JsonBackupService {
     ..isCreditCard = (m['isCreditCard'] as bool?) ?? false
     ..icon = m['icon'] as String?
     ..colorValue = m['colorValue'] as int?
-    ..last4Digits = m['last4Digits'] as String?;
+    ..last4Digits = m['last4Digits'] as String?
+    ..isDisabled = (m['isDisabled'] as bool?) ?? false;
 
   Tag _mapToTag(Map<String, dynamic> m) => Tag()
     ..id = m['id'] as int
@@ -542,4 +579,59 @@ class JsonBackupService {
     ..notes = m['notes'] as String?
     ..createdAt = DateTime.parse(m['createdAt'] as String)
     ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+
+  SavedCalculation _mapToSavedCalculation(Map<String, dynamic> m) =>
+      SavedCalculation()
+        ..id = m['id'] as int
+        ..tool = m['tool'] as String
+        ..name = m['name'] as String
+        ..inputsJson = m['inputsJson'] as String
+        ..summary = m['summary'] as String
+        ..savedAt = DateTime.parse(m['savedAt'] as String)
+        ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+
+  CalculatorRecentUse _mapToRecentUse(Map<String, dynamic> m) =>
+      CalculatorRecentUse()
+        ..id = m['id'] as int
+        ..calculatorType = m['calculatorType'] as String
+        ..lastUsed = DateTime.parse(m['lastUsed'] as String)
+        ..useCount = (m['useCount'] as int?) ?? 0;
+
+  AskKuberMessage _mapToAskKuberMessage(Map<String, dynamic> m) =>
+      AskKuberMessage()
+        ..id = m['id'] as int
+        ..text = m['text'] as String
+        ..isUser = m['isUser'] as bool
+        ..time = DateTime.parse(m['time'] as String)
+        ..thinkingJson = m['thinkingJson'] as String?
+        ..vizJson = m['vizJson'] as String?
+        ..metadataJson = m['metadataJson'] as String?;
+
+  SmsAccountMapping _mapToSmsAccountMapping(Map<String, dynamic> m) =>
+      SmsAccountMapping()
+        ..id = m['id'] as int
+        ..senderId = m['senderId'] as String
+        ..accountId = m['accountId'] as String
+        ..usageCount = (m['usageCount'] as int?) ?? 0
+        ..lastUsed = DateTime.parse(m['lastUsed'] as String);
+
+  SmsTransaction _mapToSmsTransaction(Map<String, dynamic> m) => SmsTransaction()
+    ..id = m['id'] as int
+    ..rawSms = m['rawSms'] as String
+    ..senderId = m['senderId'] as String
+    ..rawSmsHash = m['rawSmsHash'] as String
+    ..parsedDate = DateTime.parse(m['parsedDate'] as String)
+    ..parsedAmount = (m['parsedAmount'] as num).toDouble()
+    ..parsedType = m['parsedType'] as String
+    ..parsedMerchant = m['parsedMerchant'] as String?
+    ..parsedAccountSuffix = m['parsedAccountSuffix'] as String?
+    ..suggestedAccountId = m['suggestedAccountId'] as String?
+    ..suggestedCategoryId = m['suggestedCategoryId'] as String?
+    ..reviewStatus = m['reviewStatus'] as String
+    ..smsDate = DateTime.parse(m['smsDate'] as String)
+    ..importedAt = m['importedAt'] != null
+        ? DateTime.parse(m['importedAt'] as String)
+        : null
+    ..importedTransactionId = m['importedTransactionId'] as String?
+    ..patternMatched = m['patternMatched'] as String?;
 }
