@@ -78,10 +78,10 @@ class _SavedCalculationsScreenState
     final async = ref.watch(savedCalculationsProvider);
     final tools = ref.watch(savedToolsProvider);
 
-    // Reset an invalid filter if its tool no longer has saves.
-    if (_filter != 'all' && !tools.contains(_filter)) {
-      _filter = 'all';
-    }
+    // Fall back to "all" when the selected tool no longer has saves (e.g. its
+    // last calc was deleted). Derived locally — never mutate state in build().
+    final effectiveFilter =
+        (_filter != 'all' && !tools.contains(_filter)) ? 'all' : _filter;
 
     return PopScope(
       // While selecting, the system/back gesture cancels the selection instead
@@ -142,14 +142,14 @@ class _SavedCalculationsScreenState
                   ),
                 ];
               }
-              final filtered = _filter == 'all'
+              final filtered = effectiveFilter == 'all'
                   ? list
-                  : list.where((c) => c.tool == _filter).toList();
+                  : list.where((c) => c.tool == effectiveFilter).toList();
               return [
                 SliverToBoxAdapter(
                   child: _FilterChips(
                     tools: tools,
-                    selected: _filter,
+                    selected: effectiveFilter,
                     onSelect: (f) => setState(() => _filter = f),
                   ),
                 ),

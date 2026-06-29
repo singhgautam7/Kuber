@@ -67,6 +67,19 @@ EmiResult computeEmiSchedule(
   int tenureMonths, {
   double extraMonthlyPrepayment = 0,
 }) {
+  // Guard invalid input (the UI also blocks it): without this a zero tenure
+  // yields totalInterest = −principal.
+  if (principal <= 0 || tenureMonths <= 0) {
+    return EmiResult(
+      emi: 0,
+      totalPayable: 0,
+      totalInterest: 0,
+      principal: principal <= 0 ? 0 : principal,
+      yearly: const [],
+      balanceSeries: [principal <= 0 ? 0 : principal],
+      interestSeries: const [0],
+    );
+  }
   final years = (tenureMonths / 12).ceil();
   final r = annualRatePercent / 100 / 12;
   final emi = calculateEmi(principal, annualRatePercent, tenureMonths);

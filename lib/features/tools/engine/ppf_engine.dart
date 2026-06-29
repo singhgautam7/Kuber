@@ -51,10 +51,13 @@ double clampPpfDeposit(double deposit) {
 /// PPF compounds yearly: interest is credited on the year-end balance
 /// (opening + deposit).
 PpfResult computePpf(
-  double yearlyDeposit,
+  double rawYearlyDeposit,
   int years, {
   double ratePercent = kPpfDefaultRate,
 }) {
+  // Enforce the statutory ₹500–₹1,50,000 window inside the engine so maturity
+  // can never reflect an out-of-bounds deposit (the screen also clamps + warns).
+  final yearlyDeposit = clampPpfDeposit(rawYearlyDeposit);
   double bal = 0;
   final balanceSeries = <double>[0];
   final yearly = <PpfYearRow>[];

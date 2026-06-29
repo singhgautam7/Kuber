@@ -78,6 +78,26 @@ RetirementResult computeRetirement({
 }) {
   final yearsToRet = retirementAge - currentAge;
   final yearsInRet = lifeExpectancy - retirementAge;
+
+  // Guard non-increasing ages (the UI also validates this): without it the
+  // PV-of-annuity formula returns a nonsensical negative corpus.
+  if (yearsToRet <= 0 || yearsInRet <= 0) {
+    return RetirementResult(
+      requiredCorpus: 0,
+      monthlyInvestment: 0,
+      yearsToRetirement: yearsToRet < 0 ? 0 : yearsToRet,
+      yearsInRetirement: yearsInRet < 0 ? 0 : yearsInRet,
+      monthlyExpenseAtRetirement: currentMonthlyExpense,
+      fvCurrentSavings: currentSavings,
+      totalInvested: 0,
+      returns: 0,
+      preRetirementSeries: [currentSavings],
+      postRetirementSeries: const [0],
+      phase1: const [],
+      phase2: const [],
+    );
+  }
+
   final infl = inflationPercent / 100;
   final pre = preRetirementReturnPercent / 100;
   final post = postRetirementReturnPercent / 100;

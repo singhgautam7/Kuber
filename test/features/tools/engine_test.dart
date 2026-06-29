@@ -334,4 +334,34 @@ void main() {
       expect(r.requiredCorpus, greaterThan(0));
     });
   });
+
+  group('Engine input guards', () {
+    test('EMI zero tenure returns zeros, not negative interest', () {
+      final r = computeEmiSchedule(100000, 10, 0);
+      expect(r.emi, 0);
+      expect(r.totalInterest, 0);
+      expect(r.totalPayable, 0);
+    });
+
+    test('PPF deposit is clamped inside the engine', () {
+      final over = computePpf(500000, 15); // above ₹1.5L cap
+      final capped = computePpf(kPpfMaxDeposit, 15);
+      expect(over.maturity, capped.maturity);
+    });
+
+    test('Retirement with life <= retirement age returns safe zeros', () {
+      final r = computeRetirement(
+        currentAge: 30,
+        retirementAge: 60,
+        lifeExpectancy: 55,
+        currentMonthlyExpense: 60000,
+        inflationPercent: 6,
+        preRetirementReturnPercent: 12,
+        postRetirementReturnPercent: 7,
+        currentSavings: 1000000,
+      );
+      expect(r.requiredCorpus, 0);
+      expect(r.monthlyInvestment, 0);
+    });
+  });
 }

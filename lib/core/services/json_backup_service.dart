@@ -204,6 +204,15 @@ class JsonBackupService {
 
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {
+      // A chunk failed after the up-front clear(), so the database is now
+      // partially restored. Reset it to a clean-empty state so the user isn't
+      // left with half a backup (the previous single-transaction import rolled
+      // back to empty on failure; this preserves that guarantee).
+      try {
+        await isar.writeTxn(() => isar.clear());
+      } catch (_) {
+        // Best-effort cleanup; surface the original import error regardless.
+      }
       return ImportResult(
         successCount: 0,
         failureCount: 0,
