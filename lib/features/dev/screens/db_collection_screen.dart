@@ -32,6 +32,8 @@ import '../../sms_import/data/sms_account_mapping.dart';
 import '../../tools/saved/data/saved_calculation.dart';
 import '../../tools/saved/data/calculator_recent_use.dart';
 import '../../ask_kuber/data/ask_kuber_message.dart';
+import '../../notes/data/kuber_note.dart';
+import '../../reminders/data/reminder.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -181,6 +183,14 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
               .collection<AskKuberMessage>()
               .where()
               .findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'KuberNote':
+          final list = await isar.collection<KuberNote>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'Reminder':
+          final list = await isar.collection<Reminder>().where().findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }

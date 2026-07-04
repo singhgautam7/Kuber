@@ -25,7 +25,11 @@ import '../providers/loan_provider.dart';
 
 class AddLoanScreen extends ConsumerStatefulWidget {
   final Loan? existing;
-  const AddLoanScreen({super.key, this.existing});
+
+  /// Pre-fill support for Kuber Notes tap-to-convert (create mode only).
+  final double? amountPrefill;
+
+  const AddLoanScreen({super.key, this.existing, this.amountPrefill});
 
   @override
   ConsumerState<AddLoanScreen> createState() => _AddLoanScreenState();
@@ -65,6 +69,14 @@ class _AddLoanScreenState extends ConsumerState<AddLoanScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.existing == null) {
+      final amount = widget.amountPrefill;
+      if (amount != null && amount > 0) {
+        _principalController.text = amount == amount.truncateToDouble()
+            ? amount.toInt().toString()
+            : amount.toStringAsFixed(2);
+      }
+    }
     final e = widget.existing;
     if (e != null) {
       _isEditing = true;

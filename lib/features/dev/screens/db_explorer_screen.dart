@@ -31,6 +31,8 @@ import '../../sms_import/data/sms_account_mapping.dart';
 import '../../tools/saved/data/saved_calculation.dart';
 import '../../tools/saved/data/calculator_recent_use.dart';
 import '../../ask_kuber/data/ask_kuber_message.dart';
+import '../../notes/data/kuber_note.dart';
+import '../../reminders/data/reminder.dart';
 
 class CollectionMeta {
   final String name;
@@ -110,6 +112,8 @@ class DbExplorerScreen extends ConsumerWidget {
         'AskKuberMessage',
         (i) => i.collection<AskKuberMessage>().count(),
       ),
+      CollectionMeta('KuberNote', (i) => i.collection<KuberNote>().count()),
+      CollectionMeta('Reminder', (i) => i.collection<Reminder>().count()),
     ]..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(

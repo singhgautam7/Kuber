@@ -23,6 +23,7 @@ import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/services/biometric_service.dart';
+import '../../notes/providers/notes_provider.dart';
 
 // Imports for widget configurations and count
 import '../../widget_editor/providers/widget_editor_provider.dart';
@@ -572,6 +573,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           }
                         },
                         activeTrackColor: cs.primary,
+                      ),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    // Notes-specific gate. Greyed out until the app-wide
+                    // biometric toggle above is on (per design 1l).
+                    Opacity(
+                      opacity: currentBiometricsEnabled ? 1 : 0.45,
+                      child: _SettingsTile(
+                        icon: Icons.lock_outline_rounded,
+                        label: 'Require biometric to open Notes',
+                        subtitle: currentBiometricsEnabled
+                            ? 'Ask for Face / fingerprint unlock'
+                            : 'Turn on Biometric unlock above first',
+                        trailing: Switch(
+                          value: currentBiometricsEnabled &&
+                              ref.watch(notesBiometricRequiredProvider),
+                          onChanged: !currentBiometricsEnabled
+                              ? null
+                              : (val) async {
+                                  await ref
+                                      .read(notesBiometricRequiredProvider
+                                          .notifier)
+                                      .set(val);
+                                  if (!val) {
+                                    ref
+                                        .read(
+                                            notesUnlockedThisSessionProvider
+                                                .notifier)
+                                        .state = false;
+                                  }
+                                },
+                          activeTrackColor: cs.primary,
+                        ),
                       ),
                     ),
                   ],

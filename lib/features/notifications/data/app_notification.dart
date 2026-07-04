@@ -11,6 +11,7 @@ enum NotificationType {
   loanEmi,
   ledgerReminder,
   backup,
+  reminderTrigger,
 }
 
 @collection

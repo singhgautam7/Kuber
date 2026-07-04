@@ -25,6 +25,8 @@ import '../../features/sms_import/data/sms_transaction.dart';
 import '../../features/sms_import/data/sms_account_mapping.dart';
 import '../../features/tools/saved/data/saved_calculation.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
+import '../../features/notes/data/kuber_note.dart';
+import '../../features/reminders/data/reminder.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -57,6 +59,8 @@ class IsarService {
       SmsAccountMappingSchema,
       SavedCalculationSchema,
       CalculatorRecentUseSchema,
+      KuberNoteSchema,
+      ReminderSchema,
     ], directory: dir.path);
   }
 }

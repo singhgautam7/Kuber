@@ -22,8 +22,10 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
 import '../providers/analytics_provider.dart';
-import '../widgets/category_group_stats.dart';
-import '../widgets/analytics_toggle.dart';
+import '../../charts/widgets/category_donut_chart.dart';
+import '../../charts/widgets/income_expense_chart.dart';
+import '../../charts/widgets/income_expense_chart_controls.dart'
+    show KuberSegmentedTabs;
 import '../widgets/avg_weekly_heatmap.dart';
 import '../widgets/transaction_size_distribution.dart';
 import '../widgets/tag_wise_analytics.dart';
@@ -397,7 +399,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }) {
     return _AnalyticsCard(
       title: context.l10n.biggestTransactions,
-      trailing: AnalyticsCardSmallTabs(
+      trailing: KuberSegmentedTabs(
         labels: [context.l10n.expenseLabel, context.l10n.incomeLabel],
         selectedIndex: _biggestTab,
         onChanged: (i) => setState(() => _biggestTab = i),
@@ -610,22 +612,17 @@ class _AnalyticsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              // ignore: use_null_aware_elements
-              if (trailing != null) trailing!,
-            ],
+          Text(
+            title,
+            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+          // Tabs sit below the title (left-aligned), matching the chart cards.
+          if (trailing != null) ...[
+            const SizedBox(height: KuberSpacing.md),
+            Align(alignment: Alignment.centerLeft, child: trailing!),
+          ],
           const SizedBox(height: KuberSpacing.xl),
           child,
         ],
@@ -737,13 +734,22 @@ class _AnalyticsWidgetList extends ConsumerWidget {
         return Padding(
           padding: bottom,
           child: RepaintBoundary(
-            child: KuberBarChart(
+            child: IncomeExpenseChart(
               key: TutorialStepKeys.spendingTrendsChart,
-              title: ctx.l10n.spendingTrend,
-              buckets: buckets,
-              height: 200,
-              enableBucketDropdown: filter.type != FilterType.today,
-              bucket: filter.effectiveBucket,
+              compact: false,
+              points: [
+                for (final b in buckets)
+                  IncomeExpensePoint(
+                    label: b.dayLabel,
+                    income: b.income,
+                    expense: b.expense,
+                    date: b.date,
+                    endDate: b.endDate,
+                  ),
+              ],
+              bucket: filter.type == FilterType.today
+                  ? null
+                  : filter.effectiveBucket,
               availableBuckets:
                   availableBucketsForRange(filter.from, filter.to),
               onBucketChanged: (b) =>
@@ -775,7 +781,7 @@ class _AnalyticsWidgetList extends ConsumerWidget {
         return Padding(
           padding: bottom,
           child: RepaintBoundary(
-            child: CategoryGroupStatsWidget(
+            child: CategoryDonutChart(
               key: TutorialStepKeys.categoryBreakdownChart,
             ),
           ),

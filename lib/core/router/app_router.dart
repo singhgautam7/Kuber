@@ -63,6 +63,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 
+import '../../features/notes/screens/note_editor_screen.dart';
+import '../../features/notes/screens/notes_biometric_gate.dart';
+import '../../features/notes/screens/notes_filter_screen.dart';
+import '../../features/notes/screens/notes_landing_screen.dart';
+import '../../features/reminders/screens/add_edit_reminder_screen.dart';
+import '../../features/reminders/data/reminder.dart';
+import '../../features/reminders/screens/reminders_landing_screen.dart';
+import '../../features/upcoming_events/screens/upcoming_events_full_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/tools/tools_hub_screen.dart';
 import '../../features/tools/currency_converter/currency_converter_screen.dart';
@@ -184,6 +192,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             initialAccountId: int.tryParse(
               state.uri.queryParameters['accountId'] ?? '',
             ),
+            initialAmount: double.tryParse(
+              state.uri.queryParameters['amount'] ?? '',
+            ),
+            initialName: state.uri.queryParameters['name'],
+            initialCategoryId: int.tryParse(
+              state.uri.queryParameters['categoryId'] ?? '',
+            ),
+            sourceNoteId: state.uri.queryParameters['sourceNoteId'],
+            sourceReminderId: int.tryParse(
+              state.uri.queryParameters['reminderId'] ?? '',
+            ),
           ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return SlideTransition(
@@ -241,7 +260,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/recurring/add',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const AddRecurringScreen(),
+        builder: (_, state) => AddRecurringScreen(
+          amountPrefill:
+              double.tryParse(state.uri.queryParameters['amount'] ?? ''),
+          categoryPrefill:
+              int.tryParse(state.uri.queryParameters['categoryId'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/recurring/edit',
@@ -418,6 +442,34 @@ final routerProvider = Provider<GoRouter>((ref) {
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const ToolsHubScreen(),
                   ),
+                  GoRoute(
+                    path: 'notes',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, _) => const NotesBiometricGate(
+                      child: NotesLandingScreen(),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'filter',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, _) => const NotesFilterScreen(),
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    path: 'reminders',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, state) => RemindersLandingScreen(
+                      openReminderId: int.tryParse(
+                        state.uri.queryParameters['open'] ?? '',
+                      ),
+                    ),
+                  ),
+                  GoRoute(
+                    path: 'upcoming-events',
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (_, _) => const UpcomingEventsFullScreen(),
+                  ),
 
                   GoRoute(
                     path: 'tools/currency-converter',
@@ -582,6 +634,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           return AddLedgerScreen(
             prefill: extra is LedgerPrefill ? extra : null,
+            amountPrefill:
+                double.tryParse(state.uri.queryParameters['amount'] ?? ''),
           );
         },
       ),
@@ -594,7 +648,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/loans/add',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const AddLoanScreen(),
+        builder: (_, state) => AddLoanScreen(
+          amountPrefill:
+              double.tryParse(state.uri.queryParameters['amount'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/loans/edit',
@@ -604,13 +661,37 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/investments/add',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (_, _) => const AddInvestmentScreen(),
+        builder: (_, state) => AddInvestmentScreen(
+          amountPrefill:
+              double.tryParse(state.uri.queryParameters['amount'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '/investments/edit',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) =>
             AddInvestmentScreen(existing: state.extra as Investment?),
+      ),
+      GoRoute(
+        path: '/notes/editor',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, state) => NotesBiometricGate(
+          child: NoteEditorScreen(
+            noteId:
+                int.tryParse(state.uri.queryParameters['id'] ?? '') ?? -1,
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/reminders/add',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const AddEditReminderScreen(),
+      ),
+      GoRoute(
+        path: '/reminders/edit',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, state) =>
+            AddEditReminderScreen(existing: state.extra as Reminder?),
       ),
       GoRoute(
         path: '/widget-editor/home',

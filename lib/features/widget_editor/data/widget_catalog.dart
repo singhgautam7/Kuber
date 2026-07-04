@@ -45,8 +45,8 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
   ),
   HomeWidgetConfig(
     id: 'seven_day_chart',
-    name: 'Last 7 Days Chart',
-    description: 'Daily income vs expense for the past week',
+    name: 'Income & Expense',
+    description: 'Monthly income vs expense for the last 6 months',
     enabled: true,
   ),
   HomeWidgetConfig(
@@ -56,10 +56,16 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     enabled: false,
   ),
   HomeWidgetConfig(
-    id: 'upcoming_recurring',
-    name: 'Upcoming Recurring',
-    description: 'Next recurring transactions due',
-    enabled: false,
+    id: 'upcoming_events_widget',
+    name: 'Upcoming Events',
+    description: 'Reminders, EMIs, SIPs, recurring and ledger due dates',
+    enabled: true,
+  ),
+  HomeWidgetConfig(
+    id: 'kuber_notes_widget',
+    name: 'Kuber Notes',
+    description: 'Latest note preview and quick add',
+    enabled: true,
   ),
   HomeWidgetConfig(
     id: 'recent_transactions',
@@ -124,9 +130,13 @@ String localizedWidgetName(BuildContext context, String id) {
     'quick_add' => l.wgtQuickAddName,
     'spending_stats' => l.wgtSpendingStatsName,
     'home_accounts' => l.wgtHomeAccountsName,
-    'seven_day_chart' => l.wgtSevenDayChartName,
+    // Renamed by the chart redesign (English-only, like SMS import).
+    'seven_day_chart' => 'Income & Expense',
     'budget_snapshot' => l.wgtBudgetSnapshotName,
-    'upcoming_recurring' => l.wgtUpcomingRecurringName,
+    // Upcoming Events + Kuber Notes are English-only features (see SMS
+    // import / Ask Kuber precedent).
+    'upcoming_events_widget' => 'Upcoming Events',
+    'kuber_notes_widget' => 'Kuber Notes',
     'recent_transactions' => l.wgtRecentTransactionsName,
     // SMS import is an English-only feature (see Ask Kuber precedent).
     'sms_import_widget' => 'SMS Import',
@@ -150,9 +160,11 @@ String? localizedWidgetDesc(BuildContext context, String id) {
     'quick_add' => l.wgtQuickAddDesc,
     'spending_stats' => l.wgtSpendingStatsDesc,
     'home_accounts' => l.wgtHomeAccountsDesc,
-    'seven_day_chart' => l.wgtSevenDayChartDesc,
+    'seven_day_chart' => 'Monthly income vs expense for the last 6 months',
     'budget_snapshot' => l.wgtBudgetSnapshotDesc,
-    'upcoming_recurring' => l.wgtUpcomingRecurringDesc,
+    'upcoming_events_widget' =>
+        'Reminders, EMIs, SIPs, recurring and ledger due dates',
+    'kuber_notes_widget' => 'Latest note preview and quick add',
     'recent_transactions' => l.wgtRecentTransactionsDesc,
     'sms_import_widget' => 'Pending bank SMS transactions to review',
     'summary_card' => l.wgtSummaryCardDesc,

@@ -34,6 +34,7 @@ import '../widgets/tags_tile.dart';
 import '../widgets/transaction_suggestion_overlay.dart';
 import '../widgets/transaction_type_selector.dart';
 import '../widgets/transfer_account_tile.dart';
+import '../../reminders/providers/reminders_provider.dart';
 import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
@@ -44,11 +45,29 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   final String? initialType;
   final int? initialAccountId;
 
+  /// Pre-fill support for Kuber Notes tap-to-convert and Reminders
+  /// "Add as transaction" (create mode only).
+  final double? initialAmount;
+  final String? initialName;
+  final int? initialCategoryId;
+
+  /// KuberNote.id recorded as the created transaction's provenance.
+  final String? sourceNoteId;
+
+  /// Reminder.id — after a successful save, offers a "Mark reminder done"
+  /// snackbar action (offer/confirm pattern; never auto-completes).
+  final int? sourceReminderId;
+
   const AddTransactionScreen({
     super.key,
     this.transaction,
     this.initialType,
     this.initialAccountId,
+    this.initialAmount,
+    this.initialName,
+    this.initialCategoryId,
+    this.sourceNoteId,
+    this.sourceReminderId,
   });
 
   @override
@@ -111,6 +130,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     } else {
       _type = widget.initialType ?? 'expense';
       _selectedAccountId = widget.initialAccountId;
+      _selectedCategoryId = widget.initialCategoryId;
+      if (widget.initialName != null && widget.initialName!.isNotEmpty) {
+        _nameController.text = widget.initialName!;
+      }
+      final amount = widget.initialAmount;
+      if (amount != null && amount > 0) {
+        _amountController.text = amount == amount.truncateToDouble()
+            ? amount.toInt().toString()
+            : amount.toStringAsFixed(2);
+        // A prefilled entry already has its amount; a suggestion overlay
+        // popping over it would fight the prefill.
+        _suppressSuggestions = true;
+      }
     }
   }
 
@@ -886,6 +918,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     t.nameLower = name.toLowerCase();
     t.createdAt = _selectedDate;
     t.updatedAt = DateTime.now();
+    if (!_isEditing && widget.sourceNoteId != null) {
+      t.sourceNoteId = widget.sourceNoteId;
+    }
 
     // Set attachment paths for existing attachments (edit mode)
     if (_isEditing) {
@@ -932,10 +967,26 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
 
     context.pop();
-    showKuberSnackBar(
-      context,
-      _isEditing ? l10n.transactionUpdated : l10n.transactionSaved,
-    );
+    final reminderId = widget.sourceReminderId;
+    if (!_isEditing && reminderId != null) {
+      // Offer/confirm pattern — never auto-complete the reminder.
+      showKuberSnackBar(
+        context,
+        'Transaction added',
+        actionLabel: 'Mark reminder done',
+        onAction: () {
+          ref
+              .read(remindersRepositoryProvider)
+              .markDone(reminderId)
+              .ignore();
+        },
+      );
+    } else {
+      showKuberSnackBar(
+        context,
+        _isEditing ? l10n.transactionUpdated : l10n.transactionSaved,
+      );
+    }
   }
 
   /// Clears the inputs that change per-entry while preserving the

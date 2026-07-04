@@ -26,9 +26,15 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.infoConfig,
     this.overflowConfig,
     this.onBack,
+    this.showBrand = true,
   });
 
   final bool showHome;
+
+  /// When false and [title] is null, renders no leading brand block (just the
+  /// back / home / info buttons). Landing pages that already show the screen
+  /// name in [KuberPageHeader] set this false.
+  final bool showBrand;
   final KuberInfoConfig? infoConfig;
 
   /// Overrides the default back behavior (pop). Used e.g. to clear a
@@ -70,7 +76,9 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: KuberSpacing.sm),
               ],
-              if (title == null) ...[
+              if (title == null && !showBrand) ...[
+                const SizedBox.shrink(),
+              ] else if (title == null) ...[
                 Container(
                   width: 32,
                   height: 32,

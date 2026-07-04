@@ -23,6 +23,8 @@ import 'package:kuber/features/sms_import/data/sms_transaction.dart';
 import 'package:kuber/features/sms_import/data/sms_account_mapping.dart';
 import 'package:kuber/features/tools/saved/data/saved_calculation.dart';
 import 'package:kuber/features/tools/saved/data/calculator_recent_use.dart';
+import 'package:kuber/features/notes/data/kuber_note.dart';
+import 'package:kuber/features/reminders/data/reminder.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -48,6 +50,8 @@ const _allSchemas = [
   SmsAccountMappingSchema,
   SavedCalculationSchema,
   CalculatorRecentUseSchema,
+  KuberNoteSchema,
+  ReminderSchema,
 ];
 
 bool _isarInitialized = false;

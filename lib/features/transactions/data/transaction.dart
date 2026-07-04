@@ -47,6 +47,11 @@ class Transaction {
   String? importSource;     // null | 'sms'
   String? importedFromSms;  // raw SMS body, stored only for SMS-imported txns
 
+  // Kuber Notes provenance. Set only when the transaction was created via
+  // the Notes tap-to-convert flow; stores KuberNote.id as a string. Nullable
+  // so existing rows migrate safely with a null default.
+  String? sourceNoteId;
+
   @ignore
   String? tempTags; // temporary storage for import
 
@@ -70,5 +75,6 @@ class Transaction {
     'attachmentPaths': attachmentPaths,
     'importSource': importSource,
     'importedFromSms': importedFromSms,
+    'sourceNoteId': sourceNoteId,
   };
 }

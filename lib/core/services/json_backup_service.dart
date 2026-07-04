@@ -26,6 +26,8 @@ import '../../features/backups/data/backup_config.dart';
 import '../../features/ask_kuber/data/ask_kuber_message.dart';
 import '../../features/sms_import/data/sms_transaction.dart';
 import '../../features/sms_import/data/sms_account_mapping.dart';
+import '../../features/notes/data/kuber_note.dart';
+import '../../features/reminders/data/reminder.dart';
 import '../../features/tools/saved/data/saved_calculation.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
 import 'data_service.dart';
@@ -99,6 +101,8 @@ class JsonBackupService {
     final askKuberMessages = await isar.askKuberMessages.where().findAll();
     final smsTransactions = await isar.smsTransactions.where().findAll();
     final smsAccountMappings = await isar.smsAccountMappings.where().findAll();
+    final kuberNotes = await isar.kuberNotes.where().findAll();
+    final reminders = await isar.reminders.where().findAll();
 
     final data = {
       'version': _version,
@@ -126,6 +130,8 @@ class JsonBackupService {
       'askKuberMessages': askKuberMessages.map((a) => a.toMap()).toList(),
       'smsTransactions': smsTransactions.map((s) => s.toMap()).toList(),
       'smsAccountMappings': smsAccountMappings.map((s) => s.toMap()).toList(),
+      'kuberNotes': kuberNotes.map((n) => n.toMap()).toList(),
+      'reminders': reminders.map((r) => r.toMap()).toList(),
     };
 
     // Encoding the whole database into one string is the heaviest part of a
@@ -201,6 +207,8 @@ class JsonBackupService {
           isar.smsAccountMappings, _mapToSmsAccountMapping);
       await restore('smsTransactions', 'SMS transactions', isar.smsTransactions,
           _mapToSmsTransaction);
+      await restore('kuberNotes', 'notes', isar.kuberNotes, _mapToKuberNote);
+      await restore('reminders', 'reminders', isar.reminders, _mapToReminder);
 
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {
@@ -253,6 +261,7 @@ class JsonBackupService {
     'updatedAt': t.updatedAt.toIso8601String(),
     'nameLower': t.nameLower,
     'attachmentPaths': t.attachmentPaths,
+    'sourceNoteId': t.sourceNoteId,
   };
 
   Map<String, dynamic> _catToMap(Category c) => {
@@ -422,7 +431,35 @@ class JsonBackupService {
     ..createdAt = DateTime.parse(m['createdAt'] as String)
     ..updatedAt = DateTime.parse(m['updatedAt'] as String)
     ..nameLower = m['nameLower'] as String
-    ..attachmentPaths = (m['attachmentPaths'] as List?)?.cast<String>() ?? [];
+    ..attachmentPaths = (m['attachmentPaths'] as List?)?.cast<String>() ?? []
+    ..sourceNoteId = m['sourceNoteId'] as String?;
+
+  KuberNote _mapToKuberNote(Map<String, dynamic> m) => KuberNote()
+    ..id = m['id'] as int
+    ..title = (m['title'] as String?) ?? ''
+    ..content = (m['content'] as String?) ?? ''
+    ..categoryId = m['categoryId'] as String?
+    ..tagIds = (m['tagIds'] as List?)?.cast<String>() ?? []
+    ..pinned = (m['pinned'] as bool?) ?? false
+    ..isReadOnly = (m['isReadOnly'] as bool?) ?? false
+    ..createdAt = DateTime.parse(m['createdAt'] as String)
+    ..updatedAt = DateTime.parse(m['updatedAt'] as String);
+
+  Reminder _mapToReminder(Map<String, dynamic> m) => Reminder()
+    ..id = m['id'] as int
+    ..title = (m['title'] as String?) ?? ''
+    ..notes = m['notes'] as String?
+    ..dueAt = DateTime.parse(m['dueAt'] as String)
+    ..amount = (m['amount'] as num?)?.toDouble()
+    ..transactionType = m['transactionType'] as String?
+    ..categoryId = m['categoryId'] as String?
+    ..repeat = m['repeat'] as String?
+    ..status = (m['status'] as String?) ?? ReminderStatus.pending
+    ..completedAt = m['completedAt'] == null
+        ? null
+        : DateTime.parse(m['completedAt'] as String)
+    ..createdAt = DateTime.parse(m['createdAt'] as String)
+    ..updatedAt = DateTime.parse(m['updatedAt'] as String);
 
   Category _mapToCat(Map<String, dynamic> m) => Category()
     ..id = m['id'] as int

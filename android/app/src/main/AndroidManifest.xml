@@ -2,6 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Re-registers scheduled reminder notifications after a reboot
+         (flutter_local_notifications boot receiver below). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <!-- Read-only access to the SMS inbox, used solely to detect bank
          transaction messages for the Import from SMS feature. Read-only;
@@ -62,6 +65,20 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- flutter_local_notifications: fires scheduled reminders and
+             re-registers them after reboot / app update. -->
+        <receiver android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false"
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
 
         <provider
             android:name="androidx.core.content.FileProvider"

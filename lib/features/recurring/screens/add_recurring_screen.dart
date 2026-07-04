@@ -27,7 +27,17 @@ import '../providers/recurring_provider.dart';
 
 class AddRecurringScreen extends ConsumerStatefulWidget {
   final RecurringRule? existingRule;
-  const AddRecurringScreen({super.key, this.existingRule});
+
+  /// Pre-fill support for Kuber Notes tap-to-convert (create mode only).
+  final double? amountPrefill;
+  final int? categoryPrefill;
+
+  const AddRecurringScreen({
+    super.key,
+    this.existingRule,
+    this.amountPrefill,
+    this.categoryPrefill,
+  });
 
   @override
   ConsumerState<AddRecurringScreen> createState() => _AddRecurringScreenState();
@@ -72,6 +82,17 @@ class _AddRecurringScreenState extends ConsumerState<AddRecurringScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.existingRule == null) {
+      final amount = widget.amountPrefill;
+      if (amount != null && amount > 0) {
+        _amountController.text = amount == amount.truncateToDouble()
+            ? amount.toInt().toString()
+            : amount.toStringAsFixed(2);
+      }
+      if (widget.categoryPrefill != null) {
+        _selectedCategoryId = widget.categoryPrefill;
+      }
+    }
     final rule = widget.existingRule;
     if (rule != null) {
       _nameController.text = rule.name;

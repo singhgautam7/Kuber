@@ -20,6 +20,7 @@ import '../../features/transactions/data/transaction.dart';
 import '../../features/settings/providers/settings_provider.dart' show formatterProvider;
 import '../../features/transactions/providers/transaction_provider.dart';
 import '../../features/recurring/providers/recurring_provider.dart';
+import '../../features/notes/providers/notes_provider.dart';
 import 'category_icon.dart';
 import 'timed_snackbar.dart'; // showKuberSnackBar
 import '../../features/tags/providers/tag_providers.dart';
@@ -124,6 +125,12 @@ class _TransactionDetailSheetState
   /// the id against the recurring rules so they still read as "Recurring".
   ({String label, IconData icon}) _source(BuildContext context) {
     final t = transaction;
+    if (t.sourceNoteId != null) {
+      return (
+        label: 'Added from Kuber Notes',
+        icon: Icons.sticky_note_2_outlined,
+      );
+    }
     if (t.importSource == 'sms') {
       return (label: context.l10n.sourceSms, icon: Icons.sms_outlined);
     }
@@ -148,6 +155,22 @@ class _TransactionDetailSheetState
         return (label: context.l10n.sourceLentBorrowed, icon: Icons.swap_horiz_rounded);
     }
     return (label: context.l10n.sourceManual, icon: Icons.edit_outlined);
+  }
+
+  /// Opens the source note in the editor, or falls back to a snackbar when
+  /// the note has been deleted.
+  Future<void> _openSourceNote() async {
+    final id = int.tryParse(transaction.sourceNoteId ?? '');
+    final note = id == null
+        ? null
+        : await ref.read(notesRepositoryProvider).getById(id);
+    if (!mounted) return;
+    if (note == null) {
+      showKuberSnackBar(context, 'This note was deleted.');
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).pop();
+    context.push('/notes/editor?id=${note.id}');
   }
 
   @override
@@ -254,12 +277,23 @@ class _TransactionDetailSheetState
         valueLeadingIcon: iconData,
         valueIconColor: iconColor,
       ),
-      InfoTableDataRow(
-        label: context.l10n.sourceLabel,
-        value: source.label,
-        valueLeadingIcon: source.icon,
-        valueIconColor: cs.onSurfaceVariant,
-      ),
+      if (transaction.sourceNoteId != null)
+        InfoTableDataRow(
+          label: context.l10n.sourceLabel,
+          value: source.label,
+          valueLeadingIcon: source.icon,
+          valueIconColor: cs.primary,
+          valueColor: cs.primary,
+          tappable: true,
+          onTap: _openSourceNote,
+        )
+      else
+        InfoTableDataRow(
+          label: context.l10n.sourceLabel,
+          value: source.label,
+          valueLeadingIcon: source.icon,
+          valueIconColor: cs.onSurfaceVariant,
+        ),
     ];
 
     return KuberBottomSheet(
@@ -311,6 +345,15 @@ class _TransactionDetailSheetState
           ),
           const SizedBox(height: 18),
           InfoTable(rows: rows),
+
+          // ── "View note" (Kuber Notes provenance, per 1m) ─────────────────
+          if (transaction.sourceNoteId != null) ...[
+            const SizedBox(height: 14),
+            _ViewSourceNoteButton(
+              sourceNoteId: transaction.sourceNoteId!,
+              onTap: _openSourceNote,
+            ),
+          ],
 
           // ── Notes ────────────────────────────────────────────────────────
           if (transaction.notes != null && transaction.notes!.isNotEmpty)
@@ -449,6 +492,66 @@ class _TransactionDetailSheetState
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Bordered full-width "View note: "title"" button below the info table for
+/// transactions created from Kuber Notes (per 1m).
+class _ViewSourceNoteButton extends ConsumerWidget {
+  final String sourceNoteId;
+  final VoidCallback onTap;
+
+  const _ViewSourceNoteButton({
+    required this.sourceNoteId,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final id = int.tryParse(sourceNoteId);
+    return FutureBuilder(
+      future: id == null
+          ? Future.value(null)
+          : ref.read(notesRepositoryProvider).getById(id),
+      builder: (context, snapshot) {
+        final note = snapshot.data;
+        final label = note == null
+            ? 'View note'
+            : 'View note: "${note.title.isEmpty ? 'Untitled note' : note.title}"';
+        return InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          child: Container(
+            height: 46,
+            decoration: BoxDecoration(
+              border: Border.all(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.sticky_note_2_outlined,
+                    size: 16, color: cs.primary),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: localeFont(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

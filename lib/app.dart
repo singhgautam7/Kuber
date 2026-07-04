@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kuber/l10n/app_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart'
+    show FlutterQuillLocalizations;
 
 import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
@@ -13,6 +15,7 @@ import 'features/budgets/services/budget_service.dart';
 import 'features/history/providers/selection_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
+import 'features/reminders/data/reminders_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/sms_import/providers/sms_import_provider.dart';
 import 'features/tutorial/widgets/tutorial_overlay.dart';
@@ -45,6 +48,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
       _runOnOpenLedgerReminders();
       _runDueBackup();
       _runSmsCleanup();
+      _runReminderMaintenance();
     });
   }
 
@@ -73,8 +77,11 @@ class _KuberAppState extends ConsumerState<KuberApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state != AppLifecycleState.resumed) return;
-    // Already checked today? A daily (or longer) backup can't be due again, so
-    // skip — avoids a DB read on every foreground.
+    // A reminder notification may have fired while we were backgrounded —
+    // mirror any newly-due reminders into the in-app inbox and heal alarms.
+    _runReminderMaintenance();
+    // Already checked backup today? A daily (or longer) backup can't be due
+    // again, so skip — avoids a DB read on every foreground.
     final now = DateTime.now();
     final last = _lastBackupCheckDay;
     if (last != null &&
@@ -111,6 +118,19 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ).checkAll();
     } catch (e, stack) {
       debugPrint('Kuber: on-open ledger reminders failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  /// On-open reminder pass: 7-day completed cleanup, inbox mirroring of due
+  /// reminders, and re-registering upcoming notification alarms. Best-effort
+  /// and post-first-frame so it never delays cold start.
+  Future<void> _runReminderMaintenance() async {
+    try {
+      final isar = ref.read(isarProvider);
+      await RemindersRepository(isar).onAppOpenMaintenance();
+    } catch (e, stack) {
+      debugPrint(
+          'Kuber: on-open reminder maintenance failed (non-fatal): $e\n$stack');
     }
   }
 
@@ -209,7 +229,11 @@ class _KuberAppState extends ConsumerState<KuberApp>
       routerConfig: router,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        // Required by the flutter_quill editor used in Kuber Notes.
+        FlutterQuillLocalizations.delegate,
+      ],
       builder: (context, child) {
         final brightness = Theme.of(context).brightness;
         final isDark = brightness == Brightness.dark;

@@ -14,6 +14,7 @@ import '../handlers/investments_handler.dart';
 import '../handlers/language_handler.dart';
 import '../handlers/ledger_handler.dart';
 import '../handlers/loans_handler.dart';
+import '../handlers/notes_handler.dart';
 import '../handlers/query_handler.dart';
 import '../handlers/recent_transactions_handler.dart';
 import '../handlers/savings_handler.dart';
@@ -48,6 +49,9 @@ class QueryOrchestrator {
           // Functional help.
           HowToHandler(),
           LanguageHandler(),
+          // Kuber Notes lookups run before spending/counts so "what did I
+          // note this month" isn't swallowed by the data handlers.
+          NotesHandler(),
           // Entity-scoped lookups run before the spending/counts handlers so
           // "how many times…" and "when did I last…" aren't swallowed by them.
           FrequencyHandler(),

@@ -12,6 +12,7 @@ import 'core/theme/app_theme.dart';
 import 'features/notifications/providers/notification_provider.dart';
 import 'features/backups/data/backup_config.dart';
 import 'features/recurring/data/recurring_processor.dart';
+import 'features/reminders/data/reminder_action_handler.dart';
 import 'features/stories/services/welcome_story.dart';
 
 
@@ -93,10 +94,28 @@ Future<void> _bootstrap() async {
     String? capturedPayload;
     await NotificationService().init(
       onTap: (payload) => capturedPayload = payload,
+      // Reminder notification action buttons (Mark done / Snooze 1 hour)
+      // apply directly, matching quick-action semantics.
+      onAction: (actionId, payload) {
+        handleReminderNotificationAction(isar, actionId, payload)
+            .catchError((Object e) {
+          debugPrint('Kuber: reminder action failed (non-fatal): $e');
+        });
+      },
     );
     // Prefer cold-start payload (set during init) over any captured later.
     coldStartPayload =
         NotificationService().consumeColdStartPayload() ?? capturedPayload;
+
+    // If the app was LAUNCHED from a reminder action button, apply it now.
+    final coldAction = NotificationService().consumeColdStartAction();
+    if (coldAction != null) {
+      await handleReminderNotificationAction(
+        isar,
+        coldAction.actionId,
+        coldAction.payload,
+      );
+    }
 
     // Recurring must run before the first frame: its result decides whether
     // the splash routes to the recurring-loader screen.

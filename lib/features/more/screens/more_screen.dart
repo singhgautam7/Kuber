@@ -120,6 +120,13 @@ class MoreScreenSimple extends ConsumerWidget {
                       subtitle: context.l10n.menuInvestmentsDesc,
                       onTap: () => context.push('/more/investments'),
                     ),
+                    // Reminders (English-only feature, like SMS import).
+                    _MenuItem(
+                      icon: Icons.notifications_active_outlined,
+                      label: 'Reminders',
+                      subtitle: 'Never miss anything money-related',
+                      onTap: () => context.push('/more/reminders'),
+                    ),
                   ],
                 ),
 
@@ -149,6 +156,19 @@ class MoreScreenSimple extends ConsumerWidget {
                       label: context.l10n.menuCalculators,
                       subtitle: context.l10n.menuCalculatorsDesc,
                       onTap: () => context.push('/more/tools'),
+                    ),
+                    // Kuber Notes + Upcoming Events (English-only features).
+                    _MenuItem(
+                      icon: Icons.sticky_note_2_outlined,
+                      label: 'Kuber Notes',
+                      subtitle: 'Jot expenses and do quick math',
+                      onTap: () => context.push('/more/notes'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.upcoming_rounded,
+                      label: 'Upcoming Events',
+                      subtitle: 'Everything coming up, in one place',
+                      onTap: () => context.push('/more/upcoming-events'),
                     ),
                   ],
                 ),
