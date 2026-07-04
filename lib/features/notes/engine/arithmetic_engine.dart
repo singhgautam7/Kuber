@@ -77,14 +77,30 @@ class ArithmeticEngine {
     if (triggers.isEmpty) return const [];
 
     final tokens = parser.parse(plainText, excluded: resultSpans);
+    final inlineTriggers = triggers.where((t) => t.isInline).toList();
+    final columnTriggers = triggers.where((t) => !t.isInline).toList();
 
-    bool onTriggerLine(NumberToken t) => triggers
-        .any((tr) => t.startOffset >= tr.lineStart && t.startOffset < tr.lineEnd);
+    bool onInlineLine(int offset) => inlineTriggers
+        .any((t) => offset >= t.lineStart && offset < t.lineEnd);
+    bool onColumnLine(int offset) => columnTriggers
+        .any((t) => offset >= t.lineStart && offset < t.lineEnd);
+
+    // Countable numbers for column sums:
+    //  * every regular number NOT on an inline line (its operands are
+    //    consumed by the expression) and NOT on a column-trigger line, PLUS
+    //  * each inline line's RESULT, counted as one number at that line.
+    // Inline lines do NOT act as column-scope boundaries — they are
+    // independent math, not column triggers.
+    final valuePoints = <({int offset, double value})>[
+      for (final t in tokens)
+        if (!onInlineLine(t.startOffset) && !onColumnLine(t.startOffset))
+          (offset: t.startOffset, value: t.value),
+      for (final t in inlineTriggers)
+        (offset: t.lineStart, value: t.inlineValue!),
+    ]..sort((a, b) => a.offset.compareTo(b.offset));
 
     final resolutions = <ArithmeticResolution>[];
-    for (var i = 0; i < triggers.length; i++) {
-      final trigger = triggers[i];
-
+    for (final trigger in triggers) {
       // Mode A — value already computed from the inline expression.
       if (trigger.isInline) {
         resolutions.add(
@@ -92,12 +108,13 @@ class ArithmeticEngine {
         continue;
       }
 
-      // Mode B — scoped / global column sum.
-      final scoped = tokens.where((t) {
-        if (onTriggerLine(t)) return false;
+      // Mode B — scoped / global column sum. Scope runs from the previous
+      // COLUMN trigger (inline triggers are ignored as boundaries).
+      final idx = columnTriggers.indexOf(trigger);
+      final scopeStart = idx <= 0 ? 0 : columnTriggers[idx - 1].lineEnd;
+      final scoped = valuePoints.where((p) {
         if (trigger.isGlobal) return true;
-        final scopeStart = i == 0 ? 0 : triggers[i - 1].lineEnd;
-        return t.startOffset >= scopeStart && t.startOffset < trigger.lineStart;
+        return p.offset >= scopeStart && p.offset < trigger.lineStart;
       }).toList();
 
       if (scoped.isEmpty) continue;
@@ -105,11 +122,11 @@ class ArithmeticEngine {
       double value;
       if (trigger.isDifference) {
         value = scoped.first.value;
-        for (final t in scoped.skip(1)) {
-          value -= t.value;
+        for (final p in scoped.skip(1)) {
+          value -= p.value;
         }
       } else {
-        value = scoped.fold(0.0, (s, t) => s + t.value);
+        value = scoped.fold(0.0, (s, p) => s + p.value);
       }
       resolutions.add(ArithmeticResolution(trigger: trigger, value: value));
     }

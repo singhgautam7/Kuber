@@ -75,6 +75,26 @@ void main() {
     });
   });
 
+  group('Inline results feed column sums', () {
+    ArithmeticResolution columnOf(String text) =>
+        engine.resolve(text).firstWhere((r) => !r.trigger.isInline);
+
+    test('column total counts the inline result, not its operands', () {
+      // 60*5 = 300 → total sums 300 + 45 + 90 + 220 - 30 = 625
+      // (operands 60 and 5 are NOT double-counted).
+      const text = 'Milk 60 * 5 =\nBread 45\nEggs 90\nVegetables 220\n'
+          '-30\ntotal';
+      expect(columnOf(text).value, 625);
+    });
+
+    test('inline line does not reset the column scope', () {
+      // The 10 above the inline line is still summed by total below it.
+      const text = '10\n2 * 3 =\n5\ntotal';
+      // 10 + 6 (inline result) + 5 = 21
+      expect(columnOf(text).value, 21);
+    });
+  });
+
   group('Precedence', () {
     test('inline wins over column when operators are present', () {
       // "Total 100 + 200 =" is inline 300, NOT the column sum of lines above.
