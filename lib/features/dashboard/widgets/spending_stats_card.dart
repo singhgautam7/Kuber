@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart';
@@ -18,7 +19,9 @@ class SpendingStatsCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         KuberHomeWidgetTitle(title: context.l10n.spendingPattern),
@@ -92,6 +95,7 @@ class SpendingStatsCard extends ConsumerWidget {
           ),
         ),
       ],
+      ),
     );
   }
 

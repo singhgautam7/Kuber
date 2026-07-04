@@ -48,7 +48,9 @@ class HomeAccountsCard extends ConsumerWidget {
       data: (accounts) {
         if (accounts.isEmpty) return const SizedBox.shrink();
 
-        return Column(
+        return Padding(
+          padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             KuberHomeWidgetTitle(
@@ -98,6 +100,7 @@ class HomeAccountsCard extends ConsumerWidget {
               ),
             ),
           ],
+          ),
         );
       },
     );

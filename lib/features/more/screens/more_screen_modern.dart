@@ -255,7 +255,7 @@ class MoreScreenModern extends ConsumerWidget {
                     // Upcoming Events sits right below Notifications
                     // (English-only feature).
                     _CompactRowData(
-                      icon: Icons.upcoming_rounded,
+                      icon: Icons.calendar_month_rounded,
                       label: 'Upcoming Events',
                       sub: 'Everything coming up, in one place',
                       onTap: () => context.push('/more/upcoming-events'),

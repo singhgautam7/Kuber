@@ -165,7 +165,7 @@ class MoreScreenSimple extends ConsumerWidget {
                       onTap: () => context.push('/more/notes'),
                     ),
                     _MenuItem(
-                      icon: Icons.upcoming_rounded,
+                      icon: Icons.calendar_month_rounded,
                       label: 'Upcoming Events',
                       subtitle: 'Everything coming up, in one place',
                       onTap: () => context.push('/more/upcoming-events'),

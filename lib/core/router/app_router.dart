@@ -143,6 +143,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Normalize deep link paths from app shortcuts (kuber://app/<path>)
       // GoRouter sees the path portion; remap any shortcut aliases here.
       if (state.matchedLocation == '/ask-kuber') return '/more/ask-kuber';
+      if (state.matchedLocation == '/tools') return '/more/tools';
+      if (state.matchedLocation == '/notes') return '/more/notes';
 
       // Allow splash screen to show
       if (state.matchedLocation == '/splash') return null;

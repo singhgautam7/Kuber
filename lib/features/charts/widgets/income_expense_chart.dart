@@ -28,6 +28,11 @@ class IncomeExpenseChart extends ConsumerStatefulWidget {
   final bool compact;
   final String title;
 
+  /// Whether to render the title inside the card. Home passes `false` and
+  /// renders an external [KuberHomeWidgetTitle] above the card (matching the
+  /// other home widget headings); Analytics keeps the in-card title.
+  final bool showTitle;
+
   /// Compact-mode range tabs (Home): shown as a chip row below the title.
   final List<ChartRangeTab> rangeTabs;
   final String? selectedRangeId;
@@ -43,6 +48,7 @@ class IncomeExpenseChart extends ConsumerStatefulWidget {
     required this.points,
     required this.compact,
     this.title = 'Income & Expense',
+    this.showTitle = true,
     this.rangeTabs = const [],
     this.selectedRangeId,
     this.onRangeSelected,
@@ -115,13 +121,14 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.title,
-              style: localeFont(
-                  fontSize: widget.compact ? 14 : 15,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface)),
+          if (widget.showTitle)
+            Text(widget.title,
+                style: localeFont(
+                    fontSize: widget.compact ? 14 : 15,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface)),
           if (widget.compact && widget.rangeTabs.isNotEmpty) ...[
-            const SizedBox(height: 12),
+            if (widget.showTitle) const SizedBox(height: 12),
             CompactRangeTabs(
               tabs: widget.rangeTabs,
               selectedId: widget.selectedRangeId,

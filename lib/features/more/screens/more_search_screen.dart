@@ -92,7 +92,7 @@ List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevM
   _SearchableItem(
     label: 'Upcoming Events',
     subtitle: 'Everything coming up, in one place',
-    icon: Icons.upcoming_rounded,
+    icon: Icons.calendar_month_rounded,
     section: context.l10n.moreToolsTitle,
     route: '/more/upcoming-events',
   ),

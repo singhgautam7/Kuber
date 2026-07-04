@@ -6,4 +6,8 @@
     <string name="shortcut_history_long">View Transactions</string>
     <string name="shortcut_ask_short">Ask Kuber</string>
     <string name="shortcut_ask_long">Ask Kuber</string>
+    <string name="shortcut_tools_short">Tools</string>
+    <string name="shortcut_tools_long">Calculators &amp; Tools</string>
+    <string name="shortcut_notes_short">Notes</string>
+    <string name="shortcut_notes_long">Kuber Notes</string>
 </resources>

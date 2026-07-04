@@ -43,6 +43,7 @@ class UpcomingEventsWidget extends ConsumerWidget {
           ),
         ),
         Container(
+          width: double.infinity,
           padding: events.isEmpty
               ? const EdgeInsets.symmetric(vertical: 26, horizontal: 16)
               : const EdgeInsets.fromLTRB(14, 6, 14, 0),
