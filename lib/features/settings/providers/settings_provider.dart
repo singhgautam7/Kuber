@@ -10,9 +10,14 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../core/utils/locale_font.dart';
 
-final formatterProvider = Provider((ref) {
-  final settings = ref.watch(settingsProvider).valueOrNull;
-  final system = settings?.numberSystem ?? NumberSystem.indian;
+// Each derived settings provider narrows to just its field with `.select()` so
+// toggling one setting (e.g. privacy mode) doesn't invalidate the others and
+// force every consumer of them to rebuild. Riverpod short-circuits when the
+// selected value is `==`-equal to the previous.
+
+final formatterProvider = Provider<AppFormatter>((ref) {
+  final system = ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.numberSystem ?? NumberSystem.indian));
   return AppFormatter(system: system);
 });
 
@@ -26,41 +31,44 @@ final settingsProvider = AsyncNotifierProvider<SettingsNotifier, SettingsState>(
 );
 
 final currencyProvider = Provider<KuberCurrency>((ref) {
-  final settings = ref.watch(settingsProvider);
-  final code = settings.valueOrNull?.currency ?? 'INR';
+  final code = ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.currency ?? 'INR'));
   return currencyFromCode(code);
 });
 
 final localeProvider = Provider<Locale>((ref) {
-  final settings = ref.watch(settingsProvider).valueOrNull;
-  return settings?.locale ?? const Locale('en');
+  return ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.locale ?? const Locale('en')));
 });
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
-  final settings = ref.watch(settingsProvider).valueOrNull;
-  return settings?.themeMode ?? ThemeMode.system;
+  return ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.themeMode ?? ThemeMode.system));
 });
 
 final privacyModeProvider = Provider<bool>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.privacyMode ?? false;
+  return ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.privacyMode ?? false));
 });
 
 final navBarStyleProvider = Provider<NavBarStyle>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.navBarStyle ??
-      NavBarStyle.modern;
+  return ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.navBarStyle ?? NavBarStyle.modern));
 });
 
 final moreTabLayoutProvider = Provider<MoreTabLayout>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.moreTabLayout ??
-      MoreTabLayout.modern;
+  return ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.moreTabLayout ?? MoreTabLayout.modern));
 });
 
 final thresholdFloorProvider = Provider<double>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.thresholdFloor ?? 500;
+  return ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.thresholdFloor ?? 500));
 });
 
 final thresholdCeilingProvider = Provider<double>((ref) {
-  return ref.watch(settingsProvider).valueOrNull?.thresholdCeiling ?? 2000;
+  return ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.thresholdCeiling ?? 2000));
 });
 
 enum NumberSystem { indian, international }

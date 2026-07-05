@@ -21,8 +21,9 @@ class TagWiseAnalytics extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tagsAsync = ref.watch(tagListProvider);
     final txTagsMapAsync = ref.watch(transactionTagsMapProvider);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return tagsAsync.when(
       data: (allTags) {

@@ -184,8 +184,9 @@ class _KuberBarChartState extends ConsumerState<KuberBarChart>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1111,8 +1112,9 @@ class _YAxisColumn extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final formatter = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final style = tt.labelSmall?.copyWith(

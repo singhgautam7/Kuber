@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:isar_community/isar.dart';
@@ -38,16 +38,30 @@ class WidgetSyncService {
   static const _mutedHex = 0x3F3F3F46;
 
   Future<void> syncAll() async {
+    // Load the two collections shared across sub-syncs ONCE per sync run.
+    // Previously each of the 4 txn-consuming sub-syncs re-scanned the full
+    // transactions collection (4x on every sync); categories were re-scanned 3x.
+    List<Transaction> txns = const [];
+    Map<String, Category> cats = const {};
+    try {
+      txns = await _allTxns();
+    } catch (_) {}
+    try {
+      cats = {
+        for (final c in await _isar.categorys.where().findAll()) c.id.toString(): c,
+      };
+    } catch (_) {}
+
     // Each sub-sync is isolated so a single failure cannot break the rest.
     for (final task in <Future<void> Function()>[
-      _syncMonthlyNet,
+      () => _syncMonthlyNet(txns),
       _syncAccountBalances,
       _syncSmsBadge,
       _syncUpcomingEvents,
-      _syncRecentTransactions,
-      _syncBudgetStatus,
+      () => _syncRecentTransactions(txns, cats),
+      () => _syncBudgetStatus(txns, cats),
       _syncNotes,
-      _syncCharts,
+      () => _syncCharts(txns, cats),
     ]) {
       try {
         await task();
@@ -68,19 +82,28 @@ class WidgetSyncService {
 
   Future<List<Transaction>> _allTxns() => _isar.transactions.where().findAll();
 
+  /// FQN prefix for our Android widget providers. All appwidget receivers live
+  /// in `com.grs.kuber.widgets.*`; the home_widget plugin's default lookup
+  /// (`context.packageName + "." + androidName`) resolves to `com.grs.kuber.*`
+  /// and fails with ClassNotFoundException. Passing `qualifiedAndroidName`
+  /// bypasses the plugin's own resolution and hits the correct class.
+  static const _androidWidgetPackage = 'com.grs.kuber.widgets';
+
   Future<void> _save(String key, Map<String, dynamic> data, String androidName) async {
     await HomeWidget.saveWidgetData<String>(key, jsonEncode(data));
-    await HomeWidget.updateWidget(name: androidName, androidName: androidName);
+    await HomeWidget.updateWidget(
+      name: androidName,
+      qualifiedAndroidName: '$_androidWidgetPackage.$androidName',
+    );
   }
 
   String _hex(int argb) => '#${(argb & 0xFFFFFFFF).toRadixString(16).padLeft(8, '0')}';
 
   // ---- 1. Monthly Net -----------------------------------------------------
 
-  Future<void> _syncMonthlyNet() async {
+  Future<void> _syncMonthlyNet(List<Transaction> txns) async {
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month);
-    final txns = await _allTxns();
     var income = 0.0, expense = 0.0;
     for (final t in txns) {
       if (!_isSpendable(t) || t.createdAt.isBefore(monthStart)) continue;
@@ -118,7 +141,7 @@ class WidgetSyncService {
     }
     await HomeWidget.updateWidget(
       name: 'AccountBalanceWidgetProvider',
-      androidName: 'AccountBalanceWidgetProvider',
+      qualifiedAndroidName: '$_androidWidgetPackage.AccountBalanceWidgetProvider',
     );
   }
 
@@ -172,12 +195,11 @@ class WidgetSyncService {
 
   // ---- 5. Recent Transactions ---------------------------------------------
 
-  Future<void> _syncRecentTransactions() async {
-    final txns = await _allTxns();
+  Future<void> _syncRecentTransactions(
+      List<Transaction> txns, Map<String, Category> cats) async {
     final recent = txns.where((t) => !t.isTransfer).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final accounts = {for (final a in await _isar.accounts.where().findAll()) a.id.toString(): a.name};
-    final cats = {for (final c in await _isar.categorys.where().findAll()) c.id.toString(): c};
     final list = recent.take(5).map((t) {
       final cat = cats[t.categoryId];
       return {
@@ -198,12 +220,11 @@ class WidgetSyncService {
 
   // ---- 6. Budget Status ----------------------------------------------------
 
-  Future<void> _syncBudgetStatus() async {
+  Future<void> _syncBudgetStatus(
+      List<Transaction> txns, Map<String, Category> cats) async {
     final budgets = await _isar.budgets.where().findAll();
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month);
-    final txns = await _allTxns();
-    final cats = {for (final c in await _isar.categorys.where().findAll()) c.id.toString(): c};
 
     double spentFor(String categoryId) {
       var s = 0.0;
@@ -272,13 +293,14 @@ class WidgetSyncService {
 
   // ---- 8. Charts (compact / trends / donut) --------------------------------
 
-  Future<void> _syncCharts() async {
-    final txns = (await _allTxns()).where(_isSpendable).toList();
+  Future<void> _syncCharts(
+      List<Transaction> allTxns, Map<String, Category> cats) async {
+    final txns = allTxns.where(_isSpendable).toList();
     // Isolate each so a failure in one chart can't prevent the others syncing.
     for (final task in <Future<void> Function()>[
       () => _syncChartCompact(txns),
       () => _syncTrends(txns),
-      () => _syncDonut(txns),
+      () => _syncDonut(txns, cats),
     ]) {
       try {
         await task();
@@ -365,10 +387,10 @@ class WidgetSyncService {
     }, 'ChartWithRangeWidgetProvider');
   }
 
-  Future<void> _syncDonut(List<Transaction> txns) async {
+  Future<void> _syncDonut(
+      List<Transaction> txns, Map<String, Category> cats) async {
     final now = DateTime.now();
     final monthStart = DateTime(now.year, now.month);
-    final cats = {for (final c in await _isar.categorys.where().findAll()) c.id.toString(): c};
     final byCat = <String, double>{};
     for (final t in txns) {
       if (t.type == 'expense' && !t.createdAt.isBefore(monthStart)) {

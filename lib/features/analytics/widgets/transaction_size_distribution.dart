@@ -30,8 +30,9 @@ class TransactionSizeDistribution extends ConsumerWidget {
     final ceiling = ref.watch(thresholdCeilingProvider);
     final distribution = _calculateDistribution(floor, ceiling);
     final total = distribution.values.fold<int>(0, (sum, val) => sum + val);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final formatter = ref.watch(formatterProvider);
 
     return Card(

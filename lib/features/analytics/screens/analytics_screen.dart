@@ -58,8 +58,13 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
   ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
 }
 
+/// Local state provider for the Biggest-Transactions expense/income tab.
+/// Promoted out of the screen's local state so switching tabs invalidates only
+/// that section instead of re-running the whole screen build (which recomputes
+/// the O(n) chart buckets).
+final _biggestTabProvider = StateProvider<int>((_) => 0);
+
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  int _biggestTab = 0; // 0 = expense, 1 = income
 
   // ---- bucket helpers -----------------------------------------------------
 
@@ -311,11 +316,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     // Category map — only watched when needed for biggest transactions
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
 
-    // Top 5 biggest transactions (filtered by tab)
-    final biggestType = _biggestTab == 0 ? 'expense' : 'income';
-    final biggest = periodTxns.where((t) => t.type == biggestType).toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
-    final top5 = biggest.take(5).toList();
+    // Top-5 biggest transactions are now computed inside `_BiggestTransactionsSection`,
+    // which watches `_biggestTabProvider` directly — so a tab switch doesn't
+    // invalidate this build (and doesn't re-run bucket computation).
 
     return Scaffold(
       body: CustomScrollView(
@@ -363,8 +366,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 buckets: buckets,
                 periodTxns: periodTxns,
                 computed: computed,
-                top5: top5,
-                biggestType: biggestType,
                 categoryMap: categoryMap,
                 totalIncome: totalIncome,
                 totalExpense: totalExpense,
@@ -373,128 +374,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 textTheme: textTheme,
                 buildSummary: (cs, tt, inc, exp, net) =>
                     _buildSummaryCard(ref, cs, tt, inc, exp, net),
-                buildBiggest: (cs, tt, t5, bt, cm) =>
-                    _buildBiggestTransactionsSection(
-                  cs,
-                  tt,
-                  t5,
-                  isMoreTab: false,
-                  biggestType: bt,
-                  categoryMap: cm,
-                ),
               ),
             ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBiggestTransactionsSection(
-    ColorScheme cs,
-    TextTheme tt,
-    List<Transaction> top5, {
-    required bool isMoreTab,
-    required String biggestType,
-    required Map<int, dynamic> categoryMap,
-  }) {
-    return _AnalyticsCard(
-      title: context.l10n.biggestTransactions,
-      trailing: KuberSegmentedTabs(
-        labels: [context.l10n.expenseLabel, context.l10n.incomeLabel],
-        selectedIndex: _biggestTab,
-        onChanged: (i) => setState(() => _biggestTab = i),
-      ),
-      child: top5.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
-              child: Center(
-                child: Text(
-                  'No $biggestType transactions',
-                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-              ),
-            )
-          : Column(
-              children: List.generate(top5.length, (i) {
-                final t = top5[i];
-                final cat = categoryMap[int.tryParse(t.categoryId)];
-                final isExpense = t.type == 'expense';
-                final rankColor = i == 0 ? cs.primary : cs.onSurfaceVariant;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                  child: InkWell(
-                    onTap: () => showTransactionDetailSheet(context, ref, t),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: KuberSpacing.xs,
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: rankColor.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '#${i + 1}',
-                              style: tt.labelSmall?.copyWith(
-                                color: rankColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: KuberSpacing.md),
-                          if (cat != null)
-                            CategoryIcon.square(
-                              icon: IconMapper.fromString(cat.icon),
-                              rawColor: harmonizeCategory(
-                                context,
-                                Color(cat.colorValue),
-                              ),
-                              size: 36,
-                            ),
-                          const SizedBox(width: KuberSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  t.name,
-                                  style: tt.bodyMedium,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (cat != null)
-                                  Text(
-                                    cat.name,
-                                    style: tt.bodySmall?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            maskAmount(
-                              '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
-                              ref.watch(privacyModeProvider),
-                            ),
-                            style: tt.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isExpense ? cs.error : cs.tertiary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
     );
   }
 
@@ -599,8 +482,9 @@ class _AnalyticsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(KuberSpacing.lg),
@@ -646,7 +530,9 @@ class _SummaryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     return Container(
       padding: const EdgeInsets.all(KuberSpacing.md),
       decoration: BoxDecoration(
@@ -662,16 +548,14 @@ class _SummaryTile extends StatelessWidget {
               const SizedBox(width: KuberSpacing.xs),
               Text(
                 label,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+                style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
           const SizedBox(height: KuberSpacing.xs),
           Text(
             amount,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            style: textTheme.titleMedium?.copyWith(
               color: cs.onSurface,
               fontWeight: FontWeight.w700,
             ),
@@ -690,8 +574,6 @@ class _AnalyticsWidgetList extends ConsumerWidget {
   final List<KuberBarBucket> buckets;
   final List<Transaction> periodTxns;
   final AnalyticsComputed computed;
-  final List<Transaction> top5;
-  final String biggestType;
   final Map<int, dynamic> categoryMap;
   final double totalIncome;
   final double totalExpense;
@@ -701,16 +583,12 @@ class _AnalyticsWidgetList extends ConsumerWidget {
 
   final Widget Function(ColorScheme cs, TextTheme tt, double inc, double exp,
       double net) buildSummary;
-  final Widget Function(ColorScheme cs, TextTheme tt, List<Transaction> t5,
-      String bt, Map<int, dynamic> cm) buildBiggest;
 
   const _AnalyticsWidgetList({
     required this.filter,
     required this.buckets,
     required this.periodTxns,
     required this.computed,
-    required this.top5,
-    required this.biggestType,
     required this.categoryMap,
     required this.totalIncome,
     required this.totalExpense,
@@ -718,7 +596,6 @@ class _AnalyticsWidgetList extends ConsumerWidget {
     required this.colorScheme,
     required this.textTheme,
     required this.buildSummary,
-    required this.buildBiggest,
   });
 
   Widget _buildWidget(BuildContext ctx, WidgetRef ref, String id) {
@@ -794,8 +671,15 @@ class _AnalyticsWidgetList extends ConsumerWidget {
           ),
         );
       case 'biggest_transactions':
-        return buildBiggest(
-            colorScheme, textTheme, top5, biggestType, categoryMap);
+        // Scoped widget: watches _biggestTabProvider internally so a tab switch
+        // rebuilds only this section, not the whole analytics screen (which
+        // would otherwise re-run bucket computation for every tab tap).
+        return _BiggestTransactionsSection(
+          periodTxns: periodTxns,
+          categoryMap: categoryMap,
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -824,6 +708,136 @@ class _AnalyticsWidgetList extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// Biggest-transactions section with its own local tab state, so switching
+/// between Expense/Income doesn't invalidate the analytics screen build (and
+/// doesn't re-run the O(n) chart-bucket construction).
+class _BiggestTransactionsSection extends ConsumerWidget {
+  final List<Transaction> periodTxns;
+  final Map<int, dynamic> categoryMap;
+  final ColorScheme colorScheme;
+  final TextTheme textTheme;
+
+  const _BiggestTransactionsSection({
+    required this.periodTxns,
+    required this.categoryMap,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = colorScheme;
+    final tt = textTheme;
+    final biggestTab = ref.watch(_biggestTabProvider);
+    final biggestType = biggestTab == 0 ? 'expense' : 'income';
+    final top5 = (periodTxns.where((t) => t.type == biggestType).toList()
+          ..sort((a, b) => b.amount.compareTo(a.amount)))
+        .take(5)
+        .toList();
+
+    return _AnalyticsCard(
+      title: context.l10n.biggestTransactions,
+      trailing: KuberSegmentedTabs(
+        labels: [context.l10n.expenseLabel, context.l10n.incomeLabel],
+        selectedIndex: biggestTab,
+        onChanged: (i) =>
+            ref.read(_biggestTabProvider.notifier).state = i,
+      ),
+      child: top5.isEmpty
+          ? Padding(
+              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+              child: Center(
+                child: Text(
+                  'No $biggestType transactions',
+                  style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                ),
+              ),
+            )
+          : Column(
+              children: List.generate(top5.length, (i) {
+                final t = top5[i];
+                final cat = categoryMap[int.tryParse(t.categoryId)];
+                final isExpense = t.type == 'expense';
+                final rankColor = i == 0 ? cs.primary : cs.onSurfaceVariant;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+                  child: InkWell(
+                    onTap: () => showTransactionDetailSheet(context, ref, t),
+                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: KuberSpacing.xs,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: rankColor.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              '#${i + 1}',
+                              style: tt.labelSmall?.copyWith(
+                                color: rankColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: KuberSpacing.md),
+                          if (cat != null)
+                            CategoryIcon.square(
+                              icon: IconMapper.fromString(cat.icon),
+                              rawColor: harmonizeCategory(
+                                context,
+                                Color(cat.colorValue),
+                              ),
+                              size: 36,
+                            ),
+                          const SizedBox(width: KuberSpacing.md),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  t.name,
+                                  style: tt.bodyMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (cat != null)
+                                  Text(
+                                    cat.name,
+                                    style: tt.bodySmall?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            maskAmount(
+                              '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
+                              ref.watch(privacyModeProvider),
+                            ),
+                            style: tt.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isExpense ? cs.error : cs.tertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
     );
   }
 }

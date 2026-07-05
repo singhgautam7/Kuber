@@ -20,8 +20,8 @@ class AboutScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final settings = ref.watch(settingsProvider).valueOrNull;
-    final userName = settings?.userName ?? '';
+    final userName = ref.watch(
+        settingsProvider.select((s) => s.valueOrNull?.userName ?? ''));
     final lang = Localizations.localeOf(context).languageCode;
 
     return Scaffold(

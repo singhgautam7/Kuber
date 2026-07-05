@@ -159,8 +159,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final userName = ref.watch(
       settingsProvider.select((async) => async.valueOrNull?.userName ?? ''),
     );
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final l10n = context.l10n;
     final widgetsAsync = ref.watch(homeWidgetsProvider);
 
@@ -509,8 +510,9 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Container(
       padding: const EdgeInsets.all(20),

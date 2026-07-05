@@ -11,7 +11,6 @@ import '../../dashboard/providers/dashboard_provider.dart';
 import '../../history/utils/history_utils.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tags/providers/tag_providers.dart';
-import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/transaction_row.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
@@ -25,10 +24,11 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
     final recentAsync = ref.watch(recentTransactionsProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
     final accountMapAsync = ref.watch(accountMapProvider);
-    final allTransactionsAsync = ref.watch(transactionListProvider);
+    final transferPairsAsync = ref.watch(transferPairAccountIdsProvider);
     final fmt = ref.watch(formatterProvider);
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Column(
       children: [
@@ -70,15 +70,17 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
             }
             final accountMap = accountMapAsync.valueOrNull ?? {};
             final categoryMap = categoryMapAsync.valueOrNull ?? {};
-            final allTransactions = allTransactionsAsync.valueOrNull ?? [];
-            final transferPairs = buildTransferPairAccountIds(allTransactions);
+            final transferPairs = transferPairsAsync.valueOrNull ?? const {};
 
-            // Build tag names map for indicator line
-            final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
-            final tagNameById = {for (final t in allTags) t.id: t.name};
-            final txnTagsMapData = ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+            // Tag names map for the row indicator line. Both maps come from
+            // cached providers; only the per-recent-row filter runs on rebuild.
+            final tagNameById = ref.watch(tagNameByIdProvider);
+            final txnTagsMapData =
+                ref.watch(transactionTagsMapProvider).valueOrNull ?? {};
+            final recentIds = {for (final t in transactions) t.id};
             final tagNamesMap = <int, List<String>>{};
             for (final entry in txnTagsMapData.entries) {
+              if (!recentIds.contains(entry.key)) continue;
               final names = entry.value
                   .map((tagId) => tagNameById[tagId])
                   .whereType<String>()

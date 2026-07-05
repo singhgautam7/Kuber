@@ -119,8 +119,9 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final loaded = _widgets != null;
 
     return PopScope(

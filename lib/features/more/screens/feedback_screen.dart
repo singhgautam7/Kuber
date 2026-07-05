@@ -166,8 +166,9 @@ Currency    : ${currency.name} (${currency.code})
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final lang = AppLocale.current.languageCode;
 
     return Scaffold(

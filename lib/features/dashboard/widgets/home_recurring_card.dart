@@ -23,8 +23,9 @@ class HomeRecurringCard extends ConsumerWidget {
     final upcomingAsync = ref.watch(upcomingRecurringProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
     final fmt = ref.watch(formatterProvider);
-    final textTheme = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return upcomingAsync.when(
       loading: () => const SizedBox.shrink(),

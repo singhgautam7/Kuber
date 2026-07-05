@@ -204,8 +204,9 @@ class DataActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     final iconBg = destructive
         ? cs.errorContainer.withValues(alpha: 0.5)

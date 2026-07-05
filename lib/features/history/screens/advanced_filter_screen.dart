@@ -120,7 +120,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final accountsAsync = ref.watch(accountListProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
     final tagsAsync = ref.watch(tagListProvider);
@@ -204,12 +206,12 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                 title: context.l10n.transactionNameLabel,
                 child: TextField(
                   controller: _searchCtrl,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  style: textTheme.bodyLarge?.copyWith(
                     color: cs.onSurface,
                   ),
                   decoration: InputDecoration(
                     hintText: context.l10n.searchViaName,
-                    hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    hintStyle: textTheme.bodyLarge?.copyWith(
                       color: cs.onSurfaceVariant,
                     ),
                   ),
@@ -261,12 +263,12 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                       child: TextField(
                         controller: _minAmountCtrl,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
                         decoration: InputDecoration(
                           hintText: context.l10n.minLabel,
-                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          hintStyle: textTheme.bodyLarge?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
                         ),
@@ -277,12 +279,12 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                       child: TextField(
                         controller: _maxAmountCtrl,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
                         decoration: InputDecoration(
                           hintText: context.l10n.maxLabel,
-                          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          hintStyle: textTheme.bodyLarge?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
                         ),

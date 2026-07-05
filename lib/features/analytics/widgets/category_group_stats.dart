@@ -29,8 +29,9 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
         ? ref.watch(analyticsGroupStatsProvider)
         : ref.watch(analyticsCategoryStatsProvider);
 
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Container(
       width: double.infinity,
@@ -228,8 +229,9 @@ class _StatRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: KuberSpacing.md),

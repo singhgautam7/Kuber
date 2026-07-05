@@ -335,8 +335,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   Widget _buildDisplay() {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final currency = ref.watch(currencyProvider);
 
     final resultStr = _previewResult ?? (_expression.isEmpty ? '0' : _expression);
@@ -530,8 +531,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   Widget _buildHeroCTA() {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final currency = ref.watch(currencyProvider);
 
     final evaluated = _evaluate(_rawExpression) ?? double.tryParse(_rawExpression) ?? 0.0;

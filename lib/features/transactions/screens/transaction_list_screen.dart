@@ -79,7 +79,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       _displayedGroupCount = _groupsPerPage;
     });
 
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final viewAsync = ref.watch(historyViewProvider);
 
     return GestureDetector(
@@ -163,7 +165,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                               children: [
                                 Text(
                                   '${context.l10n.expLabel} ',
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -176,7 +178,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     '-${fmt.formatCurrency(totalExp.round())}',
                                     isPrivate,
                                   ),
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w800,
@@ -187,7 +189,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 const SizedBox(width: KuberSpacing.lg),
                                 Text(
                                   '${context.l10n.incLabel} ',
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -200,7 +202,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     '+${fmt.formatCurrency(totalInc.round())}',
                                     isPrivate,
                                   ),
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w800,
@@ -211,7 +213,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 const SizedBox(width: KuberSpacing.lg),
                                 Text(
                                   '${context.l10n.netLabel} ',
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -226,7 +228,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                         : '${totalNet > 0 ? '+' : '-'}${fmt.formatCurrency(totalNet.abs().round())}',
                                     isPrivate,
                                   ),
-                                  style: Theme.of(context).textTheme.labelSmall
+                                  style: textTheme.labelSmall
                                       ?.copyWith(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w800,
@@ -253,7 +255,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           ),
                           child: RichText(
                             text: TextSpan(
-                              style: Theme.of(context).textTheme.labelSmall
+                              style: textTheme.labelSmall
                                   ?.copyWith(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
