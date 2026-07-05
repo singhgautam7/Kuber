@@ -263,26 +263,31 @@ class _SevenDayChartSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const KuberHomeWidgetTitle(title: 'Income & Expense'),
-        IncomeExpenseChart(
-          compact: true,
-          showTitle: false,
-          points: points,
-          rangeTabs: const [
-        ChartRangeTab('days7', '7D'),
-        ChartRangeTab('weeks4', '4W'),
-        ChartRangeTab('months6', '6M'),
-      ],
-      selectedRangeId: switch (range) {
-        HomeChartRange.days7 => 'days7',
-        HomeChartRange.weeks4 => 'weeks4',
-        HomeChartRange.months6 => 'months6',
-      },
-          onRangeSelected: (id) =>
-              ref.read(homeChartRangeProvider.notifier).state = switch (id) {
-            'days7' => HomeChartRange.days7,
-            'weeks4' => HomeChartRange.weeks4,
-            _ => HomeChartRange.months6,
-          },
+        // RepaintBoundary isolates the chart's internal fl_chart animations
+        // (bar transitions, tooltip overlays) from the surrounding home-tab
+        // ListView, which scrolls independently.
+        RepaintBoundary(
+          child: IncomeExpenseChart(
+            compact: true,
+            showTitle: false,
+            points: points,
+            rangeTabs: const [
+              ChartRangeTab('days7', '7D'),
+              ChartRangeTab('weeks4', '4W'),
+              ChartRangeTab('months6', '6M'),
+            ],
+            selectedRangeId: switch (range) {
+              HomeChartRange.days7 => 'days7',
+              HomeChartRange.weeks4 => 'weeks4',
+              HomeChartRange.months6 => 'months6',
+            },
+            onRangeSelected: (id) =>
+                ref.read(homeChartRangeProvider.notifier).state = switch (id) {
+              'days7' => HomeChartRange.days7,
+              'weeks4' => HomeChartRange.weeks4,
+              _ => HomeChartRange.months6,
+            },
+          ),
         ),
       ],
     );
