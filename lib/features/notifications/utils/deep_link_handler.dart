@@ -14,6 +14,8 @@ import '../../loans/data/loan.dart';
 import '../../loans/widgets/loan_detail_sheet.dart';
 import '../../recurring/data/recurring_rule.dart';
 import '../../recurring/widgets/recurring_detail_sheet.dart';
+import '../../reminders/data/reminder.dart';
+import '../../reminders/widgets/reminder_view_sheet.dart';
 import '../data/app_notification.dart';
 
 /// Resolves a notification payload (e.g. `"loan:abc-uid"`) to a route +
@@ -142,6 +144,23 @@ Future<void> handleNotificationTap(
       // Investment notifications route to the investments page (no detail
       // sheet open — the SIP transaction itself is what was added).
       context.go('/more/investments');
+      break;
+
+    case 'reminder':
+      final reminderId = int.tryParse(id);
+      final reminder = reminderId == null
+          ? null
+          : await isar.collection<Reminder>().get(reminderId);
+      if (!context.mounted) return;
+      if (reminder == null) {
+        _missing(context);
+        return;
+      }
+      context.go('/');
+      if (!context.mounted) return;
+      context.push('/more/reminders');
+      if (!context.mounted) return;
+      showReminderViewSheet(context, reminder);
       break;
 
     default:

@@ -3,6 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:kuber/core/constants/info_l10n.dart';
 import 'package:flutter/material.dart';
 import '../../../core/models/info_config.dart';
+import '../../core/theme/app_theme.dart';
 import 'kuber_bottom_sheet.dart';
 import 'app_button.dart';
 
@@ -31,15 +32,17 @@ class KuberInfoBottomSheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            displayDescription,
-            style: localeFont(
-              fontSize: 15,
-              color: cs.onSurfaceVariant,
-              height: 1.5,
+          if (displayDescription.trim().isNotEmpty) ...[
+            Text(
+              displayDescription,
+              style: localeFont(
+                fontSize: 15,
+                color: cs.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+          ],
           ...List.generate(config.items.length, (index) {
             final item = config.items[index];
             final localizedItemMap = (localizedMap?['items'] as List?)?[index];
@@ -85,6 +88,10 @@ class KuberInfoBottomSheet extends StatelessWidget {
                             height: 1.4,
                           ),
                         ),
+                        if (item.example != null) ...[
+                          const SizedBox(height: 9),
+                          _ExampleBox(example: item.example!),
+                        ],
                       ],
                     ),
                   ),
@@ -105,6 +112,70 @@ class KuberInfoBottomSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => KuberInfoBottomSheet(config: config),
+    );
+  }
+}
+
+/// Boxed worked example: input line, then trigger word + a highlighted result
+/// chip. Used by info sheets (e.g. About Kuber Notes arithmetic examples).
+class _ExampleBox extends StatelessWidget {
+  final KuberInfoExample example;
+
+  const _ExampleBox({required this.example});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            example.expression,
+            style: localeFont(
+              fontSize: 13,
+              color: cs.onSurface,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Text(
+                example.trigger,
+                style: localeFont(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  example.result,
+                  style: localeFont(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -187,6 +187,7 @@ const _AppNotificationtypeEnumValueMap = {
   'loanEmi': 3,
   'ledgerReminder': 4,
   'backup': 5,
+  'reminderTrigger': 6,
 };
 const _AppNotificationtypeValueEnumMap = {
   0: NotificationType.general,
@@ -195,6 +196,7 @@ const _AppNotificationtypeValueEnumMap = {
   3: NotificationType.loanEmi,
   4: NotificationType.ledgerReminder,
   5: NotificationType.backup,
+  6: NotificationType.reminderTrigger,
 };
 
 Id _appNotificationGetId(AppNotification object) {

@@ -2512,6 +2512,12 @@ class AppLocalizationsTe extends AppLocalizations {
   String get menuStoriesArchiveDesc => 'ప్రతి రీక్యాప్, ఇటీవలిది మొదట';
 
   @override
+  String get menuWidgets => 'Widgets';
+
+  @override
+  String get menuWidgetsDesc => 'Home screen widgets to keep Kuber in view';
+
+  @override
   String get menuTroubleshoot => 'ట్రబుల్‌షూట్';
 
   @override

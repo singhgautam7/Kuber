@@ -25,6 +25,8 @@ import '../../features/sms_import/data/sms_transaction.dart';
 import '../../features/sms_import/data/sms_account_mapping.dart';
 import '../../features/tools/saved/data/saved_calculation.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
+import '../../features/notes/data/kuber_note.dart';
+import '../../features/reminders/data/reminder.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -32,6 +34,12 @@ final isarProvider = Provider<Isar>((ref) {
 
 class IsarService {
   static Future<Isar> open() async {
+    // Reuse the process-global instance if it's already open. The widget
+    // configuration activities boot a second Flutter engine that re-runs
+    // main(); without this, a second Isar.open() in the same process would
+    // fail and crash the config screen.
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) return existing;
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open([
       TransactionSchema,
@@ -57,6 +65,8 @@ class IsarService {
       SmsAccountMappingSchema,
       SavedCalculationSchema,
       CalculatorRecentUseSchema,
+      KuberNoteSchema,
+      ReminderSchema,
     ], directory: dir.path);
   }
 }

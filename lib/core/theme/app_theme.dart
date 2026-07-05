@@ -46,6 +46,12 @@ class KuberColors {
   static const warning = Color(0xFFF59E0B);
   static const warningSubtle = Color(0x1AF59E0B);
 
+  // Upcoming Events source-pill accents (per the Notes/Reminders/Events
+  // handoff design — EMI purple, Ledger yellow; other sources reuse
+  // primary / income / warning).
+  static const eventEmi = Color(0xFFA855F7);
+  static const eventLedger = Color(0xFFFACC15);
+
   // Utility
   static const white = Color(0xFFFFFFFF);
 }
@@ -75,6 +81,10 @@ class KuberLightColors {
   static const expenseSubtle = Color(0x1ADC2626);
   static const warning = Color(0xFFD97706);
   static const warningSubtle = Color(0x1AD97706);
+
+  // Upcoming Events source-pill accents (darker for light surfaces).
+  static const eventEmi = Color(0xFF9333EA);
+  static const eventLedger = Color(0xFFCA8A04);
 
   // Utility
   static const white = Color(0xFFFFFFFF);

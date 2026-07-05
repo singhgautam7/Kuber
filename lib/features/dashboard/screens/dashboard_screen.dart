@@ -10,7 +10,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../shared/widgets/kuber_bar_chart.dart';
 import '../../dashboard/providers/dashboard_provider.dart';
 import '../../../shared/widgets/edit_widgets_button.dart';
 import '../../notifications/data/app_notification.dart';
@@ -22,16 +21,20 @@ import '../../stories/widgets/story_ring.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../widget_editor/models/home_widget_config.dart';
 import '../../widget_editor/providers/widget_editor_provider.dart';
+import '../../charts/providers/home_income_expense_provider.dart';
+import '../../charts/widgets/income_expense_chart.dart';
 import '../widgets/home_header.dart';
 import '../widgets/home_smart_insights.dart';
 import '../widgets/spending_stats_card.dart';
 import '../widgets/budget_snapshot_card.dart';
 import '../widgets/home_accounts_card.dart';
-import '../widgets/home_recurring_card.dart';
 import '../widgets/home_recent_transactions.dart';
+import '../../notes/widgets/notes_home_widget.dart';
+import '../../upcoming_events/widgets/upcoming_events_widget.dart';
 import '../widgets/quick_add_widget.dart';
 import '../../sms_import/widgets/sms_import_home_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
+import '../../../shared/widgets/skeleton_loader.dart';
 
 List<String> _homeSubtitles(AppLocalizations l10n) => [
   l10n.homeSubtitle1,
@@ -105,38 +108,50 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     await repo.markAllRead();
   }
 
+  /// Widgets that render their own bottom spacing internally and collapse to
+  /// zero height when empty (so no orphan gap remains). The dashboard must NOT
+  /// add spacing around these.
+  static const _selfSpacedWidgets = {
+    'spending_stats',
+    'home_accounts',
+    'budget_snapshot',
+    'smart_insights',
+    'sms_import_widget',
+  };
+
   /// Map a widget id from the catalog to its actual implementation. Hidden
-  /// widgets are simply not constructed — their providers never run.
+  /// widgets are simply not constructed — their providers never run. Every
+  /// widget carries a uniform [KuberSpacing.xl] bottom gap: self-spacing
+  /// widgets add it internally (and drop it when empty); the rest get it here.
   Widget _buildHomeWidget(String id) {
-    switch (id) {
-      case 'balance_hero':
-        return RepaintBoundary(
+    final Widget? child = switch (id) {
+      'balance_hero' => RepaintBoundary(
           key: TutorialStepKeys.dashboardBalanceCard,
           child: const _BalanceHeroSection(),
-        );
-      case 'quick_add':
-        return QuickAddWidget(key: TutorialStepKeys.quickAddFab);
-      case 'spending_stats':
-        return const RepaintBoundary(child: SpendingStatsCard());
-      case 'home_accounts':
-        return const RepaintBoundary(child: HomeAccountsCard());
-      case 'seven_day_chart':
-        return const RepaintBoundary(child: _SevenDayChartSection());
-      case 'insight_stories':
-        return const RepaintBoundary(child: StoryRingSection());
-      case 'smart_insights':
-        return const RepaintBoundary(child: HomeSmartInsights());
-      case 'budget_snapshot':
-        return const RepaintBoundary(child: BudgetSnapshotCard());
-      case 'upcoming_recurring':
-        return const RepaintBoundary(child: HomeRecurringCard());
-      case 'recent_transactions':
-        return const RepaintBoundary(child: HomeRecentTransactionsCard());
-      case 'sms_import_widget':
-        return const RepaintBoundary(child: SmsImportHomeWidget());
-      default:
-        return const SizedBox.shrink();
-    }
+        ),
+      'quick_add' => QuickAddWidget(key: TutorialStepKeys.quickAddFab),
+      'spending_stats' => const RepaintBoundary(child: SpendingStatsCard()),
+      'home_accounts' => const RepaintBoundary(child: HomeAccountsCard()),
+      'seven_day_chart' =>
+        const RepaintBoundary(child: _SevenDayChartSection()),
+      'insight_stories' => const RepaintBoundary(child: StoryRingSection()),
+      'smart_insights' => const RepaintBoundary(child: HomeSmartInsights()),
+      'budget_snapshot' => const RepaintBoundary(child: BudgetSnapshotCard()),
+      'upcoming_events_widget' =>
+        const RepaintBoundary(child: UpcomingEventsWidget()),
+      'kuber_notes_widget' => const RepaintBoundary(child: NotesHomeWidget()),
+      'recent_transactions' =>
+        const RepaintBoundary(child: HomeRecentTransactionsCard()),
+      'sms_import_widget' =>
+        const RepaintBoundary(child: SmsImportHomeWidget()),
+      _ => null,
+    };
+    if (child == null) return const SizedBox.shrink();
+    if (_selfSpacedWidgets.contains(id)) return child;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      child: child,
+    );
   }
 
   @override
@@ -199,10 +214,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             data: (configs) {
               final visible = configs.where((c) => c.enabled).toList();
               return [
-                for (final c in visible) ...[
-                  _buildHomeWidget(c.id),
-                  const SizedBox(height: KuberSpacing.xl),
-                ],
+                // Each widget owns its own bottom spacing (see _buildHomeWidget)
+                // so a widget that self-hides in an empty state leaves no gap.
+                for (final c in visible) _buildHomeWidget(c.id),
                 const EditWidgetsButton(scope: WidgetEditorScope.home),
               ];
             },
@@ -222,10 +236,7 @@ class _BalanceHeroSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryAsync = ref.watch(monthlySummaryProvider);
     return summaryAsync.when(
-      loading: () => const SizedBox(
-        height: 180,
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const _BalanceHeroSkeleton(),
       error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
       data: (summary) => _BalanceHeroCard(summary: summary),
     );
@@ -239,36 +250,86 @@ class _SevenDayChartSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chartAsync = ref.watch(last7DaysSummaryProvider);
-    return chartAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (e, _) => const SizedBox.shrink(),
-      data: (days) {
-        final hasData = days.any((d) => d.income > 0 || d.expense > 0);
-        if (!hasData) {
-          return const _SpendingAnalysisEmpty();
-        }
-        return KuberBarChart(
-          title: context.l10n.last7Days,
-          buckets: _last7DaysBuckets(days),
-          height: 200,
-        );
+    final range = ref.watch(homeChartRangeProvider);
+    final points = ref.watch(homeIncomeExpenseProvider);
+    // Empty only when there's no data in ANY range (fresh install); otherwise
+    // keep the chart so the user can switch ranges.
+    final hasData = points.any((p) => p.income > 0 || p.expense > 0);
+    if (!hasData && range == HomeChartRange.months6) {
+      return const _SpendingAnalysisEmpty();
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const KuberHomeWidgetTitle(title: 'Income & Expense'),
+        IncomeExpenseChart(
+          compact: true,
+          showTitle: false,
+          points: points,
+          rangeTabs: const [
+        ChartRangeTab('days7', '7D'),
+        ChartRangeTab('weeks4', '4W'),
+        ChartRangeTab('months6', '6M'),
+      ],
+      selectedRangeId: switch (range) {
+        HomeChartRange.days7 => 'days7',
+        HomeChartRange.weeks4 => 'weeks4',
+        HomeChartRange.months6 => 'months6',
       },
+          onRangeSelected: (id) =>
+              ref.read(homeChartRangeProvider.notifier).state = switch (id) {
+            'days7' => HomeChartRange.days7,
+            'weeks4' => HomeChartRange.weeks4,
+            _ => HomeChartRange.months6,
+          },
+        ),
+      ],
     );
   }
+}
 
-  static List<KuberBarBucket> _last7DaysBuckets(List<DaySummary> days) {
-    return List.generate(days.length, (i) {
-      final d = days[i];
-      return KuberBarBucket(
-        dayLabel: DateFormat('d').format(d.date),
-        monthLabel: DateFormat('MMM').format(d.date).toUpperCase(),
-        income: d.income,
-        expense: d.expense,
-        isHighlighted: i == days.length - 1,
-        date: d.date,
-      );
-    });
+/// Skeleton mirroring the Balance Hero card shape so the first paint doesn't
+/// flash a spinner while [monthlySummaryProvider] resolves.
+class _BalanceHeroSkeleton extends StatelessWidget {
+  const _BalanceHeroSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.lg,
+        vertical: KuberSpacing.md + 2,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: const [
+              SkeletonBlock(width: 120, height: 12, borderRadius: 4),
+              Spacer(),
+              SkeletonBlock(width: 90, height: 22, borderRadius: 4),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.md),
+          const SkeletonBlock(
+              width: double.infinity, height: 8, borderRadius: 3),
+          const SizedBox(height: KuberSpacing.sm + 2),
+          Row(
+            children: const [
+              SkeletonBlock(width: 70, height: 13, borderRadius: 4),
+              Spacer(),
+              SkeletonBlock(width: 70, height: 13, borderRadius: 4),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -461,7 +522,7 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          KuberHomeWidgetTitle(title: context.l10n.last7Days),
+          const KuberHomeWidgetTitle(title: 'Income & Expense'),
           const SizedBox(height: 24),
           Center(
             child: Padding(

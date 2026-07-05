@@ -31,7 +31,15 @@ class AddLedgerScreen extends ConsumerStatefulWidget {
   final Ledger? existing;
   final LedgerPrefill? prefill;
 
-  const AddLedgerScreen({super.key, this.existing, this.prefill});
+  /// Amount-only pre-fill for Kuber Notes tap-to-convert (create mode only).
+  final double? amountPrefill;
+
+  const AddLedgerScreen({
+    super.key,
+    this.existing,
+    this.prefill,
+    this.amountPrefill,
+  });
 
   @override
   ConsumerState<AddLedgerScreen> createState() => _AddLedgerScreenState();
@@ -75,6 +83,13 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     } else {
       final prefill = widget.prefill;
       _type = prefill?.type ?? 'lent';
+      final amountOnly = widget.amountPrefill;
+      if (prefill == null && amountOnly != null && amountOnly > 0) {
+        _amountController.text =
+            amountOnly == amountOnly.truncateToDouble()
+                ? amountOnly.toInt().toString()
+                : amountOnly.toStringAsFixed(2);
+      }
       if (prefill != null) {
         _amountController.text = prefill.amount == prefill.amount.truncateToDouble()
             ? prefill.amount.toInt().toString()

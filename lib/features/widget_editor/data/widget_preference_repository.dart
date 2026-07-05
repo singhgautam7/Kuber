@@ -33,9 +33,15 @@ class WidgetPreferenceRepository {
 
     // 1. Keep stored rows in stored order, but drop orphans not in the catalog.
     for (final row in stored) {
-      final widgetKey = row.widgetKey == 'smart_insights'
+      var widgetKey = row.widgetKey == 'smart_insights'
           ? 'insight_stories'
           : row.widgetKey;
+      // One-time Recurring → Upcoming Events widget replacement: users who
+      // had the Recurring widget enabled see the new widget enabled, in the
+      // same position.
+      if (widgetKey == 'upcoming_recurring') {
+        widgetKey = 'upcoming_events_widget';
+      }
       final catalog = catalogById[widgetKey];
       if (catalog == null) continue; // orphan: removed from catalog
       seen.add(widgetKey);

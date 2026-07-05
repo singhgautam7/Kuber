@@ -37,4 +37,28 @@
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
+    <shortcut
+        android:shortcutId="tools"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_tools_short"
+        android:shortcutLongLabel="@string/shortcut_tools_long"
+        android:icon="@drawable/ic_shortcut_tools">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/tools" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="notes"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_notes_short"
+        android:shortcutLongLabel="@string/shortcut_notes_long"
+        android:icon="@drawable/ic_shortcut_notes">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/notes" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
 </shortcuts>

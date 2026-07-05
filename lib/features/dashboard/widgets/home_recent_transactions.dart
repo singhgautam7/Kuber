@@ -15,6 +15,7 @@ import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/widgets/transaction_row.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
+import '../../../shared/widgets/skeleton_loader.dart';
 
 class HomeRecentTransactionsCard extends ConsumerWidget {
   const HomeRecentTransactionsCard({super.key});
@@ -46,7 +47,7 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
           ),
         ),
         recentAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const _RecentTransactionsSkeleton(),
           error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
           data: (transactions) {
             if (transactions.isEmpty) {
@@ -112,6 +113,56 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// Skeleton for the recent-transactions list — a card with a few row
+/// placeholders shown while [recentTransactionsProvider] first resolves.
+class _RecentTransactionsSkeleton extends StatelessWidget {
+  const _RecentTransactionsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.md,
+        vertical: KuberSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        children: [
+          for (var i = 0; i < 4; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
+              child: Row(
+                children: const [
+                  SkeletonBlock(width: 38, height: 38, borderRadius: 10),
+                  SizedBox(width: KuberSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonBlock(
+                            width: 130, height: 13, borderRadius: 5),
+                        SizedBox(height: 7),
+                        SkeletonBlock(
+                            width: 80, height: 11, borderRadius: 5),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: KuberSpacing.md),
+                  SkeletonBlock(width: 60, height: 14, borderRadius: 5),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

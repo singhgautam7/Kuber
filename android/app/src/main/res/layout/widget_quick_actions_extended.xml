@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick Actions Extended · 4x3 · 302x224dp. 4x2 launcher grid. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp">
+
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/w_quick_actions"
+        android:textSize="13sp" android:fontFamily="sans-serif-medium"
+        android:textColor="@color/kuber_text_primary" />
+
+    <!-- Row 1 -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:orientation="horizontal"
+        android:layout_marginTop="8dp" android:baselineAligned="false">
+        <LinearLayout android:id="@+id/btn_add_txn" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_plus" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_add_txn"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_recurring" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_repeat" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_recurring"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_add_loan" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_bank" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_add_loan"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_invest" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_trending_up" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_invest"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Row 2 -->
+    <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:orientation="horizontal" android:baselineAligned="false">
+        <LinearLayout android:id="@+id/btn_lend_borrow" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_swap" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_lend_borrow"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_ask_kuber" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_chat" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_ask_kuber"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_calculators" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_calculator" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_calculators"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/btn_notes" android:layout_width="0dp"
+            android:layout_height="match_parent" android:layout_weight="1"
+            android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="17dp" android:layout_height="17dp"
+                android:src="@drawable/ic_widget_note" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" android:text="@string/w_action_notes"
+                android:textSize="8sp" android:textColor="@color/kuber_text_secondary" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

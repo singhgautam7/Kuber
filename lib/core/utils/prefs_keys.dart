@@ -58,4 +58,13 @@ class PrefsKeys {
   // Stories
   static const lastStoryGenerationDate = 'kuber_last_story_generation_date';
   static const welcomeStoryGenerated = 'kuber_welcome_story_generated';
+
+  // Kuber Notes
+  static const notesOnboardingSeen = 'notes_onboarding_seen';
+  static const notesViewMode = 'notes_view_mode'; // 'list' | 'grid'
+  static const notesBiometricRequired = 'kuber_notes_biometric_required';
+
+  // Upcoming Events widget migration (one-time Recurring widget replacement)
+  static const upcomingEventsWidgetMigrated =
+      'kuber_upcoming_events_widget_migrated_v1';
 }

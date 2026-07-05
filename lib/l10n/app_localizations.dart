@@ -4616,6 +4616,18 @@ abstract class AppLocalizations {
   /// **'Every recap, newest first'**
   String get menuStoriesArchiveDesc;
 
+  /// No description provided for @menuWidgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Widgets'**
+  String get menuWidgets;
+
+  /// No description provided for @menuWidgetsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Home screen widgets to keep Kuber in view'**
+  String get menuWidgetsDesc;
+
   /// No description provided for @menuTroubleshoot.
   ///
   /// In en, this message translates to:

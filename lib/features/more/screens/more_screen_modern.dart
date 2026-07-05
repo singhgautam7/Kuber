@@ -160,6 +160,13 @@ class MoreScreenModern extends ConsumerWidget {
                       sub: context.l10n.menuInvestmentsDesc,
                       onTap: () => context.push('/more/investments'),
                     ),
+                    // Reminders (English-only feature, like SMS import).
+                    _ManageTileData(
+                      icon: Icons.notifications_active_outlined,
+                      label: 'Reminders',
+                      sub: 'Never miss anything money-related',
+                      onTap: () => context.push('/more/reminders'),
+                    ),
                   ],
                 ),
 
@@ -207,7 +214,16 @@ class MoreScreenModern extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    const Expanded(child: SizedBox.shrink()),
+                    Expanded(
+                      // Kuber Notes (English-only feature).
+                      child: _ToolCard(
+                        icon: Icons.sticky_note_2_outlined,
+                        title: 'Kuber Notes',
+                        subtitle: 'Jot expenses and do quick math',
+                        accent: _ToolAccent.primary,
+                        onTap: () => context.push('/more/notes'),
+                      ),
+                    ),
                   ],
                 ),
 
@@ -236,6 +252,14 @@ class MoreScreenModern extends ConsumerWidget {
                       sub: context.l10n.menuNotificationsDesc,
                       onTap: () => _openNotificationsSheet(context, ref),
                     ),
+                    // Upcoming Events sits right below Notifications
+                    // (English-only feature).
+                    _CompactRowData(
+                      icon: Icons.calendar_month_rounded,
+                      label: 'Upcoming Events',
+                      sub: 'Everything coming up, in one place',
+                      onTap: () => context.push('/more/upcoming-events'),
+                    ),
                     _CompactRowData(
                       icon: Icons.auto_stories_rounded,
                       label: context.l10n.menuStoriesArchive,
@@ -243,10 +267,10 @@ class MoreScreenModern extends ConsumerWidget {
                       onTap: () => context.push('/more/stories-archive'),
                     ),
                     _CompactRowData(
-                      icon: Icons.build,
-                      label: context.l10n.menuTroubleshoot,
-                      sub: context.l10n.menuTroubleshootDesc,
-                      onTap: () => context.push('/more/troubleshoot'),
+                      icon: Icons.widgets_outlined,
+                      label: context.l10n.menuWidgets,
+                      sub: context.l10n.menuWidgetsDesc,
+                      onTap: () => context.push('/more/widgets-gallery'),
                     ),
                   ],
                 ),

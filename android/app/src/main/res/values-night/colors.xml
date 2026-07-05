@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="splash_background">#000000</color>
+
+    <!-- ==== Vault palette for home-screen widgets (Obsidian / dark) ==== -->
+    <!-- Mapping source: specs/design_handoff_android_widgets/color_resources.md -->
+    <color name="kuber_background">#000000</color>
+    <color name="kuber_surface_card">#09090B</color>
+    <color name="kuber_surface_muted">#18181B</color>
+    <color name="kuber_border">#27272A</color>
+    <color name="kuber_border_muted">#3F3F46</color>
+    <color name="kuber_text_primary">#FAFAFA</color>
+    <color name="kuber_text_secondary">#A1A1AA</color>
+    <color name="kuber_text_muted">#71717A</color>
+    <color name="kuber_primary">#3B82F6</color>
+    <color name="kuber_income">#22C55E</color>
+    <color name="kuber_expense">#EF4444</color>
+    <color name="kuber_warning_amber">#F59E0B</color>
+    <color name="kuber_purple">#A855F7</color>
+
+    <!-- Subtle tint variants: pre-composited over surfaceCard (#09090B), not
+         runtime alpha, per color_resources.md note. -->
+    <color name="kuber_primary_subtle">#101A2C</color>
+    <color name="kuber_income_subtle">#0D2317</color>
+    <color name="kuber_expense_subtle">#291113</color>
+    <color name="kuber_amber_subtle">#2A1E0B</color>
+    <color name="kuber_purple_subtle">#1F142C</color>
+
+    <!-- Source-type pill text colors (Upcoming Events) -->
+    <color name="kuber_pill_reminder_text">#60A5FA</color>
+    <color name="kuber_pill_emi_text">#C084FC</color>
+    <color name="kuber_pill_sip_text">#4ADE80</color>
 </resources>

@@ -6,6 +6,7 @@ import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/skeleton_loader.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -122,10 +123,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
                 // Transaction list
                 ...viewAsync.when(
-                  loading: () => [
-                    const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
+                  // Skeleton (summary bar + a few rows) so the first open of
+                  // the History tab doesn't stutter behind a blank spinner.
+                  loading: () => const [
+                    SliverToBoxAdapter(child: _HistorySkeleton()),
                   ],
                   error: (e, _) => [
                     SliverFillRemaining(
@@ -582,6 +583,60 @@ class _SelectionActionBar extends ConsumerWidget {
             },
             child: Text(context.l10n.deleteLabel),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Skeleton shown while [historyViewProvider] first loads: a summary bar
+/// followed by a handful of transaction-row placeholders.
+class _HistorySkeleton extends StatelessWidget {
+  const _HistorySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Summary bar (count / EXP / INC / NET).
+          Row(
+            children: const [
+              SkeletonBlock(width: 90, height: 20, borderRadius: 6),
+              SizedBox(width: 10),
+              SkeletonBlock(width: 70, height: 20, borderRadius: 6),
+              SizedBox(width: 10),
+              SkeletonBlock(width: 70, height: 20, borderRadius: 6),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.lg),
+          for (var i = 0; i < 7; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+              child: Row(
+                children: const [
+                  SkeletonBlock(width: 40, height: 40, borderRadius: 10),
+                  SizedBox(width: KuberSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SkeletonBlock(
+                            width: 140, height: 13, borderRadius: 5),
+                        SizedBox(height: 7),
+                        SkeletonBlock(
+                            width: 90, height: 11, borderRadius: 5),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: KuberSpacing.md),
+                  SkeletonBlock(width: 64, height: 14, borderRadius: 5),
+                ],
+              ),
+            ),
         ],
       ),
     );

@@ -33,6 +33,23 @@ final smsInboxServiceProvider = Provider<SmsInboxService>(
   (ref) => const SmsInboxService(),
 );
 
+/// Lightweight summary for the home dashboard widget: the last-scan timestamp
+/// (from shared prefs) and the permission flag — WITHOUT loading any SMS rows
+/// from Isar. The heavy [smsImportProvider] (which reads every staged row) is
+/// only loaded on the SMS Import screen or when a background scan actually
+/// runs, so the home page never stutters querying thousands of rows.
+final smsHomeInfoProvider =
+    FutureProvider<({DateTime? lastScannedAt, bool hasPermission})>(
+  (ref) async {
+    final prefs = await SharedPreferences.getInstance();
+    final iso = prefs.getString(_kLastScannedAtKey);
+    final lastScannedAt = iso == null ? null : DateTime.tryParse(iso);
+    final hasPermission =
+        await ref.read(smsInboxServiceProvider).checkPermission();
+    return (lastScannedAt: lastScannedAt, hasPermission: hasPermission);
+  },
+);
+
 /// Snapshot of the staging collection, split by review status, plus scan and
 /// permission flags.
 class SmsImportState {

@@ -6,4 +6,84 @@
     <string name="shortcut_history_long">View Transactions</string>
     <string name="shortcut_ask_short">Ask Kuber</string>
     <string name="shortcut_ask_long">Ask Kuber</string>
+    <string name="shortcut_tools_short">Tools</string>
+    <string name="shortcut_tools_long">Calculators &amp; Tools</string>
+    <string name="shortcut_notes_short">Notes</string>
+    <string name="shortcut_notes_long">Kuber Notes</string>
+
+    <!-- ==== Home-screen widget static copy ==== -->
+    <!-- Widget display names (picker) -->
+    <string name="w_name_monthly_net">Monthly Net</string>
+    <string name="w_name_account_balance">Account Balance</string>
+    <string name="w_name_sms_badge">SMS Import Badge</string>
+    <string name="w_name_upcoming_events">Upcoming Events</string>
+    <string name="w_name_recent_transactions">Recent Transactions</string>
+    <string name="w_name_quick_actions">Quick Actions</string>
+    <string name="w_name_chart_compact">Chart (compact)</string>
+    <string name="w_name_trends">Trends</string>
+    <string name="w_name_category_donut">Category Donut</string>
+    <string name="w_name_budget_status">Budget Status</string>
+    <string name="w_name_quick_actions_extended">Quick Actions Extended</string>
+    <string name="w_name_notes">Notes</string>
+
+    <!-- Widget picker descriptions -->
+    <string name="w_desc_monthly_net">See this month\'s net at a glance</string>
+    <string name="w_desc_account_balance">Show any account\'s current balance</string>
+    <string name="w_desc_sms_badge">Unreviewed bank messages count</string>
+    <string name="w_desc_upcoming_events">Next 30 days of reminders, EMIs, and SIPs</string>
+    <string name="w_desc_recent_transactions">Latest 5 transactions</string>
+    <string name="w_desc_quick_actions">Add transaction and open Ask Kuber</string>
+    <string name="w_desc_chart_compact">Last 7 days spending trend</string>
+    <string name="w_desc_trends">Trends with 7D / 4W / 6M toggle</string>
+    <string name="w_desc_category_donut">Top spending categories</string>
+    <string name="w_desc_budget_status">Track top 3 budgets</string>
+    <string name="w_desc_quick_actions_extended">8 shortcuts to common actions</string>
+    <string name="w_desc_notes">Recent notes and quick add</string>
+
+    <!-- In-widget labels -->
+    <string name="w_this_month">This month</string>
+    <string name="w_this_month_lower">this month</string>
+    <string name="w_rupee">₹</string>
+    <string name="w_import_sms">IMPORT SMS</string>
+    <string name="w_unreviewed_messages">unreviewed messages</string>
+    <string name="w_all_caught_up">All caught up</string>
+    <string name="w_upcoming_events">Upcoming events</string>
+    <string name="w_next_30_days">next 30 days</string>
+    <string name="w_recent_transactions">Recent transactions</string>
+    <string name="w_last_7_days">Last 7 days</string>
+    <string name="w_trends">Trends</string>
+    <string name="w_top_categories">Top categories</string>
+    <string name="w_budget_status">Budget status</string>
+    <string name="w_quick_actions">Quick actions</string>
+    <string name="w_kuber_notes">Kuber Notes</string>
+    <string name="w_add_note">Add note</string>
+    <string name="w_view_all">View all</string>
+    <string name="w_view_all_notes">View all notes</string>
+    <string name="w_view_analytics">View analytics</string>
+
+    <!-- Range chips -->
+    <string name="w_range_7d">7D</string>
+    <string name="w_range_4w">4W</string>
+    <string name="w_range_6m">6M</string>
+
+    <!-- Quick action labels -->
+    <string name="w_action_add_txn">Add txn</string>
+    <string name="w_action_recurring">Recurring</string>
+    <string name="w_action_ask_kuber">Ask Kuber</string>
+    <string name="w_action_import_sms">Import SMS</string>
+    <string name="w_action_add_loan">Add loan</string>
+    <string name="w_action_invest">Invest</string>
+    <string name="w_action_lend_borrow">Lend/Borrow</string>
+    <string name="w_action_calculators">Calculators</string>
+    <string name="w_action_notes">Notes</string>
+
+    <!-- Empty-state copy -->
+    <string name="w_empty_monthly_net">No transactions this month yet</string>
+    <string name="w_empty_account_balance">Tap to choose an account</string>
+    <string name="w_empty_upcoming_events">No events in the next 30 days</string>
+    <string name="w_empty_recent_transactions">No transactions yet</string>
+    <string name="w_empty_chart">No spending in this range yet</string>
+    <string name="w_empty_category_donut">No spending this month yet</string>
+    <string name="w_empty_budget_status">No budgets set for this month</string>
+    <string name="w_empty_notes">No notes yet. Tap \'Add note\' to create your first.</string>
 </resources>

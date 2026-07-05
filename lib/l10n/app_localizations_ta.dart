@@ -2533,6 +2533,12 @@ class AppLocalizationsTa extends AppLocalizations {
   String get menuStoriesArchiveDesc => 'ஒவ்வொரு சுருக்கமும், புதியது முதலில்';
 
   @override
+  String get menuWidgets => 'Widgets';
+
+  @override
+  String get menuWidgetsDesc => 'Home screen widgets to keep Kuber in view';
+
+  @override
   String get menuTroubleshoot => 'பழுது நீக்குதல்';
 
   @override

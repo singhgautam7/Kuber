@@ -2519,6 +2519,12 @@ class AppLocalizationsKn extends AppLocalizations {
       'ಪ್ರತಿಯೊಂದು ಕಥೆಯ ಸಾರಾಂಶ, ಇತ್ತೀಚಿನದು ಮೊದಲು';
 
   @override
+  String get menuWidgets => 'Widgets';
+
+  @override
+  String get menuWidgetsDesc => 'Home screen widgets to keep Kuber in view';
+
+  @override
   String get menuTroubleshoot => 'ದೋಷನಿವಾರಣೆ';
 
   @override

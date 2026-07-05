@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/timezone.dart' as tz;
 
 import '../utils/prefs_keys.dart';
 import '../../features/notifications/data/app_notification.dart';
@@ -57,6 +59,12 @@ const Map<NotificationType, _Channel> _typeChannels = {
     'Automatic backup failure notifications',
     Importance.high,
   ),
+  NotificationType.reminderTrigger: _Channel(
+    'kuber_reminders',
+    'Reminders',
+    'Money reminder alerts',
+    Importance.high,
+  ),
 };
 
 class NotificationService {
@@ -78,7 +86,26 @@ class NotificationService {
     return p;
   }
 
-  Future<void> init({void Function(String payload)? onTap}) async {
+  /// Captured at startup if the app was launched from a notification ACTION
+  /// button (e.g. a reminder's "Mark done"). Cleared once consumed.
+  ({String actionId, String payload})? _coldStartAction;
+  ({String actionId, String payload})? consumeColdStartAction() {
+    final a = _coldStartAction;
+    _coldStartAction = null;
+    return a;
+  }
+
+  bool _timezonesReady = false;
+  void _ensureTimezones() {
+    if (_timezonesReady) return;
+    tzdata.initializeTimeZones();
+    _timezonesReady = true;
+  }
+
+  Future<void> init({
+    void Function(String payload)? onTap,
+    void Function(String actionId, String payload)? onAction,
+  }) async {
     if (_isInitialized) return;
 
     try {
@@ -99,7 +126,11 @@ class NotificationService {
         settings: initializationSettings,
         onDidReceiveNotificationResponse: (response) {
           final payload = response.payload;
-          if (payload != null && payload.isNotEmpty) {
+          if (payload == null || payload.isEmpty) return;
+          final actionId = response.actionId;
+          if (actionId != null && actionId.isNotEmpty) {
+            onAction?.call(actionId, payload);
+          } else {
             onTap?.call(payload);
           }
         },
@@ -123,11 +154,21 @@ class NotificationService {
         }
       }
 
-      // Detect cold-start launch from a notification tap.
+      // Detect cold-start launch from a notification tap or action button.
       final launchDetails = await _notificationsPlugin
           .getNotificationAppLaunchDetails();
       if (launchDetails?.didNotificationLaunchApp ?? false) {
-        _coldStartPayload = launchDetails?.notificationResponse?.payload;
+        final response = launchDetails?.notificationResponse;
+        final actionId = response?.actionId;
+        final payload = response?.payload;
+        if (actionId != null &&
+            actionId.isNotEmpty &&
+            payload != null &&
+            payload.isNotEmpty) {
+          _coldStartAction = (actionId: actionId, payload: payload);
+        } else {
+          _coldStartPayload = payload;
+        }
       }
 
       _isInitialized = true;
@@ -305,6 +346,76 @@ class NotificationService {
       );
     } catch (e) {
       // Silently fail
+    }
+  }
+
+  /// Schedules a reminder notification at [when] with "Mark done" and
+  /// "Snooze 1 hour" actions. Uses the reminder's Isar id, so re-scheduling
+  /// the same reminder replaces the previous alarm.
+  ///
+  /// Scheduling is duration-based (`now(tz.local) + (when - now)`), which
+  /// resolves to the correct absolute instant without needing the device's
+  /// IANA timezone name. Inexact scheduling avoids the Android 12+ exact
+  /// alarm permission.
+  Future<void> scheduleReminderNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime when,
+    String? payload,
+  }) async {
+    await maybeRequestPermissionOnce();
+    _ensureTimezones();
+
+    final delay = when.difference(DateTime.now());
+    if (delay.isNegative) return;
+    final scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
+
+    const androidDetails = AndroidNotificationDetails(
+      'kuber_reminders',
+      'Reminders',
+      channelDescription: 'Money reminder alerts',
+      importance: Importance.high,
+      priority: Priority.high,
+      autoCancel: true,
+      actions: [
+        AndroidNotificationAction(
+          'reminder_mark_done',
+          'Mark done',
+          showsUserInterface: true,
+        ),
+        AndroidNotificationAction(
+          'reminder_snooze_1h',
+          'Snooze 1 hour',
+          showsUserInterface: true,
+        ),
+      ],
+    );
+
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
+    );
+
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: payload,
+      );
+    } catch (e) {
+      // Silently fail — a missed alarm is healed by on-open maintenance.
     }
   }
 

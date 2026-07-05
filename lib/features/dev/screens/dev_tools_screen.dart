@@ -57,6 +57,24 @@ class DevToolsScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                _SectionLabel(label: 'TROUBLESHOOT'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.build_outlined,
+                      label: 'Troubleshoot',
+                      subtitle: 'Fix data and suggestion issues',
+                      onTap: () => context.push('/more/troubleshoot'),
+                      trailing: Icon(
+                        Icons.chevron_right_rounded,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
                 _SectionLabel(label: 'DATABASE'),
                 const SizedBox(height: KuberSpacing.sm),
                 _SettingsCard(

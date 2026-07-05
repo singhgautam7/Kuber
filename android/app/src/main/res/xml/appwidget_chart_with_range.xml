@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="302dp"
+    android:minHeight="224dp"
+    android:minResizeWidth="220dp"
+    android:minResizeHeight="180dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="3"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/widget_chart_with_range"
+    android:previewLayout="@layout/widget_chart_with_range"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:configure="com.grs.kuber.widgets.TrendsRangeConfigActivity"
+    android:description="@string/w_desc_trends" />

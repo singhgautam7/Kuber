@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Upcoming Events · 4x2 · 302x146dp. Fixed rows (no ListView). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp">
+
+    <!-- LOADING -->
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <FrameLayout android:layout_width="100dp" android:layout_height="10dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="16dp"
+            android:layout_marginTop="10dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="16dp"
+            android:layout_marginTop="10dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="16dp"
+            android:layout_marginTop="10dp" android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <!-- EMPTY -->
+    <LinearLayout
+        android:id="@+id/state_empty"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/w_upcoming_events"
+            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_primary" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                android:src="@drawable/ic_widget_calendar" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/w_empty_upcoming_events"
+                android:textSize="11sp" android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:baselineAligned="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="@string/w_upcoming_events"
+                android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_text_primary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/w_next_30_days"
+                android:textSize="10sp" android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center_vertical">
+
+            <!-- row 0 -->
+            <LinearLayout android:id="@+id/row_0" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                <TextView android:id="@+id/row_0_date" android:layout_width="44dp"
+                    android:layout_height="wrap_content" android:text="Today"
+                    android:textSize="10sp" android:textColor="@color/kuber_text_muted" />
+                <TextView android:id="@+id/row_0_title" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                    android:text="Pay maid salary" android:textSize="11.5sp"
+                    android:textColor="@color/kuber_text_primary" />
+                <TextView android:id="@+id/row_0_pill" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginEnd="8dp"
+                    android:paddingStart="5dp" android:paddingEnd="5dp"
+                    android:paddingTop="1dp" android:paddingBottom="1dp"
+                    android:background="@drawable/widget_pill_reminder" android:text="REMINDER"
+                    android:textSize="8.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_pill_reminder_text" />
+                <TextView android:id="@+id/row_0_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="−₹3,000"
+                    android:textSize="11.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+
+            <!-- row 1 -->
+            <LinearLayout android:id="@+id/row_1" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                <TextView android:id="@+id/row_1_date" android:layout_width="44dp"
+                    android:layout_height="wrap_content" android:text="5 Jul"
+                    android:textSize="10sp" android:textColor="@color/kuber_text_muted" />
+                <TextView android:id="@+id/row_1_title" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                    android:text="Home Loan EMI" android:textSize="11.5sp"
+                    android:textColor="@color/kuber_text_primary" />
+                <TextView android:id="@+id/row_1_pill" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginEnd="8dp"
+                    android:paddingStart="5dp" android:paddingEnd="5dp"
+                    android:paddingTop="1dp" android:paddingBottom="1dp"
+                    android:background="@drawable/widget_pill_emi" android:text="EMI"
+                    android:textSize="8.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_pill_emi_text" />
+                <TextView android:id="@+id/row_1_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="−₹24,600"
+                    android:textSize="11.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+
+            <!-- row 2 -->
+            <LinearLayout android:id="@+id/row_2" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                <TextView android:id="@+id/row_2_date" android:layout_width="44dp"
+                    android:layout_height="wrap_content" android:text="7 Jul"
+                    android:textSize="10sp" android:textColor="@color/kuber_text_muted" />
+                <TextView android:id="@+id/row_2_title" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                    android:text="Nifty Index SIP" android:textSize="11.5sp"
+                    android:textColor="@color/kuber_text_primary" />
+                <TextView android:id="@+id/row_2_pill" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginEnd="8dp"
+                    android:paddingStart="5dp" android:paddingEnd="5dp"
+                    android:paddingTop="1dp" android:paddingBottom="1dp"
+                    android:background="@drawable/widget_pill_sip" android:text="SIP"
+                    android:textSize="8.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_pill_sip_text" />
+                <TextView android:id="@+id/row_2_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="−₹5,000"
+                    android:textSize="11.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+
+            <!-- row 3 (hidden unless a 4th event exists) -->
+            <LinearLayout android:id="@+id/row_3" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp"
+                android:visibility="gone">
+                <TextView android:id="@+id/row_3_date" android:layout_width="44dp"
+                    android:layout_height="wrap_content" android:textSize="10sp"
+                    android:textColor="@color/kuber_text_muted" />
+                <TextView android:id="@+id/row_3_title" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                    android:textSize="11.5sp" android:textColor="@color/kuber_text_primary" />
+                <TextView android:id="@+id/row_3_pill" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:layout_marginEnd="8dp"
+                    android:paddingStart="5dp" android:paddingEnd="5dp"
+                    android:paddingTop="1dp" android:paddingBottom="1dp"
+                    android:background="@drawable/widget_pill_reminder"
+                    android:textSize="8.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_pill_reminder_text" />
+                <TextView android:id="@+id/row_3_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textSize="11.5sp"
+                    android:fontFamily="sans-serif-medium" android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Footer -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="end"
+            android:paddingTop="5dp" android:background="@drawable/widget_footer_divider">
+            <TextView android:id="@+id/footer_link" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/w_view_all"
+                android:textSize="10.5sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_primary" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

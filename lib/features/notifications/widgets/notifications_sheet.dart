@@ -2,6 +2,7 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:kuber/core/utils/date_formatter.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
@@ -81,6 +82,9 @@ String _getGroupTitle(NotificationType type, String lang) {
         case 'ml': return 'ബാക്കപ്പ്';
         default: return 'Backup';
       }
+    case NotificationType.reminderTrigger:
+      // Reminders are an English-only feature (SMS import precedent).
+      return 'Reminders';
   }
 }
 
@@ -204,17 +208,22 @@ extension NotificationTypeMeta on NotificationType {
     NotificationType.loanEmi => Icons.account_balance_outlined,
     NotificationType.ledgerReminder => Icons.handshake_outlined,
     NotificationType.backup => Icons.backup_outlined,
+    NotificationType.reminderTrigger => Icons.notifications_active_outlined,
   };
 }
 
-const _kGroupOrder = [
-  NotificationType.general,
-  NotificationType.budgetAlert,
-  NotificationType.recurringTransaction,
-  NotificationType.loanEmi,
-  NotificationType.ledgerReminder,
-  NotificationType.backup,
-];
+/// Date-section label for a notification: Today / Yesterday / "5 Jul" /
+/// "5 Jul 2025".
+String _dateGroupLabel(DateTime dt) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final day = DateTime(dt.year, dt.month, dt.day);
+  final diff = today.difference(day).inDays;
+  if (diff == 0) return 'Today';
+  if (diff == 1) return 'Yesterday';
+  if (dt.year == now.year) return DateFormat('d MMM').format(dt);
+  return DateFormat('d MMM yyyy').format(dt);
+}
 
 class NotificationsSheet extends StatelessWidget {
   final List<AppNotification> notifications;
@@ -291,15 +300,13 @@ class NotificationsSheet extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final lang = AppLocale.current.languageCode;
 
-    final byType = <NotificationType, List<AppNotification>>{};
-    for (final t in _kGroupOrder) {
-      byType[t] = <AppNotification>[];
-    }
-    for (final n in notifications) {
-      byType[n.type]!.add(n);
-    }
-    for (final t in byType.keys) {
-      byType[t]!.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    // Sorted most-recent first, grouped by date (Today / Yesterday / date) —
+    // no type segregation.
+    final sorted = [...notifications]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final dateGroups = <String, List<AppNotification>>{};
+    for (final n in sorted) {
+      dateGroups.putIfAbsent(_dateGroupLabel(n.createdAt), () => []).add(n);
     }
 
     final hasAny = notifications.isNotEmpty;
@@ -437,20 +444,19 @@ class NotificationsSheet extends StatelessWidget {
                             ],
                           ),
                         ),
-                        for (final t in _kGroupOrder)
-                          if ((byType[t] ?? const []).isNotEmpty)
-                            _Group(
-                              type: t,
-                              lang: lang,
-                              items: byType[t]!,
-                              onTap: (n) {
-                                Navigator.of(
-                                  context,
-                                  rootNavigator: true,
-                                ).pop();
-                                onTapNotification(n);
-                              },
-                            ),
+                        for (final entry in dateGroups.entries)
+                          _Group(
+                            label: entry.key,
+                            lang: lang,
+                            items: entry.value,
+                            onTap: (n) {
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop();
+                              onTapNotification(n);
+                            },
+                          ),
                       ],
                     )
                   : Padding(
@@ -469,13 +475,19 @@ class NotificationsSheet extends StatelessWidget {
   }
 }
 
+/// Date-based section header + a card of notification rows (recent first).
 class _Group extends StatelessWidget {
-  final NotificationType type;
+  final String label;
   final String lang;
   final List<AppNotification> items;
   final void Function(AppNotification) onTap;
 
-  const _Group({required this.type, required this.lang, required this.items, required this.onTap});
+  const _Group({
+    required this.label,
+    required this.lang,
+    required this.items,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -488,7 +500,7 @@ class _Group extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 0, 4, KuberSpacing.sm),
             child: Text(
-              _getGroupTitle(type, lang).toUpperCase(),
+              label.toUpperCase(),
               style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -506,7 +518,7 @@ class _Group extends StatelessWidget {
             child: Column(
               children: [
                 for (var i = 0; i < items.length; i++) ...[
-                  _Row(item: items[i], onTap: () => onTap(items[i])),
+                  _Row(item: items[i], lang: lang, onTap: () => onTap(items[i])),
                   if (i < items.length - 1)
                     Divider(height: 1, color: cs.outline, indent: 60),
                 ],
@@ -521,8 +533,9 @@ class _Group extends StatelessWidget {
 
 class _Row extends StatelessWidget {
   final AppNotification item;
+  final String lang;
   final VoidCallback onTap;
-  const _Row({required this.item, required this.onTap});
+  const _Row({required this.item, required this.lang, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -601,38 +614,52 @@ class _Row extends StatelessWidget {
                           height: 1.35,
                         ),
                       ),
+                      const SizedBox(height: 5),
+                      // Meta line: Time · Type (date lives in the section
+                      // header, so no "x ago" here).
+                      Row(
+                        children: [
+                          Text(
+                            DateFormatter.time(item.createdAt),
+                            style: localeFont(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 7),
+                            child: Container(
+                              width: 3,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: cs.onSurfaceVariant
+                                    .withValues(alpha: 0.5),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              _getGroupTitle(item.type, lang),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: localeFont(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: cs.onSurfaceVariant
+                                    .withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 14, 14, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      DateFormatter.timeAgo(item.createdAt),
-                      style: localeFont(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                    if (unread) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: cs.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+              const SizedBox(width: 12),
             ],
           ),
         ),
