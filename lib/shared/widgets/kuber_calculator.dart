@@ -640,30 +640,30 @@ class _CalcKeyState extends State<_CalcKey>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    // Resting palette per kind. accent is the colour the button flashes
-    // toward on press — grey for numbers, blue for operators, red for danger.
-    final Color restBg;
+    // Resting palette per kind. We pre-blend translucent colors over cs.surface
+    // to ensure they are fully opaque before animating, preventing opacity/bleed-through jitters.
+    final Color solidBg;
+    final Color solidBorder;
     final Color restFg;
-    final Color restBorder;
     final Color accent;
 
     switch (widget.kind) {
       case _CalcKeyKind.number:
-        restBg = cs.surfaceContainer;
+        solidBg = cs.surfaceContainer;
+        solidBorder = cs.outline;
         restFg = cs.onSurface;
-        restBorder = cs.outline;
         accent = cs.onSurface;
         break;
       case _CalcKeyKind.operator:
-        restBg = cs.primary.withValues(alpha: 0.10);
+        solidBg = Color.alphaBlend(cs.primary.withValues(alpha: 0.10), cs.surface);
+        solidBorder = Color.alphaBlend(cs.primary.withValues(alpha: 0.18), cs.surface);
         restFg = cs.primary;
-        restBorder = cs.primary.withValues(alpha: 0.18);
         accent = cs.primary;
         break;
       case _CalcKeyKind.danger:
-        restBg = cs.error.withValues(alpha: 0.10);
+        solidBg = Color.alphaBlend(cs.error.withValues(alpha: 0.10), cs.surface);
+        solidBorder = Color.alphaBlend(cs.error.withValues(alpha: 0.10), cs.surface);
         restFg = cs.error;
-        restBorder = cs.error.withValues(alpha: 0.10);
         accent = cs.error;
         break;
     }
@@ -690,11 +690,16 @@ class _CalcKeyState extends State<_CalcKey>
                 // Bell shape: 0 → 1 → 0 over the single forward run.
                 // sin(π) is 1.22e-16 in doubles, i.e. visually 0.
                 final v = math.sin(_ctrl.value * math.pi);
-                // Interpolate to a stronger accent tint on press.
-                final bg = Color.lerp(
-                    restBg, accent.withValues(alpha: 0.28), v)!;
-                final border = Color.lerp(
-                    restBorder, accent.withValues(alpha: 0.55), v)!;
+
+                // Blend the translucent active overlays over the solid resting colors.
+                // Since both inputs are opaque/pre-blended, the target colors are solid,
+                // and Color.lerp will compute intermediate values with a constant 1.0 alpha.
+                final targetBg = Color.alphaBlend(accent.withValues(alpha: 0.28), solidBg);
+                final targetBorder = Color.alphaBlend(accent.withValues(alpha: 0.55), solidBorder);
+
+                final bg = Color.lerp(solidBg, targetBg, v)!;
+                final border = Color.lerp(solidBorder, targetBorder, v)!;
+
                 // 0.97 scale — enough to feel, not enough to jitter neighbours.
                 final scale = 1.0 - (v * 0.03);
                 return Transform.scale(
