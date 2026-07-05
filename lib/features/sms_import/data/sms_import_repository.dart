@@ -49,29 +49,34 @@ class SmsImportRepository extends BaseRepository<SmsTransaction> {
   }
 
   /// Inserts only rows whose hash is not already staged, so re-scanning
-  /// resets an existing row's review status. Also checks (senderId, smsDate, parsedAmount) triple.
+  /// resets an existing row's review status. Also checks (senderId, smsDate,
+  /// parsedAmount) triple.
+  ///
+  /// Duplicate detection is done against two Sets pre-loaded from Isar in a
+  /// single query each — the previous per-row `filter().findFirst()` did
+  /// 2×N Isar lookups (hash indexed but the triple is not), which is O(N²)
+  /// on non-indexed fields for a full-inbox scan of thousands of SMS.
   Future<int> insertNew(List<SmsTransaction> rows) async {
     if (rows.isEmpty) return 0;
+    // Snapshot existing rows into in-memory Sets so per-row checks are O(1).
+    final existing = await isar.smsTransactions.where().findAll();
+    final existingHashes = <String>{for (final e in existing) e.rawSmsHash};
+    final existingTriples = <String>{
+      for (final e in existing)
+        '${e.senderId}|${e.smsDate.millisecondsSinceEpoch}|${e.parsedAmount}',
+    };
     return isar.writeTxn(() async {
       var inserted = 0;
       for (final row in rows) {
-        final existingHash = await isar.smsTransactions
-            .filter()
-            .rawSmsHashEqualTo(row.rawSmsHash)
-            .findFirst();
-        if (existingHash != null) continue;
-
-        final existingTriple = await isar.smsTransactions
-            .filter()
-            .senderIdEqualTo(row.senderId)
-            .and()
-            .smsDateEqualTo(row.smsDate)
-            .and()
-            .parsedAmountEqualTo(row.parsedAmount)
-            .findFirst();
-        if (existingTriple != null) continue;
+        if (existingHashes.contains(row.rawSmsHash)) continue;
+        final triple =
+            '${row.senderId}|${row.smsDate.millisecondsSinceEpoch}|${row.parsedAmount}';
+        if (existingTriples.contains(triple)) continue;
 
         await isar.smsTransactions.put(row);
+        // Track the new row so a duplicate later in the same batch is caught.
+        existingHashes.add(row.rawSmsHash);
+        existingTriples.add(triple);
         inserted++;
       }
       return inserted;

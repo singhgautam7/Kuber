@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/settings/providers/settings_provider.dart'
-    show settingsProvider, SwipeMode, NavBarStyle;
+    show settingsProvider, navBarStyleProvider, SwipeMode, NavBarStyle;
 import '../../features/history/providers/selection_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
@@ -189,7 +189,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final settings = ref.watch(settingsProvider).valueOrNull;
     if (widget.navigationShell == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -205,8 +204,12 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= KuberBreakpoints.smallTablet;
 
-    final swipeMode = settings?.swipeMode ?? SwipeMode.changeTabs;
-    final navBarStyle = settings?.navBarStyle ?? NavBarStyle.modern;
+    // Only watch the two fields this scaffold actually renders with —
+    // watching the whole settings state would rebuild the app shell on any
+    // settings change (theme, currency, etc.).
+    final swipeMode = ref.watch(settingsProvider
+        .select((s) => s.valueOrNull?.swipeMode ?? SwipeMode.changeTabs));
+    final navBarStyle = ref.watch(navBarStyleProvider);
 
     final animatedContent = swipeMode == SwipeMode.changeTabs
         ? PageView(
@@ -378,8 +381,9 @@ class _ModernNavBarState extends State<_ModernNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     final hide = widget.isSelectionMode || widget.isKeyboardOpen;
 
     return AnimatedSlide(
@@ -489,8 +493,9 @@ class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Container(
       decoration: BoxDecoration(

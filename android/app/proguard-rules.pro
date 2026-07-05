@@ -14,3 +14,10 @@
 
 # Google Play Core rules (fixes R8 "Missing classes" errors)
 -dontwarn com.google.android.play.core.**
+
+# Home-screen widget providers: R8 strips these because the Dart side references
+# them only by string name (via home_widget's HomeWidget.updateWidget). Without
+# these keeps, profile/release builds throw ClassNotFoundException from the
+# AppWidgetManager binder and every widget sync silently fails.
+-keep class com.grs.kuber.widgets.** { *; }
+-keep class * extends android.appwidget.AppWidgetProvider { *; }

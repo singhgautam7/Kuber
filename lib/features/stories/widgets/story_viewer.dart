@@ -376,9 +376,13 @@ class _ProgressBars extends StatelessWidget {
                 child: i < currentIndex
                     ? _bar(1)
                     : i == currentIndex
-                    ? AnimatedBuilder(
-                        animation: controller,
-                        builder: (_, __) => _bar(controller.value),
+                    // RepaintBoundary keeps the 60Hz progress tween from
+                    // repainting the top chrome (close/share/logo) each frame.
+                    ? RepaintBoundary(
+                        child: AnimatedBuilder(
+                          animation: controller,
+                          builder: (_, __) => _bar(controller.value),
+                        ),
                       )
                     : const SizedBox.shrink(),
               ),

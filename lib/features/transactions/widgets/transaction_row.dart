@@ -28,7 +28,9 @@ class DateGroupHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final formatter = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final isPositive = dayTotal >= 0;
@@ -49,7 +51,7 @@ class DateGroupHeader extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            style: textTheme.labelSmall?.copyWith(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: cs.onSurfaceVariant,
@@ -66,7 +68,7 @@ class DateGroupHeader extends ConsumerWidget {
           const SizedBox(width: KuberSpacing.sm),
           Text(
             totalText,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            style: textTheme.titleSmall?.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: totalColor,
@@ -265,7 +267,11 @@ class TransactionRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    // Cache theme lookups — this widget renders per-row in the History list,
+    // so five separate Theme.of(context).textTheme walks per row adds up.
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final isSelectionMode = ref.watch(isSelectionModeProvider);
     // Watch only this row's membership so toggling one selection rebuilds only
     // the affected row, not every visible row.
@@ -401,10 +407,7 @@ class TransactionRow extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             displayName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
+                            style: textTheme.bodyMedium?.copyWith(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: cs.onSurface,
@@ -433,7 +436,7 @@ class TransactionRow extends ConsumerWidget {
                           child: Text(
                             subtitle,
                             style:
-                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                textTheme.bodySmall?.copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                       color: cs.onSurfaceVariant,
@@ -459,10 +462,7 @@ class TransactionRow extends ConsumerWidget {
                             ),
                             child: Text(
                               context.l10n.adjustmentLabel,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
+                              style: textTheme.labelSmall?.copyWith(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w700,
                                     color: cs.onSurfaceVariant,
@@ -490,7 +490,7 @@ class TransactionRow extends ConsumerWidget {
                 children: [
                   Text(
                     maskAmount('$amountPrefix${formatter.formatCurrency(transaction.amount)}', ref.watch(privacyModeProvider)),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: amountColor,
@@ -499,7 +499,7 @@ class TransactionRow extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Text(
                     DateFormatter.time(transaction.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: textTheme.bodySmall?.copyWith(
                           fontSize: 11,
                           fontWeight: FontWeight.w400,
                           color: cs.onSurfaceVariant,

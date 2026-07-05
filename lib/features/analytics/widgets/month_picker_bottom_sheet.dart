@@ -28,8 +28,9 @@ class _MonthPickerBottomSheetState extends State<MonthPickerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Container(
       decoration: BoxDecoration(

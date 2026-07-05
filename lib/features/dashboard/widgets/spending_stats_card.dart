@@ -19,6 +19,15 @@ class SpendingStatsCard extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final valueStyle = theme.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    final projectedStyle = valueStyle?.copyWith(color: cs.onSurface);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
       child: Column(
@@ -28,10 +37,10 @@ class SpendingStatsCard extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainer,
+            color: cs.surfaceContainer,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+              color: cs.outline.withValues(alpha: 0.5),
               width: 1,
             ),
           ),
@@ -42,15 +51,13 @@ class SpendingStatsCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.l10n.avgDaily, style: _captionStyle(context)),
+                    Text(context.l10n.avgDaily, style: _captionStyle(theme)),
                     const SizedBox(height: 4),
                     Text(
-                      maskAmount(ref.watch(formatterProvider).formatCurrency(stats.avgDaily.roundToDouble()), ref.watch(privacyModeProvider)),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      maskAmount(fmt.formatCurrency(stats.avgDaily.roundToDouble()), isPrivate),
+                      style: valueStyle,
                     ),
-                    Text(context.l10n.last90Days, style: _captionStyle(context)),
+                    Text(context.l10n.last90Days, style: _captionStyle(theme)),
                   ],
                 ),
               ),
@@ -60,15 +67,13 @@ class SpendingStatsCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.l10n.statThisMonth, style: _captionStyle(context)),
+                    Text(context.l10n.statThisMonth, style: _captionStyle(theme)),
                     const SizedBox(height: 4),
                     Text(
-                      maskAmount(ref.watch(formatterProvider).formatCurrency(stats.monthTotal.roundToDouble()), ref.watch(privacyModeProvider)),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
+                      maskAmount(fmt.formatCurrency(stats.monthTotal.roundToDouble()), isPrivate),
+                      style: valueStyle,
                     ),
-                    Text(context.l10n.statDays('${stats.daysElapsed}'), style: _captionStyle(context)),
+                    Text(context.l10n.statDays('${stats.daysElapsed}'), style: _captionStyle(theme)),
                   ],
                 ),
               ),
@@ -78,16 +83,13 @@ class SpendingStatsCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.l10n.projectedLabel, style: _captionStyle(context)),
+                    Text(context.l10n.projectedLabel, style: _captionStyle(theme)),
                     const SizedBox(height: 4),
                     Text(
-                      maskAmount(ref.watch(formatterProvider).formatCurrency(stats.projected.roundToDouble()), ref.watch(privacyModeProvider)),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                      maskAmount(fmt.formatCurrency(stats.projected.roundToDouble()), isPrivate),
+                      style: projectedStyle,
                     ),
-                    Text(context.l10n.endOfMonth, style: _captionStyle(context)),
+                    Text(context.l10n.endOfMonth, style: _captionStyle(theme)),
                   ],
                 ),
               ),
@@ -99,9 +101,9 @@ class SpendingStatsCard extends ConsumerWidget {
     );
   }
 
-  TextStyle? _captionStyle(BuildContext context) =>
-      Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+  TextStyle? _captionStyle(ThemeData theme) =>
+      theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
             letterSpacing: 0.8,
             fontWeight: FontWeight.w600,
           );

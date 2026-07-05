@@ -35,8 +35,9 @@ class _HomeSmartInsightsState extends ConsumerState<HomeSmartInsights> {
   Widget build(BuildContext context) {
     final insights = ref.watch(smartInsightsProvider);
     final isPrivate = ref.watch(privacyModeProvider);
-    final tt = Theme.of(context).textTheme;
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final tt = theme.textTheme;
+    final cs = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
@@ -92,8 +93,9 @@ class _InsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     final bgColor = isFirst ? cs.primary : cs.surfaceContainer;
     final labelColor =
@@ -171,8 +173,9 @@ class _InsightsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),

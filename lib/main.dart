@@ -182,8 +182,9 @@ class KuberStartupErrorApp extends StatelessWidget {
       darkTheme: AppTheme.dark(const Locale('en')),
       home: Builder(
         builder: (context) {
-          final cs = Theme.of(context).colorScheme;
-          final tt = Theme.of(context).textTheme;
+          final theme = Theme.of(context);
+          final cs = theme.colorScheme;
+          final tt = theme.textTheme;
           return Scaffold(
             body: Center(
               child: Padding(

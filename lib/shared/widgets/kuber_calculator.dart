@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -335,8 +337,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   Widget _buildDisplay() {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final currency = ref.watch(currencyProvider);
 
     final resultStr = _previewResult ?? (_expression.isEmpty ? '0' : _expression);
@@ -530,8 +533,9 @@ class _KuberCalculatorState extends ConsumerState<KuberCalculator> {
   }
 
   Widget _buildHeroCTA() {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final currency = ref.watch(currencyProvider);
 
     final evaluated = _evaluate(_rawExpression) ?? double.tryParse(_rawExpression) ?? 0.0;
@@ -579,7 +583,7 @@ enum _CalcKeyKind {
   danger,
 }
 
-class _CalcKey extends StatelessWidget {
+class _CalcKey extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
   final IconData? icon;
@@ -595,58 +599,137 @@ class _CalcKey extends StatelessWidget {
   });
 
   @override
+  State<_CalcKey> createState() => _CalcKeyState();
+}
+
+/// Per-kind accent overlay + subtle scale-down.
+///
+/// The visual shape is `0 → peak → 0` over one press. We deliberately do
+/// NOT use `CurvedAnimation` here — its `.value` getter asserts that any
+/// attached curve maps `1.0` to near `1.0`, which is a contract for
+/// monotonic curves. A bell shape violates that. Instead we listen to
+/// `_ctrl` directly and apply `sin(t·π)` inline in the AnimatedBuilder.
+class _CalcKeyState extends State<_CalcKey>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  static const _flashDuration = Duration(milliseconds: 260);
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: _flashDuration);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  /// Single flash — controller runs 0 → 1 once. The builder maps that
+  /// linear ramp through `sin(t·π)` so the visible value rises to 1 at
+  /// the midpoint and falls back to ~0 at the end. Rapid taps restart
+  /// from 0 (any in-flight animation is cancelled), so successive
+  /// presses read as distinct pulses.
+  void _flash() {
+    _ctrl.forward(from: 0);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final Color bgColor;
-    final Color fgColor;
-    final Border? border;
+    // Resting palette per kind. We pre-blend translucent colors over cs.surface
+    // to ensure they are fully opaque before animating, preventing opacity/bleed-through jitters.
+    final Color solidBg;
+    final Color solidBorder;
+    final Color restFg;
+    final Color accent;
 
-    switch (kind) {
+    switch (widget.kind) {
       case _CalcKeyKind.number:
-        bgColor = cs.surfaceContainer;
-        fgColor = cs.onSurface;
-        border = Border.all(color: cs.outline);
+        solidBg = cs.surfaceContainer;
+        solidBorder = cs.outline;
+        restFg = cs.onSurface;
+        accent = cs.onSurface;
         break;
       case _CalcKeyKind.operator:
-        bgColor = cs.primary.withValues(alpha: 0.10);
-        fgColor = cs.primary;
-        border = Border.all(color: cs.primary.withValues(alpha: 0.18));
+        solidBg = Color.alphaBlend(cs.primary.withValues(alpha: 0.10), cs.surface);
+        solidBorder = Color.alphaBlend(cs.primary.withValues(alpha: 0.18), cs.surface);
+        restFg = cs.primary;
+        accent = cs.primary;
         break;
       case _CalcKeyKind.danger:
-        bgColor = cs.error.withValues(alpha: 0.10);
-        fgColor = cs.error;
-        border = Border.all(color: cs.error.withValues(alpha: 0.10));
+        solidBg = Color.alphaBlend(cs.error.withValues(alpha: 0.10), cs.surface);
+        solidBorder = Color.alphaBlend(cs.error.withValues(alpha: 0.10), cs.surface);
+        restFg = cs.error;
+        accent = cs.error;
         break;
     }
 
     return Expanded(
-      flex: flex,
+      flex: widget.flex,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 54,
-            decoration: BoxDecoration(
-              color: bgColor,
-              border: border,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            alignment: Alignment.center,
-            child: icon != null
-                ? Icon(icon, size: 22, color: fgColor)
-                : Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      color: fgColor,
+        // RepaintBoundary keeps the 60 Hz tap animation isolated from the
+        // sibling keys and the receipt/hero panel above.
+        child: RepaintBoundary(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            // Fire the flash and the action together — the accent pulse
+            // lands at the same instant the digit/operator appears in the
+            // expression, so the two events read as one.
+            onTap: () {
+              _flash();
+              widget.onTap();
+            },
+            child: AnimatedBuilder(
+              animation: _ctrl,
+              builder: (context, _) {
+                // Bell shape: 0 → 1 → 0 over the single forward run.
+                // sin(π) is 1.22e-16 in doubles, i.e. visually 0.
+                final v = math.sin(_ctrl.value * math.pi);
+
+                // Blend the translucent active overlays over the solid resting colors.
+                // Since both inputs are opaque/pre-blended, the target colors are solid,
+                // and Color.lerp will compute intermediate values with a constant 1.0 alpha.
+                final targetBg = Color.alphaBlend(accent.withValues(alpha: 0.28), solidBg);
+                final targetBorder = Color.alphaBlend(accent.withValues(alpha: 0.55), solidBorder);
+
+                final bg = Color.lerp(solidBg, targetBg, v)!;
+                final border = Color.lerp(solidBorder, targetBorder, v)!;
+
+                // 0.97 scale — enough to feel, not enough to jitter neighbours.
+                final scale = 1.0 - (v * 0.03);
+                return Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: bg,
+                      border: Border.all(color: border),
+                      borderRadius: BorderRadius.circular(14),
                     ),
+                    alignment: Alignment.center,
+                    child: widget.icon != null
+                        ? Icon(widget.icon, size: 22, color: restFg)
+                        : Text(
+                            widget.label,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w600,
+                              color: restFg,
+                            ),
+                          ),
                   ),
+                );
+              },
+            ),
           ),
         ),
       ),
     );
   }
 }
+

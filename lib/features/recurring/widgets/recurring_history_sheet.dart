@@ -135,8 +135,9 @@ class _RecurringTxnRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final formatter = ref.watch(formatterProvider);
 
     final categoryMapAsync = ref.watch(categoryMapProvider);

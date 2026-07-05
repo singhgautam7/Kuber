@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -53,8 +54,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   StreamSubscription? _docSub;
   Timer? _saveDebounce;
   Timer? _highlightDebounce;
-  bool _saving = false;
-  bool _dirty = false;
+  // Save-status flags live in ValueNotifiers, not `setState` — every keystroke
+  // triggers `_markDirty`, and rebuilding the whole editor (including the
+  // Quill tree and its LayoutBuilder+IntrinsicHeight) 60× while a user types
+  // is prohibitively expensive. Only the top-bar's save indicator subscribes.
+  final ValueNotifier<bool> _saving = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _dirty = ValueNotifier<bool>(false);
 
   /// A brand-new note is NOT written to the database until the first real
   /// edit, so backing out of a blank note never flashes + deletes on the
@@ -133,8 +138,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   void _markDirty() {
-    _dirty = true;
-    if (!_saving && mounted) setState(() {});
+    _dirty.value = true;
     _saveDebounce?.cancel();
     _saveDebounce = Timer(const Duration(milliseconds: 500), _save);
   }
@@ -145,7 +149,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (c == null || note == null) return;
     // Never persist a brand-new note that is still empty.
     if (!_persisted && _isEmptyNote()) return;
-    setState(() => _saving = true);
+    _saving.value = true;
     note
       ..title = _titleController.text.trim()
       ..content = jsonEncode(c.document.toDelta().toJson());
@@ -153,10 +157,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     note.id = await ref.read(notesRepositoryProvider).put(note);
     _persisted = true;
     if (!mounted) return;
-    setState(() {
-      _saving = false;
-      _dirty = false;
-    });
+    _saving.value = false;
+    _dirty.value = false;
   }
 
   /// Ensures a new note exists in the DB (with a real id) before an action
@@ -217,7 +219,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
         // Empty note: delete it if it had been persisted; if it was never
         // written (lazy new note), there's nothing to clean up.
         if (_persisted) _repo?.delete(note.id).ignore();
-      } else if (_dirty && c != null) {
+      } else if (_dirty.value && c != null) {
         // Flush any pending edit the 500ms debounce hadn't written yet.
         note
           ..title = _titleController.text.trim()
@@ -228,6 +230,8 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     _controller?.dispose();
     _titleController.dispose();
     _editorFocus.dispose();
+    _saving.dispose();
+    _dirty.dispose();
     super.dispose();
   }
 
@@ -260,8 +264,13 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            NoteEditorTopBar(
-              saving: _saving || _dirty,
+            // Subscribes to the two save-status ValueNotifiers so only this
+            // top-bar rebuilds while typing. The Quill editor tree, its
+            // LayoutBuilder + IntrinsicHeight, and the toolbar all skip the
+            // rebuild pass on each keystroke.
+            _NoteEditorTopBarSaveIndicator(
+              saving: _saving,
+              dirty: _dirty,
               persisted: _persisted,
               readOnly: readOnly,
               onToggleReadOnly: _toggleReadOnly,
@@ -380,6 +389,50 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             ),
             if (!readOnly) KuberEditorToolbar(controller: controller),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Scoped subscriber: only this widget rebuilds when `_saving` or `_dirty`
+/// changes. Wraps `NoteEditorTopBar` so keystroke-driven dirty flips do NOT
+/// invalidate the editor body / Quill tree above.
+class _NoteEditorTopBarSaveIndicator extends StatelessWidget {
+  final ValueListenable<bool> saving;
+  final ValueListenable<bool> dirty;
+  final bool persisted;
+  final bool readOnly;
+  final VoidCallback onToggleReadOnly;
+  final VoidCallback onShare;
+  final VoidCallback onDuplicate;
+  final VoidCallback onDelete;
+
+  const _NoteEditorTopBarSaveIndicator({
+    required this.saving,
+    required this.dirty,
+    required this.persisted,
+    required this.readOnly,
+    required this.onToggleReadOnly,
+    required this.onShare,
+    required this.onDuplicate,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: saving,
+      builder: (context, savingValue, _) => ValueListenableBuilder<bool>(
+        valueListenable: dirty,
+        builder: (context, dirtyValue, _) => NoteEditorTopBar(
+          saving: savingValue || dirtyValue,
+          persisted: persisted,
+          readOnly: readOnly,
+          onToggleReadOnly: onToggleReadOnly,
+          onShare: onShare,
+          onDuplicate: onDuplicate,
+          onDelete: onDelete,
         ),
       ),
     );

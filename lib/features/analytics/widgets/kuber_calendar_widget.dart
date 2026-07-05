@@ -40,8 +40,9 @@ class _KuberCalendarWidgetState extends State<KuberCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     final daysInMonth = DateTime(widget.viewDate.year, widget.viewDate.month + 1, 0).day;
     final firstDayWeekday = DateTime(widget.viewDate.year, widget.viewDate.month, 1).weekday; // 1=Mon, 7=Sun

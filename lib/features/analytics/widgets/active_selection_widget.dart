@@ -18,8 +18,9 @@ class ActiveSelectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     final startDateStr = DateFormat('MMM d').format(start);
     final startYearStr = DateFormat('yyyy').format(start);

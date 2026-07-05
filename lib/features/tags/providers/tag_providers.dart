@@ -17,6 +17,14 @@ final tagListProvider = StreamProvider<List<Tag>>((ref) {
   return repository.watchTags();
 });
 
+/// Cached tag-id → name map. Consumers that need to display tag names for
+/// transactions (Home recent card, History rows, etc.) can watch this
+/// derived provider instead of rebuilding the map inline on every rebuild.
+final tagNameByIdProvider = Provider<Map<int, String>>((ref) {
+  final tags = ref.watch(tagListProvider).valueOrNull ?? const <Tag>[];
+  return {for (final t in tags) t.id: t.name};
+});
+
 final transactionTagsProvider = StreamProvider.family<List<Tag>, int>((ref, transactionId) {
   final repository = ref.watch(tagRepositoryProvider);
   return repository.watchTagsForTransaction(transactionId);

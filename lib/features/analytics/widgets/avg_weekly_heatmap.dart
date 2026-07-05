@@ -36,8 +36,9 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
 
     final dailyAverages = widget.precomputedDailyAverages ?? _calculateDailyAverages();
     final maxAvg = dailyAverages.values.fold<double>(0, (max, val) => val > max ? val : max);
-    final cs = Theme.of(context).colorScheme;
-    final tt = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final tt = theme.textTheme;
 
     return Card(
       margin: EdgeInsets.zero,

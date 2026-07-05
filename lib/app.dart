@@ -10,10 +10,13 @@ import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/widget_sync_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/analytics/providers/analytics_provider.dart';
 import 'features/auth/screens/lock_screen.dart';
 import 'features/backups/providers/backup_provider.dart';
 import 'features/budgets/services/budget_service.dart';
+import 'features/history/providers/history_view_provider.dart';
 import 'features/history/providers/selection_provider.dart';
+import 'features/transactions/providers/transaction_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
 import 'features/reminders/data/reminders_repository.dart';
@@ -51,7 +54,29 @@ class _KuberAppState extends ConsumerState<KuberApp>
       _runSmsCleanup();
       _runReminderMaintenance();
       _runWidgetSync();
+      // Warm the non-Home tabs' providers ~1.5s after first frame — late
+      // enough that Home has finished its own hydration, early enough that
+      // a user tapping Analytics or History hits cached data.
+      Future.delayed(const Duration(milliseconds: 1500), _warmTabProviders);
     });
+  }
+
+  /// Warms the providers that the Analytics and History tabs consume on first
+  /// build, so tapping either tab doesn't trigger an O(N) synchronous compute
+  /// in the middle of the tab-switch animation. Deliberately delayed (not
+  /// run immediately post-frame) so Home's own first-paint hydration is not
+  /// competing with this warm-up for the UI thread.
+  void _warmTabProviders() {
+    if (!mounted) return;
+    try {
+      ref.read(analyticsFilterProvider);
+      ref.read(analyticsTransactionsProvider);
+      ref.read(analyticsComputedProvider);
+      ref.read(historyViewProvider.future).ignore();
+      ref.read(transferPairAccountIdsProvider.future).ignore();
+    } catch (e, stack) {
+      debugPrint('Kuber: tab provider warm-up failed (non-fatal): $e\n$stack');
+    }
   }
 
   /// Refreshes all native home-screen widgets. Best-effort and post-first-frame
@@ -102,6 +127,10 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // Refresh home-screen widgets so a change made this session (then a jump to
     // the launcher) reflects within seconds of returning.
     _runWidgetSync();
+    // The user may have granted SMS permission via system settings while we
+    // were backgrounded — invalidate the lightweight home-tab provider so
+    // the SMS card picks up the new permission on the next frame.
+    ref.invalidate(smsHomeInfoProvider);
     // Already checked backup today? A daily (or longer) backup can't be due
     // again, so skip — avoids a DB read on every foreground.
     final now = DateTime.now();

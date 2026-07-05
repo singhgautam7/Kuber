@@ -67,14 +67,20 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return AnimatedBuilder(
-      animation: _anim,
-      builder: (_, __) => Container(
-        width: 6,
-        height: 6,
-        decoration: BoxDecoration(
-          color: cs.onSurfaceVariant.withValues(alpha: 0.3 + 0.7 * _anim.value),
-          shape: BoxShape.circle,
+    // RepaintBoundary isolates the 60Hz opacity tween to this dot's ~6×6 layer,
+    // so the parent Row / Padding / Align / enclosing ListView row don't repaint
+    // once per frame while the indicator is visible.
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _anim,
+        builder: (_, __) => Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color:
+                cs.onSurfaceVariant.withValues(alpha: 0.3 + 0.7 * _anim.value),
+            shape: BoxShape.circle,
+          ),
         ),
       ),
     );

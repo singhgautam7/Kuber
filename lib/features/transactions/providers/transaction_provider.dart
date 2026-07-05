@@ -7,6 +7,7 @@ import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/attachment_service.dart';
 import '../data/transaction.dart';
 import '../data/transaction_repository.dart';
+import '../helpers/transaction_filters.dart';
 import '../../budgets/services/budget_service.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -19,6 +20,18 @@ final transactionListProvider =
     AsyncNotifierProvider<TransactionListNotifier, List<Transaction>>(
       TransactionListNotifier.new,
     );
+
+/// Cached transfer-pair account-id map for the whole transaction list.
+/// Both the History screen and the Home recent-transactions card render
+/// transfer rows and need the paired leg's accountId (O(1) row lookup).
+/// Computing this once per transaction-list change — instead of once per
+/// widget rebuild — avoids re-scanning every transaction on unrelated
+/// rebuilds (e.g. entering selection mode, switching tabs).
+final transferPairAccountIdsProvider =
+    FutureProvider<Map<int, String>>((ref) async {
+  final txns = await ref.watch(transactionListProvider.future);
+  return buildTransferPairAccountIds(txns);
+});
 
 class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
   @override

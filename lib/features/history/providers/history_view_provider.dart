@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../tags/providers/tag_providers.dart';
-import '../../transactions/helpers/transaction_filters.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../utils/filter_utils.dart';
 import '../utils/history_utils.dart';
@@ -50,7 +49,9 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
   final transactions = await ref.watch(transactionListProvider.future);
   final filter = ref.watch(historyFilterProvider);
   final txnTagsMap = await ref.watch(transactionTagsMapProvider.future);
-  final tags = await ref.watch(tagListProvider.future);
+  final tagNameById = ref.watch(tagNameByIdProvider);
+  final transferPairAccountId =
+      await ref.watch(transferPairAccountIdsProvider.future);
 
   final filtered = applyHistoryFilters(
     transactions,
@@ -75,7 +76,6 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
 
   final groups = groupTransactionsByDate(filtered);
 
-  final tagNameById = {for (final t in tags) t.id: t.name};
   final tagNamesMap = <int, List<String>>{};
   for (final entry in txnTagsMap.entries) {
     final names = entry.value
@@ -91,7 +91,7 @@ final historyViewProvider = FutureProvider<HistoryView>((ref) async {
     totalIncome: totalIncome,
     totalExpense: totalExpense,
     tagNamesMap: tagNamesMap,
-    transferPairAccountId: buildTransferPairAccountIds(transactions),
+    transferPairAccountId: transferPairAccountId,
     sourceEmpty: transactions.isEmpty,
   );
 });
