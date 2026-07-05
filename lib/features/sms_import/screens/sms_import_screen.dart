@@ -122,7 +122,14 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
   /// first-load scan (Scenario A) or the list. [refresh] re-reads the provider
   /// so a freshly granted permission is reflected.
   Future<void> _resolveGrantedEntry({required bool refresh}) async {
-    if (refresh) ref.invalidate(smsImportProvider);
+    if (refresh) {
+      ref.invalidate(smsImportProvider);
+      // The home dashboard reads a lightweight FutureProvider mirroring
+      // (permission, lastScannedAt). It caches until invalidated — without
+      // this line the home widget keeps showing "Set up" even after the
+      // user grants permission and returns.
+      ref.invalidate(smsHomeInfoProvider);
+    }
     await ref.read(smsImportProvider.future);
     if (!mounted) return;
     if (ref.read(smsImportProvider.notifier).shouldFirstLoad()) {

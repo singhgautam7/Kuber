@@ -267,6 +267,12 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
         trigger: trigger,
       );
       state = AsyncData((await _load()).copyWith(scanProgress: done));
+      // The home-tab widget reads a lightweight FutureProvider that caches
+      // its result. A scan just changed `lastScannedAt` (and possibly
+      // `hasPermission`, if this was the first scan after grant), so
+      // invalidate that provider — otherwise the widget will still show
+      // "Set up" (or a stale timestamp) when the user returns to home.
+      ref.invalidate(smsHomeInfoProvider);
 
       // The background strip fades itself out after 2s; the first-load screen
       // clears progress itself once it transitions.

@@ -127,6 +127,10 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // Refresh home-screen widgets so a change made this session (then a jump to
     // the launcher) reflects within seconds of returning.
     _runWidgetSync();
+    // The user may have granted SMS permission via system settings while we
+    // were backgrounded — invalidate the lightweight home-tab provider so
+    // the SMS card picks up the new permission on the next frame.
+    ref.invalidate(smsHomeInfoProvider);
     // Already checked backup today? A daily (or longer) backup can't be due
     // again, so skip — avoids a DB read on every foreground.
     final now = DateTime.now();
