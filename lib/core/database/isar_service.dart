@@ -34,6 +34,12 @@ final isarProvider = Provider<Isar>((ref) {
 
 class IsarService {
   static Future<Isar> open() async {
+    // Reuse the process-global instance if it's already open. The widget
+    // configuration activities boot a second Flutter engine that re-runs
+    // main(); without this, a second Isar.open() in the same process would
+    // fail and crash the config screen.
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) return existing;
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open([
       TransactionSchema,

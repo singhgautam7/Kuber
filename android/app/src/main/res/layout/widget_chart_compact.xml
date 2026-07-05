@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chart (compact, 7D) · 4x2 · 302x146dp. Pre-rendered PNG in the ImageView. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp">
+
+    <!-- LOADING -->
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <FrameLayout android:layout_width="90dp" android:layout_height="10dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="140dp" android:layout_height="9dp"
+            android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <!-- EMPTY -->
+    <LinearLayout
+        android:id="@+id/state_empty"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/w_last_7_days"
+            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_primary" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                android:src="@drawable/ic_widget_trending_up" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/w_empty_chart"
+                android:textSize="11sp" android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:baselineAligned="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="@string/w_last_7_days"
+                android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_text_primary" />
+            <TextView android:id="@+id/tv_net" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="−₹8,940"
+                android:textSize="12sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_expense" />
+        </LinearLayout>
+
+        <ImageView android:id="@+id/iv_chart" android:layout_width="match_parent"
+            android:layout_height="0dp" android:layout_weight="1"
+            android:layout_marginTop="8dp" android:layout_marginBottom="4dp"
+            android:scaleType="fitXY" android:contentDescription="@null" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView android:id="@+id/tv_income" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:layout_marginEnd="14dp"
+                android:text="Income ₹22,100" android:textSize="9.5sp"
+                android:textColor="@color/kuber_income" />
+            <TextView android:id="@+id/tv_expense" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="Expense ₹31,040"
+                android:textSize="9.5sp" android:textColor="@color/kuber_expense" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

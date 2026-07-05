@@ -74,6 +74,14 @@ List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevM
     section: context.l10n.moreToolsTitle,
     route: '/more/sms-import',
   ),
+  // Home screen widgets gallery. Keywords: widgets, home screen, add widget.
+  _SearchableItem(
+    label: context.l10n.menuWidgets,
+    subtitle: 'Home screen widgets, add widget to your home screen',
+    icon: Icons.widgets_outlined,
+    section: context.l10n.moreAppTitle,
+    route: '/more/widgets-gallery',
+  ),
   // Kuber Notes / Reminders / Upcoming Events (English-only features).
   _SearchableItem(
     label: 'Kuber Notes',

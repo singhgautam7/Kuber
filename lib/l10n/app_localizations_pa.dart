@@ -2496,6 +2496,12 @@ class AppLocalizationsPa extends AppLocalizations {
   String get menuStoriesArchiveDesc => 'ਹਰ ਰੀਕੈਪ, ਨਵਾਂ ਪਹਿਲਾਂ';
 
   @override
+  String get menuWidgets => 'Widgets';
+
+  @override
+  String get menuWidgetsDesc => 'Home screen widgets to keep Kuber in view';
+
+  @override
   String get menuTroubleshoot => 'ਸਮੱਸਿਆ ਨਿਵਾਰਨ';
 
   @override

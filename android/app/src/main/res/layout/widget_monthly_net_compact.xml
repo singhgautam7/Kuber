@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monthly Net · 2x1 · 146x68dp (compact variant) -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="10dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
+
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+        <FrameLayout android:layout_width="60dp" android:layout_height="8dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="90dp" android:layout_height="16dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/w_this_month"
+                android:textAllCaps="true"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_text_muted" />
+            <TextView
+                android:id="@+id/tv_updated"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="4m ago"
+                android:textSize="9sp"
+                android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_net"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="+₹18,240"
+            android:textSize="19sp"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="13sp"
+            android:autoSizeMaxTextSize="19sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_income" />
+    </LinearLayout>
+</FrameLayout>

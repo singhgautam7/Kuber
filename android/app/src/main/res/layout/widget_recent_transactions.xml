@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Recent Transactions · 4x2 · 302x146dp. Fixed rows (no ListView). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp">
+
+    <!-- LOADING -->
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <FrameLayout android:layout_width="120dp" android:layout_height="10dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="18dp"
+            android:layout_marginTop="10dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="18dp"
+            android:layout_marginTop="8dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="18dp"
+            android:layout_marginTop="8dp" android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <!-- EMPTY -->
+    <LinearLayout
+        android:id="@+id/state_empty"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/w_recent_transactions"
+            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_primary" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp"
+                android:src="@drawable/ic_widget_plus" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/w_empty_recent_transactions"
+                android:textSize="11sp" android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/w_recent_transactions"
+            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_primary" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center_vertical">
+
+            <!-- row 0 -->
+            <LinearLayout android:id="@+id/row_0" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                <ImageView android:id="@+id/row_0_icon" android:layout_width="20dp"
+                    android:layout_height="20dp" android:layout_marginEnd="9dp"
+                    android:src="@drawable/widget_cat_tile" android:contentDescription="@null" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="8dp" android:orientation="vertical">
+                    <TextView android:id="@+id/row_0_name" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:text="Swiggy order" android:textSize="11.5sp"
+                        android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/row_0_account" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:textAllCaps="true" android:text="HDFC Savings" android:textSize="8.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+                <TextView android:id="@+id/row_0_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="−₹460"
+                    android:textSize="11.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+
+            <!-- row 1 -->
+            <LinearLayout android:id="@+id/row_1" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                <ImageView android:id="@+id/row_1_icon" android:layout_width="20dp"
+                    android:layout_height="20dp" android:layout_marginEnd="9dp"
+                    android:src="@drawable/widget_cat_tile" android:contentDescription="@null" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="8dp" android:orientation="vertical">
+                    <TextView android:id="@+id/row_1_name" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:text="Salary credit" android:textSize="11.5sp"
+                        android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/row_1_account" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:textAllCaps="true" android:text="HDFC Savings" android:textSize="8.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+                <TextView android:id="@+id/row_1_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="+₹64,200"
+                    android:textSize="11.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_income" />
+            </LinearLayout>
+
+            <!-- row 2 -->
+            <LinearLayout android:id="@+id/row_2" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                <ImageView android:id="@+id/row_2_icon" android:layout_width="20dp"
+                    android:layout_height="20dp" android:layout_marginEnd="9dp"
+                    android:src="@drawable/widget_cat_tile" android:contentDescription="@null" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="8dp" android:orientation="vertical">
+                    <TextView android:id="@+id/row_2_name" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:text="Uber ride" android:textSize="11.5sp"
+                        android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/row_2_account" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:textAllCaps="true" android:text="ICICI Credit" android:textSize="8.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+                <TextView android:id="@+id/row_2_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="−₹212"
+                    android:textSize="11.5sp" android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+
+            <!-- row 3 (hidden unless a 4th txn exists / taller cell) -->
+            <LinearLayout android:id="@+id/row_3" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="horizontal"
+                android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp"
+                android:visibility="gone">
+                <ImageView android:id="@+id/row_3_icon" android:layout_width="20dp"
+                    android:layout_height="20dp" android:layout_marginEnd="9dp"
+                    android:src="@drawable/widget_cat_tile" android:contentDescription="@null" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="8dp" android:orientation="vertical">
+                    <TextView android:id="@+id/row_3_name" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:textSize="11.5sp" android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/row_3_account" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                        android:textAllCaps="true" android:textSize="8.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+                <TextView android:id="@+id/row_3_amount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textSize="11.5sp"
+                    android:fontFamily="sans-serif-medium" android:textColor="@color/kuber_expense" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Footer -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="end"
+            android:paddingTop="5dp" android:background="@drawable/widget_footer_divider">
+            <TextView android:id="@+id/footer_link" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/w_view_all"
+                android:textSize="10.5sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_primary" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

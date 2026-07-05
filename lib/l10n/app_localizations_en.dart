@@ -2493,6 +2493,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menuStoriesArchiveDesc => 'Every recap, newest first';
 
   @override
+  String get menuWidgets => 'Widgets';
+
+  @override
+  String get menuWidgetsDesc => 'Home screen widgets to keep Kuber in view';
+
+  @override
   String get menuTroubleshoot => 'Troubleshoot';
 
   @override

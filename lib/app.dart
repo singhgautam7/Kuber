@@ -8,6 +8,7 @@ import 'package:flutter_quill/flutter_quill.dart'
 import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/widget_sync_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/lock_screen.dart';
 import 'features/backups/providers/backup_provider.dart';
@@ -49,7 +50,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
       _runDueBackup();
       _runSmsCleanup();
       _runReminderMaintenance();
+      _runWidgetSync();
     });
+  }
+
+  /// Refreshes all native home-screen widgets. Best-effort and post-first-frame
+  /// so it never delays cold start; internally isolated so it can't crash the app.
+  Future<void> _runWidgetSync() async {
+    try {
+      await ref.read(widgetSyncServiceProvider).syncAll();
+    } catch (e, stack) {
+      debugPrint('Kuber: widget sync failed (non-fatal): $e\n$stack');
+    }
   }
 
   // Date (y/m/d) of the last scheduled-backup check, so resume doesn't re-check
@@ -76,10 +88,20 @@ class _KuberAppState extends ConsumerState<KuberApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    // When leaving the app (e.g. pressing Home), push the latest data to the
+    // home-screen widgets so they reflect any change made this session before
+    // the user looks at them.
+    if (state == AppLifecycleState.paused) {
+      _runWidgetSync();
+      return;
+    }
     if (state != AppLifecycleState.resumed) return;
     // A reminder notification may have fired while we were backgrounded —
     // mirror any newly-due reminders into the in-app inbox and heal alarms.
     _runReminderMaintenance();
+    // Refresh home-screen widgets so a change made this session (then a jump to
+    // the launcher) reflects within seconds of returning.
+    _runWidgetSync();
     // Already checked backup today? A daily (or longer) backup can't be due
     // again, so skip — avoids a DB read on every foreground.
     final now = DateTime.now();

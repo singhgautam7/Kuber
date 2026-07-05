@@ -1,8 +1,11 @@
 package com.grs.kuber
 
 import android.app.Activity
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.Telephony
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -12,6 +15,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterFragmentActivity() {
     private val channelName = "com.grs.kuber/saf_backups"
     private val smsChannelName = "com.grs.kuber/sms"
+    private val widgetsChannelName = "com.grs.kuber/widgets"
     private val pickFolderRequest = 24017
     private var pendingPickResult: MethodChannel.Result? = null
 
@@ -65,6 +69,39 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            widgetsChannelName
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isPinSupported" -> result.success(isPinSupported())
+                "requestPin" -> {
+                    val provider = call.argument<String>("provider")
+                    if (provider == null) {
+                        result.error("bad_args", "Missing widget provider name", null)
+                    } else {
+                        result.success(requestPin(provider))
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    /** Whether the launcher supports pin-to-home (API 26+ and launcher opt-in). */
+    private fun isPinSupported(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+        val mgr = getSystemService(AppWidgetManager::class.java) ?: return false
+        return mgr.isRequestPinAppWidgetSupported
+    }
+
+    /** Requests the launcher pin the given widget provider to the home screen. */
+    private fun requestPin(provider: String): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+        val mgr = getSystemService(AppWidgetManager::class.java) ?: return false
+        if (!mgr.isRequestPinAppWidgetSupported) return false
+        val component = ComponentName(this, "com.grs.kuber.widgets.$provider")
+        return mgr.requestPinAppWidget(component, null, null)
     }
 
     /**

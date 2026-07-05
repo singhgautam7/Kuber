@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Account Balance · 2x1 · 146x68dp (compact variant) -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="10dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
+
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+        <FrameLayout android:layout_width="70dp" android:layout_height="8dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="100dp" android:layout_height="15dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/tv_account_name"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textAllCaps="true"
+            android:text="HDFC SAVINGS"
+            android:textSize="9sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_muted" />
+        <TextView
+            android:id="@+id/tv_balance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="₹2,84,650"
+            android:textSize="17sp"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="17sp"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_income" />
+    </LinearLayout>
+</FrameLayout>

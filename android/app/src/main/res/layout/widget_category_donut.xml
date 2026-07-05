@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Category Donut · 4x3 · 302x224dp. Donut is a pre-rendered PNG. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp">
+
+    <!-- LOADING -->
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <FrameLayout android:layout_width="100dp" android:layout_height="11dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="120dp" android:layout_height="9dp"
+            android:layout_gravity="end" android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <!-- EMPTY -->
+    <LinearLayout
+        android:id="@+id/state_empty"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/w_top_categories"
+            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_primary" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@drawable/ic_widget_trending_up" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:text="@string/w_empty_category_donut"
+                android:textSize="11sp" android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/w_top_categories"
+            android:textSize="13sp" android:fontFamily="sans-serif-medium"
+            android:textColor="@color/kuber_text_primary" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="1dp" android:text="@string/w_this_month_lower"
+            android:textSize="10sp" android:textColor="@color/kuber_text_muted" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="horizontal"
+            android:gravity="center_vertical" android:layout_marginTop="6dp">
+
+            <ImageView android:id="@+id/iv_donut" android:layout_width="92dp"
+                android:layout_height="92dp" android:layout_marginEnd="16dp"
+                android:scaleType="fitCenter" android:contentDescription="@null" />
+
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+
+                <LinearLayout android:id="@+id/cat_0" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal"
+                    android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                    <ImageView android:id="@+id/cat_0_dot" android:layout_width="8dp"
+                        android:layout_height="8dp" android:layout_marginEnd="6dp"
+                        android:src="@drawable/widget_dot" android:contentDescription="@null" />
+                    <TextView android:id="@+id/cat_0_name" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:maxLines="1" android:ellipsize="end" android:text="Food"
+                        android:textSize="10.5sp" android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/cat_0_value" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                        android:text="₹19,300 · 42%" android:textSize="10sp"
+                        android:textColor="@color/kuber_text_secondary" />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/cat_1" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal"
+                    android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                    <ImageView android:id="@+id/cat_1_dot" android:layout_width="8dp"
+                        android:layout_height="8dp" android:layout_marginEnd="6dp"
+                        android:src="@drawable/widget_dot" android:contentDescription="@null" />
+                    <TextView android:id="@+id/cat_1_name" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:maxLines="1" android:ellipsize="end" android:text="Transport"
+                        android:textSize="10.5sp" android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/cat_1_value" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                        android:text="₹11,900 · 26%" android:textSize="10sp"
+                        android:textColor="@color/kuber_text_secondary" />
+                </LinearLayout>
+
+                <LinearLayout android:id="@+id/cat_2" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal"
+                    android:gravity="center_vertical" android:paddingTop="3dp" android:paddingBottom="3dp">
+                    <ImageView android:id="@+id/cat_2_dot" android:layout_width="8dp"
+                        android:layout_height="8dp" android:layout_marginEnd="6dp"
+                        android:src="@drawable/widget_dot" android:contentDescription="@null" />
+                    <TextView android:id="@+id/cat_2_name" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:maxLines="1" android:ellipsize="end" android:text="Shopping"
+                        android:textSize="10.5sp" android:textColor="@color/kuber_text_primary" />
+                    <TextView android:id="@+id/cat_2_value" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginStart="6dp"
+                        android:text="₹7,800 · 17%" android:textSize="10sp"
+                        android:textColor="@color/kuber_text_secondary" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Footer -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="end"
+            android:paddingTop="6dp" android:background="@drawable/widget_footer_divider">
+            <TextView android:id="@+id/footer_link" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/w_view_analytics"
+                android:textSize="10.5sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_primary" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

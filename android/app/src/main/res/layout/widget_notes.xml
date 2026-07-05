@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notes · 4x3 · 302x224dp. Three recent notes (fixed rows). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_card_bg"
+    android:padding="12dp"
+    android:paddingStart="14dp"
+    android:paddingEnd="14dp">
+
+    <!-- LOADING -->
+    <LinearLayout
+        android:id="@+id/state_loading"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <FrameLayout android:layout_width="90dp" android:layout_height="11dp"
+            android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="22dp"
+            android:layout_marginTop="12dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="22dp"
+            android:layout_marginTop="12dp" android:background="@drawable/widget_skeleton_bg" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="22dp"
+            android:layout_marginTop="12dp" android:background="@drawable/widget_skeleton_bg" />
+    </LinearLayout>
+
+    <!-- EMPTY -->
+    <LinearLayout
+        android:id="@+id/state_empty"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:baselineAligned="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="@string/w_kuber_notes"
+                android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_text_primary" />
+            <TextView android:id="@+id/add_note_empty" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/w_add_note"
+                android:textSize="10.5sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_primary" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <ImageView android:layout_width="24dp" android:layout_height="24dp"
+                android:src="@drawable/ic_widget_note" android:contentDescription="@null" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:gravity="center"
+                android:text="@string/w_empty_notes"
+                android:textSize="11sp" android:textColor="@color/kuber_text_muted" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CONTENT -->
+    <LinearLayout
+        android:id="@+id/state_content"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:visibility="gone">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:baselineAligned="true">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="@string/w_kuber_notes"
+                android:textSize="13sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_text_primary" />
+            <TextView android:id="@+id/add_note" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/w_add_note"
+                android:textSize="10.5sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_primary" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:orientation="vertical" android:gravity="center_vertical">
+
+            <!-- note 0 -->
+            <LinearLayout android:id="@+id/note_0" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:paddingTop="4dp" android:paddingBottom="4dp">
+                <TextView android:id="@+id/note_0_title" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                    android:text="Rent renewal - landlord terms" android:textSize="11.5sp"
+                    android:fontFamily="sans-serif-medium" android:textColor="@color/kuber_text_primary" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="2dp">
+                    <TextView android:id="@+id/note_0_preview" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                        android:text="Deposit 2 months, 11% hike from Aug…" android:textSize="9.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                    <TextView android:id="@+id/note_0_time" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="2h ago"
+                        android:textSize="9sp" android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- note 1 -->
+            <LinearLayout android:id="@+id/note_1" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:paddingTop="4dp" android:paddingBottom="4dp">
+                <TextView android:id="@+id/note_1_title" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                    android:text="Trip budget - Goa Aug" android:textSize="11.5sp"
+                    android:fontFamily="sans-serif-medium" android:textColor="@color/kuber_text_primary" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="2dp">
+                    <TextView android:id="@+id/note_1_preview" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                        android:text="Flights ₹9k, stay ₹14k, buffer 20%…" android:textSize="9.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                    <TextView android:id="@+id/note_1_time" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="1d ago"
+                        android:textSize="9sp" android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- note 2 -->
+            <LinearLayout android:id="@+id/note_2" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:paddingTop="4dp" android:paddingBottom="4dp">
+                <TextView android:id="@+id/note_2_title" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+                    android:text="Tax docs checklist FY26" android:textSize="11.5sp"
+                    android:fontFamily="sans-serif-medium" android:textColor="@color/kuber_text_primary" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="2dp">
+                    <TextView android:id="@+id/note_2_preview" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:layout_marginEnd="8dp" android:maxLines="1" android:ellipsize="end"
+                        android:text="Form 16, 80C proofs, rent receipts…" android:textSize="9.5sp"
+                        android:textColor="@color/kuber_text_muted" />
+                    <TextView android:id="@+id/note_2_time" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="3d ago"
+                        android:textSize="9sp" android:textColor="@color/kuber_text_muted" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Footer -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="end"
+            android:paddingTop="6dp" android:background="@drawable/widget_footer_divider">
+            <TextView android:id="@+id/footer_link" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/w_view_all_notes"
+                android:textSize="10.5sp" android:fontFamily="sans-serif-medium"
+                android:textColor="@color/kuber_primary" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
