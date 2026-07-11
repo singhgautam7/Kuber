@@ -20,6 +20,7 @@ import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../ask_kuber/screen/kuber_mark.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../../pro/feature_gates/pro_gate.dart';
+import '../../pro/more/more_premium_card.dart';
 import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import 'more_screen_modern.dart';
 
@@ -70,6 +71,9 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // Kuber Pro entry point — first item, above the Manage section.
+                const MorePremiumCardClassic(),
+                const SizedBox(height: KuberSpacing.xl),
                 // Manage section
                 _MenuSection(
                   title: context.l10n.moreManageTitle,

@@ -50,6 +50,7 @@ import '../screens/more_screen.dart' show launchTutorialFromMore;
 import '../../ask_kuber/screen/kuber_mark.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../../pro/feature_gates/pro_gate.dart';
+import '../../pro/more/more_premium_card.dart';
 import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 
 class MoreScreenModern extends ConsumerWidget {
@@ -108,6 +109,9 @@ class MoreScreenModern extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // Kuber Pro entry point — first item, above "01 / MANAGE".
+                const MorePremiumHeroCard(),
+                const SizedBox(height: KuberSpacing.xl),
                 // 01 / MANAGE -------------------------------------------------
                 // No item-count hint here: it was hardcoded ("8 spaces"), out
                 // of sync with the actual count, and added no value.

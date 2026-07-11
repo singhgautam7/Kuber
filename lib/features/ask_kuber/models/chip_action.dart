@@ -1,8 +1,10 @@
 /// A follow-up chip rendered in the strip above the input.
 ///
-/// Two variants:
+/// Three variants:
 /// - [AskChipAction]: tapping fills the input and sends [query].
 /// - [NavChipAction]: tapping navigates to a GoRouter [route].
+/// - [EmailChipAction]: tapping opens the mail client to the developer with a
+///   pre-filled subject/body (used by the knowledge handler).
 ///
 /// Persisted inside `AskKuberMessage.metadataJson` so a reloaded chat keeps its
 /// chips functional.
@@ -17,6 +19,12 @@ sealed class ChipAction {
         return NavChipAction(
           label: json['label'] as String? ?? '',
           route: json['route'] as String? ?? '/',
+        );
+      case 'email':
+        return EmailChipAction(
+          label: json['label'] as String? ?? 'Email the developer',
+          subject: json['subject'] as String? ?? '',
+          body: json['body'] as String? ?? '',
         );
       case 'ask':
       default:
@@ -46,5 +54,27 @@ class NavChipAction extends ChipAction {
     'kind': 'nav',
     'label': label,
     'route': route,
+  };
+}
+
+/// Opens the mail client to the developer with a pre-filled [subject] and
+/// [body]. Filled-pill styling with a leading envelope icon. [body] may contain
+/// `{version}` / `{device}` placeholders, resolved at launch time.
+class EmailChipAction extends ChipAction {
+  final String label;
+  final String subject;
+  final String body;
+  const EmailChipAction({
+    required this.label,
+    required this.subject,
+    required this.body,
+  });
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'kind': 'email',
+    'label': label,
+    'subject': subject,
+    'body': body,
   };
 }

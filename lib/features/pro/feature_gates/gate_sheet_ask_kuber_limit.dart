@@ -7,9 +7,10 @@ void showAskKuberLimitGateSheet(BuildContext context) {
     context,
     icon: Icons.auto_awesome_rounded,
     featureName: 'Ask Kuber',
-    headline: "You've used your 5 weekly Ask Kuber messages",
+    headline: 'Weekly Ask Kuber limit reached',
     body:
-        'Your free limit resets next week. Kuber Pro removes the weekly '
-        'cap entirely, so you can ask as often as you like.',
+        'Free accounts get 5 Ask Kuber messages a week. Your limit resets next '
+        'week, or upgrade to Kuber Pro to remove the weekly cap entirely so you '
+        'can ask as often as you like.',
   );
 }
