@@ -14,6 +14,7 @@ import 'features/backups/data/backup_config.dart';
 import 'features/recurring/data/recurring_processor.dart';
 import 'features/reminders/data/reminder_action_handler.dart';
 import 'features/stories/services/welcome_story.dart';
+import 'features/pro/paywall/pro_state.dart';
 
 
 final recurringProcessResultProvider = StateProvider<int>((ref) {
@@ -77,6 +78,10 @@ Future<void> _bootstrap() async {
     isar = await IsarService.open();
     await SeedService().seedInitialData(isar);
     await MigrationService.runAll(isar);
+    // First-install: create the Kuber Pro entitlement row with the 14-day
+    // trial window. No-op on subsequent launches. Must run before the first
+    // frame so no widget flashes free UI while the row is being materialised.
+    await ensureEntitlementBootstrap(isar);
   } catch (e, stack) {
     debugPrint('Kuber: fatal startup failure (database): $e\n$stack');
     runApp(KuberStartupErrorApp(onRetry: _bootstrap));

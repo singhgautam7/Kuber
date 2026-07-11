@@ -10,6 +10,8 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../pro/feature_gates/gate_sheet_backups.dart';
+import '../../pro/feature_gates/pro_gate.dart';
 import '../providers/backup_provider.dart';
 import '../utils/backup_uri_formatter.dart';
 
@@ -23,6 +25,9 @@ class AutomaticBackupsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: cs.surface,
       body: settings.when(
+        // Keep the current content on reload (e.g. after toggling a setting)
+        // instead of flashing a full-screen spinner.
+        skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(context.l10n.errorWithDetails(error.toString()))),
         data: (s) => CustomScrollView(
@@ -50,9 +55,17 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                   _sectionLabel(context, context.l10n.configurationLabel),
                   _MasterToggle(
                     value: s.enabled,
-                    onChanged: (value) => ref
-                        .read(backupSettingsProvider.notifier)
-                        .setEnabled(value),
+                    onChanged: (value) {
+                      // Automatic Backups is a Kuber Pro feature. Gate only the
+                      // act of turning it on; disabling is always allowed.
+                      if (value &&
+                          !proGate(context, ref, showBackupsGateSheet)) {
+                        return;
+                      }
+                      ref
+                          .read(backupSettingsProvider.notifier)
+                          .setEnabled(value);
+                    },
                   ),
                   AnimatedSize(
                     duration: const Duration(milliseconds: 220),
@@ -63,12 +76,16 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                         : const SizedBox(width: double.infinity),
                   ),
                   _sectionLabel(context, context.l10n.actionsLabel),
+                  // Primary action button; renders in its disabled style when
+                  // the user can't back up yet (off, no folder, or already
+                  // backed up today).
                   AppButton(
                     label: context.l10n.backupNow,
                     icon: Icons.cloud_upload_outlined,
-                    type: AppButtonType.outline,
+                    type: AppButtonType.primary,
                     fullWidth: true,
-                    onPressed: s.enabled && s.folderPath != null && !s.backupJustCompleted
+                    onPressed:
+                        s.enabled && s.folderPath != null && !s.backupJustCompleted
                         ? () async {
                               final (success, message) = await ref
                                   .read(backupSettingsProvider.notifier)
@@ -82,17 +99,15 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                             }
                         : null,
                   ),
-                  if (s.backupJustCompleted)
-                    Padding(
-                      padding: const EdgeInsets.only(top: KuberSpacing.sm),
-                      child: Text(
-                        context.l10n.alreadyBackedUpToday,
-                        style: localeFont(
-                          fontSize: 12,
-                          color: cs.onSurfaceVariant,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+                  // Helper line under the button: a real backup failure is an
+                  // error (red); "already backed up today" is just an
+                  // informational note (muted).
+                  if (s.status == BackupStatus.failed && s.failureReason != null)
+                    _ButtonHelperText(text: s.failureReason!, isError: true)
+                  else if (s.backupJustCompleted)
+                    _ButtonHelperText(
+                      text: context.l10n.alreadyBackedUpToday,
+                      isError: false,
                     ),
                 ]),
               ),
@@ -161,6 +176,21 @@ class _StatusBlock extends ConsumerWidget {
           description:
               context.l10n.lastCopySaved('${settings.retention}'),
         );
+      case BackupStatus.ready:
+        // Turned on with a folder chosen, but no backup has run yet. English
+        // string (like other recently added Kuber features) — a full l10n
+        // entry across every locale can follow.
+        return _StatusCard(
+          icon: Icons.cloud_done_outlined,
+          tint: cs.tertiary,
+          tintBg: cs.tertiary.withValues(alpha: 0.10),
+          border: cs.tertiary.withValues(alpha: 0.28),
+          title: 'Backups are on',
+          titleColor: cs.tertiary,
+          description:
+              'Your first scheduled backup will run soon. Or back up now to '
+              'save a copy immediately.',
+        );
       case BackupStatus.neverConfigured:
         return _StatusCard(
           icon: Icons.backup_outlined,
@@ -173,6 +203,30 @@ class _StatusBlock extends ConsumerWidget {
               context.l10n.neverLoseDataDesc,
         );
     }
+  }
+}
+
+/// Small centered helper line rendered under the "Back up now" button. Red for
+/// a real error, muted for an informational note.
+class _ButtonHelperText extends StatelessWidget {
+  final String text;
+  final bool isError;
+  const _ButtonHelperText({required this.text, required this.isError});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: KuberSpacing.sm),
+      child: Text(
+        text,
+        style: localeFont(
+          fontSize: 12,
+          color: isError ? cs.error : cs.onSurfaceVariant,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }
 

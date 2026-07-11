@@ -75,6 +75,7 @@ import '../../features/widgets_gallery/screens/widgets_gallery_screen.dart';
 import '../../features/widgets_gallery/screens/account_widget_config_screen.dart';
 import '../../features/widgets_gallery/screens/trends_widget_config_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
+import '../../features/pro/paywall/paywall_screen.dart';
 import '../../features/tools/tools_hub_screen.dart';
 import '../../features/tools/currency_converter/currency_converter_screen.dart';
 import '../../features/tools/emi_calculator/emi_calculator_screen.dart';
@@ -427,7 +428,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'ask-kuber',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const AskKuberScreen(),
+                    // `extra` carries an optional prompt from the Ask Kuber
+                    // home widget's suggestion chips; the screen auto-sends it.
+                    builder: (_, state) =>
+                        AskKuberScreen(initialQuery: state.extra as String?),
                   ),
                   GoRoute(
                     path: 'sms-import',
@@ -737,6 +741,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) =>
             const WidgetEditorScreen(scope: WidgetEditorScope.analytics),
+      ),
+      GoRoute(
+        path: '/pro',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const KuberProPaywallScreen(),
       ),
     ],
   );

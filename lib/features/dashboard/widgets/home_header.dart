@@ -16,13 +16,11 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../pro/home/premium_home_button.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
-import '../../ask_kuber/screen/kuber_mark.dart';
 
 /// Replaces the brand wordmark + actions row on the dashboard. Other screens
 /// keep `KuberAppBar`. Layout: Ask Kuber pill — spacer — privacy
@@ -40,7 +38,6 @@ class HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isPrivate = ref.watch(privacyModeProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return SafeArea(
       bottom: false,
@@ -52,6 +49,27 @@ class HomeHeader extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Row(
             children: [
+              // Pro status button at the extreme left, replacing the retired
+              // "Ask Kuber" pill (Ask Kuber now has its own home widget). The
+              // privacy toggle and notification bell move to the right.
+              // Pro status button at the extreme left. It already surfaces the
+              // trial countdown ("TRIAL · Nd") in its own label, so there is no
+              // separate trial pill here (a second one overflowed the row).
+              const PremiumHomeButton(),
+              const Spacer(),
+              _HeaderIconButton(
+                key: TutorialStepKeys.privacyModeIcon,
+                icon: isPrivate
+                    ? Icons.visibility_off_rounded
+                    : Icons.visibility_rounded,
+                accentBorder: isPrivate,
+                tooltip: isPrivate
+                    ? context.l10n.privacyModeOn
+                    : context.l10n.privacyModeOff,
+                onTap: () =>
+                    ref.read(settingsProvider.notifier).togglePrivacyMode(),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -67,40 +85,6 @@ class HomeHeader extends ConsumerWidget {
                       child: _UnreadBadge(count: unreadCount),
                     ),
                 ],
-              ),
-              const Spacer(),
-              _HeaderIconButton(
-                tooltip: context.l10n.askKuber,
-                onTap: () => context.push('/more/ask-kuber'),
-                accentBorder: true,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    KuberMarkWidget(size: 16, bare: true, color: cs.primary),
-                    const SizedBox(width: 6),
-                    Text(
-                      context.l10n.askKuber,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              _HeaderIconButton(
-                key: TutorialStepKeys.privacyModeIcon,
-                icon: isPrivate
-                    ? Icons.visibility_off_rounded
-                    : Icons.visibility_rounded,
-                accentBorder: isPrivate,
-                tooltip: isPrivate
-                    ? context.l10n.privacyModeOn
-                    : context.l10n.privacyModeOff,
-                onTap: () =>
-                    ref.read(settingsProvider.notifier).togglePrivacyMode(),
               ),
             ],
           ),

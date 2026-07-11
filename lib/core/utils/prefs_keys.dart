@@ -67,4 +67,18 @@ class PrefsKeys {
   // Upcoming Events widget migration (one-time Recurring widget replacement)
   static const upcomingEventsWidgetMigrated =
       'kuber_upcoming_events_widget_migrated_v1';
+
+  // Kuber Pro — last-known Play Billing prices (JSON), for offline paywall
+  static const cachedProPrices = 'cached_pro_prices_v1';
+
+  // Kuber Pro — promo campaign remote config
+  static const promoConfigCached = 'kuber_promo_config_cached';
+  static const promoConfigFetchedAt = 'kuber_promo_config_fetched_at';
+  static const promoBannerSessionDismissed =
+      'kuber_promo_banner_session_dismissed';
+
+  // Kuber Pro — Ask Kuber weekly free-tier counter. The full key appends the
+  // ISO week, e.g. `ask_kuber_messages_week_2026-W28`, so it resets weekly
+  // with no cleanup job.
+  static const askKuberWeekPrefix = 'ask_kuber_messages_week_';
 }

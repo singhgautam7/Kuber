@@ -48,6 +48,9 @@ import '../../tutorial/models/tutorial_step_keys.dart';
 // shared helper file in lib/features/more/.
 import '../screens/more_screen.dart' show launchTutorialFromMore;
 import '../../ask_kuber/screen/kuber_mark.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/pro_gate.dart';
+import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 
 class MoreScreenModern extends ConsumerWidget {
   const MoreScreenModern({super.key});
@@ -106,7 +109,9 @@ class MoreScreenModern extends ConsumerWidget {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // 01 / MANAGE -------------------------------------------------
-                _GroupHead(num: '01', name: context.l10n.moreManageTitle, hint: context.l10n.menuManageSpaces),
+                // No item-count hint here: it was hardcoded ("8 spaces"), out
+                // of sync with the actual count, and added no value.
+                _GroupHead(num: '01', name: context.l10n.moreManageTitle),
                 _HeroTile(
                   icon: Icons.account_balance_wallet,
                   label: context.l10n.menuAccounts.toUpperCase(),
@@ -196,7 +201,11 @@ class MoreScreenModern extends ConsumerWidget {
                         title: 'Import from SMS',
                         subtitle: 'Read bank SMS for transactions',
                         accent: _ToolAccent.primary,
-                        onTap: () => context.push('/more/sms-import'),
+                        onTap: () {
+                          if (proGate(context, ref, showSmsImportGateSheet)) {
+                            context.push('/more/sms-import');
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -357,6 +366,13 @@ class MoreScreenModern extends ConsumerWidget {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: KuberSpacing.md),
+
+                // Buy Me a Coffee — full-width button below the "Help us" rows
+                // (rate / share / feedback). Opens the tier picker sheet;
+                // grants no Pro features.
+                const BuyMeCoffeeButton(),
 
                 const SizedBox(height: KuberSpacing.xxl),
 

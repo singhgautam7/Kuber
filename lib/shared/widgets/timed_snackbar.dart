@@ -46,11 +46,16 @@ void showKuberSnackBar(
   String? secondaryActionLabel,
   VoidCallback? onSecondaryAction,
   Duration? duration,
+  OverlayState? overlay,
 }) {
   // Clear any currently showing snackbar first.
   _dismissCurrent();
 
-  final overlay = Overlay.of(context, rootOverlay: true);
+  // Callers that only hold a root-navigator context (e.g. a global service)
+  // can pass [overlay] directly, because `Overlay.of` cannot resolve an
+  // overlay from the Navigator's own context — the overlay is its descendant,
+  // not its ancestor.
+  final resolvedOverlay = overlay ?? Overlay.of(context, rootOverlay: true);
   final controller = _KuberSnackBarController();
 
   final entry = OverlayEntry(
@@ -69,7 +74,7 @@ void showKuberSnackBar(
 
   _currentController = controller;
   _currentEntry = entry;
-  overlay.insert(entry);
+  resolvedOverlay.insert(entry);
 
   _currentTimer = Timer(duration ?? _kSnackDuration, _dismissCurrent);
 }

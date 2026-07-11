@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/pro_gate.dart';
 import '../providers/sms_import_provider.dart';
 
 /// Home dashboard widget for SMS import. Deliberately lightweight: it reads
@@ -92,8 +94,12 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
   }
 }
 
-void _openImport(BuildContext context, SmsImportTabArg tab) {
-  context.push('/more/sms-import?tab=${tab.name}');
+void _openImport(BuildContext context, WidgetRef ref, SmsImportTabArg tab) {
+  // SMS Import is a Kuber Pro feature. Free users get the gate sheet instead
+  // of the screen; Pro and trial users pass straight through.
+  if (proGate(context, ref, showSmsImportGateSheet)) {
+    context.push('/more/sms-import?tab=${tab.name}');
+  }
 }
 
 /// Tab the widget deep-links to. Mirrors SmsImportTab without importing the
@@ -103,7 +109,7 @@ enum SmsImportTabArg { unreviewed, imported, dismissed }
 /// Muted "last checked" summary — the home surface shows when the inbox was
 /// last scanned rather than a live unreviewed counter (which would require
 /// loading every staged row).
-class _LastCheckedCard extends StatelessWidget {
+class _LastCheckedCard extends ConsumerWidget {
   final DateTime? lastScannedAt;
   const _LastCheckedCard({super.key, required this.lastScannedAt});
 
@@ -127,10 +133,10 @@ class _LastCheckedCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     return InkWell(
-      onTap: () => _openImport(context, SmsImportTabArg.unreviewed),
+      onTap: () => _openImport(context, ref, SmsImportTabArg.unreviewed),
       borderRadius: BorderRadius.circular(KuberRadius.md),
       child: Container(
         padding: const EdgeInsets.all(18),
@@ -182,11 +188,11 @@ class _LastCheckedCard extends StatelessWidget {
   }
 }
 
-class _PermissionNeededCard extends StatelessWidget {
+class _PermissionNeededCard extends ConsumerWidget {
   const _PermissionNeededCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(18),
@@ -248,7 +254,7 @@ class _PermissionNeededCard extends StatelessWidget {
                 ),
               ),
               onPressed: () =>
-                  _openImport(context, SmsImportTabArg.unreviewed),
+                  _openImport(context, ref, SmsImportTabArg.unreviewed),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

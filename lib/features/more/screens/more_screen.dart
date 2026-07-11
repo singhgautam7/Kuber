@@ -18,6 +18,9 @@ import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../ask_kuber/screen/kuber_mark.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/pro_gate.dart';
+import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import 'more_screen_modern.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -149,7 +152,11 @@ class MoreScreenSimple extends ConsumerWidget {
                       icon: Icons.sms_outlined,
                       label: 'Import from SMS',
                       subtitle: 'Read bank SMS for transactions',
-                      onTap: () => context.push('/more/sms-import'),
+                      onTap: () {
+                        if (proGate(context, ref, showSmsImportGateSheet)) {
+                          context.push('/more/sms-import');
+                        }
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.calculate_rounded,
@@ -267,6 +274,12 @@ class MoreScreenSimple extends ConsumerWidget {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: KuberSpacing.lg),
+
+                // Buy Me a Coffee — one-time support, grants no Pro features.
+                // Full-width button that opens the tier picker sheet.
+                const BuyMeCoffeeButton(),
 
                 const SizedBox(height: KuberSpacing.xl),
 

@@ -8,6 +8,8 @@ import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../pro/feature_gates/gate_sheet_notes_limit.dart';
+import '../../pro/paywall/pro_state.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/kuber_note.dart';
 import '../providers/notes_provider.dart';
@@ -48,6 +50,14 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
   }
 
   void _createNote() {
+    // Free tier keeps at most 2 notes; creating a 3rd triggers the Pro gate.
+    // Pro and trial users are unlimited.
+    final unlimited = ref.read(kuberProStateProvider).hasProAccess;
+    final count = ref.read(notesStreamProvider).valueOrNull?.length ?? 0;
+    if (!unlimited && count >= 2) {
+      showNotesLimitGateSheet(context);
+      return;
+    }
     // id=new → the editor holds the note in memory and only persists it on
     // the first real edit (no blank-note flash when backing out).
     context.push('/notes/editor?id=new');

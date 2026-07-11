@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
+import '../../pro/feature_gates/gate_sheet_notes_limit.dart';
+import '../../pro/paywall/pro_state.dart';
 import '../data/notes_repository.dart';
 import '../providers/notes_provider.dart';
 
@@ -14,7 +16,15 @@ import '../providers/notes_provider.dart';
 class NotesHomeWidget extends ConsumerWidget {
   const NotesHomeWidget({super.key});
 
-  void _addNote(BuildContext context) {
+  void _addNote(BuildContext context, WidgetRef ref) {
+    // Free tier keeps at most 2 notes; the 3rd triggers the Pro gate. Pro and
+    // trial users are unlimited.
+    final unlimited = ref.read(kuberProStateProvider).hasProAccess;
+    final count = ref.read(notesStreamProvider).valueOrNull?.length ?? 0;
+    if (!unlimited && count >= 2) {
+      showNotesLimitGateSheet(context);
+      return;
+    }
     // Lazy new note — persisted only on first edit (see NoteEditorScreen).
     context.push('/notes/editor?id=new');
   }
@@ -53,7 +63,7 @@ class NotesHomeWidget extends ConsumerWidget {
             border: Border.all(color: cs.outline),
           ),
           child: latest == null
-              ? _EmptyBody(onAdd: () => _addNote(context))
+              ? _EmptyBody(onAdd: () => _addNote(context, ref))
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -140,7 +150,7 @@ class NotesHomeWidget extends ConsumerWidget {
                             label: 'Add a note',
                             icon: Icons.add_rounded,
                             filled: true,
-                            onTap: () => _addNote(context),
+                            onTap: () => _addNote(context, ref),
                           ),
                         ),
                       ],

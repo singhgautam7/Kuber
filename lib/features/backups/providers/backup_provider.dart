@@ -15,7 +15,7 @@ import '../services/saf_backup_store.dart';
 
 enum BackupFrequency { daily, weekly, monthly }
 
-enum BackupStatus { failed, succeeded, neverConfigured }
+enum BackupStatus { failed, succeeded, ready, neverConfigured }
 
 enum BackupFailureReason { folderRevoked, diskFull, writeError, unknown }
 
@@ -70,30 +70,40 @@ class BackupSettingsNotifier extends AsyncNotifier<BackupSettings> {
     return _toSettings(await repo.getOrCreate());
   }
 
+  /// Persists [config] and republishes derived settings straight away, so the
+  /// UI reflects the change on the same frame instead of waiting for the Isar
+  /// `watchLazy` -> `invalidateSelf` round trip (which also flashed a loading
+  /// spinner). `watchLazy` still handles external changes (a scheduled backup
+  /// completing while this screen is open).
+  Future<void> _saveAndPublish(BackupConfig config) async {
+    await ref.read(backupRepositoryProvider).save(config);
+    state = AsyncData(_toSettings(config));
+  }
+
   Future<void> setEnabled(bool enabled) async {
     final repo = ref.read(backupRepositoryProvider);
     final config = await repo.getOrCreate();
     config.enabled = enabled;
     if (enabled && config.folderUri == null) {
-      await repo.save(config);
+      await _saveAndPublish(config);
       await pickFolder();
       return;
     }
-    await repo.save(config);
+    await _saveAndPublish(config);
   }
 
   Future<void> setFrequency(BackupFrequency frequency) async {
     final repo = ref.read(backupRepositoryProvider);
     final config = await repo.getOrCreate();
     config.frequency = frequency.name;
-    await repo.save(config);
+    await _saveAndPublish(config);
   }
 
   Future<void> setRetention(int retention) async {
     final repo = ref.read(backupRepositoryProvider);
     final config = await repo.getOrCreate();
     config.retention = retention;
-    await repo.save(config);
+    await _saveAndPublish(config);
   }
 
   Future<void> pickFolder() async {
@@ -103,7 +113,7 @@ class BackupSettingsNotifier extends AsyncNotifier<BackupSettings> {
     final config = await repo.getOrCreate();
     config.folderUri = uri;
     config.enabled = true;
-    await repo.save(config);
+    await _saveAndPublish(config);
   }
 
   Future<(bool, String)> backupNow() async {
@@ -111,6 +121,8 @@ class BackupSettingsNotifier extends AsyncNotifier<BackupSettings> {
     try {
       await runBackup(config, manual: true);
       final updated = await ref.read(backupRepositoryProvider).getOrCreate();
+      // Reflect the new lastBackupAt / failure in the status card immediately.
+      state = AsyncData(_toSettings(updated));
       if (updated.lastFailureReason != null) {
         return (false, _failureMessage(_failureFromString(updated.lastFailureReason!)));
       }
@@ -219,10 +231,16 @@ final backupSettingsProvider =
     );
 
 BackupSettings _toSettings(BackupConfig config) {
+  final hasFolder = config.folderUri != null && config.folderUri!.isNotEmpty;
   final status = config.lastFailureReason != null
       ? BackupStatus.failed
       : config.lastBackupAt != null
       ? BackupStatus.succeeded
+      // Configured (turned on + a folder chosen) but no backup has run yet.
+      // Without this the top status card stayed on "never configured" even
+      // after the user enabled backups or picked a folder.
+      : (config.enabled && hasFolder)
+      ? BackupStatus.ready
       : BackupStatus.neverConfigured;
   return BackupSettings(
     enabled: config.enabled,
