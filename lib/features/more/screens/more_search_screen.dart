@@ -9,10 +9,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/constants/tools_l10n.dart';
 import '../../dev/providers/dev_mode_provider.dart';
+import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
+import '../../pro/feature_gates/pro_gate.dart';
 import '../../settings/widgets/settings_widgets.dart';
 import '../../ask_kuber/screen/kuber_mark.dart';
 import 'more_screen.dart';
-
 
 class _SearchableItem {
   final String label;
@@ -56,7 +57,11 @@ class _SearchableItem {
   }
 }
 
-List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevMode) => [
+List<_SearchableItem> _buildItems(
+  BuildContext context,
+  String lang,
+  bool isDevMode,
+) => [
   // AI Assistant
   _SearchableItem(
     label: context.l10n.menuAskKuber,
@@ -73,6 +78,17 @@ List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevM
     icon: Icons.sms_outlined,
     section: context.l10n.moreToolsTitle,
     route: '/more/sms-import',
+  ),
+  _SearchableItem(
+    label: 'Advanced Analytics',
+    subtitle: 'Deep analytical views of your finances',
+    icon: Icons.insert_chart_outlined_rounded,
+    section: context.l10n.moreToolsTitle,
+    onRefAction: (ctx, ref) async {
+      if (proGate(ctx, ref, showAdvancedAnalyticsGateSheet)) {
+        ctx.push('/advanced-analytics');
+      }
+    },
   ),
   // Home screen widgets gallery. Keywords: widgets, home screen, add widget.
   _SearchableItem(
@@ -342,11 +358,8 @@ List<_SearchableItem> _buildItems(BuildContext context, String lang, bool isDevM
     subtitle: context.l10n.menuShareAppDesc,
     icon: Icons.share_rounded,
     section: context.l10n.moreHelpUsTitle,
-    onAction: () => SharePlus.instance.share(
-      ShareParams(
-        text: context.l10n.shareMessage,
-      ),
-    ),
+    onAction: () =>
+        SharePlus.instance.share(ShareParams(text: context.l10n.shareMessage)),
   ),
   _SearchableItem(
     label: context.l10n.menuFeedback,
@@ -457,10 +470,7 @@ class _MoreSearchScreenState extends ConsumerState<MoreSearchScreen> {
                     child: TextField(
                       controller: _controller,
                       focusNode: _focusNode,
-                      style: localeFont(
-                        fontSize: 14,
-                        color: cs.onSurface,
-                      ),
+                      style: localeFont(fontSize: 14, color: cs.onSurface),
                       decoration: InputDecoration(
                         hintText: '${context.l10n.search}...',
                         hintStyle: localeFont(

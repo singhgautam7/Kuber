@@ -119,6 +119,14 @@ const List<ShortcutMeta> _kManageShortcuts = [
 /// Kuber-signature shortcuts — the features unique to Kuber's product.
 const List<ShortcutMeta> _kSignatureShortcuts = [
   ShortcutMeta(
+    id: 'advanced_analytics',
+    label: 'Advanced Analytics',
+    shortLabel: 'Insights',
+    icon: Icons.insert_chart_outlined_rounded,
+    route: '/advanced-analytics',
+    section: ShortcutSection.kuberSpecific,
+  ),
+  ShortcutMeta(
     id: 'ask_kuber',
     label: 'Ask Kuber',
     icon: Icons.auto_awesome_rounded,

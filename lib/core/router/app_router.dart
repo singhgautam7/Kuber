@@ -3,6 +3,16 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
 import '../../features/analytics/screens/analytics_filter_screen.dart';
+import '../../features/advanced_analytics/screens/advanced_analytics_landing.dart';
+import '../../features/advanced_analytics/screens/category_deep_dive_screen.dart';
+import '../../features/advanced_analytics/screens/trends_over_time_screen.dart';
+import '../../features/advanced_analytics/screens/spending_patterns_screen.dart';
+import '../../features/advanced_analytics/screens/forecast_screen.dart';
+import '../../features/advanced_analytics/screens/cash_flow_screen.dart';
+import '../../features/advanced_analytics/screens/financial_health_score_screen.dart';
+import '../../features/advanced_analytics/screens/anomaly_detection_screen.dart';
+import '../../features/advanced_analytics/screens/merchant_analysis_screen.dart';
+import '../../features/advanced_analytics/screens/savings_rate_screen.dart';
 
 import '../../features/history/screens/advanced_filter_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
@@ -149,11 +159,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation == '/ask-kuber') return '/more/ask-kuber';
       if (state.matchedLocation == '/tools') return '/more/tools';
       if (state.matchedLocation == '/notes') return '/more/notes';
+      if (state.matchedLocation == '/advanced-analytics') return null;
       if (state.matchedLocation == '/home') return '/';
       if (state.matchedLocation == '/sms-import') return '/more/sms-import';
-      if (state.matchedLocation == '/upcoming-events') return '/more/upcoming-events';
+      if (state.matchedLocation == '/upcoming-events') {
+        return '/more/upcoming-events';
+      }
       if (state.matchedLocation == '/budgets') return '/more/budgets';
-      if (state.matchedLocation == '/widgets-gallery') return '/more/widgets-gallery';
+      if (state.matchedLocation == '/widgets-gallery') {
+        return '/more/widgets-gallery';
+      }
       if (state.matchedLocation == '/notes/new') return '/notes/editor';
 
       // Widget configuration activities boot straight onto these routes.
@@ -246,6 +261,58 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) => const AdvancedFilterScreen(),
       ),
+      GoRoute(
+        path: '/advanced-analytics',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (context, state) => const AdvancedAnalyticsLanding(),
+        routes: [
+          GoRoute(
+            path: 'category',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const CategoryDeepDiveScreen(),
+          ),
+          GoRoute(
+            path: 'trends',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const TrendsOverTimeScreen(),
+          ),
+          GoRoute(
+            path: 'spending-patterns',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const SpendingPatternsScreen(),
+          ),
+          GoRoute(
+            path: 'forecast',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const ForecastScreen(),
+          ),
+          GoRoute(
+            path: 'cash-flow',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const CashFlowScreen(),
+          ),
+          GoRoute(
+            path: 'health-score',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const FinancialHealthScoreScreen(),
+          ),
+          GoRoute(
+            path: 'anomalies',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const AnomalyDetectionScreen(),
+          ),
+          GoRoute(
+            path: 'merchants',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const MerchantAnalysisScreen(),
+          ),
+          GoRoute(
+            path: 'savings-rate',
+            parentNavigatorKey: rootNavigatorKey,
+            builder: (context, state) => const SavingsRateScreen(),
+          ),
+        ],
+      ),
 
       GoRoute(
         path: '/category/add',
@@ -276,10 +343,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/recurring/add',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => AddRecurringScreen(
-          amountPrefill:
-              double.tryParse(state.uri.queryParameters['amount'] ?? ''),
-          categoryPrefill:
-              int.tryParse(state.uri.queryParameters['categoryId'] ?? ''),
+          amountPrefill: double.tryParse(
+            state.uri.queryParameters['amount'] ?? '',
+          ),
+          categoryPrefill: int.tryParse(
+            state.uri.queryParameters['categoryId'] ?? '',
+          ),
         ),
       ),
       GoRoute(
@@ -437,8 +506,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'sms-import',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, state) => SmsImportScreen(
-                      initialTab: switch (
-                          state.uri.queryParameters['tab']) {
+                      initialTab: switch (state.uri.queryParameters['tab']) {
                         'imported' => SmsImportTab.imported,
                         'dismissed' => SmsImportTab.dismissed,
                         _ => SmsImportTab.unreviewed,
@@ -468,9 +536,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'notes',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const NotesBiometricGate(
-                      child: NotesLandingScreen(),
-                    ),
+                    builder: (_, _) =>
+                        const NotesBiometricGate(child: NotesLandingScreen()),
                     routes: [
                       GoRoute(
                         path: 'filter',
@@ -530,7 +597,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/gst-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, s) => GstCalculatorScreen(savedId: _savedId(s)),
+                    builder: (_, s) =>
+                        GstCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/fd-rd-calculator',
@@ -541,7 +609,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/ppf-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, s) => PpfCalculatorScreen(savedId: _savedId(s)),
+                    builder: (_, s) =>
+                        PpfCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/salary-calculator',
@@ -592,7 +661,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'tools/hra-calculator',
                     parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, s) => HraCalculatorScreen(savedId: _savedId(s)),
+                    builder: (_, s) =>
+                        HraCalculatorScreen(savedId: _savedId(s)),
                   ),
                   GoRoute(
                     path: 'tools/split-calculator',
@@ -657,8 +727,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           final extra = state.extra;
           return AddLedgerScreen(
             prefill: extra is LedgerPrefill ? extra : null,
-            amountPrefill:
-                double.tryParse(state.uri.queryParameters['amount'] ?? ''),
+            amountPrefill: double.tryParse(
+              state.uri.queryParameters['amount'] ?? '',
+            ),
           );
         },
       ),
@@ -672,8 +743,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/loans/add',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => AddLoanScreen(
-          amountPrefill:
-              double.tryParse(state.uri.queryParameters['amount'] ?? ''),
+          amountPrefill: double.tryParse(
+            state.uri.queryParameters['amount'] ?? '',
+          ),
         ),
       ),
       GoRoute(
@@ -685,8 +757,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/investments/add',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => AddInvestmentScreen(
-          amountPrefill:
-              double.tryParse(state.uri.queryParameters['amount'] ?? ''),
+          amountPrefill: double.tryParse(
+            state.uri.queryParameters['amount'] ?? '',
+          ),
         ),
       ),
       GoRoute(
@@ -700,8 +773,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => NotesBiometricGate(
           child: NoteEditorScreen(
-            noteId:
-                int.tryParse(state.uri.queryParameters['id'] ?? '') ?? -1,
+            noteId: int.tryParse(state.uri.queryParameters['id'] ?? '') ?? -1,
           ),
         ),
       ),
@@ -720,14 +792,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/widget-config/account',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => AccountWidgetConfigScreen(
-          widgetId: int.tryParse(state.uri.queryParameters['widgetId'] ?? '') ?? -1,
+          widgetId:
+              int.tryParse(state.uri.queryParameters['widgetId'] ?? '') ?? -1,
         ),
       ),
       GoRoute(
         path: '/widget-config/range',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, state) => TrendsWidgetConfigScreen(
-          widgetId: int.tryParse(state.uri.queryParameters['widgetId'] ?? '') ?? -1,
+          widgetId:
+              int.tryParse(state.uri.queryParameters['widgetId'] ?? '') ?? -1,
         ),
       ),
       GoRoute(

@@ -91,7 +91,20 @@ class KuberProState {
   /// rather than [isPro]. A Play trial user is already [isPro]. The paywall's
   /// manage-vs-sell decision keys off [isPro]: a Play-trial user has a real
   /// subscription to manage, a legacy-trial user does not.
-  bool get hasProAccess => isPro || isTrial;
+  /// TESTING ESCAPE HATCH — remove before shipping.
+  ///
+  /// Compile-time flag that opens every Pro gate so features can be exercised
+  /// without a purchase or trial. It is a `const bool.fromEnvironment`, so it
+  /// is `false` in any build that does not explicitly pass the define — that
+  /// includes `flutter test`, CI, and every release build — and the OR branch
+  /// below is tree-shaken out entirely. There is no runtime way to flip it, so
+  /// it is not a shippable-security concern on its own; the real entitlement
+  /// (Play Billing) stays the source of truth. Turn it on with:
+  ///   flutter run --dart-define=KUBER_UNLOCK_PRO=true
+  static const _unlockProForTesting =
+      bool.fromEnvironment('KUBER_UNLOCK_PRO');
+
+  bool get hasProAccess => _unlockProForTesting || isPro || isTrial;
 
   /// Whole days since Pro/promo was activated. Used by the manage-state hero
   /// as a small badge of pride, not a functional countdown.

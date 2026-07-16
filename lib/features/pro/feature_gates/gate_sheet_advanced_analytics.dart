@@ -9,7 +9,8 @@ void showAdvancedAnalyticsGateSheet(BuildContext context) {
     featureName: 'Advanced Analytics',
     headline: 'Advanced Analytics is a Kuber Pro feature',
     body:
-        'See spending trends, category breakdowns and budget performance '
-        'in more depth with Kuber Pro.',
+        'Unlock trends, category deep-dives, spending patterns, forecasts, '
+        'cash flow, anomalies, merchant analysis, savings rate tracking and '
+        'your financial health score with Kuber Pro.',
   );
 }
