@@ -60,7 +60,13 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
           if (i != _touched) setState(() => _touched = i);
         }
 
-        return GestureDetector(
+        return TapRegion(
+          // Close the tooltip when tapping anywhere outside the chart, like the
+          // Home/Analytics charts.
+          onTapOutside: (_) {
+            if (_touched != -1) setState(() => _touched = -1);
+          },
+          child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           // Tap toggles; horizontal drag scrubs the selection across the chart
           // (like the Home/Analytics line charts).
@@ -84,6 +90,7 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
                 _tooltip(cs, w, n),
               ],
             ],
+          ),
           ),
         );
       },

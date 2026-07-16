@@ -2,6 +2,7 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -12,7 +13,7 @@ import '../data/recurring_rule.dart';
 import '../providers/recurring_provider.dart';
 import '../data/recurring_repository.dart';
 import '../../../shared/widgets/category_icon.dart';
-import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/sheet_button_section.dart';
 import '../widgets/recurring_history_sheet.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 
@@ -104,6 +105,55 @@ class RecurringDetailSheet extends ConsumerWidget {
         rawColor: iconColor,
         size: 48,
       ),
+      actions: SheetButtonSection(
+        padding: EdgeInsets.zero,
+        // Primary = History; row shows Edit + Pause/Resume; Delete goes to the
+        // overflow (⋯) menu — matching the account detail sheet.
+        primary: SheetAction(
+          label: context.l10n.historyLabel,
+          icon: Icons.history_rounded,
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              useSafeArea: true,
+              useRootNavigator: true,
+              backgroundColor: cs.surfaceContainer,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(KuberRadius.lg),
+                ),
+              ),
+              builder: (_) => RecurringHistorySheet(rule: rule),
+            );
+          },
+        ),
+        actions: [
+          SheetAction(
+            label: context.l10n.editLabel,
+            icon: Icons.edit_outlined,
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.push('/recurring/edit', extra: rule);
+            },
+          ),
+          SheetAction(
+            label:
+                isPaused ? context.l10n.resumeLabel : context.l10n.pauseLabel,
+            icon: isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+            onPressed: () {
+              ref.read(recurringListProvider.notifier).togglePause(rule);
+              Navigator.of(context).pop();
+            },
+          ),
+          SheetAction(
+            label: context.l10n.deleteLabel,
+            icon: Icons.delete_outline_rounded,
+            destructive: true,
+            onPressed: () => _confirmDelete(context, ref),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -168,75 +218,39 @@ class RecurringDetailSheet extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.lg),
-
-          // ── Actions ──────────────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.editLabel,
-                  icon: Icons.edit_outlined,
-                  type: AppButtonType.normal,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+          if ((rule.notes ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: KuberSpacing.lg),
+            Text(
+              context.l10n.notesLabel.toUpperCase(),
+              style: localeFont(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.xs),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpacing.lg,
+                vertical: KuberSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
+              ),
+              child: Text(
+                rule.notes!.trim(),
+                style: localeFont(
+                  fontSize: 14,
+                  color: cs.onSurface,
+                  height: 1.4,
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: AppButton(
-                  label: isPaused ? context.l10n.resumeLabel : context.l10n.pauseLabel,
-                  icon: isPaused
-                      ? Icons.play_arrow_rounded
-                      : Icons.pause_rounded,
-                  type: AppButtonType.normal,
-                  onPressed: () {
-                    ref
-                        .read(recurringListProvider.notifier)
-                        .togglePause(rule);
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.historyLabel,
-                  icon: Icons.history_rounded,
-                  type: AppButtonType.primary,
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      useRootNavigator: true,
-                      backgroundColor: cs.surfaceContainer,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(KuberRadius.lg),
-                        ),
-                      ),
-                      builder: (_) => RecurringHistorySheet(rule: rule),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.deleteLabel,
-                  icon: Icons.delete_outline_rounded,
-                  type: AppButtonType.danger,
-                  onPressed: () => _confirmDelete(context, ref),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
           const SizedBox(height: KuberSpacing.xs),
         ],
       ),

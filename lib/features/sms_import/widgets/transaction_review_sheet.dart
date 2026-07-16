@@ -326,6 +326,7 @@ class _TransactionReviewSheetState
                                   ? '  ·  ${account.last4Digits}'
                                   : ''),
                       muted: account == null,
+                      error: account == null,
                       onTap: _pickAccount,
                     ),
 
@@ -335,6 +336,7 @@ class _TransactionReviewSheetState
                       label: 'CATEGORY',
                       value: category?.name ?? 'Pick category',
                       muted: category == null,
+                      error: category == null,
                       leadingDot: category == null
                           ? null
                           : harmonizeCategory(
@@ -378,19 +380,41 @@ class _TransactionReviewSheetState
       return const SizedBox(height: 12);
     }
 
+    final needAccount = _accountId == null;
+    final needCategory = _categoryId == null;
     final addButton = AppButton(
       label: 'Add to Kuber',
       type: AppButtonType.primary,
       fullWidth: true,
       isLoading: _saving,
-      onPressed: (_accountId == null || _amount <= 0) ? null : _addToKuber,
+      onPressed: (needAccount || needCategory || _amount <= 0)
+          ? null
+          : _addToKuber,
     );
+
+    final String? blockReason = _amount > 0
+        ? (needAccount && needCategory
+            ? 'Enter account and category details'
+            : needAccount
+                ? 'Enter account details'
+                : needCategory
+                    ? 'Enter category details'
+                    : null)
+        : null;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
       child: Column(
         children: [
           addButton,
+          if (blockReason != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              blockReason,
+              textAlign: TextAlign.center,
+              style: localeFont(fontSize: 11.5, color: cs.error),
+            ),
+          ],
           if (status == SmsReviewStatus.unreviewed)
             TextButton(
               onPressed: _saving ? null : _dismiss,
@@ -731,6 +755,10 @@ class _FieldRow extends StatelessWidget {
   final String value;
   final IconData trailing;
   final bool muted;
+
+  /// Highlights the row (label + icon in error color) when a required value is
+  /// missing.
+  final bool error;
   final Color? leadingDot;
   final VoidCallback onTap;
 
@@ -740,6 +768,7 @@ class _FieldRow extends StatelessWidget {
     required this.value,
     this.trailing = Icons.chevron_right_rounded,
     this.muted = false,
+    this.error = false,
     this.leadingDot,
     required this.onTap,
   });
@@ -760,10 +789,13 @@ class _FieldRow extends StatelessWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
+                color: error
+                    ? cs.error.withValues(alpha: 0.12)
+                    : cs.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(KuberRadius.md),
               ),
-              child: Icon(icon, size: 14, color: cs.onSurfaceVariant),
+              child: Icon(icon,
+                  size: 14, color: error ? cs.error : cs.onSurfaceVariant),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -775,7 +807,7 @@ class _FieldRow extends StatelessWidget {
                     style: localeFont(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant,
+                      color: error ? cs.error : cs.onSurfaceVariant,
                       letterSpacing: 0.4,
                     ),
                   ),
