@@ -32,6 +32,7 @@ import '../widgets/tag_wise_analytics.dart';
 import '../widgets/top_filter_row.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
+import '../../advanced_analytics/widgets/deeper_insights_teaser.dart';
 
 // ---------------------------------------------------------------------------
 // Private data classes
@@ -694,14 +695,20 @@ class _AnalyticsWidgetList extends ConsumerWidget {
       data: (configs) {
         final visible = configs.where((c) => c.enabled).toList();
         return SliverList.builder(
-          // +2 for EditWidgetsButton + bottom nav spacer.
-          itemCount: visible.length + 2,
+          // +3 for Advanced Analytics teaser, EditWidgetsButton, and bottom spacer.
+          itemCount: visible.length + 3,
           itemBuilder: (ctx, i) {
             if (i == visible.length) {
+              return const Padding(
+                padding: EdgeInsets.only(top: KuberSpacing.lg),
+                child: DeeperInsightsTeaser(),
+              );
+            }
+            if (i == visible.length + 1) {
               return const EditWidgetsButton(
                   scope: WidgetEditorScope.analytics);
             }
-            if (i == visible.length + 1) {
+            if (i == visible.length + 2) {
               return SizedBox(height: navBarBottomPadding(ctx));
             }
             return _buildWidget(ctx, ref, visible[i].id);

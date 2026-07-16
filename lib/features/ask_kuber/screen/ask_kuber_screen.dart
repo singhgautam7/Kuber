@@ -2,17 +2,24 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../pro/feature_gates/gate_sheet_ask_kuber_limit.dart';
+import '../../pro/paywall/pro_state.dart';
 import '../../settings/providers/settings_provider.dart';
+import '../data/ask_kuber_usage.dart';
+import '../data/email_templates.dart';
 import '../models/chat_message.dart';
 import '../models/handler_result.dart';
 import '../models/query_context.dart';
@@ -27,7 +34,13 @@ import '../../../shared/widgets/date_separator.dart';
 import 'welcome_view.dart';
 
 class AskKuberScreen extends ConsumerStatefulWidget {
-  const AskKuberScreen({super.key});
+  /// Optional prompt to send automatically on first frame. Set when the user
+  /// taps a suggestion chip on the Ask Kuber home widget, which pushes this
+  /// screen with the query as route `extra`. Null for a normal open (empty
+  /// chat / history).
+  final String? initialQuery;
+
+  const AskKuberScreen({super.key, this.initialQuery});
 
   @override
   ConsumerState<AskKuberScreen> createState() => _AskKuberScreenState();
@@ -83,6 +96,16 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
       _isInitializing = false;
     });
     if (_messages.isNotEmpty) _scrollToBottom();
+
+    // Auto-send the suggestion the user tapped from the home widget, once the
+    // chat has finished hydrating. _send applies the same weekly free-tier
+    // gate as a manually typed message.
+    final query = widget.initialQuery?.trim();
+    if (query != null && query.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _send(query);
+      });
+    }
   }
 
   /// Randomized opener per session, avoiding the immediately previous one.
@@ -117,7 +140,17 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
   Future<void> _send([String? override]) async {
     final input = (override ?? _controller.text).trim();
     if (input.isEmpty || _isProcessing || _isTyping) return;
+
+    // Free tier: 5 Ask Kuber messages per week. The 6th send is gated. Pro and
+    // trial users are unlimited and skip the counter entirely.
+    final unlimited = ref.read(kuberProStateProvider).hasProAccess;
+    if (!unlimited && await AskKuberUsage.atWeeklyLimit()) {
+      if (mounted) showAskKuberLimitGateSheet(context);
+      return;
+    }
+    if (!mounted) return;
     if (override == null) _controller.clear();
+    if (!unlimited) unawaited(AskKuberUsage.increment());
 
     final repo = ref.read(askKuberRepositoryProvider);
     final userMsg =
@@ -203,6 +236,63 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
       showKuberSnackBar(context, "That's no longer available", isError: true);
     }
   }
+
+  /// Opens the mail client to the developer with a pre-filled subject/body.
+  /// `{version}` / `{device}` placeholders in [body] are resolved from real
+  /// device info first. If no mail app can handle the intent, we fall back to a
+  /// snackbar that surfaces the address with a "Copy address" action.
+  Future<void> _emailDeveloper(String subject, String body) async {
+    var resolvedBody = body;
+    if (resolvedBody.contains('{version}') ||
+        resolvedBody.contains('{device}')) {
+      try {
+        final info = await PackageInfo.fromPlatform();
+        resolvedBody = resolvedBody.replaceAll(
+            '{version}', '${info.version}+${info.buildNumber}');
+      } catch (_) {
+        resolvedBody = resolvedBody.replaceAll('{version}', 'unknown');
+      }
+      try {
+        final device = DeviceInfoPlugin();
+        final android = await device.androidInfo;
+        resolvedBody = resolvedBody.replaceAll(
+            '{device}', '${android.manufacturer} ${android.model}');
+      } catch (_) {
+        resolvedBody = resolvedBody.replaceAll('{device}', 'unknown');
+      }
+    }
+
+    final uri = Uri(
+      scheme: 'mailto',
+      path: EmailTemplates.developerEmail,
+      query: _encodeMailtoQuery({'subject': subject, 'body': resolvedBody}),
+    );
+
+    var launched = false;
+    try {
+      launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      launched = false;
+    }
+    if (launched || !mounted) return;
+
+    showKuberSnackBar(
+      context,
+      'No email app found. The developer is at ${EmailTemplates.developerEmail}',
+      isError: true,
+      actionLabel: 'Copy address',
+      onAction: () =>
+          Clipboard.setData(const ClipboardData(text: EmailTemplates.developerEmail)),
+    );
+  }
+
+  /// mailto query encoding: spaces must be %20 (not '+', which some mail apps
+  /// render literally), so we can't use Uri's default form-encoding.
+  String _encodeMailtoQuery(Map<String, String> params) => params.entries
+      .map((e) =>
+          '${e.key}=${Uri.encodeComponent(e.value)}')
+      .join('&');
 
   void _openFeedback() => _navigate('/more/feedback');
 
@@ -326,6 +416,7 @@ class _AskKuberScreenState extends ConsumerState<AskKuberScreen>
                 actions: lastKuber.followUps,
                 onAsk: _send,
                 onNavigate: _navigate,
+                onEmail: _emailDeveloper,
               );
             },
           ),

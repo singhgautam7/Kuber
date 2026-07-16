@@ -8,6 +8,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../main.dart';
+import '../../accounts/providers/account_provider.dart';
+import '../../categories/providers/category_provider.dart';
+import '../../dashboard/providers/dashboard_provider.dart';
+import '../../widget_editor/providers/widget_editor_provider.dart';
 
 import '../../../shared/widgets/brand_icon.dart';
 
@@ -46,6 +50,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       curve: Curves.easeOut,
     ));
 
+    // Kick Home's heavy provider reads off now (non-blocking) so they warm
+    // while the splash animates. The splash still dismisses on its fixed timer
+    // below — we never make the user wait on data — and Home shows its own
+    // skeletons for anything not cached yet by the time it mounts.
+    _warmCriticalHomeData();
+
     _controller.forward().then((_) {
       Future.delayed(const Duration(milliseconds: 600), () {
         if (!mounted) return;
@@ -64,6 +74,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       context.go(missedCount > 0 ? '/recurring-loader' : '/');
     } else {
       context.go('/onboarding');
+    }
+  }
+
+  /// Fire-and-forget warm of the providers Home renders from on first build
+  /// (current-month hero summary, account balances, category map, widget
+  /// layout). Each is a non-autoDispose [FutureProvider], so a value read here
+  /// stays cached and is ready when Home mounts, without blocking the timed
+  /// splash. `.ignore()` swallows any error/timeout — Home's skeletons cover
+  /// the not-yet-ready case.
+  void _warmCriticalHomeData() {
+    for (final future in <Future<void>>[
+      ref.read(monthlySummaryProvider.future).then((_) {}),
+      ref.read(accountBalancesProvider.future).then((_) {}),
+      ref.read(categoryMapProvider.future).then((_) {}),
+      ref.read(homeWidgetsProvider.future).then((_) {}),
+    ]) {
+      future.ignore();
     }
   }
 

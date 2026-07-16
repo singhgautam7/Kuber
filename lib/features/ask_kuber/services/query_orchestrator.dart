@@ -8,6 +8,7 @@ import '../handlers/easter_egg_handler.dart';
 import '../handlers/fallback_handler.dart';
 import '../handlers/frequency_handler.dart';
 import '../handlers/how_to_handler.dart';
+import '../handlers/knowledge_handler.dart';
 import '../handlers/last_spent_handler.dart';
 import '../handlers/income_handler.dart';
 import '../handlers/investments_handler.dart';
@@ -46,6 +47,10 @@ class QueryOrchestrator {
           // Conversational layer.
           ConversationalHandler(),
           EasterEggHandler(),
+          // Knowledge base: informational "help" / "how does X work" answers.
+          // Runs before how-to so informational phrasing wins; how-to keeps the
+          // functional "how do I do X" navigation.
+          KnowledgeHandler(),
           // Functional help.
           HowToHandler(),
           LanguageHandler(),

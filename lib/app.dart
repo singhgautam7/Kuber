@@ -19,6 +19,10 @@ import 'features/history/providers/selection_provider.dart';
 import 'features/transactions/providers/transaction_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
+import 'features/pro/paywall/billing_ui_state.dart';
+import 'features/pro/paywall/pro_state.dart';
+import 'features/pro/services/promo_config_service.dart';
+import 'features/pro/services/purchase_service.dart';
 import 'features/reminders/data/reminders_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/sms_import/providers/sms_import_provider.dart';
@@ -54,6 +58,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
       _runSmsCleanup();
       _runReminderMaintenance();
       _runWidgetSync();
+      _initPurchases();
+      _initPromoConfig();
       // Warm the non-Home tabs' providers ~1.5s after first frame — late
       // enough that Home has finished its own hydration, early enough that
       // a user tapping Analytics or History hits cached data.
@@ -76,6 +82,41 @@ class _KuberAppState extends ConsumerState<KuberApp>
       ref.read(transferPairAccountIdsProvider.future).ignore();
     } catch (e, stack) {
       debugPrint('Kuber: tab provider warm-up failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  /// Connects to Google Play Billing and reconciles entitlement on cold start.
+  /// Deferred to after first frame and fully guarded — a device with no Play
+  /// services, or any billing error, must never affect launch. Once connected,
+  /// PurchaseService listens to the purchase stream for the app's lifetime.
+  Future<void> _initPurchases() async {
+    try {
+      // Offline-fallback prices for the paywall, before the live query lands.
+      await ref.read(cachedProductPricesProvider.notifier).hydrate();
+      // The entitlement row was created in main()'s bootstrap; force a read so
+      // the notifier hydrates from Isar (synchronous), then clear the
+      // Pro-bootstrap gate that keeps the Settings card skeleton and the
+      // hidden trial pill in their loading state.
+      ref.read(kuberProStateProvider);
+      ref.read(proBootstrapLoadingProvider.notifier).state = false;
+
+      await ref.read(purchaseServiceProvider).initialize();
+    } catch (e, stack) {
+      debugPrint('Kuber: purchase init failed (non-fatal): $e\n$stack');
+      // Never strand the UI on skeletons if billing init throws.
+      ref.read(proBootstrapLoadingProvider.notifier).state = false;
+    }
+  }
+
+  /// Refreshes the remote promo campaign (best-effort, TTL-gated) and hydrates
+  /// the in-memory config so promo surfaces can read it synchronously. Fully
+  /// guarded — a promo is a nice-to-have and must never affect launch.
+  Future<void> _initPromoConfig() async {
+    try {
+      await const PromoConfigService().refreshIfStale();
+      await ref.read(promoConfigProvider.notifier).hydrate();
+    } catch (e, stack) {
+      debugPrint('Kuber: promo config init failed (non-fatal): $e\n$stack');
     }
   }
 

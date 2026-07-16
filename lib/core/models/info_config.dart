@@ -4,11 +4,13 @@ class KuberInfoConfig {
   final String title;
   final String description;
   final List<KuberInfoItem> items;
+  final Widget? customChild;
 
   const KuberInfoConfig({
     required this.title,
     required this.description,
     required this.items,
+    this.customChild,
   });
 }
 

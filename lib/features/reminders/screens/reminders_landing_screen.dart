@@ -7,6 +7,8 @@ import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
+import '../../pro/feature_gates/gate_sheet_reminders.dart';
+import '../../pro/feature_gates/pro_gate.dart';
 import '../data/reminder.dart';
 import '../providers/reminders_provider.dart';
 import '../widgets/about_reminders_info_sheet.dart';
@@ -79,7 +81,11 @@ class _RemindersLandingScreenState
             title: 'Reminders',
             description: 'Set reminders for anything money-related',
             actionTooltip: 'New reminder',
-            onAction: () => context.push('/reminders/add'),
+            onAction: () {
+              if (proGate(context, ref, showRemindersGateSheet)) {
+                context.push('/reminders/add');
+              }
+            },
           ),
           Expanded(
             child: !loaded

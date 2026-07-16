@@ -13,12 +13,14 @@ class ChipStrip extends StatelessWidget {
   final List<ChipAction> actions;
   final void Function(String query) onAsk;
   final void Function(String route) onNavigate;
+  final void Function(String subject, String body) onEmail;
 
   const ChipStrip({
     super.key,
     required this.actions,
     required this.onAsk,
     required this.onNavigate,
+    required this.onEmail,
   });
 
   @override
@@ -66,9 +68,17 @@ class ChipStrip extends StatelessWidget {
           onTap: () => onAsk(query),
           cs: cs,
         ),
-      NavChipAction(:final label, :final route) => _NavChip(
+      NavChipAction(:final label, :final route) => _FilledChip(
           label: label,
+          icon: Icons.arrow_forward_rounded,
           onTap: () => onNavigate(route),
+          cs: cs,
+        ),
+      EmailChipAction(:final label, :final subject, :final body) => _FilledChip(
+          label: label,
+          icon: Icons.mail_outline_rounded,
+          iconLeading: true,
+          onTap: () => onEmail(subject, body),
           cs: cs,
         ),
     };
@@ -107,14 +117,31 @@ class _AskChip extends StatelessWidget {
   }
 }
 
-class _NavChip extends StatelessWidget {
+/// Filled primary pill with an icon. Used for navigate chips (trailing arrow)
+/// and email chips (leading envelope) — same treatment, differing only in which
+/// side the icon sits.
+class _FilledChip extends StatelessWidget {
   final String label;
+  final IconData icon;
+  final bool iconLeading;
   final VoidCallback onTap;
   final ColorScheme cs;
-  const _NavChip({required this.label, required this.onTap, required this.cs});
+  const _FilledChip({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    required this.cs,
+    this.iconLeading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final text = Text(
+      label,
+      style: localeFont(
+          fontSize: 13, fontWeight: FontWeight.w500, color: cs.onPrimary),
+    );
+    final iconWidget = Icon(icon, size: 13, color: cs.onPrimary);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Material(
@@ -126,20 +153,14 @@ class _NavChip extends StatelessWidget {
           splashColor: cs.onPrimary.withValues(alpha: 0.18),
           highlightColor: cs.onPrimary.withValues(alpha: 0.10),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 7, 9, 7),
+            padding: iconLeading
+                ? const EdgeInsets.fromLTRB(9, 7, 12, 7)
+                : const EdgeInsets.fromLTRB(12, 7, 9, 7),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: localeFont(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: cs.onPrimary),
-                ),
-                const SizedBox(width: 6),
-                Icon(Icons.arrow_forward_rounded, size: 13, color: cs.onPrimary),
-              ],
+              children: iconLeading
+                  ? [iconWidget, const SizedBox(width: 6), text]
+                  : [text, const SizedBox(width: 6), iconWidget],
             ),
           ),
         ),

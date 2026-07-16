@@ -18,6 +18,12 @@ import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../ask_kuber/screen/kuber_mark.dart';
+import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/pro_gate.dart';
+// PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
+// import '../../pro/more/more_premium_card.dart';
+// import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import 'more_screen_modern.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -41,9 +47,13 @@ class MoreScreenSimple extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final isDevMode = ref.watch(devModeProvider).valueOrNull ?? false;
 
-    final footerHeartParts = context.l10n.madeInIndia('{heart}').split('{heart}');
+    final footerHeartParts = context.l10n
+        .madeInIndia('{heart}')
+        .split('{heart}');
     final footerBefore = footerHeartParts.first;
-    final footerAfter = footerHeartParts.length > 1 ? footerHeartParts.last : '';
+    final footerAfter = footerHeartParts.length > 1
+        ? footerHeartParts.last
+        : '';
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -67,6 +77,11 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // PAYMENT-HIDDEN (KYC pending): Kuber Pro entry point hidden
+                // while Play Billing KYC is pending. Restore when re-enabling
+                // payments (see specs/pro-gating-disabled.md).
+                // const MorePremiumCardClassic(),
+                // const SizedBox(height: KuberSpacing.xl),
                 // Manage section
                 _MenuSection(
                   title: context.l10n.moreManageTitle,
@@ -149,7 +164,26 @@ class MoreScreenSimple extends ConsumerWidget {
                       icon: Icons.sms_outlined,
                       label: 'Import from SMS',
                       subtitle: 'Read bank SMS for transactions',
-                      onTap: () => context.push('/more/sms-import'),
+                      onTap: () {
+                        if (proGate(context, ref, showSmsImportGateSheet)) {
+                          context.push('/more/sms-import');
+                        }
+                      },
+                    ),
+                    _MenuItem(
+                      icon: Icons.insert_chart_outlined_rounded,
+                      label: 'Advanced Analytics',
+                      subtitle: 'Deep analytical views of your finances',
+                      showProPill: true,
+                      onTap: () {
+                        if (proGate(
+                          context,
+                          ref,
+                          showAdvancedAnalyticsGateSheet,
+                        )) {
+                          context.push('/advanced-analytics');
+                        }
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.calculate_rounded,
@@ -253,9 +287,7 @@ class MoreScreenSimple extends ConsumerWidget {
                       subtitle: context.l10n.menuShareAppDesc,
                       onTap: () {
                         SharePlus.instance.share(
-                          ShareParams(
-                            text: context.l10n.shareMessage,
-                          ),
+                          ShareParams(text: context.l10n.shareMessage),
                         );
                       },
                     ),
@@ -268,6 +300,12 @@ class MoreScreenSimple extends ConsumerWidget {
                   ],
                 ),
 
+                // PAYMENT-HIDDEN (KYC pending): Buy Me a Coffee support button
+                // hidden while Play Billing KYC is pending. Restore the button
+                // and its spacing when re-enabling payments
+                // (see specs/pro-gating-disabled.md).
+                // const SizedBox(height: KuberSpacing.lg),
+                // const BuyMeCoffeeButton(),
                 const SizedBox(height: KuberSpacing.xl),
 
                 // About section
@@ -410,6 +448,7 @@ class _MenuItem extends StatelessWidget {
   final String subtitle;
   final VoidCallback onTap;
   final Widget? iconWidget;
+  final bool showProPill;
 
   const _MenuItem({
     super.key,
@@ -418,6 +457,7 @@ class _MenuItem extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     this.iconWidget,
+    this.showProPill = false,
   });
 
   @override
@@ -450,20 +490,46 @@ class _MenuItem extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
+            if (showProPill) ...[
+              const SizedBox(width: KuberSpacing.sm),
+              _ProPill(color: cs.primary),
+            ],
             Icon(
               Icons.chevron_right_rounded,
               color: cs.onSurfaceVariant.withValues(alpha: 0.5),
               size: 20,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProPill extends StatelessWidget {
+  final Color color;
+
+  const _ProPill({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
+      ),
+      child: Text(
+        'PRO',
+        style: localeFont(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          color: color,
         ),
       ),
     );

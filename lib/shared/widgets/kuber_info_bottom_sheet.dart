@@ -99,6 +99,10 @@ class KuberInfoBottomSheet extends StatelessWidget {
               ),
             );
           }),
+          if (config.customChild != null) ...[
+            config.customChild!,
+            const SizedBox(height: 16),
+          ],
           const SizedBox(height: 16),
         ],
       ),

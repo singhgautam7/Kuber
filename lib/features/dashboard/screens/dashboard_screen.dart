@@ -30,10 +30,16 @@ import '../widgets/budget_snapshot_card.dart';
 import '../widgets/home_accounts_card.dart';
 import '../widgets/home_recent_transactions.dart';
 import '../../notes/widgets/notes_home_widget.dart';
+import '../../pro/home/ask_kuber_home_widget.dart';
+import '../../pro/home/shortcuts_widget.dart';
+import '../../pro/promo/home_promo_banner.dart';
+import '../../pro/paywall/pro_state.dart';
+import '../../pro/trial/trial_ending_sheet.dart';
 import '../../upcoming_events/widgets/upcoming_events_widget.dart';
 import '../widgets/quick_add_widget.dart';
 import '../../sms_import/widgets/sms_import_home_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
+import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../../shared/widgets/skeleton_loader.dart';
 
 List<String> _homeSubtitles(AppLocalizations l10n) => [
@@ -88,6 +94,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       if (!mounted || match == null) return;
       await handleNotificationTap(context, ref, match);
     });
+
+    // One-time "your Kuber Pro trial ended" notice, shown on the first frame
+    // after the 14-day window closes. The Isar-backed guard
+    // (shouldShowTrialEndedNotice / markTrialEndedNoticeShown) ensures it
+    // fires at most once per install.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final notifier = ref.read(kuberProStateProvider.notifier);
+      if (notifier.shouldShowTrialEndedNotice()) {
+        showTrialEndingSheet(context);
+        notifier.markTrialEndedNoticeShown();
+      }
+    });
   }
 
   Future<void> _openNotificationsSheet() async {
@@ -140,6 +159,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       'upcoming_events_widget' =>
         const RepaintBoundary(child: UpcomingEventsWidget()),
       'kuber_notes_widget' => const RepaintBoundary(child: NotesHomeWidget()),
+      'ask_kuber_widget' => const RepaintBoundary(child: AskKuberHomeWidget()),
+      'shortcuts_widget' => const RepaintBoundary(child: ShortcutsWidget()),
       'recent_transactions' =>
         const RepaintBoundary(child: HomeRecentTransactionsCard()),
       'sms_import_widget' =>
@@ -206,11 +227,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ),
           const SizedBox(height: KuberSpacing.lg),
 
+          // Promo campaign banner — sits above the monthly-net hero card and
+          // self-hides when no promo is running, the user dismissed it this
+          // session, or they already have Pro.
+          const HomePromoBanner(),
+
           // Dynamic widget list — order + enabled comes from Isar via the
           // widget editor. Disabled widgets are not constructed at all, so
           // their providers don't run.
           ...widgetsAsync.when(
-            loading: () => const <Widget>[],
+            // Until the widget layout (and its data) is ready, show card-shaped
+            // skeletons rather than a blank gap. On a large database the timed
+            // splash can dismiss before these resolve; this covers that window.
+            loading: () => [
+              for (final h in const <double>[148, 88, 120, 88])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+                  child: KuberSkeleton(height: h),
+                ),
+            ],
             error: (_, __) => const <Widget>[],
             data: (configs) {
               final visible = configs.where((c) => c.enabled).toList();

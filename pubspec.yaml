@@ -1,7 +1,7 @@
 name: kuber
 description: "Kuber, a local-first expense manager"
 publish_to: 'none'
-version: 4.0.0+45
+version: 4.1.0+46
 
 environment:
   sdk: ^3.11.1
@@ -59,6 +59,9 @@ dependencies:
 
   # Native Android home-screen widgets (Flutter <-> RemoteViews bridge)
   home_widget: ^0.7.0
+
+  # Google Play Billing (Kuber Pro subscriptions + Buy Me a Coffee)
+  in_app_purchase: ^3.2.0
 
 dev_dependencies:
   flutter_test:

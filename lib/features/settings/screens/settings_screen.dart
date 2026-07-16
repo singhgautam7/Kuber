@@ -11,6 +11,10 @@ import '../../../shared/widgets/kuber_app_bar.dart';
 
 import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
+import '../../pro/feature_gates/gate_sheet_multi_currency.dart';
+import '../../pro/feature_gates/pro_gate.dart';
+// PAYMENT-HIDDEN (KYC pending): restore with the KuberProSettingsSection below.
+// import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
@@ -352,6 +356,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // PAYMENT-HIDDEN (KYC pending): the Kuber Pro status/upgrade
+                // section is hidden while Play Billing KYC is pending. Restore
+                // when re-enabling payments (see specs/pro-gating-disabled.md).
+                // const KuberProSettingsSection(),
+                // const SizedBox(height: KuberSpacing.lg),
                 // PROFILE
                 _SectionLabel(label: context.l10n.profileSection),
                 _SectionDescription(context.l10n.profileDescription),
@@ -449,7 +458,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.account_balance_wallet_outlined,
                       label: context.l10n.currencyLabel,
                       subtitle: context.l10n.currencySubtitle,
-                      onTap: () => _showCurrencyPicker(context, currencyCode),
+                      onTap: () {
+                        // Multi-currency is a Kuber Pro feature. Free users see
+                        // the gate instead of the currency list.
+                        if (proGate(context, ref, showMultiCurrencyGateSheet)) {
+                          _showCurrencyPicker(context, currencyCode);
+                        }
+                      },
                       trailing: _trailingWidget(
                         context,
                         text: '${currency.symbol} ${currency.code}',

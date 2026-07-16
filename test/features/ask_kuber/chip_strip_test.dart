@@ -9,12 +9,17 @@ void main() {
     required List<ChipAction> actions,
     required void Function(String) onAsk,
     required void Function(String) onNavigate,
+    void Function(String subject, String body)? onEmail,
   }) {
     return MaterialApp(
       theme: AppTheme.dark(const Locale('en')),
       home: Scaffold(
         body: ChipStrip(
-            actions: actions, onAsk: onAsk, onNavigate: onNavigate),
+          actions: actions,
+          onAsk: onAsk,
+          onNavigate: onNavigate,
+          onEmail: onEmail ?? (_, __) {},
+        ),
       ),
     );
   }
@@ -43,5 +48,30 @@ void main() {
 
     await tester.tap(find.text('View budget'));
     expect(route, '/more/budgets');
+  });
+
+  testWidgets('email chip tap passes its subject and body', (tester) async {
+    String? subject;
+    String? body;
+    await tester.pumpWidget(host(
+      actions: const [
+        EmailChipAction(
+          label: 'Email the developer',
+          subject: 'Kuber feedback',
+          body: 'Hello',
+        ),
+      ],
+      onAsk: (_) {},
+      onNavigate: (_) {},
+      onEmail: (s, b) {
+        subject = s;
+        body = b;
+      },
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Email the developer'));
+    expect(subject, 'Kuber feedback');
+    expect(body, 'Hello');
   });
 }

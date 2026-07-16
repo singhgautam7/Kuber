@@ -48,6 +48,12 @@ import '../../tutorial/models/tutorial_step_keys.dart';
 // shared helper file in lib/features/more/.
 import '../screens/more_screen.dart' show launchTutorialFromMore;
 import '../../ask_kuber/screen/kuber_mark.dart';
+import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/pro_gate.dart';
+// PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
+// import '../../pro/more/more_premium_card.dart';
+// import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 
 class MoreScreenModern extends ConsumerWidget {
   const MoreScreenModern({super.key});
@@ -56,21 +62,35 @@ class MoreScreenModern extends ConsumerWidget {
     final lang = AppLocale.current.languageCode;
     switch (lang) {
       case 'hi':
-        return count == 1 ? '1 खाता ट्रैक किया गया' : '$count खाते ट्रैक किए गए';
+        return count == 1
+            ? '1 खाता ट्रैक किया गया'
+            : '$count खाते ट्रैक किए गए';
       case 'kn':
-        return count == 1 ? '1 ಖಾತೆಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ' : '$count ಖಾತೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ';
+        return count == 1
+            ? '1 ಖಾತೆಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ'
+            : '$count ಖಾತೆಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ';
       case 'ml':
-        return count == 1 ? '1 അക്കൗണ്ട് ട്രാക്ക് ചെയ്തു' : '$count അക്കൗಂಡുകൾ ಟ്രാക്ക് ചെയ്തു';
+        return count == 1
+            ? '1 അക്കൗണ്ട് ട്രാക്ക് ചെയ്തു'
+            : '$count അക്കൗಂಡുകൾ ಟ്രാക്ക് ചെയ്തു';
       case 'ta':
-        return count == 1 ? '1 கணக்கு கண்கಾಣிக்கப்படுகிறது' : '$count கணக்குகள் கண்கಾಣிக்கப்படுகின்றன';
+        return count == 1
+            ? '1 கணக்கு கண்கಾಣிக்கப்படுகிறது'
+            : '$count கணக்குகள் கண்கಾಣிக்கப்படுகின்றன';
       case 'te':
-        return count == 1 ? '1 ఖాటా ట్రాక్ చేయబడింది' : '$count ಖಾತಗಳು ಟ್ರ್ಯಾಕ್ చేయబడ్డాయి';
+        return count == 1
+            ? '1 ఖాటా ట్రాక్ చేయబడింది'
+            : '$count ಖಾತಗಳು ಟ್ರ್ಯಾಕ್ చేయబడ్డాయి';
       case 'mr':
         return count == 1 ? '1 खाते ट्रॅक केले' : '$count खाती ट्रॅक केली';
       case 'bn':
-        return count == 1 ? '1টি অ্যাকাউন্ট ট্র্যাক করা হয়েছে' : '$countটি অ্যাকাউন্ট ট্র্যাক করা হয়েছে';
+        return count == 1
+            ? '1টি অ্যাকাউন্ট ট্র্যাক করা হয়েছে'
+            : '$countটি অ্যাকাউন্ট ট্র্যাক করা হয়েছে';
       case 'pa':
-        return count == 1 ? '1 ਖਾਤਾ ਟ੍ਰੈਕ ਕੀਤਾ ਗਿਆ' : '$count ਖਾਤੇ ਟ੍ਰੈਕ ਕੀਤੇ ਗਏ';
+        return count == 1
+            ? '1 ਖਾਤਾ ਟ੍ਰੈਕ ਕੀਤਾ ਗਿਆ'
+            : '$count ਖਾਤੇ ਟ੍ਰੈਕ ਕੀਤੇ ਗਏ';
       default:
         return count == 1 ? '1 account tracked' : '$count accounts tracked';
     }
@@ -105,8 +125,15 @@ class MoreScreenModern extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
+                // PAYMENT-HIDDEN (KYC pending): Kuber Pro entry point hidden
+                // while Play Billing KYC is pending. Restore when re-enabling
+                // payments (see specs/pro-gating-disabled.md).
+                // const MorePremiumHeroCard(),
+                // const SizedBox(height: KuberSpacing.xl),
                 // 01 / MANAGE -------------------------------------------------
-                _GroupHead(num: '01', name: context.l10n.moreManageTitle, hint: context.l10n.menuManageSpaces),
+                // No item-count hint here: it was hardcoded ("8 spaces"), out
+                // of sync with the actual count, and added no value.
+                _GroupHead(num: '01', name: context.l10n.moreManageTitle),
                 _HeroTile(
                   icon: Icons.account_balance_wallet,
                   label: context.l10n.menuAccounts.toUpperCase(),
@@ -196,7 +223,11 @@ class MoreScreenModern extends ConsumerWidget {
                         title: 'Import from SMS',
                         subtitle: 'Read bank SMS for transactions',
                         accent: _ToolAccent.primary,
-                        onTap: () => context.push('/more/sms-import'),
+                        onTap: () {
+                          if (proGate(context, ref, showSmsImportGateSheet)) {
+                            context.push('/more/sms-import');
+                          }
+                        },
                       ),
                     ),
                   ],
@@ -206,6 +237,24 @@ class MoreScreenModern extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _ToolCard(
+                        icon: Icons.insert_chart_outlined_rounded,
+                        title: 'Advanced Analytics',
+                        subtitle: 'Deep analytical views of your finances',
+                        accent: _ToolAccent.primary,
+                        onTap: () {
+                          if (proGate(
+                            context,
+                            ref,
+                            showAdvancedAnalyticsGateSheet,
+                          )) {
+                            context.push('/advanced-analytics');
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    Expanded(
+                      child: _ToolCard(
                         icon: Icons.calculate_rounded,
                         title: context.l10n.menuCalculators,
                         subtitle: context.l10n.menuCalculatorsDesc,
@@ -213,7 +262,11 @@ class MoreScreenModern extends ConsumerWidget {
                         onTap: () => context.push('/more/tools'),
                       ),
                     ),
-                    const SizedBox(width: KuberSpacing.sm),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.sm),
+                Row(
+                  children: [
                     Expanded(
                       // Kuber Notes (English-only feature).
                       child: _ToolCard(
@@ -224,6 +277,8 @@ class MoreScreenModern extends ConsumerWidget {
                         onTap: () => context.push('/more/notes'),
                       ),
                     ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    const Expanded(child: SizedBox.shrink()),
                   ],
                 ),
 
@@ -345,9 +400,7 @@ class MoreScreenModern extends ConsumerWidget {
                       icon: Icons.share_rounded,
                       label: context.l10n.menuShare,
                       onTap: () => SharePlus.instance.share(
-                        ShareParams(
-                          text: context.l10n.shareMessage,
-                        ),
+                        ShareParams(text: context.l10n.shareMessage),
                       ),
                     ),
                     _HelpAction(
@@ -357,6 +410,13 @@ class MoreScreenModern extends ConsumerWidget {
                     ),
                   ],
                 ),
+
+                // PAYMENT-HIDDEN (KYC pending): Buy Me a Coffee support button
+                // hidden while Play Billing KYC is pending. Restore the button
+                // and its spacing when re-enabling payments
+                // (see specs/pro-gating-disabled.md).
+                // const SizedBox(height: KuberSpacing.md),
+                // const BuyMeCoffeeButton(),
 
                 const SizedBox(height: KuberSpacing.xxl),
 
@@ -413,10 +473,7 @@ class _GroupHead extends StatelessWidget {
             const Spacer(),
             Text(
               h,
-              style: localeFont(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-              ),
+              style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
             ),
           ],
         ],
@@ -767,7 +824,8 @@ class _ToolCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(KuberRadius.md + 4),
                     ),
                     alignment: Alignment.center,
-                    child: iconWidget ?? Icon(icon, size: 22, color: accentColor),
+                    child:
+                        iconWidget ?? Icon(icon, size: 22, color: accentColor),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -920,10 +978,7 @@ class _CompactRow extends StatelessWidget {
                   const SizedBox(height: 1),
                   Text(
                     data.sub,
-                    style: localeFont(
-                      fontSize: 11,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
