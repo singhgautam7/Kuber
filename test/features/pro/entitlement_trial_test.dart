@@ -77,7 +77,10 @@ void main() {
     test('free state is never in a trial phase', () {
       const s = KuberProState();
       expect(s.inTrialPhase, isFalse);
-      expect(s.hasProAccess, isFalse);
+      // TEMPORARY: Pro gating is disabled (all features free) while billing KYC
+      // is pending, so hasProAccess is hard-coded true. Restore this to isFalse
+      // when re-enabling gating (see hasProAccess / specs/pro-gating-disabled.md).
+      expect(s.hasProAccess, isTrue);
     });
   });
 }

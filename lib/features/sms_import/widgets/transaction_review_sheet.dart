@@ -833,7 +833,11 @@ class _FieldRow extends StatelessWidget {
                           style: localeFont(
                             fontSize: 14.5,
                             fontWeight: FontWeight.w500,
-                            color: muted ? cs.onSurfaceVariant : cs.onSurface,
+                            color: error
+                                ? cs.error
+                                : muted
+                                    ? cs.onSurfaceVariant
+                                    : cs.onSurface,
                           ),
                         ),
                       ),

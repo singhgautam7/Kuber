@@ -80,10 +80,15 @@ class _AaChartTapAreaState extends State<AaChartTapArea> {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              SizedBox(
-                width: double.infinity,
-                height: widget.height,
-                child: CustomPaint(painter: widget.painter),
+              // RepaintBoundary isolates the hand-drawn chart so it isn't
+              // repainted by the enclosing scrollable / tooltip rebuilds
+              // (performance.md §5).
+              RepaintBoundary(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: widget.height,
+                  child: CustomPaint(painter: widget.painter),
+                ),
               ),
               if (_touched >= 0 && _touched < n) ...[
                 _selectionLine(cs, w, n),

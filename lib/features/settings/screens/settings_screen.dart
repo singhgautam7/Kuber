@@ -13,7 +13,8 @@ import '../../accounts/data/account.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../pro/feature_gates/gate_sheet_multi_currency.dart';
 import '../../pro/feature_gates/pro_gate.dart';
-import '../../pro/settings/kuber_pro_settings_section.dart';
+// PAYMENT-HIDDEN (KYC pending): restore with the KuberProSettingsSection below.
+// import '../../pro/settings/kuber_pro_settings_section.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
@@ -355,9 +356,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // KUBER PRO — status / upgrade entry, above everything else.
-                const KuberProSettingsSection(),
-                const SizedBox(height: KuberSpacing.lg),
+                // PAYMENT-HIDDEN (KYC pending): the Kuber Pro status/upgrade
+                // section is hidden while Play Billing KYC is pending. Restore
+                // when re-enabling payments (see specs/pro-gating-disabled.md).
+                // const KuberProSettingsSection(),
+                // const SizedBox(height: KuberSpacing.lg),
                 // PROFILE
                 _SectionLabel(label: context.l10n.profileSection),
                 _SectionDescription(context.l10n.profileDescription),

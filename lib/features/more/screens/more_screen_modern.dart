@@ -51,8 +51,9 @@ import '../../ask_kuber/screen/kuber_mark.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../../pro/feature_gates/pro_gate.dart';
-import '../../pro/more/more_premium_card.dart';
-import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
+// PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
+// import '../../pro/more/more_premium_card.dart';
+// import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 
 class MoreScreenModern extends ConsumerWidget {
   const MoreScreenModern({super.key});
@@ -124,9 +125,11 @@ class MoreScreenModern extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Kuber Pro entry point — first item, above "01 / MANAGE".
-                const MorePremiumHeroCard(),
-                const SizedBox(height: KuberSpacing.xl),
+                // PAYMENT-HIDDEN (KYC pending): Kuber Pro entry point hidden
+                // while Play Billing KYC is pending. Restore when re-enabling
+                // payments (see specs/pro-gating-disabled.md).
+                // const MorePremiumHeroCard(),
+                // const SizedBox(height: KuberSpacing.xl),
                 // 01 / MANAGE -------------------------------------------------
                 // No item-count hint here: it was hardcoded ("8 spaces"), out
                 // of sync with the actual count, and added no value.
@@ -408,12 +411,12 @@ class MoreScreenModern extends ConsumerWidget {
                   ],
                 ),
 
-                const SizedBox(height: KuberSpacing.md),
-
-                // Buy Me a Coffee — full-width button below the "Help us" rows
-                // (rate / share / feedback). Opens the tier picker sheet;
-                // grants no Pro features.
-                const BuyMeCoffeeButton(),
+                // PAYMENT-HIDDEN (KYC pending): Buy Me a Coffee support button
+                // hidden while Play Billing KYC is pending. Restore the button
+                // and its spacing when re-enabling payments
+                // (see specs/pro-gating-disabled.md).
+                // const SizedBox(height: KuberSpacing.md),
+                // const BuyMeCoffeeButton(),
 
                 const SizedBox(height: KuberSpacing.xxl),
 

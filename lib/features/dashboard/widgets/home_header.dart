@@ -18,7 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../pro/home/premium_home_button.dart';
+// PAYMENT-HIDDEN (KYC pending): restore with the PremiumHomeButton below.
+// import '../../pro/home/premium_home_button.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 
@@ -49,13 +50,10 @@ class HomeHeader extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Row(
             children: [
-              // Pro status button at the extreme left, replacing the retired
-              // "Ask Kuber" pill (Ask Kuber now has its own home widget). The
-              // privacy toggle and notification bell move to the right.
-              // Pro status button at the extreme left. It already surfaces the
-              // trial countdown ("TRIAL · Nd") in its own label, so there is no
-              // separate trial pill here (a second one overflowed the row).
-              const PremiumHomeButton(),
+              // PAYMENT-HIDDEN (KYC pending): the Pro status button is hidden
+              // while Play Billing KYC is pending. Restore `PremiumHomeButton`
+              // here when re-enabling payments (see specs/pro-gating-disabled.md).
+              // const PremiumHomeButton(),
               const Spacer(),
               _HeaderIconButton(
                 key: TutorialStepKeys.privacyModeIcon,

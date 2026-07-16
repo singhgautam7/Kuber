@@ -86,25 +86,23 @@ class KuberProState {
   bool get inTrialPhase =>
       trialEndsAt != null && trialEndsAt!.isAfter(DateTime.now());
 
-  /// Whether the user may use Pro-gated features right now. A legacy trial user
-  /// is unpaid ([isPro] false) but still gets full access, so gates check this
-  /// rather than [isPro]. A Play trial user is already [isPro]. The paywall's
-  /// manage-vs-sell decision keys off [isPro]: a Play-trial user has a real
-  /// subscription to manage, a legacy-trial user does not.
-  /// TESTING ESCAPE HATCH — remove before shipping.
+  /// Whether the user may use Pro-gated features right now. Every gate in the
+  /// app routes through this getter (via `proGate`), so it is the single
+  /// on/off switch for Pro.
   ///
-  /// Compile-time flag that opens every Pro gate so features can be exercised
-  /// without a purchase or trial. It is a `const bool.fromEnvironment`, so it
-  /// is `false` in any build that does not explicitly pass the define — that
-  /// includes `flutter test`, CI, and every release build — and the OR branch
-  /// below is tree-shaken out entirely. There is no runtime way to flip it, so
-  /// it is not a shippable-security concern on its own; the real entitlement
-  /// (Play Billing) stays the source of truth. Turn it on with:
-  ///   flutter run --dart-define=KUBER_UNLOCK_PRO=true
-  static const _unlockProForTesting =
-      bool.fromEnvironment('KUBER_UNLOCK_PRO');
-
-  bool get hasProAccess => _unlockProForTesting || isPro || isTrial;
+  /// ── TEMPORARY (billing KYC pending): ALL PRO FEATURES ARE FREE. ──
+  /// While Play Billing KYC is being verified we ship every Pro feature
+  /// unlocked by returning `true` here — no gating code is deleted, just
+  /// bypassed. To RE-ENABLE Pro gating once KYC clears, restore the real
+  /// check below:
+  ///
+  ///   bool get hasProAccess =>
+  ///       const bool.fromEnvironment('KUBER_UNLOCK_PRO') || isPro || isTrial;
+  ///
+  /// See `specs/pro-gating-disabled.md` for the full list of what this affects
+  /// and how to turn gating back on. The paywall's manage-vs-sell decision
+  /// still keys off [isPro] (real entitlement), not this getter.
+  bool get hasProAccess => true;
 
   /// Whole days since Pro/promo was activated. Used by the manage-state hero
   /// as a small badge of pride, not a functional countdown.

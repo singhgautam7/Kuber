@@ -21,8 +21,9 @@ import '../../ask_kuber/screen/kuber_mark.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../../pro/feature_gates/pro_gate.dart';
-import '../../pro/more/more_premium_card.dart';
-import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
+// PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
+// import '../../pro/more/more_premium_card.dart';
+// import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import 'more_screen_modern.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -76,9 +77,11 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Kuber Pro entry point — first item, above the Manage section.
-                const MorePremiumCardClassic(),
-                const SizedBox(height: KuberSpacing.xl),
+                // PAYMENT-HIDDEN (KYC pending): Kuber Pro entry point hidden
+                // while Play Billing KYC is pending. Restore when re-enabling
+                // payments (see specs/pro-gating-disabled.md).
+                // const MorePremiumCardClassic(),
+                // const SizedBox(height: KuberSpacing.xl),
                 // Manage section
                 _MenuSection(
                   title: context.l10n.moreManageTitle,
@@ -297,12 +300,12 @@ class MoreScreenSimple extends ConsumerWidget {
                   ],
                 ),
 
-                const SizedBox(height: KuberSpacing.lg),
-
-                // Buy Me a Coffee — one-time support, grants no Pro features.
-                // Full-width button that opens the tier picker sheet.
-                const BuyMeCoffeeButton(),
-
+                // PAYMENT-HIDDEN (KYC pending): Buy Me a Coffee support button
+                // hidden while Play Billing KYC is pending. Restore the button
+                // and its spacing when re-enabling payments
+                // (see specs/pro-gating-disabled.md).
+                // const SizedBox(height: KuberSpacing.lg),
+                // const BuyMeCoffeeButton(),
                 const SizedBox(height: KuberSpacing.xl),
 
                 // About section
