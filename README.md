@@ -95,6 +95,8 @@ git clone https://github.com/your-username/kubera.git
 cd kubera
 flutter pub get
 flutter run
+```
+
 ---
 
 ## Brand Icon (vector)
