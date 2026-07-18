@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/services/widget_sync_service.dart';
+import '../../../core/theme/kuber_tokens.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
@@ -41,9 +43,25 @@ final localeProvider = Provider<Locale>((ref) {
       .select((s) => s.valueOrNull?.locale ?? const Locale('en')));
 });
 
+/// Theme values read synchronously from SharedPreferences in `_bootstrap`
+/// (before `runApp`) and injected as an override. They are the pre-hydration
+/// fallback for [themeModeProvider] / [themeVariantProvider], so the first
+/// frame already renders the persisted theme with no flash while the async
+/// [settingsProvider] loads.
+final bootThemeProvider = Provider<(ThemeMode, ThemeVariant)>(
+  (ref) => (ThemeMode.system, ThemeVariant.signature),
+);
+
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
-  return ref.watch(settingsProvider
-      .select((s) => s.valueOrNull?.themeMode ?? ThemeMode.system));
+  final boot = ref.watch(bootThemeProvider).$1;
+  return ref
+      .watch(settingsProvider.select((s) => s.valueOrNull?.themeMode ?? boot));
+});
+
+final themeVariantProvider = Provider<ThemeVariant>((ref) {
+  final boot = ref.watch(bootThemeProvider).$2;
+  return ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.themeVariant ?? boot));
 });
 
 final privacyModeProvider = Provider<bool>((ref) {
@@ -81,6 +99,7 @@ enum MoreTabLayout { simple, modern }
 
 class SettingsState {
   final ThemeMode themeMode;
+  final ThemeVariant themeVariant;
   final String currency;
   final String dateFormat;
   final String userName;
@@ -97,6 +116,7 @@ class SettingsState {
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
+    this.themeVariant = ThemeVariant.signature,
     this.currency = 'INR',
     this.dateFormat = 'dd/MM/yyyy',
     this.userName = '',
@@ -114,6 +134,7 @@ class SettingsState {
 
   SettingsState copyWith({
     ThemeMode? themeMode,
+    ThemeVariant? themeVariant,
     String? currency,
     String? dateFormat,
     String? userName,
@@ -129,6 +150,7 @@ class SettingsState {
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
+      themeVariant: themeVariant ?? this.themeVariant,
       currency: currency ?? this.currency,
       dateFormat: dateFormat ?? this.dateFormat,
       userName: userName ?? this.userName,
@@ -152,6 +174,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     ref.keepAlive();
     final prefs = await SharedPreferences.getInstance();
     final themeModeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
+    final themeVariantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
     final currency = prefs.getString(PrefsKeys.currency) ?? 'INR';
     final dateFormat = prefs.getString('date_format') ?? 'dd/MM/yyyy';
     final userName = prefs.getString(PrefsKeys.userName) ?? '';
@@ -174,6 +197,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
+      themeVariant: ThemeVariant
+          .values[themeVariantIndex.clamp(0, ThemeVariant.values.length - 1)],
       currency: currency,
       dateFormat: dateFormat,
       userName: userName,
@@ -201,6 +226,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     state = AsyncData(
       SettingsState(
         themeMode: cur.themeMode,
+        themeVariant: cur.themeVariant,
         currency: cur.currency,
         dateFormat: cur.dateFormat,
         userName: cur.userName,
@@ -239,6 +265,31 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(PrefsKeys.themeMode, mode.index);
     state = AsyncData(state.requireValue.copyWith(themeMode: mode));
+    _syncWidgetsForTheme();
+  }
+
+  Future<void> setThemeVariant(ThemeVariant variant) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.themeVariant, variant.index);
+    state = AsyncData(state.requireValue.copyWith(themeVariant: variant));
+    _syncWidgetsForTheme();
+  }
+
+  Timer? _widgetSyncDebounce;
+
+  /// Pushes the new palette to the native home-screen widgets shortly after a
+  /// theme change so they re-tint within ~2s. Debounced: the Theme sheet is
+  /// built for tapping through families back to back, and a full syncAll
+  /// (all-transactions scan + chart bitmap renders) per tap would stack up on
+  /// the UI isolate right while the whole app is re-theming. Only the last
+  /// selection within the window triggers a sync.
+  void _syncWidgetsForTheme() {
+    _widgetSyncDebounce?.cancel();
+    _widgetSyncDebounce = Timer(const Duration(milliseconds: 800), () {
+      ref.read(widgetSyncServiceProvider).syncAll().catchError((Object e) {
+        debugPrint('Kuber: widget sync after theme change failed: $e');
+      });
+    });
   }
 
   Future<void> setCurrency(String currency) async {

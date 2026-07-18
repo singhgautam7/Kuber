@@ -21,6 +21,7 @@ class MonthlyNetWidgetProvider : HomeWidgetProvider() {
             val compact = isCompact(appWidgetManager, id)
             val layout = if (compact) R.layout.widget_monthly_net_compact else R.layout.widget_monthly_net
             val views = RemoteViews(context.packageName, layout)
+            WidgetTheme.applyCard(views, widgetData)
             bind(context, views, widgetData, compact)
             views.setOnClickPendingIntent(
                 R.id.widget_root,
@@ -75,8 +76,16 @@ class MonthlyNetWidgetProvider : HomeWidgetProvider() {
         val stale = WidgetCommon.isStale(updatedMillis)
 
         views.setTextViewText(R.id.tv_net, data.optString("net", "₹0"))
-        val netColor = if (stale) R.color.kuber_text_secondary else colorFor(data.optString("netSign"))
-        views.setTextColor(R.id.tv_net, ContextCompat.getColor(context, netColor))
+        views.setTextColor(
+            R.id.tv_net,
+            WidgetTheme.amountColor(context, prefs, data.optString("netSign"), stale)
+        )
+        if (!compact) {
+            val accent = WidgetTheme.primary(context, prefs)
+            WidgetTheme.tintIcon(views, R.id.iv_hicon, accent)
+            views.setTextColor(R.id.tv_mark, accent)
+            views.setInt(R.id.tv_mark, "setBackgroundResource", WidgetTheme.markBg(prefs))
+        }
 
         if (compact) {
             views.setTextViewText(R.id.tv_updated, WidgetCommon.updatedLabel(updatedMillis, "").trim())
@@ -95,9 +104,4 @@ class MonthlyNetWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    private fun colorFor(sign: String): Int = when (sign) {
-        "income" -> R.color.kuber_income
-        "expense" -> R.color.kuber_expense
-        else -> R.color.kuber_text_primary
-    }
 }

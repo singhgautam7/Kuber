@@ -31,6 +31,7 @@ class AccountBalanceWidgetProvider : HomeWidgetProvider() {
             val compact = isCompact(appWidgetManager, id)
             val layout = if (compact) R.layout.widget_account_balance_compact else R.layout.widget_account_balance
             val views = RemoteViews(context.packageName, layout)
+            WidgetTheme.applyCard(views, widgetData)
             val accountId = widgetData.getString(accountKey(id), null)
             bind(context, views, widgetData, accountId, compact)
             if (accountId != null) {
@@ -109,14 +110,11 @@ class AccountBalanceWidgetProvider : HomeWidgetProvider() {
 
         views.setTextViewText(R.id.tv_account_name, data.optString("name"))
         views.setTextViewText(R.id.tv_balance, data.optString("balance", "₹0"))
-        val balColor = when {
-            stale -> R.color.kuber_text_secondary
-            data.optString("sign") == "expense" -> R.color.kuber_expense
-            else -> R.color.kuber_income
-        }
-        views.setTextColor(R.id.tv_balance, ContextCompat.getColor(context, balColor))
+        val sign = if (data.optString("sign") == "expense") "expense" else "income"
+        views.setTextColor(R.id.tv_balance, WidgetTheme.amountColor(context, prefs, sign, stale))
 
         if (!compact) {
+            WidgetTheme.tintIcon(views, R.id.iv_hicon, WidgetTheme.primary(context, prefs))
             views.setViewVisibility(R.id.iv_stale, WidgetCommon.vis(stale))
             views.setTextViewText(R.id.tv_updated, WidgetCommon.updatedLabel(updatedMillis, "Last updated"))
             views.setTextColor(

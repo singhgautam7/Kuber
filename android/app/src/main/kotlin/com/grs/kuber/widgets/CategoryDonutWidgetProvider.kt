@@ -30,6 +30,7 @@ class CategoryDonutWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_category_donut)
+            WidgetTheme.applyCard(views, widgetData)
             bind(context, views, widgetData)
             val pi = WidgetCommon.deepLink(context, "analytics?section=categories", "donut_$id")
             views.setOnClickPendingIntent(R.id.widget_root, pi)
@@ -51,6 +52,9 @@ class CategoryDonutWidgetProvider : HomeWidgetProvider() {
             return
         }
         WidgetCommon.showState(views, R.id.state_loading, R.id.state_empty, R.id.state_content, WidgetCommon.State.CONTENT)
+        val accent = WidgetTheme.primary(context, prefs)
+        WidgetTheme.tintIcon(views, R.id.iv_hicon, accent)
+        views.setTextColor(R.id.footer_link, accent)
         views.setImageViewBitmap(R.id.iv_donut, bmp)
         for ((i, r) in rows.withIndex()) {
             if (i >= cats.length()) {

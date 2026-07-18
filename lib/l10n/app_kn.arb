@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "ಖರ್ಚು ಮಾಡಿದ ಮಿತಿ",
   "adjustmentIncreasedBy": "ಹೆಚ್ಚಾಗಿದೆ",
   "adjustmentDecreasedBy": "ಕಡಿಮೆಯಾಗಿದೆ",
-  "dangerZone": "ಅಪಾಯಕಾರಿ ವಲಯ"
+  "dangerZone": "ಅಪಾಯಕಾರಿ ವಲಯ",
+  "themeModeSectionLabel": "ಮೋಡ್",
+  "themeFamilyDescSignature": "ಕ್ಲಾಸಿಕ್ ಕುಬೇರ್ ನೋಟ.",
+  "themeFamilyDescFlewtube": "ಗಾಢ ಮತ್ತು ತಮಾಷೆಯ.",
+  "themeFamilyDescWoofsapp": "ಸ್ನೇಹಪರ ಮತ್ತು ಪರಿಚಿತ.",
+  "themeFamilyDescPurrhub": "ಕಪ್ಪು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ದಟ್ಟ ಹಳದಿ.",
+  "themeFamilyDescHonkpe": "ಶ್ರೀಮಂತ, ಪಾವತಿ ಶೈಲಿಯ ಅನುಭವ.",
+  "themeFamilyDescSqueakdin": "ಶಿಸ್ತುಬದ್ಧ, ಕೆಲಸ-ಕೇಂದ್ರಿತ.",
+  "themeFamilyDescOinkzon": "ಬೆಚ್ಚಗಿನ, ಶಾಪಿಂಗ್ ಶೈಲಿಯ."
 }

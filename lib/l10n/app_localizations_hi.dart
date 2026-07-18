@@ -4823,4 +4823,28 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get dangerZone => 'खतरनाक क्षेत्र';
+
+  @override
+  String get themeModeSectionLabel => 'मोड';
+
+  @override
+  String get themeFamilyDescSignature => 'क्लासिक कुबेर लुक।';
+
+  @override
+  String get themeFamilyDescFlewtube => 'चटख और मज़ेदार।';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'दोस्ताना और जाना-पहचाना।';
+
+  @override
+  String get themeFamilyDescPurrhub => 'गहरे काले पर बोल्ड पीला।';
+
+  @override
+  String get themeFamilyDescHonkpe => 'रिच और पेमेंट जैसा अहसास।';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'सधा हुआ, काम-केंद्रित।';
+
+  @override
+  String get themeFamilyDescOinkzon => 'गर्म और शॉपिंग वाला अंदाज़।';
 }

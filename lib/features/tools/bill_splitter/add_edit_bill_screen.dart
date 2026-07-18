@@ -716,8 +716,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: balance.balanced
-                                  ? KuberColors.income
-                                  : KuberColors.warning,
+                                  ? cs.tertiary
+                                  : context.kuberColors.warning,
                             ),
                           ),
                         ],
@@ -1170,8 +1170,8 @@ class _LendBorrowSummary extends StatelessWidget {
               final debt = entry.value;
               final isLast = entry.key == debts.length - 1;
               final color = debt.isLent
-                  ? KuberColors.income
-                  : KuberColors.expense;
+                  ? cs.tertiary
+                  : cs.error;
               final label = debt.isLent
                   ? '${debt.personName} owes You'
                   : 'You owe ${debt.personName}';

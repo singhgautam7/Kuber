@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "खर्च केलेली मर्यादा",
   "adjustmentIncreasedBy": "ने वाढली",
   "adjustmentDecreasedBy": "ने घटली",
-  "dangerZone": "धोकादायक विभाग"
+  "dangerZone": "धोकादायक विभाग",
+  "themeModeSectionLabel": "मोड",
+  "themeFamilyDescSignature": "क्लासिक कुबेर लुक.",
+  "themeFamilyDescFlewtube": "ठळक आणि खेळकर.",
+  "themeFamilyDescWoofsapp": "मैत्रीपूर्ण आणि ओळखीचा.",
+  "themeFamilyDescPurrhub": "गडद काळ्यावर ठळक पिवळा.",
+  "themeFamilyDescHonkpe": "समृद्ध, पेमेंटसारखा अनुभव.",
+  "themeFamilyDescSqueakdin": "नीटनेटका, कामकेंद्री.",
+  "themeFamilyDescOinkzon": "उबदार आणि शॉपिंग शैलीचा."
 }

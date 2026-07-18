@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "ചെലവഴിച്ച പരിധി",
   "adjustmentIncreasedBy": "വർദ്ധിച്ചു",
   "adjustmentDecreasedBy": "കുറഞ്ഞു",
-  "dangerZone": "അപകട മേഖല"
+  "dangerZone": "അപകട മേഖല",
+  "themeModeSectionLabel": "മോഡ്",
+  "themeFamilyDescSignature": "ക്ലാസിക് കുബേർ ലുക്ക്.",
+  "themeFamilyDescFlewtube": "തിളക്കമുള്ളതും രസകരവും.",
+  "themeFamilyDescWoofsapp": "സൗഹൃദപരവും പരിചിതവും.",
+  "themeFamilyDescPurrhub": "കറുപ്പിൽ ബോൾഡ് മഞ്ഞ.",
+  "themeFamilyDescHonkpe": "സമ്പന്നം, പേയ്മെന്റ് ശൈലി.",
+  "themeFamilyDescSqueakdin": "അടുക്കും ചിട്ടയും, ജോലി കേന്ദ്രീകൃതം.",
+  "themeFamilyDescOinkzon": "ഊഷ്മളം, ഷോപ്പിംഗ് ശൈലി."
 }

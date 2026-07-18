@@ -101,6 +101,8 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   @override
   Future<void> setThemeMode(themeMode) async {}
   @override
+  Future<void> setThemeVariant(themeVariant) async {}
+  @override
   Future<void> setUserName(String name) async {}
   @override
   Future<void> clearAllData() async {}

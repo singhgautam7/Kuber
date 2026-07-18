@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "खर्च की गई सीमा",
   "adjustmentIncreasedBy": "से बढ़ा",
   "adjustmentDecreasedBy": "से घटा",
-  "dangerZone": "खतरनाक क्षेत्र"
+  "dangerZone": "खतरनाक क्षेत्र",
+  "themeModeSectionLabel": "मोड",
+  "themeFamilyDescSignature": "क्लासिक कुबेर लुक।",
+  "themeFamilyDescFlewtube": "चटख और मज़ेदार।",
+  "themeFamilyDescWoofsapp": "दोस्ताना और जाना-पहचाना।",
+  "themeFamilyDescPurrhub": "गहरे काले पर बोल्ड पीला।",
+  "themeFamilyDescHonkpe": "रिच और पेमेंट जैसा अहसास।",
+  "themeFamilyDescSqueakdin": "सधा हुआ, काम-केंद्रित।",
+  "themeFamilyDescOinkzon": "गर्म और शॉपिंग वाला अंदाज़।"
 }

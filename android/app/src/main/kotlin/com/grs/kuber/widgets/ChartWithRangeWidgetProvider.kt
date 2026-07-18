@@ -32,6 +32,7 @@ class ChartWithRangeWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_chart_with_range)
+            WidgetTheme.applyCard(views, widgetData)
             val range = widgetData.getString(rangeKey(id), "7D") ?: "7D"
             bind(context, views, widgetData, id, range)
             val pi = WidgetCommon.deepLink(context, "analytics", "trends_$id")
@@ -43,7 +44,9 @@ class ChartWithRangeWidgetProvider : HomeWidgetProvider() {
 
     private fun bind(context: Context, views: RemoteViews, prefs: SharedPreferences, widgetId: Int, range: String) {
         // Chips always wired + styled (visible even in loading/empty).
-        styleChips(context, views, widgetId, range)
+        styleChips(context, views, prefs, widgetId, range)
+        WidgetTheme.tintIcon(views, R.id.iv_hicon, WidgetTheme.primary(context, prefs))
+        views.setTextColor(R.id.footer_link, WidgetTheme.primary(context, prefs))
 
         val data = WidgetCommon.json(prefs, "chart_with_range")
         if (data == null) {
@@ -62,26 +65,32 @@ class ChartWithRangeWidgetProvider : HomeWidgetProvider() {
         views.setTextViewText(R.id.tv_net, rd.optString("net"))
         views.setTextColor(
             R.id.tv_net,
-            ContextCompat.getColor(
-                context,
-                if (rd.optString("netSign") == "income") R.color.kuber_income else R.color.kuber_expense
-            )
+            WidgetTheme.amountColor(context, prefs, rd.optString("netSign"))
         )
         views.setTextViewText(R.id.tv_income, rd.optString("income"))
+        views.setTextColor(R.id.tv_income, WidgetTheme.income(context, prefs))
         views.setTextViewText(R.id.tv_expense, rd.optString("expense"))
+        views.setTextColor(R.id.tv_expense, WidgetTheme.expense(context, prefs))
     }
 
-    private fun styleChips(context: Context, views: RemoteViews, widgetId: Int, range: String) {
+    private fun styleChips(
+        context: Context,
+        views: RemoteViews,
+        prefs: SharedPreferences,
+        widgetId: Int,
+        range: String
+    ) {
         val chips = mapOf("7D" to R.id.chip_7d, "4W" to R.id.chip_4w, "6M" to R.id.chip_6m)
         for ((key, chipId) in chips) {
             val selected = key == range
             views.setInt(
                 chipId, "setBackgroundResource",
-                if (selected) R.drawable.widget_chip_bg_selected else R.drawable.widget_chip_bg
+                if (selected) WidgetTheme.chipSelectedBg(prefs) else R.drawable.widget_chip_bg
             )
             views.setTextColor(
                 chipId,
-                ContextCompat.getColor(context, if (selected) R.color.kuber_primary else R.color.kuber_text_secondary)
+                if (selected) WidgetTheme.primary(context, prefs)
+                else ContextCompat.getColor(context, R.color.kuber_text_secondary)
             )
             views.setOnClickPendingIntent(chipId, switchIntent(context, widgetId, key))
         }

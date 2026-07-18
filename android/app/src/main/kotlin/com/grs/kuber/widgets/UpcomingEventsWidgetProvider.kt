@@ -29,6 +29,10 @@ class UpcomingEventsWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_upcoming_events)
+            WidgetTheme.applyCard(views, widgetData)
+            val accent = WidgetTheme.primary(context, widgetData)
+            WidgetTheme.tintIcon(views, R.id.iv_hicon, accent)
+            views.setTextColor(R.id.footer_link, accent)
             bind(context, views, widgetData, id)
             views.setOnClickPendingIntent(
                 R.id.widget_root,
@@ -66,13 +70,11 @@ class UpcomingEventsWidgetProvider : HomeWidgetProvider() {
             views.setTextViewText(r.date, e.optString("date"))
             views.setTextViewText(r.title, e.optString("title"))
             views.setTextViewText(r.amount, e.optString("amount"))
-            val amtColor = when {
-                stale -> R.color.kuber_text_secondary
-                e.optString("amountSign") == "income" -> R.color.kuber_income
-                else -> R.color.kuber_expense
-            }
-            views.setTextColor(r.amount, ContextCompat.getColor(context, amtColor))
-            bindPill(context, views, r.pill, e.optString("sourceType"))
+            views.setTextColor(
+                r.amount,
+                WidgetTheme.amountColor(context, prefs, e.optString("amountSign"), stale)
+            )
+            bindPill(context, views, prefs, r.pill, e.optString("sourceType"))
             views.setOnClickPendingIntent(
                 r.row,
                 WidgetCommon.deepLink(context, e.optString("path", "more/upcoming-events"), "events_${widgetId}_$i")
@@ -80,16 +82,37 @@ class UpcomingEventsWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    private fun bindPill(context: Context, views: RemoteViews, pillId: Int, type: String) {
-        val (bg, colorRes, label) = when (type) {
-            "reminder" -> Triple(R.drawable.widget_pill_reminder, R.color.kuber_pill_reminder_text, "REMINDER")
-            "emi" -> Triple(R.drawable.widget_pill_emi, R.color.kuber_pill_emi_text, "EMI")
-            "sip" -> Triple(R.drawable.widget_pill_sip, R.color.kuber_pill_sip_text, "SIP")
-            "recurring" -> Triple(R.drawable.widget_pill_recurring, R.color.kuber_warning_amber, "RECURRING")
-            else -> Triple(R.drawable.widget_pill_ledger, R.color.kuber_text_secondary, "LEDGER")
+    private fun bindPill(
+        context: Context,
+        views: RemoteViews,
+        prefs: SharedPreferences,
+        pillId: Int,
+        type: String
+    ) {
+        // Reminder and SIP pills carry the family accent / income colors; EMI,
+        // recurring, and ledger keep their family-independent identity colors.
+        val (bg, color, label) = when (type) {
+            "reminder" -> Triple(
+                WidgetTheme.pillReminderBg(prefs), WidgetTheme.primary(context, prefs), "REMINDER"
+            )
+            "emi" -> Triple(
+                R.drawable.widget_pill_emi,
+                ContextCompat.getColor(context, R.color.kuber_pill_emi_text), "EMI"
+            )
+            "sip" -> Triple(
+                WidgetTheme.pillSipBg(prefs), WidgetTheme.income(context, prefs), "SIP"
+            )
+            "recurring" -> Triple(
+                R.drawable.widget_pill_recurring,
+                ContextCompat.getColor(context, R.color.kuber_warning_amber), "RECURRING"
+            )
+            else -> Triple(
+                R.drawable.widget_pill_ledger,
+                ContextCompat.getColor(context, R.color.kuber_text_secondary), "LEDGER"
+            )
         }
         views.setInt(pillId, "setBackgroundResource", bg)
         views.setTextViewText(pillId, label)
-        views.setTextColor(pillId, ContextCompat.getColor(context, colorRes))
+        views.setTextColor(pillId, color)
     }
 }

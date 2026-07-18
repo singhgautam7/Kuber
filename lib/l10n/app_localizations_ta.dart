@@ -4893,4 +4893,28 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get dangerZone => 'ஆபத்து மண்டலம்';
+
+  @override
+  String get themeModeSectionLabel => 'பயன்முறை';
+
+  @override
+  String get themeFamilyDescSignature => 'கிளாசிக் குபேர் தோற்றம்.';
+
+  @override
+  String get themeFamilyDescFlewtube => 'துடிப்பான, விளையாட்டுத்தனமான.';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'நட்பான, பழக்கமான.';
+
+  @override
+  String get themeFamilyDescPurrhub => 'கருப்பில் அடர் மஞ்சள்.';
+
+  @override
+  String get themeFamilyDescHonkpe => 'செழுமையான, பணப்பரிவர்த்தனை உணர்வு.';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'ஒழுங்கான, வேலை மையம்.';
+
+  @override
+  String get themeFamilyDescOinkzon => 'கதகதப்பான, ஷாப்பிங் பாணி.';
 }

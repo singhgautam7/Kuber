@@ -8773,6 +8773,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Danger Zone'**
   String get dangerZone;
+
+  /// No description provided for @themeModeSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get themeModeSectionLabel;
+
+  /// No description provided for @themeFamilyDescSignature.
+  ///
+  /// In en, this message translates to:
+  /// **'The classic Kuber look.'**
+  String get themeFamilyDescSignature;
+
+  /// No description provided for @themeFamilyDescFlewtube.
+  ///
+  /// In en, this message translates to:
+  /// **'Loud and playful.'**
+  String get themeFamilyDescFlewtube;
+
+  /// No description provided for @themeFamilyDescWoofsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Friendly and familiar.'**
+  String get themeFamilyDescWoofsapp;
+
+  /// No description provided for @themeFamilyDescPurrhub.
+  ///
+  /// In en, this message translates to:
+  /// **'Bold yellow on inky black.'**
+  String get themeFamilyDescPurrhub;
+
+  /// No description provided for @themeFamilyDescHonkpe.
+  ///
+  /// In en, this message translates to:
+  /// **'Rich and transactional.'**
+  String get themeFamilyDescHonkpe;
+
+  /// No description provided for @themeFamilyDescSqueakdin.
+  ///
+  /// In en, this message translates to:
+  /// **'Buttoned-up and work-first.'**
+  String get themeFamilyDescSqueakdin;
+
+  /// No description provided for @themeFamilyDescOinkzon.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm and shoppy.'**
+  String get themeFamilyDescOinkzon;
 }
 
 class _AppLocalizationsDelegate

@@ -15,19 +15,12 @@ import '../engine/event_aggregator.dart';
 ({String label, Color color}) eventSourceStyle(
     BuildContext context, String sourceType) {
   final cs = Theme.of(context).colorScheme;
-  final dark = Theme.of(context).brightness == Brightness.dark;
   return switch (sourceType) {
     'reminder' => (label: 'REMINDER', color: cs.primary),
-    'emi' => (
-        label: 'EMI',
-        color: dark ? KuberColors.eventEmi : KuberLightColors.eventEmi
-      ),
+    'emi' => (label: 'EMI', color: context.kuberColors.eventEmi),
     'sip' => (label: 'SIP', color: cs.tertiary),
     'recurring' => (label: 'RECURRING', color: context.kuberColors.warning),
-    _ => (
-        label: 'LEDGER',
-        color: dark ? KuberColors.eventLedger : KuberLightColors.eventLedger
-      ),
+    _ => (label: 'LEDGER', color: context.kuberColors.eventLedger),
   };
 }
 

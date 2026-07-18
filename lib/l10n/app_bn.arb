@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "ব্যবহৃত সীমা",
   "adjustmentIncreasedBy": "বেড়েছে",
   "adjustmentDecreasedBy": "কমেছে",
-  "dangerZone": "বিপজ্জনক অঞ্চল"
+  "dangerZone": "বিপজ্জনক অঞ্চল",
+  "themeModeSectionLabel": "মোড",
+  "themeFamilyDescSignature": "ক্লাসিক কুবের লুক।",
+  "themeFamilyDescFlewtube": "উজ্জ্বল ও মজার।",
+  "themeFamilyDescWoofsapp": "বন্ধুত্বপূর্ণ ও চেনা।",
+  "themeFamilyDescPurrhub": "গাঢ় কালোতে বোল্ড হলুদ।",
+  "themeFamilyDescHonkpe": "রিচ, পেমেন্টের মতো অনুভূতি।",
+  "themeFamilyDescSqueakdin": "গোছানো ও কাজকেন্দ্রিক।",
+  "themeFamilyDescOinkzon": "উষ্ণ ও শপিং ঘরানার।"
 }

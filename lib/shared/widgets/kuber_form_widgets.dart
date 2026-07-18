@@ -992,11 +992,7 @@ class KuberCallout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Vault `warning` token isn't a ColorScheme role today. Read from
-    // `context.kuberColors.warning` if your codebase has that extension;
-    // otherwise the lightweight fallback below is theme-aware.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final warning = isDark ? const Color(0xFFF59E0B) : const Color(0xFFD97706);
+    final warning = context.kuberColors.warning;
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(

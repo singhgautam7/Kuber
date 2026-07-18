@@ -246,10 +246,10 @@ class ViewBillSheet extends ConsumerWidget {
                             statusColor = cs.primary;
                           } else if (bill.paidByPersonName == kYouName) {
                             statusLabel = 'OWES YOU';
-                            statusColor = KuberColors.income;
+                            statusColor = cs.tertiary;
                           } else if (p.personName == kYouName) {
                             statusLabel = 'YOU OWE';
-                            statusColor = KuberColors.expense;
+                            statusColor = cs.error;
                           } else {
                             statusLabel = 'OWES';
                             statusColor = cs.onSurfaceVariant;
@@ -402,7 +402,7 @@ class ViewBillSheet extends ConsumerWidget {
                       width: 48,
                       height: 48,
                       decoration: ShapeDecoration(
-                        color: KuberColors.expenseSubtle,
+                        color: cs.errorContainer,
                         shape: bsSquircle(
                           10,
                           side: BorderSide(
@@ -410,9 +410,9 @@ class ViewBillSheet extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.delete_outline_rounded,
-                        color: KuberColors.expense,
+                        color: cs.error,
                         size: 20,
                       ),
                     ),
@@ -553,8 +553,8 @@ class _LedgerActionsCard extends StatelessWidget {
               final debt = entry.value;
               final isLast = entry.key == debts.length - 1;
               final color = debt.isLent
-                  ? KuberColors.income
-                  : KuberColors.expense;
+                  ? cs.tertiary
+                  : cs.error;
               final label = debt.isLent
                   ? '${debt.personName} owes You'
                   : 'You owe ${debt.personName}';

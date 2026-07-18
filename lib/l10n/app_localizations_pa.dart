@@ -4821,4 +4821,28 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get dangerZone => 'ਖਤਰਨਾਕ ਖੇਤਰ';
+
+  @override
+  String get themeModeSectionLabel => 'ਮੋਡ';
+
+  @override
+  String get themeFamilyDescSignature => 'ਕਲਾਸਿਕ ਕੁਬੇਰ ਲੁੱਕ।';
+
+  @override
+  String get themeFamilyDescFlewtube => 'ਚਮਕਦਾਰ ਅਤੇ ਮਜ਼ੇਦਾਰ।';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'ਦੋਸਤਾਨਾ ਅਤੇ ਜਾਣਿਆ-ਪਛਾਣਿਆ।';
+
+  @override
+  String get themeFamilyDescPurrhub => 'ਗੂੜ੍ਹੇ ਕਾਲੇ ਉੱਤੇ ਗੂੜ੍ਹਾ ਪੀਲਾ।';
+
+  @override
+  String get themeFamilyDescHonkpe => 'ਅਮੀਰ, ਭੁਗਤਾਨ ਵਰਗਾ ਅਹਿਸਾਸ।';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'ਸਲੀਕੇਦਾਰ, ਕੰਮ-ਕੇਂਦਰਿਤ।';
+
+  @override
+  String get themeFamilyDescOinkzon => 'ਨਿੱਘਾ ਅਤੇ ਸ਼ਾਪਿੰਗ ਅੰਦਾਜ਼ ਵਾਲਾ।';
 }

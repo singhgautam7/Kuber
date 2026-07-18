@@ -30,6 +30,7 @@ class BudgetStatusWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_budget_status)
+            WidgetTheme.applyCard(views, widgetData)
             bind(context, views, widgetData, id)
             views.setOnClickPendingIntent(R.id.footer_link, WidgetCommon.deepLink(context, "more/budgets", "bud_all_$id"))
             appWidgetManager.updateAppWidget(id, views)
@@ -48,6 +49,7 @@ class BudgetStatusWidgetProvider : HomeWidgetProvider() {
             return
         }
         WidgetCommon.showState(views, R.id.state_loading, R.id.state_empty, R.id.state_content, WidgetCommon.State.CONTENT)
+        WidgetTheme.tintIcon(views, R.id.iv_hicon, WidgetTheme.primary(context, prefs))
 
         for ((i, r) in rows.withIndex()) {
             if (i >= budgets.length()) {
@@ -68,6 +70,9 @@ class BudgetStatusWidgetProvider : HomeWidgetProvider() {
                 views.setViewVisibility(pb, if (pb == shown) View.VISIBLE else View.GONE)
             }
             views.setProgressBar(shown, 100, pct, false)
+            WidgetTheme.tintProgress(views, r.pbPrimary, WidgetTheme.primary(context, prefs))
+            WidgetTheme.tintProgress(views, r.pbAmber, WidgetTheme.warning(context))
+            WidgetTheme.tintProgress(views, r.pbExpense, WidgetTheme.expense(context, prefs))
             views.setOnClickPendingIntent(
                 r.row,
                 WidgetCommon.deepLink(context, b.optString("path", "more/budgets"), "bud_${widgetId}_$i")
