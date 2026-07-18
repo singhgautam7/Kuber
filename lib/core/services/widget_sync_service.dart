@@ -19,6 +19,7 @@ import '../../features/transactions/data/transaction.dart';
 import '../../features/upcoming_events/engine/event_aggregator.dart';
 import '../../features/settings/providers/settings_provider.dart';
 import '../database/isar_service.dart';
+import '../theme/kuber_tokens.dart';
 import '../utils/formatters.dart';
 
 /// Owns all Flutter -> native home-screen widget data sync. Computes each
@@ -32,12 +33,55 @@ class WidgetSyncService {
   Isar get _isar => ref.read(isarProvider);
   AppFormatter get _fmt => ref.read(formatterProvider);
 
-  static const _incomeHex = 0xFF22C55E;
-  static const _expenseHex = 0xFFEF4444;
-  static const _primaryHex = 0xFF3B82F6;
-  static const _mutedHex = 0x3F3F3F46;
+  /// Active theme family, falling back to the boot-read value while the async
+  /// settings provider hydrates (syncAll can run post-first-frame before
+  /// hydration completes).
+  ThemeVariant get _activeVariant {
+    final settings = ref.read(settingsProvider).valueOrNull;
+    return settings?.themeVariant ?? ref.read(bootThemeProvider).$2;
+  }
+
+  /// Token set used for chart bitmaps and payload fallback colors. Native
+  /// home-screen widgets always follow the OS light/dark setting (their
+  /// resources resolve via values-night), so the bitmaps are painted with the
+  /// OS brightness regardless of the in-app mode override.
+  KuberTokens get _tokens => KuberTokens.of(
+        _activeVariant,
+        ui.PlatformDispatcher.instance.platformBrightness,
+      );
+
+  int _argb(ui.Color c) => c.toARGB32();
+
+  // Reentrancy guard: syncAll can be triggered from several places (first
+  // frame, app pause, app resume, theme change). Running two full syncs
+  // concurrently doubles the all-transactions scans and bitmap renders for no
+  // benefit; instead, a call that arrives mid-run marks a rerun and the
+  // in-flight run does one more pass at the end with the latest data.
+  bool _syncing = false;
+  bool _rerunRequested = false;
 
   Future<void> syncAll() async {
+    if (_syncing) {
+      _rerunRequested = true;
+      return;
+    }
+    _syncing = true;
+    try {
+      do {
+        _rerunRequested = false;
+        await _syncAllOnce();
+      } while (_rerunRequested);
+    } finally {
+      _syncing = false;
+    }
+  }
+
+  Future<void> _syncAllOnce() async {
+    // Publish the active family + mode first so the native side re-tints even
+    // if a later data sub-sync fails.
+    try {
+      await _syncTheme();
+    } catch (_) {}
     // Load the two collections shared across sub-syncs ONCE per sync run.
     // Previously each of the 4 txn-consuming sub-syncs re-scanned the full
     // transactions collection (4x on every sync); categories were re-scanned 3x.
@@ -98,6 +142,15 @@ class WidgetSyncService {
   }
 
   String _hex(int argb) => '#${(argb & 0xFFFFFFFF).toRadixString(16).padLeft(8, '0')}';
+
+  // ---- 0. Theme ------------------------------------------------------------
+
+  /// Publishes the active theme family for the native providers. The Kotlin
+  /// side (WidgetTheme.kt) maps the family name onto its per-family color
+  /// resources; light/dark stays with the OS resource system (values-night).
+  Future<void> _syncTheme() async {
+    await HomeWidget.saveWidgetData<String>('theme_family', _activeVariant.name);
+  }
 
   // ---- 1. Monthly Net -----------------------------------------------------
 
@@ -207,7 +260,7 @@ class WidgetSyncService {
         'account': accounts[t.accountId] ?? '',
         'amount': '${t.type == 'income' ? '+' : '−'}${_money(t.amount)}',
         'amountSign': t.type == 'income' ? 'income' : 'expense',
-        'color': _hex(cat?.colorValue ?? _primaryHex),
+        'color': _hex(cat?.colorValue ?? _argb(_tokens.primary)),
         'path': 'history',
       };
     }).toList();
@@ -401,14 +454,14 @@ class WidgetSyncService {
     final sorted = byCat.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     final top = sorted.take(3).toList();
     final segments = <(double, int)>[
-      for (final e in top) (total == 0 ? 0 : e.value / total, cats[e.key]?.colorValue ?? _primaryHex),
+      for (final e in top) (total == 0 ? 0 : e.value / total, cats[e.key]?.colorValue ?? _argb(_tokens.primary)),
     ];
     final rows = top.map((e) {
       final pct = total == 0 ? 0 : (e.value / total * 100).round();
       return {
         'name': cats[e.key]?.name ?? 'Category',
         'value': '${_money(e.value)} · $pct%',
-        'color': _hex(cats[e.key]?.colorValue ?? _primaryHex),
+        'color': _hex(cats[e.key]?.colorValue ?? _argb(_tokens.primary)),
       };
     }).toList();
     final path = await _renderDonut(segments);
@@ -437,8 +490,9 @@ class WidgetSyncService {
       final n = data.length;
       const gap = 12.0;
       final barW = (w - gap * (n - 1)) / n;
-      final incPaint = ui.Paint()..color = const ui.Color(_incomeHex);
-      final expPaint = ui.Paint()..color = const ui.Color(_expenseHex);
+      final tokens = _tokens;
+      final incPaint = ui.Paint()..color = tokens.income;
+      final expPaint = ui.Paint()..color = tokens.expense;
       for (var i = 0; i < n; i++) {
         final x = i * (barW + gap);
         final incH = maxTotal == 0 ? 0.0 : data[i].$1 / maxTotal * h;
@@ -478,7 +532,7 @@ class WidgetSyncService {
       }
       // remainder
       if (drawn < 1) {
-        paint.color = const ui.Color(_mutedHex);
+        paint.color = _tokens.borderMuted.withAlpha(0x3F);
         canvas.drawArc(rect, start, (1 - drawn) * 6.28319, true, paint);
       }
       // transparent hole so the card shows through

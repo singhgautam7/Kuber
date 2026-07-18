@@ -4836,4 +4836,28 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get dangerZone => 'বিপজ্জনক অঞ্চল';
+
+  @override
+  String get themeModeSectionLabel => 'মোড';
+
+  @override
+  String get themeFamilyDescSignature => 'ক্লাসিক কুবের লুক।';
+
+  @override
+  String get themeFamilyDescFlewtube => 'উজ্জ্বল ও মজার।';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'বন্ধুত্বপূর্ণ ও চেনা।';
+
+  @override
+  String get themeFamilyDescPurrhub => 'গাঢ় কালোতে বোল্ড হলুদ।';
+
+  @override
+  String get themeFamilyDescHonkpe => 'রিচ, পেমেন্টের মতো অনুভূতি।';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'গোছানো ও কাজকেন্দ্রিক।';
+
+  @override
+  String get themeFamilyDescOinkzon => 'উষ্ণ ও শপিং ঘরানার।';
 }

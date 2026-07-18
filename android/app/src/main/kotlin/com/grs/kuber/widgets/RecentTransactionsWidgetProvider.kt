@@ -30,6 +30,10 @@ class RecentTransactionsWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_recent_transactions)
+            WidgetTheme.applyCard(views, widgetData)
+            val accent = WidgetTheme.primary(context, widgetData)
+            WidgetTheme.tintIcon(views, R.id.iv_hicon, accent)
+            views.setTextColor(R.id.footer_link, accent)
             bind(context, views, widgetData, id)
             views.setOnClickPendingIntent(R.id.widget_root, WidgetCommon.deepLink(context, "history", "recent_root_$id"))
             views.setOnClickPendingIntent(R.id.footer_link, WidgetCommon.deepLink(context, "history", "recent_all_$id"))
@@ -61,12 +65,10 @@ class RecentTransactionsWidgetProvider : HomeWidgetProvider() {
             views.setTextViewText(r.name, t.optString("name"))
             views.setTextViewText(r.account, t.optString("account"))
             views.setTextViewText(r.amount, t.optString("amount"))
-            val amtColor = when {
-                stale -> R.color.kuber_text_secondary
-                t.optString("amountSign") == "income" -> R.color.kuber_income
-                else -> R.color.kuber_expense
-            }
-            views.setTextColor(r.amount, ContextCompat.getColor(context, amtColor))
+            views.setTextColor(
+                r.amount,
+                WidgetTheme.amountColor(context, prefs, t.optString("amountSign"), stale)
+            )
             runCatching { views.setInt(r.icon, "setColorFilter", Color.parseColor(t.optString("color", "#3B82F6"))) }
             views.setOnClickPendingIntent(
                 r.row,

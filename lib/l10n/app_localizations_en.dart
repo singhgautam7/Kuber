@@ -4810,4 +4810,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dangerZone => 'Danger Zone';
+
+  @override
+  String get themeModeSectionLabel => 'Mode';
+
+  @override
+  String get themeFamilyDescSignature => 'The classic Kuber look.';
+
+  @override
+  String get themeFamilyDescFlewtube => 'Loud and playful.';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'Friendly and familiar.';
+
+  @override
+  String get themeFamilyDescPurrhub => 'Bold yellow on inky black.';
+
+  @override
+  String get themeFamilyDescHonkpe => 'Rich and transactional.';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'Buttoned-up and work-first.';
+
+  @override
+  String get themeFamilyDescOinkzon => 'Warm and shoppy.';
 }

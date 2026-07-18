@@ -14,7 +14,7 @@
     <LinearLayout android:id="@+id/btn_add_txn" android:layout_width="0dp"
         android:layout_height="match_parent" android:layout_weight="1"
         android:orientation="vertical" android:gravity="center">
-        <ImageView android:layout_width="16dp" android:layout_height="16dp"
+        <ImageView android:id="@+id/qa_ic_0" android:layout_width="16dp" android:layout_height="16dp"
             android:src="@drawable/ic_widget_plus" android:contentDescription="@null" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="3dp" android:text="@string/w_action_add_txn"
@@ -25,7 +25,7 @@
     <LinearLayout android:id="@+id/btn_recurring" android:layout_width="0dp"
         android:layout_height="match_parent" android:layout_weight="1"
         android:orientation="vertical" android:gravity="center">
-        <ImageView android:layout_width="16dp" android:layout_height="16dp"
+        <ImageView android:id="@+id/qa_ic_1" android:layout_width="16dp" android:layout_height="16dp"
             android:src="@drawable/ic_widget_repeat" android:contentDescription="@null" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="3dp" android:text="@string/w_action_recurring"
@@ -36,7 +36,7 @@
     <LinearLayout android:id="@+id/btn_ask_kuber" android:layout_width="0dp"
         android:layout_height="match_parent" android:layout_weight="1"
         android:orientation="vertical" android:gravity="center">
-        <ImageView android:layout_width="16dp" android:layout_height="16dp"
+        <ImageView android:id="@+id/qa_ic_2" android:layout_width="16dp" android:layout_height="16dp"
             android:src="@drawable/ic_widget_chat" android:contentDescription="@null" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="3dp" android:text="@string/w_action_ask_kuber"
@@ -47,7 +47,7 @@
     <LinearLayout android:id="@+id/btn_import_sms" android:layout_width="0dp"
         android:layout_height="match_parent" android:layout_weight="1"
         android:orientation="vertical" android:gravity="center">
-        <ImageView android:layout_width="16dp" android:layout_height="16dp"
+        <ImageView android:id="@+id/qa_ic_3" android:layout_width="16dp" android:layout_height="16dp"
             android:src="@drawable/ic_widget_sms" android:contentDescription="@null" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="3dp" android:text="@string/w_action_import_sms"

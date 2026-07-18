@@ -27,6 +27,12 @@ class NotesWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_notes)
+            WidgetTheme.applyCard(views, widgetData)
+            val accent = WidgetTheme.primary(context, widgetData)
+            WidgetTheme.tintIcon(views, R.id.iv_hicon, accent)
+            views.setTextColor(R.id.add_note, accent)
+            views.setTextColor(R.id.add_note_empty, accent)
+            views.setTextColor(R.id.footer_link, accent)
             bind(context, views, widgetData, id)
             views.setOnClickPendingIntent(R.id.widget_root, WidgetCommon.deepLink(context, "more/notes", "notes_root_$id"))
             views.setOnClickPendingIntent(R.id.footer_link, WidgetCommon.deepLink(context, "more/notes", "notes_all_$id"))

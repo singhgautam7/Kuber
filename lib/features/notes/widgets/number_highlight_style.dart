@@ -34,7 +34,7 @@ class NumberHighlightStyle {
     return localeFont(
       fontWeight: FontWeight.w800,
       fontSize: 17,
-      color: Colors.white,
+      color: cs.onPrimary,
     ).copyWith(backgroundColor: cs.primary);
   }
 }

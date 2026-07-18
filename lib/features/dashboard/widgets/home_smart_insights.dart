@@ -102,7 +102,13 @@ class _InsightCard extends StatelessWidget {
         isFirst ? Colors.white.withValues(alpha: 0.55) : cs.onSurfaceVariant;
     final iconColor = isFirst
         ? Colors.white.withValues(alpha: 0.85)
-        : (insight.iconColor ?? cs.primary);
+        : switch (insight.iconAccent) {
+            InsightAccent.income => cs.tertiary,
+            InsightAccent.expense => cs.error,
+            InsightAccent.warning => context.kuberColors.warning,
+            InsightAccent.purple => context.kuberColors.eventEmi,
+            InsightAccent.primary || null => cs.primary,
+          };
     final textColor = isFirst ? Colors.white : cs.onSurface;
     final borderColor = isFirst ? Colors.transparent : cs.outline;
 

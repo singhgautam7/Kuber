@@ -228,10 +228,10 @@ class _BillRow extends StatelessWidget {
     final String statusLabel;
     switch (status) {
       case BillStatus.youLent:
-        statusColor = isArchived ? cs.onSurfaceVariant : KuberColors.income;
+        statusColor = isArchived ? cs.onSurfaceVariant : cs.tertiary;
         statusLabel = 'OWES YOU';
       case BillStatus.youOwe:
-        statusColor = isArchived ? cs.onSurfaceVariant : KuberColors.expense;
+        statusColor = isArchived ? cs.onSurfaceVariant : cs.error;
         statusLabel = 'YOU OWE';
       case BillStatus.settled:
         statusColor = cs.onSurfaceVariant;

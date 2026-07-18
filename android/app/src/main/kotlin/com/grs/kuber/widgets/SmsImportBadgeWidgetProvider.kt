@@ -18,6 +18,10 @@ class SmsImportBadgeWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_sms_import_badge)
+            WidgetTheme.applyCard(views, widgetData)
+            val accent = WidgetTheme.primary(context, widgetData)
+            WidgetTheme.tintIcon(views, R.id.iv_hicon, accent)
+            views.setTextColor(R.id.tv_action, accent)
             val data = WidgetCommon.json(widgetData, "sms_badge")
             if (data == null) {
                 WidgetCommon.showState(views, R.id.state_loading, 0, R.id.state_content, WidgetCommon.State.LOADING)

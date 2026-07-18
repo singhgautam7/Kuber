@@ -4831,4 +4831,28 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get dangerZone => 'धोकादायक विभाग';
+
+  @override
+  String get themeModeSectionLabel => 'मोड';
+
+  @override
+  String get themeFamilyDescSignature => 'क्लासिक कुबेर लुक.';
+
+  @override
+  String get themeFamilyDescFlewtube => 'ठळक आणि खेळकर.';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'मैत्रीपूर्ण आणि ओळखीचा.';
+
+  @override
+  String get themeFamilyDescPurrhub => 'गडद काळ्यावर ठळक पिवळा.';
+
+  @override
+  String get themeFamilyDescHonkpe => 'समृद्ध, पेमेंटसारखा अनुभव.';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'नीटनेटका, कामकेंद्री.';
+
+  @override
+  String get themeFamilyDescOinkzon => 'उबदार आणि शॉपिंग शैलीचा.';
 }

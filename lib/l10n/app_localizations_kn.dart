@@ -4861,4 +4861,28 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get dangerZone => 'ಅಪಾಯಕಾರಿ ವಲಯ';
+
+  @override
+  String get themeModeSectionLabel => 'ಮೋಡ್';
+
+  @override
+  String get themeFamilyDescSignature => 'ಕ್ಲಾಸಿಕ್ ಕುಬೇರ್ ನೋಟ.';
+
+  @override
+  String get themeFamilyDescFlewtube => 'ಗಾಢ ಮತ್ತು ತಮಾಷೆಯ.';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'ಸ್ನೇಹಪರ ಮತ್ತು ಪರಿಚಿತ.';
+
+  @override
+  String get themeFamilyDescPurrhub => 'ಕಪ್ಪು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ದಟ್ಟ ಹಳದಿ.';
+
+  @override
+  String get themeFamilyDescHonkpe => 'ಶ್ರೀಮಂತ, ಪಾವತಿ ಶೈಲಿಯ ಅನುಭವ.';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'ಶಿಸ್ತುಬದ್ಧ, ಕೆಲಸ-ಕೇಂದ್ರಿತ.';
+
+  @override
+  String get themeFamilyDescOinkzon => 'ಬೆಚ್ಚಗಿನ, ಶಾಪಿಂಗ್ ಶೈಲಿಯ.';
 }

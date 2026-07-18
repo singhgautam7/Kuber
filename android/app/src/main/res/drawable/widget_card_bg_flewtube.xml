@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget outer card for the flewtube theme family. Opaque fill so the widget
+     reads against any wallpaper; border is the shared alpha overlay. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/kuber_flewtube_surface_card" />
+    <stroke android:width="1dp" android:color="@color/kuber_border" />
+    <corners android:radius="16dp" />
+</shape>

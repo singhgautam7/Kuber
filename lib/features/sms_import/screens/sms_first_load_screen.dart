@@ -425,7 +425,7 @@ class _EmptyResult extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(999),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Container(color: KuberColors.borderMuted),
+                    child: Container(color: context.kuberColors.borderMuted),
                   ),
                 ),
                 const SizedBox(height: 4),

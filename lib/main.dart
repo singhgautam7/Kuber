@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/utils/prefs_keys.dart';
+import 'features/settings/providers/settings_provider.dart';
 import 'core/database/isar_service.dart';
 import 'core/database/migrations.dart';
 import 'core/database/seed_service.dart';
@@ -88,6 +91,23 @@ Future<void> _bootstrap() async {
     return;
   }
 
+  // Read the persisted theme before the first frame so the app never flashes
+  // the wrong palette while the async settings provider hydrates. Best-effort:
+  // a prefs failure falls back to system mode + Signature.
+  var bootTheme = (ThemeMode.system, ThemeVariant.signature);
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final modeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
+    final variantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
+    bootTheme = (
+      ThemeMode.values[modeIndex.clamp(0, ThemeMode.values.length - 1)],
+      ThemeVariant
+          .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)],
+    );
+  } catch (e) {
+    debugPrint('Kuber: boot theme read failed (non-fatal): $e');
+  }
+
   // Best-effort on-open processing. A failure here must not prevent launch.
   String? coldStartPayload;
   int missedCount = 0;
@@ -141,6 +161,7 @@ Future<void> _bootstrap() async {
       child: ProviderScope(
         overrides: [
           isarProvider.overrideWithValue(isar),
+          bootThemeProvider.overrideWithValue(bootTheme),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
           automaticBackupDueProvider.overrideWith((ref) => backupDue),
           if (coldStartPayload != null)

@@ -4857,4 +4857,28 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get dangerZone => 'ప్రమాద జోన్';
+
+  @override
+  String get themeModeSectionLabel => 'మోడ్';
+
+  @override
+  String get themeFamilyDescSignature => 'క్లాసిక్ కుబేర్ లుక్.';
+
+  @override
+  String get themeFamilyDescFlewtube => 'ప్రకాశవంతం, సరదాగా.';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'స్నేహపూర్వకం, పరిచయమైనది.';
+
+  @override
+  String get themeFamilyDescPurrhub => 'నలుపుపై బోల్డ్ పసుపు.';
+
+  @override
+  String get themeFamilyDescHonkpe => 'రిచ్, చెల్లింపుల తరహా అనుభూతి.';
+
+  @override
+  String get themeFamilyDescSqueakdin => 'చక్కటి, పని-కేంద్రీకృతం.';
+
+  @override
+  String get themeFamilyDescOinkzon => 'వెచ్చని, షాపింగ్ శైలి.';
 }

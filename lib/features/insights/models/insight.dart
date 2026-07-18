@@ -25,6 +25,13 @@ enum InsightType {
   fallbackTip,
 }
 
+/// Semantic accent for an insight's icon. Insights are generated inside a
+/// provider (no BuildContext), so they carry a role instead of a resolved
+/// [Color]; the widget resolves the role against the active theme. This keeps
+/// insight colors correct across theme family/mode changes without
+/// regenerating insights.
+enum InsightAccent { primary, income, expense, warning, purple }
+
 class KuberInsight {
   final InsightType type;
   final String message;
@@ -32,7 +39,7 @@ class KuberInsight {
   final double confidence;
   final bool isPositive;
   final IconData? iconData;
-  final Color? iconColor;
+  final InsightAccent? iconAccent;
   final String typeLabel;
   final List<String> highlights;
   final bool highlightIsWarning;
@@ -44,7 +51,7 @@ class KuberInsight {
     required this.confidence,
     required this.isPositive,
     this.iconData,
-    this.iconColor,
+    this.iconAccent,
     this.typeLabel = '',
     this.highlights = const [],
     this.highlightIsWarning = false,

@@ -21,6 +21,7 @@ class ChartCompactWidgetProvider : HomeWidgetProvider() {
     ) {
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_chart_compact)
+            WidgetTheme.applyCard(views, widgetData)
             bind(context, views, widgetData)
             views.setOnClickPendingIntent(R.id.widget_root, WidgetCommon.deepLink(context, "analytics", "chart_$id"))
             appWidgetManager.updateAppWidget(id, views)
@@ -40,16 +41,16 @@ class ChartCompactWidgetProvider : HomeWidgetProvider() {
         }
         WidgetCommon.showState(views, R.id.state_loading, R.id.state_empty, R.id.state_content, WidgetCommon.State.CONTENT)
         views.setImageViewBitmap(R.id.iv_chart, bmp)
+        WidgetTheme.tintIcon(views, R.id.iv_hicon, WidgetTheme.primary(context, prefs))
         views.setTextViewText(R.id.tv_net, data.optString("net"))
         views.setTextColor(
             R.id.tv_net,
-            ContextCompat.getColor(
-                context,
-                if (data.optString("netSign") == "income") R.color.kuber_income else R.color.kuber_expense
-            )
+            WidgetTheme.amountColor(context, prefs, data.optString("netSign"))
         )
         views.setTextViewText(R.id.tv_income, data.optString("income"))
+        views.setTextColor(R.id.tv_income, WidgetTheme.income(context, prefs))
         views.setTextViewText(R.id.tv_expense, data.optString("expense"))
+        views.setTextColor(R.id.tv_expense, WidgetTheme.expense(context, prefs))
     }
 
     private fun loadBitmap(path: String?) = runCatching {

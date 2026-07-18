@@ -10,8 +10,17 @@ import com.grs.kuber.R
 class QuickActionsExtendedWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        val prefs = WidgetCommon.data(context)
         for (id in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.widget_quick_actions_extended)
+            WidgetTheme.applyCard(views, prefs)
+            val accent = WidgetTheme.primary(context, prefs)
+            for (icon in listOf(
+                R.id.qa_ic_0, R.id.qa_ic_1, R.id.qa_ic_2, R.id.qa_ic_3,
+                R.id.qa_ic_4, R.id.qa_ic_5, R.id.qa_ic_6, R.id.qa_ic_7
+            )) {
+                WidgetTheme.tintIcon(views, icon, accent)
+            }
             views.setOnClickPendingIntent(R.id.btn_add_txn, WidgetCommon.deepLink(context, "add-transaction", "qax_add_$id"))
             views.setOnClickPendingIntent(R.id.btn_recurring, WidgetCommon.deepLink(context, "recurring/add", "qax_rec_$id"))
             views.setOnClickPendingIntent(R.id.btn_add_loan, WidgetCommon.deepLink(context, "loans/add", "qax_loan_$id"))

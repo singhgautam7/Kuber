@@ -39,8 +39,11 @@ class KuberApp extends ConsumerStatefulWidget {
 class _KuberAppState extends ConsumerState<KuberApp>
     with WidgetsBindingObserver {
   // Stable cached instances of theme to prevent tab-switch rebuild animations/jank,
-  // refreshed only when the active Locale is updated.
+  // refreshed only when the active Locale or theme family changes. This is the
+  // app's single theme cache; both dimensions must key it (see
+  // specs/plans/theme-personalization-cache-audit.md).
   Locale? _cachedLocale;
+  ThemeVariant? _cachedVariant;
   ThemeData? _lightTheme;
   ThemeData? _darkTheme;
 
@@ -298,13 +301,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
+    final themeVariant = ref.watch(themeVariantProvider);
     final router = ref.watch(routerProvider);
     final locale = ref.watch(localeProvider);
 
-    if (_cachedLocale != locale || _lightTheme == null || _darkTheme == null) {
+    if (_cachedLocale != locale ||
+        _cachedVariant != themeVariant ||
+        _lightTheme == null ||
+        _darkTheme == null) {
       _cachedLocale = locale;
-      _lightTheme = AppTheme.light(locale);
-      _darkTheme = AppTheme.dark(locale);
+      _cachedVariant = themeVariant;
+      _lightTheme = AppTheme.light(locale, themeVariant);
+      _darkTheme = AppTheme.dark(locale, themeVariant);
     }
 
     // Watch these so the widget rebuilds (and the notification listener

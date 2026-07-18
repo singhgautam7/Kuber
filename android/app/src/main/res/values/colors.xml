@@ -4,31 +4,76 @@
     <color name="icon_background">#0B0F1A</color>
 
     <!-- ==== Vault palette for home-screen widgets (Alabaster / light) ==== -->
-    <!-- Mapping source: specs/design_handoff_android_widgets/color_resources.md -->
+    <!-- Neutrals are alpha overlays over the (opaque, per-family) card fill,
+         so text, borders, muted chrome, and skeletons pick up the active
+         theme family's tint with no per-family duplicates. -->
     <color name="kuber_background">#FFFFFF</color>
     <color name="kuber_surface_card">#FAFAFA</color>
-    <color name="kuber_surface_muted">#F0F0F1</color>
-    <color name="kuber_border">#E4E4E7</color>
-    <color name="kuber_border_muted">#D4D4D8</color>
-    <color name="kuber_text_primary">#18181B</color>
-    <color name="kuber_text_secondary">#52525B</color>
-    <color name="kuber_text_muted">#71717A</color>
+    <color name="kuber_surface_muted">#0D000000</color>
+    <color name="kuber_border">#17000000</color>
+    <color name="kuber_border_muted">#26000000</color>
+    <color name="kuber_text_primary">#E6000000</color>
+    <color name="kuber_text_secondary">#9E000000</color>
+    <color name="kuber_text_muted">#78000000</color>
     <color name="kuber_primary">#3B82F6</color>
     <color name="kuber_income">#16A34A</color>
     <color name="kuber_expense">#DC2626</color>
     <color name="kuber_warning_amber">#D97706</color>
     <color name="kuber_purple">#9333EA</color>
 
-    <!-- Subtle tint variants: pre-composited over surfaceCard (#FAFAFA), not
-         runtime alpha, per color_resources.md note. -->
-    <color name="kuber_primary_subtle">#E7EEFA</color>
-    <color name="kuber_income_subtle">#E3F1E8</color>
-    <color name="kuber_expense_subtle">#F7E5E5</color>
-    <color name="kuber_amber_subtle">#F7EDE2</color>
-    <color name="kuber_purple_subtle">#F2EAFA</color>
+    <!-- Subtle tint variants: accent at ~10% alpha over the card. -->
+    <color name="kuber_primary_subtle">#1A3B82F6</color>
+    <color name="kuber_income_subtle">#1A16A34A</color>
+    <color name="kuber_expense_subtle">#1ADC2626</color>
+    <color name="kuber_amber_subtle">#1AD97706</color>
+    <color name="kuber_purple_subtle">#1A9333EA</color>
 
     <!-- Source-type pill text colors (Upcoming Events) -->
     <color name="kuber_pill_reminder_text">#2563EB</color>
     <color name="kuber_pill_emi_text">#9333EA</color>
     <color name="kuber_pill_sip_text">#16A34A</color>
+
+    <!-- ==== Per-family accents (Alabaster) ==== -->
+    <!-- flewtube family -->
+    <color name="kuber_flewtube_surface_card">#FBF2F2</color>
+    <color name="kuber_flewtube_primary">#C41E3A</color>
+    <color name="kuber_flewtube_primary_subtle">#1AC41E3A</color>
+    <color name="kuber_flewtube_income">#059669</color>
+    <color name="kuber_flewtube_income_subtle">#1A059669</color>
+    <color name="kuber_flewtube_expense">#B45309</color>
+    <!-- woofsapp family -->
+    <color name="kuber_woofsapp_surface_card">#F0F9F2</color>
+    <color name="kuber_woofsapp_primary">#15803D</color>
+    <color name="kuber_woofsapp_primary_subtle">#1A15803D</color>
+    <color name="kuber_woofsapp_income">#0369A1</color>
+    <color name="kuber_woofsapp_income_subtle">#1A0369A1</color>
+    <color name="kuber_woofsapp_expense">#DC2626</color>
+    <!-- purrhub family -->
+    <color name="kuber_purrhub_surface_card">#FBF8EC</color>
+    <color name="kuber_purrhub_primary">#A16207</color>
+    <color name="kuber_purrhub_primary_subtle">#1AA16207</color>
+    <color name="kuber_purrhub_income">#16A34A</color>
+    <color name="kuber_purrhub_income_subtle">#1A16A34A</color>
+    <color name="kuber_purrhub_expense">#DC2626</color>
+    <!-- honkpe family -->
+    <color name="kuber_honkpe_surface_card">#F7F3FD</color>
+    <color name="kuber_honkpe_primary">#6D28D9</color>
+    <color name="kuber_honkpe_primary_subtle">#1A6D28D9</color>
+    <color name="kuber_honkpe_income">#16A34A</color>
+    <color name="kuber_honkpe_income_subtle">#1A16A34A</color>
+    <color name="kuber_honkpe_expense">#DC2626</color>
+    <!-- squeakdin family -->
+    <color name="kuber_squeakdin_surface_card">#EFF4FB</color>
+    <color name="kuber_squeakdin_primary">#1E3A8A</color>
+    <color name="kuber_squeakdin_primary_subtle">#1A1E3A8A</color>
+    <color name="kuber_squeakdin_income">#16A34A</color>
+    <color name="kuber_squeakdin_income_subtle">#1A16A34A</color>
+    <color name="kuber_squeakdin_expense">#DC2626</color>
+    <!-- oinkzon family -->
+    <color name="kuber_oinkzon_surface_card">#FBF3E9</color>
+    <color name="kuber_oinkzon_primary">#C2410C</color>
+    <color name="kuber_oinkzon_primary_subtle">#1AC2410C</color>
+    <color name="kuber_oinkzon_income">#16A34A</color>
+    <color name="kuber_oinkzon_income_subtle">#1A16A34A</color>
+    <color name="kuber_oinkzon_expense">#DC2626</color>
 </resources>

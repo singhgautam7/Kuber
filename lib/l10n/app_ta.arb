@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "செலவழித்த வரம்பு",
   "adjustmentIncreasedBy": "அதிகரித்தது",
   "adjustmentDecreasedBy": "குறைந்தது",
-  "dangerZone": "ஆபத்து மண்டலம்"
+  "dangerZone": "ஆபத்து மண்டலம்",
+  "themeModeSectionLabel": "பயன்முறை",
+  "themeFamilyDescSignature": "கிளாசிக் குபேர் தோற்றம்.",
+  "themeFamilyDescFlewtube": "துடிப்பான, விளையாட்டுத்தனமான.",
+  "themeFamilyDescWoofsapp": "நட்பான, பழக்கமான.",
+  "themeFamilyDescPurrhub": "கருப்பில் அடர் மஞ்சள்.",
+  "themeFamilyDescHonkpe": "செழுமையான, பணப்பரிவர்த்தனை உணர்வு.",
+  "themeFamilyDescSqueakdin": "ஒழுங்கான, வேலை மையம்.",
+  "themeFamilyDescOinkzon": "கதகதப்பான, ஷாப்பிங் பாணி."
 }

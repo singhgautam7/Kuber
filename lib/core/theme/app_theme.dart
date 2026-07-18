@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'app_text_styles.dart';
+import 'kuber_tokens.dart';
 import '../utils/locale_font.dart';
+
+export 'kuber_tokens.dart' show ThemeVariant, KuberTokens;
 
 class KuberSpacing {
   static const xs = 4.0;
@@ -19,6 +22,10 @@ class KuberRadius {
   static const full = 999.0;
 }
 
+/// The Kuber Signature (default family) dark palette. These constants are the
+/// reference values for `KuberTokens.dark(ThemeVariant.signature)`; widgets
+/// must not read them directly — go through `Theme.of(context).colorScheme`
+/// or `context.kuberColors` so all seven theme families work.
 class KuberColors {
   // Backgrounds
   static const background = Color(0xFF000000);
@@ -56,6 +63,8 @@ class KuberColors {
   static const white = Color(0xFFFFFFFF);
 }
 
+/// The Kuber Signature (default family) light palette. Same caveat as
+/// [KuberColors]: reference values only, never read from widgets.
 class KuberLightColors {
   // Backgrounds
   static const background = Color(0xFFFFFFFF);
@@ -90,19 +99,44 @@ class KuberLightColors {
   static const white = Color(0xFFFFFFFF);
 }
 
-/// Semantic colors that have no slot in Material's [ColorScheme] — currently
-/// just the warning/over-budget amber. Registered as a [ThemeExtension] so it
-/// adapts to light/dark like the rest of the theme. Access via
-/// `context.kuberColors.warning` instead of hardcoding the hex.
+/// Semantic colors that have no slot in Material's [ColorScheme]: the
+/// warning/over-budget amber, the selected-card ring, the accent-as-text
+/// variant, and the Upcoming Events source-pill accents. Registered as a
+/// [ThemeExtension] so every value tracks the active theme family and mode.
+/// Access via `context.kuberColors.*` instead of hardcoding hex.
 @immutable
 class KuberSemanticColors extends ThemeExtension<KuberSemanticColors> {
   final Color warning;
   final Color warningSubtle;
+  final Color primaryRing;
+  final Color primaryText;
+  final Color eventEmi;
+  final Color eventLedger;
+
+  /// The Vault `borderMuted` token. Light themes expose it as
+  /// `colorScheme.outlineVariant`, but dark themes map `outlineVariant` to
+  /// `border` (a long-standing mapping kept for visual parity), so this is the
+  /// only reliable way to read borderMuted in both modes.
+  final Color borderMuted;
 
   const KuberSemanticColors({
     required this.warning,
     required this.warningSubtle,
+    this.primaryRing = const Color(0x473B82F6),
+    this.primaryText = KuberColors.primary,
+    this.eventEmi = KuberColors.eventEmi,
+    this.eventLedger = KuberColors.eventLedger,
+    this.borderMuted = KuberColors.borderMuted,
   });
+
+  KuberSemanticColors.fromTokens(KuberTokens tokens)
+      : warning = tokens.warning,
+        warningSubtle = tokens.warningSubtle,
+        primaryRing = tokens.primaryRing,
+        primaryText = tokens.primaryText,
+        eventEmi = tokens.eventEmi,
+        eventLedger = tokens.eventLedger,
+        borderMuted = tokens.borderMuted;
 
   static const dark = KuberSemanticColors(
     warning: KuberColors.warning,
@@ -112,13 +146,31 @@ class KuberSemanticColors extends ThemeExtension<KuberSemanticColors> {
   static const light = KuberSemanticColors(
     warning: KuberLightColors.warning,
     warningSubtle: KuberLightColors.warningSubtle,
+    primaryRing: Color(0x3D3B82F6),
+    primaryText: KuberLightColors.primary,
+    eventEmi: KuberLightColors.eventEmi,
+    eventLedger: KuberLightColors.eventLedger,
+    borderMuted: KuberLightColors.borderMuted,
   );
 
   @override
-  KuberSemanticColors copyWith({Color? warning, Color? warningSubtle}) {
+  KuberSemanticColors copyWith({
+    Color? warning,
+    Color? warningSubtle,
+    Color? primaryRing,
+    Color? primaryText,
+    Color? eventEmi,
+    Color? eventLedger,
+    Color? borderMuted,
+  }) {
     return KuberSemanticColors(
       warning: warning ?? this.warning,
       warningSubtle: warningSubtle ?? this.warningSubtle,
+      primaryRing: primaryRing ?? this.primaryRing,
+      primaryText: primaryText ?? this.primaryText,
+      eventEmi: eventEmi ?? this.eventEmi,
+      eventLedger: eventLedger ?? this.eventLedger,
+      borderMuted: borderMuted ?? this.borderMuted,
     );
   }
 
@@ -131,6 +183,11 @@ class KuberSemanticColors extends ThemeExtension<KuberSemanticColors> {
     return KuberSemanticColors(
       warning: Color.lerp(warning, other.warning, t)!,
       warningSubtle: Color.lerp(warningSubtle, other.warningSubtle, t)!,
+      primaryRing: Color.lerp(primaryRing, other.primaryRing, t)!,
+      primaryText: Color.lerp(primaryText, other.primaryText, t)!,
+      eventEmi: Color.lerp(eventEmi, other.eventEmi, t)!,
+      eventLedger: Color.lerp(eventLedger, other.eventLedger, t)!,
+      borderMuted: Color.lerp(borderMuted, other.borderMuted, t)!,
     );
   }
 }
@@ -144,368 +201,209 @@ extension KuberThemeX on BuildContext {
 }
 
 class AppTheme {
-  static ThemeData dark(Locale locale) {
-    final textTheme = buildKuberTextTheme(locale, ThemeData.dark().textTheme);
-
-    final colorScheme = ColorScheme.dark(
-      surface: KuberColors.background,
-      onSurface: KuberColors.textPrimary,
-      onSurfaceVariant: KuberColors.textSecondary,
-      primary: KuberColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: KuberColors.primarySubtle,
-      onPrimaryContainer: KuberColors.primary,
-      secondary: KuberColors.primary,
-      onSecondary: Colors.white,
-      tertiary: KuberColors.income,
-      onTertiary: Colors.white,
-      error: KuberColors.expense,
-      onError: Colors.white,
-      errorContainer: KuberColors.expenseSubtle,
-      onErrorContainer: KuberColors.expense,
-      surfaceContainer: KuberColors.surfaceCard,
-      surfaceContainerHigh: KuberColors.surfaceMuted,
-      outline: KuberColors.border,
-      outlineVariant: KuberColors.border,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
+  static ThemeData dark(
+    Locale locale, [
+    ThemeVariant variant = ThemeVariant.signature,
+  ]) {
+    return _build(
+      tokens: KuberTokens.dark(variant),
       brightness: Brightness.dark,
-      colorScheme: colorScheme,
-      extensions: const [KuberSemanticColors.dark],
-      textTheme: textTheme,
-      splashFactory: NoSplash.splashFactory,
-      scaffoldBackgroundColor: KuberColors.background,
-      cardTheme: CardThemeData(
-        color: KuberColors.surfaceCard,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: KuberColors.border),
-        ),
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: KuberColors.surfaceCard,
-        indicatorColor: KuberColors.primarySubtle,
-        surfaceTintColor: Colors.transparent,
-        indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        iconTheme: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: KuberColors.primary);
-          }
-          return const IconThemeData(color: KuberColors.textSecondary);
-        }),
-        labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return textTheme.labelSmall?.copyWith(
-              color: KuberColors.primary,
-              fontWeight: FontWeight.w600,
-            );
-          }
-          return textTheme.labelSmall?.copyWith(
-            color: KuberColors.textSecondary,
-          );
-        }),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: KuberColors.surfaceCard,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: KuberColors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: KuberColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: KuberColors.primary, width: 2),
-        ),
-        labelStyle: const TextStyle(color: KuberColors.textSecondary),
-      ),
-      dividerTheme: const DividerThemeData(
-        color: KuberColors.border,
-        thickness: 0.5,
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: KuberColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: KuberColors.textPrimary,
-        ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: KuberColors.surfaceCard,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: KuberColors.textPrimary,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: KuberColors.border),
-        ),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-      ),
-      chipTheme: ChipThemeData(
-        backgroundColor: KuberColors.surfaceMuted,
-        side: const BorderSide(color: KuberColors.border),
-        selectedColor: KuberColors.primarySubtle,
-        checkmarkColor: KuberColors.primary,
-        showCheckmark: true,
-        labelStyle: AppTextStyles.inter.copyWith(
-          fontSize: 13,
-          color: KuberColors.textSecondary,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-      ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: KuberColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(KuberRadius.lg),
-          ),
-          side: BorderSide(color: KuberColors.border),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: KuberColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: KuberColors.border),
-        ),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: KuberColors.primary,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: KuberColors.textPrimary,
-          side: const BorderSide(color: KuberColors.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: KuberColors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-        ),
-      ),
-      segmentedButtonTheme: SegmentedButtonThemeData(
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return KuberColors.primarySubtle;
-            }
-            return KuberColors.surfaceCard;
-          }),
-          foregroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return KuberColors.primary;
-            }
-            return KuberColors.textSecondary;
-          }),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-            ),
-          ),
-          side: const WidgetStatePropertyAll(
-            BorderSide(color: KuberColors.border),
-          ),
-        ),
-      ),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return Colors.white;
-          return KuberColors.textSecondary;
-        }),
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) return KuberColors.primary;
-          return KuberColors.surfaceMuted;
-        }),
-      ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: KuberColors.primary,
-        linearTrackColor: KuberColors.surfaceMuted,
-      ),
-      listTileTheme: ListTileThemeData(
-        tileColor: KuberColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-      ),
-      popupMenuTheme: PopupMenuThemeData(
-        color: KuberColors.surfaceMuted,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-      ),
+      locale: locale,
     );
   }
 
-  static ThemeData light(Locale locale) {
-    final textTheme = buildKuberTextTheme(locale, ThemeData.light().textTheme);
-
-    final colorScheme = ColorScheme.light(
-      surface: KuberLightColors.background,
-      onSurface: KuberLightColors.textPrimary,
-      onSurfaceVariant: KuberLightColors.textSecondary,
-      primary: KuberLightColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: KuberLightColors.primarySubtle,
-      onPrimaryContainer: KuberLightColors.primary,
-      secondary: KuberLightColors.primary,
-      onSecondary: Colors.white,
-      tertiary: KuberLightColors.income,
-      onTertiary: Colors.white,
-      error: KuberLightColors.expense,
-      onError: Colors.white,
-      errorContainer: KuberLightColors.expenseSubtle,
-      onErrorContainer: KuberLightColors.expense,
-      surfaceContainer: KuberLightColors.surfaceCard,
-      surfaceContainerHigh: KuberLightColors.surfaceMuted,
-      outline: KuberLightColors.border,
-      outlineVariant: KuberLightColors.borderMuted,
+  static ThemeData light(
+    Locale locale, [
+    ThemeVariant variant = ThemeVariant.signature,
+  ]) {
+    return _build(
+      tokens: KuberTokens.light(variant),
+      brightness: Brightness.light,
+      locale: locale,
     );
+  }
+
+  static ThemeData _build({
+    required KuberTokens tokens,
+    required Brightness brightness,
+    required Locale locale,
+  }) {
+    final isDark = brightness == Brightness.dark;
+    final textTheme = buildKuberTextTheme(
+      locale,
+      isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme,
+    );
+
+    // Keep the legacy named constructors so every slot not set here resolves
+    // to the exact same fallback it always has; Signature must stay
+    // byte-identical to the pre-personalization theme.
+    final colorScheme = isDark
+        ? ColorScheme.dark(
+            surface: tokens.background,
+            onSurface: tokens.textPrimary,
+            onSurfaceVariant: tokens.textSecondary,
+            primary: tokens.primary,
+            onPrimary: tokens.onPrimary,
+            primaryContainer: tokens.primarySubtle,
+            onPrimaryContainer: tokens.primary,
+            secondary: tokens.primary,
+            onSecondary: tokens.onPrimary,
+            tertiary: tokens.income,
+            onTertiary: Colors.white,
+            tertiaryContainer: tokens.incomeSubtle,
+            onTertiaryContainer: tokens.income,
+            error: tokens.expense,
+            onError: Colors.white,
+            errorContainer: tokens.expenseSubtle,
+            onErrorContainer: tokens.expense,
+            surfaceContainer: tokens.surfaceCard,
+            surfaceContainerHigh: tokens.surfaceMuted,
+            outline: tokens.border,
+            // Dark has always mapped outlineVariant to border (not
+            // borderMuted); preserved for parity.
+            outlineVariant: tokens.border,
+          )
+        : ColorScheme.light(
+            surface: tokens.background,
+            onSurface: tokens.textPrimary,
+            onSurfaceVariant: tokens.textSecondary,
+            primary: tokens.primary,
+            onPrimary: tokens.onPrimary,
+            primaryContainer: tokens.primarySubtle,
+            onPrimaryContainer: tokens.primary,
+            secondary: tokens.primary,
+            onSecondary: tokens.onPrimary,
+            tertiary: tokens.income,
+            onTertiary: Colors.white,
+            tertiaryContainer: tokens.incomeSubtle,
+            onTertiaryContainer: tokens.income,
+            error: tokens.expense,
+            onError: Colors.white,
+            errorContainer: tokens.expenseSubtle,
+            onErrorContainer: tokens.expense,
+            surfaceContainer: tokens.surfaceCard,
+            surfaceContainerHigh: tokens.surfaceMuted,
+            outline: tokens.border,
+            outlineVariant: tokens.borderMuted,
+          );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: brightness,
       colorScheme: colorScheme,
-      extensions: const [KuberSemanticColors.light],
+      extensions: [KuberSemanticColors.fromTokens(tokens)],
       textTheme: textTheme,
       splashFactory: NoSplash.splashFactory,
-      scaffoldBackgroundColor: KuberLightColors.background,
+      scaffoldBackgroundColor: tokens.background,
       cardTheme: CardThemeData(
-        color: KuberLightColors.surfaceCard,
+        color: tokens.surfaceCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: KuberLightColors.border),
+          side: BorderSide(color: tokens.border),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: KuberLightColors.surfaceCard,
-        indicatorColor: KuberLightColors.primarySubtle,
+        backgroundColor: tokens.surfaceCard,
+        indicatorColor: tokens.primarySubtle,
         surfaceTintColor: Colors.transparent,
         indicatorShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: KuberLightColors.primary);
+            return IconThemeData(color: tokens.primary);
           }
-          return const IconThemeData(color: KuberLightColors.textSecondary);
+          return IconThemeData(color: tokens.textSecondary);
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return textTheme.labelSmall?.copyWith(
-              color: KuberLightColors.primary,
+              color: tokens.primaryText,
               fontWeight: FontWeight.w600,
             );
           }
           return textTheme.labelSmall?.copyWith(
-            color: KuberLightColors.textSecondary,
+            color: tokens.textSecondary,
           );
         }),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: KuberLightColors.surfaceCard,
+        fillColor: tokens.surfaceCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: KuberLightColors.border),
+          borderSide: BorderSide(color: tokens.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: KuberLightColors.border),
+          borderSide: BorderSide(color: tokens.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(
-            color: KuberLightColors.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: tokens.primary, width: 2),
         ),
-        labelStyle: const TextStyle(color: KuberLightColors.textSecondary),
+        labelStyle: TextStyle(color: tokens.textSecondary),
       ),
-      dividerTheme: const DividerThemeData(
-        color: KuberLightColors.border,
+      dividerTheme: DividerThemeData(
+        color: tokens.border,
         thickness: 0.5,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: KuberLightColors.background,
+        backgroundColor: tokens.background,
         elevation: 0,
         scrolledUnderElevation: 0,
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: KuberLightColors.textPrimary,
+          color: tokens.textPrimary,
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: KuberLightColors.surfaceCard,
+        backgroundColor: tokens.surfaceCard,
         contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: KuberLightColors.textPrimary,
+          color: tokens.textPrimary,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: KuberLightColors.border),
+          side: BorderSide(color: tokens.border),
         ),
         behavior: SnackBarBehavior.floating,
         elevation: 0,
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: KuberLightColors.surfaceMuted,
-        side: const BorderSide(color: KuberLightColors.border),
-        selectedColor: KuberLightColors.primarySubtle,
-        checkmarkColor: KuberLightColors.primary,
+        backgroundColor: tokens.surfaceMuted,
+        side: BorderSide(color: tokens.border),
+        selectedColor: tokens.primarySubtle,
+        checkmarkColor: tokens.primary,
         showCheckmark: true,
         labelStyle: AppTextStyles.inter.copyWith(
           fontSize: 13,
-          color: KuberLightColors.textSecondary,
+          color: tokens.textSecondary,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: KuberLightColors.surfaceCard,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: tokens.surfaceCard,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
+          borderRadius: const BorderRadius.vertical(
             top: Radius.circular(KuberRadius.lg),
           ),
-          side: BorderSide(color: KuberLightColors.border),
+          side: BorderSide(color: tokens.border),
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: KuberLightColors.surfaceCard,
+        backgroundColor: tokens.surfaceCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: KuberLightColors.border),
+          side: BorderSide(color: tokens.border),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: KuberLightColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: tokens.primary,
+          foregroundColor: tokens.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(KuberRadius.md),
           ),
@@ -513,8 +411,8 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: KuberLightColors.textPrimary,
-          side: const BorderSide(color: KuberLightColors.border),
+          foregroundColor: tokens.textPrimary,
+          side: BorderSide(color: tokens.border),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(KuberRadius.md),
           ),
@@ -522,7 +420,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: KuberLightColors.primary,
+          foregroundColor: tokens.primaryText,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(KuberRadius.md),
           ),
@@ -532,50 +430,48 @@ class AppTheme {
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return KuberLightColors.primarySubtle;
+              return tokens.primarySubtle;
             }
-            return KuberLightColors.surfaceCard;
+            return tokens.surfaceCard;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return KuberLightColors.primary;
+              return tokens.primaryText;
             }
-            return KuberLightColors.textSecondary;
+            return tokens.textSecondary;
           }),
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(KuberRadius.md),
             ),
           ),
-          side: const WidgetStatePropertyAll(
-            BorderSide(color: KuberLightColors.border),
+          side: WidgetStatePropertyAll(
+            BorderSide(color: tokens.border),
           ),
         ),
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return Colors.white;
-          return KuberLightColors.textSecondary;
+          return tokens.textSecondary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return KuberLightColors.primary;
-          }
-          return KuberLightColors.surfaceMuted;
+          if (states.contains(WidgetState.selected)) return tokens.primary;
+          return tokens.surfaceMuted;
         }),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: KuberLightColors.primary,
-        linearTrackColor: KuberLightColors.surfaceMuted,
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: tokens.primary,
+        linearTrackColor: tokens.surfaceMuted,
       ),
       listTileTheme: ListTileThemeData(
-        tileColor: KuberLightColors.surfaceCard,
+        tileColor: tokens.surfaceCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: KuberLightColors.surfaceMuted,
+        color: tokens.surfaceMuted,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(KuberRadius.md),
         ),

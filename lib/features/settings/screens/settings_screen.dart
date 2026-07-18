@@ -21,6 +21,7 @@ import '../providers/settings_provider.dart';
 
 import '../widgets/settings_widgets.dart';
 import '../widgets/settings_choice_sheet.dart';
+import '../widgets/theme_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../widgets/settings_language_row.dart';
 import '../../more/widgets/more_tab_layout_picker.dart';
@@ -78,44 +79,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _showThemeSheet(BuildContext context, ThemeMode current) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<ThemeMode>(
-        title: context.l10n.themeLabel,
-        subtitle: context.l10n.appearanceCategory,
-        selectedValue: current,
-        choices: [
-          SettingsChoice(
-            value: ThemeMode.light,
-            label: context.l10n.themeLightChoice,
-            subtitle: context.l10n.themeSubtitleLight,
-            icon: Icons.light_mode_outlined,
-          ),
-          SettingsChoice(
-            value: ThemeMode.dark,
-            label: context.l10n.themeDarkChoice,
-            subtitle: context.l10n.themeSubtitleDark,
-            icon: Icons.dark_mode_outlined,
-          ),
-          SettingsChoice(
-            value: ThemeMode.system,
-            label: context.l10n.themeSystemChoice,
-            subtitle: context.l10n.themeSubtitleSystem,
-            icon: Icons.settings_brightness_outlined,
-          ),
-        ],
-        onSelected: (val) {
-          setState(() => _tempThemeMode = val);
-          ref.read(settingsProvider.notifier).setThemeMode(val);
-        },
-      ),
-    );
-  }
+  // The Theme sheet (family picker + mode) reads and writes settingsProvider
+  // directly; see theme_sheet.dart.
 
   void _showBottomNavSheet(BuildContext context, NavBarStyle current) {
     showModalBottomSheet(
@@ -392,8 +357,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       icon: Icons.palette_outlined,
                       label: context.l10n.themeLabel,
                       subtitle: context.l10n.themeSubtitle,
-                      onTap: () => _showThemeSheet(context, currentTheme),
-                      trailing: _trailingWidget(context, text: themeStr),
+                      onTap: () => showThemeSheet(context),
+                      trailing: _trailingWidget(
+                        context,
+                        text:
+                            '${themeFamilyName(settings?.themeVariant ?? ThemeVariant.signature)} · $themeStr',
+                      ),
                     ),
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(

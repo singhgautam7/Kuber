@@ -9,9 +9,11 @@ import '../../../core/theme/app_theme.dart';
 class _P {
   final ColorScheme cs;
   final Color warning;
+  final Color eventEmi;
   _P(BuildContext c)
       : cs = Theme.of(c).colorScheme,
-        warning = c.kuberColors.warning;
+        warning = c.kuberColors.warning,
+        eventEmi = c.kuberColors.eventEmi;
 
   Color get income => cs.tertiary;
   Color get expense => cs.error;
@@ -188,7 +190,7 @@ Widget upcomingEventsPreview(BuildContext context) {
       ]),
       const Spacer(),
       _eventRow(context, 'Today', 'Pay maid salary', _pill('REMINDER', p.primary, p.primary.withValues(alpha: 0.12)), '−₹3,000'),
-      _eventRow(context, '5 Jul', 'Home Loan EMI', _pill('EMI', KuberColors.eventEmi, KuberColors.eventEmi.withValues(alpha: 0.12)), '−₹24,600'),
+      _eventRow(context, '5 Jul', 'Home Loan EMI', _pill('EMI', p.eventEmi, p.eventEmi.withValues(alpha: 0.12)), '−₹24,600'),
       _eventRow(context, '7 Jul', 'Nifty Index SIP', _pill('SIP', p.income, p.income.withValues(alpha: 0.12)), '−₹5,000'),
       const Spacer(),
       _footerLink(context, 'View all'),
@@ -333,13 +335,13 @@ Widget categoryDonutPreview(BuildContext context) {
       const SizedBox(height: 6),
       Expanded(child: Row(children: [
         SizedBox(width: 88, height: 88, child: CustomPaint(painter: _DonutPainter([
-          (0.42, p.primary), (0.26, p.warning), (0.17, KuberColors.eventEmi), (0.15, p.surfaceMuted),
+          (0.42, p.primary), (0.26, p.warning), (0.17, p.eventEmi), (0.15, p.surfaceMuted),
         ], p.surface))),
         const SizedBox(width: 16),
         Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           _legend(context, p.primary, 'Food', '₹19,300 · 42%'),
           _legend(context, p.warning, 'Transport', '₹11,900 · 26%'),
-          _legend(context, KuberColors.eventEmi, 'Shopping', '₹7,800 · 17%'),
+          _legend(context, p.eventEmi, 'Shopping', '₹7,800 · 17%'),
         ])),
       ])),
       _footerLink(context, 'View analytics'),

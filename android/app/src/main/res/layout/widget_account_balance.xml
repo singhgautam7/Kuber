@@ -32,7 +32,7 @@
         android:orientation="vertical"
         android:gravity="center"
         android:visibility="gone">
-        <ImageView android:layout_width="20dp" android:layout_height="20dp"
+        <ImageView android:id="@+id/iv_hicon" android:layout_width="20dp" android:layout_height="20dp"
             android:src="@drawable/ic_widget_bank"
             android:contentDescription="@null" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"

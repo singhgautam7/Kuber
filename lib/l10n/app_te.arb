@@ -1399,5 +1399,13 @@
   "valueNounLimitSpentCap": "ఖర్చు చేసిన పరిమితి",
   "adjustmentIncreasedBy": "పెరిగింది",
   "adjustmentDecreasedBy": "తగ్గింది",
-  "dangerZone": "ప్రమాద జోన్"
+  "dangerZone": "ప్రమాద జోన్",
+  "themeModeSectionLabel": "మోడ్",
+  "themeFamilyDescSignature": "క్లాసిక్ కుబేర్ లుక్.",
+  "themeFamilyDescFlewtube": "ప్రకాశవంతం, సరదాగా.",
+  "themeFamilyDescWoofsapp": "స్నేహపూర్వకం, పరిచయమైనది.",
+  "themeFamilyDescPurrhub": "నలుపుపై బోల్డ్ పసుపు.",
+  "themeFamilyDescHonkpe": "రిచ్, చెల్లింపుల తరహా అనుభూతి.",
+  "themeFamilyDescSqueakdin": "చక్కటి, పని-కేంద్రీకృతం.",
+  "themeFamilyDescOinkzon": "వెచ్చని, షాపింగ్ శైలి."
 }

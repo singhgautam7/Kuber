@@ -40,12 +40,12 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-                <ImageView
+                <ImageView android:id="@+id/iv_hicon"
                     android:layout_width="12dp" android:layout_height="12dp"
                     android:layout_marginEnd="5dp"
                     android:src="@drawable/ic_widget_sms"
                     android:contentDescription="@null" />
-                <TextView
+                <TextView android:id="@+id/tv_action"
                     android:layout_width="wrap_content" android:layout_height="wrap_content"
                     android:text="@string/w_import_sms"
                     android:textSize="9.5sp"

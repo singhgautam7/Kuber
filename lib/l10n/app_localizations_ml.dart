@@ -4875,4 +4875,29 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get dangerZone => 'അപകട മേഖല';
+
+  @override
+  String get themeModeSectionLabel => 'മോഡ്';
+
+  @override
+  String get themeFamilyDescSignature => 'ക്ലാസിക് കുബേർ ലുക്ക്.';
+
+  @override
+  String get themeFamilyDescFlewtube => 'തിളക്കമുള്ളതും രസകരവും.';
+
+  @override
+  String get themeFamilyDescWoofsapp => 'സൗഹൃദപരവും പരിചിതവും.';
+
+  @override
+  String get themeFamilyDescPurrhub => 'കറുപ്പിൽ ബോൾഡ് മഞ്ഞ.';
+
+  @override
+  String get themeFamilyDescHonkpe => 'സമ്പന്നം, പേയ്മെന്റ് ശൈലി.';
+
+  @override
+  String get themeFamilyDescSqueakdin =>
+      'അടുക്കും ചിട്ടയും, ജോലി കേന്ദ്രീകൃതം.';
+
+  @override
+  String get themeFamilyDescOinkzon => 'ഊഷ്മളം, ഷോപ്പിംഗ് ശൈലി.';
 }
