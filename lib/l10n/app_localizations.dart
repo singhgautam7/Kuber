@@ -8821,6 +8821,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Warm and shoppy.'**
   String get themeFamilyDescOinkzon;
+
+  /// No description provided for @applyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get applyLabel;
+
+  /// No description provided for @speedDialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Kuber Notes'**
+  String get speedDialNote;
 }
 
 class _AppLocalizationsDelegate

@@ -5,12 +5,10 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.BitmapFactory
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
 import es.antonborri.home_widget.HomeWidgetProvider
-import java.io.File
 
 /**
  * Trends (range switcher) (4x3). Charts for all three ranges are pre-rendered by
@@ -110,7 +108,5 @@ class ChartWithRangeWidgetProvider : HomeWidgetProvider() {
         )
     }
 
-    private fun loadBitmap(path: String?) = runCatching {
-        if (path.isNullOrBlank() || !File(path).exists()) null else BitmapFactory.decodeFile(path)
-    }.getOrNull()
+    private fun loadBitmap(path: String?) = WidgetCommon.decodeBitmap(path)
 }

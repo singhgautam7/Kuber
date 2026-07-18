@@ -6,8 +6,10 @@ import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.Telephony
+import androidx.activity.enableEdgeToEdge
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -18,6 +20,16 @@ class MainActivity : FlutterFragmentActivity() {
     private val widgetsChannelName = "com.grs.kuber/widgets"
     private val pickFolderRequest = 24017
     private var pendingPickResult: MethodChannel.Result? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Android 15 edge-to-edge: explicit backward-compatible opt-in, per
+        // the Play Console recommendation. Pairs with the Dart-side
+        // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge) in
+        // main.dart; bar appearance is driven from app.dart (icon brightness
+        // only, never the deprecated bar-color setters).
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

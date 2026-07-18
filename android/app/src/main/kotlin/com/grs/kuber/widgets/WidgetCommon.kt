@@ -4,10 +4,13 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetPlugin
 import org.json.JSONObject
+import java.io.File
 
 /**
  * Shared helpers for all Kuber home-screen widget providers.
@@ -36,6 +39,28 @@ object WidgetCommon {
     /** True when [updatedMillis] is older than 24h. */
     fun isStale(updatedMillis: Long): Boolean =
         updatedMillis > 0 && System.currentTimeMillis() - updatedMillis > STALE_AFTER_MS
+
+    /**
+     * Decodes a chart PNG rendered by the Flutter side, downsampling to at
+     * most [maxDim] px on the longest edge (BitmapFactory.Options bounds pass
+     * + inSampleSize, per the Play Console bitmap-downsampling guidance).
+     * The app's own bitmaps are small (<=480px), so this is a safety net for
+     * future resolution bumps rather than a behavior change. Never throws.
+     */
+    fun decodeBitmap(path: String?, maxDim: Int = 1024): Bitmap? = runCatching {
+        if (path.isNullOrBlank() || !File(path).exists()) return null
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        var sample = 1
+        while (bounds.outWidth / (sample * 2) > maxDim ||
+            bounds.outHeight / (sample * 2) > maxDim
+        ) {
+            sample *= 2
+        }
+        val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+        BitmapFactory.decodeFile(path, opts)
+    }.getOrNull()
 
     /** "Updated 4m ago" style relative label. */
     fun updatedLabel(updatedMillis: Long, prefix: String = "Updated"): String {

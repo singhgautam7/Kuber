@@ -156,7 +156,7 @@ class KuberBottomSheet extends StatelessWidget {
 
             if (actions != null) ...[
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                 child: actions!,
               ),
             ],

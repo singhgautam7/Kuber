@@ -356,13 +356,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _SettingsTile(
                       icon: Icons.palette_outlined,
                       label: context.l10n.themeLabel,
-                      subtitle: context.l10n.themeSubtitle,
+                      subtitle:
+                          '${themeFamilyName(settings?.themeVariant ?? ThemeVariant.signature)} • $themeStr',
                       onTap: () => showThemeSheet(context),
-                      trailing: _trailingWidget(
-                        context,
-                        text:
-                            '${themeFamilyName(settings?.themeVariant ?? ThemeVariant.signature)} · $themeStr',
-                      ),
+                      trailing: _trailingWidget(context),
                     ),
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(

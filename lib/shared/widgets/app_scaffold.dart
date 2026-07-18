@@ -704,6 +704,17 @@ class _SpeedDialMenu extends AnimatedWidget {
       children: [
         _buildOption(
           context,
+          index: 4,
+          icon: Icons.edit_note_rounded,
+          label: context.l10n.speedDialNote,
+          onTap: () {
+            onClose();
+            context.push('/notes/editor');
+          },
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        _buildOption(
+          context,
           index: 3,
           icon: Icons.sync_rounded,
           label: context.l10n.speedDialRecurring,

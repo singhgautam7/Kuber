@@ -4860,4 +4860,10 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'উষ্ণ ও শপিং ঘরানার।';
+
+  @override
+  String get applyLabel => 'প্রয়োগ করুন';
+
+  @override
+  String get speedDialNote => 'কুবের নোট যোগ করুন';
 }

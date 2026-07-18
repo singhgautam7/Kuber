@@ -129,7 +129,7 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
                       PieChartData(
                         startDegreeOffset: -90,
                         sectionsSpace: 2,
-                        centerSpaceRadius: 57,
+                        centerSpaceRadius: 60,
                         pieTouchData: PieTouchData(
                           touchCallback: (event, response) {
                             final isAction = event is FlTapUpEvent ||
@@ -156,9 +156,7 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
                                   : slices[i]
                                       .color
                                       .withValues(alpha: 0.4),
-                              // Tapped segment grows outward (~70→72 in the
-                              // design), others stay put.
-                              radius: selected == i ? 30 : 26,
+                              radius: selected == i ? 28 : 24,
                             ),
                         ],
                       ),

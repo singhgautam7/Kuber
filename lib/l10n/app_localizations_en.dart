@@ -4834,4 +4834,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'Warm and shoppy.';
+
+  @override
+  String get applyLabel => 'Apply';
+
+  @override
+  String get speedDialNote => 'Add Kuber Notes';
 }

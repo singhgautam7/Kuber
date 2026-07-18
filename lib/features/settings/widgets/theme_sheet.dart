@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../providers/settings_provider.dart';
 import 'theme_family_icons.dart';
@@ -43,66 +44,139 @@ void showThemeSheet(BuildContext context) {
   );
 }
 
-/// The Appearance > Theme bottom sheet: theme family picker on top, compact
-/// Light / Dark / System mode control at the bottom. Selecting a family
-/// re-tints the sheet live (the app theme swaps immediately) and does not
-/// close the sheet, so families can be compared back to back.
-class ThemeSheet extends ConsumerWidget {
+/// The Appearance > Theme bottom sheet: mode control on top, theme family
+/// picker below, and Cancel / Apply buttons at the bottom. Selecting a mode or
+/// family re-tints the app live so options can be compared. If the sheet is
+/// dismissed via Cancel, close button, or backdrop tap, any unapplied theme
+/// changes are reverted back to the initial state when the sheet was opened.
+class ThemeSheet extends ConsumerStatefulWidget {
   const ThemeSheet({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Narrow watches (performance.md rule 1): the sheet re-tints the entire
-    // app on selection, so it must not also rebuild for unrelated settings.
-    final selectedVariant = ref.watch(themeVariantProvider);
-    final selectedMode = ref.watch(themeModeProvider);
-    final cs = Theme.of(context).colorScheme;
+  ConsumerState<ThemeSheet> createState() => _ThemeSheetState();
+}
 
-    return KuberBottomSheet(
-      title: context.l10n.themeLabel,
-      subtitle: context.l10n.appearanceCategory,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final variant in ThemeVariant.values)
-            Padding(
-              padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-              child: _ThemeFamilyCard(
-                variant: variant,
-                selected: variant == selectedVariant,
-                onTap: () {
-                  if (variant == selectedVariant) return;
-                  HapticFeedback.selectionClick();
-                  ref
-                      .read(settingsProvider.notifier)
-                      .setThemeVariant(variant);
-                },
+class _ThemeSheetState extends ConsumerState<ThemeSheet> {
+  late ThemeVariant _initialVariant;
+  late ThemeMode _initialMode;
+  late ThemeVariant _selectedVariant;
+  late ThemeMode _selectedMode;
+  bool _applied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final settings = ref.read(settingsProvider).valueOrNull;
+    _initialVariant = settings?.themeVariant ?? ThemeVariant.signature;
+    _initialMode = settings?.themeMode ?? ThemeMode.system;
+    _selectedVariant = _initialVariant;
+    _selectedMode = _initialMode;
+  }
+
+  void _onVariantSelected(ThemeVariant variant) {
+    if (variant == _selectedVariant) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _selectedVariant = variant;
+    });
+    ref.read(settingsProvider.notifier).setThemeVariant(variant);
+  }
+
+  void _onModeSelected(ThemeMode mode) {
+    if (mode == _selectedMode) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _selectedMode = mode;
+    });
+    ref.read(settingsProvider.notifier).setThemeMode(mode);
+  }
+
+  void _apply() {
+    // The selection is already live-applied and persisted by the preview
+    // taps; Apply just keeps it by skipping the revert in _onPopInvoked.
+    _applied = true;
+    Navigator.of(context).pop();
+  }
+
+  void _cancel() {
+    Navigator.of(context).pop();
+  }
+
+  void _onPopInvoked(bool didPop) {
+    if (didPop && !_applied) {
+      if (_selectedVariant != _initialVariant ||
+          _selectedMode != _initialMode) {
+        ref.read(settingsProvider.notifier).setThemeVariant(_initialVariant);
+        ref.read(settingsProvider.notifier).setThemeMode(_initialMode);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isSameAsInitial =
+        (_selectedVariant == _initialVariant) && (_selectedMode == _initialMode);
+
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
+      child: KuberBottomSheet(
+        title: context.l10n.themeLabel,
+        subtitle: context.l10n.appearanceCategory,
+        actions: Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                label: context.l10n.cancelLabel,
+                type: AppButtonType.outline,
+                onPressed: _cancel,
               ),
             ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: KuberSpacing.md),
-            child: Divider(height: 1),
-          ),
-          Text(
-            context.l10n.themeModeSectionLabel.toUpperCase(),
-            style: localeFont(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.4,
+            const SizedBox(width: KuberSpacing.md),
+            Expanded(
+              child: AppButton(
+                label: context.l10n.applyLabel,
+                type: AppButtonType.primary,
+                onPressed: isSameAsInitial ? null : _apply,
+              ),
             ),
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-          _ModeSegmentedRow(
-            selected: selectedMode,
-            onChanged: (mode) {
-              if (mode == selectedMode) return;
-              HapticFeedback.mediumImpact();
-              ref.read(settingsProvider.notifier).setThemeMode(mode);
-            },
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.l10n.themeModeSectionLabel.toUpperCase(),
+              style: localeFont(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 1.4,
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.sm),
+            _ModeSegmentedRow(
+              selected: _selectedMode,
+              onChanged: _onModeSelected,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: KuberSpacing.md),
+              child: Divider(height: 1),
+            ),
+            for (int i = 0; i < ThemeVariant.values.length; i++)
+              Padding(
+                padding: EdgeInsets.only(
+                  bottom: i < ThemeVariant.values.length - 1 ? KuberSpacing.sm : 0,
+                ),
+                child: _ThemeFamilyCard(
+                  variant: ThemeVariant.values[i],
+                  selected: ThemeVariant.values[i] == _selectedVariant,
+                  onTap: () => _onVariantSelected(ThemeVariant.values[i]),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

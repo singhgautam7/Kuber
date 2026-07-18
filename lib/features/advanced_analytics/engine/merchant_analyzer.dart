@@ -68,7 +68,7 @@ MerchantAnalysisResult computeMerchantAnalysis(AnalyticsInput input) {
   return MerchantAnalysisResult(
     merchantCount: rows.length,
     totalSpend: current.fold<double>(0, (sum, t) => sum + t.amount),
-    topMerchants: rows.take(10).toList(),
+    topMerchants: rows,
     newMerchants: newRows.take(5).toList(),
     risingMerchants: rising.take(5).toList(),
   );

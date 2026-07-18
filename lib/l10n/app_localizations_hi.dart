@@ -4847,4 +4847,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'गर्म और शॉपिंग वाला अंदाज़।';
+
+  @override
+  String get applyLabel => 'लागू करें';
+
+  @override
+  String get speedDialNote => 'कुबेर नोट जोड़ें';
 }

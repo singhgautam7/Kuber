@@ -4855,4 +4855,10 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'उबदार आणि शॉपिंग शैलीचा.';
+
+  @override
+  String get applyLabel => 'लागू करा';
+
+  @override
+  String get speedDialNote => 'कुबेर नोट जोडा';
 }

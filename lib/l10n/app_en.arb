@@ -2778,5 +2778,9 @@
   "themeFamilyDescSqueakdin": "Buttoned-up and work-first.",
   "@themeFamilyDescSqueakdin": {},
   "themeFamilyDescOinkzon": "Warm and shoppy.",
-  "@themeFamilyDescOinkzon": {}
+  "@themeFamilyDescOinkzon": {},
+  "applyLabel": "Apply",
+  "@applyLabel": {},
+  "speedDialNote": "Add Kuber Notes",
+  "@speedDialNote": {}
 }

@@ -3,12 +3,10 @@ package com.grs.kuber.widgets
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.BitmapFactory
 import android.widget.RemoteViews
 import androidx.core.content.ContextCompat
 import com.grs.kuber.R
 import es.antonborri.home_widget.HomeWidgetProvider
-import java.io.File
 
 /** Chart (compact, 7D) (4x2). Pre-rendered PNG bar chart. Tap -> Analytics. */
 class ChartCompactWidgetProvider : HomeWidgetProvider() {
@@ -53,7 +51,5 @@ class ChartCompactWidgetProvider : HomeWidgetProvider() {
         views.setTextColor(R.id.tv_expense, WidgetTheme.expense(context, prefs))
     }
 
-    private fun loadBitmap(path: String?) = runCatching {
-        if (path.isNullOrBlank() || !File(path).exists()) null else BitmapFactory.decodeFile(path)
-    }.getOrNull()
+    private fun loadBitmap(path: String?) = WidgetCommon.decodeBitmap(path)
 }

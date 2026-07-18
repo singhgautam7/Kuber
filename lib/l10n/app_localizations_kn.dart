@@ -4885,4 +4885,10 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'ಬೆಚ್ಚಗಿನ, ಶಾಪಿಂಗ್ ಶೈಲಿಯ.';
+
+  @override
+  String get applyLabel => 'ಅನ್ವಯಿಸಿ';
+
+  @override
+  String get speedDialNote => 'ಕುಬೇರ್ ನೋಟ್ ಸೇರಿಸಿ';
 }

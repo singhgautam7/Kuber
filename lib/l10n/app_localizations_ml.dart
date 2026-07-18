@@ -4900,4 +4900,10 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'ഊഷ്മളം, ഷോപ്പിംഗ് ശൈലി.';
+
+  @override
+  String get applyLabel => 'പ്രയോഗിക്കുക';
+
+  @override
+  String get speedDialNote => 'കുബേർ നോട്ട് ചേർക്കുക';
 }

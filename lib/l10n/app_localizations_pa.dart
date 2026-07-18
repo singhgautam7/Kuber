@@ -4845,4 +4845,10 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'ਨਿੱਘਾ ਅਤੇ ਸ਼ਾਪਿੰਗ ਅੰਦਾਜ਼ ਵਾਲਾ।';
+
+  @override
+  String get applyLabel => 'ਲਾਗੂ ਕਰੋ';
+
+  @override
+  String get speedDialNote => 'ਕੁਬੇਰ ਨੋਟ ਜੋੜੋ';
 }

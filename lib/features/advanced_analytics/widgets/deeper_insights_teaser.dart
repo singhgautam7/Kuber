@@ -63,7 +63,7 @@ class DeeperInsightsTeaser extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          _ProChip(color: cs.primary),
+                          // _ProChip(color: cs.primary),
                         ],
                       ),
                       const SizedBox(height: KuberSpacing.xs),
@@ -88,6 +88,9 @@ class DeeperInsightsTeaser extends ConsumerWidget {
   }
 }
 
+// PAYMENT-HIDDEN (KYC pending): the chip usage above is commented out; keep
+// the class for when Pro UI is restored.
+// ignore: unused_element
 class _ProChip extends StatelessWidget {
   final Color color;
 

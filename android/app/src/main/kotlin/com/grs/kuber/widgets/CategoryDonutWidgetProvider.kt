@@ -3,13 +3,11 @@ package com.grs.kuber.widgets
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.view.View
 import android.widget.RemoteViews
 import com.grs.kuber.R
 import es.antonborri.home_widget.HomeWidgetProvider
-import java.io.File
 
 /** Category Donut (4x3). Pre-rendered donut PNG + top-3 rows. Tap -> Analytics (categories). */
 class CategoryDonutWidgetProvider : HomeWidgetProvider() {
@@ -69,7 +67,5 @@ class CategoryDonutWidgetProvider : HomeWidgetProvider() {
         }
     }
 
-    private fun loadBitmap(path: String?) = runCatching {
-        if (path.isNullOrBlank() || !File(path).exists()) null else BitmapFactory.decodeFile(path)
-    }.getOrNull()
+    private fun loadBitmap(path: String?) = WidgetCommon.decodeBitmap(path)
 }

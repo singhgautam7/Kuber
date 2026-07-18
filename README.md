@@ -95,3 +95,13 @@ git clone https://github.com/your-username/kubera.git
 cd kubera
 flutter pub get
 flutter run
+---
+
+## Brand Icon (vector)
+
+The Kuber brand mark (dark tile, accent circle, angular rupee) exists in two forms:
+
+- **Raster (launcher / stores)**: `android/play_store_512.png` and the `android/app/src/main/res/mipmap-*/` launcher PNGs. Static Signature-blue; used by the OS launcher and the Android 12+ system launch screen, which cannot follow the in-app theme.
+- **Vector (in-app, theme-aware)**: `lib/shared/widgets/brand_icon.dart` — `KuberBrandMarkPainter`, a CustomPainter whose geometry was traced 1:1 from `play_store_512.png` (512-unit coordinate space). Colors derive from the active theme family: circle = `colorScheme.primary`, tile + glyph = `KuberBrandMarkPainter.deepShade(primary)` (HSL: saturation x0.85, lightness 0.26). With the Signature theme it reproduces the launcher icon (`#0E397C` tile, `#4388FD` circle). Used by the splash screen, onboarding brand row, and tutorial header via the `BrandIcon` widget.
+
+If the launcher icon art ever changes, re-trace the glyph geometry in `KuberBrandMarkPainter.paint` so the two stay in sync.

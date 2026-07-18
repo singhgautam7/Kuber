@@ -4917,4 +4917,10 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'கதகதப்பான, ஷாப்பிங் பாணி.';
+
+  @override
+  String get applyLabel => 'பயன்படுத்து';
+
+  @override
+  String get speedDialNote => 'குபேர் நோட் சேர்';
 }

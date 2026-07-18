@@ -412,7 +412,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: _SummaryTile(
                   label: context.l10n.incomeLabel,
                   amount: maskAmount(
-                    ref.watch(formatterProvider).formatCurrency(income),
+                    ref.watch(formatterProvider).formatCurrency(income.round()),
                     ref.watch(privacyModeProvider),
                   ),
                   color: cs.tertiary,
@@ -424,7 +424,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: _SummaryTile(
                   label: context.l10n.expenseLabel,
                   amount: maskAmount(
-                    ref.watch(formatterProvider).formatCurrency(expense),
+                    ref.watch(formatterProvider).formatCurrency(expense.round()),
                     ref.watch(privacyModeProvider),
                   ),
                   color: cs.error,
@@ -451,14 +451,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   'Net: ',
                   style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
-                Text(
-                  maskAmount(
-                    '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net)}',
-                    ref.watch(privacyModeProvider),
-                  ),
-                  style: tt.titleMedium?.copyWith(
-                    color: net >= 0 ? cs.tertiary : cs.error,
-                    fontWeight: FontWeight.w700,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      maskAmount(
+                        '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net.round())}',
+                        ref.watch(privacyModeProvider),
+                      ),
+                      style: tt.titleMedium?.copyWith(
+                        color: net >= 0 ? cs.tertiary : cs.error,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -554,11 +559,15 @@ class _SummaryTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: KuberSpacing.xs),
-          Text(
-            amount,
-            style: textTheme.titleMedium?.copyWith(
-              color: cs.onSurface,
-              fontWeight: FontWeight.w700,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              amount,
+              style: textTheme.titleMedium?.copyWith(
+                color: cs.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],

@@ -4881,4 +4881,10 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get themeFamilyDescOinkzon => 'వెచ్చని, షాపింగ్ శైలి.';
+
+  @override
+  String get applyLabel => 'వర్తింపజేయి';
+
+  @override
+  String get speedDialNote => 'కుబేర్ నోట్ జోడించు';
 }

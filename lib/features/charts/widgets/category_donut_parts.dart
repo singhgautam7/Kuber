@@ -27,25 +27,30 @@ class DonutCenterTotal extends ConsumerWidget {
     final total = slices.fold(0.0, (s, x) => s + x.amount);
     final noun = groupMode ? 'groups' : 'categories';
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          maskAmount(fmt.formatCurrency(total), isPrivate),
-          style: localeFont(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-            letterSpacing: -0.5,
+    return SizedBox(
+      width: 96,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              maskAmount(fmt.formatCurrency(total.round()), isPrivate),
+              style: localeFont(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+                letterSpacing: -0.5,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          // No leading "across" so the line stays short and clear of the ring.
-          '${slices.length} ${slices.length == 1 ? (groupMode ? 'group' : 'category') : noun}',
-          style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
-        ),
-      ],
+          const SizedBox(height: 2),
+          Text(
+            '${slices.length} ${slices.length == 1 ? (groupMode ? 'group' : 'category') : noun}',
+            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -66,8 +71,8 @@ class DonutCenterSelected extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 34),
+    return SizedBox(
+      width: 96,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -82,20 +87,25 @@ class DonutCenterSelected extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            maskAmount(fmt.formatCurrency(slice.amount), isPrivate),
-            style: localeFont(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-              letterSpacing: -0.5,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              maskAmount(fmt.formatCurrency(slice.amount.round()), isPrivate),
+              style: localeFont(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
           const SizedBox(height: 2),
           Text(
             '${fmt.formatPercentage(slice.percentage)} of '
-            '${maskAmount(fmt.formatCurrency(total), isPrivate)}',
-            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+            '${maskAmount(fmt.formatCurrency(total.round()), isPrivate)}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: localeFont(fontSize: 10, color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -168,10 +178,11 @@ class DonutTopRow extends ConsumerWidget {
                 style: localeFont(
                     fontSize: 12, color: cs.onSurfaceVariant),
               ),
-              SizedBox(
-                width: 84,
+              const SizedBox(width: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 70),
                 child: Text(
-                  maskAmount(fmt.formatCurrency(slice.amount), isPrivate),
+                  maskAmount(fmt.formatCurrency(slice.amount.round()), isPrivate),
                   textAlign: TextAlign.right,
                   style: localeFont(
                     fontSize: 13,
