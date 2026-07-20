@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/utils/frame_budget_monitor.dart';
 import 'core/utils/prefs_keys.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'core/database/isar_service.dart';
@@ -65,6 +66,10 @@ void main() async {
   // setNavigationBarColor APIs). Inset-aware layouts (SafeArea /
   // MediaQuery.viewPadding) keep content clear of the bars.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  // Guardrail: logs frames whose build phase overruns the display budget, so a
+  // future slow widget doesn't get silently absorbed by the home/analytics
+  // progressive-reveal ramp. No-op in release; see FrameBudgetMonitor docs.
+  FrameBudgetMonitor.attach();
   await _bootstrap();
 }
 
