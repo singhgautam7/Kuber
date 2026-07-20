@@ -69,10 +69,35 @@ class DashboardScreen extends ConsumerStatefulWidget {
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   late final int _subtitleIndex;
 
+  // Progressive reveal — the home list grows one item per frame instead of
+  // inflating every above-the-fold card in the single frame that renders when
+  // Home first mounts. Each card (Balance Hero, Spending Stats, …) costs
+  // ~10ms to build; inflating several together produces one 20-34ms hitch (a
+  // visibly dropped frame on this 90Hz display), which is the splash→home
+  // jitter. Spreading to one card per frame keeps the worst frame ~12ms —
+  // sub-perceptible — and the list still fills within a few hundred ms. Cards
+  // whose data isn't ready fall back to their own skeletons.
+  static const _kInitialReveal = 3; // header + greeting visible on frame 1
+  int _revealCount = _kInitialReveal;
+  int _lastItemCount = 1 << 30;
+  bool _revealScheduled = false;
+
+  void _growReveal() {
+    if (_revealScheduled || _revealCount >= _lastItemCount) return;
+    _revealScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _revealScheduled = false;
+      if (!mounted) return;
+      setState(() => _revealCount += 1);
+      _growReveal();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _subtitleIndex = Random().nextInt(7);
+    _growReveal();
 
     // Consume any cold-start notification payload now that the dashboard is
     // mounted and the router is alive.
@@ -186,78 +211,86 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final l10n = context.l10n;
     final widgetsAsync = ref.watch(homeWidgetsProvider);
 
+    // Fixed leading items (header, greeting, promo) followed by the dynamic
+    // widget list. We flatten everything into a single index-addressable list
+    // and feed it to ListView.builder so only the items near the viewport are
+    // built on mount — the previous eager `ListView(children: [...])` built
+    // every home widget (Balance Hero, accounts, charts, Pro widgets, upcoming
+    // events, etc.) synchronously on the first frame, which is what made the
+    // splash→home transition stutter as the widget set grew.
+    final leading = <Widget>[
+      HomeHeader(
+        unreadCount: ref.watch(unreadCountProvider).valueOrNull ?? 0,
+        onTapNotifications: _openNotificationsSheet,
+      ),
+      const SizedBox(height: KuberSpacing.lg),
+      // Greeting — fixed, not part of the editor
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            userName.isNotEmpty
+                ? '${_timeGreeting(l10n)}, ${userName.toTitleCase()}'
+                : _timeGreeting(l10n),
+            style: textTheme.displaySmall?.copyWith(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+              height: 1.15,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.xs),
+          Text(
+            _homeSubtitles(l10n)[_subtitleIndex],
+            style: textTheme.bodyMedium?.copyWith(
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: KuberSpacing.lg),
+      // Promo campaign banner — self-hides when no promo, dismissed, or Pro.
+      const HomePromoBanner(),
+    ];
+
+    final trailing = widgetsAsync.when(
+      // Until the widget layout (and its data) is ready, show card-shaped
+      // skeletons rather than a blank gap. On a large database the timed splash
+      // can dismiss before these resolve; this covers that window.
+      loading: () => <Widget>[
+        for (final h in const <double>[148, 88, 120, 88])
+          Padding(
+            padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+            child: KuberSkeleton(height: h),
+          ),
+      ],
+      error: (_, __) => const <Widget>[],
+      data: (configs) {
+        final visible = configs.where((c) => c.enabled).toList();
+        return <Widget>[
+          // Each widget owns its own bottom spacing (see _buildHomeWidget) so a
+          // widget that self-hides in an empty state leaves no gap.
+          for (final c in visible) _buildHomeWidget(c.id),
+          const EditWidgetsButton(scope: WidgetEditorScope.home),
+        ];
+      },
+    );
+
+    final items = [...leading, ...trailing];
+    _lastItemCount = items.length;
+    if (_revealCount < items.length) _growReveal();
+    final revealed = _revealCount.clamp(0, items.length);
+
     return Scaffold(
-      body: ListView(
+      body: ListView.builder(
         padding: EdgeInsets.only(
           left: KuberSpacing.lg,
           right: KuberSpacing.lg,
           bottom: navBarBottomPadding(context),
         ),
-        children: [
-          HomeHeader(
-            unreadCount: ref.watch(unreadCountProvider).valueOrNull ?? 0,
-            onTapNotifications: _openNotificationsSheet,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-
-          // Greeting — fixed, not part of the editor
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                userName.isNotEmpty
-                    ? '${_timeGreeting(l10n)}, ${userName.toTitleCase()}'
-                    : _timeGreeting(l10n),
-                style: textTheme.displaySmall?.copyWith(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                  height: 1.15,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.xs),
-              Text(
-                _homeSubtitles(l10n)[_subtitleIndex],
-                style: textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-
-          // Promo campaign banner — sits above the monthly-net hero card and
-          // self-hides when no promo is running, the user dismissed it this
-          // session, or they already have Pro.
-          const HomePromoBanner(),
-
-          // Dynamic widget list — order + enabled comes from Isar via the
-          // widget editor. Disabled widgets are not constructed at all, so
-          // their providers don't run.
-          ...widgetsAsync.when(
-            // Until the widget layout (and its data) is ready, show card-shaped
-            // skeletons rather than a blank gap. On a large database the timed
-            // splash can dismiss before these resolve; this covers that window.
-            loading: () => [
-              for (final h in const <double>[148, 88, 120, 88])
-                Padding(
-                  padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
-                  child: KuberSkeleton(height: h),
-                ),
-            ],
-            error: (_, __) => const <Widget>[],
-            data: (configs) {
-              final visible = configs.where((c) => c.enabled).toList();
-              return [
-                // Each widget owns its own bottom spacing (see _buildHomeWidget)
-                // so a widget that self-hides in an empty state leaves no gap.
-                for (final c in visible) _buildHomeWidget(c.id),
-                const EditWidgetsButton(scope: WidgetEditorScope.home),
-              ];
-            },
-          ),
-        ],
+        itemCount: revealed,
+        itemBuilder: (context, index) => items[index],
       ),
     );
   }

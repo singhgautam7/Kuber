@@ -579,7 +579,7 @@ class _SummaryTile extends StatelessWidget {
 /// Dynamic analytics widget list — order + enabled flags come from
 /// `analyticsWidgetsProvider`. Hidden widgets are not constructed; their
 /// underlying providers stay idle until re-enabled.
-class _AnalyticsWidgetList extends ConsumerWidget {
+class _AnalyticsWidgetList extends ConsumerStatefulWidget {
   final AnalyticsFilter filter;
   final List<KuberBarBucket> buckets;
   final List<Transaction> periodTxns;
@@ -608,14 +608,43 @@ class _AnalyticsWidgetList extends ConsumerWidget {
     required this.buildSummary,
   });
 
+  @override
+  ConsumerState<_AnalyticsWidgetList> createState() =>
+      _AnalyticsWidgetListState();
+}
+
+class _AnalyticsWidgetListState extends ConsumerState<_AnalyticsWidgetList> {
+  // Progressive reveal, mirroring the home dashboard (see dashboard_screen).
+  // Reveal one card per frame so the heavy above-the-fold widgets (summary
+  // card, spending-trend fl_chart, heatmap …) inflate across frames instead of
+  // in the single frame that renders when the Analytics tab first opens —
+  // which would drop a frame on this 90Hz display and read as tab-switch jitter.
+  // Start at 1 so the heavy spending-trend fl_chart does not inflate in the
+  // same frame as the summary card when the tab first opens.
+  static const _kInitialReveal = 1;
+  int _revealCount = _kInitialReveal;
+  int _lastItemCount = 1 << 30;
+  bool _revealScheduled = false;
+
+  void _growReveal() {
+    if (_revealScheduled || _revealCount >= _lastItemCount) return;
+    _revealScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _revealScheduled = false;
+      if (!mounted) return;
+      setState(() => _revealCount += 1);
+      _growReveal();
+    });
+  }
+
   Widget _buildWidget(BuildContext ctx, WidgetRef ref, String id) {
     final bottom = const EdgeInsets.only(bottom: KuberSpacing.lg);
     switch (id) {
       case 'summary_card':
         return Padding(
           padding: bottom,
-          child: buildSummary(colorScheme, textTheme, totalIncome,
-              totalExpense, netAmount),
+          child: widget.buildSummary(widget.colorScheme, widget.textTheme,
+              widget.totalIncome, widget.totalExpense, widget.netAmount),
         );
       case 'spending_trend':
         return Padding(
@@ -625,7 +654,7 @@ class _AnalyticsWidgetList extends ConsumerWidget {
               key: TutorialStepKeys.spendingTrendsChart,
               compact: false,
               points: [
-                for (final b in buckets)
+                for (final b in widget.buckets)
                   IncomeExpensePoint(
                     label: b.dayLabel,
                     income: b.income,
@@ -634,11 +663,11 @@ class _AnalyticsWidgetList extends ConsumerWidget {
                     endDate: b.endDate,
                   ),
               ],
-              bucket: filter.type == FilterType.today
+              bucket: widget.filter.type == FilterType.today
                   ? null
-                  : filter.effectiveBucket,
-              availableBuckets:
-                  availableBucketsForRange(filter.from, filter.to),
+                  : widget.filter.effectiveBucket,
+              availableBuckets: availableBucketsForRange(
+                  widget.filter.from, widget.filter.to),
               onBucketChanged: (b) =>
                   ref.read(analyticsFilterProvider.notifier).setBucket(b),
             ),
@@ -649,8 +678,8 @@ class _AnalyticsWidgetList extends ConsumerWidget {
           padding: bottom,
           child: RepaintBoundary(
             child: AvgWeeklyHeatmap(
-              transactions: periodTxns,
-              precomputedDailyAverages: computed.dailyAverages,
+              transactions: widget.periodTxns,
+              precomputedDailyAverages: widget.computed.dailyAverages,
             ),
           ),
         );
@@ -659,8 +688,8 @@ class _AnalyticsWidgetList extends ConsumerWidget {
           padding: bottom,
           child: RepaintBoundary(
             child: TransactionSizeDistribution(
-              transactions: periodTxns,
-              precomputedDistribution: computed.sizeDistribution,
+              transactions: widget.periodTxns,
+              precomputedDistribution: widget.computed.sizeDistribution,
             ),
           ),
         );
@@ -677,7 +706,7 @@ class _AnalyticsWidgetList extends ConsumerWidget {
         return Padding(
           padding: bottom,
           child: RepaintBoundary(
-            child: TagWiseAnalytics(transactions: periodTxns),
+            child: TagWiseAnalytics(transactions: widget.periodTxns),
           ),
         );
       case 'biggest_transactions':
@@ -685,10 +714,10 @@ class _AnalyticsWidgetList extends ConsumerWidget {
         // rebuilds only this section, not the whole analytics screen (which
         // would otherwise re-run bucket computation for every tab tap).
         return _BiggestTransactionsSection(
-          periodTxns: periodTxns,
-          categoryMap: categoryMap,
-          colorScheme: colorScheme,
-          textTheme: textTheme,
+          periodTxns: widget.periodTxns,
+          categoryMap: widget.categoryMap,
+          colorScheme: widget.colorScheme,
+          textTheme: widget.textTheme,
         );
       default:
         return const SizedBox.shrink();
@@ -696,16 +725,19 @@ class _AnalyticsWidgetList extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final widgetsAsync = ref.watch(analyticsWidgetsProvider);
     return widgetsAsync.when(
       loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
       error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
       data: (configs) {
         final visible = configs.where((c) => c.enabled).toList();
+        // +3 for Advanced Analytics teaser, EditWidgetsButton, and bottom spacer.
+        final total = visible.length + 3;
+        _lastItemCount = total;
+        if (_revealCount < total) _growReveal();
         return SliverList.builder(
-          // +3 for Advanced Analytics teaser, EditWidgetsButton, and bottom spacer.
-          itemCount: visible.length + 3,
+          itemCount: _revealCount.clamp(0, total),
           itemBuilder: (ctx, i) {
             if (i == visible.length) {
               return const Padding(
