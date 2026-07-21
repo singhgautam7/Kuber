@@ -38,12 +38,6 @@ const List<HomeWidgetConfig> kHomeWidgetCatalog = [
     enabled: true,
   ),
   HomeWidgetConfig(
-    id: 'shortcuts_widget',
-    name: 'Shortcuts',
-    description: 'Pinned shortcuts to the tools you use most',
-    enabled: true,
-  ),
-  HomeWidgetConfig(
     id: 'sms_import_widget',
     name: 'SMS Import',
     description: 'Pending bank SMS transactions to review',
@@ -152,7 +146,6 @@ String localizedWidgetName(BuildContext context, String id) {
     'recent_transactions' => l.wgtRecentTransactionsName,
     // English-only features (see Ask Kuber / SMS import precedent).
     'ask_kuber_widget' => 'Ask Kuber',
-    'shortcuts_widget' => 'Shortcuts',
     // SMS import is an English-only feature (see Ask Kuber precedent).
     'sms_import_widget' => 'SMS Import',
     'summary_card' => l.wgtSummaryCardName,
@@ -182,7 +175,6 @@ String? localizedWidgetDesc(BuildContext context, String id) {
     'kuber_notes_widget' => 'Latest note preview and quick add',
     'recent_transactions' => l.wgtRecentTransactionsDesc,
     'ask_kuber_widget' => 'Ask about your money, plus one-tap suggestions',
-    'shortcuts_widget' => 'Pinned shortcuts to the tools you use most',
     'sms_import_widget' => 'Pending bank SMS transactions to review',
     'summary_card' => l.wgtSummaryCardDesc,
     'spending_trend' => l.wgtSpendingTrendDesc,

@@ -25,7 +25,6 @@ import 'package:kuber/features/tools/saved/data/saved_calculation.dart';
 import 'package:kuber/features/tools/saved/data/calculator_recent_use.dart';
 import 'package:kuber/features/notes/data/kuber_note.dart';
 import 'package:kuber/features/reminders/data/reminder.dart';
-import 'package:kuber/features/pro/data/pinned_shortcut_pref.dart';
 import 'package:kuber/features/pro/data/user_entitlement.dart';
 
 const _allSchemas = [
@@ -55,7 +54,6 @@ const _allSchemas = [
   KuberNoteSchema,
   ReminderSchema,
   UserEntitlementSchema,
-  PinnedShortcutPrefSchema,
 ];
 
 bool _isarInitialized = false;

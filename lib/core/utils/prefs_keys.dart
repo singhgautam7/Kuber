@@ -13,6 +13,11 @@ class PrefsKeys {
   static const numberSystem = 'number_system';
   static const language = 'kuber_language';
 
+  // Quick Actions (nav-bar long-press) + Add menu (FAB long-press) shortcuts.
+  // Each is a List<String> of ids; order = display order in the grid / list.
+  static const quickActionShortcuts = 'quick_action_shortcuts';
+  static const addMenuActions = 'add_menu_actions';
+
   // Migration Keys
   static const migratedTxnLinkedRuleV1 = 'kuber_migrated_txn_linked_rule_v1';
   static const migratedSeedLedgerCategoryV1 =

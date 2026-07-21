@@ -84,6 +84,7 @@ import '../../features/upcoming_events/screens/upcoming_events_full_screen.dart'
 import '../../features/widgets_gallery/screens/widgets_gallery_screen.dart';
 import '../../features/widgets_gallery/screens/account_widget_config_screen.dart';
 import '../../features/widgets_gallery/screens/trends_widget_config_screen.dart';
+import '../../features/quick_actions/screens/configure_shortcuts_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/pro/paywall/paywall_screen.dart';
 import '../../features/tools/tools_hub_screen.dart';
@@ -143,10 +144,20 @@ class GoRouterRefreshStream extends ChangeNotifier {
   }
 }
 
+/// The location the router boots at. Computed in `main._bootstrap` (from the
+/// onboarded flag + recurring/backup state) and injected via override, so the
+/// app opens directly on its real destination — Home, Onboarding or the
+/// recurring loader — instead of a separate `/splash` route we then animate
+/// away from. The brand splash is now a fade-out overlay (see
+/// `ColdStartSplash` in app.dart) painted ON TOP of that already-built
+/// destination, so the heavy first build happens hidden behind it and never
+/// shows as a stuck/juddering frame during a route transition.
+final initialLocationProvider = Provider<String>((ref) => '/');
+
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: ref.read(initialLocationProvider),
     refreshListenable: GoRouterRefreshStream(
       ref.watch(recurringProcessResultProvider.notifier).stream,
     ),
@@ -392,8 +403,17 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/',
-                builder: (context, state) =>
-                    const ScreenEntrance(id: 'home', child: DashboardScreen()),
+                // NOTE: deliberately NOT wrapped in ScreenEntrance. Home's first
+                // appearance is the cold-start splash→home handoff, which is
+                // exactly when Home does its heavy first build + progressive
+                // reveal. A 320ms entrance slide running on top of that heavy
+                // build competes for the frame budget on high-refresh panels
+                // (120Hz S26 Ultra) and shows as a stuck/stuttering frame — the
+                // "cheap app" splash→home jitter. The progressive reveal already
+                // gives Home a gentle fill-in, so no entrance animation is
+                // needed here. (Entrance stays on History/Analytics, where first
+                // visit is a deliberate tab tap, not the cold-start build.)
+                builder: (context, state) => const DashboardScreen(),
               ),
             ],
           ),
@@ -775,6 +795,20 @@ final routerProvider = Provider<GoRouter>((ref) {
           child: NoteEditorScreen(
             noteId: int.tryParse(state.uri.queryParameters['id'] ?? '') ?? -1,
           ),
+        ),
+      ),
+      GoRoute(
+        path: '/settings/quick-actions',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const ConfigureShortcutsScreen(
+          kind: ConfigureKind.quickActionShortcuts,
+        ),
+      ),
+      GoRoute(
+        path: '/settings/add-menu',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const ConfigureShortcutsScreen(
+          kind: ConfigureKind.addMenu,
         ),
       ),
       GoRoute(

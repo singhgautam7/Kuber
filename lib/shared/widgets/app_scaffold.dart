@@ -1,4 +1,3 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,8 @@ import '../../features/categories/providers/category_provider.dart';
 import '../../features/settings/providers/settings_provider.dart'
     show settingsProvider, navBarStyleProvider, SwipeMode, NavBarStyle;
 import '../../features/history/providers/selection_provider.dart';
+import '../../features/quick_actions/widgets/add_new_sheet.dart';
+import '../../features/quick_actions/widgets/quick_actions_sheet.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import 'kuber_nav_bar.dart';
@@ -29,27 +30,15 @@ class AppScaffold extends ConsumerStatefulWidget {
   ConsumerState<AppScaffold> createState() => _AppScaffoldState();
 }
 
-class _AppScaffoldState extends ConsumerState<AppScaffold>
-    with SingleTickerProviderStateMixin {
-  bool _showSpeedDial = false;
+class _AppScaffoldState extends ConsumerState<AppScaffold> {
   bool _isAnimatingProgrammatically = false;
   late final PageController _pageController;
-  late final AnimationController _dialController;
-  late final Animation<double> _dialAnimation;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(
       initialPage: widget.navigationShell?.currentIndex ?? 0,
-    );
-    _dialController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _dialAnimation = CurvedAnimation(
-      parent: _dialController,
-      curve: Curves.easeOut,
     );
     // Pre-warm keepAlive providers so form sheets find data in cache
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,7 +50,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   @override
   void dispose() {
     _pageController.dispose();
-    _dialController.dispose();
     super.dispose();
   }
 
@@ -120,7 +108,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
   void _onTabTapped(int index) {
     if (widget.navigationShell == null) return;
     if (index == widget.navigationShell!.currentIndex) return;
-    if (_showSpeedDial) _closeSpeedDial();
 
     ref.read(transactionSelectionProvider.notifier).clear();
     ref.read(currentShellTabIndexProvider.notifier).state = index;
@@ -167,24 +154,13 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
     widget.navigationShell!.goBranch(index);
   }
 
-  void _onAddTapped() {
-    if (_showSpeedDial) {
-      _closeSpeedDial();
-    } else {
-      context.push('/add-transaction');
-    }
-  }
+  void _onAddTapped() => context.push('/add-transaction');
 
-  void _openSpeedDial() {
-    setState(() => _showSpeedDial = true);
-    _dialController.forward();
-  }
+  /// FAB / add-button long-press → the Add New sheet (add-entry shortcuts).
+  void _openAddMenu() => showAddNewSheet(context);
 
-  void _closeSpeedDial() {
-    _dialController.reverse().then((_) {
-      if (mounted) setState(() => _showSpeedDial = false);
-    });
-  }
+  /// Nav-tab long-press → the Quick Actions sheet (controls + shortcuts).
+  void _openQuickActions() => showQuickActionsSheet(context);
 
   @override
   Widget build(BuildContext context) {
@@ -240,68 +216,28 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
       content = Scaffold(
         backgroundColor: cs.surface,
         extendBody: true,
-        body: Stack(
-          children: [
-            animatedContent,
-            if (_showSpeedDial) ...[
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: _closeSpeedDial,
-                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
-                ),
-              ),
-              Positioned(
-                right: KuberSpacing.lg,
-                bottom: 100,
-                child: _SpeedDialMenu(
-                  animation: _dialAnimation,
-                  onClose: _closeSpeedDial,
-                ),
-              ),
-            ],
-          ],
-        ),
+        body: animatedContent,
         bottomNavigationBar: _ModernNavBar(
           currentIndex: currentIndex,
           onTap: _onTabTapped,
+          onTabLongPress: _openQuickActions,
           onAddTapped: _onAddTapped,
-          onAddLongPress: _openSpeedDial,
+          onAddLongPress: _openAddMenu,
           isSelectionMode: isSelectionMode,
           isKeyboardOpen: isKeyboardOpen,
-          isSpeedDialOpen: _showSpeedDial,
         ),
       );
     } else {
       content = Scaffold(
         backgroundColor: cs.surface,
-        body: Stack(
-          children: [
-            animatedContent,
-            if (_showSpeedDial) ...[
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: _closeSpeedDial,
-                  child: Container(color: Colors.black.withValues(alpha: 0.5)),
-                ),
-              ),
-              Positioned(
-                right: KuberSpacing.lg,
-                bottom: 100,
-                child: _SpeedDialMenu(
-                  animation: _dialAnimation,
-                  onClose: _closeSpeedDial,
-                ),
-              ),
-            ],
-          ],
-        ),
+        body: animatedContent,
         floatingActionButton: currentIndex != 3
             ? AnimatedScale(
                 scale: (isSelectionMode || isKeyboardOpen) ? 0.0 : 1.0,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
                 child: GestureDetector(
-                  onLongPress: _openSpeedDial,
+                  onLongPress: _openAddMenu,
                   child: FloatingActionButton(
                     onPressed: _onAddTapped,
                     backgroundColor: cs.primary,
@@ -310,11 +246,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(KuberRadius.md),
                     ),
-                    child: AnimatedRotation(
-                      turns: _showSpeedDial ? 0.125 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: const Icon(Icons.add),
-                    ),
+                    child: const Icon(Icons.add),
                   ),
                 ),
               )
@@ -322,6 +254,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
         bottomNavigationBar: _KuberAnimatedNavBar(
           currentIndex: currentIndex,
           onTap: _onTabTapped,
+          onTabLongPress: _openQuickActions,
         ),
       );
     }
@@ -356,20 +289,20 @@ class _AppScaffoldState extends ConsumerState<AppScaffold>
 class _ModernNavBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final VoidCallback onTabLongPress;
   final VoidCallback onAddTapped;
   final VoidCallback onAddLongPress;
   final bool isSelectionMode;
   final bool isKeyboardOpen;
-  final bool isSpeedDialOpen;
 
   const _ModernNavBar({
     required this.currentIndex,
     required this.onTap,
+    required this.onTabLongPress,
     required this.onAddTapped,
     required this.onAddLongPress,
     required this.isSelectionMode,
     required this.isKeyboardOpen,
-    required this.isSpeedDialOpen,
   });
 
   @override
@@ -439,6 +372,7 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                               isSelected: isSelected,
                               animDuration: _animDuration,
                               onTap: () => widget.onTap(i),
+                              onLongPress: widget.onTabLongPress,
                               cs: cs,
                               tt: tt,
                               fullTint: true,
@@ -461,11 +395,7 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                         borderRadius: BorderRadius.circular(KuberRadius.xl),
                       ),
                       alignment: Alignment.center,
-                      child: AnimatedRotation(
-                        turns: widget.isSpeedDialOpen ? 0.125 : 0,
-                        duration: _animDuration,
-                        child: Icon(Icons.add, color: cs.onPrimary, size: 26),
-                      ),
+                      child: Icon(Icons.add, color: cs.onPrimary, size: 26),
                     ),
                   ),
                 ],
@@ -481,8 +411,13 @@ class _ModernNavBarState extends State<_ModernNavBar> {
 class _KuberAnimatedNavBar extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final VoidCallback onTabLongPress;
 
-  const _KuberAnimatedNavBar({required this.currentIndex, required this.onTap});
+  const _KuberAnimatedNavBar({
+    required this.currentIndex,
+    required this.onTap,
+    required this.onTabLongPress,
+  });
 
   @override
   State<_KuberAnimatedNavBar> createState() => _KuberAnimatedNavBarState();
@@ -518,6 +453,7 @@ class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
                   isSelected: isSelected,
                   animDuration: _animDuration,
                   onTap: () => widget.onTap(i),
+                  onLongPress: widget.onTabLongPress,
                   cs: cs,
                   tt: tt,
                 ),
@@ -550,6 +486,7 @@ class _NavBarItem extends StatefulWidget {
   final bool isSelected;
   final Duration animDuration;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final ColorScheme cs;
   final TextTheme tt;
   final bool fullTint;
@@ -559,6 +496,7 @@ class _NavBarItem extends StatefulWidget {
     required this.isSelected,
     required this.animDuration,
     required this.onTap,
+    this.onLongPress,
     required this.cs,
     required this.tt,
     this.fullTint = false,
@@ -613,6 +551,7 @@ class _NavBarItemState extends State<_NavBarItem>
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
@@ -681,132 +620,6 @@ class _NavBarItemState extends State<_NavBarItem>
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-class _SpeedDialMenu extends AnimatedWidget {
-  final VoidCallback onClose;
-
-  const _SpeedDialMenu({
-    required Animation<double> animation,
-    required this.onClose,
-  }) : super(listenable: animation);
-
-  Animation<double> get _progress => listenable as Animation<double>;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildOption(
-          context,
-          index: 4,
-          icon: Icons.edit_note_rounded,
-          label: context.l10n.speedDialNote,
-          onTap: () {
-            onClose();
-            context.push('/notes/editor');
-          },
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        _buildOption(
-          context,
-          index: 3,
-          icon: Icons.sync_rounded,
-          label: context.l10n.speedDialRecurring,
-          onTap: () {
-            onClose();
-            context.push('/recurring/add');
-          },
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        _buildOption(
-          context,
-          index: 2,
-          icon: Icons.account_balance_rounded,
-          label: context.l10n.speedDialLoan,
-          onTap: () {
-            onClose();
-            context.push('/loans/add');
-          },
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        _buildOption(
-          context,
-          index: 1,
-          icon: Icons.show_chart_rounded,
-          label: context.l10n.speedDialInvestment,
-          onTap: () {
-            onClose();
-            context.push('/investments/add');
-          },
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        _buildOption(
-          context,
-          index: 0,
-          icon: Icons.handshake_outlined,
-          label: context.l10n.speedDialLendBorrow,
-          onTap: () {
-            onClose();
-            context.push('/ledger/add');
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOption(
-    BuildContext context, {
-    required int index,
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final cs = Theme.of(context).colorScheme;
-    final delay = (index * 0.15).clamp(0.0, 0.5);
-    final progress = ((_progress.value - delay) / (1.0 - delay)).clamp(
-      0.0,
-      1.0,
-    );
-
-    return Opacity(
-      opacity: progress,
-      child: Transform.translate(
-        offset: Offset(0, 20 * (1 - progress)),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.lg,
-              vertical: KuberSpacing.md,
-            ),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: cs.primary, size: 20),
-                const SizedBox(width: KuberSpacing.sm),
-                Text(
-                  label,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

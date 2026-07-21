@@ -385,6 +385,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const SizedBox(height: KuberSpacing.xl),
 
+                // SHORTCUTS — Quick Actions (nav-bar long-press) + Add menu
+                // (FAB long-press). English-only literals, like other
+                // Kuber-signature surfaces.
+                const _SectionLabel(label: 'SHORTCUTS'),
+                const _SectionDescription('Personalize your long-press menus.'),
+                const SizedBox(height: KuberSpacing.sm),
+                _SettingsCard(
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.bolt_rounded,
+                      label: 'Quick Actions',
+                      subtitle: 'Nav-bar long-press · controls & shortcuts',
+                      onTap: () => context.push('/settings/quick-actions'),
+                      trailing: Icon(Icons.chevron_right_rounded,
+                          color: cs.onSurfaceVariant),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _SettingsTile(
+                      icon: Icons.add_circle_outline_rounded,
+                      label: 'Add Menu',
+                      subtitle: '+ button long-press · add-entry shortcuts',
+                      onTap: () => context.push('/settings/add-menu'),
+                      trailing: Icon(Icons.chevron_right_rounded,
+                          color: cs.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.md),
+                const _ShortcutsDiscoveryTip(),
+                const SizedBox(height: KuberSpacing.xl),
+
                 // WIDGETS
                 _SectionLabel(label: context.l10n.widgetsSection),
                 _SectionDescription(context.l10n.widgetsDescription),
@@ -1048,6 +1079,67 @@ class _SettingsTile extends StatelessWidget {
             if (trailing case final Widget t) t,
           ],
         ),
+      ),
+    );
+  }
+}
+/// Discovery tip below the SHORTCUTS card — teaches both long-press gestures so
+/// the feature is findable without knowing them. Dashed primary-tinted bar.
+class _ShortcutsDiscoveryTip extends StatelessWidget {
+  const _ShortcutsDiscoveryTip();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.md),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: cs.primary,
+              borderRadius: BorderRadius.circular(KuberRadius.sm),
+            ),
+            child: const Icon(Icons.touch_app_rounded,
+                size: 18, color: Colors.white),
+          ),
+          const SizedBox(width: KuberSpacing.md),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                style: localeFont(
+                  fontSize: 12.5,
+                  color: cs.onSurface,
+                  height: 1.45,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'Tip: ',
+                    style: localeFont(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: cs.primary,
+                    ),
+                  ),
+                  const TextSpan(
+                    text:
+                        'long-press any bottom-nav tab (Home, History, '
+                        'Analytics, More) for Quick Actions, or long-press the '
+                        '+ button for the Add menu.',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

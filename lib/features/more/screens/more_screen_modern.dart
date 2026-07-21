@@ -194,6 +194,14 @@ class MoreScreenModern extends ConsumerWidget {
                       sub: 'Never miss anything money-related',
                       onTap: () => context.push('/more/reminders'),
                     ),
+                    // Entry point for the nav-bar long-press Quick Actions grid,
+                    // so it's discoverable without knowing the gesture.
+                    _ManageTileData(
+                      icon: Icons.bolt_rounded,
+                      label: 'Customize Shortcuts',
+                      sub: 'Arrange the Quick Actions grid',
+                      onTap: () => context.push('/settings/quick-actions'),
+                    ),
                   ],
                 ),
 

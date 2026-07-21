@@ -27,6 +27,7 @@ import 'features/reminders/data/reminders_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/sms_import/providers/sms_import_provider.dart';
 import 'features/tutorial/widgets/tutorial_overlay.dart';
+import 'features/splash/widgets/cold_start_splash.dart';
 import 'shared/widgets/app_scaffold.dart';
 
 class KuberApp extends ConsumerStatefulWidget {
@@ -46,6 +47,11 @@ class _KuberAppState extends ConsumerState<KuberApp>
   ThemeVariant? _cachedVariant;
   ThemeData? _lightTheme;
   ThemeData? _darkTheme;
+
+  /// Cold-start brand splash overlay. Shown once per launch, on top of the
+  /// already-built destination, then fades out (see ColdStartSplash). Removed
+  /// from the tree once its fade completes.
+  bool _showColdSplash = true;
 
   @override
   void initState() {
@@ -365,7 +371,25 @@ class _KuberAppState extends ConsumerState<KuberApp>
                   bottom: false,
                   left: false,
                   right: false,
-                  child: LockScreen(child: child!),
+                  // The destination builds underneath from the first frame; the
+                  // cold-start splash sits on top and fades out to reveal it
+                  // already painted — no route transition over a mid-build
+                  // screen (the splash→home "stuck frame" fix).
+                  child: Stack(
+                    children: [
+                      LockScreen(child: child!),
+                      if (_showColdSplash)
+                        Positioned.fill(
+                          child: ColdStartSplash(
+                            onFinished: () {
+                              if (mounted) {
+                                setState(() => _showColdSplash = false);
+                              }
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/router/app_router.dart' show initialLocationProvider;
 import 'core/utils/frame_budget_monitor.dart';
 import 'core/utils/prefs_keys.dart';
 import 'features/settings/providers/settings_provider.dart';
@@ -100,6 +101,7 @@ Future<void> _bootstrap() async {
   // the wrong palette while the async settings provider hydrates. Best-effort:
   // a prefs failure falls back to system mode + Signature.
   var bootTheme = (ThemeMode.system, ThemeVariant.signature);
+  var onboarded = false;
   try {
     final prefs = await SharedPreferences.getInstance();
     final modeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
@@ -109,6 +111,7 @@ Future<void> _bootstrap() async {
       ThemeVariant
           .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)],
     );
+    onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
   } catch (e) {
     debugPrint('Kuber: boot theme read failed (non-fatal): $e');
   }
@@ -161,12 +164,24 @@ Future<void> _bootstrap() async {
     debugPrint('Kuber: on-open processing failed (non-fatal): $e\n$stack');
   }
 
+  // Decide the boot destination up front (same logic the router's redirect
+  // would apply for '/'), so the app opens directly on Home / Onboarding /
+  // recurring-loader. The brand splash is a fade-out overlay painted on top
+  // (see KuberApp), so the destination's heavy first build happens hidden
+  // behind it — no route transition to judder.
+  final initialLocation = _resolveInitialLocation(
+    onboarded: onboarded,
+    missedCount: missedCount,
+    backupDue: backupDue,
+  );
+
   runApp(
     RestartWidget(
       child: ProviderScope(
         overrides: [
           isarProvider.overrideWithValue(isar),
           bootThemeProvider.overrideWithValue(bootTheme),
+          initialLocationProvider.overrideWithValue(initialLocation),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
           automaticBackupDueProvider.overrideWith((ref) => backupDue),
           if (coldStartPayload != null)
@@ -176,6 +191,19 @@ Future<void> _bootstrap() async {
       ),
     ),
   );
+}
+
+/// Mirrors the router's '/' redirect: a fresh install opens Onboarding; an
+/// onboarded user with missed recurring rules / a due backup opens the
+/// recurring loader; otherwise Home.
+String _resolveInitialLocation({
+  required bool onboarded,
+  required int missedCount,
+  required bool backupDue,
+}) {
+  if (!onboarded) return '/onboarding';
+  if (missedCount > 0 || backupDue) return '/recurring-loader';
+  return '/';
 }
 
 Future<bool> _isAutomaticBackupDue(Isar isar) async {

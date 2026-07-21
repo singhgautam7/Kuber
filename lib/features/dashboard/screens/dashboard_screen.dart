@@ -31,7 +31,6 @@ import '../widgets/home_accounts_card.dart';
 import '../widgets/home_recent_transactions.dart';
 import '../../notes/widgets/notes_home_widget.dart';
 import '../../pro/home/ask_kuber_home_widget.dart';
-import '../../pro/home/shortcuts_widget.dart';
 import '../../pro/promo/home_promo_banner.dart';
 import '../../pro/paywall/pro_state.dart';
 import '../../pro/trial/trial_ending_sheet.dart';
@@ -185,7 +184,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const RepaintBoundary(child: UpcomingEventsWidget()),
       'kuber_notes_widget' => const RepaintBoundary(child: NotesHomeWidget()),
       'ask_kuber_widget' => const RepaintBoundary(child: AskKuberHomeWidget()),
-      'shortcuts_widget' => const RepaintBoundary(child: ShortcutsWidget()),
       'recent_transactions' =>
         const RepaintBoundary(child: HomeRecentTransactionsCard()),
       'sms_import_widget' =>

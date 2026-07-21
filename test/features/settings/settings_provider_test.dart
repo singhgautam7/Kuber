@@ -91,6 +91,10 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   @override
   Future<void> setBiometricsEnabled(bool enabled) async {}
   @override
+  Future<void> setQuickActionShortcuts(List<String> ids) async {}
+  @override
+  Future<void> setAddMenuActions(List<String> ids) async {}
+  @override
   Future<void> setCurrency(String currency) async {}
   @override
   Future<void> setDateFormat(String format) async {}

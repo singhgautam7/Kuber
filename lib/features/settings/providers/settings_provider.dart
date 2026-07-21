@@ -97,6 +97,42 @@ enum NavBarStyle { classic, modern }
 
 enum MoreTabLayout { simple, modern }
 
+/// Default Quick Actions grid (nav-bar long-press). Ids resolve against the
+/// shortcut catalog. Order = grid order.
+const List<String> kDefaultQuickActionShortcuts = [
+  'accounts',
+  'investments',
+  'ledger',
+  'emi-calculator', // tool ids are hyphenated in kShortcutCatalog
+  'advanced_analytics',
+  'ask_kuber',
+  'categories',
+];
+
+/// Default Add menu (FAB long-press) — the full ordered list of add-entry
+/// actions, all reorderable / hide-able via the Customize Add Menu screen. The
+/// sheet renders exactly this list, so the setting and the FAB stay in sync.
+const List<String> kDefaultAddMenuActions = [
+  'add_expense',
+  'add_income',
+  'transfer',
+  'add_note',
+  'add_recurring',
+  'add_loan',
+  'add_investment',
+  'lend_borrow',
+];
+
+final quickActionShortcutsProvider = Provider<List<String>>((ref) {
+  return ref.watch(settingsProvider.select(
+      (s) => s.valueOrNull?.quickActionShortcuts ?? kDefaultQuickActionShortcuts));
+});
+
+final addMenuActionsProvider = Provider<List<String>>((ref) {
+  return ref.watch(settingsProvider
+      .select((s) => s.valueOrNull?.addMenuActions ?? kDefaultAddMenuActions));
+});
+
 class SettingsState {
   final ThemeMode themeMode;
   final ThemeVariant themeVariant;
@@ -113,6 +149,8 @@ class SettingsState {
   final NavBarStyle navBarStyle;
   final MoreTabLayout moreTabLayout;
   final Locale locale;
+  final List<String> quickActionShortcuts;
+  final List<String> addMenuActions;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -130,6 +168,8 @@ class SettingsState {
     this.navBarStyle = NavBarStyle.classic,
     this.moreTabLayout = MoreTabLayout.modern,
     this.locale = const Locale('en'),
+    this.quickActionShortcuts = kDefaultQuickActionShortcuts,
+    this.addMenuActions = kDefaultAddMenuActions,
   });
 
   SettingsState copyWith({
@@ -147,6 +187,8 @@ class SettingsState {
     NavBarStyle? navBarStyle,
     MoreTabLayout? moreTabLayout,
     Locale? locale,
+    List<String>? quickActionShortcuts,
+    List<String>? addMenuActions,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -164,6 +206,8 @@ class SettingsState {
       navBarStyle: navBarStyle ?? this.navBarStyle,
       moreTabLayout: moreTabLayout ?? this.moreTabLayout,
       locale: locale ?? this.locale,
+      quickActionShortcuts: quickActionShortcuts ?? this.quickActionShortcuts,
+      addMenuActions: addMenuActions ?? this.addMenuActions,
     );
   }
 }
@@ -194,6 +238,11 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final languageCode = prefs.getString(PrefsKeys.language) ?? 'en';
     final locale = Locale(languageCode);
     AppLocale.current = locale;
+    final quickActionShortcuts =
+        prefs.getStringList(PrefsKeys.quickActionShortcuts) ??
+            kDefaultQuickActionShortcuts;
+    final addMenuActions =
+        prefs.getStringList(PrefsKeys.addMenuActions) ?? kDefaultAddMenuActions;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -212,7 +261,23 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       navBarStyle: NavBarStyle.values[navBarStyleIndex],
       moreTabLayout: MoreTabLayout.values[moreTabLayoutIndex],
       locale: locale,
+      quickActionShortcuts: quickActionShortcuts,
+      addMenuActions: addMenuActions,
     );
+  }
+
+  /// Persists the Quick Actions grid order/membership (nav-bar long-press).
+  Future<void> setQuickActionShortcuts(List<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(PrefsKeys.quickActionShortcuts, ids);
+    state = AsyncData(state.requireValue.copyWith(quickActionShortcuts: ids));
+  }
+
+  /// Persists the Add menu order/membership (FAB long-press).
+  Future<void> setAddMenuActions(List<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(PrefsKeys.addMenuActions, ids);
+    state = AsyncData(state.requireValue.copyWith(addMenuActions: ids));
   }
 
   Future<void> setDefaultAccountId(String? id) async {
