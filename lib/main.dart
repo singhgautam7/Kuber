@@ -100,16 +100,19 @@ Future<void> _bootstrap() async {
   // Read the persisted theme before the first frame so the app never flashes
   // the wrong palette while the async settings provider hydrates. Best-effort:
   // a prefs failure falls back to system mode + Signature.
-  var bootTheme = (ThemeMode.system, ThemeVariant.signature);
+  var bootTheme = (ThemeMode.system, ThemeVariant.signature, KuberStyle.signature);
   var onboarded = false;
   try {
     final prefs = await SharedPreferences.getInstance();
     final modeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
     final variantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
+    final styleIndex = prefs.getInt(PrefsKeys.designLanguage) ?? 0;
     bootTheme = (
       ThemeMode.values[modeIndex.clamp(0, ThemeMode.values.length - 1)],
       ThemeVariant
           .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)],
+      KuberStyle
+          .values[styleIndex.clamp(0, KuberStyle.values.length - 1)],
     );
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
   } catch (e) {

@@ -24,6 +24,7 @@ import '../widgets/settings_choice_sheet.dart';
 import '../widgets/theme_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../widgets/settings_language_row.dart';
+import '../widgets/design_language_sheet.dart';
 import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -48,7 +49,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   String? _tempCurrencyCode;
   SwipeMode? _tempSwipeMode;
   NumberSystem? _tempNumberSystem;
-  NavBarStyle? _tempNavBarStyle;
+  KuberStyle? _tempDesignLanguage;
   MoreTabLayout? _tempMoreTabLayout;
   bool? _tempBiometricsEnabled;
 
@@ -61,7 +62,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _tempCurrencyCode = settings?.currency;
     _tempSwipeMode = settings?.swipeMode;
     _tempNumberSystem = settings?.numberSystem;
-    _tempNavBarStyle = settings?.navBarStyle;
+    _tempDesignLanguage = settings?.designLanguage;
     _tempMoreTabLayout = settings?.moreTabLayout;
     _tempBiometricsEnabled = settings?.biometricsEnabled;
   }
@@ -82,34 +83,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   // The Theme sheet (family picker + mode) reads and writes settingsProvider
   // directly; see theme_sheet.dart.
 
-  void _showBottomNavSheet(BuildContext context, NavBarStyle current) {
+  void _showDesignLanguageSheet(BuildContext context, KuberStyle current) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<NavBarStyle>(
-        title: context.l10n.bottomNavLabel,
+      builder: (_) => SettingsChoiceSheet<KuberStyle>(
+        title: 'Design Language',
         subtitle: context.l10n.appearanceCategory,
         selectedValue: current,
-        choices: [
-          SettingsChoice(
-            value: NavBarStyle.classic,
-            label: context.l10n.navClassicChoice,
-            subtitle: context.l10n.navSubtitleClassic,
-            icon: Icons.view_headline_rounded,
-          ),
-          SettingsChoice(
-            value: NavBarStyle.modern,
-            label: context.l10n.navModernChoice,
-            subtitle: context.l10n.navSubtitleModern,
-            icon: Icons.lens_rounded,
-          ),
-        ],
+        choices: designLanguageChoices(context),
         onSelected: (val) {
-          setState(() => _tempNavBarStyle = val);
-          ref.read(settingsProvider.notifier).setNavBarStyle(val);
+          setState(() => _tempDesignLanguage = val);
+          ref.read(settingsProvider.notifier).setDesignLanguage(val);
         },
       ),
     );
@@ -243,8 +231,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _tempSwipeMode ?? settings?.swipeMode ?? SwipeMode.changeTabs;
     final currentNumberSystem =
         _tempNumberSystem ?? settings?.numberSystem ?? NumberSystem.indian;
-    final currentNavBarStyle =
-        _tempNavBarStyle ?? settings?.navBarStyle ?? NavBarStyle.modern;
+    final currentDesignLanguage =
+        _tempDesignLanguage ?? settings?.designLanguage ?? KuberStyle.signature;
     final currentMoreTabLayout =
         _tempMoreTabLayout ?? settings?.moreTabLayout ?? MoreTabLayout.simple;
     final currentBiometricsEnabled =
@@ -256,9 +244,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         : currentTheme == ThemeMode.dark
         ? context.l10n.themeDarkChoice
         : context.l10n.themeSystemChoice;
-    final navStr = currentNavBarStyle == NavBarStyle.classic
-        ? context.l10n.navClassicChoice
-        : context.l10n.navModernChoice;
+    final designLanguageStr = currentDesignLanguage == KuberStyle.m3Expressive
+        ? 'Material 3 Expressive'
+        : 'Kuber Signature';
     final moreLayoutStr = currentMoreTabLayout == MoreTabLayout.simple
         ? context.l10n.simpleLabel
         : context.l10n.navModernChoice;
@@ -363,12 +351,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(
-                      icon: Icons.space_dashboard_rounded,
-                      label: context.l10n.bottomNavLabel,
-                      subtitle: context.l10n.bottomNavSubtitle,
+                      icon: Icons.style_outlined,
+                      label: 'Design Language',
+                      subtitle: 'Choose between Signature and Material 3 Expressive',
                       onTap: () =>
-                          _showBottomNavSheet(context, currentNavBarStyle),
-                      trailing: _trailingWidget(context, text: navStr),
+                          _showDesignLanguageSheet(context, currentDesignLanguage),
+                      trailing:
+                          _trailingWidget(context, text: designLanguageStr),
                     ),
                     Divider(height: 1, color: cs.outline),
                     _SettingsTile(

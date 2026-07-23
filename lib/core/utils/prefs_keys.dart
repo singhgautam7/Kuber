@@ -50,6 +50,7 @@ class PrefsKeys {
   static const thresholdFloor = 'kuber_threshold_floor';
   static const thresholdCeiling = 'kuber_threshold_ceiling';
   static const navBarStyle = 'nav_bar_style';
+  static const designLanguage = 'design_language';
   static const moreTabLayout = 'more_tab_layout';
 
   // Analytics filter

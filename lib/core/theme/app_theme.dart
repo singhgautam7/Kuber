@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'app_text_styles.dart';
+import 'kuber_style.dart';
 import 'kuber_tokens.dart';
 import '../utils/locale_font.dart';
 
 export 'kuber_tokens.dart' show ThemeVariant, KuberTokens;
+export 'kuber_style.dart' show KuberStyle, KuberStyleTokens, KuberStyleThemeX;
 
 class KuberSpacing {
   static const xs = 4.0;
@@ -204,9 +206,11 @@ class AppTheme {
   static ThemeData dark(
     Locale locale, [
     ThemeVariant variant = ThemeVariant.signature,
+    KuberStyle style = KuberStyle.signature,
   ]) {
     return _build(
       tokens: KuberTokens.dark(variant),
+      styleTokens: KuberStyleTokens.of(style),
       brightness: Brightness.dark,
       locale: locale,
     );
@@ -215,9 +219,11 @@ class AppTheme {
   static ThemeData light(
     Locale locale, [
     ThemeVariant variant = ThemeVariant.signature,
+    KuberStyle style = KuberStyle.signature,
   ]) {
     return _build(
       tokens: KuberTokens.light(variant),
+      styleTokens: KuberStyleTokens.of(style),
       brightness: Brightness.light,
       locale: locale,
     );
@@ -225,6 +231,7 @@ class AppTheme {
 
   static ThemeData _build({
     required KuberTokens tokens,
+    required KuberStyleTokens styleTokens,
     required Brightness brightness,
     required Locale locale,
   }) {
@@ -291,7 +298,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      extensions: [KuberSemanticColors.fromTokens(tokens)],
+      extensions: [KuberSemanticColors.fromTokens(tokens), styleTokens],
       textTheme: textTheme,
       splashFactory: NoSplash.splashFactory,
       scaffoldBackgroundColor: tokens.background,
@@ -299,7 +306,7 @@ class AppTheme {
         color: tokens.surfaceCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.cardRadius),
           side: BorderSide(color: tokens.border),
         ),
       ),
@@ -308,7 +315,7 @@ class AppTheme {
         indicatorColor: tokens.primarySubtle,
         surfaceTintColor: Colors.transparent,
         indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.chipRadius),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -332,15 +339,15 @@ class AppTheme {
         filled: true,
         fillColor: tokens.surfaceCard,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.textFieldRadius),
           borderSide: BorderSide(color: tokens.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.textFieldRadius),
           borderSide: BorderSide(color: tokens.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.textFieldRadius),
           borderSide: BorderSide(color: tokens.primary, width: 2),
         ),
         labelStyle: TextStyle(color: tokens.textSecondary),
@@ -363,7 +370,7 @@ class AppTheme {
           color: tokens.textPrimary,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.snackbarRadius),
           side: BorderSide(color: tokens.border),
         ),
         behavior: SnackBarBehavior.floating,
@@ -380,15 +387,15 @@ class AppTheme {
           color: tokens.textSecondary,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.chipRadius),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: tokens.surfaceCard,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(KuberRadius.lg),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(styleTokens.sheetRadius),
           ),
           side: BorderSide(color: tokens.border),
         ),
@@ -396,7 +403,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: tokens.surfaceCard,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.dialogRadius),
           side: BorderSide(color: tokens.border),
         ),
       ),
@@ -405,7 +412,7 @@ class AppTheme {
           backgroundColor: tokens.primary,
           foregroundColor: tokens.onPrimary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(styleTokens.buttonRadius),
           ),
         ),
       ),
@@ -414,7 +421,7 @@ class AppTheme {
           foregroundColor: tokens.textPrimary,
           side: BorderSide(color: tokens.border),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(styleTokens.buttonRadius),
           ),
         ),
       ),
@@ -422,7 +429,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: tokens.primaryText,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(styleTokens.buttonRadius),
           ),
         ),
       ),
@@ -442,7 +449,7 @@ class AppTheme {
           }),
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(styleTokens.chipRadius),
             ),
           ),
           side: WidgetStatePropertyAll(
@@ -467,13 +474,13 @@ class AppTheme {
       listTileTheme: ListTileThemeData(
         tileColor: tokens.surfaceCard,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.cardRadius),
         ),
       ),
       popupMenuTheme: PopupMenuThemeData(
         color: tokens.surfaceMuted,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(styleTokens.cardRadius),
         ),
       ),
     );

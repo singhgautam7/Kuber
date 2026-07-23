@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/accounts/providers/account_provider.dart';
 import '../../features/categories/providers/category_provider.dart';
 import '../../features/settings/providers/settings_provider.dart'
-    show settingsProvider, navBarStyleProvider, SwipeMode, NavBarStyle;
+    show settingsProvider, SwipeMode;
 import '../../features/history/providers/selection_provider.dart';
 import '../../features/quick_actions/widgets/add_new_sheet.dart';
 import '../../features/quick_actions/widgets/quick_actions_sheet.dart';
@@ -180,12 +180,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     final width = MediaQuery.of(context).size.width;
     final isWide = width >= KuberBreakpoints.smallTablet;
 
-    // Only watch the two fields this scaffold actually renders with —
-    // watching the whole settings state would rebuild the app shell on any
-    // settings change (theme, currency, etc.).
     final swipeMode = ref.watch(settingsProvider
         .select((s) => s.valueOrNull?.swipeMode ?? SwipeMode.changeTabs));
-    final navBarStyle = ref.watch(navBarStyleProvider);
 
     final animatedContent = swipeMode == SwipeMode.changeTabs
         ? PageView(
@@ -212,7 +208,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
           ],
         ),
       );
-    } else if (navBarStyle == NavBarStyle.modern) {
+    } else {
       content = Scaffold(
         backgroundColor: cs.surface,
         extendBody: true,
@@ -225,36 +221,6 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
           onAddLongPress: _openAddMenu,
           isSelectionMode: isSelectionMode,
           isKeyboardOpen: isKeyboardOpen,
-        ),
-      );
-    } else {
-      content = Scaffold(
-        backgroundColor: cs.surface,
-        body: animatedContent,
-        floatingActionButton: currentIndex != 3
-            ? AnimatedScale(
-                scale: (isSelectionMode || isKeyboardOpen) ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                child: GestureDetector(
-                  onLongPress: _openAddMenu,
-                  child: FloatingActionButton(
-                    onPressed: _onAddTapped,
-                    backgroundColor: cs.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                    child: const Icon(Icons.add),
-                  ),
-                ),
-              )
-            : null,
-        bottomNavigationBar: _KuberAnimatedNavBar(
-          currentIndex: currentIndex,
-          onTap: _onTabTapped,
-          onTabLongPress: _openQuickActions,
         ),
       );
     }
@@ -310,13 +276,16 @@ class _ModernNavBar extends StatefulWidget {
 }
 
 class _ModernNavBarState extends State<_ModernNavBar> {
-  static const _animDuration = Duration(milliseconds: 200);
+  static const _animDuration = Duration(milliseconds: 250);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
+    final styleTokens = context.styleTokens;
+    final isM3E = styleTokens.isM3Expressive;
+    final fabRadius = isM3E ? 999.0 : KuberRadius.xl;
     final hide = widget.isSelectionMode || widget.isKeyboardOpen;
 
     return AnimatedSlide(
@@ -359,7 +328,7 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                       height: 64,
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.xl),
+                        borderRadius: BorderRadius.circular(fabRadius),
                         border: Border.all(color: cs.outlineVariant, width: 1),
                       ),
                       child: Row(
@@ -370,19 +339,19 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                             child: _NavBarItem(
                               item: item,
                               isSelected: isSelected,
+                              isM3Expressive: isM3E,
                               animDuration: _animDuration,
                               onTap: () => widget.onTap(i),
                               onLongPress: widget.onTabLongPress,
                               cs: cs,
                               tt: tt,
-                              fullTint: true,
                             ),
                           );
                         }),
                       ),
                     ),
                   ),
-                  // Add button — always visible in Modern mode
+                  // Add button — always visible
                   const SizedBox(width: KuberSpacing.sm),
                   GestureDetector(
                     onTap: widget.onAddTapped,
@@ -392,7 +361,7 @@ class _ModernNavBarState extends State<_ModernNavBar> {
                       height: 64,
                       decoration: BoxDecoration(
                         color: cs.primary,
-                        borderRadius: BorderRadius.circular(KuberRadius.xl),
+                        borderRadius: BorderRadius.circular(fabRadius),
                       ),
                       alignment: Alignment.center,
                       child: Icon(Icons.add, color: cs.onPrimary, size: 26),
@@ -403,64 +372,6 @@ class _ModernNavBarState extends State<_ModernNavBar> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _KuberAnimatedNavBar extends StatefulWidget {
-  final int currentIndex;
-  final ValueChanged<int> onTap;
-  final VoidCallback onTabLongPress;
-
-  const _KuberAnimatedNavBar({
-    required this.currentIndex,
-    required this.onTap,
-    required this.onTabLongPress,
-  });
-
-  @override
-  State<_KuberAnimatedNavBar> createState() => _KuberAnimatedNavBarState();
-}
-
-class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
-  static const _animDuration = Duration(milliseconds: 200);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final tt = theme.textTheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border(
-          top: BorderSide(color: cs.outline.withValues(alpha: 0.4)),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: List.generate(kuberNavItems.length, (i) {
-              final item = kuberNavItems[i];
-              final isSelected = i == widget.currentIndex;
-              return Expanded(
-                child: _NavBarItem(
-                  item: item,
-                  isSelected: isSelected,
-                  animDuration: _animDuration,
-                  onTap: () => widget.onTap(i),
-                  onLongPress: widget.onTabLongPress,
-                  cs: cs,
-                  tt: tt,
-                ),
-              );
-            }),
-          ),
-        ),
       ),
     );
   }
@@ -484,22 +395,22 @@ String _localNavLabel(BuildContext context, String label) {
 class _NavBarItem extends StatefulWidget {
   final KuberNavItem item;
   final bool isSelected;
+  final bool isM3Expressive;
   final Duration animDuration;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final ColorScheme cs;
   final TextTheme tt;
-  final bool fullTint;
 
   const _NavBarItem({
     required this.item,
     required this.isSelected,
+    required this.isM3Expressive,
     required this.animDuration,
     required this.onTap,
     this.onLongPress,
     required this.cs,
     required this.tt,
-    this.fullTint = false,
   });
 
   @override
@@ -509,7 +420,6 @@ class _NavBarItem extends StatefulWidget {
 class _NavBarItemState extends State<_NavBarItem>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _scaleAnim;
 
   @override
   void initState() {
@@ -519,10 +429,6 @@ class _NavBarItemState extends State<_NavBarItem>
       duration: widget.animDuration,
       value: widget.isSelected ? 1.0 : 0.0,
     );
-    _scaleAnim = Tween<double>(
-      begin: 0.85,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -547,24 +453,67 @@ class _NavBarItemState extends State<_NavBarItem>
   Widget build(BuildContext context) {
     final selectedColor = widget.cs.primary;
     final unselectedColor = widget.cs.onSurfaceVariant;
+    final labelStr = _localNavLabel(context, widget.item.label);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: widget.onTap,
-      onLongPress: widget.onLongPress,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          final t = _controller.value;
+    return Semantics(
+      label: labelStr,
+      selected: widget.isSelected,
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) {
+            final t = _controller.value;
+            final iconData = widget.isSelected
+                ? widget.item.activeIcon
+                : widget.item.icon;
 
-          // Single icon with interpolated color — no Opacity/compositing overhead
-          final iconColor = Color.lerp(unselectedColor, selectedColor, t)!;
-          final iconData = t > 0.5 ? widget.item.activeIcon : widget.item.icon;
-          final iconContent = Icon(iconData, size: 22, color: iconColor);
-          final labelStr = _localNavLabel(context, widget.item.label);
+            if (widget.isM3Expressive) {
+              // M3 Expressive style: Active tab shows icon + text in primarySubtle pill; inactive tab shows icon only.
+              if (widget.isSelected) {
+                return Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: widget.cs.primaryContainer,
+                      borderRadius: BorderRadius.circular(999.0),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(iconData, size: 20, color: selectedColor),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            labelStr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: widget.tt.labelMedium?.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: selectedColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
-          if (widget.fullTint) {
-            // Modern: no background tint — active state shown via icon/text color only
+              return Center(
+                child: Icon(iconData, size: 22, color: unselectedColor),
+              );
+            }
+
+            // Kuber Signature style: All tabs display icon + text label
+            final iconColor = Color.lerp(unselectedColor, selectedColor, t)!;
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -584,42 +533,8 @@ class _NavBarItemState extends State<_NavBarItem>
                 ],
               ),
             );
-          }
-
-          // Classic: icon-only tint, label sits outside below
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ScaleTransition(
-                scale: _scaleAnim,
-                child: Container(
-                  width: 56,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: widget.cs.primaryContainer.withValues(
-                      alpha: t * 0.1,
-                    ),
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
-                  ),
-                  alignment: Alignment.center,
-                  child: iconContent,
-                ),
-              ),
-              const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: widget.animDuration,
-                style: widget.tt.labelSmall!.copyWith(
-                  fontSize: 11,
-                  fontWeight: widget.isSelected
-                      ? FontWeight.w700
-                      : FontWeight.w500,
-                  color: widget.isSelected ? selectedColor : unselectedColor,
-                ),
-                child: Text(labelStr),
-              ),
-            ],
-          );
-        },
+          },
+        ),
       ),
     );
   }

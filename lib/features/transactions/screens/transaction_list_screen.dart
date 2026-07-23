@@ -13,11 +13,7 @@ import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../settings/providers/settings_provider.dart'
-    show
-        formatterProvider,
-        privacyModeProvider,
-        navBarStyleProvider,
-        NavBarStyle;
+    show formatterProvider, privacyModeProvider;
 import '../data/transaction.dart';
 import '../providers/transaction_provider.dart';
 import '../../export/widgets/export_bottom_sheet.dart';
@@ -425,15 +421,14 @@ class _SelectionActionBar extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
 
-    final isModern = ref.watch(navBarStyleProvider) == NavBarStyle.modern;
     // Root-view inset: the shell body has a bottomNavigationBar, so Flutter
     // zeroes viewPadding.bottom here — viewPaddingOf would return 0 and the bar
     // would slide under the system nav bar (the app nav bar is hidden during
     // selection, so nothing else clears it).
     final bottomInset = systemNavBarInset(context);
-    // On modern nav bar, add generous bottom clearance so curved-screen edges
+    // Add generous bottom clearance so curved-screen edges
     // don't clip the action buttons (the floating nav bar normally fills this space).
-    final bottomPad = isModern ? bottomInset + KuberSpacing.xl : bottomInset;
+    final bottomPad = bottomInset + KuberSpacing.xl;
 
     return Material(
       elevation: 8,

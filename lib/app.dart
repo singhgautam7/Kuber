@@ -45,6 +45,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // specs/plans/theme-personalization-cache-audit.md).
   Locale? _cachedLocale;
   ThemeVariant? _cachedVariant;
+  KuberStyle? _cachedStyle;
   ThemeData? _lightTheme;
   ThemeData? _darkTheme;
 
@@ -308,17 +309,20 @@ class _KuberAppState extends ConsumerState<KuberApp>
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final themeVariant = ref.watch(themeVariantProvider);
+    final designLanguage = ref.watch(designLanguageProvider);
     final router = ref.watch(routerProvider);
     final locale = ref.watch(localeProvider);
 
     if (_cachedLocale != locale ||
         _cachedVariant != themeVariant ||
+        _cachedStyle != designLanguage ||
         _lightTheme == null ||
         _darkTheme == null) {
       _cachedLocale = locale;
       _cachedVariant = themeVariant;
-      _lightTheme = AppTheme.light(locale, themeVariant);
-      _darkTheme = AppTheme.dark(locale, themeVariant);
+      _cachedStyle = designLanguage;
+      _lightTheme = AppTheme.light(locale, themeVariant, designLanguage);
+      _darkTheme = AppTheme.dark(locale, themeVariant, designLanguage);
     }
 
     // Watch these so the widget rebuilds (and the notification listener

@@ -6,7 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/services/widget_sync_service.dart';
-import '../../../core/theme/kuber_tokens.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
@@ -45,11 +45,11 @@ final localeProvider = Provider<Locale>((ref) {
 
 /// Theme values read synchronously from SharedPreferences in `_bootstrap`
 /// (before `runApp`) and injected as an override. They are the pre-hydration
-/// fallback for [themeModeProvider] / [themeVariantProvider], so the first
+/// fallback for [themeModeProvider] / [themeVariantProvider] / [designLanguageProvider], so the first
 /// frame already renders the persisted theme with no flash while the async
 /// [settingsProvider] loads.
-final bootThemeProvider = Provider<(ThemeMode, ThemeVariant)>(
-  (ref) => (ThemeMode.system, ThemeVariant.signature),
+final bootThemeProvider = Provider<(ThemeMode, ThemeVariant, KuberStyle)>(
+  (ref) => (ThemeMode.system, ThemeVariant.signature, KuberStyle.signature),
 );
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
@@ -64,14 +64,15 @@ final themeVariantProvider = Provider<ThemeVariant>((ref) {
       settingsProvider.select((s) => s.valueOrNull?.themeVariant ?? boot));
 });
 
+final designLanguageProvider = Provider<KuberStyle>((ref) {
+  final boot = ref.watch(bootThemeProvider).$3;
+  return ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.designLanguage ?? boot));
+});
+
 final privacyModeProvider = Provider<bool>((ref) {
   return ref.watch(
       settingsProvider.select((s) => s.valueOrNull?.privacyMode ?? false));
-});
-
-final navBarStyleProvider = Provider<NavBarStyle>((ref) {
-  return ref.watch(settingsProvider
-      .select((s) => s.valueOrNull?.navBarStyle ?? NavBarStyle.modern));
 });
 
 final moreTabLayoutProvider = Provider<MoreTabLayout>((ref) {
@@ -92,8 +93,6 @@ final thresholdCeilingProvider = Provider<double>((ref) {
 enum NumberSystem { indian, international }
 
 enum SwipeMode { changeTabs, performActions }
-
-enum NavBarStyle { classic, modern }
 
 enum MoreTabLayout { simple, modern }
 
@@ -136,6 +135,7 @@ final addMenuActionsProvider = Provider<List<String>>((ref) {
 class SettingsState {
   final ThemeMode themeMode;
   final ThemeVariant themeVariant;
+  final KuberStyle designLanguage;
   final String currency;
   final String dateFormat;
   final String userName;
@@ -146,7 +146,6 @@ class SettingsState {
   final bool privacyMode;
   final double thresholdFloor;
   final double thresholdCeiling;
-  final NavBarStyle navBarStyle;
   final MoreTabLayout moreTabLayout;
   final Locale locale;
   final List<String> quickActionShortcuts;
@@ -155,6 +154,7 @@ class SettingsState {
   const SettingsState({
     this.themeMode = ThemeMode.system,
     this.themeVariant = ThemeVariant.signature,
+    this.designLanguage = KuberStyle.signature,
     this.currency = 'INR',
     this.dateFormat = 'dd/MM/yyyy',
     this.userName = '',
@@ -165,7 +165,6 @@ class SettingsState {
     this.privacyMode = false,
     this.thresholdFloor = 500,
     this.thresholdCeiling = 2000,
-    this.navBarStyle = NavBarStyle.classic,
     this.moreTabLayout = MoreTabLayout.modern,
     this.locale = const Locale('en'),
     this.quickActionShortcuts = kDefaultQuickActionShortcuts,
@@ -175,6 +174,7 @@ class SettingsState {
   SettingsState copyWith({
     ThemeMode? themeMode,
     ThemeVariant? themeVariant,
+    KuberStyle? designLanguage,
     String? currency,
     String? dateFormat,
     String? userName,
@@ -184,7 +184,6 @@ class SettingsState {
     bool? privacyMode,
     double? thresholdFloor,
     double? thresholdCeiling,
-    NavBarStyle? navBarStyle,
     MoreTabLayout? moreTabLayout,
     Locale? locale,
     List<String>? quickActionShortcuts,
@@ -193,6 +192,7 @@ class SettingsState {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
       themeVariant: themeVariant ?? this.themeVariant,
+      designLanguage: designLanguage ?? this.designLanguage,
       currency: currency ?? this.currency,
       dateFormat: dateFormat ?? this.dateFormat,
       userName: userName ?? this.userName,
@@ -203,7 +203,6 @@ class SettingsState {
       privacyMode: privacyMode ?? this.privacyMode,
       thresholdFloor: thresholdFloor ?? this.thresholdFloor,
       thresholdCeiling: thresholdCeiling ?? this.thresholdCeiling,
-      navBarStyle: navBarStyle ?? this.navBarStyle,
       moreTabLayout: moreTabLayout ?? this.moreTabLayout,
       locale: locale ?? this.locale,
       quickActionShortcuts: quickActionShortcuts ?? this.quickActionShortcuts,
@@ -219,6 +218,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final prefs = await SharedPreferences.getInstance();
     final themeModeIndex = prefs.getInt(PrefsKeys.themeMode) ?? 0;
     final themeVariantIndex = prefs.getInt(PrefsKeys.themeVariant) ?? 0;
+    final designLanguageIndex =
+        prefs.getInt(PrefsKeys.designLanguage) ?? KuberStyle.signature.index;
     final currency = prefs.getString(PrefsKeys.currency) ?? 'INR';
     final dateFormat = prefs.getString('date_format') ?? 'dd/MM/yyyy';
     final userName = prefs.getString(PrefsKeys.userName) ?? '';
@@ -231,8 +232,10 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final thresholdFloor = prefs.getDouble(PrefsKeys.thresholdFloor) ?? 500;
     final thresholdCeiling =
         prefs.getDouble(PrefsKeys.thresholdCeiling) ?? 2000;
-    final navBarStyleIndex =
-        prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
+    // Clean up legacy nav_bar_style key if present
+    if (prefs.containsKey(PrefsKeys.navBarStyle)) {
+      await prefs.remove(PrefsKeys.navBarStyle);
+    }
     final moreTabLayoutIndex =
         prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.modern.index;
     final languageCode = prefs.getString(PrefsKeys.language) ?? 'en';
@@ -248,6 +251,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       themeMode: ThemeMode.values[themeModeIndex],
       themeVariant: ThemeVariant
           .values[themeVariantIndex.clamp(0, ThemeVariant.values.length - 1)],
+      designLanguage: KuberStyle
+          .values[designLanguageIndex.clamp(0, KuberStyle.values.length - 1)],
       currency: currency,
       dateFormat: dateFormat,
       userName: userName,
@@ -258,7 +263,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       privacyMode: privacyMode,
       thresholdFloor: thresholdFloor,
       thresholdCeiling: thresholdCeiling,
-      navBarStyle: NavBarStyle.values[navBarStyleIndex],
       moreTabLayout: MoreTabLayout.values[moreTabLayoutIndex],
       locale: locale,
       quickActionShortcuts: quickActionShortcuts,
@@ -300,7 +304,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         numberSystem: cur.numberSystem,
         defaultAccountId: id,
         privacyMode: cur.privacyMode,
-        navBarStyle: cur.navBarStyle,
+        designLanguage: cur.designLanguage,
         moreTabLayout: cur.moreTabLayout,
         locale: cur.locale,
       ),
@@ -314,10 +318,10 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     state = AsyncData(state.requireValue.copyWith(locale: locale));
   }
 
-  Future<void> setNavBarStyle(NavBarStyle style) async {
+  Future<void> setDesignLanguage(KuberStyle style) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(PrefsKeys.navBarStyle, style.index);
-    state = AsyncData(state.requireValue.copyWith(navBarStyle: style));
+    await prefs.setInt(PrefsKeys.designLanguage, style.index);
+    state = AsyncData(state.requireValue.copyWith(designLanguage: style));
   }
 
   Future<void> setMoreTabLayout(MoreTabLayout layout) async {
