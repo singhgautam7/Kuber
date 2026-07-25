@@ -22,10 +22,10 @@ import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../tools/bill_splitter/providers/people_provider.dart';
-import '../../tools/bill_splitter/widgets/bs_avatar.dart';
 import '../data/ledger.dart';
 import '../data/ledger_prefill.dart';
 import '../providers/ledger_provider.dart';
+import '../widgets/ledger_suggestion_overlay.dart';
 
 class AddLedgerScreen extends ConsumerStatefulWidget {
   final Ledger? existing;
@@ -116,7 +116,6 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     final symbol = ref.watch(currencyProvider).symbol;
     final tone = _type == 'lent' ? HeroAmountTone.expense : HeroAmountTone.income;
     final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
-    final people = ref.watch(peopleListProvider).valueOrNull ?? [];
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -185,18 +184,18 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   onCalculatorTap: () => _openCalculatorFor(_amountController),
                 ),
                 KuberFieldLabel(context.l10n.personLabel),
-                RawAutocomplete<String>(
+                RawAutocomplete<LedgerPersonSuggestion>(
                   textEditingController: _nameController,
                   focusNode: _nameFocusNode,
+                  displayStringForOption: (s) => s.personName,
                   optionsBuilder: (textEditingValue) {
-                    final query = textEditingValue.text.trim().toLowerCase();
-                    if (query.isEmpty) {
-                      return people.map((p) => p.name).toList();
-                    }
-                    return people
-                        .where((p) => p.name.toLowerCase().contains(query))
-                        .map((p) => p.name)
-                        .toList();
+                    final query = textEditingValue.text.trim();
+                    if (query.isEmpty) return const [];
+                    return ref.read(ledgerPersonSuggestionsProvider(query));
+                  },
+                  onSelected: (suggestion) {
+                    _nameController.text = suggestion.personName;
+                    setState(() {});
                   },
                   fieldViewBuilder:
                       (context, controller, focusNode, onFieldSubmitted) {
@@ -213,55 +212,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     );
                   },
                   optionsViewBuilder: (context, onSelected, options) {
-                    return Align(
-                      alignment: Alignment.topLeft,
-                      child: Material(
-                        elevation: 8,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        color: cs.surfaceContainer,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 240),
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            itemCount: options.length,
-                            separatorBuilder: (_, __) => Divider(
-                              height: 1,
-                              indent: 56,
-                              color: cs.outline,
-                            ),
-                            itemBuilder: (ctx, i) {
-                              final name = options.elementAt(i);
-                              return InkWell(
-                                onTap: () => onSelected(name),
-                                borderRadius: BorderRadius.circular(
-                                  KuberRadius.md,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      BsAvatar(name: name, size: 32),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        name,
-                                        style: localeFont(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: cs.onSurface,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
+                    return LedgerSuggestionOverlay(
+                      options: options,
+                      onSelected: onSelected,
                     );
                   },
                 ),

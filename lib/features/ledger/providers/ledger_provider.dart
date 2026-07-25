@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../tools/bill_splitter/providers/people_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
@@ -226,3 +227,95 @@ final ledgerSummaryProvider = FutureProvider<({double toReceive, double owed})>(
     );
   },
 );
+
+class LedgerPersonSuggestion {
+  final String personName;
+  final bool isSettled;
+  final double? remainingAmount;
+
+  const LedgerPersonSuggestion({
+    required this.personName,
+    required this.isSettled,
+    this.remainingAmount,
+  });
+}
+
+/// Person suggestions for autocomplete in Add/Edit Ledger.
+/// Returns suggestions for all saved people (both settled & unsettled).
+/// Returns [] when query is empty.
+final ledgerPersonSuggestionsProvider =
+    Provider.family<List<LedgerPersonSuggestion>, String>((ref, query) {
+      final trimmed = query.trim().toLowerCase();
+      if (trimmed.isEmpty) return const [];
+
+      final people = ref.watch(peopleListProvider).valueOrNull ?? const [];
+      final ledgers = ref.watch(ledgerListProvider).valueOrNull ?? const [];
+      final txns = ref.watch(transactionListProvider).valueOrNull ?? const [];
+
+      // Collect all unique person names from People table and Ledger entries
+      final nameMap = <String, String>{};
+      for (final p in people) {
+        final pName = p.name.trim();
+        if (pName.isNotEmpty) {
+          nameMap[pName.toLowerCase()] = pName;
+        }
+      }
+      for (final l in ledgers) {
+        final lName = l.personName.trim();
+        if (lName.isNotEmpty) {
+          nameMap[l.personNameLower] = lName;
+        }
+      }
+
+      // Filter matching names
+      final matches =
+          nameMap.entries.where((e) => e.key.contains(trimmed)).toList();
+      if (matches.isEmpty) return const [];
+
+      // Sort matches: prefix matches first, then alphabetical
+      matches.sort((a, b) {
+        final aPrefix = a.key.startsWith(trimmed);
+        final bPrefix = b.key.startsWith(trimmed);
+        if (aPrefix != bPrefix) return aPrefix ? -1 : 1;
+        return a.value.compareTo(b.value);
+      });
+
+      // Pre-group ledgers by personNameLower
+      final ledgersByPerson = <String, List<Ledger>>{};
+      for (final l in ledgers) {
+        ledgersByPerson.putIfAbsent(l.personNameLower, () => []).add(l);
+      }
+
+      final results = <LedgerPersonSuggestion>[];
+      for (final entry in matches) {
+        final nameLower = entry.key;
+        final displayName = entry.value;
+        final personLedgers = ledgersByPerson[nameLower] ?? const [];
+
+        final openLedgers = personLedgers.where((l) => !l.isSettled).toList();
+        if (openLedgers.isNotEmpty) {
+          double totalRemaining = 0.0;
+          for (final l in openLedgers) {
+            totalRemaining += calc.computeRemaining(l, txns);
+          }
+          results.add(
+            LedgerPersonSuggestion(
+              personName: displayName,
+              isSettled: false,
+              remainingAmount: totalRemaining > 0 ? totalRemaining : null,
+            ),
+          );
+        } else {
+          results.add(
+            LedgerPersonSuggestion(
+              personName: displayName,
+              isSettled: true,
+              remainingAmount: null,
+            ),
+          );
+        }
+      }
+
+      return results;
+    });
+
