@@ -21,6 +21,7 @@ import '../../features/tutorial/screens/tutorial_chapter_screen.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
+import '../../features/quick_add/screens/quick_add_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../shared/widgets/screen_entrance.dart';
 import '../../features/accounts/data/account.dart';
@@ -257,6 +258,31 @@ final routerProvider = Provider<GoRouter>((ref) {
                       curve: Curves.easeOutCubic,
                     ),
                   ),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/quick-add',
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: QuickAddScreen(
+            initialText: state.uri.queryParameters['text'],
+            openVoiceImmediately: state.uri.queryParameters['voice'] == 'true',
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutCubic,
+                ),
+              ),
               child: child,
             );
           },

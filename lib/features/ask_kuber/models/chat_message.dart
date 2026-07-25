@@ -1,5 +1,6 @@
 import 'chip_action.dart';
 import 'thinking_info.dart';
+import 'transaction_preview_payload.dart';
 import 'viz_payload.dart';
 
 /// In-memory chat message held by the screen. [text] is mutable so the
@@ -12,6 +13,7 @@ class ChatMessage {
   final DateTime time;
   final ThinkingInfo? thinking;
   final VizPayload? vizPayload;
+  final TransactionPreviewPayload? previewPayload;
   final List<ChipAction> followUps;
   int? storedId;
 
@@ -21,6 +23,7 @@ class ChatMessage {
     required this.time,
     this.thinking,
     this.vizPayload,
+    this.previewPayload,
     this.followUps = const [],
     this.storedId,
   });

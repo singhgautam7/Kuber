@@ -37,6 +37,18 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     super.dispose();
   }
 
+  void _openFullScreen({bool voice = false}) {
+    final text = _controller.text.trim();
+    final uri = Uri(
+      path: '/quick-add',
+      queryParameters: {
+        if (text.isNotEmpty) 'text': text,
+        if (voice) 'voice': 'true',
+      },
+    );
+    context.push(uri.toString());
+  }
+
   Future<void> _submit([String? override]) async {
     final l10n = context.l10n;
     final input = (override ?? _controller.text).trim();
@@ -97,19 +109,6 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
             c.name.toLowerCase() == 'other')
         .firstOrNull;
 
-    if (resolvedCategory == null && catHint.isNotEmpty) {
-      final newCat = Category()
-        ..name = catHint.toTitleCase()
-        ..icon = 'circle'
-        ..colorValue = 0xFF6B7280
-        ..type = 'expense';
-      await ref.read(categoryListProvider.notifier).add(newCat);
-      categories = await ref.read(categoryListProvider.future);
-      resolvedCategory = categories
-          .where((c) => c.name.toLowerCase() == catHint.toLowerCase())
-          .firstOrNull;
-    }
-
     if (resolvedCategory == null) {
       if (mounted) {
         setState(() {
@@ -132,6 +131,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       ..categoryId = resolvedCategory.id.toString()
       ..accountId = resolvedAccountId
       ..quickAddNote = input
+      ..importSource = 'quick_add'
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now();
 
@@ -193,6 +193,28 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       children: [
         KuberHomeWidgetTitle(
           title: context.l10n.quickAddTitle,
+          trailing: GestureDetector(
+            onTap: () => _openFullScreen(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Full screen',
+                  style: localeFont(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.open_in_full_rounded,
+                  size: 14,
+                  color: cs.primary,
+                ),
+              ],
+            ),
+          ),
           infoConfig: KuberInfoConfig(
             title: context.l10n.quickAddInfoTitle,
             description: context.l10n.quickAddInfoDesc,
@@ -251,6 +273,27 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
+              // Voice Button (52 wide, surfaceContainerHigh, border, KuberRadius.md)
+              GestureDetector(
+                onTap: () => _openFullScreen(voice: true),
+                child: Container(
+                  width: 52,
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(color: cs.outline),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.mic_none_rounded,
+                      size: 22,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              // Send button
               ValueListenableBuilder<TextEditingValue>(
                 valueListenable: _controller,
                 builder: (context, value, child) {
@@ -298,6 +341,18 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
             ],
           ),
         ),
+        // Non-tappable example chips below input
+        const SizedBox(height: KuberSpacing.sm),
+        IgnorePointer(
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _buildExampleChip(cs, 'Try: "300 movies and 500 dinner"'),
+              _buildExampleChip(cs, '"1200 rent from HDFC"'),
+            ],
+          ),
+        ),
         if (_error != null) ...[
           const SizedBox(height: KuberSpacing.sm),
           Text(
@@ -306,6 +361,24 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildExampleChip(ColorScheme cs, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Text(
+        text,
+        style: localeFont(
+          fontSize: 11.5,
+          color: cs.onSurfaceVariant,
+        ),
+      ),
     );
   }
 }

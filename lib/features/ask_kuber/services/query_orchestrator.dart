@@ -1,3 +1,4 @@
+import '../handlers/add_transaction_intent_handler.dart';
 import '../handlers/average_expense_handler.dart';
 import '../handlers/balance_handler.dart';
 import '../handlers/biggest_expense_handler.dart';
@@ -53,6 +54,7 @@ class QueryOrchestrator {
           KnowledgeHandler(),
           // Functional help.
           HowToHandler(),
+          AddTransactionIntentHandler(),
           LanguageHandler(),
           // Kuber Notes lookups run before spending/counts so "what did I
           // note this month" isn't swallowed by the data handlers.

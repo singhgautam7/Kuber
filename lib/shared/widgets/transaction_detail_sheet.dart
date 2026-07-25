@@ -134,6 +134,12 @@ class _TransactionDetailSheetState
     if (t.importSource == 'sms') {
       return (label: context.l10n.sourceSms, icon: Icons.sms_outlined);
     }
+    if (t.importSource == 'voice') {
+      return (label: 'Voice', icon: Icons.mic_none_rounded);
+    }
+    if (t.importSource == 'quick_add') {
+      return (label: 'Quick add', icon: Icons.bolt_rounded);
+    }
 
     var type = t.linkedRuleType;
     if (type == null && t.linkedRuleId != null) {
@@ -370,17 +376,60 @@ class _TransactionDetailSheetState
               ),
             ),
 
-          if (transaction.quickAddNote != null &&
+          if (transaction.importSource == 'voice' &&
+              transaction.quickAddNote != null &&
+              transaction.quickAddNote!.isNotEmpty)
+            _LabeledBlock(
+              label: 'VOICE TRANSCRIPT',
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(KuberSpacing.md),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: cs.outline),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.mic_none_rounded, size: 16, color: cs.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '"${transaction.quickAddNote!}"',
+                        style: localeFont(
+                          fontSize: 13.5,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                          color: cs.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else if (transaction.quickAddNote != null &&
               transaction.quickAddNote!.isNotEmpty)
             _LabeledBlock(
               label: context.l10n.addedUsingPrompt,
-              child: Text(
-                transaction.quickAddNote!,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurface,
-                  height: 1.5,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(KuberSpacing.md),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: cs.outline),
+                ),
+                child: Text(
+                  transaction.quickAddNote!,
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurfaceVariant,
+                    height: 1.5,
+                  ),
                 ),
               ),
             ),

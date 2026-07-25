@@ -29,6 +29,42 @@ class HowToHandler extends QueryHandler {
       ),
     ),
     (
+      ['how to pay credit card', 'pay credit card', 'credit card bill',
+        'how to pay credit card bill', 'pay my credit card'],
+      HowToResponse(
+        'Pay it as a Transfer from your bank account to your credit card account. That clears the card balance and records the movement in one step.',
+        deepLinkRoute: '/add-transaction?type=transfer',
+        deepLinkLabel: 'Open Transfer',
+      ),
+    ),
+    (
+      ['how to generate mock data', 'generate mock data', 'add sample data',
+        'populate sample data'],
+      HowToResponse(
+        'Open Developer settings to populate sample transactions for testing.',
+        deepLinkRoute: '/more/dev-tools',
+        deepLinkLabel: 'Open dev settings',
+      ),
+    ),
+    (
+      ['how to clear mock data', 'clear mock data', 'delete mock data',
+        'reset sample data', 'clear sample data'],
+      HowToResponse(
+        "This deletes all sample data. You'll be asked to confirm first.",
+        deepLinkRoute: '/more/dev-tools',
+        deepLinkLabel: 'Open dev settings',
+      ),
+    ),
+    (
+      ['how to import sms', 'import from sms', 'how to import from sms',
+        'scan bank sms', 'import sms'],
+      HowToResponse(
+        'Kuber can scan bank SMS to auto-create transactions. Open SMS Import to start.',
+        deepLinkRoute: '/more/sms-import',
+        deepLinkLabel: 'Open SMS Import',
+      ),
+    ),
+    (
       ['how do i set a budget', 'how to set a budget', 'how to add budget',
         'how to add a budget', 'how do i budget', 'how to create a budget',
         'set a budget', 'create a budget', 'how to make a budget'],

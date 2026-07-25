@@ -22,7 +22,6 @@ import '../../categories/providers/category_provider.dart';
 import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../tools/bill_splitter/providers/people_provider.dart';
-import '../../tools/bill_splitter/widgets/bs_avatar.dart';
 import '../data/ledger.dart';
 import '../data/ledger_prefill.dart';
 import '../providers/ledger_provider.dart';
@@ -191,7 +190,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                   optionsBuilder: (textEditingValue) {
                     final query = textEditingValue.text.trim().toLowerCase();
                     if (query.isEmpty) {
-                      return people.map((p) => p.name).toList();
+                      return const <String>[];
                     }
                     return people
                         .where((p) => p.name.toLowerCase().contains(query))
@@ -213,52 +212,129 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
                     );
                   },
                   optionsViewBuilder: (context, onSelected, options) {
+                    final ledgers = ref.watch(ledgerListProvider).valueOrNull ?? [];
                     return Align(
                       alignment: Alignment.topLeft,
-                      child: Material(
-                        elevation: 8,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        color: cs.surfaceContainer,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        decoration: BoxDecoration(
+                          color: cs.surfaceContainerHigh,
+                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          border: Border.all(color: cs.outline),
+                        ),
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxHeight: 240),
-                          child: ListView.separated(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            itemCount: options.length,
-                            separatorBuilder: (_, __) => Divider(
-                              height: 1,
-                              indent: 56,
-                              color: cs.outline,
-                            ),
-                            itemBuilder: (ctx, i) {
-                              final name = options.elementAt(i);
-                              return InkWell(
-                                onTap: () => onSelected(name),
-                                borderRadius: BorderRadius.circular(
-                                  KuberRadius.md,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      BsAvatar(name: name, size: 32),
-                                      const SizedBox(width: 12),
-                                      Text(
-                                        name,
-                                        style: localeFont(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: cs.onSurface,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(KuberRadius.md),
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                indent: 64,
+                                color: cs.outline,
+                              ),
+                              itemBuilder: (ctx, i) {
+                                final name = options.elementAt(i);
+                                final personLower = name.toLowerCase();
+                                final personLedgers = ledgers.where((l) => l.personNameLower == personLower).toList();
+                                final openLedgers = personLedgers.where((l) => !l.isSettled).toList();
+
+                                final bool isSettled = personLedgers.isNotEmpty && openLedgers.isEmpty;
+
+                                String? subtitle;
+                                if (openLedgers.isNotEmpty) {
+                                  final totalOpen = openLedgers.fold<double>(0, (sum, l) => sum + l.originalAmount);
+                                  final openType = openLedgers.first.type;
+                                  final openAmountStr = totalOpen % 1 == 0
+                                      ? totalOpen.toInt().toString()
+                                      : totalOpen.toStringAsFixed(2);
+                                  subtitle = openType == 'lent'
+                                      ? 'You lent · $symbol$openAmountStr open'
+                                      : 'You borrowed · $symbol$openAmountStr open';
+                                }
+
+                                final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+                                return InkWell(
+                                  onTap: () => onSelected(name),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: KuberSpacing.md,
+                                      vertical: KuberSpacing.sm,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // Avatar
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: cs.primary.withValues(alpha: 0.16),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              initial,
+                                              style: localeFont(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                                color: cs.primary,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: KuberSpacing.sm),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                name,
+                                                style: localeFont(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: cs.onSurface,
+                                                ),
+                                              ),
+                                              if (subtitle != null) ...[
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  subtitle,
+                                                  style: localeFont(
+                                                    fontSize: 11.5,
+                                                    color: cs.onSurfaceVariant,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                        if (isSettled)
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              color: cs.surfaceContainer,
+                                              borderRadius: BorderRadius.circular(KuberRadius.sm),
+                                              border: Border.all(color: cs.outline),
+                                            ),
+                                            child: Text(
+                                              'Settled',
+                                              style: localeFont(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w600,
+                                                color: cs.onSurfaceVariant,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),

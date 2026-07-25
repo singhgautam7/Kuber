@@ -1,10 +1,22 @@
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
+import '../../../shared/widgets/transaction_preview_card.dart';
+import '../../accounts/providers/account_provider.dart';
+import '../../categories/data/category.dart';
+import '../../categories/providers/category_provider.dart';
+import '../../settings/providers/settings_provider.dart';
+import '../../transactions/data/transaction.dart';
+import '../../transactions/providers/transaction_provider.dart';
 import '../models/chat_message.dart';
+import '../models/transaction_preview_payload.dart';
 import '../models/viz_payload.dart';
 import 'budget_status_viz.dart';
 import 'thinking_panel.dart';
@@ -28,8 +40,6 @@ class MessageBubble extends StatelessWidget {
   }
 }
 
-
-
 class _UserBubble extends StatelessWidget {
   final ChatMessage message;
   const _UserBubble({required this.message});
@@ -46,7 +56,6 @@ class _UserBubble extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: KuberSpacing.md),
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 7),
           decoration: BoxDecoration(
-            // Primary-tinted fill with a subtle primary border (per design CSS).
             color: cs.primary.withValues(alpha: 0.10),
             border: Border.all(color: cs.primary.withValues(alpha: 0.22)),
             borderRadius: BorderRadius.circular(KuberRadius.lg),
@@ -94,16 +103,16 @@ List<InlineSpan> buildRichSpans(String text, TextStyle base, Color highlight) {
 }
 
 /// Kuber message: bare editorial text on the chat surface, no bubble box.
-class _KuberMessage extends StatefulWidget {
+class _KuberMessage extends ConsumerStatefulWidget {
   final ChatMessage message;
   final ValueListenable<String>? stream;
   const _KuberMessage({required this.message, this.stream});
 
   @override
-  State<_KuberMessage> createState() => _KuberMessageState();
+  ConsumerState<_KuberMessage> createState() => _KuberMessageState();
 }
 
-class _KuberMessageState extends State<_KuberMessage>
+class _KuberMessageState extends ConsumerState<_KuberMessage>
     with SingleTickerProviderStateMixin {
   bool _expanded = false;
   late final AnimationController _ctrl;
@@ -130,6 +139,62 @@ class _KuberMessageState extends State<_KuberMessage>
 
   TextStyle get _textStyle =>
       localeFont(fontSize: 15, color: Theme.of(context).colorScheme.onSurface, height: 1.5);
+
+  Future<void> _commitPreview(TransactionPreviewPayload payload) async {
+    final accounts = ref.read(accountListProvider).valueOrNull ?? [];
+    final categories = ref.read(categoryListProvider).valueOrNull ?? [];
+    final settings = await ref.read(settingsProvider.future);
+    final defaultAccId = settings.defaultAccountId;
+
+    int addedCount = 0;
+    for (final item in payload.items) {
+      if (item.amount == null || item.amount! <= 0) continue;
+
+      String? resolvedAccId;
+      if (item.accountHint != null) {
+        resolvedAccId = accounts
+            .where((a) => a.name.toLowerCase().contains(item.accountHint!.toLowerCase()))
+            .firstOrNull
+            ?.id
+            .toString();
+      }
+      resolvedAccId ??= defaultAccId;
+
+      Category? cat = item.matchResult.category;
+      cat ??= categories.where((c) => c.name.toLowerCase() == 'general' || c.name.toLowerCase() == 'other').firstOrNull;
+      cat ??= categories.firstOrNull;
+
+      if (cat == null || resolvedAccId == null) continue;
+
+      final name = item.categoryCandidate?.isNotEmpty == true
+          ? item.categoryCandidate!
+          : cat.name;
+
+      final txn = Transaction()
+        ..name = name
+        ..nameLower = name.toLowerCase()
+        ..amount = item.amount!
+        ..type = item.type
+        ..categoryId = cat.id.toString()
+        ..accountId = resolvedAccId
+        ..quickAddNote = payload.rawPrompt
+        ..importSource = 'quick_add'
+        ..createdAt = DateTime.now()
+        ..updatedAt = DateTime.now();
+
+      await ref.read(transactionListProvider.notifier).add(txn);
+      addedCount++;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      payload.isCommitted = true;
+    });
+    showKuberSnackBar(
+      context,
+      addedCount == 1 ? 'Transaction added' : '$addedCount transactions added',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,6 +229,7 @@ class _KuberMessageState extends State<_KuberMessage>
 
     final thinking = msg.thinking;
     final viz = msg.vizPayload;
+    final preview = msg.previewPayload;
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -176,6 +242,10 @@ class _KuberMessageState extends State<_KuberMessage>
             children: [
               Text.rich(TextSpan(
                   children: buildRichSpans(msg.text, _textStyle, cs.primary))),
+              if (preview != null) ...[
+                const SizedBox(height: KuberSpacing.sm),
+                _buildPreview(cs, preview),
+              ],
               if (viz != null) ...[
                 const SizedBox(height: KuberSpacing.sm),
                 _buildViz(viz),
@@ -203,6 +273,111 @@ class _KuberMessageState extends State<_KuberMessage>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPreview(ColorScheme cs, TransactionPreviewPayload payload) {
+    if (payload.missingDefaultAccount || payload.missingCategories || payload.missingAccounts) {
+      String title = 'No default account set';
+      String desc = 'Set a default account in settings to add transactions from Ask Kuber.';
+      String route = '/more/settings';
+      String btnLabel = 'Set default account';
+
+      if (payload.missingCategories) {
+        title = 'No categories found';
+        desc = 'Set up a category first before adding transactions.';
+        route = '/more/categories';
+        btnLabel = 'Set up category';
+      } else if (payload.missingAccounts) {
+        title = 'No accounts found';
+        desc = 'Add an account first before adding transactions.';
+        route = '/more/accounts';
+        btnLabel = 'Add an account';
+      }
+
+      return Container(
+        margin: const EdgeInsets.only(top: KuberSpacing.xs),
+        padding: const EdgeInsets.all(KuberSpacing.md),
+        decoration: BoxDecoration(
+          color: cs.error.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(KuberRadius.lg),
+          border: Border.all(color: cs.error.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, size: 20, color: cs.error),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: localeFont(fontSize: 14, fontWeight: FontWeight.w700, color: cs.error),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              desc,
+              style: localeFont(fontSize: 13, color: cs.onSurfaceVariant, height: 1.4),
+            ),
+            const SizedBox(height: KuberSpacing.md),
+            AppButton(
+              label: btnLabel,
+              type: AppButtonType.primary,
+              onPressed: () => context.push(route),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < payload.items.length; i++) ...[
+          if (i > 0) const SizedBox(height: KuberSpacing.xs),
+          TransactionPreviewCard(
+            item: payload.items[i],
+            dense: true,
+          ),
+        ],
+        const SizedBox(height: KuberSpacing.sm),
+        if (!payload.isCommitted)
+          AppButton(
+            label: payload.items.length > 1
+                ? 'Add ${payload.items.length} transactions'
+                : 'Add transaction',
+            type: AppButtonType.primary,
+            onPressed: () => _commitPreview(payload),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: cs.tertiary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: cs.tertiary.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle_rounded, size: 16, color: cs.tertiary),
+                const SizedBox(width: 6),
+                Text(
+                  payload.items.length == 1
+                      ? 'Added transaction'
+                      : 'Added ${payload.items.length} transactions',
+                  style: localeFont(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: cs.tertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 
