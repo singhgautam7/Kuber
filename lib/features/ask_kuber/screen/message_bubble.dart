@@ -9,6 +9,7 @@ import '../models/viz_payload.dart';
 import 'budget_status_viz.dart';
 import 'thinking_panel.dart';
 import 'top_categories_viz.dart';
+import 'transaction_preview_viz.dart';
 
 /// Dispatches to the user or Kuber message. No avatar on either side. When
 /// [stream] is supplied (the actively-typing Kuber message), the text is read
@@ -178,7 +179,7 @@ class _KuberMessageState extends State<_KuberMessage>
                   children: buildRichSpans(msg.text, _textStyle, cs.primary))),
               if (viz != null) ...[
                 const SizedBox(height: KuberSpacing.sm),
-                _buildViz(viz),
+                _buildViz(viz, msg),
               ],
               if (thinking != null)
                 ThinkingMetaRow(
@@ -206,8 +207,10 @@ class _KuberMessageState extends State<_KuberMessage>
     );
   }
 
-  Widget _buildViz(VizPayload viz) => switch (viz) {
+  Widget _buildViz(VizPayload viz, ChatMessage msg) => switch (viz) {
         TopCategoriesViz() => TopCategoriesVizView(data: viz),
         BudgetStatusViz() => BudgetStatusVizView(data: viz),
+        TransactionPreviewViz() =>
+          TransactionPreviewVizView(message: msg, viz: viz),
       };
 }

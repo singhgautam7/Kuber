@@ -243,6 +243,7 @@ class WidgetSyncService {
         'sip' => 'more/investments',
         'recurring' => 'more/recurring',
         'ledger' => 'more/ledger',
+        'creditCard' => 'more/accounts',
         _ => 'more/upcoming-events',
       };
 

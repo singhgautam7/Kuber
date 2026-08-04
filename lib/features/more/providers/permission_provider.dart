@@ -15,6 +15,7 @@ class PermissionStates {
   final AppPermissionStatus notifications;
   final AppPermissionStatus storage;
   final AppPermissionStatus sms;
+  final AppPermissionStatus microphone;
   final bool isBiometricAvailable;
   final bool isBiometricEnabled;
 
@@ -22,6 +23,7 @@ class PermissionStates {
     required this.notifications,
     required this.storage,
     required this.sms,
+    required this.microphone,
     required this.isBiometricAvailable,
     required this.isBiometricEnabled,
   });
@@ -30,6 +32,7 @@ class PermissionStates {
     AppPermissionStatus? notifications,
     AppPermissionStatus? storage,
     AppPermissionStatus? sms,
+    AppPermissionStatus? microphone,
     bool? isBiometricAvailable,
     bool? isBiometricEnabled,
   }) {
@@ -37,6 +40,7 @@ class PermissionStates {
       notifications: notifications ?? this.notifications,
       storage: storage ?? this.storage,
       sms: sms ?? this.sms,
+      microphone: microphone ?? this.microphone,
       isBiometricAvailable: isBiometricAvailable ?? this.isBiometricAvailable,
       isBiometricEnabled: isBiometricEnabled ?? this.isBiometricEnabled,
     );
@@ -88,6 +92,9 @@ class PermissionNotifier extends AsyncNotifier<PermissionStates> {
       smsStatus = AppPermissionStatus.notRequired;
     }
 
+    // Check Microphone (used by the optional Quick Add voice input).
+    final micStatus = await Permission.microphone.status;
+
     // Check Biometrics
     final isAvailable = await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
     final isEnabled = prefs.getBool(PrefsKeys.biometricsEnabled) ?? false;
@@ -98,6 +105,9 @@ class PermissionNotifier extends AsyncNotifier<PermissionStates> {
           : AppPermissionStatus.denied,
       storage: storageStatus,
       sms: smsStatus,
+      microphone: micStatus.isGranted
+          ? AppPermissionStatus.granted
+          : AppPermissionStatus.denied,
       isBiometricAvailable: isAvailable,
       isBiometricEnabled: isEnabled,
     );
@@ -120,6 +130,11 @@ class PermissionNotifier extends AsyncNotifier<PermissionStates> {
 
   Future<void> requestSms() async {
     await Permission.sms.request();
+    await refresh();
+  }
+
+  Future<void> requestMicrophone() async {
+    await Permission.microphone.request();
     await refresh();
   }
 }

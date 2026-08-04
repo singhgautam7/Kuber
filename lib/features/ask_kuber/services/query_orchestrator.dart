@@ -1,3 +1,4 @@
+import '../handlers/add_transaction_handler.dart';
 import '../handlers/average_expense_handler.dart';
 import '../handlers/balance_handler.dart';
 import '../handlers/biggest_expense_handler.dart';
@@ -54,6 +55,10 @@ class QueryOrchestrator {
           // Functional help.
           HowToHandler(),
           LanguageHandler(),
+          // Log-a-transaction intent -> interactive preview (never auto-adds).
+          // Narrow guards (add cue + amount + not a data-query phrasing) keep
+          // real questions flowing through to the data handlers below.
+          AddTransactionHandler(),
           // Kuber Notes lookups run before spending/counts so "what did I
           // note this month" isn't swallowed by the data handlers.
           NotesHandler(),

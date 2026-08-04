@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../quick_add/services/quick_add_resolver.dart';
+
 /// Optional inline visualization rendered inside a Kuber bubble, below the
 /// text. Augments the plain-English answer, never replaces it.
 sealed class VizPayload {
@@ -10,6 +12,17 @@ sealed class VizPayload {
   static VizPayload? fromJson(Map<String, dynamic>? json) {
     if (json == null) return null;
     switch (json['kind'] as String?) {
+      case 'transactionPreview':
+        return TransactionPreviewViz(
+          originalMessage: json['originalMessage'] as String? ?? '',
+          drafts: (json['drafts'] as List<dynamic>? ?? const [])
+              .map((e) => QuickAddDraft.fromJson(e as Map<String, dynamic>))
+              .toList(),
+          state: json['state'] as String? ?? 'preview',
+          writtenIds: (json['writtenIds'] as List<dynamic>? ?? const [])
+              .map((e) => (e as num).toInt())
+              .toList(),
+        );
       case 'topCategories':
         return TopCategoriesViz(
           (json['rows'] as List<dynamic>? ?? const [])
@@ -28,6 +41,43 @@ sealed class VizPayload {
         return null;
     }
   }
+}
+
+/// An interactive transaction-preview bubble: one or more parsed lines the user
+/// confirms before anything is written. [state] and [writtenIds] are mutable so
+/// the bubble can transform in place (preview -> confirmed / cancelled) and its
+/// row can be persisted, exactly like [ChatMessage.text] is mutable during
+/// streaming. Never auto-adds.
+class TransactionPreviewViz extends VizPayload {
+  /// The user's original message, stored as each transaction's source text.
+  final String originalMessage;
+
+  /// The resolved lines. Re-snapshotted (with confirmed/cancelled status) when
+  /// the bubble transforms; the preview render re-resolves from
+  /// [originalMessage] for freshness. Mutable, like [state]/[writtenIds].
+  List<QuickAddDraft> drafts;
+
+  /// 'preview' | 'confirmed' | 'cancelled'.
+  String state;
+
+  /// Transaction ids written on confirm, for Undo.
+  List<int> writtenIds;
+
+  TransactionPreviewViz({
+    required this.originalMessage,
+    required this.drafts,
+    this.state = 'preview',
+    this.writtenIds = const [],
+  });
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'kind': 'transactionPreview',
+        'originalMessage': originalMessage,
+        'drafts': drafts.map((d) => d.toJson()).toList(),
+        'state': state,
+        'writtenIds': writtenIds,
+      };
 }
 
 /// Ranked horizontal-bar list of top spending categories.

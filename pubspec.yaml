@@ -35,6 +35,9 @@ dependencies:
   intl: ^0.20.2
   shared_preferences: ^2.5.3
   permission_handler: ^12.0.1
+  # On-device speech-to-text for Quick Add voice input (offline, streaming,
+  # exposes mic amplitude for the waveform). No comparable in-repo alternative.
+  speech_to_text: ^7.0.0
   csv: ^8.0.0
   file_picker: ^11.0.1
   share_plus: ^12.0.1

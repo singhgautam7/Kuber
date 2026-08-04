@@ -43,6 +43,7 @@ import '../providers/account_provider.dart';
 // From the pickers-and-setup pass:
 import '../../../shared/widgets/icon_picker_bottom_sheet.dart';
 import '../../../shared/widgets/color_picker_bottom_sheet.dart';
+import 'credit_billing_cycle_section.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
   final Account? account;
@@ -61,6 +62,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
   late String _selectedType;
   String? _selectedIcon;
   int? _selectedColor;
+
+  // Credit-card billing cycle (only meaningful when type == credit).
+  int? _billGenerationDay;
+  int? _paymentDueDay;
+  bool _billReminder = false;
+  bool _paymentReminder = false;
 
   bool get _isEditing => widget.account != null;
   bool get _isCreditCard => _selectedType == 'credit';
@@ -87,6 +94,10 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     if (a?.isCreditCard == true) _selectedType = 'credit';
     _selectedIcon = a?.icon ?? IconMapper.kAccountIconKeys.first;
     _selectedColor = a?.colorValue ?? AppColorPalette.kVibrant.first;
+    _billGenerationDay = a?.billGenerationDay;
+    _paymentDueDay = a?.paymentDueDay;
+    _billReminder = a?.billGenerationReminderEnabled ?? false;
+    _paymentReminder = a?.paymentDueReminderEnabled ?? false;
   }
 
   @override
@@ -124,7 +135,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           _isCreditCard ? double.tryParse(_limitController.text) : null
       ..last4Digits = _last4Controller.text.isNotEmpty
           ? _last4Controller.text
-          : null;
+          : null
+      // Credit-card billing cycle — cleared when the account is not a card.
+      ..billGenerationDay = _isCreditCard ? _billGenerationDay : null
+      ..paymentDueDay = _isCreditCard ? _paymentDueDay : null
+      ..billGenerationReminderEnabled = _isCreditCard && _billReminder
+      ..paymentDueReminderEnabled = _isCreditCard && _paymentReminder;
 
     ref.read(allAccountsProvider.notifier).add(account).then((id) {
       if (!_isEditing) {
@@ -299,6 +315,21 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               ),
           ],
         ),
+
+        // ── BILLING CYCLE (credit card only) ─────────────────────────
+        if (_isCreditCard) ...[
+          const SizedBox(height: 22),
+          CreditBillingCycleSection(
+            billDay: _billGenerationDay,
+            dueDay: _paymentDueDay,
+            billReminder: _billReminder,
+            dueReminder: _paymentReminder,
+            onBillDayChanged: (v) => setState(() => _billGenerationDay = v),
+            onDueDayChanged: (v) => setState(() => _paymentDueDay = v),
+            onBillReminderChanged: (v) => setState(() => _billReminder = v),
+            onDueReminderChanged: (v) => setState(() => _paymentReminder = v),
+          ),
+        ],
 
         const SizedBox(height: 24),
         // Save lives in the parent (bottom sheet or screen scaffold).

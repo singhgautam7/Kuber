@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/isar_service.dart';
 // Imported for the generated Isar collection accessors (isar.reminders, etc).
+import '../../accounts/data/account.dart';
 import '../../investments/data/investment.dart';
 import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
@@ -17,7 +18,7 @@ import '../engine/event_aggregator.dart';
 const int kUpcomingEventsMaxDays = 90;
 
 /// Live upcoming events for the next [kUpcomingEventsMaxDays] days.
-/// Re-aggregates when any of the 5 source collections changes.
+/// Re-aggregates when any of the 6 source collections changes.
 final upcomingEventsProvider =
     StreamProvider<List<UpcomingEvent>>((ref) {
   final isar = ref.watch(isarProvider);
@@ -41,6 +42,7 @@ final upcomingEventsProvider =
     isar.investments.watchLazy().listen((_) => emit()),
     isar.recurringRules.watchLazy().listen((_) => emit()),
     isar.ledgers.watchLazy().listen((_) => emit()),
+    isar.accounts.watchLazy().listen((_) => emit()),
   ];
 
   ref.onDispose(() {

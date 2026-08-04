@@ -8,6 +8,7 @@ import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
 import '../data/account_repository.dart';
+import '../data/credit_card_reminder_service.dart';
 
 /// Set to true from AppScaffold to trigger the account form sheet on the Accounts tab.
 final triggerAddAccountProvider = StateProvider<bool>((ref) => false);
@@ -17,6 +18,12 @@ final pendingAccountSelectionProvider = StateProvider<int?>((ref) => null);
 
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository(ref.watch(tutorialAwareIsarProvider));
+});
+
+/// Schedules/cancels OS reminders for credit-card billing cycles.
+final creditCardReminderServiceProvider =
+    Provider<CreditCardReminderService>((ref) {
+  return CreditCardReminderService(ref.watch(tutorialAwareIsarProvider));
 });
 
 /// Source of truth: every account, including disabled (archived) ones. Used by
@@ -38,12 +45,16 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
   Future<int> add(Account a) async {
     final id = await ref.read(accountRepositoryProvider).save(a);
     ref.invalidateSelf();
+    // Handles add and edit (the form reuses this path): (re)arm or clear the
+    // card's billing reminders from its current state. a.id is set post-save.
+    unawaited(ref.read(creditCardReminderServiceProvider).reschedule(a));
     return id;
   }
 
   Future<void> delete(int id) async {
     await ref.read(accountRepositoryProvider).delete(id);
     ref.invalidateSelf();
+    unawaited(ref.read(creditCardReminderServiceProvider).cancelFor(id));
   }
 
   /// Hides (or restores) an account without deleting it. Existing transactions
@@ -55,6 +66,9 @@ class AccountListNotifier extends AsyncNotifier<List<Account>> {
     account.isDisabled = disabled;
     await repo.save(account);
     ref.invalidateSelf();
+    // Archiving cancels billing reminders; restoring re-arms them.
+    final reminders = ref.read(creditCardReminderServiceProvider);
+    unawaited(disabled ? reminders.cancelFor(id) : reminders.reschedule(account));
   }
 }
 

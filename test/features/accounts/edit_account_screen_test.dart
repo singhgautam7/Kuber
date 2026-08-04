@@ -150,6 +150,29 @@ void main() {
     await cleanTearDown(tester);
   });
 
+  testWidgets(
+      'unchanged balance with float residue creates no adjustment (regression)',
+      (tester) async {
+    // A computed balance carrying sub-paise floating-point residue
+    // (0.1 + 0.2 == 0.30000000000000004). The hero shows/parses the rounded
+    // "0.30"; without paise-rounding the diff would be a phantom ~5e-17 and
+    // spuriously offer a ₹0.00 adjustment on save.
+    final account = await seedBankAccount(tester, initialBalance: 0.1 + 0.2);
+    final container = await buildContainer(tester);
+    await pumpScreen(tester, container, account);
+
+    // Do not touch the hero.
+    await tapAndWaitForPop(tester, find.text('Save changes'));
+    await settle(tester);
+
+    expect(find.text('Create adjustment transaction?'), findsNothing);
+    expect(await adjustmentCount(tester), 0);
+
+    await tester.pump(const Duration(seconds: 8));
+    container.dispose();
+    await cleanTearDown(tester);
+  });
+
   testWidgets('changed balance shows modal and creates the adjustment',
       (tester) async {
     final account = await seedBankAccount(tester, initialBalance: 1000);

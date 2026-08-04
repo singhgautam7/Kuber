@@ -20,6 +20,25 @@ class TransactionRepository extends BaseRepository<Transaction> {
     return isar.writeTxn(() => isar.transactions.put(t));
   }
 
+  /// Persists many transactions in a single write transaction (atomic — either
+  /// all land or none do). Used by Quick Add / Ask Kuber confirm so a
+  /// multi-line entry never half-commits. Returns the assigned ids in order.
+  Future<List<int>> saveAll(List<Transaction> txns) async {
+    if (txns.isEmpty) return const [];
+    final now = DateTime.now();
+    for (final t in txns) {
+      t.nameLower = t.name.toLowerCase();
+      t.updatedAt = now;
+    }
+    final ids = <int>[];
+    await isar.writeTxn(() async {
+      for (final t in txns) {
+        ids.add(await isar.transactions.put(t));
+      }
+    });
+    return ids;
+  }
+
   Future<void> delete(Id id) async {
     await isar.writeTxn(() => isar.transactions.delete(id));
   }

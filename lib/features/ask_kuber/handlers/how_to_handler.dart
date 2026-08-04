@@ -142,6 +142,84 @@ class HowToHandler extends QueryHandler {
       ),
     ),
     (
+      // Placed before "pay credit card" so the bill-reminder intent wins over
+      // the payment intent (first match wins on substring).
+      ['credit card bill reminder', 'credit card reminder', 'bill generation day',
+        'payment due day', 'set bill reminder', 'billing cycle',
+        'remind me credit card', 'credit card due reminder', 'when is my bill',
+        'credit card billing'],
+      HowToResponse(
+        'Open More, Accounts, edit your credit card, then set the Bill '
+        'generation day and Payment due day and turn on Remind me for each.',
+        deepLinkRoute: '/more/accounts',
+        deepLinkLabel: 'Take me there',
+      ),
+    ),
+    (
+      ['pay credit card', 'pay my credit card', 'credit card bill',
+        'pay cc bill', 'clear credit card', 'pay off credit card',
+        'how to pay credit card', 'paying credit card'],
+      HowToResponse(
+        'Use a Transfer. Tap the + button and choose Transfer, then set your '
+        'credit card as the To account and your bank as the From account. That '
+        'records the payment and lowers the card balance.',
+        deepLinkRoute: '/add-transaction?type=transfer',
+        deepLinkLabel: 'Open Transfer',
+      ),
+    ),
+    (
+      ['generate mock data', 'mock data', 'sample data', 'test data',
+        'fake data', 'dummy data', 'how to generate mock', 'demo data'],
+      HowToResponse(
+        'More, Data, then under Danger Zone tap Generate Mock Data. It replaces '
+        'everything with realistic sample data for testing.',
+        deepLinkRoute: '/more/data',
+        deepLinkLabel: 'Take me there',
+      ),
+    ),
+    (
+      ['clear data', 'clear all data', 'delete all data', 'remove mock data',
+        'i see mock data', 'get rid of mock data', 'reset app data',
+        'erase data', 'how do i clear', 'wipe my data', 'delete everything'],
+      HowToResponse(
+        'More, Data, then under Danger Zone tap Clear All Data. If you are '
+        'seeing sample data from Generate Mock Data, this removes it. Back up '
+        'first if you want to keep anything.',
+        deepLinkRoute: '/more/data',
+        deepLinkLabel: 'Take me there',
+      ),
+    ),
+    (
+      ['set default account', 'default account', 'change default account',
+        'no default account', 'set a default account', 'pick a default account'],
+      HowToResponse(
+        'More, Settings, under Transactions choose your Default Account. New '
+        'quick entries and Ask Kuber additions use it.',
+        deepLinkRoute: '/more/settings',
+        deepLinkLabel: 'Take me there',
+      ),
+    ),
+    (
+      ['enable dev tools', 'developer mode', 'dev mode', 'dev tools',
+        'unlock dev', 'developer tools', 'developer options'],
+      HowToResponse(
+        'Open More, About and tap the app version a few times. Dev Tools then '
+        'appears under More.',
+        deepLinkRoute: '/more/about',
+        deepLinkLabel: 'Open About',
+      ),
+    ),
+    (
+      ['restore backup', 'restore my data', 'restore from backup',
+        'import backup', 'recover my data', 'restore data', 'load a backup'],
+      HowToResponse(
+        'More, Data, Import Data. Pick your backup file to restore it. Merge '
+        'keeps what you have, Override replaces it.',
+        deepLinkRoute: '/more/data',
+        deepLinkLabel: 'Take me there',
+      ),
+    ),
+    (
       ['how do i see my insights', 'where are stories', 'where are my stories',
         'money stories', 'see my insights', 'view stories', 'how do i see insights'],
       HowToResponse(

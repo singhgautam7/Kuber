@@ -26,6 +26,7 @@ import 'package:kuber/features/tools/saved/data/calculator_recent_use.dart';
 import 'package:kuber/features/notes/data/kuber_note.dart';
 import 'package:kuber/features/reminders/data/reminder.dart';
 import 'package:kuber/features/pro/data/user_entitlement.dart';
+import 'package:kuber/features/search/data/recent_search.dart';
 
 const _allSchemas = [
   TransactionSchema,
@@ -54,6 +55,7 @@ const _allSchemas = [
   KuberNoteSchema,
   ReminderSchema,
   UserEntitlementSchema,
+  RecentSearchSchema,
 ];
 
 bool _isarInitialized = false;

@@ -17,39 +17,59 @@ const AccountSchema = CollectionSchema(
   name: r'Account',
   id: -6646797162501847804,
   properties: {
-    r'colorValue': PropertySchema(
+    r'billGenerationDay': PropertySchema(
       id: 0,
+      name: r'billGenerationDay',
+      type: IsarType.long,
+    ),
+    r'billGenerationReminderEnabled': PropertySchema(
+      id: 1,
+      name: r'billGenerationReminderEnabled',
+      type: IsarType.bool,
+    ),
+    r'colorValue': PropertySchema(
+      id: 2,
       name: r'colorValue',
       type: IsarType.long,
     ),
     r'creditLimit': PropertySchema(
-      id: 1,
+      id: 3,
       name: r'creditLimit',
       type: IsarType.double,
     ),
-    r'icon': PropertySchema(id: 2, name: r'icon', type: IsarType.string),
+    r'icon': PropertySchema(id: 4, name: r'icon', type: IsarType.string),
     r'initialBalance': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'initialBalance',
       type: IsarType.double,
     ),
     r'isCreditCard': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'isCreditCard',
       type: IsarType.bool,
     ),
     r'isDisabled': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'isDisabled',
       type: IsarType.bool,
     ),
     r'last4Digits': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'last4Digits',
       type: IsarType.string,
     ),
-    r'name': PropertySchema(id: 7, name: r'name', type: IsarType.string),
-    r'type': PropertySchema(id: 8, name: r'type', type: IsarType.string),
+    r'name': PropertySchema(id: 9, name: r'name', type: IsarType.string),
+    r'paymentDueDay': PropertySchema(
+      id: 10,
+      name: r'paymentDueDay',
+      type: IsarType.long,
+    ),
+    r'paymentDueReminderEnabled': PropertySchema(
+      id: 11,
+      name: r'paymentDueReminderEnabled',
+      type: IsarType.bool,
+    ),
+    r'type': PropertySchema(id: 12, name: r'type', type: IsarType.string),
   },
 
   estimateSize: _accountEstimateSize,
@@ -96,15 +116,19 @@ void _accountSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.colorValue);
-  writer.writeDouble(offsets[1], object.creditLimit);
-  writer.writeString(offsets[2], object.icon);
-  writer.writeDouble(offsets[3], object.initialBalance);
-  writer.writeBool(offsets[4], object.isCreditCard);
-  writer.writeBool(offsets[5], object.isDisabled);
-  writer.writeString(offsets[6], object.last4Digits);
-  writer.writeString(offsets[7], object.name);
-  writer.writeString(offsets[8], object.type);
+  writer.writeLong(offsets[0], object.billGenerationDay);
+  writer.writeBool(offsets[1], object.billGenerationReminderEnabled);
+  writer.writeLong(offsets[2], object.colorValue);
+  writer.writeDouble(offsets[3], object.creditLimit);
+  writer.writeString(offsets[4], object.icon);
+  writer.writeDouble(offsets[5], object.initialBalance);
+  writer.writeBool(offsets[6], object.isCreditCard);
+  writer.writeBool(offsets[7], object.isDisabled);
+  writer.writeString(offsets[8], object.last4Digits);
+  writer.writeString(offsets[9], object.name);
+  writer.writeLong(offsets[10], object.paymentDueDay);
+  writer.writeBool(offsets[11], object.paymentDueReminderEnabled);
+  writer.writeString(offsets[12], object.type);
 }
 
 Account _accountDeserialize(
@@ -114,16 +138,20 @@ Account _accountDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Account();
-  object.colorValue = reader.readLongOrNull(offsets[0]);
-  object.creditLimit = reader.readDoubleOrNull(offsets[1]);
-  object.icon = reader.readStringOrNull(offsets[2]);
+  object.billGenerationDay = reader.readLongOrNull(offsets[0]);
+  object.billGenerationReminderEnabled = reader.readBool(offsets[1]);
+  object.colorValue = reader.readLongOrNull(offsets[2]);
+  object.creditLimit = reader.readDoubleOrNull(offsets[3]);
+  object.icon = reader.readStringOrNull(offsets[4]);
   object.id = id;
-  object.initialBalance = reader.readDouble(offsets[3]);
-  object.isCreditCard = reader.readBool(offsets[4]);
-  object.isDisabled = reader.readBool(offsets[5]);
-  object.last4Digits = reader.readStringOrNull(offsets[6]);
-  object.name = reader.readString(offsets[7]);
-  object.type = reader.readString(offsets[8]);
+  object.initialBalance = reader.readDouble(offsets[5]);
+  object.isCreditCard = reader.readBool(offsets[6]);
+  object.isDisabled = reader.readBool(offsets[7]);
+  object.last4Digits = reader.readStringOrNull(offsets[8]);
+  object.name = reader.readString(offsets[9]);
+  object.paymentDueDay = reader.readLongOrNull(offsets[10]);
+  object.paymentDueReminderEnabled = reader.readBool(offsets[11]);
+  object.type = reader.readString(offsets[12]);
   return object;
 }
 
@@ -137,20 +165,28 @@ P _accountDeserializeProp<P>(
     case 0:
       return (reader.readLongOrNull(offset)) as P;
     case 1:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 3:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
-    case 5:
-      return (reader.readBool(offset)) as P;
-    case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readDouble(offset)) as P;
+    case 6:
+      return (reader.readBool(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
+      return (reader.readLongOrNull(offset)) as P;
+    case 11:
+      return (reader.readBool(offset)) as P;
+    case 12:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -249,6 +285,91 @@ extension AccountQueryWhere on QueryBuilder<Account, Account, QWhereClause> {
 
 extension AccountQueryFilter
     on QueryBuilder<Account, Account, QFilterCondition> {
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationDayIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'billGenerationDay'),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationDayIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'billGenerationDay'),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationDayEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'billGenerationDay', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationDayGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'billGenerationDay',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationDayLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'billGenerationDay',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationDayBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'billGenerationDay',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  billGenerationReminderEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'billGenerationReminderEnabled',
+          value: value,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterFilterCondition> colorValueIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1037,6 +1158,92 @@ extension AccountQueryFilter
     });
   }
 
+  QueryBuilder<Account, Account, QAfterFilterCondition> paymentDueDayIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'paymentDueDay'),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  paymentDueDayIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'paymentDueDay'),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition> paymentDueDayEqualTo(
+    int? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'paymentDueDay', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  paymentDueDayGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'paymentDueDay',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition> paymentDueDayLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'paymentDueDay',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition> paymentDueDayBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'paymentDueDay',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterFilterCondition>
+  paymentDueReminderEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'paymentDueReminderEnabled',
+          value: value,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterFilterCondition> typeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1191,6 +1398,32 @@ extension AccountQueryLinks
     on QueryBuilder<Account, Account, QFilterCondition> {}
 
 extension AccountQuerySortBy on QueryBuilder<Account, Account, QSortBy> {
+  QueryBuilder<Account, Account, QAfterSortBy> sortByBillGenerationDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy> sortByBillGenerationDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationDay', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  sortByBillGenerationReminderEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationReminderEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  sortByBillGenerationReminderEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationReminderEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterSortBy> sortByColorValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorValue', Sort.asc);
@@ -1287,6 +1520,32 @@ extension AccountQuerySortBy on QueryBuilder<Account, Account, QSortBy> {
     });
   }
 
+  QueryBuilder<Account, Account, QAfterSortBy> sortByPaymentDueDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy> sortByPaymentDueDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueDay', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  sortByPaymentDueReminderEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueReminderEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  sortByPaymentDueReminderEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueReminderEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterSortBy> sortByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.asc);
@@ -1302,6 +1561,32 @@ extension AccountQuerySortBy on QueryBuilder<Account, Account, QSortBy> {
 
 extension AccountQuerySortThenBy
     on QueryBuilder<Account, Account, QSortThenBy> {
+  QueryBuilder<Account, Account, QAfterSortBy> thenByBillGenerationDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy> thenByBillGenerationDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationDay', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  thenByBillGenerationReminderEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationReminderEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  thenByBillGenerationReminderEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'billGenerationReminderEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterSortBy> thenByColorValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorValue', Sort.asc);
@@ -1410,6 +1695,32 @@ extension AccountQuerySortThenBy
     });
   }
 
+  QueryBuilder<Account, Account, QAfterSortBy> thenByPaymentDueDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy> thenByPaymentDueDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueDay', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  thenByPaymentDueReminderEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueReminderEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Account, Account, QAfterSortBy>
+  thenByPaymentDueReminderEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'paymentDueReminderEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<Account, Account, QAfterSortBy> thenByType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'type', Sort.asc);
@@ -1425,6 +1736,19 @@ extension AccountQuerySortThenBy
 
 extension AccountQueryWhereDistinct
     on QueryBuilder<Account, Account, QDistinct> {
+  QueryBuilder<Account, Account, QDistinct> distinctByBillGenerationDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'billGenerationDay');
+    });
+  }
+
+  QueryBuilder<Account, Account, QDistinct>
+  distinctByBillGenerationReminderEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'billGenerationReminderEnabled');
+    });
+  }
+
   QueryBuilder<Account, Account, QDistinct> distinctByColorValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'colorValue');
@@ -1479,6 +1803,19 @@ extension AccountQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Account, Account, QDistinct> distinctByPaymentDueDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'paymentDueDay');
+    });
+  }
+
+  QueryBuilder<Account, Account, QDistinct>
+  distinctByPaymentDueReminderEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'paymentDueReminderEnabled');
+    });
+  }
+
   QueryBuilder<Account, Account, QDistinct> distinctByType({
     bool caseSensitive = true,
   }) {
@@ -1493,6 +1830,19 @@ extension AccountQueryProperty
   QueryBuilder<Account, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Account, int?, QQueryOperations> billGenerationDayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'billGenerationDay');
+    });
+  }
+
+  QueryBuilder<Account, bool, QQueryOperations>
+  billGenerationReminderEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'billGenerationReminderEnabled');
     });
   }
 
@@ -1541,6 +1891,19 @@ extension AccountQueryProperty
   QueryBuilder<Account, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<Account, int?, QQueryOperations> paymentDueDayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'paymentDueDay');
+    });
+  }
+
+  QueryBuilder<Account, bool, QQueryOperations>
+  paymentDueReminderEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'paymentDueReminderEnabled');
     });
   }
 

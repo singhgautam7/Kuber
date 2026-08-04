@@ -431,8 +431,8 @@ class _SelectionActionBar extends ConsumerWidget {
     // would slide under the system nav bar (the app nav bar is hidden during
     // selection, so nothing else clears it).
     final bottomInset = systemNavBarInset(context);
-    // On modern nav bar, add generous bottom clearance so curved-screen edges
-    // don't clip the action buttons (the floating nav bar normally fills this space).
+    // On the modern floating nav bar, add generous bottom clearance so
+    // curved-screen edges don't clip the action buttons.
     final bottomPad = isModern ? bottomInset + KuberSpacing.xl : bottomInset;
 
     return Material(

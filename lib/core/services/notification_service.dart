@@ -419,7 +419,71 @@ class NotificationService {
     }
   }
 
+  /// Schedules a credit-card billing reminder (bill generated / payment due) at
+  /// [when]. Reuses the existing `kuber_reminders` channel — these are money
+  /// reminders the user explicitly opted into via the account's "Remind me"
+  /// toggle — but carries no "Mark done"/"Snooze" actions (they don't apply to
+  /// an auto-generated billing reminder). Like [scheduleReminderNotification],
+  /// scheduling is duration-based and inexact; a missed alarm is healed by
+  /// on-open maintenance. [id] must be stable per card+kind so a reschedule
+  /// replaces the previous alarm.
+  Future<void> scheduleCreditCardNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime when,
+    String? payload,
+  }) async {
+    await maybeRequestPermissionOnce();
+    _ensureTimezones();
+
+    final delay = when.difference(DateTime.now());
+    if (delay.isNegative) return;
+    final scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
+
+    const androidDetails = AndroidNotificationDetails(
+      'kuber_reminders',
+      'Reminders',
+      channelDescription: 'Money reminder alerts',
+      importance: Importance.high,
+      priority: Priority.high,
+      autoCancel: true,
+    );
+
+    const darwinDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+      macOS: darwinDetails,
+    );
+
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: details,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: payload,
+      );
+    } catch (e) {
+      // Silently fail — a missed alarm is healed by on-open maintenance.
+    }
+  }
+
   Future<void> cancel(int id) async {
-    await _notificationsPlugin.cancel(id: id);
+    try {
+      await _notificationsPlugin.cancel(id: id);
+    } catch (e) {
+      // Silently fail — a stale alarm is harmless and is re-evaluated on the
+      // next on-open maintenance pass. Also guards environments where the
+      // plugin isn't registered (e.g. widget tests).
+    }
   }
 }

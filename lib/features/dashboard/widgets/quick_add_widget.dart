@@ -16,7 +16,8 @@ import '../../transactions/providers/transaction_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/models/info_config.dart';
-import '../utils/quick_add_parser.dart';
+import '../../quick_add/services/quick_add_parser.dart';
+import '../../../core/utils/fuzzy_category_matcher.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 
 class QuickAddWidget extends ConsumerStatefulWidget {
@@ -42,7 +43,7 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     final input = (override ?? _controller.text).trim();
     if (input.isEmpty) return;
 
-    final parsed = parseQuickAdd(input);
+    final parsed = parseQuickAddSingle(input);
 
     if (parsed.amount == null || parsed.amount! <= 0) {
       setState(() => _error = l10n.quickAddInvalidAmount);
@@ -82,14 +83,15 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       return;
     }
 
-    // Resolve or create category
-    final catHint = (parsed.category ?? '').toLowerCase().trim();
+    // Resolve or create category. Fuzzy match against the user's real
+    // categories (normalized, singular/plural aware) — never creates a
+    // duplicate of an existing one.
+    final catHint = parsed.categoryHint?.trim() ?? '';
     var categories = ref.read(categoryListProvider).valueOrNull ?? [];
 
     Category? resolvedCategory;
     if (catHint.isNotEmpty) {
-      resolvedCategory =
-          categories.where((c) => c.name.toLowerCase().contains(catHint)).firstOrNull;
+      resolvedCategory = matchCategory(catHint, categories, type: parsed.type);
     }
     resolvedCategory ??= categories
         .where((c) =>
@@ -102,12 +104,13 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
         ..name = catHint.toTitleCase()
         ..icon = 'circle'
         ..colorValue = 0xFF6B7280
-        ..type = 'expense';
+        ..type = parsed.type == 'income' ? 'income' : 'expense';
       await ref.read(categoryListProvider.notifier).add(newCat);
       categories = await ref.read(categoryListProvider.future);
-      resolvedCategory = categories
-          .where((c) => c.name.toLowerCase() == catHint.toLowerCase())
-          .firstOrNull;
+      resolvedCategory = matchCategory(catHint, categories, type: parsed.type) ??
+          categories
+              .where((c) => c.name.toLowerCase() == catHint.toLowerCase())
+              .firstOrNull;
     }
 
     if (resolvedCategory == null) {
@@ -121,16 +124,18 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     }
 
     // Save transaction
-    final name = parsed.category != null
-        ? parsed.category!.toTitleCase()
+    final name = (parsed.categoryHint != null &&
+            parsed.categoryHint!.trim().isNotEmpty)
+        ? parsed.categoryHint!.toTitleCase()
         : 'Quick Add';
     final txn = Transaction()
       ..name = name
       ..nameLower = name.toLowerCase()
       ..amount = parsed.amount!
-      ..type = 'expense'
+      ..type = parsed.type
       ..categoryId = resolvedCategory.id.toString()
       ..accountId = resolvedAccountId
+      ..importSource = 'quick_add'
       ..quickAddNote = input
       ..createdAt = DateTime.now()
       ..updatedAt = DateTime.now();
@@ -193,6 +198,19 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       children: [
         KuberHomeWidgetTitle(
           title: context.l10n.quickAddTitle,
+          // "FULL SCREEN" text link, styled like the "VIEW ALL" action.
+          trailing: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.push('/quick-add'),
+            child: Text(
+              'FULL SCREEN',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: cs.primary,
+                  ),
+            ),
+          ),
           infoConfig: KuberInfoConfig(
             title: context.l10n.quickAddInfoTitle,
             description: context.l10n.quickAddInfoDesc,
@@ -248,6 +266,23 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
                   onSubmitted: (_) {
                     if (_controller.text.trim().isNotEmpty) _submit();
                   },
+                ),
+              ),
+              const SizedBox(width: KuberSpacing.sm),
+              // Mic — to the left of send; opens the full page with voice on.
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => context.push('/quick-add?voice=1'),
+                child: Container(
+                  width: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    border:
+                        Border.all(color: cs.primary.withValues(alpha: 0.30)),
+                  ),
+                  child: Icon(Icons.mic_none_rounded, size: 20, color: cs.primary),
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),
@@ -309,3 +344,4 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     );
   }
 }
+

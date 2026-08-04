@@ -28,6 +28,8 @@ import '../../features/tools/saved/data/calculator_recent_use.dart';
 import '../../features/notes/data/kuber_note.dart';
 import '../../features/reminders/data/reminder.dart';
 import '../../features/pro/data/user_entitlement.dart';
+// Deprecated collection, kept registered so older databases still open.
+import '../../features/search/data/recent_search.dart';
 
 final isarProvider = Provider<Isar>((ref) {
   throw UnimplementedError('Must be overridden in ProviderScope');
@@ -69,6 +71,7 @@ class IsarService {
       KuberNoteSchema,
       ReminderSchema,
       UserEntitlementSchema,
+      RecentSearchSchema,
     ], directory: dir.path);
   }
 }

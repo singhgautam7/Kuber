@@ -1,12 +1,14 @@
 import 'package:isar_community/isar.dart';
 
+import '../../../core/utils/monthly_recurrence.dart';
+import '../../accounts/data/account.dart';
 import '../../investments/data/investment.dart';
 import '../../ledger/data/ledger.dart';
 import '../../loans/data/loan.dart';
 import '../../recurring/data/recurring_rule.dart';
 import '../../reminders/data/reminder.dart';
 
-/// One upcoming money event, normalized across the 5 sources. Read-only,
+/// One upcoming money event, normalized across the 6 sources. Read-only,
 /// one-directional aggregation — sources never know this exists.
 sealed class UpcomingEvent {
   DateTime get date;
@@ -15,7 +17,7 @@ sealed class UpcomingEvent {
   /// Signed amount: negative = outgoing, positive = incoming. null = none.
   double? get amount;
 
-  /// 'reminder' | 'emi' | 'sip' | 'recurring' | 'ledger'
+  /// 'reminder' | 'emi' | 'sip' | 'recurring' | 'ledger' | 'creditCard'
   String get sourceType;
 
   String get sourceId;
@@ -111,7 +113,46 @@ class LedgerEvent implements UpcomingEvent {
   String get sourceId => '${ledger.id}';
 }
 
-/// Queries all 5 sources and returns a chronologically merged, typed list
+/// A credit-card billing-cycle event: either the statement generating
+/// ([isPaymentDue] == false) or the payment falling due ([isPaymentDue] ==
+/// true). One card can emit up to two per window. Amount is intentionally null
+/// (see [amount]).
+class CreditCardEvent implements UpcomingEvent {
+  final Account account;
+  @override
+  final DateTime date;
+  final bool isPaymentDue;
+
+  const CreditCardEvent(this.account, this.date, {required this.isPaymentDue});
+
+  @override
+  String get title => isPaymentDue
+      ? 'Payment due · ${account.name}'
+      : 'Bill generated · ${account.name}';
+
+  /// Always null: the outstanding balance would require summing the card's
+  /// transactions, which is too costly for this live-refiring aggregator.
+  @override
+  double? get amount => null;
+
+  @override
+  String get sourceType => 'creditCard';
+  @override
+  String get sourceId => '${account.id}:${isPaymentDue ? 'due' : 'bill'}';
+
+  /// A payment-due event within the next 3 days. Bill-generation events are
+  /// never flagged urgent.
+  bool get isUrgent {
+    if (!isPaymentDue) return false;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final d = DateTime(date.year, date.month, date.day);
+    final days = d.difference(today).inDays;
+    return days >= 0 && days <= 3;
+  }
+}
+
+/// Queries all 6 sources and returns a chronologically merged, typed list
 /// capped to `[now, now + window]`.
 class UpcomingEventsAggregator {
   final Isar isar;
@@ -145,7 +186,7 @@ class UpcomingEventsAggregator {
       final loans =
           await isar.loans.filter().isCompletedEqualTo(false).findAll();
       for (final loan in loans) {
-        final next = _nextMonthlyOccurrence(loan.billDate, now);
+        final next = nextMonthlyOccurrence(loan.billDate, now);
         if (inWindow(next)) events.add(LoanEmiEvent(loan, next));
       }
     }
@@ -156,7 +197,7 @@ class UpcomingEventsAggregator {
       for (final inv in investments) {
         final day = inv.sipDate;
         if (day == null) continue;
-        final next = _nextMonthlyOccurrence(day, now);
+        final next = nextMonthlyOccurrence(day, now);
         if (inWindow(next)) events.add(InvestmentSipEvent(inv, next));
       }
     }
@@ -182,17 +223,29 @@ class UpcomingEventsAggregator {
           .map(LedgerEvent.new));
     }
 
+    if (wanted('creditCard')) {
+      // Small table (a handful of rows): load once and filter in memory.
+      final accounts = await isar.accounts.where().findAll();
+      for (final a in accounts) {
+        if (!a.isCreditCard || a.isDisabled) continue;
+        final billDay = a.billGenerationDay;
+        if (billDay != null) {
+          final next = nextMonthlyOccurrence(billDay, now);
+          if (inWindow(next)) {
+            events.add(CreditCardEvent(a, next, isPaymentDue: false));
+          }
+        }
+        final dueDay = a.paymentDueDay;
+        if (dueDay != null) {
+          final next = nextMonthlyOccurrence(dueDay, now);
+          if (inWindow(next)) {
+            events.add(CreditCardEvent(a, next, isPaymentDue: true));
+          }
+        }
+      }
+    }
+
     events.sort((a, b) => a.date.compareTo(b.date));
     return events;
-  }
-
-  /// Next occurrence of a day-of-month (1-28) on or after today.
-  static DateTime _nextMonthlyOccurrence(int day, DateTime now) {
-    final today = DateTime(now.year, now.month, now.day);
-    var candidate = DateTime(now.year, now.month, day);
-    if (candidate.isBefore(today)) {
-      candidate = DateTime(now.year, now.month + 1, day);
-    }
-    return candidate;
   }
 }
