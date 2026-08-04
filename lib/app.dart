@@ -146,6 +146,12 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // most once per calendar day is sufficient and cheap.
   DateTime? _lastBackupCheckDay;
 
+  // Date (y/m/d) of the last credit-card billing re-arm. Bill/due dates change
+  // at most daily, and the account save path re-arms immediately on any edit,
+  // so this on-open healing pass only needs to run once per calendar day —
+  // keeping frequent resumes from repeating the notification plugin calls.
+  DateTime? _lastCreditReminderMaintenanceDay;
+
   /// Runs a scheduled backup if one is due. Called on first frame (cold start)
   /// and on the first resume of each new day, because Android usually keeps the
   /// process warm — the cold-start loader path alone almost never fires
@@ -240,8 +246,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
 
   /// On-open credit-card billing pass: re-arm the next bill/due reminder for
   /// every credit card (advances to next month after one fires, heals reboots).
-  /// Best-effort and post-first-frame.
+  /// Gated to at most once per calendar day (cold start always runs since the
+  /// field resets with the process); best-effort and post-first-frame.
   Future<void> _runCreditCardReminderMaintenance() async {
+    final now = DateTime.now();
+    final last = _lastCreditReminderMaintenanceDay;
+    if (last != null &&
+        last.year == now.year &&
+        last.month == now.month &&
+        last.day == now.day) {
+      return;
+    }
+    _lastCreditReminderMaintenanceDay = DateTime(now.year, now.month, now.day);
     try {
       final isar = ref.read(isarProvider);
       await CreditCardReminderService(isar).onAppOpenMaintenance();

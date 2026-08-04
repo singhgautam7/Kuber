@@ -270,19 +270,22 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
               ),
               const SizedBox(width: KuberSpacing.sm),
               // Mic — to the left of send; opens the full page with voice on.
+              // Same solid-accent styling as the send button, minus the
+              // disabled state: the mic is always enabled, so it always renders
+              // in the active (primary-filled) look.
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => context.push('/quick-add?voice=1'),
                 child: Container(
-                  width: 48,
-                  alignment: Alignment.center,
+                  width: 52,
                   decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.10),
+                    color: cs.primary,
                     borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border:
-                        Border.all(color: cs.primary.withValues(alpha: 0.30)),
                   ),
-                  child: Icon(Icons.mic_none_rounded, size: 20, color: cs.primary),
+                  child: Center(
+                    child: Icon(Icons.mic_none_rounded,
+                        size: 22, color: cs.onPrimary),
+                  ),
                 ),
               ),
               const SizedBox(width: KuberSpacing.sm),

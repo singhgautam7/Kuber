@@ -87,6 +87,21 @@ void main() {
     expect(await creditEvents(), isEmpty);
   });
 
+  test('uses the injected accounts list instead of a DB read (sync path)',
+      () async {
+    // A real credit card exists in the DB...
+    await putCard(name: 'HDFC', billDay: 20, dueDay: 5);
+    // ...but passing an empty accounts list must yield no credit events,
+    // proving the aggregator reuses the caller's list (widget-sync path) and
+    // does not fall back to querying the accounts collection.
+    final events = await UpcomingEventsAggregator(isar).getUpcomingEvents(
+      window: const Duration(days: 45),
+      sourceFilters: {'creditCard'},
+      accounts: const [],
+    );
+    expect(events, isEmpty);
+  });
+
   test('day-31 resolves within the month, never overflowing', () async {
     await putCard(name: 'Amex', billDay: 31, dueDay: null);
     final events = await creditEvents(windowDays: 60);

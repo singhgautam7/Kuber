@@ -162,6 +162,9 @@ class UpcomingEventsAggregator {
   Future<List<UpcomingEvent>> getUpcomingEvents({
     required Duration window,
     Set<String>? sourceFilters,
+    // Pre-loaded accounts, to avoid a duplicate read when the caller (e.g.
+    // widget sync) already has them. Null = load here.
+    List<Account>? accounts,
   }) async {
     final now = DateTime.now();
     final end = now.add(window);
@@ -224,9 +227,10 @@ class UpcomingEventsAggregator {
     }
 
     if (wanted('creditCard')) {
-      // Small table (a handful of rows): load once and filter in memory.
-      final accounts = await isar.accounts.where().findAll();
-      for (final a in accounts) {
+      // Small table (a handful of rows): reuse the caller's list if given,
+      // else load once and filter in memory.
+      final creditAccounts = accounts ?? await isar.accounts.where().findAll();
+      for (final a in creditAccounts) {
         if (!a.isCreditCard || a.isDisabled) continue;
         final billDay = a.billGenerationDay;
         if (billDay != null) {

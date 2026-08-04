@@ -87,6 +87,7 @@ class WidgetSyncService {
     // transactions collection (4x on every sync); categories were re-scanned 3x.
     List<Transaction> txns = const [];
     Map<String, Category> cats = const {};
+    List<Account> accounts = const [];
     try {
       txns = await _allTxns();
     } catch (_) {}
@@ -95,14 +96,17 @@ class WidgetSyncService {
         for (final c in await _isar.categorys.where().findAll()) c.id.toString(): c,
       };
     } catch (_) {}
+    try {
+      accounts = await _isar.accounts.where().findAll();
+    } catch (_) {}
 
     // Each sub-sync is isolated so a single failure cannot break the rest.
     for (final task in <Future<void> Function()>[
       () => _syncMonthlyNet(txns),
       _syncAccountBalances,
       _syncSmsBadge,
-      _syncUpcomingEvents,
-      () => _syncRecentTransactions(txns, cats),
+      () => _syncUpcomingEvents(accounts),
+      () => _syncRecentTransactions(txns, cats, accounts),
       () => _syncBudgetStatus(txns, cats),
       _syncNotes,
       () => _syncCharts(txns, cats),
@@ -210,9 +214,11 @@ class WidgetSyncService {
 
   // ---- 4. Upcoming Events --------------------------------------------------
 
-  Future<void> _syncUpcomingEvents() async {
-    final events = await UpcomingEventsAggregator(_isar)
-        .getUpcomingEvents(window: const Duration(days: 30));
+  Future<void> _syncUpcomingEvents(List<Account> accounts) async {
+    final events = await UpcomingEventsAggregator(_isar).getUpcomingEvents(
+      window: const Duration(days: 30),
+      accounts: accounts,
+    );
     events.sort((a, b) => a.date.compareTo(b.date));
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -250,10 +256,11 @@ class WidgetSyncService {
   // ---- 5. Recent Transactions ---------------------------------------------
 
   Future<void> _syncRecentTransactions(
-      List<Transaction> txns, Map<String, Category> cats) async {
+      List<Transaction> txns, Map<String, Category> cats,
+      List<Account> accountList) async {
     final recent = txns.where((t) => !t.isTransfer).toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final accounts = {for (final a in await _isar.accounts.where().findAll()) a.id.toString(): a.name};
+    final accounts = {for (final a in accountList) a.id.toString(): a.name};
     final list = recent.take(5).map((t) {
       final cat = cats[t.categoryId];
       return {
