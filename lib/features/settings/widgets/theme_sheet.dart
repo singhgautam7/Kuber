@@ -10,8 +10,8 @@ import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../providers/settings_provider.dart';
 import 'theme_family_icons.dart';
 
-/// Display names for the seven theme families. Brand names, deliberately not
-/// localized.
+/// Full display names for the seven theme families. Brand names, deliberately
+/// not localized.
 String themeFamilyName(ThemeVariant variant) => switch (variant) {
       ThemeVariant.signature => 'Kuber Signature',
       ThemeVariant.flewtube => 'FlewTube Red',
@@ -22,15 +22,15 @@ String themeFamilyName(ThemeVariant variant) => switch (variant) {
       ThemeVariant.oinkzon => 'Oinkzon Orange',
     };
 
-String _familyDescription(BuildContext context, ThemeVariant variant) =>
-    switch (variant) {
-      ThemeVariant.signature => context.l10n.themeFamilyDescSignature,
-      ThemeVariant.flewtube => context.l10n.themeFamilyDescFlewtube,
-      ThemeVariant.woofsapp => context.l10n.themeFamilyDescWoofsapp,
-      ThemeVariant.purrhub => context.l10n.themeFamilyDescPurrhub,
-      ThemeVariant.honkpe => context.l10n.themeFamilyDescHonkpe,
-      ThemeVariant.squeakdin => context.l10n.themeFamilyDescSqueakdin,
-      ThemeVariant.oinkzon => context.l10n.themeFamilyDescOinkzon,
+/// Short family names shown on the preview swatch cards.
+String themeFamilyShortName(ThemeVariant variant) => switch (variant) {
+      ThemeVariant.signature => 'Signature',
+      ThemeVariant.flewtube => 'Flewtube',
+      ThemeVariant.woofsapp => 'Woofsapp',
+      ThemeVariant.purrhub => 'Purrhub',
+      ThemeVariant.honkpe => 'Honkpe',
+      ThemeVariant.squeakdin => 'Squeakdin',
+      ThemeVariant.oinkzon => 'Oinkzon',
     };
 
 void showThemeSheet(BuildContext context) {
@@ -44,11 +44,11 @@ void showThemeSheet(BuildContext context) {
   );
 }
 
-/// The Appearance > Theme bottom sheet: mode control on top, theme family
-/// picker below, and Cancel / Apply buttons at the bottom. Selecting a mode or
-/// family re-tints the app live so options can be compared. If the sheet is
-/// dismissed via Cancel, close button, or backdrop tap, any unapplied theme
-/// changes are reverted back to the initial state when the sheet was opened.
+/// The Appearance > Theme bottom sheet: appearance-mode control on top, then a
+/// 2-column grid of accent-family preview cards. Each card renders a miniature
+/// (a transaction row + a Home pill) in that family's own tokens so the user can
+/// preview every look. Selecting a mode or family re-tints the app live;
+/// dismissing via Cancel / backdrop reverts to the initial selection.
 class ThemeSheet extends ConsumerStatefulWidget {
   const ThemeSheet({super.key});
 
@@ -76,31 +76,23 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
   void _onVariantSelected(ThemeVariant variant) {
     if (variant == _selectedVariant) return;
     HapticFeedback.selectionClick();
-    setState(() {
-      _selectedVariant = variant;
-    });
+    setState(() => _selectedVariant = variant);
     ref.read(settingsProvider.notifier).setThemeVariant(variant);
   }
 
   void _onModeSelected(ThemeMode mode) {
     if (mode == _selectedMode) return;
     HapticFeedback.mediumImpact();
-    setState(() {
-      _selectedMode = mode;
-    });
+    setState(() => _selectedMode = mode);
     ref.read(settingsProvider.notifier).setThemeMode(mode);
   }
 
   void _apply() {
-    // The selection is already live-applied and persisted by the preview
-    // taps; Apply just keeps it by skipping the revert in _onPopInvoked.
     _applied = true;
     Navigator.of(context).pop();
   }
 
-  void _cancel() {
-    Navigator.of(context).pop();
-  }
+  void _cancel() => Navigator.of(context).pop();
 
   void _onPopInvoked(bool didPop) {
     if (didPop && !_applied) {
@@ -112,17 +104,25 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
     }
   }
 
+  Brightness get _previewBrightness => switch (_selectedMode) {
+        ThemeMode.light => Brightness.light,
+        ThemeMode.dark => Brightness.dark,
+        ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+      };
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isSameAsInitial =
-        (_selectedVariant == _initialVariant) && (_selectedMode == _initialMode);
+    final isSameAsInitial = (_selectedVariant == _initialVariant) &&
+        (_selectedMode == _initialMode);
+    final variants = ThemeVariant.values;
+    final brightness = _previewBrightness;
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
       child: KuberBottomSheet(
         title: context.l10n.themeLabel,
-        subtitle: context.l10n.appearanceCategory,
+        subtitle: 'Pick an appearance mode and accent family.',
         actions: Row(
           children: [
             Expanded(
@@ -146,8 +146,13 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
+            _ModeSegmentedRow(
+              selected: _selectedMode,
+              onChanged: _onModeSelected,
+            ),
+            const SizedBox(height: KuberSpacing.lg),
             Text(
-              context.l10n.themeModeSectionLabel.toUpperCase(),
+              'ACCENT FAMILY',
               style: localeFont(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -156,23 +161,36 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
               ),
             ),
             const SizedBox(height: KuberSpacing.sm),
-            _ModeSegmentedRow(
-              selected: _selectedMode,
-              onChanged: _onModeSelected,
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: KuberSpacing.md),
-              child: Divider(height: 1),
-            ),
-            for (int i = 0; i < ThemeVariant.values.length; i++)
+            for (int i = 0; i < variants.length; i += 2)
               Padding(
-                padding: EdgeInsets.only(
-                  bottom: i < ThemeVariant.values.length - 1 ? KuberSpacing.sm : 0,
-                ),
-                child: _ThemeFamilyCard(
-                  variant: ThemeVariant.values[i],
-                  selected: ThemeVariant.values[i] == _selectedVariant,
-                  onTap: () => _onVariantSelected(ThemeVariant.values[i]),
+                padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+                child: Row(
+                  // Not `stretch`: this Row lives in the sheet's scroll view,
+                  // so its cross-axis (height) is unbounded and stretch would
+                  // fail to lay out. The two cards are identical in structure,
+                  // so top-alignment keeps them the same height anyway.
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _FamilyPreviewCard(
+                        variant: variants[i],
+                        brightness: brightness,
+                        selected: variants[i] == _selectedVariant,
+                        onTap: () => _onVariantSelected(variants[i]),
+                      ),
+                    ),
+                    const SizedBox(width: KuberSpacing.md),
+                    Expanded(
+                      child: i + 1 < variants.length
+                          ? _FamilyPreviewCard(
+                              variant: variants[i + 1],
+                              brightness: brightness,
+                              selected: variants[i + 1] == _selectedVariant,
+                              onTap: () => _onVariantSelected(variants[i + 1]),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ),
           ],
@@ -182,82 +200,72 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
   }
 }
 
-class _ThemeFamilyCard extends StatelessWidget {
+/// A single accent-family preview: the family icon + name, a miniature
+/// transaction row, and a Home pill — all rendered in that family's tokens.
+class _FamilyPreviewCard extends StatelessWidget {
   final ThemeVariant variant;
+  final Brightness brightness;
   final bool selected;
   final VoidCallback onTap;
 
-  const _ThemeFamilyCard({
+  const _FamilyPreviewCard({
     required this.variant,
+    required this.brightness,
     required this.selected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final tokens = KuberTokens.of(variant, Theme.of(context).brightness);
-    final name = themeFamilyName(variant);
-    final description = _familyDescription(context, variant);
+    final t = KuberTokens.of(variant, brightness);
+    final name = themeFamilyShortName(variant);
 
     return Semantics(
       selected: selected,
       button: true,
-      label: '$name, $description',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+      label: themeFamilyName(variant),
+      child: GestureDetector(
         onTap: onTap,
-        highlightColor: cs.surfaceContainerHigh,
-        child: Container(
-          height: 72,
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: cs.surfaceContainer,
+            color: t.surfaceCard,
             borderRadius: BorderRadius.circular(KuberRadius.md),
             border: Border.all(
-              color: selected ? tokens.primaryRing : cs.outline,
+              color: selected ? t.primary : t.border,
               width: selected ? 1.5 : 1,
             ),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              ThemeFamilyIcon(variant: variant),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+              Row(
+                children: [
+                  ThemeFamilyIcon(variant: variant, size: 26),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
                       name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: localeFont(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: localeFont(
                         fontSize: 13,
-                        color: cs.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                        color: t.textPrimary,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  if (selected)
+                    Icon(Icons.check_circle_rounded, size: 16, color: t.primary),
+                ],
               ),
-              const SizedBox(width: KuberSpacing.sm),
-              ExcludeSemantics(
-                child: _RadioIndicator(
-                  selected: selected,
-                  accent: tokens.primary,
-                ),
-              ),
+              const SizedBox(height: 10),
+              _MiniTransaction(t: t),
+              const SizedBox(height: 8),
+              _MiniHomePill(t: t),
             ],
           ),
         ),
@@ -266,43 +274,119 @@ class _ThemeFamilyCard extends StatelessWidget {
   }
 }
 
-class _RadioIndicator extends StatelessWidget {
-  final bool selected;
-  final Color accent;
-
-  const _RadioIndicator({required this.selected, required this.accent});
+/// Miniature transaction row: accent chip, two text bars, a red −₹250.
+class _MiniTransaction extends StatelessWidget {
+  final KuberTokens t;
+  const _MiniTransaction({required this.t});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Container(
-      width: 20,
-      height: 20,
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: selected ? accent : cs.outline,
-          width: 1.5,
-        ),
+        color: t.surfaceMuted,
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
       ),
-      alignment: Alignment.center,
-      child: selected
-          ? Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: accent,
-              ),
-            )
-          : null,
+      child: Row(
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: t.primarySubtle,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: t.border,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                FractionallySizedBox(
+                  widthFactor: 0.5,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: t.borderMuted,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '−₹250',
+            style: localeFont(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: t.expense,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// Light | Dark | System control, styled like the Expense | Income | Transfer
-/// selector on the Add Transaction screen: muted track, animated solid accent
-/// pill for the active segment.
+/// Miniature Home nav pill in the family accent.
+class _MiniHomePill extends StatelessWidget {
+  final KuberTokens t;
+  const _MiniHomePill({required this.t});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: t.primarySubtle,
+        borderRadius: BorderRadius.circular(KuberRadius.full),
+        border: Border.all(color: t.primaryRing),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: t.primary),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'Home',
+            style: localeFont(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: t.primaryText,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: t.primaryText.withValues(alpha: 0.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// System | Light | Dark control: muted track, animated solid-accent pill for
+/// the active segment.
 class _ModeSegmentedRow extends StatelessWidget {
   final ThemeMode selected;
   final ValueChanged<ThemeMode> onChanged;
@@ -314,9 +398,9 @@ class _ModeSegmentedRow extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final labels = {
+      ThemeMode.system: context.l10n.themeSystemChoice,
       ThemeMode.light: context.l10n.themeLightChoice,
       ThemeMode.dark: context.l10n.themeDarkChoice,
-      ThemeMode.system: context.l10n.themeSystemChoice,
     };
 
     return Container(
@@ -330,9 +414,9 @@ class _ModeSegmentedRow extends StatelessWidget {
       child: Row(
         children: [
           for (final mode in const [
+            ThemeMode.system,
             ThemeMode.light,
             ThemeMode.dark,
-            ThemeMode.system,
           ])
             Expanded(
               child: Semantics(

@@ -112,9 +112,6 @@ class MoreScreenModern extends ConsumerWidget {
             child: KuberPageHeader(
               title: context.l10n.navMore,
               description: context.l10n.moreManageSubtitle,
-              actionIcon: Icons.search_rounded,
-              actionTooltip: context.l10n.moreSearchTooltip,
-              onAction: () => context.push('/more/search'),
             ),
           ),
           SliverPadding(
@@ -286,7 +283,16 @@ class MoreScreenModern extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: KuberSpacing.sm),
-                    const Expanded(child: SizedBox.shrink()),
+                    Expanded(
+                      // Quick Add (English-only feature), directly after Notes.
+                      child: _ToolCard(
+                        icon: Icons.flash_on_rounded,
+                        title: 'Quick Add',
+                        subtitle: 'Type or speak to log transactions',
+                        accent: _ToolAccent.primary,
+                        onTap: () => context.push('/quick-add'),
+                      ),
+                    ),
                   ],
                 ),
 

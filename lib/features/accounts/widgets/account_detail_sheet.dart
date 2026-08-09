@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/date_formatter.dart';
+import '../../../core/utils/monthly_recurrence.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, settingsProvider;
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -51,6 +52,28 @@ class AccountDetailSheet extends ConsumerWidget {
         InfoTableDataRow(
           label: context.l10n.accountNumberLabel,
           value: '•••• ${account.last4Digits}',
+        ),
+      if (account.isCreditCard && account.billGenerationDay != null)
+        InfoTableDataRow(
+          label: context.l10n.billGenerationLabel,
+          value: context.l10n.dayOfEveryMonth(
+            ordinalDay(account.billGenerationDay!),
+          ),
+          valueLeadingIcon: account.billGenerationReminderEnabled
+              ? Icons.notifications_active_rounded
+              : null,
+          valueIconColor: cs.primary,
+        ),
+      if (account.isCreditCard && account.paymentDueDay != null)
+        InfoTableDataRow(
+          label: context.l10n.paymentDueLabel,
+          value: context.l10n.dayOfEveryMonth(
+            ordinalDay(account.paymentDueDay!),
+          ),
+          valueLeadingIcon: account.paymentDueReminderEnabled
+              ? Icons.notifications_active_rounded
+              : null,
+          valueIconColor: cs.primary,
         ),
       InfoTableDataRow(
         label: context.l10n.defaultAccountLabel,

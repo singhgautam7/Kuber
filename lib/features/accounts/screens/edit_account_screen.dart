@@ -46,6 +46,7 @@ import '../../transactions/providers/transaction_provider.dart';
 import '../data/account.dart';
 import '../providers/account_provider.dart';
 import '../widgets/adjustment_confirmation_modal.dart';
+import '../widgets/credit_billing_cycle_section.dart';
 
 class EditAccountScreen extends ConsumerStatefulWidget {
   final Account account;
@@ -66,6 +67,12 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   bool _isDefault = false;
   bool _isDisabled = false;
   bool _saving = false;
+
+  // Credit-card billing cycle (credit cards only).
+  int? _billGenerationDay;
+  int? _paymentDueDay;
+  bool _billReminder = false;
+  bool _paymentReminder = false;
 
   // Signed seed used for diff math (matches EditBalanceSheet semantics):
   //   bank/cash → computed balance (positive)
@@ -91,6 +98,10 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     _selectedIcon = _a.icon ?? IconMapper.kAccountIconKeys.first;
     _selectedColor = _a.colorValue ?? AppColorPalette.kVibrant.first;
     _isDisabled = _a.isDisabled;
+    _billGenerationDay = _a.billGenerationDay;
+    _paymentDueDay = _a.paymentDueDay;
+    _billReminder = _a.billGenerationReminderEnabled;
+    _paymentReminder = _a.paymentDueReminderEnabled;
 
     final defaultId = ref.read(
       settingsProvider.select((s) => s.valueOrNull?.defaultAccountId),
@@ -110,14 +121,20 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   String _fmtSeed(double v) =>
       v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
 
+  /// Rounds to paise (2 decimals). The computed balance can carry sub-paise
+  /// floating-point residue from summing transactions; comparing that against
+  /// the 2-decimal value the user actually sees/types would otherwise report a
+  /// phantom fraction-of-a-rupee change on save.
+  double _round2(double v) => (v * 100).roundToDouble() / 100;
+
   /// Seeds the hero field once. Credit shows the limit-spent magnitude
   /// (|balance|); bank/cash shows the signed balance.
   void _seedValueField(double computedBalance) {
     if (_seeded) return;
     _seeded = true;
-    _seedSigned = computedBalance;
+    _seedSigned = _round2(computedBalance);
     _valueController.text =
-        _fmtSeed(_isCredit ? computedBalance.abs() : computedBalance);
+        _fmtSeed(_isCredit ? _seedSigned.abs() : _seedSigned);
   }
 
   /// Signed new hero value, mirroring EditBalanceSheet (_newValue):
@@ -131,7 +148,7 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
   double get _diffSigned {
     final v = _typedSigned;
     if (v == null) return 0;
-    return v - _seedSigned;
+    return _round2(v - _seedSigned);
   }
 
   bool get _hasAdjustment =>
@@ -199,6 +216,12 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
     // Total Limit is a plain field write (no adjustment).
     if (_isCredit) {
       account.creditLimit = double.tryParse(_limitController.text.trim());
+      // Billing cycle. Reminder flags follow their day + toggle.
+      account
+        ..billGenerationDay = _billGenerationDay
+        ..paymentDueDay = _paymentDueDay
+        ..billGenerationReminderEnabled = _billReminder
+        ..paymentDueReminderEnabled = _paymentReminder;
     }
     // type & isCreditCard are intentionally NOT written — read-only forever.
     // initialBalance is NOT written — the adjustment transaction moves balance.
@@ -631,6 +654,19 @@ class _EditAccountScreenState extends ConsumerState<EditAccountScreen> {
             padding: const EdgeInsets.only(left: 2),
             child: Text(l10n.totalLimitHelper,
                 style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
+          ),
+
+          // ── Billing cycle (collapsible) ────────────────────────────────
+          const SizedBox(height: 24),
+          CreditBillingCycleSection(
+            billDay: _billGenerationDay,
+            dueDay: _paymentDueDay,
+            billReminder: _billReminder,
+            dueReminder: _paymentReminder,
+            onBillDayChanged: (v) => setState(() => _billGenerationDay = v),
+            onDueDayChanged: (v) => setState(() => _paymentDueDay = v),
+            onBillReminderChanged: (v) => setState(() => _billReminder = v),
+            onDueReminderChanged: (v) => setState(() => _paymentReminder = v),
           ),
         ],
 

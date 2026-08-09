@@ -290,6 +290,10 @@ class JsonBackupService {
     'colorValue': a.colorValue,
     'last4Digits': a.last4Digits,
     'isDisabled': a.isDisabled,
+    'billGenerationDay': a.billGenerationDay,
+    'paymentDueDay': a.paymentDueDay,
+    'billGenerationReminderEnabled': a.billGenerationReminderEnabled,
+    'paymentDueReminderEnabled': a.paymentDueReminderEnabled,
   };
 
   Map<String, dynamic> _tagToMap(Tag t) => {
@@ -484,7 +488,13 @@ class JsonBackupService {
     ..icon = m['icon'] as String?
     ..colorValue = m['colorValue'] as int?
     ..last4Digits = m['last4Digits'] as String?
-    ..isDisabled = (m['isDisabled'] as bool?) ?? false;
+    ..isDisabled = (m['isDisabled'] as bool?) ?? false
+    ..billGenerationDay = m['billGenerationDay'] as int?
+    ..paymentDueDay = m['paymentDueDay'] as int?
+    ..billGenerationReminderEnabled =
+        (m['billGenerationReminderEnabled'] as bool?) ?? false
+    ..paymentDueReminderEnabled =
+        (m['paymentDueReminderEnabled'] as bool?) ?? false;
 
   Tag _mapToTag(Map<String, dynamic> m) => Tag()
     ..id = m['id'] as int

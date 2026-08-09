@@ -244,6 +244,10 @@
   "@navSubtitleClassic": {},
   "navSubtitleModern": "Floating pill",
   "@navSubtitleModern": {},
+  "navFuturisticChoice": "Futuristic",
+  "@navFuturisticChoice": {},
+  "navSubtitleFuturistic": "Label on active",
+  "@navSubtitleFuturistic": {},
   "numFormatIndian": "Indian",
   "@numFormatIndian": {},
   "numFormatInternational": "International",
@@ -2782,5 +2786,40 @@
   "applyLabel": "Apply",
   "@applyLabel": {},
   "speedDialNote": "Add Kuber Notes",
-  "@speedDialNote": {}
+  "@speedDialNote": {},
+  "billingCycle": "Billing cycle",
+  "@billingCycle": {},
+  "billGenerationDaySection": "Bill generation day",
+  "@billGenerationDaySection": {},
+  "paymentDueDaySection": "Payment due day",
+  "@paymentDueDaySection": {},
+  "remindMe": "Remind me",
+  "@remindMe": {},
+  "billReminderSub": "Notify on the day the bill is generated",
+  "@billReminderSub": {},
+  "dueReminderSub": "Notify on the payment due date",
+  "@dueReminderSub": {},
+  "billGenerationLabel": "Bill generation",
+  "@billGenerationLabel": {},
+  "paymentDueLabel": "Payment due",
+  "@paymentDueLabel": {},
+  "dayOfEveryMonth": "{ordinal} of every month",
+  "@dayOfEveryMonth": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String"
+      }
+    }
+  },
+  "billDueCrossMonthHint": "The bill generates on the {billOrdinal} and payment is due on the {dueOrdinal}, so payment falls in the next month.",
+  "@billDueCrossMonthHint": {
+    "placeholders": {
+      "billOrdinal": {
+        "type": "String"
+      },
+      "dueOrdinal": {
+        "type": "String"
+      }
+    }
+  }
 }

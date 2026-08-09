@@ -369,6 +369,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSubtitleModern => 'Floating pill';
 
   @override
+  String get navFuturisticChoice => 'Futuristic';
+
+  @override
+  String get navSubtitleFuturistic => 'Label on active';
+
+  @override
   String get numFormatIndian => 'Indian';
 
   @override
@@ -4840,4 +4846,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get speedDialNote => 'Add Kuber Notes';
+
+  @override
+  String get billingCycle => 'Billing cycle';
+
+  @override
+  String get billGenerationDaySection => 'Bill generation day';
+
+  @override
+  String get paymentDueDaySection => 'Payment due day';
+
+  @override
+  String get remindMe => 'Remind me';
+
+  @override
+  String get billReminderSub => 'Notify on the day the bill is generated';
+
+  @override
+  String get dueReminderSub => 'Notify on the payment due date';
+
+  @override
+  String get billGenerationLabel => 'Bill generation';
+
+  @override
+  String get paymentDueLabel => 'Payment due';
+
+  @override
+  String dayOfEveryMonth(String ordinal) {
+    return '$ordinal of every month';
+  }
+
+  @override
+  String billDueCrossMonthHint(String billOrdinal, String dueOrdinal) {
+    return 'The bill generates on the $billOrdinal and payment is due on the $dueOrdinal, so payment falls in the next month.';
+  }
 }

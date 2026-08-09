@@ -285,6 +285,8 @@ class _EventCard extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final amount = event.amount;
+    final ev = event;
+    final isUrgent = ev is CreditCardEvent && ev.isUrgent;
 
     return GestureDetector(
       onTap: () => openUpcomingEventSource(context, ref, event),
@@ -321,7 +323,11 @@ class _EventCard extends ConsumerWidget {
                         _timeLabel(context),
                         style: localeFont(
                           fontSize: 11,
-                          color: cs.onSurfaceVariant,
+                          fontWeight:
+                              isUrgent ? FontWeight.w700 : FontWeight.w400,
+                          color: isUrgent
+                              ? context.kuberColors.warning
+                              : cs.onSurfaceVariant,
                         ),
                       ),
                     ],

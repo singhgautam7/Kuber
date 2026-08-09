@@ -134,6 +134,16 @@ class _TransactionDetailSheetState
     if (t.importSource == 'sms') {
       return (label: context.l10n.sourceSms, icon: Icons.sms_outlined);
     }
+    // Quick Add / Ask Kuber provenance. English literals, matching the
+    // Kuber Notes label above (these are English-only features). The original
+    // typed / spoken text is stored in `quickAddNote` and renders in the
+    // "ADDED USING PROMPT" block below, mirroring how the SMS body is shown.
+    if (t.importSource == 'quick_add') {
+      return (label: 'Quick Add', icon: Icons.flash_on_rounded);
+    }
+    if (t.importSource == 'ask_kuber') {
+      return (label: 'Ask Kuber', icon: Icons.auto_awesome_rounded);
+    }
 
     var type = t.linkedRuleType;
     if (type == null && t.linkedRuleId != null) {

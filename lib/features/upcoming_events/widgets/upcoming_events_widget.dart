@@ -122,6 +122,8 @@ class _EventTimelineRow extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
     final amount = event.amount;
+    final ev = event;
+    final isUrgent = ev is CreditCardEvent && ev.isUrgent;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -155,7 +157,7 @@ class _EventTimelineRow extends ConsumerWidget {
                     style: localeFont(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
+                      color: isUrgent ? context.kuberColors.warning : cs.onSurface,
                       height: 1.1,
                     ),
                   ),

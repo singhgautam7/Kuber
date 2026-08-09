@@ -11,6 +11,11 @@
          nothing is stored or transmitted without the user's approval. -->
     <uses-permission android:name="android.permission.READ_SMS"/>
 
+    <!-- Microphone, used solely for the optional Quick Add voice input
+         (on-device speech-to-text). Nothing is recorded or transmitted. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+
     <!-- READ_SMS implicitly requires android.hardware.telephony, which would
          drop tablets, Android TV and Chromebooks from the supported-device set
          on the Play Store. The SMS import feature is optional (the rest of the
@@ -238,6 +243,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Lets speech_to_text discover the on-device speech recognition
+             service on Android 11+ (package visibility). -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
         </intent>
     </queries>
 </manifest>

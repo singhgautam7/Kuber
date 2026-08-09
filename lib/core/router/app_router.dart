@@ -21,6 +21,7 @@ import '../../features/tutorial/screens/tutorial_chapter_screen.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/transactions/screens/transaction_list_screen.dart';
 import '../../features/transactions/screens/add_transaction_screen.dart';
+import '../../features/quick_add/screens/quick_add_screen.dart';
 import '../../shared/widgets/app_scaffold.dart';
 import '../../shared/widgets/screen_entrance.dart';
 import '../../features/accounts/data/account.dart';
@@ -28,7 +29,6 @@ import '../../features/accounts/screens/accounts_screen.dart';
 import '../../features/accounts/screens/add_edit_account_screen.dart';
 import '../../features/accounts/screens/edit_account_screen.dart';
 import '../../features/more/screens/more_screen.dart';
-import '../../features/more/screens/more_search_screen.dart';
 import '../../features/more/screens/about_screen.dart';
 import '../../features/more/screens/feedback_screen.dart';
 import '../../features/more/screens/permissions_screen.dart';
@@ -260,6 +260,15 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: child,
             );
           },
+        ),
+      ),
+      GoRoute(
+        path: '/quick-add',
+        parentNavigatorKey: rootNavigatorKey,
+        // Plain builder -> uses the app's default page transition, so the push
+        // and back animations match other pushed pages (Accounts, Loans, ...).
+        builder: (context, state) => QuickAddScreen(
+          autoStartVoice: state.uri.queryParameters['voice'] == '1',
         ),
       ),
       GoRoute(
@@ -688,11 +697,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'tools/split-calculator',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const BillSplitterScreen(),
-                  ),
-                  GoRoute(
-                    path: 'search',
-                    parentNavigatorKey: rootNavigatorKey,
-                    builder: (_, _) => const MoreSearchScreen(),
                   ),
                   GoRoute(
                     path: 'dev-tools',

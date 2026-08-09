@@ -64,9 +64,6 @@ class MoreScreenSimple extends ConsumerWidget {
             child: KuberPageHeader(
               title: context.l10n.navMore,
               description: context.l10n.moreManageSubtitle,
-              actionIcon: Icons.search_rounded,
-              actionTooltip: context.l10n.moreSearchTooltip,
-              onAction: () => context.push('/more/search'),
             ),
           ),
           SliverPadding(
@@ -197,6 +194,12 @@ class MoreScreenSimple extends ConsumerWidget {
                       label: 'Kuber Notes',
                       subtitle: 'Jot expenses and do quick math',
                       onTap: () => context.push('/more/notes'),
+                    ),
+                    _MenuItem(
+                      icon: Icons.flash_on_rounded,
+                      label: 'Quick Add',
+                      subtitle: 'Type or speak to log transactions',
+                      onTap: () => context.push('/quick-add'),
                     ),
                     _MenuItem(
                       icon: Icons.calendar_month_rounded,

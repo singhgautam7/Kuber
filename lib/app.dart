@@ -8,6 +8,7 @@ import 'package:flutter_quill/flutter_quill.dart'
 import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
+import 'features/accounts/data/credit_card_reminder_service.dart';
 import 'core/services/widget_sync_service.dart';
 import 'core/theme/app_theme.dart';
 import 'features/analytics/providers/analytics_provider.dart';
@@ -66,6 +67,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
       _runDueBackup();
       _runSmsCleanup();
       _runReminderMaintenance();
+      _runCreditCardReminderMaintenance();
       _runWidgetSync();
       _initPurchases();
       _initPromoConfig();
@@ -144,6 +146,12 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // most once per calendar day is sufficient and cheap.
   DateTime? _lastBackupCheckDay;
 
+  // Date (y/m/d) of the last credit-card billing re-arm. Bill/due dates change
+  // at most daily, and the account save path re-arms immediately on any edit,
+  // so this on-open healing pass only needs to run once per calendar day —
+  // keeping frequent resumes from repeating the notification plugin calls.
+  DateTime? _lastCreditReminderMaintenanceDay;
+
   /// Runs a scheduled backup if one is due. Called on first frame (cold start)
   /// and on the first resume of each new day, because Android usually keeps the
   /// process warm — the cold-start loader path alone almost never fires
@@ -174,6 +182,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // A reminder notification may have fired while we were backgrounded —
     // mirror any newly-due reminders into the in-app inbox and heal alarms.
     _runReminderMaintenance();
+    _runCreditCardReminderMaintenance();
     // Refresh home-screen widgets so a change made this session (then a jump to
     // the launcher) reflects within seconds of returning.
     _runWidgetSync();
@@ -232,6 +241,29 @@ class _KuberAppState extends ConsumerState<KuberApp>
     } catch (e, stack) {
       debugPrint(
           'Kuber: on-open reminder maintenance failed (non-fatal): $e\n$stack');
+    }
+  }
+
+  /// On-open credit-card billing pass: re-arm the next bill/due reminder for
+  /// every credit card (advances to next month after one fires, heals reboots).
+  /// Gated to at most once per calendar day (cold start always runs since the
+  /// field resets with the process); best-effort and post-first-frame.
+  Future<void> _runCreditCardReminderMaintenance() async {
+    final now = DateTime.now();
+    final last = _lastCreditReminderMaintenanceDay;
+    if (last != null &&
+        last.year == now.year &&
+        last.month == now.month &&
+        last.day == now.day) {
+      return;
+    }
+    _lastCreditReminderMaintenanceDay = DateTime(now.year, now.month, now.day);
+    try {
+      final isar = ref.read(isarProvider);
+      await CreditCardReminderService(isar).onAppOpenMaintenance();
+    } catch (e, stack) {
+      debugPrint(
+          'Kuber: on-open credit-card reminder maintenance failed (non-fatal): $e\n$stack');
     }
   }
 

@@ -11,6 +11,7 @@ import '../helpers/transaction_filters.dart';
 import '../../budgets/services/budget_service.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../services/suggestion_service.dart';
 
 final transactionRepositoryProvider = Provider<TransactionRepository>((ref) {
   return TransactionRepository(ref.watch(tutorialAwareIsarProvider));
@@ -55,6 +56,32 @@ class TransactionListNotifier extends AsyncNotifier<List<Transaction>> {
           .catchError((_) {});
     }
     return id;
+  }
+
+  /// Persists many transactions atomically (single write txn) and refreshes the
+  /// same dependencies a single [add] would — but only once for the whole batch,
+  /// so a Quick Add / Ask Kuber confirm of N lines triggers one invalidation
+  /// storm, not N. Returns the assigned ids in order.
+  Future<List<int>> addMany(List<Transaction> txns) async {
+    if (txns.isEmpty) return const [];
+    final ids = await ref.read(transactionRepositoryProvider).saveAll(txns);
+    ref.invalidateSelf();
+    _invalidateDependencies();
+    // Suggestion upserts — parity with the other save paths (add-txn, SMS,
+    // recurring). Fire-and-forget so confirm stays snappy.
+    final suggestions = ref.read(suggestionServiceProvider);
+    for (final t in txns) {
+      suggestions.upsertSuggestion(t).ignore();
+    }
+    // Budget alerts once per distinct expense category.
+    final expenseCategories = <String>{
+      for (final t in txns)
+        if (t.type == 'expense') t.categoryId,
+    };
+    for (final categoryId in expenseCategories) {
+      ref.read(budgetServiceProvider).checkAlerts(categoryId).catchError((_) {});
+    }
+    return ids;
   }
 
   /// Creates a balance-adjustment transaction for a changed account balance or

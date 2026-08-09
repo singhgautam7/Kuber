@@ -293,6 +293,20 @@ class PermissionsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: KuberSpacing.lg),
                   _PermissionCard(
+                    icon: Icons.mic_none_rounded,
+                    title: 'Microphone',
+                    description:
+                        'Used only for Quick Add voice input. Speech is '
+                        'recognized on your device. Nothing is recorded or '
+                        'transmitted.',
+                    status: state.microphone,
+                    lang: lang,
+                    onTap: () => ref
+                        .read(permissionProvider.notifier)
+                        .requestMicrophone(),
+                  ),
+                  const SizedBox(height: KuberSpacing.lg),
+                  _PermissionCard(
                     icon: Icons.folder_special_outlined,
                     title: _getFilesTitle(lang),
                     description: backupSettings?.folderPath == null

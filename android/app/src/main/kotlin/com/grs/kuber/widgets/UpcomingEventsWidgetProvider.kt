@@ -106,6 +106,13 @@ class UpcomingEventsWidgetProvider : HomeWidgetProvider() {
                 R.drawable.widget_pill_recurring,
                 ContextCompat.getColor(context, R.color.kuber_warning_amber), "RECURRING"
             )
+            // Credit-card billing. Mirrors the in-app pill, which uses
+            // colorScheme.secondary — and in the Vault theme secondary == primary,
+            // so reuse the family primary + reminder pill background here. The
+            // "CARD" label disambiguates it from the reminder pill.
+            "creditCard" -> Triple(
+                WidgetTheme.pillReminderBg(prefs), WidgetTheme.primary(context, prefs), "CARD"
+            )
             else -> Triple(
                 R.drawable.widget_pill_ledger,
                 ContextCompat.getColor(context, R.color.kuber_text_secondary), "LEDGER"

@@ -790,6 +790,18 @@ abstract class AppLocalizations {
   /// **'Floating pill'**
   String get navSubtitleModern;
 
+  /// No description provided for @navFuturisticChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Futuristic'**
+  String get navFuturisticChoice;
+
+  /// No description provided for @navSubtitleFuturistic.
+  ///
+  /// In en, this message translates to:
+  /// **'Label on active'**
+  String get navSubtitleFuturistic;
+
   /// No description provided for @numFormatIndian.
   ///
   /// In en, this message translates to:
@@ -8833,6 +8845,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Kuber Notes'**
   String get speedDialNote;
+
+  /// No description provided for @billingCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing cycle'**
+  String get billingCycle;
+
+  /// No description provided for @billGenerationDaySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill generation day'**
+  String get billGenerationDaySection;
+
+  /// No description provided for @paymentDueDaySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due day'**
+  String get paymentDueDaySection;
+
+  /// No description provided for @remindMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me'**
+  String get remindMe;
+
+  /// No description provided for @billReminderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify on the day the bill is generated'**
+  String get billReminderSub;
+
+  /// No description provided for @dueReminderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify on the payment due date'**
+  String get dueReminderSub;
+
+  /// No description provided for @billGenerationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill generation'**
+  String get billGenerationLabel;
+
+  /// No description provided for @paymentDueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment due'**
+  String get paymentDueLabel;
+
+  /// No description provided for @dayOfEveryMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{ordinal} of every month'**
+  String dayOfEveryMonth(String ordinal);
+
+  /// No description provided for @billDueCrossMonthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The bill generates on the {billOrdinal} and payment is due on the {dueOrdinal}, so payment falls in the next month.'**
+  String billDueCrossMonthHint(String billOrdinal, String dueOrdinal);
 }
 
 class _AppLocalizationsDelegate

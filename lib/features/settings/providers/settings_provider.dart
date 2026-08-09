@@ -93,6 +93,8 @@ enum NumberSystem { indian, international }
 
 enum SwipeMode { changeTabs, performActions }
 
+// 0=classic, 1=modern. (A former index 2 "futuristic" was removed; the load
+// path clamps any stale index 2 back to modern.)
 enum NavBarStyle { classic, modern }
 
 enum MoreTabLayout { simple, modern }
@@ -258,7 +260,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       privacyMode: privacyMode,
       thresholdFloor: thresholdFloor,
       thresholdCeiling: thresholdCeiling,
-      navBarStyle: NavBarStyle.values[navBarStyleIndex],
+      navBarStyle: NavBarStyle
+          .values[navBarStyleIndex.clamp(0, NavBarStyle.values.length - 1)],
       moreTabLayout: MoreTabLayout.values[moreTabLayoutIndex],
       locale: locale,
       quickActionShortcuts: quickActionShortcuts,

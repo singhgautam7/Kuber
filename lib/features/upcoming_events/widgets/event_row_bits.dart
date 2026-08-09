@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../accounts/widgets/account_detail_sheet.dart';
 import '../../ledger/widgets/ledger_detail_sheet.dart';
 import '../../loans/widgets/loan_detail_sheet.dart';
 import '../../recurring/widgets/recurring_detail_sheet.dart';
@@ -20,6 +21,7 @@ import '../engine/event_aggregator.dart';
     'emi' => (label: 'EMI', color: context.kuberColors.eventEmi),
     'sip' => (label: 'SIP', color: cs.tertiary),
     'recurring' => (label: 'RECURRING', color: context.kuberColors.warning),
+    'creditCard' => (label: 'CREDIT CARD', color: cs.secondary),
     _ => (label: 'LEDGER', color: context.kuberColors.eventLedger),
   };
 }
@@ -52,6 +54,15 @@ void openUpcomingEventSource(
         useSafeArea: true,
         backgroundColor: Colors.transparent,
         builder: (_) => LedgerDetailSheet(ledger: ledger),
+      );
+    case CreditCardEvent(:final account):
+      showModalBottomSheet(
+        context: context,
+        useRootNavigator: true,
+        isScrollControlled: true,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => AccountDetailSheet(account: account),
       );
   }
 }

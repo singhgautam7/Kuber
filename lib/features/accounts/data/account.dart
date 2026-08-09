@@ -20,6 +20,24 @@ class Account {
   /// false, so existing rows migrate safely.
   bool isDisabled = false;
 
+  // ── Credit-card billing cycle (credit cards only) ────────────────────────
+  // Optional day-of-month (1-31) fields. Adding optional/defaulted properties
+  // to an existing collection is a safe Isar migration: existing rows read
+  // null for the ints and false for the bools with no migration step (same
+  // pattern as [isDisabled] above).
+
+  /// Day of month (1-31) the card's statement is generated. null = unset.
+  int? billGenerationDay;
+
+  /// Day of month (1-31) the card payment is due. null = unset.
+  int? paymentDueDay;
+
+  /// Fire a reminder on the bill-generation day.
+  bool billGenerationReminderEnabled = false;
+
+  /// Fire a reminder on the payment-due day.
+  bool paymentDueReminderEnabled = false;
+
   Map<String, dynamic> toMap() => {
     'id': id,
     'name': name,
@@ -31,5 +49,9 @@ class Account {
     'colorValue': colorValue,
     'last4Digits': last4Digits,
     'isDisabled': isDisabled,
+    'billGenerationDay': billGenerationDay,
+    'paymentDueDay': paymentDueDay,
+    'billGenerationReminderEnabled': billGenerationReminderEnabled,
+    'paymentDueReminderEnabled': paymentDueReminderEnabled,
   };
 }

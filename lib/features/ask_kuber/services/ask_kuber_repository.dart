@@ -36,6 +36,16 @@ class AskKuberRepository {
     });
   }
 
+  /// Re-persists an already-stored message in place (e.g. a transaction-preview
+  /// bubble transformed to its confirmed/cancelled state). Falls back to
+  /// [append] if the message was never stored.
+  Future<void> update(ChatMessage msg) async {
+    final id = msg.storedId;
+    if (id == null) return append(msg);
+    final row = _toRow(msg)..id = id;
+    await isar.writeTxn(() => isar.askKuberMessages.put(row));
+  }
+
   /// Wipes the whole conversation (Clear chat).
   Future<void> clear() async {
     await isar.writeTxn(() async {
