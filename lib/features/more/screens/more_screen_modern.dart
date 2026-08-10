@@ -289,7 +289,7 @@ class MoreScreenModern extends ConsumerWidget {
                       child: _ToolCard(
                         icon: Icons.credit_card_rounded,
                         title: 'Kuber Cards',
-                        subtitle: 'Encrypted card vault',
+                        subtitle: 'Encrypted vault to save all your cards',
                         accent: _ToolAccent.primary,
                         onTap: () {
                           if (proGate(context, ref, showKuberCardsGateSheet)) {

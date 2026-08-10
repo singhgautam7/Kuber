@@ -74,9 +74,9 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
     super.dispose();
   }
 
-  void _copy(String value) {
+  void _copy(String value, String label) {
     CardClipboardService.copy(value);
-    showKuberSnackBar(context, 'Copied. Clipboard clears in 30 seconds.');
+    showKuberSnackBar(context, 'Copied $label.');
   }
 
   void _revealCustom(int index) {
@@ -141,64 +141,65 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
 
   Widget _content(ColorScheme cs, DecryptedCard dec) {
     final hasNumber = (dec.number ?? '').isNotEmpty;
+
+    // The card face is the hero; below it a field table lists number, holder,
+    // expiry and network (number + expiry stay masked until "Show details").
+    // Long-press any row (or the card) copies that field's underlying value.
     final rows = <InfoTableRow>[
       InfoTableDataRow(
         label: 'Card number',
         value: hasNumber
             ? (_revealed ? _group(dec.number!) : '•••• ${dec.last4 ?? '••••'}')
             : (dec.last4 != null ? '•••• ${dec.last4}' : '••••'),
-        onLongPress: hasNumber ? () => _copy(dec.number!) : null,
+        onLongPress:
+            hasNumber ? () => _copy(dec.number!, 'card number') : null,
       ),
       if ((dec.cardholder ?? '').isNotEmpty)
         InfoTableDataRow(
           label: 'Cardholder',
           value: dec.cardholder!,
-          onLongPress: () => _copy(dec.cardholder!),
+          onLongPress: () => _copy(dec.cardholder!, 'cardholder'),
         ),
       if ((dec.expiry ?? '').isNotEmpty)
         InfoTableDataRow(
           label: 'Expiry',
           value: _revealed ? dec.expiry! : '••/••',
-          onLongPress: () => _copy(dec.expiry!),
+          onLongPress: () => _copy(dec.expiry!, 'Expiry'),
         ),
       if ((dec.network ?? '').isNotEmpty)
         InfoTableDataRow(
           label: 'Network',
           value: _titleCase(dec.network!),
-          onLongPress: () => _copy(_titleCase(dec.network!)),
+          onLongPress: () => _copy(_titleCase(dec.network!), 'network'),
         ),
     ];
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StoredCardVisual(
-          nickname: dec.nickname,
-          last4: dec.last4,
-          bankIcon: dec.bankIcon,
-          network: dec.network,
-          colorValue: dec.colorValue,
-          isGradient: dec.isGradient,
-          showBottomRow: true,
-          cardholder: dec.cardholder,
-          expiry: _revealed ? dec.expiry : null,
-          revealedNumber: _revealed ? dec.number : null,
+        GestureDetector(
+          onLongPress:
+              hasNumber ? () => _copy(dec.number!, 'card number') : null,
+          child: StoredCardVisual(
+            nickname: dec.nickname,
+            last4: dec.last4,
+            bankIcon: dec.bankIcon,
+            network: dec.network,
+            colorValue: dec.colorValue,
+            isGradient: dec.isGradient,
+            // Cardholder always shown; expiry masked as ••/•• until revealed.
+            cardholder: dec.cardholder,
+            expiry: _revealed
+                ? dec.expiry
+                : ((dec.expiry ?? '').isNotEmpty ? '••/••' : null),
+            revealedNumber: _revealed ? dec.number : null,
+          ),
         ),
         const SizedBox(height: KuberSpacing.lg),
-        if (hasNumber)
-          AppButton(
-            // Accented while hidden (the primary call-to-action); a plain
-            // outline button once details are shown.
-            label: _revealed ? 'Hide details' : 'Show details',
-            type: _revealed ? AppButtonType.outline : AppButtonType.primary,
-            icon: _revealed
-                ? Icons.visibility_off_rounded
-                : Icons.visibility_rounded,
-            fullWidth: true,
-            height: 46,
-            onPressed: () => setState(() => _revealed = !_revealed),
-          ),
-        const SizedBox(height: KuberSpacing.lg),
+        if (hasNumber) ...[
+          _revealButton(cs),
+          const SizedBox(height: KuberSpacing.lg),
+        ],
         InfoTable(rows: rows),
         if (dec.customFields.isNotEmpty) ...[
           const SizedBox(height: KuberSpacing.lg),
@@ -208,6 +209,50 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
         ],
         _linkedAccount(cs, dec),
       ],
+    );
+  }
+
+  /// Reveal toggle. Both states use accent content: hidden reads as a bordered
+  /// surface button, shown reads as a primary-tinted button (per the design).
+  Widget _revealButton(ColorScheme cs) {
+    final shown = _revealed;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() => _revealed = !_revealed),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        child: Ink(
+          height: 48,
+          decoration: BoxDecoration(
+            color: shown
+                ? cs.primary.withValues(alpha: 0.10)
+                : cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(
+              color: shown ? cs.primary.withValues(alpha: 0.40) : cs.outline,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                shown ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                size: 18,
+                color: cs.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                shown ? 'Hide details' : 'Show details',
+                style: localeFont(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -228,7 +273,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
             ? (revealed ? Icons.visibility_off_rounded : Icons.visibility_rounded)
             : null,
         onTap: risky && !revealed ? () => _revealCustom(i) : null,
-        onLongPress: () => _copy(f.value),
+        onLongPress: () => _copy(f.value, f.label),
       ));
     }
     return rows;

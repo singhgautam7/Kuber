@@ -9,12 +9,16 @@ import 'card_icon.dart';
 import 'card_network_glyph.dart';
 
 /// The signature Kuber Cards surface: a realistic-proportioned card carrying the
-/// user's chosen background (solid or gradient), a fixed metallic sheen, the bank
-/// glyph, nickname, masked last 4, and an abstracted network mark.
+/// user's chosen background (solid or gradient), a fixed metallic sheen, and,
+/// per `tokens-and-visual-spec.md`, this anatomy:
 ///
-/// One widget, size-driven by the enclosing width (the caller wraps it in the
-/// right layout). Aspect ratio is fixed at 1.586:1 (ISO/IEC 7810 ID-1).
-/// See `tokens-and-visual-spec.md`.
+///   [icon] Nickname                     <- top row
+///   •••• •••• •••• 1234                  <- masked number, lower half
+///   CARD HOLDER      EXPIRES             <- mini labels (onCard @ 60%)
+///   Asha Mehta       08/28      [NET]    <- values + network glyph bottom-right
+///
+/// Cardholder / expiry are optional (omitted when empty). Aspect ratio is fixed
+/// at 1.586:1 (ISO/IEC 7810 ID-1).
 class StoredCardVisual extends StatelessWidget {
   final String nickname;
   final String? last4;
@@ -23,14 +27,14 @@ class StoredCardVisual extends StatelessWidget {
   final int colorValue;
   final bool isGradient;
 
-  /// Fully revealed number to render instead of the masked form (detail sheet
-  /// "Show details" state). Null keeps the masked `•••• •••• •••• 1234`.
+  /// Fully revealed number rendered instead of the masked `•••• •••• •••• 1234`
+  /// (detail-sheet "Show details" state). Null keeps the masked form.
   final String? revealedNumber;
 
-  /// Cardholder + expiry shown along the bottom (detail-sheet hero only).
+  /// Bottom-row values, each shown only when non-empty. The caller passes a
+  /// masked placeholder (e.g. `••/••`) when a value should read as hidden.
   final String? cardholder;
   final String? expiry;
-  final bool showBottomRow;
 
   const StoredCardVisual({
     super.key,
@@ -43,23 +47,26 @@ class StoredCardVisual extends StatelessWidget {
     this.revealedNumber,
     this.cardholder,
     this.expiry,
-    this.showBottomRow = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final onCard =
         CardPalette.onCardColor(colorValue: colorValue, isGradient: isGradient);
+    final hasHolder = (cardholder ?? '').isNotEmpty;
+    final hasExpiry = (expiry ?? '').isNotEmpty;
 
     return AspectRatio(
       aspectRatio: 1.586,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final w = constraints.maxWidth;
-          // Scale paddings/typography off the card width so all sizes read well.
-          final pad = w * 0.065;
-          final nameSize = (w * 0.052).clamp(15.0, 22.0);
-          final numSize = (w * 0.046).clamp(14.0, 19.0);
+          final pad = w * 0.062;
+          final tile = (w * 0.125).clamp(38.0, 44.0);
+          final nameSize = (w * 0.05).clamp(15.0, 19.0);
+          final numSize = (w * 0.052).clamp(15.0, 21.0);
+          final labelSize = (w * 0.027).clamp(8.0, 10.0);
+          final valueSize = (w * 0.034).clamp(11.0, 14.0);
 
           return DecoratedBox(
             decoration: BoxDecoration(
@@ -78,9 +85,7 @@ class StoredCardVisual extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // Metallic sheen overlay (fixed, identical in both themes).
                 Positioned.fill(child: _MetallicSheen()),
-                // Inner stroke for depth (no shadow, per Vault).
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -96,52 +101,64 @@ class StoredCardVisual extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _bankTile(onCard, w),
+                      // TOP ROW: bank icon + nickname.
+                      Row(
+                        children: [
+                          _bankTile(onCard, tile),
+                          SizedBox(width: pad * 0.55),
+                          Expanded(
+                            child: Text(
+                              nickname.isEmpty ? 'New card' : nickname,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: localeFont(
+                                fontSize: nameSize,
+                                fontWeight: FontWeight.w700,
+                                color: onCard,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       const Spacer(),
+                      // Masked / revealed number.
+                      Text(
+                        _maskedNumber(),
+                        style: localeFont(
+                          fontSize: numSize,
+                          fontWeight: FontWeight.w600,
+                          color: onCard,
+                          letterSpacing: 1.5,
+                          fontFeatures: const [ui.FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      SizedBox(height: pad * 0.5),
+                      // Bottom row: card holder / expiry group + network glyph.
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text(
-                                  nickname.isEmpty ? 'New card' : nickname,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: localeFont(
-                                    fontSize: nameSize,
-                                    fontWeight: FontWeight.w700,
-                                    color: onCard,
+                                if (hasHolder)
+                                  Flexible(
+                                    child: _pair(onCard, 'CARD HOLDER',
+                                        cardholder!, labelSize, valueSize),
                                   ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _maskedNumber(),
-                                  style: localeFont(
-                                    fontSize: numSize,
-                                    fontWeight: FontWeight.w600,
-                                    color: onCard.withValues(alpha: 0.85),
-                                    fontFeatures: const [
-                                      ui.FontFeature.tabularFigures()
-                                    ],
-                                  ),
-                                ),
-                                if (showBottomRow) ...[
-                                  SizedBox(height: pad * 0.5),
-                                  _bottomRow(onCard, w),
-                                ],
+                                if (hasHolder && hasExpiry)
+                                  SizedBox(width: pad * 1.4),
+                                if (hasExpiry)
+                                  _pair(onCard, 'EXPIRES', expiry!, labelSize,
+                                      valueSize),
                               ],
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(left: pad * 0.5),
-                            child: CardNetworkGlyph(
-                              network: network,
-                              color: onCard,
-                              size: w * 0.11,
-                            ),
+                          SizedBox(width: pad * 0.5),
+                          CardNetworkGlyph(
+                            network: network,
+                            color: onCard,
+                            size: w * 0.11,
                           ),
                         ],
                       ),
@@ -156,8 +173,7 @@ class StoredCardVisual extends StatelessWidget {
     );
   }
 
-  Widget _bankTile(Color onCard, double w) {
-    final tile = (w * 0.11).clamp(36.0, 52.0);
+  Widget _bankTile(Color onCard, double tile) {
     return Container(
       width: tile,
       height: tile,
@@ -170,43 +186,32 @@ class StoredCardVisual extends StatelessWidget {
     );
   }
 
-  Widget _bottomRow(Color onCard, double w) {
-    final labelStyle = localeFont(
-      fontSize: (w * 0.028).clamp(8.0, 11.0),
-      fontWeight: FontWeight.w600,
-      letterSpacing: 1,
-      color: onCard.withValues(alpha: 0.65),
-    );
-    final valueStyle = localeFont(
-      fontSize: (w * 0.033).clamp(10.0, 13.0),
-      fontWeight: FontWeight.w600,
-      color: onCard,
-    );
-    return Row(
+  Widget _pair(
+      Color onCard, String label, String value, double ls, double vs) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        if ((cardholder ?? '').isNotEmpty)
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('CARD HOLDER', style: labelStyle),
-                Text(cardholder!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: valueStyle),
-              ],
-            ),
+        Text(
+          label,
+          style: localeFont(
+            fontSize: ls,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
+            color: onCard.withValues(alpha: 0.60),
           ),
-        if ((expiry ?? '').isNotEmpty)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('EXPIRES', style: labelStyle),
-              Text(expiry!, style: valueStyle),
-            ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: localeFont(
+            fontSize: vs,
+            fontWeight: FontWeight.w600,
+            color: onCard,
           ),
+        ),
       ],
     );
   }
@@ -242,7 +247,6 @@ class _MetallicSheen extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(KuberRadius.xl),
         gradient: const LinearGradient(
-          // ~115 degrees.
           begin: Alignment(-0.9, -1),
           end: Alignment(0.9, 1),
           colors: [
@@ -258,7 +262,7 @@ class _MetallicSheen extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(KuberRadius.xl),
           border: const Border(
-            top: BorderSide(color: Color(0x4DFFFFFF)), // crisp top-edge highlight
+            top: BorderSide(color: Color(0x4DFFFFFF)),
           ),
         ),
       ),

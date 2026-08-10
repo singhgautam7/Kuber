@@ -200,7 +200,7 @@ class MoreScreenSimple extends ConsumerWidget {
                     _MenuItem(
                       icon: Icons.credit_card_rounded,
                       label: 'Kuber Cards',
-                      subtitle: 'Encrypted card vault',
+                      subtitle: 'Encrypted vault to save all your cards',
                       onTap: () {
                         if (proGate(context, ref, showKuberCardsGateSheet)) {
                           context.push('/cards');

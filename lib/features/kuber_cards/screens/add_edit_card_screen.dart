@@ -355,10 +355,20 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   Widget _customFieldRow(ColorScheme cs, int i) {
     final row = _custom[i];
     // Standard inputs (same height/margins as the rest of the form): a Label
-    // field with a delete affordance, then a Value field below.
+    // field with a delete affordance, then a Value field below. A hairline
+    // boundary before each field after the first keeps multiple custom fields
+    // from reading as one long stack of identical inputs.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (i > 0) ...[
+          const SizedBox(height: 4),
+          Divider(
+              height: 1,
+              thickness: 1,
+              color: cs.outline.withValues(alpha: 0.6)),
+          const SizedBox(height: 14),
+        ],
         Row(
           children: [
             Expanded(child: _field(row.label, hint: 'Label')),

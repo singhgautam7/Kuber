@@ -113,53 +113,69 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     return CardsSecureScaffold(
       child: Scaffold(
         backgroundColor: cs.surface,
-        appBar: KuberAppBar(
-          showBack: true,
-          showHome: true,
-          showBrand: false,
-          infoConfig: aboutKuberCardsInfo,
-          overflowConfig: KuberOverflowConfig(
-            items: [
-              KuberOverflowItem(
-                icon: viewMode == CardsViewMode.card
-                    ? Icons.view_list_rounded
-                    : Icons.view_agenda_outlined,
-                label: viewMode == CardsViewMode.card
-                    ? 'Switch to list view'
-                    : 'Switch to card view',
-                onTap: () => ref.read(cardsViewModeProvider.notifier).toggle(),
+        // Nothing here is pinned: the app bar, page header, and the search +
+        // count rows all scroll with the card list (parity with the
+        // More -> Accounts landing).
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: KuberAppBar(
+                showBack: true,
+                showHome: true,
+                showBrand: false,
+                infoConfig: aboutKuberCardsInfo,
+                overflowConfig: KuberOverflowConfig(
+                  items: [
+                    KuberOverflowItem(
+                      icon: viewMode == CardsViewMode.card
+                          ? Icons.view_list_rounded
+                          : Icons.view_agenda_outlined,
+                      label: viewMode == CardsViewMode.card
+                          ? 'Switch to list view'
+                          : 'Switch to card view',
+                      onTap: () =>
+                          ref.read(cardsViewModeProvider.notifier).toggle(),
+                    ),
+                    KuberOverflowItem(
+                      icon: Icons.settings_outlined,
+                      label: 'Settings',
+                      onTap: () => context.push('/cards/settings'),
+                    ),
+                    KuberOverflowItem(
+                      icon: Icons.lock_rounded,
+                      label: 'Lock now',
+                      onTap: () =>
+                          ref.read(cardSessionProvider.notifier).lock(),
+                    ),
+                  ],
+                ),
               ),
-              KuberOverflowItem(
-                icon: Icons.settings_outlined,
-                label: 'Settings',
-                onTap: () => context.push('/cards/settings'),
-              ),
-              KuberOverflowItem(
-                icon: Icons.lock_rounded,
-                label: 'Lock now',
-                onTap: () => ref.read(cardSessionProvider.notifier).lock(),
-              ),
-            ],
-          ),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            KuberPageHeader(
-              title: 'Kuber Cards',
-              description: 'Your cards, encrypted on-device',
-              actionIcon: Icons.add_rounded,
-              actionTooltip: 'Add card',
-              onAction: () => context.push('/cards/add'),
             ),
-            Expanded(
-              child: cardsAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(
-                    child: Text('Could not load cards', style: localeFont())),
-                data: (cards) => _body(cs, cards, viewMode),
+            SliverToBoxAdapter(
+              child: KuberPageHeader(
+                title: 'Kuber Cards',
+                description: 'Your cards, encrypted on-device',
+                actionIcon: Icons.add_rounded,
+                actionTooltip: 'Add card',
+                onAction: () => context.push('/cards/add'),
               ),
+            ),
+            ...cardsAsync.when(
+              loading: () => const [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ],
+              error: (e, _) => [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                      child:
+                          Text('Could not load cards', style: localeFont())),
+                ),
+              ],
+              data: (cards) => _contentSlivers(cs, cards, viewMode),
             ),
           ],
         ),
@@ -167,15 +183,21 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     );
   }
 
-  Widget _body(ColorScheme cs, List<StoredCard> cards, CardsViewMode viewMode) {
+  List<Widget> _contentSlivers(
+      ColorScheme cs, List<StoredCard> cards, CardsViewMode viewMode) {
     if (cards.isEmpty) {
-      return KuberEmptyState(
-        icon: Icons.credit_card_rounded,
-        title: 'No cards yet',
-        description: 'Add your first card to keep it safe here.',
-        actionLabel: 'Add card',
-        onAction: () => context.push('/cards/add'),
-      );
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: KuberEmptyState(
+            icon: Icons.credit_card_rounded,
+            title: 'No cards yet',
+            description: 'Add your first card to keep it safe here.',
+            actionLabel: 'Add card',
+            onAction: () => context.push('/cards/add'),
+          ),
+        ),
+      ];
     }
 
     final filtered = _applyFilters(cards);
@@ -184,38 +206,40 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     // (hasProAccess == true), so nothing blurs today. See specs/pro-gating-disabled.md.
     final hasPro = ref.watch(kuberProStateProvider).hasProAccess;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _controlsRow(cs, viewMode),
-        // "SHOWING N CARDS" eyebrow, mirroring the History tab's count row.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-          child: RichText(
-            text: TextSpan(
-              style: localeFont(
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                color: cs.onSurfaceVariant,
-              ),
-              children: [
-                const TextSpan(text: 'SHOWING '),
-                TextSpan(
-                  text: '${filtered.length} ',
-                  style: TextStyle(color: cs.primary),
-                ),
-                TextSpan(text: filtered.length == 1 ? 'CARD' : 'CARDS'),
-              ],
-            ),
+    return [
+      SliverToBoxAdapter(child: _controlsRow(cs, viewMode)),
+      // "SHOWING N CARDS" eyebrow, mirroring the History tab's count row.
+      SliverToBoxAdapter(child: _countEyebrow(cs, filtered.length)),
+      SliverPadding(
+        padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+        sliver: viewMode == CardsViewMode.card
+            ? _cardSliver(filtered, hasPro)
+            : _listSliver(cs, filtered, hasPro),
+      ),
+      SliverToBoxAdapter(
+        child: SizedBox(height: MediaQuery.of(context).padding.bottom),
+      ),
+    ];
+  }
+
+  Widget _countEyebrow(ColorScheme cs, int count) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+      child: RichText(
+        text: TextSpan(
+          style: localeFont(
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.2,
+            color: cs.onSurfaceVariant,
           ),
+          children: [
+            const TextSpan(text: 'SHOWING '),
+            TextSpan(text: '$count ', style: TextStyle(color: cs.primary)),
+            TextSpan(text: count == 1 ? 'CARD' : 'CARDS'),
+          ],
         ),
-        Expanded(
-          child: viewMode == CardsViewMode.card
-              ? _cardView(filtered, hasPro)
-              : _listView(cs, filtered, hasPro),
-        ),
-      ],
+      ),
     );
   }
 
@@ -304,9 +328,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     );
   }
 
-  Widget _cardView(List<StoredCard> cards, bool hasPro) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+  Widget _cardSliver(List<StoredCard> cards, bool hasPro) {
+    return SliverList.builder(
       itemCount: cards.length,
       itemBuilder: (context, i) {
         final card = cards[i];
@@ -322,9 +345,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     );
   }
 
-  Widget _listView(ColorScheme cs, List<StoredCard> cards, bool hasPro) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+  Widget _listSliver(ColorScheme cs, List<StoredCard> cards, bool hasPro) {
+    return SliverList.builder(
       itemCount: cards.length,
       itemBuilder: (context, i) {
         final card = cards[i];

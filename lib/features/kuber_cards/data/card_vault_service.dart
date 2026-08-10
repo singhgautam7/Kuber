@@ -315,6 +315,16 @@ class CardVaultService {
   Future<void> deleteCard(int id) =>
       _isar.writeTxn(() => _isar.storedCards.delete(id));
 
+  /// Drops an imported-but-locked vault: deletes every restored card and the
+  /// imported metadata. Used when the user declines to unlock backup cards on
+  /// import (the rest of the imported data is kept). See `import-flow.md`.
+  Future<void> discardImportedVault() async {
+    await _isar.writeTxn(() async {
+      await _isar.storedCards.clear();
+      await _isar.cardVaultMetas.clear();
+    });
+  }
+
   Future<DecryptedCard> decryptCard({
     required List<int> key,
     required StoredCard card,

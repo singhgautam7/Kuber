@@ -33,6 +33,8 @@ import '../../tools/saved/data/calculator_recent_use.dart';
 import '../../ask_kuber/data/ask_kuber_message.dart';
 import '../../notes/data/kuber_note.dart';
 import '../../reminders/data/reminder.dart';
+import '../../kuber_cards/data/stored_card.dart';
+import '../../kuber_cards/data/card_vault_meta.dart';
 
 class CollectionMeta {
   final String name;
@@ -114,6 +116,11 @@ class DbExplorerScreen extends ConsumerWidget {
       ),
       CollectionMeta('KuberNote', (i) => i.collection<KuberNote>().count()),
       CollectionMeta('Reminder', (i) => i.collection<Reminder>().count()),
+      CollectionMeta('StoredCard', (i) => i.collection<StoredCard>().count()),
+      CollectionMeta(
+        'CardVaultMeta',
+        (i) => i.collection<CardVaultMeta>().count(),
+      ),
     ]..sort((a, b) => a.name.compareTo(b.name));
 
     return Scaffold(

@@ -20,6 +20,28 @@ const String _bankPrefix = 'bank/';
 /// absolute path.
 const String _galleryPrefix = 'gallery:';
 
+/// Set once the bundled bank SVGs have been decoded into `svg.cache` (the
+/// XML->vector compile is the expensive step). Module-level so reopening the
+/// picker skips the warm-up loader entirely; the cache itself lives for the
+/// app's lifetime.
+bool _bankIconsWarmed = false;
+
+/// Warms `svg.cache` with the bank monograms in [bankKeys] so the grid decodes
+/// them from memory instead of parsing SVG XML during the sheet's open
+/// animation. `SvgLoader.loadBytes` populates the cache on first call and
+/// returns the cached bytes thereafter, so this is cheap on repeat runs.
+Future<void> _warmBankIcons(List<String> bankKeys) async {
+  await Future.wait(bankKeys.map((key) async {
+    final name = key.substring(_bankPrefix.length);
+    try {
+      await SvgAssetLoader('assets/bank_icons/$name.svg').loadBytes(null);
+    } catch (_) {
+      // A missing/broken asset must not block the picker; it falls back to a
+      // neutral bank icon at render time.
+    }
+  }));
+}
+
 Future<void> showIconPicker({
   required BuildContext context,
   required List<String> iconKeys,
@@ -79,6 +101,27 @@ class _IconPickerSheetState extends State<_IconPickerSheet> {
   final _searchCtrl = TextEditingController();
   final _searchFocus = FocusNode();
   late List<String> _filtered = widget.iconKeys;
+
+  /// False only while the bundled bank SVGs are warming on the very first open;
+  /// the grid shows a brief loader until then. The sheet itself always opens.
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final bankKeys =
+        widget.iconKeys.where((k) => k.startsWith(_bankPrefix)).toList();
+    if (bankKeys.isEmpty || _bankIconsWarmed) {
+      // No SVGs to warm (category/account pickers) or already warmed: render at
+      // once, no loader.
+      _ready = true;
+    } else {
+      _warmBankIcons(bankKeys).whenComplete(() {
+        _bankIconsWarmed = true;
+        if (mounted) setState(() => _ready = true);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -180,37 +223,58 @@ class _IconPickerSheetState extends State<_IconPickerSheet> {
             ),
           ),
           const SizedBox(height: KuberSpacing.md),
-          // Gallery action scrolls with the grid (not pinned).
-          if (widget.allowGallery && _searchCtrl.text.isEmpty) ...[
-            _GalleryPickRow(onTap: _pickFromGallery),
-            const SizedBox(height: KuberSpacing.md),
-          ],
-          if (_filtered.isEmpty)
-            _IconPickerEmpty(query: _searchCtrl.text)
-          else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: KuberSpacing.sm,
-                crossAxisSpacing: KuberSpacing.sm,
-                childAspectRatio: 0.95,
-              ),
-              itemCount: _filtered.length,
-              itemBuilder: (_, index) {
-                final key = _filtered[index];
-                return _IconCell(
-                  iconKey: key,
-                  label: _labelFor(key),
-                  isSelected: key == widget.selected,
-                  onTap: () {
-                    widget.onSelected(key);
-                    Navigator.of(context, rootNavigator: true).pop();
-                  },
-                );
-              },
-            ),
+          // A bounded, LAZILY-built scroll area: only the icon cells actually on
+          // screen are constructed. Previously the grid was `shrinkWrap: true`
+          // inside the sheet's own scroll view, which forced EVERY cell to build
+          // at once on open and on each keystroke. For the Kuber Cards picker
+          // that meant ~200 cells including ~40 bundled bank SVGs (each parsed +
+          // rasterized by flutter_svg) — the source of the jitter. The category
+          // picker never felt it: fewer cells and only cheap font glyphs. Making
+          // the grid a real viewport (SliverGrid) builds ~a dozen cells at a
+          // time regardless of how many icons or SVGs are in the list. The
+          // gallery row rides inside the same scroll so it is not pinned.
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.52,
+            child: !_ready
+                ? const Center(child: CircularProgressIndicator())
+                : _filtered.isEmpty
+                ? _IconPickerEmpty(query: _searchCtrl.text)
+                : CustomScrollView(
+                    slivers: [
+                      if (widget.allowGallery && _searchCtrl.text.isEmpty) ...[
+                        SliverToBoxAdapter(
+                            child: _GalleryPickRow(onTap: _pickFromGallery)),
+                        const SliverToBoxAdapter(
+                            child: SizedBox(height: KuberSpacing.md)),
+                      ],
+                      SliverGrid(
+                        gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          mainAxisSpacing: KuberSpacing.sm,
+                          crossAxisSpacing: KuberSpacing.sm,
+                          childAspectRatio: 0.95,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (_, index) {
+                            final key = _filtered[index];
+                            return _IconCell(
+                              iconKey: key,
+                              label: _labelFor(key),
+                              isSelected: key == widget.selected,
+                              onTap: () {
+                                widget.onSelected(key);
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                            );
+                          },
+                          childCount: _filtered.length,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ],
       ),
     );

@@ -37,7 +37,6 @@ void main() {
         network: 'mastercard',
         colorValue: 0, // gradient index
         isGradient: true,
-        showBottomRow: true,
         cardholder: 'Asha Mehta',
         expiry: '08/28',
         revealedNumber: '4111111111118842',
