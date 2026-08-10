@@ -20,6 +20,7 @@ import '../../tutorial/models/tutorial_step_keys.dart';
 import '../../ask_kuber/screen/kuber_mark.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/gate_sheet_kuber_cards.dart';
 import '../../pro/feature_gates/pro_gate.dart';
 // PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
 // import '../../pro/more/more_premium_card.dart';
@@ -194,6 +195,17 @@ class MoreScreenSimple extends ConsumerWidget {
                       label: 'Kuber Notes',
                       subtitle: 'Jot expenses and do quick math',
                       onTap: () => context.push('/more/notes'),
+                    ),
+                    // Kuber Cards, directly after Notes. Pro-gated entry.
+                    _MenuItem(
+                      icon: Icons.credit_card_rounded,
+                      label: 'Kuber Cards',
+                      subtitle: 'Encrypted card vault',
+                      onTap: () {
+                        if (proGate(context, ref, showKuberCardsGateSheet)) {
+                          context.push('/cards');
+                        }
+                      },
                     ),
                     _MenuItem(
                       icon: Icons.flash_on_rounded,

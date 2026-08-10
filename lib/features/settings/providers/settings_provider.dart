@@ -108,6 +108,7 @@ const List<String> kDefaultQuickActionShortcuts = [
   'emi-calculator', // tool ids are hyphenated in kShortcutCatalog
   'advanced_analytics',
   'ask_kuber',
+  'kuber_cards',
   'categories',
 ];
 

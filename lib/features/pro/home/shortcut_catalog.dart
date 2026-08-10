@@ -164,6 +164,14 @@ const List<ShortcutMeta> _kSignatureShortcuts = [
     route: '/more/stories-archive',
     section: ShortcutSection.kuberSpecific,
   ),
+  ShortcutMeta(
+    id: 'kuber_cards',
+    label: 'Kuber Cards',
+    shortLabel: 'Cards',
+    icon: Icons.credit_card_rounded,
+    route: '/cards',
+    section: ShortcutSection.kuberSpecific,
+  ),
 ];
 
 /// Short tile labels for the calculators, keyed by `ToolCatalog` route key.

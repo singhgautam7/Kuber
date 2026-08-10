@@ -60,6 +60,14 @@ dependencies:
   flutter_quill: ^11.5.0
   timezone: ^0.11.1
 
+  # Kuber Cards vault: on-device field encryption. Argon2id KDF + AES-GCM-256,
+  # clean async API, pure Dart (works on Android + Web). See specs/plans/kuber-cards.md.
+  cryptography: ^2.7.0
+
+  # Monochrome, tintable bank-mark SVGs for the Kuber Cards icon picker. Vector
+  # keeps the ~40 marks well under the 300 KB asset budget.
+  flutter_svg: ^2.0.17
+
   # Native Android home-screen widgets (Flutter <-> RemoteViews bridge)
   home_widget: ^0.7.0
 
@@ -81,6 +89,8 @@ flutter:
 
   assets:
     - android/play_store_512.png
+    # Monochrome, tintable bank-mark SVGs for the Kuber Cards icon picker.
+    - assets/bank_icons/
     # Pre-bundled Inter weights (subset to Latin + punctuation + currency/
     # arrow/symbol ranges). google_fonts loads these from assets before any
     # network fetch, so the primary UI font is available instantly and offline.

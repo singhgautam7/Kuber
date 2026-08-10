@@ -3,23 +3,40 @@ package com.grs.kuber
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.Telephony
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
+import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 
 class MainActivity : FlutterFragmentActivity() {
     private val channelName = "com.grs.kuber/saf_backups"
     private val smsChannelName = "com.grs.kuber/sms"
     private val widgetsChannelName = "com.grs.kuber/widgets"
+    private val secureChannelName = "com.grs.kuber/secure_screen"
+    private val keystoreChannelName = "com.grs.kuber/cards_keystore"
     private val pickFolderRequest = 24017
     private var pendingPickResult: MethodChannel.Result? = null
+
+    // Kuber Cards biometric-convenience PIN store (Android Keystore).
+    private val cardsKeyAlias = "kuber_cards_pin_key"
+    private val cardsPrefs = "kuber_cards_secure"
+    private val cardsPinEntry = "pin_ct"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Android 15 edge-to-edge: explicit backward-compatible opt-in, per
@@ -98,6 +115,103 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        // Kuber Cards: FLAG_SECURE toggling (no screenshots / blank recents).
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            secureChannelName
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "enable" -> {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    result.success(null)
+                }
+                "disable" -> {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // Kuber Cards: biometric-convenience secret store (hardware Keystore).
+        // Stores the derived key (base64), never the PIN.
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            keystoreChannelName
+        ).setMethodCallHandler { call, result ->
+            try {
+                when (call.method) {
+                    "store" -> {
+                        val secret = call.argument<String>("secret")
+                        if (secret == null) {
+                            result.error("bad_args", "Missing secret", null)
+                        } else {
+                            storeCardsSecret(secret)
+                            result.success(true)
+                        }
+                    }
+                    "retrieve" -> result.success(retrieveCardsSecret())
+                    "clear" -> {
+                        clearCardsSecret()
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            } catch (e: Throwable) {
+                result.error("keystore_error", e.message, null)
+            }
+        }
+    }
+
+    // ── Kuber Cards Keystore helpers ─────────────────────────────────────────
+
+    /** Returns (creating if needed) the hardware-backed AES key for the PIN. */
+    private fun cardsSecretKey(): SecretKey {
+        val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        (ks.getKey(cardsKeyAlias, null) as? SecretKey)?.let { return it }
+        val generator = KeyGenerator.getInstance(
+            KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore"
+        )
+        generator.init(
+            KeyGenParameterSpec.Builder(
+                cardsKeyAlias,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build()
+        )
+        return generator.generateKey()
+    }
+
+    /** Encrypts the secret under the Keystore key; stores base64(iv:ct) in prefs. */
+    private fun storeCardsSecret(secret: String) {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, cardsSecretKey())
+        val iv = cipher.iv
+        val ct = cipher.doFinal(secret.toByteArray(Charsets.UTF_8))
+        val encoded = "${Base64.encodeToString(iv, Base64.NO_WRAP)}:" +
+            Base64.encodeToString(ct, Base64.NO_WRAP)
+        getSharedPreferences(cardsPrefs, Context.MODE_PRIVATE)
+            .edit().putString(cardsPinEntry, encoded).apply()
+    }
+
+    private fun retrieveCardsSecret(): String? {
+        val encoded = getSharedPreferences(cardsPrefs, Context.MODE_PRIVATE)
+            .getString(cardsPinEntry, null) ?: return null
+        val parts = encoded.split(":")
+        if (parts.size != 2) return null
+        val iv = Base64.decode(parts[0], Base64.NO_WRAP)
+        val ct = Base64.decode(parts[1], Base64.NO_WRAP)
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, cardsSecretKey(), GCMParameterSpec(128, iv))
+        return String(cipher.doFinal(ct), Charsets.UTF_8)
+    }
+
+    private fun clearCardsSecret() {
+        getSharedPreferences(cardsPrefs, Context.MODE_PRIVATE)
+            .edit().remove(cardsPinEntry).apply()
     }
 
     /** Whether the launcher supports pin-to-home (API 26+ and launcher opt-in). */
