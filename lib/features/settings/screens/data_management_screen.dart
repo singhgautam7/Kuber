@@ -6,10 +6,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../providers/data_provider.dart';
 import '../../backups/providers/backup_provider.dart';
+import '../../kuber_cards/widgets/imported_cards_prompt.dart';
 import '../widgets/data_action_widgets.dart';
 import '../widgets/data_export_bottom_sheet.dart';
 import '../widgets/data_import_bottom_sheet.dart';
@@ -126,7 +128,13 @@ class DataManagementScreen extends ConsumerWidget {
     ref.listen(dataControllerProvider, (previous, next) {
       if (next.status == DataOpStatus.success && next.message != null) {
         showKuberSnackBar(context, next.message!);
+        final lockedCards = next.lockedCardsFound;
         ref.read(dataControllerProvider.notifier).reset();
+        // A JSON restore that carried encrypted cards prompts for the backup's
+        // PIN so they can be unlocked and kept (or discarded). See import-flow.md.
+        if (lockedCards) {
+          showImportedCardsPrompt(context);
+        }
       } else if (next.status == DataOpStatus.error && next.message != null) {
         showKuberSnackBar(context, next.message!, isError: true);
         ref.read(dataControllerProvider.notifier).reset();
@@ -246,9 +254,76 @@ class DataManagementScreen extends ConsumerWidget {
         description: context.l10n.clearDataConfirmBody.replaceAll(' Type DELETE to confirm.', ''),
         confirmLabel: context.l10n.clearAllData,
         destructive: true,
-        onConfirm: () =>
-            ref.read(dataControllerProvider.notifier).clearAllData(),
+        // A full wipe is irreversible, so the sheet's "Clear all" is only the
+        // first gate: it opens a second type-to-confirm dialog (like the card
+        // delete flow) that requires the exact words "reset all".
+        onConfirm: () => _confirmResetAllTyped(context, ref),
       ),
+    );
+  }
+
+  /// Second, deliberate gate for a full wipe: the user must type the exact
+  /// phrase `reset all` before the destructive action runs. Mirrors the
+  /// type-the-nickname confirmation used to delete a card.
+  void _confirmResetAllTyped(BuildContext context, WidgetRef ref) {
+    const phrase = 'reset all';
+    final controller = TextEditingController();
+    showDialog<void>(
+      context: context,
+      builder: (dialogCtx) {
+        final cs = Theme.of(dialogCtx).colorScheme;
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialog) {
+            final canReset = controller.text.trim().toLowerCase() == phrase;
+            return AlertDialog(
+              backgroundColor: cs.surface,
+              title: Text('Reset everything?',
+                  style: localeFont(fontWeight: FontWeight.w700)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'This permanently erases all your data, including your '
+                    'encrypted Kuber Cards. This cannot be undone.',
+                    style: localeFont(color: cs.onSurfaceVariant, height: 1.45),
+                  ),
+                  const SizedBox(height: KuberSpacing.md),
+                  Text('Type "reset all" to confirm:',
+                      style: localeFont(
+                          fontSize: 12.5, color: cs.onSurfaceVariant)),
+                  const SizedBox(height: KuberSpacing.sm),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    onChanged: (_) => setDialog(() {}),
+                    style: localeFont(color: cs.onSurface),
+                    decoration: const InputDecoration(hintText: phrase),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogCtx),
+                  child: Text('Cancel', style: localeFont()),
+                ),
+                AppButton(
+                  label: 'Reset all',
+                  type: AppButtonType.danger,
+                  onPressed: canReset
+                      ? () {
+                          Navigator.pop(dialogCtx);
+                          ref
+                              .read(dataControllerProvider.notifier)
+                              .clearAllData();
+                        }
+                      : null,
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 

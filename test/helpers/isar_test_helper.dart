@@ -26,6 +26,8 @@ import 'package:kuber/features/tools/saved/data/calculator_recent_use.dart';
 import 'package:kuber/features/notes/data/kuber_note.dart';
 import 'package:kuber/features/reminders/data/reminder.dart';
 import 'package:kuber/features/pro/data/user_entitlement.dart';
+import 'package:kuber/features/kuber_cards/data/stored_card.dart';
+import 'package:kuber/features/kuber_cards/data/card_vault_meta.dart';
 import 'package:kuber/features/search/data/recent_search.dart';
 
 const _allSchemas = [
@@ -55,6 +57,8 @@ const _allSchemas = [
   KuberNoteSchema,
   ReminderSchema,
   UserEntitlementSchema,
+  StoredCardSchema,
+  CardVaultMetaSchema,
   RecentSearchSchema,
 ];
 

@@ -19,7 +19,7 @@ import '../../../shared/widgets/category_icon.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../providers/settings_provider.dart';
 
-import '../widgets/settings_widgets.dart';
+import '../widgets/settings_section.dart';
 import '../widgets/settings_choice_sheet.dart';
 import '../widgets/theme_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
@@ -29,6 +29,8 @@ import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../../core/services/biometric_service.dart';
 import '../../notes/providers/notes_provider.dart';
+import '../../kuber_cards/providers/kuber_cards_provider.dart';
+import '../../pro/feature_gates/gate_sheet_kuber_cards.dart';
 
 // Imports for widget configurations and count
 import '../../widget_editor/providers/widget_editor_provider.dart';
@@ -249,6 +251,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _tempMoreTabLayout ?? settings?.moreTabLayout ?? MoreTabLayout.simple;
     final currentBiometricsEnabled =
         _tempBiometricsEnabled ?? settings?.biometricsEnabled ?? false;
+    final hasCardsVault =
+        ref.watch(cardVaultMetaProvider).valueOrNull != null;
     final currency = currencyFromCode(currencyCode);
 
     final themeStr = currentTheme == ThemeMode.light
@@ -620,6 +624,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ),
+                    // Change Kuber Cards PIN. Shown only once a vault exists —
+                    // there is no PIN to change until the user has set up Kuber
+                    // Cards. Routed through the Pro gate.
+                    if (hasCardsVault) ...[
+                      Divider(height: 1, color: cs.outline),
+                      _SettingsTile(
+                        icon: Icons.credit_card_rounded,
+                        label: 'Change Kuber Cards PIN',
+                        subtitle: 'Update the PIN that unlocks your cards',
+                        trailing: Icon(Icons.chevron_right_rounded,
+                            size: 20, color: cs.onSurfaceVariant),
+                        onTap: () {
+                          // PRO-GATE: entry funnels through proGate (OFF now).
+                          if (proGate(context, ref, showKuberCardsGateSheet)) {
+                            context.push('/cards/change-pin');
+                          }
+                        },
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.xl),
@@ -955,134 +978,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final String label;
-  const _SectionLabel({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(left: KuberSpacing.xs),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-          color: cs.primary,
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionDescription extends StatelessWidget {
-  final String text;
-  const _SectionDescription(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.xs,
-        4,
-        KuberSpacing.xs,
-        KuberSpacing.sm,
-      ),
-      child: Text(
-        text,
-        style: localeFont(
-          fontSize: 12.5,
-          color: cs.onSurfaceVariant,
-          height: 1.4,
-          letterSpacing: -0.1,
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsCard extends StatelessWidget {
-  final List<Widget> children;
-  const _SettingsCard({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Column(children: children),
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String? subtitle;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-
-  const _SettingsTile({
-    required this.icon,
-    required this.label,
-    this.subtitle,
-    this.trailing,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.md,
-        ),
-        child: Row(
-          children: [
-            SquircleIcon(icon: icon, size: 18, padding: 8),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  if (subtitle case final s?)
-                    Text(
-                      s,
-                      style: localeFont(
-                        fontSize: 11,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            if (trailing case final Widget t) t,
-          ],
-        ),
-      ),
-    );
-  }
-}
+// These row primitives were lifted into the shared
+// `features/settings/widgets/settings_section.dart` so the Kuber Cards settings
+// page can reuse them verbatim. The old private names are kept as aliases so no
+// call site in this file changed.
+typedef _SectionLabel = SettingsSectionLabel;
+typedef _SectionDescription = SettingsSectionDescription;
+typedef _SettingsCard = SettingsCard;
+typedef _SettingsTile = SettingsTile;
 /// Discovery tip below the SHORTCUTS card — teaches both long-press gestures so
 /// the feature is findable without knowing them. Dashed primary-tinted bar.
 class _ShortcutsDiscoveryTip extends StatelessWidget {

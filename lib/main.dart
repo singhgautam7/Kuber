@@ -30,6 +30,17 @@ final automaticBackupDueProvider = StateProvider<bool>((ref) {
   return false;
 });
 
+/// Set true by the recurring-loader when it hands off to Home. On a first-of-day
+/// cold start the app opens on the loader, so running KuberApp's full on-open
+/// maintenance batch (backup, widget sync, ledger/reminder passes, tab warm-up)
+/// in the first post-frame callback would saturate the main thread and stutter
+/// the loader animation. KuberApp instead waits on this flag and runs the batch
+/// once Home is actually shown. On a normal cold start (no loader) the batch
+/// still runs immediately post-first-frame.
+final onOpenBatchReadyProvider = StateProvider<bool>((ref) {
+  return false;
+});
+
 
 class RestartWidget extends StatefulWidget {
   const RestartWidget({super.key, required this.child});

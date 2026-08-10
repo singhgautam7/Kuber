@@ -9,6 +9,8 @@ import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../../core/services/data_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../features/transactions/services/suggestion_service.dart';
+import '../../kuber_cards/data/card_keystore.dart';
+import '../../kuber_cards/providers/kuber_cards_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import '../../transactions/data/transaction.dart';
@@ -32,6 +34,11 @@ class DataState {
   final List<String>? filePaths; // All files for "Share"
   final String? loadingMessage;
 
+  /// True when a JSON import just restored encrypted Kuber Cards that are locked
+  /// (they need the PIN from the backup's device). Drives the post-import
+  /// "Encrypted cards found" prompt. Reset by [reset].
+  final bool lockedCardsFound;
+
   DataState({
     this.status = DataOpStatus.initial,
     this.message,
@@ -40,6 +47,7 @@ class DataState {
     this.filePath,
     this.filePaths,
     this.loadingMessage,
+    this.lockedCardsFound = false,
   });
 
   DataState copyWith({
@@ -50,6 +58,7 @@ class DataState {
     String? filePath,
     List<String>? filePaths,
     String? loadingMessage,
+    bool? lockedCardsFound,
   }) {
     return DataState(
       status: status ?? this.status,
@@ -59,6 +68,7 @@ class DataState {
       filePath: filePath ?? this.filePath,
       filePaths: filePaths ?? this.filePaths,
       loadingMessage: loadingMessage ?? this.loadingMessage,
+      lockedCardsFound: lockedCardsFound ?? this.lockedCardsFound,
     );
   }
 }
@@ -285,6 +295,14 @@ class DataController extends StateNotifier<DataState> {
     );
     try {
       await _service.clearAllData();
+      // isar.clear() drops the storedCards + cardVaultMetas collections, but the
+      // derived key lives in the hardware Keystore and the in-memory session
+      // holds a stale key + cached card list. Wipe the Keystore and reset the
+      // card providers so "clear all" truly leaves no card residue behind.
+      await CardKeystore.clear();
+      _ref.read(cardSessionProvider.notifier).lock();
+      _ref.invalidate(cardVaultMetaProvider);
+      _ref.invalidate(storedCardsProvider);
       // A full wipe resets the user to a fresh state, so the Welcome bubble
       // should appear again.
       await _refreshData(freshStart: true);
@@ -332,10 +350,30 @@ class DataController extends StateNotifier<DataState> {
       }
       if (result.error != null) throw Exception(result.error);
       await _refreshData();
+
+      // A JSON restore may carry encrypted Kuber Cards. They come in locked
+      // (they need the PIN from the backup's device). Reset the card session so
+      // the stale unlocked vault can't bypass the unlock gate, then surface
+      // whether any locked cards exist so the screen can prompt for that PIN.
+      var lockedCards = false;
+      if (isJson) {
+        final cardService = _ref.read(cardVaultServiceProvider);
+        final meta = await cardService.readMeta();
+        if (meta?.hasLockedImport == true) {
+          lockedCards = (await cardService.allCards()).isNotEmpty;
+        }
+        _ref.read(cardSessionProvider.notifier).lock();
+        _ref.invalidate(cardVaultMetaProvider);
+        _ref.invalidate(storedCardsProvider);
+      }
+
       final msg = result.failureCount > 0
           ? 'Imported ${result.successCount} records, ${result.failureCount} failed'
           : 'Imported ${result.successCount} records successfully';
-      state = state.copyWith(status: DataOpStatus.success, message: msg);
+      state = state.copyWith(
+          status: DataOpStatus.success,
+          message: msg,
+          lockedCardsFound: lockedCards);
     } catch (e) {
       state = state.copyWith(
         status: DataOpStatus.error,

@@ -87,6 +87,11 @@ import '../../features/widgets_gallery/screens/trends_widget_config_screen.dart'
 import '../../features/quick_actions/screens/configure_shortcuts_screen.dart';
 import '../../features/splash/screens/splash_screen.dart';
 import '../../features/pro/paywall/paywall_screen.dart';
+import '../../features/kuber_cards/data/stored_card.dart';
+import '../../features/kuber_cards/screens/cards_home_screen.dart';
+import '../../features/kuber_cards/screens/add_edit_card_screen.dart';
+import '../../features/kuber_cards/screens/cards_settings_screen.dart';
+import '../../features/kuber_cards/screens/change_pin_screen.dart';
 import '../../features/tools/tools_hub_screen.dart';
 import '../../features/tools/currency_converter/currency_converter_screen.dart';
 import '../../features/tools/emi_calculator/emi_calculator_screen.dart';
@@ -858,6 +863,34 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/pro',
         parentNavigatorKey: rootNavigatorKey,
         builder: (_, _) => const KuberProPaywallScreen(),
+      ),
+
+      // Kuber Cards (encrypted card vault). Entry decides setup / unlock / home.
+      GoRoute(
+        path: '/cards',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const KuberCardsEntry(),
+      ),
+      GoRoute(
+        path: '/cards/add',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const AddEditCardScreen(),
+      ),
+      GoRoute(
+        path: '/cards/edit',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, state) =>
+            AddEditCardScreen(card: state.extra as StoredCard?),
+      ),
+      GoRoute(
+        path: '/cards/settings',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const CardsSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/cards/change-pin',
+        parentNavigatorKey: rootNavigatorKey,
+        builder: (_, _) => const ChangePinScreen(),
       ),
     ],
   );

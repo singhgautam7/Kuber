@@ -21,8 +21,12 @@ class RecurringLoaderScreen extends ConsumerStatefulWidget {
 }
 
 class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+    with TickerProviderStateMixin {
+  // The ring spins continuously (repeat) for the whole wait; a separate one-shot
+  // controller drives the entrance fade. Sharing one controller (and calling
+  // forward() once) is why the ring used to freeze after 1.5s and look stuck.
+  late final AnimationController _ringController;
+  late final AnimationController _fadeController;
   late final Animation<double> _fadeIn;
   bool _navigating = false;
   late _LoaderPhase _phase;
@@ -30,17 +34,20 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    _ringController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    )..repeat();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
+    _fadeIn = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _fadeController.forward();
 
-    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _phase = ref.read(recurringProcessResultProvider) > 0
         ? _LoaderPhase.recurring
         : _LoaderPhase.backup;
-
-    _controller.forward();
 
     // Initialize budgets
     ref.read(budgetServiceProvider).init();
@@ -56,8 +63,10 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
         _navigating = true;
         // Reset the state so the router doesn't redirect us back here
         ref.read(recurringProcessResultProvider.notifier).state = 0;
-
         ref.read(automaticBackupDueProvider.notifier).state = false;
+        // Home is about to show: release KuberApp's on-open maintenance batch
+        // (deferred so it didn't fight this loader's animation).
+        ref.read(onOpenBatchReadyProvider.notifier).state = true;
         context.go('/');
       }
     });
@@ -65,7 +74,8 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ringController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -99,7 +109,7 @@ class _RecurringLoaderScreenState extends ConsumerState<RecurringLoaderScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SweepRingWidget(controller: _controller),
+              SweepRingWidget(controller: _ringController),
               const SizedBox(height: KuberSpacing.xl),
 
               Text(

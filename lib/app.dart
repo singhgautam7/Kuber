@@ -5,6 +5,8 @@ import 'package:kuber/l10n/app_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart'
     show FlutterQuillLocalizations;
 
+import 'main.dart' show onOpenBatchReadyProvider;
+import 'features/kuber_cards/providers/kuber_cards_provider.dart';
 import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
 import 'core/services/notification_service.dart';
@@ -62,20 +64,39 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(budgetServiceProvider).checkAllOnAppOpen();
-      _runOnOpenLedgerReminders();
-      _runDueBackup();
-      _runSmsCleanup();
-      _runReminderMaintenance();
-      _runCreditCardReminderMaintenance();
-      _runWidgetSync();
-      _initPurchases();
-      _initPromoConfig();
-      // Warm the non-Home tabs' providers ~1.5s after first frame — late
-      // enough that Home has finished its own hydration, early enough that
-      // a user tapping Analytics or History hits cached data.
-      Future.delayed(const Duration(milliseconds: 1500), _warmTabProviders);
+      // On a first-of-day cold start the app opens on the recurring/backup
+      // loader, not Home. Running the heavy on-open batch here would fight the
+      // loader's animation for the main thread (the visible "loader lags before
+      // Home" bug). Defer it until the loader hands off to Home; on a normal
+      // cold start (Home first) run it immediately as before.
+      final startedOnLoader =
+          ref.read(initialLocationProvider) == '/recurring-loader';
+      if (startedOnLoader) {
+        ref.listenManual<bool>(onOpenBatchReadyProvider, (prev, next) {
+          if (next) _runOnOpenBatch();
+        });
+      } else {
+        _runOnOpenBatch();
+      }
     });
+  }
+
+  /// The post-first-frame on-open maintenance batch. Best-effort; each item is
+  /// individually guarded. Runs once per cold start, after Home's first frame.
+  void _runOnOpenBatch() {
+    ref.read(budgetServiceProvider).checkAllOnAppOpen();
+    _runOnOpenLedgerReminders();
+    _runDueBackup();
+    _runSmsCleanup();
+    _runReminderMaintenance();
+    _runCreditCardReminderMaintenance();
+    _runWidgetSync();
+    _initPurchases();
+    _initPromoConfig();
+    // Warm the non-Home tabs' providers ~1.5s later — late enough that Home has
+    // finished its own hydration, early enough that a user tapping Analytics or
+    // History hits cached data.
+    Future.delayed(const Duration(milliseconds: 1500), _warmTabProviders);
   }
 
   /// Warms the providers that the Analytics and History tabs consume on first
@@ -171,6 +192,15 @@ class _KuberAppState extends ConsumerState<KuberApp>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    // Kuber Cards auto-lock: mark the background time on pause/hide, and re-lock
+    // on resume if we were away longer than the 60s threshold.
+    final cardsSession = ref.read(cardSessionProvider.notifier);
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      cardsSession.noteBackgrounded();
+    } else if (state == AppLifecycleState.resumed) {
+      cardsSession.relockIfExpired();
+    }
     // When leaving the app (e.g. pressing Home), push the latest data to the
     // home-screen widgets so they reflect any change made this session before
     // the user looks at them.

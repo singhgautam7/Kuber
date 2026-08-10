@@ -70,6 +70,9 @@ class PrefsKeys {
   static const notesViewMode = 'notes_view_mode'; // 'list' | 'grid'
   static const notesBiometricRequired = 'kuber_notes_biometric_required';
 
+  // Kuber Cards
+  static const cardsViewMode = 'kuber_cards_view_mode'; // 'card' | 'list'
+
   // Upcoming Events widget migration (one-time Recurring widget replacement)
   static const upcomingEventsWidgetMigrated =
       'kuber_upcoming_events_widget_migrated_v1';

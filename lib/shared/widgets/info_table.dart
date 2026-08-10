@@ -74,6 +74,10 @@ class InfoTableDataRow extends InfoTableRow {
   final bool tappable;
   final VoidCallback? onTap;
 
+  /// Optional long-press handler (e.g. copy-to-clipboard). Works on both the
+  /// standard and tappable variants; adds a press state to standard rows.
+  final VoidCallback? onLongPress;
+
   const InfoTableDataRow({
     required this.label,
     required this.value,
@@ -82,6 +86,7 @@ class InfoTableDataRow extends InfoTableRow {
     this.valueIconColor,
     this.tappable = false,
     this.onTap,
+    this.onLongPress,
   });
 }
 
@@ -136,6 +141,7 @@ class _RowWidget extends StatelessWidget {
     final r = row;
     return switch (r) {
       InfoTableDataRow() when r.tappable => _tappable(cs, r),
+      InfoTableDataRow() when r.onLongPress != null => _longPressable(cs, r),
       InfoTableDataRow() => _standard(cs, r),
       InfoTableHighlightRow() => _standard(
           cs,
@@ -165,12 +171,26 @@ class _RowWidget extends StatelessWidget {
     );
   }
 
+  /// A standard row that also copies on long-press (with a brief press tint).
+  Widget _longPressable(ColorScheme cs, InfoTableDataRow r) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: r.onTap,
+        onLongPress: r.onLongPress,
+        highlightColor: cs.primary.withValues(alpha: 0.06),
+        child: _standard(cs, r),
+      ),
+    );
+  }
+
   Widget _tappable(ColorScheme cs, InfoTableDataRow r) {
     final accent = r.valueColor ?? cs.primary;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: r.onTap,
+        onLongPress: r.onLongPress,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _minRowHeight),
           child: Padding(

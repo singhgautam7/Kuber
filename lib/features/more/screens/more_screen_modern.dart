@@ -50,6 +50,7 @@ import '../screens/more_screen.dart' show launchTutorialFromMore;
 import '../../ask_kuber/screen/kuber_mark.dart';
 import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
 import '../../pro/feature_gates/gate_sheet_sms_import.dart';
+import '../../pro/feature_gates/gate_sheet_kuber_cards.dart';
 import '../../pro/feature_gates/pro_gate.dart';
 // PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
 // import '../../pro/more/more_premium_card.dart';
@@ -284,7 +285,26 @@ class MoreScreenModern extends ConsumerWidget {
                     ),
                     const SizedBox(width: KuberSpacing.sm),
                     Expanded(
-                      // Quick Add (English-only feature), directly after Notes.
+                      // Kuber Cards, directly after Notes. Pro-gated entry.
+                      child: _ToolCard(
+                        icon: Icons.credit_card_rounded,
+                        title: 'Kuber Cards',
+                        subtitle: 'Encrypted vault to save all your cards',
+                        accent: _ToolAccent.primary,
+                        onTap: () {
+                          if (proGate(context, ref, showKuberCardsGateSheet)) {
+                            context.push('/cards');
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      // Quick Add (English-only feature).
                       child: _ToolCard(
                         icon: Icons.flash_on_rounded,
                         title: 'Quick Add',
@@ -293,6 +313,8 @@ class MoreScreenModern extends ConsumerWidget {
                         onTap: () => context.push('/quick-add'),
                       ),
                     ),
+                    const SizedBox(width: KuberSpacing.sm),
+                    const Expanded(child: SizedBox()),
                   ],
                 ),
 

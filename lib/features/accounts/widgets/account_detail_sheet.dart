@@ -19,6 +19,8 @@ import '../../../shared/widgets/sheet_button_section.dart';
 import '../../history/providers/history_filter_provider.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../kuber_cards/providers/kuber_cards_provider.dart';
 
 class AccountDetailSheet extends ConsumerWidget {
   final Account account;
@@ -180,7 +182,55 @@ class AccountDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 18),
           InfoTable(rows: rows),
+          _linkedCardBadge(context, ref),
         ],
+      ),
+    );
+  }
+
+  /// "Linked to a card in Kuber Cards" badge, shown when a stored card links
+  /// this account. Tapping opens Kuber Cards (which unlocks if needed).
+  Widget _linkedCardBadge(BuildContext context, WidgetRef ref) {
+    final card = ref.watch(cardLinkedToAccountProvider(account.id));
+    if (card == null) return const SizedBox.shrink();
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+            context.push('/cards');
+          },
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: cs.primary.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.credit_card_rounded, size: 18, color: cs.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Linked to a card in Kuber Cards',
+                    style: localeFont(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded,
+                    size: 18, color: cs.onSurfaceVariant),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

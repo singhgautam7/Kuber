@@ -28,6 +28,8 @@ import '../../features/tools/saved/data/calculator_recent_use.dart';
 import '../../features/notes/data/kuber_note.dart';
 import '../../features/reminders/data/reminder.dart';
 import '../../features/pro/data/user_entitlement.dart';
+import '../../features/kuber_cards/data/stored_card.dart';
+import '../../features/kuber_cards/data/card_vault_meta.dart';
 // Deprecated collection, kept registered so older databases still open.
 import '../../features/search/data/recent_search.dart';
 
@@ -71,6 +73,8 @@ class IsarService {
       KuberNoteSchema,
       ReminderSchema,
       UserEntitlementSchema,
+      StoredCardSchema,
+      CardVaultMetaSchema,
       RecentSearchSchema,
     ], directory: dir.path);
   }

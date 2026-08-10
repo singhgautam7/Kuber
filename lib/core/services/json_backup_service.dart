@@ -30,6 +30,8 @@ import '../../features/notes/data/kuber_note.dart';
 import '../../features/reminders/data/reminder.dart';
 import '../../features/tools/saved/data/saved_calculation.dart';
 import '../../features/tools/saved/data/calculator_recent_use.dart';
+import '../../features/kuber_cards/data/stored_card.dart';
+import '../../features/kuber_cards/data/card_vault_meta.dart';
 import 'data_service.dart';
 
 /// Top-level so it can run on a background isolate via [compute].
@@ -103,6 +105,10 @@ class JsonBackupService {
     final smsAccountMappings = await isar.smsAccountMappings.where().findAll();
     final kuberNotes = await isar.kuberNotes.where().findAll();
     final reminders = await isar.reminders.where().findAll();
+    // Kuber Cards: records are already field-level encrypted; the metadata
+    // carries salt + KDF params so the payload decrypts with the same PIN.
+    final storedCards = await isar.storedCards.where().findAll();
+    final cardVaultMeta = await isar.cardVaultMetas.get(0);
 
     final data = {
       'version': _version,
@@ -132,6 +138,8 @@ class JsonBackupService {
       'smsAccountMappings': smsAccountMappings.map((s) => s.toMap()).toList(),
       'kuberNotes': kuberNotes.map((n) => n.toMap()).toList(),
       'reminders': reminders.map((r) => r.toMap()).toList(),
+      'storedCards': storedCards.map((c) => c.toMap()).toList(),
+      'cardVaultMeta': cardVaultMeta?.toMap(),
     };
 
     // Encoding the whole database into one string is the heaviest part of a
@@ -209,6 +217,24 @@ class JsonBackupService {
           _mapToSmsTransaction);
       await restore('kuberNotes', 'notes', isar.kuberNotes, _mapToKuberNote);
       await restore('reminders', 'reminders', isar.reminders, _mapToReminder);
+
+      // Kuber Cards: the encrypted card rows persist as-is. The vault metadata
+      // is restored with biometric + lockout reset for THIS device, and flagged
+      // as a locked import so the unlock screen asks for the previous device's
+      // PIN (persist first, verify after). See specs/plans/kuber-cards.md §6.3.
+      await restore('storedCards', 'cards', isar.storedCards, StoredCard.fromMap);
+      final metaMap = data['cardVaultMeta'];
+      if (metaMap is Map<String, dynamic>) {
+        final meta = CardVaultMeta.fromMap(metaMap)
+          ..biometricEnabled = false
+          ..failedStreak = 0
+          ..cooldownUntil = null
+          ..dayLockedUntil = null
+          ..failedTimestamps = []
+          ..hasLockedImport = true;
+        await isar.writeTxn(() => isar.cardVaultMetas.put(meta));
+        count += 1;
+      }
 
       return ImportResult(successCount: count, failureCount: 0);
     } catch (e) {

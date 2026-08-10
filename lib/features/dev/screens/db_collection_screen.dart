@@ -34,6 +34,8 @@ import '../../tools/saved/data/calculator_recent_use.dart';
 import '../../ask_kuber/data/ask_kuber_message.dart';
 import '../../notes/data/kuber_note.dart';
 import '../../reminders/data/reminder.dart';
+import '../../kuber_cards/data/stored_card.dart';
+import '../../kuber_cards/data/card_vault_meta.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -191,6 +193,16 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           break;
         case 'Reminder':
           final list = await isar.collection<Reminder>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'StoredCard':
+          // Sensitive fields are stored encrypted, so toMap() surfaces only the
+          // ciphertext + plaintext columns (nickname, last4, bankIcon) here.
+          final list = await isar.collection<StoredCard>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'CardVaultMeta':
+          final list = await isar.collection<CardVaultMeta>().where().findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }
