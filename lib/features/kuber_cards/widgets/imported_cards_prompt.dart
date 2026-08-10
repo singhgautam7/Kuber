@@ -46,7 +46,7 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
   int _cardCount = 0;
   bool _ready = false;
 
-  String _pin = '';
+  final _pin = ValueNotifier<String>('');
   bool _error = false;
   int _attemptsLeft = 5;
   bool _busy = false;
@@ -55,6 +55,12 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
   void initState() {
     super.initState();
     _init();
+  }
+
+  @override
+  void dispose() {
+    _pin.dispose();
+    super.dispose();
   }
 
   Future<void> _init() async {
@@ -69,10 +75,10 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
     });
   }
 
-  void _onChanged(String v) => setState(() {
-        _pin = v;
-        _error = false;
-      });
+  void _onChanged(String v) {
+    _pin.value = v;
+    if (_error) setState(() => _error = false);
+  }
 
   Future<void> _submit(String pin) async {
     if (_busy) return;
@@ -105,15 +111,15 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
         }
       case UnlockStatus.wrongPin:
         HapticFeedback.mediumImpact();
+        _pin.value = '';
         setState(() {
           _error = true;
           _attemptsLeft = outcome.attemptsLeft;
-          _pin = '';
         });
       case UnlockStatus.cooldown:
       case UnlockStatus.dayLocked:
         HapticFeedback.mediumImpact();
-        setState(() => _pin = '');
+        _pin.value = '';
         if (rootContext.mounted) {
           showKuberSnackBar(
             rootContext,
@@ -212,10 +218,13 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
                   ),
                 ),
                 const SizedBox(height: KuberSpacing.xl),
-                CardsPinDots(
-                  length: _pinLength,
-                  filled: _pin.length,
-                  error: _error,
+                ValueListenableBuilder<String>(
+                  valueListenable: _pin,
+                  builder: (_, pin, __) => CardsPinDots(
+                    length: _pinLength,
+                    filled: pin.length,
+                    error: _error,
+                  ),
                 ),
                 if (_error) ...[
                   const SizedBox(height: 10),

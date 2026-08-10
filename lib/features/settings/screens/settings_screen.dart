@@ -624,26 +624,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                       ),
                     ),
-                    Divider(height: 1, color: cs.outline),
-                    // Change Kuber Cards PIN. Always visible; tap branches on
-                    // whether a vault exists (change-PIN vs setup). Routed
-                    // through the Pro gate. See global-settings-entry.md.
-                    _SettingsTile(
-                      icon: Icons.credit_card_rounded,
-                      label: 'Change Kuber Cards PIN',
-                      subtitle: hasCardsVault
-                          ? 'Update the PIN that unlocks your cards'
-                          : 'Set up Kuber Cards to use this',
-                      trailing: Icon(Icons.chevron_right_rounded,
-                          size: 20, color: cs.onSurfaceVariant),
-                      onTap: () {
-                        // PRO-GATE: entry funnels through proGate (OFF now).
-                        if (proGate(context, ref, showKuberCardsGateSheet)) {
-                          context.push(
-                              hasCardsVault ? '/cards/change-pin' : '/cards');
-                        }
-                      },
-                    ),
+                    // Change Kuber Cards PIN. Shown only once a vault exists —
+                    // there is no PIN to change until the user has set up Kuber
+                    // Cards. Routed through the Pro gate.
+                    if (hasCardsVault) ...[
+                      Divider(height: 1, color: cs.outline),
+                      _SettingsTile(
+                        icon: Icons.credit_card_rounded,
+                        label: 'Change Kuber Cards PIN',
+                        subtitle: 'Update the PIN that unlocks your cards',
+                        trailing: Icon(Icons.chevron_right_rounded,
+                            size: 20, color: cs.onSurfaceVariant),
+                        onTap: () {
+                          // PRO-GATE: entry funnels through proGate (OFF now).
+                          if (proGate(context, ref, showKuberCardsGateSheet)) {
+                            context.push('/cards/change-pin');
+                          }
+                        },
+                      ),
+                    ],
                   ],
                 ),
                 const SizedBox(height: KuberSpacing.xl),

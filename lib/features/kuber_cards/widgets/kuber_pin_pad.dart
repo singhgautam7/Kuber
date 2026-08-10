@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,11 +11,15 @@ import '../../../core/utils/locale_font.dart';
 /// feature widget assembled entirely from Vault tokens (like
 /// `credit_billing_cycle_section.dart`), not a shared-component variant.
 ///
-/// Controlled: the parent owns the entered [value]. Each digit calls [onChanged];
-/// entering the final [length] digit also calls [onSubmit] (auto-submit).
+/// Controlled: the parent owns the entered PIN as a [ValueListenable] and passes
+/// it as [value]. The pad reads the current value lazily on each key press (it
+/// never displays the value), so a keystroke updates only the caller's dots —
+/// the pad itself is built once and does not rebuild per digit (perf §1). Each
+/// digit calls [onChanged]; entering the final [length] digit also calls
+/// [onSubmit] (auto-submit).
 class KuberPinPad extends StatelessWidget {
   final int length;
-  final String value;
+  final ValueListenable<String> value;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmit;
   final bool enabled;
@@ -29,15 +34,17 @@ class KuberPinPad extends StatelessWidget {
   });
 
   void _press(String digit) {
-    if (value.length >= length) return;
-    final next = value + digit;
+    final current = value.value;
+    if (current.length >= length) return;
+    final next = current + digit;
     onChanged(next);
     if (next.length == length) onSubmit(next);
   }
 
   void _backspace() {
-    if (value.isEmpty) return;
-    onChanged(value.substring(0, value.length - 1));
+    final current = value.value;
+    if (current.isEmpty) return;
+    onChanged(current.substring(0, current.length - 1));
   }
 
   @override

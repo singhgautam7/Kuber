@@ -428,8 +428,15 @@ class CardVaultService {
       final label = f.label.trim();
       final value = f.value.trim();
       if (label.isEmpty && value.isEmpty) continue;
-      final enc = await CardCrypto.encrypt(key: key, plaintext: value);
-      out.add(jsonEncode({'label': label, 'value': enc.toJsonString()}));
+      // Both the label and the value are encrypted: a label like "CVV" or
+      // "ATM PIN" is itself sensitive metadata, so nothing about a custom field
+      // is stored in plaintext on disk.
+      final encValue = await CardCrypto.encrypt(key: key, plaintext: value);
+      final encLabel = await CardCrypto.encrypt(key: key, plaintext: label);
+      out.add(jsonEncode({
+        'label': encLabel.toJsonString(),
+        'value': encValue.toJsonString(),
+      }));
     }
     return out;
   }
@@ -443,8 +450,21 @@ class CardVaultService {
         key: key,
         field: EncryptedField.fromJsonString(m['value'] as String),
       );
-      out.add(CardCustomField(label: m['label'] as String, value: value));
+      final label = await _decodeLabel(key, m['label'] as String);
+      out.add(CardCustomField(label: label, value: value));
     }
     return out;
+  }
+
+  /// Labels were stored in plaintext in an earlier build and are encrypted now.
+  /// Decrypt when the stored value parses as an `EncryptedField`; otherwise
+  /// treat it as a legacy plaintext label so old rows keep decrypting.
+  Future<String> _decodeLabel(List<int> key, String raw) async {
+    try {
+      final field = EncryptedField.fromJsonString(raw);
+      return await CardCrypto.decrypt(key: key, field: field);
+    } catch (_) {
+      return raw;
+    }
   }
 }

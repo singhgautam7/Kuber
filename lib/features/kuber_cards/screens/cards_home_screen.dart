@@ -21,6 +21,7 @@ import '../data/stored_card.dart';
 import '../providers/kuber_cards_provider.dart';
 import '../widgets/cards_secure_scaffold.dart';
 import '../widgets/card_detail_sheet.dart';
+import '../widgets/card_icon.dart';
 import '../widgets/card_list_row.dart';
 import '../widgets/stored_card_visual.dart';
 import 'setup_flow_screen.dart';
@@ -99,6 +100,14 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
   _CardSort _sort = _CardSort.recent;
 
   @override
+  void initState() {
+    super.initState();
+    // Warm the bundled bank SVGs on first home open (lazy, never at app boot),
+    // so the card list draws them from cache instead of decoding mid-frame.
+    warmBankIconCache();
+  }
+
+  @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
@@ -108,7 +117,13 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final viewMode = ref.watch(cardsViewModeProvider);
-    final cardsAsync = ref.watch(storedCardsProvider);
+    // While locked, the opaque unlock overlay covers this screen, so building
+    // the card list (Isar query + a bank-SVG decode per card) here would be
+    // pure invisible work competing with the unlock screen's first paint — the
+    // source of the "PIN screen lags on open" jank. Gate the list on the
+    // unlocked state; the cheap app bar + header still build for a stable
+    // layout underneath the overlay.
+    final unlocked = ref.watch(cardsUnlockedProvider);
 
     return CardsSecureScaffold(
       child: Scaffold(
@@ -160,23 +175,26 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                 onAction: () => context.push('/cards/add'),
               ),
             ),
-            ...cardsAsync.when(
-              loading: () => const [
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ],
-              error: (e, _) => [
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                      child:
-                          Text('Could not load cards', style: localeFont())),
-                ),
-              ],
-              data: (cards) => _contentSlivers(cs, cards, viewMode),
-            ),
+            if (unlocked)
+              ...ref.watch(storedCardsProvider).when(
+                loading: () => const [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+                error: (e, _) => [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                        child:
+                            Text('Could not load cards', style: localeFont())),
+                  ),
+                ],
+                data: (cards) => _contentSlivers(cs, cards, viewMode),
+              )
+            else
+              const SliverToBoxAdapter(child: SizedBox.shrink()),
           ],
         ),
       ),

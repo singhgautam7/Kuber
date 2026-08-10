@@ -50,16 +50,14 @@ void main() {
 
   testWidgets('KuberPinPad reports digits and auto-submits on the last one',
       (tester) async {
-    var value = '';
+    final value = ValueNotifier<String>('');
     String? submitted;
     await tester.pumpWidget(_host(
-      StatefulBuilder(
-        builder: (context, setState) => KuberPinPad(
-          length: 4,
-          value: value,
-          onChanged: (v) => setState(() => value = v),
-          onSubmit: (v) => submitted = v,
-        ),
+      KuberPinPad(
+        length: 4,
+        value: value,
+        onChanged: (v) => value.value = v,
+        onSubmit: (v) => submitted = v,
       ),
     ));
 
@@ -67,8 +65,9 @@ void main() {
       await tester.tap(find.text(d));
       await tester.pump();
     }
-    expect(value, '1234');
+    expect(value.value, '1234');
     expect(submitted, '1234');
+    value.dispose();
   });
 
   testWidgets('showCardColorPicker opens and selects a swatch', (tester) async {

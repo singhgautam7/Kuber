@@ -30,8 +30,8 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
 
   int _step = 0;
   int _pinLength = 6;
-  String _pin = '';
-  String _confirm = '';
+  final _pin = ValueNotifier<String>('');
+  final _confirm = ValueNotifier<String>('');
   bool _confirmError = false;
   bool _understood = false;
   bool _committing = false;
@@ -45,22 +45,27 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _pin.dispose();
+    _confirm.dispose();
+    super.dispose();
+  }
+
   void _back() {
     if (_step == 0) {
       Navigator.of(context).maybePop();
       return;
     }
-    setState(() {
-      if (_step == 2) _confirm = ''; // leaving confirm discards it
-      _step -= 1;
-    });
+    if (_step == 2) _confirm.value = ''; // leaving confirm discards it
+    setState(() => _step -= 1);
   }
 
   Future<void> _commitVault() async {
     setState(() => _committing = true);
     final key = await ref
         .read(cardVaultServiceProvider)
-        .setupVault(pin: _pin, pinLength: _pinLength);
+        .setupVault(pin: _pin.value, pinLength: _pinLength);
     if (!mounted) return;
     ref.read(cardSessionProvider.notifier).unlock(key);
     setState(() {
@@ -119,16 +124,24 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
       case 0:
         return _sticky(KuberSaveButton(label: 'Get started', onPressed: () => setState(() => _step = 1)));
       case 1:
-        return _sticky(KuberSaveButton(
-          label: 'Continue',
-          onPressed:
-              _pin.length == _pinLength ? () => setState(() => _step = 2) : null,
+        // The button enables as the PIN reaches full length; listen to the
+        // notifier so the footer (not the whole screen) updates per keystroke.
+        return _sticky(ValueListenableBuilder<String>(
+          valueListenable: _pin,
+          builder: (_, pin, __) => KuberSaveButton(
+            label: 'Continue',
+            onPressed:
+                pin.length == _pinLength ? () => setState(() => _step = 2) : null,
+          ),
         ));
       case 2:
-        return _sticky(KuberSaveButton(
-          label: 'Continue',
-          loading: _committing,
-          onPressed: _confirm.length == _pinLength ? _onConfirm : null,
+        return _sticky(ValueListenableBuilder<String>(
+          valueListenable: _confirm,
+          builder: (_, confirm, __) => KuberSaveButton(
+            label: 'Continue',
+            loading: _committing,
+            onPressed: confirm.length == _pinLength ? _onConfirm : null,
+          ),
         ));
       case 3:
         return _sticky(KuberSaveButton(
@@ -157,12 +170,10 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
   Widget _sticky(Widget child) => child;
 
   void _onConfirm() {
-    if (_confirm != _pin) {
+    if (_confirm.value != _pin.value) {
       HapticFeedback.mediumImpact();
-      setState(() {
-        _confirmError = true;
-        _confirm = '';
-      });
+      _confirm.value = '';
+      setState(() => _confirmError = true);
       return;
     }
     setState(() => _step = 3);
@@ -243,22 +254,26 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
         const SizedBox(height: KuberSpacing.lg),
         KuberSegmented<int>(
           groupValue: _pinLength,
-          onChanged: (v) => setState(() {
-            _pinLength = v;
-            _pin = ''; // changing length clears entry
-          }),
+          onChanged: (v) {
+            _pin.value = ''; // changing length clears entry
+            setState(() => _pinLength = v);
+          },
           segments: const [
             KuberSegment(value: 4, label: '4 digits'),
             KuberSegment(value: 6, label: '6 digits'),
           ],
         ),
         const SizedBox(height: KuberSpacing.xl),
-        CardsPinDots(length: _pinLength, filled: _pin.length),
+        ValueListenableBuilder<String>(
+          valueListenable: _pin,
+          builder: (_, pin, __) =>
+              CardsPinDots(length: _pinLength, filled: pin.length),
+        ),
         const SizedBox(height: KuberSpacing.xl),
         KuberPinPad(
           length: _pinLength,
           value: _pin,
-          onChanged: (v) => setState(() => _pin = v),
+          onChanged: (v) => _pin.value = v,
           onSubmit: (_) {},
         ),
       ],
@@ -277,8 +292,11 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
         Text('Enter it once more.',
             style: localeFont(fontSize: 14, color: cs.onSurfaceVariant)),
         const SizedBox(height: KuberSpacing.xl),
-        CardsPinDots(
-            length: _pinLength, filled: _confirm.length, error: _confirmError),
+        ValueListenableBuilder<String>(
+          valueListenable: _confirm,
+          builder: (_, confirm, __) => CardsPinDots(
+              length: _pinLength, filled: confirm.length, error: _confirmError),
+        ),
         if (_confirmError) ...[
           const SizedBox(height: 10),
           Text('That did not match. Try again.',
@@ -288,10 +306,10 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
         KuberPinPad(
           length: _pinLength,
           value: _confirm,
-          onChanged: (v) => setState(() {
-            _confirm = v;
-            _confirmError = false;
-          }),
+          onChanged: (v) {
+            _confirm.value = v;
+            if (_confirmError) setState(() => _confirmError = false);
+          },
           onSubmit: (_) {},
         ),
       ],

@@ -30,7 +30,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
   int _currentLength = 6;
   int _newLength = 6;
 
-  String _entry = '';
+  final _entry = ValueNotifier<String>('');
   String _currentPin = '';
   String _newPin = '';
   bool _error = false;
@@ -50,6 +50,17 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _entry.dispose();
+    super.dispose();
+  }
+
+  void _onPadChanged(String v) {
+    _entry.value = v;
+    if (_error) setState(() => _error = false);
+  }
+
   int get _length => _step == _Step.current ? _currentLength : _newLength;
 
   Future<void> _submit(String pin) async {
@@ -63,7 +74,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
             ref.read(cardSessionProvider.notifier).unlock(outcome.key!);
             setState(() {
               _currentPin = pin;
-              _entry = '';
+              _entry.value = '';
               _error = false;
               _step = _Step.newPin;
             });
@@ -72,12 +83,12 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
             setState(() {
               _error = true;
               _attemptsLeft = outcome.attemptsLeft;
-              _entry = '';
+              _entry.value = '';
             });
           case UnlockStatus.cooldown:
           case UnlockStatus.dayLocked:
             HapticFeedback.mediumImpact();
-            setState(() => _entry = '');
+            setState(() => _entry.value = '');
             showKuberSnackBar(
               context,
               'Too many attempts. Try again later.',
@@ -89,7 +100,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
       case _Step.newPin:
         setState(() {
           _newPin = pin;
-          _entry = '';
+          _entry.value = '';
           _error = false;
           _step = _Step.confirm;
         });
@@ -98,7 +109,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
           HapticFeedback.mediumImpact();
           setState(() {
             _error = true;
-            _entry = '';
+            _entry.value = '';
           });
           return;
         }
@@ -118,7 +129,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
       setState(() {
         _busy = false;
         _step = _Step.current;
-        _entry = '';
+        _entry.value = '';
         _error = true;
       });
       return;
@@ -170,7 +181,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                     groupValue: _newLength,
                     onChanged: (v) => setState(() {
                       _newLength = v;
-                      _entry = '';
+                      _entry.value = '';
                     }),
                     segments: const [
                       KuberSegment(value: 4, label: '4 digits'),
@@ -179,8 +190,11 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                   ),
                   const SizedBox(height: KuberSpacing.lg),
                 ],
-                CardsPinDots(
-                    length: _length, filled: _entry.length, error: _error),
+                ValueListenableBuilder<String>(
+                  valueListenable: _entry,
+                  builder: (_, entry, __) => CardsPinDots(
+                      length: _length, filled: entry.length, error: _error),
+                ),
                 if (_error && _step == _Step.current) ...[
                   const SizedBox(height: 10),
                   Text('Wrong PIN. $_attemptsLeft attempts left.',
@@ -198,10 +212,7 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                   KuberPinPad(
                     length: _length,
                     value: _entry,
-                    onChanged: (v) => setState(() {
-                      _entry = v;
-                      _error = false;
-                    }),
+                    onChanged: _onPadChanged,
                     onSubmit: _submit,
                   ),
                 const Spacer(flex: 2),

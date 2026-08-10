@@ -39,7 +39,7 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
   bool _importContext = false; // vault came from a backup, needs the old PIN
   bool _ready = false;
 
-  String _pin = '';
+  final _pin = ValueNotifier<String>('');
   bool _error = false;
   int _attemptsLeft = 5;
 
@@ -84,6 +84,7 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
   @override
   void dispose() {
     _countdown?.cancel();
+    _pin.dispose();
     super.dispose();
   }
 
@@ -97,12 +98,12 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
       if (left.isNegative || left.inSeconds == 0) {
         _countdown?.cancel();
         if (mounted) {
+          _pin.value = '';
           setState(() {
             _lockedUntil = null;
             _isDayLock = false;
             _error = false;
             _attemptsLeft = 5;
-            _pin = '';
           });
         }
       } else if (mounted) {
@@ -152,10 +153,10 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
   }
 
   void _onChanged(String v) {
-    setState(() {
-      _pin = v;
-      _error = false;
-    });
+    _pin.value = v;
+    // Only rebuild the screen to clear a lingering error flag; ordinary
+    // keystrokes update just the dots via the ValueListenableBuilder.
+    if (_error) setState(() => _error = false);
   }
 
   Future<void> _submit(String pin) async {
@@ -168,17 +169,17 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
         widget.onUnlocked?.call();
       case UnlockStatus.wrongPin:
         HapticFeedback.mediumImpact();
+        _pin.value = '';
         setState(() {
           _error = true;
           _attemptsLeft = outcome.attemptsLeft;
-          _pin = '';
         });
       case UnlockStatus.cooldown:
         HapticFeedback.mediumImpact();
-        setState(() => _pin = '');
+        _pin.value = '';
         _startLock(outcome.until!, dayLock: false);
       case UnlockStatus.dayLocked:
-        setState(() => _pin = '');
+        _pin.value = '';
         _startLock(outcome.until!, dayLock: true);
         showKuberSnackBar(
           context,
@@ -255,10 +256,13 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
                   ),
                 ],
                 const SizedBox(height: KuberSpacing.xl),
-                CardsPinDots(
-                  length: _pinLength,
-                  filled: _pin.length,
-                  error: _error,
+                ValueListenableBuilder<String>(
+                  valueListenable: _pin,
+                  builder: (_, pin, __) => CardsPinDots(
+                    length: _pinLength,
+                    filled: pin.length,
+                    error: _error,
+                  ),
                 ),
                 if (_error) ...[
                   const SizedBox(height: 10),
