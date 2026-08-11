@@ -21,6 +21,11 @@ class AppButton extends StatelessWidget {
   final double height;
   final bool isLoading;
 
+  /// For [AppButtonType.danger] only: render a solid filled red button (like a
+  /// primary destructive action) instead of the default outlined/tinted red.
+  /// Used for high-stakes confirm buttons (delete a card, reset all data).
+  final bool filled;
+
   const AppButton({
     super.key,
     required this.label,
@@ -32,6 +37,7 @@ class AppButton extends StatelessWidget {
     this.width,
     this.height = 52,
     this.isLoading = false,
+    this.filled = false,
   });
 
   @override
@@ -60,9 +66,12 @@ class AppButton extends StatelessWidget {
         borderSide = BorderSide(color: cs.outline);
         break;
       case AppButtonType.danger:
-        backgroundColor = Colors.transparent;
-        foregroundColor = cs.error;
-        borderSide = BorderSide(color: cs.error.withValues(alpha: 0.5));
+        // Solid red when [filled] (prominent confirm actions); otherwise the
+        // default outlined/tinted red used inline across detail sheets.
+        backgroundColor = filled ? cs.error : Colors.transparent;
+        foregroundColor = filled ? Colors.white : cs.error;
+        borderSide =
+            filled ? null : BorderSide(color: cs.error.withValues(alpha: 0.5));
         break;
       case AppButtonType.dotted:
         // Solid border omitted here; a dashed border is painted below.

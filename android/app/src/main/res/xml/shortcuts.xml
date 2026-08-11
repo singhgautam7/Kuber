@@ -61,4 +61,16 @@
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
+    <shortcut
+        android:shortcutId="cards"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_cards_short"
+        android:shortcutLongLabel="@string/shortcut_cards_long"
+        android:icon="@drawable/ic_shortcut_cards">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/cards" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
 </shortcuts>

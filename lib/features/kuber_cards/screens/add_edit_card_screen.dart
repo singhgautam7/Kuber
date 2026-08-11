@@ -371,7 +371,12 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
         ],
         Row(
           children: [
-            Expanded(child: _field(row.label, hint: 'Label')),
+            // Title-case the label for consistency with Nickname / Cardholder.
+            Expanded(
+              child: _field(row.label,
+                  hint: 'Label',
+                  capitalization: TextCapitalization.words),
+            ),
             const SizedBox(width: 4),
             IconButton(
               icon:

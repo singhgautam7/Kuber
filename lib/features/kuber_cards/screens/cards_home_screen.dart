@@ -83,8 +83,6 @@ class _KuberCardsEntryState extends ConsumerState<KuberCardsEntry> {
 
 // ── Home ─────────────────────────────────────────────────────────────────────
 
-enum _CardSort { recent, nickname }
-
 class CardsHomeScreen extends ConsumerStatefulWidget {
   const CardsHomeScreen({super.key});
 
@@ -97,7 +95,9 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
   String _query = '';
   final Set<String> _typeFilter = {};
   final Set<String> _networkFilter = {};
-  _CardSort _sort = _CardSort.recent;
+
+  bool get _hasActiveFilters =>
+      _typeFilter.isNotEmpty || _networkFilter.isNotEmpty;
 
   @override
   void initState() {
@@ -191,7 +191,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                             Text('Could not load cards', style: localeFont())),
                   ),
                 ],
-                data: (cards) => _contentSlivers(cs, cards, viewMode),
+                data: (cards) =>
+                    _contentSlivers(cs, cards, viewMode, ref.watch(cardsSortProvider)),
               )
             else
               const SliverToBoxAdapter(child: SizedBox.shrink()),
@@ -201,8 +202,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     );
   }
 
-  List<Widget> _contentSlivers(
-      ColorScheme cs, List<StoredCard> cards, CardsViewMode viewMode) {
+  List<Widget> _contentSlivers(ColorScheme cs, List<StoredCard> cards,
+      CardsViewMode viewMode, CardsSortMode sort) {
     if (cards.isEmpty) {
       return [
         SliverFillRemaining(
@@ -218,7 +219,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
       ];
     }
 
-    final filtered = _applyFilters(cards);
+    final filtered = _applyFilters(cards, sort);
     // PRO-GATE: Kuber Cards free tier shows 2 cards fully; the 3rd onward is
     // blurred behind the paywall. Gating is globally OFF right now
     // (hasProAccess == true), so nothing blurs today. See specs/pro-gating-disabled.md.
@@ -302,10 +303,10 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
             ),
           ),
           const SizedBox(width: 8),
+          // Badge marks an applied FILTER (type/network). Sort is a saved
+          // preference, not a filter, so it never lights up this button.
           _iconBtn(cs, Icons.tune_rounded, 'Filter', _showFilterSheet,
-              active: _typeFilter.isNotEmpty ||
-                  _networkFilter.isNotEmpty ||
-                  _sort != _CardSort.recent),
+              active: _hasActiveFilters, badge: _hasActiveFilters),
           const SizedBox(width: 8),
           _iconBtn(
             cs,
@@ -322,7 +323,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
 
   Widget _iconBtn(
       ColorScheme cs, IconData icon, String tooltip, VoidCallback onTap,
-      {bool active = false}) {
+      {bool active = false, bool badge = false}) {
     return Tooltip(
       message: tooltip,
       child: Material(
@@ -330,16 +331,38 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          child: Ink(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: active ? cs.primary.withValues(alpha: 0.10) : cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: active ? cs.primary : cs.outline),
-            ),
-            child: Icon(icon,
-                size: 20, color: active ? cs.primary : cs.onSurfaceVariant),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Ink(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: active
+                      ? cs.primary.withValues(alpha: 0.10)
+                      : cs.surfaceContainer,
+                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  border: Border.all(color: active ? cs.primary : cs.outline),
+                ),
+                child: Icon(icon,
+                    size: 20, color: active ? cs.primary : cs.onSurfaceVariant),
+              ),
+              if (badge)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: cs.primary,
+                      shape: BoxShape.circle,
+                      // Ring in the page background so the dot reads as a badge.
+                      border: Border.all(color: cs.surface, width: 2),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -385,7 +408,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
 
   void _openDetail(StoredCard card) => showCardDetailSheet(context, ref, card);
 
-  List<StoredCard> _applyFilters(List<StoredCard> cards) {
+  List<StoredCard> _applyFilters(List<StoredCard> cards, CardsSortMode sort) {
     var list = cards.where((c) {
       if (_typeFilter.isNotEmpty &&
           (c.cardType == null || !_typeFilter.contains(c.cardType))) {
@@ -404,9 +427,16 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
       ].join(' ').toLowerCase();
       return hay.contains(_query);
     }).toList();
-    if (_sort == _CardSort.nickname) {
-      list.sort((a, b) =>
-          a.nickname.toLowerCase().compareTo(b.nickname.toLowerCase()));
+    // `cards` arrives most-recently-updated first (the repository's default), so
+    // `recent` needs no re-sort.
+    switch (sort) {
+      case CardsSortMode.recent:
+        break;
+      case CardsSortMode.oldest:
+        list.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
+      case CardsSortMode.nickname:
+        list.sort((a, b) =>
+            a.nickname.toLowerCase().compareTo(b.nickname.toLowerCase()));
     }
     return list;
   }
@@ -424,6 +454,9 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
       'discover': 'Discover',
       'other': 'Other',
     };
+    // Local mirror of the persisted sort so the radio updates in-sheet; the
+    // provider is the source of truth and survives app close.
+    var sort = ref.read(cardsSortProvider);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -477,21 +510,42 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                   const SizedBox(height: KuberSpacing.lg),
                   const KuberFieldLabel('Sort by'),
                   _SortOptionRow(
-                    label: 'Recently updated',
-                    selected: _sort == _CardSort.recent,
-                    onTap: () => setSheet(() => _sort = _CardSort.recent),
+                    label: 'Newest first',
+                    selected: sort == CardsSortMode.recent,
+                    onTap: () {
+                      setSheet(() => sort = CardsSortMode.recent);
+                      ref
+                          .read(cardsSortProvider.notifier)
+                          .set(CardsSortMode.recent);
+                    },
+                  ),
+                  _SortOptionRow(
+                    label: 'Oldest first',
+                    selected: sort == CardsSortMode.oldest,
+                    onTap: () {
+                      setSheet(() => sort = CardsSortMode.oldest);
+                      ref
+                          .read(cardsSortProvider.notifier)
+                          .set(CardsSortMode.oldest);
+                    },
                   ),
                   _SortOptionRow(
                     label: 'Name (A to Z)',
-                    selected: _sort == _CardSort.nickname,
-                    onTap: () => setSheet(() => _sort = _CardSort.nickname),
+                    selected: sort == CardsSortMode.nickname,
+                    onTap: () {
+                      setSheet(() => sort = CardsSortMode.nickname);
+                      ref
+                          .read(cardsSortProvider.notifier)
+                          .set(CardsSortMode.nickname);
+                    },
                   ),
                   const SizedBox(height: KuberSpacing.md),
+                  // Clears applied filters only. Sort is a saved preference, so
+                  // it is left untouched here.
                   TextButton(
                     onPressed: () => setSheet(() {
                       _typeFilter.clear();
                       _networkFilter.clear();
-                      _sort = _CardSort.recent;
                     }),
                     child: Text('Clear filters',
                         style: localeFont(color: cs.onSurfaceVariant)),

@@ -10,6 +10,8 @@
     <string name="shortcut_tools_long">Calculators &amp; Tools</string>
     <string name="shortcut_notes_short">Notes</string>
     <string name="shortcut_notes_long">Kuber Notes</string>
+    <string name="shortcut_cards_short">Cards</string>
+    <string name="shortcut_cards_long">Kuber Cards</string>
 
     <!-- ==== Home-screen widget static copy ==== -->
     <!-- Widget display names (picker) -->

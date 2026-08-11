@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,14 +15,6 @@ import '../data/card_vault_service.dart';
 import '../data/stored_card.dart';
 import '../providers/kuber_cards_provider.dart';
 import 'stored_card_visual.dart';
-
-/// Labels that mark a custom field as sensitive (masked by default, tap-reveal).
-const _riskyLabels = ['cvv', 'cvc', 'pin', 'otp', 'password', 'passcode', 'secret'];
-
-bool _isRisky(String label) {
-  final l = label.trim().toLowerCase();
-  return _riskyLabels.any((r) => l.contains(r));
-}
 
 void showCardDetailSheet(BuildContext context, WidgetRef ref, StoredCard card) {
   showModalBottomSheet<void>(
@@ -47,9 +37,7 @@ class CardDetailSheet extends ConsumerStatefulWidget {
 
 class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
   DecryptedCard? _dec;
-  bool _revealed = false; // session-length reveal of number + expiry
-  final Set<int> _revealedCustom = {}; // risky custom fields revealed (10s)
-  final Map<int, Timer> _customTimers = {};
+  bool _revealed = false; // session-length reveal of number + expiry + custom
 
   @override
   void initState() {
@@ -66,25 +54,9 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
     if (mounted) setState(() => _dec = dec);
   }
 
-  @override
-  void dispose() {
-    for (final t in _customTimers.values) {
-      t.cancel();
-    }
-    super.dispose();
-  }
-
   void _copy(String value, String label) {
     CardClipboardService.copy(value);
     showKuberSnackBar(context, 'Copied $label.');
-  }
-
-  void _revealCustom(int index) {
-    setState(() => _revealedCustom.add(index));
-    _customTimers[index]?.cancel();
-    _customTimers[index] = Timer(const Duration(seconds: 10), () {
-      if (mounted) setState(() => _revealedCustom.remove(index));
-    });
   }
 
   @override
@@ -141,6 +113,11 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
 
   Widget _content(ColorScheme cs, DecryptedCard dec) {
     final hasNumber = (dec.number ?? '').isNotEmpty;
+    // The reveal toggle governs number, expiry AND custom values, so show it
+    // whenever any of those exist.
+    final hasRevealable = hasNumber ||
+        (dec.expiry ?? '').isNotEmpty ||
+        dec.customFields.isNotEmpty;
 
     // The card face is the hero; below it a field table lists number, holder,
     // expiry and network (number + expiry stay masked until "Show details").
@@ -196,7 +173,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
           ),
         ),
         const SizedBox(height: KuberSpacing.lg),
-        if (hasNumber) ...[
+        if (hasRevealable) ...[
           _revealButton(cs),
           const SizedBox(height: KuberSpacing.lg),
         ],
@@ -257,26 +234,18 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
   }
 
   List<InfoTableRow> _customRows(DecryptedCard dec) {
-    final rows = <InfoTableRow>[];
-    for (var i = 0; i < dec.customFields.length; i++) {
-      final f = dec.customFields[i];
-      final risky = _isRisky(f.label);
-      final revealed = _revealedCustom.contains(i);
-      final display = (!risky || revealed)
-          ? f.value
-          : '•' * (f.value.isEmpty ? 4 : f.value.length.clamp(4, 12));
-      rows.add(InfoTableDataRow(
-        label: f.label,
-        value: display,
-        tappable: risky && !revealed,
-        valueLeadingIcon: risky
-            ? (revealed ? Icons.visibility_off_rounded : Icons.visibility_rounded)
-            : null,
-        onTap: risky && !revealed ? () => _revealCustom(i) : null,
-        onLongPress: () => _copy(f.value, f.label),
-      ));
-    }
-    return rows;
+    // Values follow the single "Show details" toggle — no separate per-field
+    // eye. Masked until revealed; long-press always copies the real value.
+    return [
+      for (final f in dec.customFields)
+        InfoTableDataRow(
+          label: f.label,
+          value: _revealed
+              ? f.value
+              : '•' * (f.value.isEmpty ? 4 : f.value.length.clamp(4, 12)),
+          onLongPress: () => _copy(f.value, f.label),
+        ),
+    ];
   }
 
   Widget _linkedAccount(ColorScheme cs, DecryptedCard dec) {
@@ -390,7 +359,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
                     style: localeFont(color: cs.onSurfaceVariant, height: 1.45),
                   ),
                   const SizedBox(height: KuberSpacing.md),
-                  Text('Type the nickname to confirm:',
+                  Text('Type "$nickname" to confirm:',
                       style: localeFont(
                           fontSize: 12.5, color: cs.onSurfaceVariant)),
                   const SizedBox(height: KuberSpacing.sm),
@@ -411,6 +380,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
                 AppButton(
                   label: 'Delete',
                   type: AppButtonType.danger,
+                  filled: true,
                   onPressed: canDelete
                       ? () {
                           // Fire the local delete + list reload, then pop and

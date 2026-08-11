@@ -72,6 +72,8 @@ class PrefsKeys {
 
   // Kuber Cards
   static const cardsViewMode = 'kuber_cards_view_mode'; // 'card' | 'list'
+  static const cardsSort =
+      'kuber_cards_sort'; // 'recent' | 'oldest' | 'nickname'
 
   // Upcoming Events widget migration (one-time Recurring widget replacement)
   static const upcomingEventsWidgetMigrated =

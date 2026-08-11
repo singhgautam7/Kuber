@@ -145,3 +145,34 @@ class CardsViewModeNotifier extends Notifier<CardsViewMode> {
 final cardsViewModeProvider =
     NotifierProvider<CardsViewModeNotifier, CardsViewMode>(
         CardsViewModeNotifier.new);
+
+// ── Persisted card sort order (sort persists; filters intentionally do not) ───
+
+enum CardsSortMode { recent, oldest, nickname }
+
+class CardsSortNotifier extends Notifier<CardsSortMode> {
+  @override
+  CardsSortMode build() {
+    _load();
+    return CardsSortMode.recent; // newest first is the default
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    switch (prefs.getString(PrefsKeys.cardsSort)) {
+      case 'oldest':
+        state = CardsSortMode.oldest;
+      case 'nickname':
+        state = CardsSortMode.nickname;
+    }
+  }
+
+  Future<void> set(CardsSortMode mode) async {
+    state = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(PrefsKeys.cardsSort, mode.name);
+  }
+}
+
+final cardsSortProvider =
+    NotifierProvider<CardsSortNotifier, CardsSortMode>(CardsSortNotifier.new);

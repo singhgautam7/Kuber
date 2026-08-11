@@ -310,6 +310,7 @@ class DataManagementScreen extends ConsumerWidget {
                 AppButton(
                   label: 'Reset all',
                   type: AppButtonType.danger,
+                  filled: true,
                   onPressed: canReset
                       ? () {
                           Navigator.pop(dialogCtx);
