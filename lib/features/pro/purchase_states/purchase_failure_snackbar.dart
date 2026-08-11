@@ -30,6 +30,21 @@ void showPurchaseFailedSnackbar(
   );
 }
 
+void showAlreadyOwnedSnackbar(
+  BuildContext context, {
+  VoidCallback? onRestore,
+  OverlayState? overlay,
+}) {
+  showKuberSnackBar(
+    context,
+    'You already own this. Try Restore purchases.',
+    isError: false,
+    actionLabel: onRestore != null ? 'Restore' : null,
+    onAction: onRestore,
+    overlay: overlay,
+  );
+}
+
 void showPlayStoreUnavailableSnackbar(BuildContext context,
     {OverlayState? overlay}) {
   // Round 2: softened copy. This fires for a transient Play Services hiccup

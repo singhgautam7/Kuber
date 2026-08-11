@@ -257,6 +257,17 @@ class PurchaseService {
         // stream fires again with purchased/error once Play resolves it.
         break;
       case PurchaseStatus.error:
+        // "Item already owned" is not a real failure — the user has the
+        // entitlement, the app just hasn't reconciled it. Point them at Restore
+        // instead of showing a scary "payment failed".
+        if (_isAlreadyOwned(purchase.error)) {
+          _snack((ctx, overlay) => showAlreadyOwnedSnackbar(
+                ctx,
+                onRestore: restorePurchases,
+                overlay: overlay,
+              ));
+          break;
+        }
         _snack((ctx, overlay) => showPurchaseFailedSnackbar(
               ctx,
               onRetry: () => _launch(

@@ -22,6 +22,7 @@ import 'features/history/providers/selection_provider.dart';
 import 'features/transactions/providers/transaction_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
+import 'features/pro/debug/entitlement_override.dart';
 import 'features/pro/paywall/billing_ui_state.dart';
 import 'features/pro/paywall/pro_state.dart';
 import 'features/pro/services/promo_config_service.dart';
@@ -125,6 +126,11 @@ class _KuberAppState extends ConsumerState<KuberApp>
     try {
       // Offline-fallback prices for the paywall, before the live query lands.
       await ref.read(cachedProductPricesProvider.notifier).hydrate();
+      // DEBUG-ONLY: load any forced entitlement override before the first
+      // entitlement read so the notifier hydrates from it. No-op in release.
+      if (kDebugMode) {
+        await DebugEntitlementOverride.hydrate();
+      }
       // The entitlement row was created in main()'s bootstrap; force a read so
       // the notifier hydrates from Isar (synchronous), then clear the
       // Pro-bootstrap gate that keeps the Settings card skeleton and the
@@ -173,6 +179,29 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // keeping frequent resumes from repeating the notification plugin calls.
   DateTime? _lastCreditReminderMaintenanceDay;
 
+  // Timestamp of the last on-resume Play Billing reconcile. Entitlement changes
+  // slowly (a lapse/renewal is a day-scale event), so throttling to once per 15
+  // minutes keeps frequent app switches from re-querying Play needlessly.
+  DateTime? _lastEntitlementReconcile;
+
+  /// Asks Play Billing to re-report purchases on resume so entitlement reflects
+  /// a lapse / renewal / promo redemption that happened while backgrounded.
+  /// Silent (a restored purchase never pops a sheet), throttled, and fully
+  /// guarded — billing is never allowed to affect the foreground path.
+  Future<void> _reconcileEntitlementOnResume() async {
+    final now = DateTime.now();
+    final last = _lastEntitlementReconcile;
+    if (last != null && now.difference(last) < const Duration(minutes: 15)) {
+      return;
+    }
+    _lastEntitlementReconcile = now;
+    try {
+      await ref.read(purchaseServiceProvider).restorePurchases();
+    } catch (e, stack) {
+      debugPrint('Kuber: on-resume entitlement reconcile failed: $e\n$stack');
+    }
+  }
+
   /// Runs a scheduled backup if one is due. Called on first frame (cold start)
   /// and on the first resume of each new day, because Android usually keeps the
   /// process warm — the cold-start loader path alone almost never fires
@@ -220,6 +249,10 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // were backgrounded — invalidate the lightweight home-tab provider so
     // the SMS card picks up the new permission on the next frame.
     ref.invalidate(smsHomeInfoProvider);
+    // Reconcile Pro entitlement with Play Billing on resume: a subscription may
+    // have lapsed, renewed, or a promo code been redeemed in Play while we were
+    // backgrounded. Silent + throttled + best-effort.
+    _reconcileEntitlementOnResume();
     // Already checked backup today? A daily (or longer) backup can't be due
     // again, so skip — avoids a DB read on every foreground.
     final now = DateTime.now();

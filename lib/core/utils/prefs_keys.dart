@@ -92,4 +92,10 @@ class PrefsKeys {
   // ISO week, e.g. `ask_kuber_messages_week_2026-W28`, so it resets weekly
   // with no cleanup job.
   static const askKuberWeekPrefix = 'ask_kuber_messages_week_';
+
+  // Kuber Pro — DEBUG-ONLY entitlement override (Settings > Developer >
+  // Entitlement Override). Only ever read/written under kDebugMode; the code
+  // path is tree-shaken out of release builds. Never present in production.
+  static const debugEntitlementOverride = 'debug_entitlement_override';
+  static const debugEntitlementTrialDays = 'debug_entitlement_trial_days';
 }

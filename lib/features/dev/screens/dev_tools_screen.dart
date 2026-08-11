@@ -1,5 +1,6 @@
 // ignore_for_file: use_null_aware_elements
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../pro/debug/entitlement_override_sheet.dart';
 import '../../settings/widgets/settings_widgets.dart'; // for SquircleIcon
 import '../providers/dev_mode_provider.dart';
 
@@ -92,6 +94,29 @@ class DevToolsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                // DEBUG-ONLY: force entitlement states to exercise the Pro
+                // gates without a real Play Billing purchase. kDebugMode is a
+                // const false in release, so this whole block is tree-shaken out.
+                if (kDebugMode) ...[
+                  const SizedBox(height: KuberSpacing.xl),
+                  _SectionLabel(label: 'ENTITLEMENT (DEBUG)'),
+                  const SizedBox(height: KuberSpacing.sm),
+                  _SettingsCard(
+                    children: [
+                      _SettingsTile(
+                        icon: Icons.workspace_premium_outlined,
+                        label: 'Entitlement Override',
+                        subtitle: 'Force Free / Trial / Monthly / Yearly / Lifetime',
+                        onTap: () => showEntitlementOverrideSheet(context),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: KuberSpacing.xl),
                 _SectionLabel(label: 'DANGER ZONE'),
                 const SizedBox(height: KuberSpacing.sm),
