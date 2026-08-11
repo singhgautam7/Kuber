@@ -63,6 +63,21 @@ class UserEntitlement {
   /// True once the one-shot "your trial ended" bottom sheet has been shown.
   /// Prevents nagging on every open after day 14.
   bool trialEndedNoticeShown = false;
+
+  /// Flat view for the Dev Tools DB Explorer (read-only inspection). Not used
+  /// for backup — the entitlement is device-local and never exported.
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'firstInstallAt': firstInstallAt.toIso8601String(),
+        'tier': tier,
+        'trialEndsAt': trialEndsAt?.toIso8601String(),
+        'proExpiresAt': proExpiresAt?.toIso8601String(),
+        'activatedAt': activatedAt?.toIso8601String(),
+        'activePurchaseToken': activePurchaseToken,
+        'activeProductId': activeProductId,
+        'lastVerifiedAt': lastVerifiedAt?.toIso8601String(),
+        'trialEndedNoticeShown': trialEndedNoticeShown,
+      };
 }
 
 /// String constants for [UserEntitlement.tier]. Kept as a class-of-consts

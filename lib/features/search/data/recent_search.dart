@@ -18,4 +18,13 @@ class RecentSearch {
 
   @Index()
   late DateTime updatedAt;
+
+  /// Flat view for the Dev Tools DB Explorer, so this legacy collection's
+  /// leftover rows are still inspectable on older databases.
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'query': query,
+        'queryLower': queryLower,
+        'updatedAt': updatedAt.toIso8601String(),
+      };
 }

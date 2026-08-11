@@ -36,6 +36,8 @@ import '../../notes/data/kuber_note.dart';
 import '../../reminders/data/reminder.dart';
 import '../../kuber_cards/data/stored_card.dart';
 import '../../kuber_cards/data/card_vault_meta.dart';
+import '../../pro/data/user_entitlement.dart';
+import '../../search/data/recent_search.dart';
 
 import '../widgets/record_detail_sheet.dart';
 
@@ -203,6 +205,17 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
           break;
         case 'CardVaultMeta':
           final list = await isar.collection<CardVaultMeta>().where().findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'UserEntitlement':
+          final list = await isar
+              .collection<UserEntitlement>()
+              .where()
+              .findAll();
+          records = list.map((e) => e.toMap()).toList();
+          break;
+        case 'RecentSearch':
+          final list = await isar.collection<RecentSearch>().where().findAll();
           records = list.map((e) => e.toMap()).toList();
           break;
       }

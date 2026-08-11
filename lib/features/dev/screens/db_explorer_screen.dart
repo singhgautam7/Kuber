@@ -35,6 +35,8 @@ import '../../notes/data/kuber_note.dart';
 import '../../reminders/data/reminder.dart';
 import '../../kuber_cards/data/stored_card.dart';
 import '../../kuber_cards/data/card_vault_meta.dart';
+import '../../pro/data/user_entitlement.dart';
+import '../../search/data/recent_search.dart';
 
 class CollectionMeta {
   final String name;
@@ -120,6 +122,14 @@ class DbExplorerScreen extends ConsumerWidget {
       CollectionMeta(
         'CardVaultMeta',
         (i) => i.collection<CardVaultMeta>().count(),
+      ),
+      CollectionMeta(
+        'UserEntitlement',
+        (i) => i.collection<UserEntitlement>().count(),
+      ),
+      CollectionMeta(
+        'RecentSearch',
+        (i) => i.collection<RecentSearch>().count(),
       ),
     ]..sort((a, b) => a.name.compareTo(b.name));
 
