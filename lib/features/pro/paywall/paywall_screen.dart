@@ -9,9 +9,11 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_app_bar.dart';
 import '../../../../shared/widgets/kuber_comparison_table.dart';
 import '../../../../shared/widgets/kuber_page_header.dart';
+import '../../../../shared/widgets/timed_snackbar.dart';
 import '../settings/redeem_promo_code_sheet.dart';
 import '../support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import '../purchase_states/restore_purchases_flow.dart';
+import '../services/billing_diagnostics.dart';
 import '../services/purchase_service.dart';
 import 'billing_ui_state.dart';
 import 'paywall_error_state.dart';
@@ -53,6 +55,7 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
     final isManage = proState.isPro; // purchased or promo
     final isGrandfathered = proState.isTrial; // legacy app trial (unpaid)
     final subscribed = proState.isPro && proState.plan != null;
+    final restoreFailed = ref.watch(restoreFailedSessionProvider);
 
     final overflowItems = <KuberOverflowItem>[
       KuberOverflowItem(
@@ -63,8 +66,14 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       KuberOverflowItem(
         icon: Icons.redeem_rounded,
         label: 'Redeem promo code',
-        onTap: () => showRedeemPromoCodeSheet(context),
+        onTap: () => showRedeemPromoCodeSheet(context, ref),
       ),
+      if (restoreFailed)
+        KuberOverflowItem(
+          icon: Icons.bug_report_outlined,
+          label: 'Report a billing issue',
+          onTap: () => _reportBillingIssue(context),
+        ),
       if (subscribed)
         KuberOverflowItem(
           icon: Icons.open_in_new_rounded,
@@ -276,6 +285,35 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
             '?sku=$skuId&package=$_kAndroidPackage'
         : 'https://play.google.com/store/account/subscriptions';
     launchUrl(Uri.parse(uri), mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _reportBillingIssue(BuildContext context) async {
+    final report =
+        await BillingDiagnostics.instance.generateDiagnosticsReport();
+    const subject = '[Kuber Billing Issue] Restore Failed';
+    final body = '''
+Please describe the issue you encountered:
+(e.g., I purchased Lifetime on another device, but tapping Restore purchases says "No purchase found")
+
+---
+$report
+''';
+
+    final uri = Uri.parse(
+      'mailto:singhgautam.dev@gmail.com'
+      '?subject=${Uri.encodeComponent(subject)}'
+      '&body=${Uri.encodeComponent(body)}',
+    );
+
+    if (!await launchUrl(uri)) {
+      if (context.mounted) {
+        showKuberSnackBar(
+          context,
+          'Could not open email app. You can copy diagnostics from Dev Tools.',
+          isError: true,
+        );
+      }
+    }
   }
 
   Widget _sectionLabel(String text) {
@@ -802,7 +840,7 @@ class _TrustFooter extends StatelessWidget {
               ),
               Text('·', style: localeFont(color: cs.onSurfaceVariant)),
               TextButton(
-                onPressed: () => showRedeemPromoCodeSheet(context),
+                onPressed: () => showRedeemPromoCodeSheet(context, ref),
                 child: Text(
                   'Redeem promo code',
                   style: localeFont(

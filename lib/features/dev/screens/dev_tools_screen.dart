@@ -1,4 +1,4 @@
-// ignore_for_file: use_null_aware_elements
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../pro/debug/entitlement_override_sheet.dart';
+import '../../pro/services/billing_diagnostics.dart';
 import '../../settings/widgets/settings_widgets.dart'; // for SquircleIcon
 import '../providers/dev_mode_provider.dart';
 
@@ -72,6 +73,27 @@ class DevToolsScreen extends ConsumerWidget {
                         Icons.chevron_right_rounded,
                         color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                         size: 20,
+                      ),
+                    ),
+                    _SettingsTile(
+                      icon: Icons.receipt_long_outlined,
+                      label: 'Copy Billing Diagnostics',
+                      subtitle: 'Copy recent Play Billing logs and device metadata',
+                      onTap: () async {
+                        final report = await BillingDiagnostics.instance
+                            .generateDiagnosticsReport();
+                        await Clipboard.setData(ClipboardData(text: report));
+                        if (context.mounted) {
+                          showKuberSnackBar(
+                            context,
+                            'Billing diagnostics copied to clipboard',
+                          );
+                        }
+                      },
+                      trailing: Icon(
+                        Icons.copy_rounded,
+                        color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                        size: 18,
                       ),
                     ),
                   ],
@@ -297,7 +319,7 @@ class _SettingsTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
       ),

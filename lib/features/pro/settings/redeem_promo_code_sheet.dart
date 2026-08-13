@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
+import '../../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../../shared/widgets/timed_snackbar.dart';
+import '../paywall/pro_state.dart';
 import '../purchase_states/purchase_failure_snackbar.dart';
+import '../services/purchase_service.dart';
 
 /// "Redeem promo code" row in Settings > Kuber Pro. Google Play promo codes
-/// are validated by Play itself, not by Kuber, so this only needs to collect
-/// the code (for the user's own reference) and hand off to Play's native
-/// redemption page. No in-app validation.
-void showRedeemPromoCodeSheet(BuildContext context) {
+/// are validated by Play itself, not by Kuber, so this collects the code
+/// (for the user's reference), hands off to Play's native redemption page,
+/// and automatically reconciles entitlement upon return.
+void showRedeemPromoCodeSheet(BuildContext context, [WidgetRef? ref]) {
   final controller = TextEditingController();
 
   showModalBottomSheet(
@@ -42,6 +46,33 @@ void showRedeemPromoCodeSheet(BuildContext context) {
               );
               if (!launched && context.mounted) {
                 showPlayStoreUnavailableSnackbar(context);
+                return;
+              }
+
+              // When returning from Play Store, auto-trigger query check.
+              if (ref != null && context.mounted) {
+                showKuberSnackBar(
+                  context,
+                  'Checking for your redemption...',
+                  duration: const Duration(seconds: 3),
+                );
+                try {
+                  await ref
+                      .read(purchaseServiceProvider)
+                      .restorePurchases(source: 'redeem_sheet_return');
+                  for (var i = 0; i < 25; i++) {
+                    if (ref.read(kuberProStateProvider).isPro) break;
+                    await Future<void>.delayed(
+                      const Duration(milliseconds: 100),
+                    );
+                  }
+                  if (context.mounted) {
+                    final current = ref.read(kuberProStateProvider);
+                    if (current.isPro) {
+                      showKuberSnackBar(context, 'Kuber Pro unlocked');
+                    }
+                  }
+                } catch (_) {}
               }
             },
             style: FilledButton.styleFrom(
@@ -60,8 +91,8 @@ void showRedeemPromoCodeSheet(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Enter your code and continue. Google Play handles "
-              "redemption, Kuber just opens the right page.",
+              'Enter your code and continue. Google Play handles '
+              'redemption, Kuber just opens the right page.',
               style: localeFont(
                 fontSize: 13.5,
                 color: cs.onSurfaceVariant,

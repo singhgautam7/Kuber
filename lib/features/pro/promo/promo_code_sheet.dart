@@ -60,6 +60,33 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                   );
                   if (!launched && context.mounted) {
                     showPlayStoreUnavailableSnackbar(context);
+                    return;
+                  }
+
+                  // Auto-reconcile on returning from the external Play Store activity.
+                  if (context.mounted) {
+                    showKuberSnackBar(
+                      context,
+                      'Checking for your redemption...',
+                      duration: const Duration(seconds: 3),
+                    );
+                    try {
+                      await ref
+                          .read(purchaseServiceProvider)
+                          .restorePurchases(source: 'promo_return');
+                      for (var i = 0; i < 25; i++) {
+                        if (ref.read(kuberProStateProvider).isPro) break;
+                        await Future<void>.delayed(
+                          const Duration(milliseconds: 100),
+                        );
+                      }
+                      if (context.mounted) {
+                        final current = ref.read(kuberProStateProvider);
+                        if (current.isPro) {
+                          showKuberSnackBar(context, 'Kuber Pro unlocked');
+                        }
+                      }
+                    } catch (_) {}
                   }
                 },
                 style: FilledButton.styleFrom(
@@ -80,11 +107,22 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
               child: OutlinedButton(
                 onPressed: () async {
                   Navigator.pop(ctx);
-                  // Refreshes entitlement from Play; a redeemed code lands
-                  // on the purchase stream and re-grants Pro there. This
-                  // call only asks Play to re-report — it never grants
-                  // anything itself.
-                  await ref.read(purchaseServiceProvider).restorePurchases();
+                  showKuberSnackBar(
+                    context,
+                    'Checking for your redemption...',
+                    duration: const Duration(seconds: 3),
+                  );
+                  try {
+                    await ref
+                        .read(purchaseServiceProvider)
+                        .restorePurchases(source: 'promo_already_redeemed');
+                    for (var i = 0; i < 25; i++) {
+                      if (ref.read(kuberProStateProvider).isPro) break;
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 100),
+                      );
+                    }
+                  } catch (_) {}
                   if (!context.mounted) return;
                   final current = ref.read(kuberProStateProvider);
                   showKuberSnackBar(

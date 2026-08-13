@@ -105,7 +105,7 @@ class KuberProSettingsSection extends ConsumerWidget {
         _ProActionRow(
           icon: Icons.redeem_rounded,
           label: 'Redeem promo code',
-          onTap: () => showRedeemPromoCodeSheet(context),
+          onTap: () => showRedeemPromoCodeSheet(context, ref),
         ),
         const SizedBox(height: KuberSpacing.sm),
         // Recover a purchase Play knows about but this install forgot (e.g.

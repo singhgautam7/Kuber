@@ -15,6 +15,7 @@ import '../paywall/subscription_offer.dart';
 import '../purchase_states/purchase_failure_snackbar.dart';
 import '../purchase_states/purchase_success_sheet.dart';
 import '../support/support_success_sheets.dart';
+import 'billing_diagnostics.dart';
 
 /// Play Console product IDs. The single source of truth in code — every buy
 /// site references these, never a raw string literal.
@@ -73,6 +74,10 @@ class PurchaseService {
 
   StreamSubscription<List<PurchaseDetails>>? _sub;
 
+  /// In-flight Future cache to coalesce concurrent restore/query requests
+  /// (e.g. on-resume lifecycle listener racing with manual user tap).
+  Future<void>? _inFlightRestore;
+
   /// Best-pick product per id (the chosen offer for a subscription; the sole
   /// entry for a one-time product). Drives the buy path and the price display.
   final Map<String, ProductDetails> _products = {};
@@ -106,8 +111,13 @@ class PurchaseService {
 
     try {
       _available = await _iap.isAvailable();
+      BillingDiagnostics.instance.log(
+        'INIT',
+        'Play Billing availability: $_available',
+      );
     } catch (e) {
       debugPrint('Kuber: Play Billing availability check failed: $e');
+      BillingDiagnostics.instance.recordError('initialize:isAvailable', e);
       _available = false;
     }
     if (!_available) return;
@@ -116,6 +126,7 @@ class PurchaseService {
       _onPurchaseUpdated,
       onError: (Object e, StackTrace s) {
         debugPrint('Kuber: purchase stream error: $e');
+        BillingDiagnostics.instance.recordError('purchaseStream', e, s);
       },
     );
 
@@ -125,7 +136,7 @@ class PurchaseService {
     // queryPurchases" promise. Restored purchases arrive on the stream as
     // PurchaseStatus.restored and re-grant entitlement silently.
     try {
-      await _iap.restorePurchases();
+      await restorePurchases(source: 'startup');
     } catch (e) {
       debugPrint('Kuber: startup restore failed (non-fatal): $e');
     }
@@ -150,10 +161,27 @@ class PurchaseService {
       return;
     }
 
+    final sw = Stopwatch()..start();
+    BillingDiagnostics.instance.recordQueryStart('loadProducts', source: ids.join(','));
+
     try {
-      final resp = await _iap.queryProductDetails(ids);
+      final resp = await _iap.queryProductDetails(ids).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw TimeoutException('loadProducts timed out'),
+          );
+      sw.stop();
+      BillingDiagnostics.instance.recordQueryEnd(
+        'loadProducts',
+        success: true,
+        duration: sw.elapsed,
+      );
+
       if (resp.notFoundIDs.isNotEmpty) {
         debugPrint('Kuber: products not found on Play: ${resp.notFoundIDs}');
+        BillingDiagnostics.instance.log(
+          'PRODUCTS_NOT_FOUND',
+          'IDs not found: ${resp.notFoundIDs}',
+        );
       }
 
       // Group the response by product id. A subscription returns one entry per
@@ -286,12 +314,50 @@ class PurchaseService {
   /// "No previous purchase found" feedback is owned by
   /// `restore_purchases_flow.dart`, which reads entitlement state after this
   /// resolves.
-  Future<void> restorePurchases() async {
-    if (!_available) return;
+  Future<void> restorePurchases({String source = 'manual'}) async {
+    if (!_available) {
+      BillingDiagnostics.instance.log('RESTORE_SKIP', 'Play Billing is not available');
+      return;
+    }
+    if (_inFlightRestore != null) {
+      BillingDiagnostics.instance.log(
+        'RESTORE_COALESCED',
+        'Reusing in-flight restore query',
+        {'source': source},
+      );
+      return _inFlightRestore!;
+    }
+
+    _inFlightRestore = _performRestore(source).whenComplete(() {
+      _inFlightRestore = null;
+    });
+    return _inFlightRestore!;
+  }
+
+  Future<void> _performRestore(String source) async {
+    final sw = Stopwatch()..start();
+    BillingDiagnostics.instance.recordQueryStart('restorePurchases', source: source);
     try {
-      await _iap.restorePurchases();
+      await _iap.restorePurchases().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('restorePurchases timed out after 10s'),
+      );
+      sw.stop();
+      BillingDiagnostics.instance.recordQueryEnd(
+        'restorePurchases',
+        success: true,
+        duration: sw.elapsed,
+      );
     } catch (e) {
+      sw.stop();
+      BillingDiagnostics.instance.recordQueryEnd(
+        'restorePurchases',
+        success: false,
+        duration: sw.elapsed,
+        error: e.toString(),
+      );
       debugPrint('Kuber: restorePurchases failed: $e');
+      rethrow;
     }
   }
 
@@ -303,6 +369,7 @@ class PurchaseService {
   // --- Purchase stream handling -------------------------------------------
 
   void _onPurchaseUpdated(List<PurchaseDetails> purchases) {
+    BillingDiagnostics.instance.recordStreamPurchases(purchases);
     for (final purchase in purchases) {
       _handle(purchase);
     }

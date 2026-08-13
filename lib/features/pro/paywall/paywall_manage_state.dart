@@ -130,7 +130,7 @@ class PaywallManageSection extends ConsumerWidget {
           type: AppButtonType.outline,
           fullWidth: true,
           height: 48,
-          onPressed: () => showRedeemPromoCodeSheet(context),
+          onPressed: () => showRedeemPromoCodeSheet(context, ref),
         ),
         const SizedBox(height: KuberSpacing.lg),
         Text(
