@@ -2401,7 +2401,7 @@ class AppLocalizationsPa extends AppLocalizations {
   String get moreManageTitle => 'ਪ੍ਰਬੰਧਨ';
 
   @override
-  String get moreToolsTitle => 'ਟੂਲਸ';
+  String get moreToolsTitle => 'ਸਿਗਨੇਚਰ';
 
   @override
   String get moreAppTitle => 'ਐਪ';

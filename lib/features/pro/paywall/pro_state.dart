@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/database/isar_service.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../data/user_entitlement.dart';
+import '../debug/entitlement_override.dart';
 
 /// Kuber Pro purchase tiers. Maps to the Play Console product IDs listed in
 /// the strategy document: `kuber_pro_monthly`, `kuber_pro_yearly`,
@@ -90,19 +92,15 @@ class KuberProState {
   /// app routes through this getter (via `proGate`), so it is the single
   /// on/off switch for Pro.
   ///
-  /// ── TEMPORARY (billing KYC pending): ALL PRO FEATURES ARE FREE. ──
-  /// While Play Billing KYC is being verified we ship every Pro feature
-  /// unlocked by returning `true` here — no gating code is deleted, just
-  /// bypassed. To RE-ENABLE Pro gating once KYC clears, restore the real
-  /// check below:
+  /// True when the user has a real paid/promo entitlement ([isPro]), is in a
+  /// grandfathered app-managed trial ([isTrial]), or a QA build was compiled
+  /// with `--dart-define=KUBER_UNLOCK_PRO=true`. The paywall's manage-vs-sell
+  /// decision keys off [isPro] (real entitlement), not this getter.
   ///
-  ///   bool get hasProAccess =>
-  ///       const bool.fromEnvironment('KUBER_UNLOCK_PRO') || isPro || isTrial;
-  ///
-  /// See `specs/pro-gating-disabled.md` for the full list of what this affects
-  /// and how to turn gating back on. The paywall's manage-vs-sell decision
-  /// still keys off [isPro] (real entitlement), not this getter.
-  bool get hasProAccess => true;
+  /// See `specs/pro-gating-enabled.md` for the full list of gated features and
+  /// their free-tier limits.
+  bool get hasProAccess =>
+      const bool.fromEnvironment('KUBER_UNLOCK_PRO') || isPro || isTrial;
 
   /// Whole days since Pro/promo was activated. Used by the manage-state hero
   /// as a small badge of pride, not a functional countdown.
@@ -209,6 +207,12 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
 
   @override
   KuberProState build() {
+    // DEBUG-ONLY: a forced entitlement (Dev Tools > Entitlement Override) wins
+    // over the real Isar-derived state. Compiled out of release builds.
+    if (kDebugMode) {
+      final forced = DebugEntitlementOverride.state;
+      if (forced != null) return forced;
+    }
     return _stateFromRow(_readRow());
   }
 
@@ -218,6 +222,15 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
       mutate(row);
       _isar.collection<UserEntitlement>().putSync(row);
     });
+    // A live debug override stays authoritative even after a real write (e.g. a
+    // purchase completing while an override is forced). Compiled out of release.
+    if (kDebugMode) {
+      final forced = DebugEntitlementOverride.state;
+      if (forced != null) {
+        state = forced;
+        return;
+      }
+    }
     state = _stateFromRow(_readRow());
   }
 

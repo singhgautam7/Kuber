@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/models/overflow_config.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/locale_font.dart';
+import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/kuber_app_bar.dart';
+import '../../../../shared/widgets/kuber_comparison_table.dart';
+import '../../../../shared/widgets/kuber_page_header.dart';
+import '../settings/redeem_promo_code_sheet.dart';
+import '../support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 import '../purchase_states/restore_purchases_flow.dart';
 import '../services/purchase_service.dart';
 import 'billing_ui_state.dart';
 import 'paywall_error_state.dart';
 import 'paywall_loading_state.dart';
 import 'paywall_manage_state.dart';
-import 'paywall_promo_state.dart';
-import 'paywall_trial_state.dart';
+import 'pro_page_extras.dart';
 import 'pro_state.dart';
+import 'subscription_offer.dart';
 
-/// Route: `/pro`. Full screen, not a bottom sheet, per spec — Pro gets its
-/// own space. Reachable from every feature gate, from Settings, and from a
-/// "Kuber Pro" tile in More tab. A slow ambient primary glow sits behind the
-/// whole screen (same language as Ask Kuber's welcome view) so Pro reads as
-/// a distinct, premium moment rather than another settings page.
+/// Play Store package id, for the subscription-management deeplink.
+const _kAndroidPackage = 'com.grs.kuber';
+
+/// Route: `/pro`. A single full-screen page that adapts to every entitlement
+/// state, split into two macro-modes (see specs pro-page-redesign):
+///  - **Sell** (free / lapsed) and the grandfathered legacy trial: pitch + plan
+///    cards + a sticky Continue.
+///  - **Manage** (paid active / Play Billing trial / promo): status hero +
+///    read-only plan details + hand-offs to Play.
+/// The manage-vs-sell decision keys off `isPro` (a real entitlement), not
+/// `hasProAccess`.
 class KuberProPaywallScreen extends ConsumerStatefulWidget {
   const KuberProPaywallScreen({super.key});
 
@@ -26,256 +40,435 @@ class KuberProPaywallScreen extends ConsumerStatefulWidget {
       _KuberProPaywallScreenState();
 }
 
-class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _glow;
-
-  @override
-  void initState() {
-    super.initState();
-    _glow = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _glow.dispose();
-    super.dispose();
-  }
+class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
+  ProPlan _selected = ProPlan.yearly;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final proState = ref.watch(kuberProStateProvider);
-    final promo = ref.watch(promoConfigProvider);
-    final productsLoading = ref.watch(productsLoadingProvider);
-    final productsError = ref.watch(productsErrorProvider);
-    final cachedPrices = ref.watch(cachedProductPricesProvider);
+    final offers = ref.watch(subscriptionOffersProvider);
+    final yearlyOffer = offers[kProYearlyId];
 
-    // A user who already owns Pro sees the manage state instead of the
-    // pricing cards and feature-clusters (Section 5).
-    final isManaging = proState.source == ProSource.purchased ||
-        proState.source == ProSource.promo;
+    final isManage = proState.isPro; // purchased or promo
+    final isGrandfathered = proState.isTrial; // legacy app trial (unpaid)
+    final subscribed = proState.isPro && proState.plan != null;
+
+    final overflowItems = <KuberOverflowItem>[
+      KuberOverflowItem(
+        icon: Icons.restore_rounded,
+        label: 'Restore purchases',
+        onTap: () => restorePurchases(context, ref),
+      ),
+      KuberOverflowItem(
+        icon: Icons.redeem_rounded,
+        label: 'Redeem promo code',
+        onTap: () => showRedeemPromoCodeSheet(context),
+      ),
+      if (subscribed)
+        KuberOverflowItem(
+          icon: Icons.open_in_new_rounded,
+          label: 'Manage on Play Store',
+          onTap: _openPlaySubscriptions,
+        ),
+    ];
 
     return Scaffold(
       backgroundColor: cs.surface,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: IgnorePointer(
-              child: AnimatedBuilder(
-                animation: _glow,
-                builder: (context, _) {
-                  final t = Curves.easeInOut.transform(_glow.value);
-                  return DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        center: const Alignment(0, -0.7),
-                        radius: 0.9,
-                        colors: [
-                          cs.primary.withValues(alpha: 0.22 + t * 0.10),
-                          cs.primary.withValues(alpha: 0.05),
-                          cs.primary.withValues(alpha: 0.0),
-                        ],
-                        stops: const [0.0, 0.5, 0.75],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+          const Positioned.fill(child: _AmbientGlow()),
           SafeArea(
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      KuberSpacing.lg,
-                      KuberSpacing.sm,
-                      KuberSpacing.lg,
-                      0,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        SizedBox.square(
-                          dimension: 40,
-                          child: IconButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            icon: const Icon(Icons.close_rounded, size: 20),
-                            style: IconButton.styleFrom(
-                              backgroundColor: cs.surfaceContainerHigh,
-                              shape: const CircleBorder(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: KuberAppBar(
+                    showBack: true,
+                    showHome: true,
+                    showBrand: false,
+                    infoConfig: kAboutProInfoConfig,
+                    overflowConfig: KuberOverflowConfig(items: overflowItems),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: KuberPageHeader(
+                    title: 'Kuber Pro',
+                    description: _headerSubtitle(proState),
                   ),
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
                     KuberSpacing.lg,
-                    KuberSpacing.sm,
+                    0,
                     KuberSpacing.lg,
                     KuberSpacing.xxl,
                   ),
                   sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      if (!isManaging) ...[
-                        Center(
-                          child: Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: cs.primaryContainer,
-                              borderRadius: BorderRadius.circular(KuberRadius.md),
-                            ),
-                            child: Icon(
-                              Icons.workspace_premium_rounded,
-                              color: cs.primary,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: KuberSpacing.lg),
-                      ],
-                      Text(
-                        'Kuber Pro',
-                        textAlign: TextAlign.center,
-                        style: localeFont(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: KuberSpacing.sm),
-                      if (!isManaging)
-                        Text(
-                          'One-time purchase or subscription. No account. '
-                          'Fully private.',
-                          textAlign: TextAlign.center,
-                          style: localeFont(
-                            fontSize: 14,
-                            color: cs.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        )
-                      else
-                        Text(
-                          'Thank you for supporting Kuber.',
-                          textAlign: TextAlign.center,
-                          style: localeFont(
-                            fontSize: 14,
-                            color: cs.onSurfaceVariant,
-                            height: 1.4,
-                          ),
-                        ),
-                      const SizedBox(height: KuberSpacing.xl),
+                    delegate: SliverChildListDelegate(
+                      isManage
+                          ? _manageBody(proState)
+                          : isGrandfathered
+                              ? _grandfatheredBody(proState)
+                              : _sellBody(proState, yearlyOffer),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar:
+          (!isManage) ? _StickyContinue(child: _continueButton(yearlyOffer)) : null,
+    );
+  }
 
-                      if (proState.isTrial) ...[
-                        PaywallTrialBanner(proState: proState),
-                        const SizedBox(height: KuberSpacing.xl),
-                      ],
+  String _headerSubtitle(KuberProState s) {
+    if (s.isPro) {
+      return s.inTrialPhase ? 'Trial active' : 'You\'re on Pro';
+    }
+    if (s.isTrial) return 'Legacy trial';
+    return 'Unlock everything Kuber offers';
+  }
 
-                      if (promo != null && !isManaging) ...[
-                        PaywallPromoSection(promo: promo),
-                        const SizedBox(height: KuberSpacing.xl),
-                      ],
+  // ── Sell mode (free / lapsed) ───────────────────────────────────────────
+  List<Widget> _sellBody(KuberProState proState, SubscriptionOfferInfo? offer) {
+    final hadPrior = ref.watch(hadPriorProProvider);
+    return [
+      if (hadPrior) ...[
+        const _WelcomeBackCard(),
+        const SizedBox(height: KuberSpacing.lg),
+      ],
+      const _SellHero(),
+      const SizedBox(height: KuberSpacing.xl),
+      if (offer != null && offer.hasIntroBenefit) ...[
+        _OfferBadge(offer: offer),
+        const SizedBox(height: KuberSpacing.xl),
+      ],
+      _sectionLabel('CHOOSE A PLAN'),
+      const SizedBox(height: KuberSpacing.sm),
+      ..._planCards(offer),
+      const SizedBox(height: KuberSpacing.xl),
+      _sectionTitle('What you get with Pro'),
+      const SizedBox(height: KuberSpacing.sm),
+      const KuberComparisonTable(rows: kProComparisonRows),
+      const SizedBox(height: KuberSpacing.xl),
+      const _TipJarSection(),
+      const SizedBox(height: KuberSpacing.xl),
+      const _TrustFooter(),
+    ];
+  }
 
-                      if (!isManaging) ...[
-                        ..._featureClusters(cs),
-                        const SizedBox(height: KuberSpacing.xl),
-                      ],
+  // ── Manage mode (paid / Play trial / promo) ─────────────────────────────
+  List<Widget> _manageBody(KuberProState proState) {
+    return [
+      PaywallManageSection(proState: proState),
+      const SizedBox(height: KuberSpacing.xl),
+      _sectionTitle('What Pro includes'),
+      const SizedBox(height: KuberSpacing.sm),
+      const KuberComparisonTable(rows: kProComparisonRows),
+    ];
+  }
 
-                      if (isManaging)
-                        PaywallManageSection(proState: proState)
-                      else ...[
-                        Text(
-                          'Choose a plan',
-                          style: localeFont(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: KuberSpacing.md),
-                        // Loading / error / ready states for the pricing cards,
-                        // gated on the Play Billing query (billing_ui_state).
-                        // While products load we show the pricing skeleton;
-                        // when Play is unreachable AND we have no cached price
-                        // we show a retry state; otherwise real cards, priced
-                        // from the last-known Play price (cached), falling back
-                        // to the configured amount.
-                        if (productsLoading)
-                          const PaywallPricingSkeleton()
-                        else if (productsError && cachedPrices.isEmpty)
-                          PaywallProductsErrorState(
-                            onRetry: () => ref
-                                .read(purchaseServiceProvider)
-                                .loadProducts(kAllProductIds),
-                          )
-                        else ...[
-                          _PricingCard(
-                            plan: ProPlan.monthly,
-                            title: 'Monthly',
-                            price: cachedPrices[kProMonthlyId] ?? '₹119',
-                            priceSuffix: '/month',
-                            caption: 'Try Pro month by month',
-                            isTrial: proState.isTrial,
-                            onSelect: () =>
-                                _purchase(context, ref, ProPlan.monthly),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          _PricingCard(
-                            plan: ProPlan.yearly,
-                            title: 'Yearly',
-                            price: cachedPrices[kProYearlyId] ?? '₹1,099',
-                            priceSuffix: '/year',
-                            caption: '₹92/month',
-                            highlighted: true,
-                            isTrial: proState.isTrial,
-                            onSelect: () =>
-                                _purchase(context, ref, ProPlan.yearly),
-                          ),
-                          const SizedBox(height: KuberSpacing.sm),
-                          _PricingCard(
-                            plan: ProPlan.lifetime,
-                            title: 'Lifetime',
-                            price: cachedPrices[kProLifetimeId] ?? '₹2,199',
-                            priceSuffix: ' once',
-                            caption: 'Pay once, use forever',
-                            isTrial: proState.isTrial,
-                            onSelect: () =>
-                                _purchase(context, ref, ProPlan.lifetime),
-                          ),
-                        ],
-                        const SizedBox(height: KuberSpacing.xl),
-                      ],
+  // ── Grandfathered legacy trial (manage-lite + sell plans) ───────────────
+  List<Widget> _grandfatheredBody(KuberProState proState) {
+    return [
+      _LegacyTrialCard(proState: proState),
+      const SizedBox(height: KuberSpacing.lg),
+      _sectionLabel('SUBSCRIBE TO KEEP PRO'),
+      const SizedBox(height: KuberSpacing.sm),
+      ..._planCards(ref.watch(subscriptionOffersProvider)[kProYearlyId]),
+      const SizedBox(height: KuberSpacing.xl),
+      _sectionTitle('What you get with Pro'),
+      const SizedBox(height: KuberSpacing.sm),
+      const KuberComparisonTable(rows: kProComparisonRows),
+    ];
+  }
 
-                      // Centered as a block, but the text within is left-aligned
-                      // so a wrap to a second line reads cleanly.
-                      Center(
-                        child: Text(
-                          'No account. No cloud. Cancel anytime through '
-                          'Google Play.',
-                          textAlign: TextAlign.left,
-                          style: localeFont(
-                              fontSize: 11.5, color: cs.onSurfaceVariant),
-                        ),
-                      ),
-                      const SizedBox(height: KuberSpacing.sm),
-                      if (!isManaging)
-                        Center(
-                          child: productsLoading
-                              ? const RestorePurchasesLinkLoading()
-                              : const RestorePurchasesLink(),
-                        ),
-                    ]),
+  // ── Plan cards (radio) ──────────────────────────────────────────────────
+  List<Widget> _planCards(SubscriptionOfferInfo? yearlyOffer) {
+    final loading = ref.watch(productsLoadingProvider);
+    final error = ref.watch(productsErrorProvider);
+    final prices = ref.watch(cachedProductPricesProvider);
+
+    if (loading) return [const PaywallPricingSkeleton()];
+    if (error && prices.isEmpty) {
+      return [
+        PaywallProductsErrorState(
+          onRetry: () =>
+              ref.read(purchaseServiceProvider).loadProducts(kAllProductIds),
+        ),
+      ];
+    }
+
+    final yearlyBenefit = (yearlyOffer?.hasIntroBenefit ?? false)
+        ? '1 year free, then ${_price(ProPlan.yearly, prices)}/yr'
+        : 'Save 23% vs monthly';
+
+    return [
+      _PlanCard(
+        plan: ProPlan.monthly,
+        title: 'Monthly',
+        price: _price(ProPlan.monthly, prices),
+        suffix: '/mo',
+        benefit: 'Try Pro month by month',
+        selected: _selected == ProPlan.monthly,
+        onTap: () => setState(() => _selected = ProPlan.monthly),
+      ),
+      const SizedBox(height: KuberSpacing.sm),
+      _PlanCard(
+        plan: ProPlan.yearly,
+        title: 'Yearly',
+        price: _price(ProPlan.yearly, prices),
+        suffix: '/yr',
+        benefit: yearlyBenefit,
+        benefitAccent: yearlyOffer?.hasIntroBenefit ?? false,
+        tag: _PlanTag.bestValue,
+        selected: _selected == ProPlan.yearly,
+        onTap: () => setState(() => _selected = ProPlan.yearly),
+      ),
+      const SizedBox(height: KuberSpacing.sm),
+      _PlanCard(
+        plan: ProPlan.lifetime,
+        title: 'Lifetime',
+        price: _price(ProPlan.lifetime, prices),
+        suffix: '',
+        benefit: 'Pay once, use forever',
+        tag: _PlanTag.payOnce,
+        selected: _selected == ProPlan.lifetime,
+        onTap: () => setState(() => _selected = ProPlan.lifetime),
+      ),
+    ];
+  }
+
+  Widget _continueButton(SubscriptionOfferInfo? yearlyOffer) {
+    final prices = ref.watch(cachedProductPricesProvider);
+    final price = _price(_selected, prices);
+    final label = switch (_selected) {
+      ProPlan.monthly => 'Continue with Monthly · $price/mo',
+      ProPlan.yearly => (yearlyOffer?.hasIntroBenefit ?? false)
+          ? 'Start free year · then $price/yr'
+          : 'Continue with Yearly · $price/yr',
+      ProPlan.lifetime => 'Continue with Lifetime · $price',
+    };
+    return AppButton(
+      label: label,
+      type: AppButtonType.primary,
+      fullWidth: true,
+      height: 48,
+      onPressed: () => ref
+          .read(purchaseServiceProvider)
+          .buyProduct(productIdForPlan(_selected)),
+    );
+  }
+
+  String _price(ProPlan p, Map<String, String> cached) => switch (p) {
+        ProPlan.monthly => cached[kProMonthlyId] ?? '₹119',
+        ProPlan.yearly => cached[kProYearlyId] ?? '₹1,099',
+        ProPlan.lifetime => cached[kProLifetimeId] ?? '₹2,199',
+      };
+
+  void _openPlaySubscriptions() {
+    final sku = ref.read(kuberProStateProvider).plan;
+    final skuId = sku != null ? productIdForPlan(sku) : null;
+    final uri = skuId != null
+        ? 'https://play.google.com/store/account/subscriptions'
+            '?sku=$skuId&package=$_kAndroidPackage'
+        : 'https://play.google.com/store/account/subscriptions';
+    launchUrl(Uri.parse(uri), mode: LaunchMode.externalApplication);
+  }
+
+  Widget _sectionLabel(String text) {
+    final cs = Theme.of(context).colorScheme;
+    return Text(
+      text,
+      style: localeFont(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: cs.onSurfaceVariant,
+        letterSpacing: 1.0,
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String text) {
+    final cs = Theme.of(context).colorScheme;
+    return Text(
+      text,
+      style: localeFont(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: cs.onSurface,
+      ),
+    );
+  }
+}
+
+/// Contained primary radial glow blended into the page background near the top,
+/// echoing the Ask Kuber welcome view. A static gradient fill (no ticker, no
+/// `BoxShadow`), so every card on top stays flat and legible.
+class _AmbientGlow extends StatelessWidget {
+  const _AmbientGlow();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final peak = dark ? 0.30 : 0.17;
+    final mid = dark ? 0.07 : 0.045;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(0, -0.92),
+          radius: 0.9,
+          colors: [
+            cs.primary.withValues(alpha: peak),
+            cs.primary.withValues(alpha: mid),
+            cs.primary.withValues(alpha: 0.0),
+          ],
+          stops: const [0.0, 0.42, 0.66],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Sell-mode pieces ────────────────────────────────────────────────────────
+
+class _SellHero extends StatelessWidget {
+  const _SellHero();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(KuberRadius.sm),
+                ),
+                child: Icon(Icons.workspace_premium_rounded,
+                    color: cs.primary, size: 19),
+              ),
+              const SizedBox(width: KuberSpacing.md),
+              Expanded(
+                child: Text(
+                  'Everything Kuber, unlocked.',
+                  style: localeFont(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.md),
+          Text(
+            'Support development. Get every feature. No accounts, no cloud, '
+            'still fully offline.',
+            style: localeFont(
+              fontSize: 12.5,
+              color: cs.onSurfaceVariant,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.md),
+          Row(
+            children: const [
+              _TrustChip(icon: Icons.wifi_off_rounded, label: 'Offline'),
+              SizedBox(width: KuberSpacing.lg),
+              _TrustChip(icon: Icons.lock_outline_rounded, label: 'Private'),
+              SizedBox(width: KuberSpacing.lg),
+              _TrustChip(
+                  icon: Icons.person_off_outlined, label: 'No accounts'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _TrustChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 15, color: cs.onSurfaceVariant),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: localeFont(
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WelcomeBackCard extends StatelessWidget {
+  const _WelcomeBackCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.tertiary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.tertiary),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.waving_hand_rounded, size: 20, color: cs.tertiary),
+          const SizedBox(width: KuberSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Welcome back',
+                  style: localeFont(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  'Resubscribe to continue where you left off. Your data is '
+                  'still safe on this device.',
+                  style: localeFont(
+                    fontSize: 12.5,
+                    color: cs.onSurfaceVariant,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -285,163 +478,134 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen>
       ),
     );
   }
+}
 
-  List<Widget> _featureClusters(ColorScheme cs) {
-    final clusters = <String, List<(IconData, String, String)>>{
-      'Automation': [
-        (Icons.sms_outlined, 'SMS Import', 'Auto-fill transactions from bank SMS'),
-        (Icons.backup_outlined, 'Automatic Backups', 'Scheduled, hands-off backups'),
-        (Icons.notifications_active_outlined, 'Reminders', 'Never miss a bill or EMI'),
-      ],
-      'Intelligence': [
-        (Icons.auto_awesome_rounded, 'Unlimited Ask Kuber', 'No weekly message cap'),
-        (Icons.insert_chart_outlined_rounded, 'Advanced Analytics', 'Deeper trends and breakdowns'),
-        (Icons.auto_stories_rounded, 'Money Stories archive', 'Revisit every past story'),
-      ],
-      'Notes': [
-        (Icons.sticky_note_2_outlined, 'Unlimited Kuber Notes', 'No 2-note limit'),
-      ],
-      'Polish': [
-        (Icons.currency_exchange_rounded, 'Multi-currency', 'Track more than one currency'),
-        (Icons.palette_outlined, 'Custom themes', 'Make Kuber look like yours'),
-        (Icons.widgets_outlined, 'Multiple widgets', 'More home-screen widgets'),
-      ],
-    };
+class _LegacyTrialCard extends StatelessWidget {
+  final KuberProState proState;
+  const _LegacyTrialCard({required this.proState});
 
-    final widgets = <Widget>[];
-    clusters.forEach((title, items) {
-      widgets.add(
-        Text(
-          title.toUpperCase(),
-          style: localeFont(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.0,
-          ),
-        ),
-      );
-      widgets.add(const SizedBox(height: KuberSpacing.sm));
-      widgets.add(
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final warning = context.kuberColors.warning;
+    final endsLabel = proState.trialEndsAt != null
+        ? 'Access ends on ${_shortDate(proState.trialEndsAt!)}'
+        : 'Your legacy trial is ending soon';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
         Container(
+          padding: const EdgeInsets.symmetric(
+              vertical: KuberSpacing.xl, horizontal: KuberSpacing.lg),
           decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            color: warning.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(KuberRadius.lg),
+            border: Border.all(color: warning),
           ),
           child: Column(
             children: [
-              for (var i = 0; i < items.length; i++) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                    vertical: KuberSpacing.md,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(KuberRadius.sm),
-                        ),
-                        child: Icon(items[i].$1, size: 17, color: cs.primary),
-                      ),
-                      const SizedBox(width: KuberSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              items[i].$2,
-                              style: localeFont(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                            Text(
-                              items[i].$3,
-                              style: localeFont(
-                                fontSize: 12,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: warning.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
                 ),
-                if (i != items.length - 1) Divider(height: 1, color: cs.outline),
-              ],
+                child: Icon(Icons.schedule_rounded, color: warning, size: 26),
+              ),
+              const SizedBox(height: KuberSpacing.md),
+              Text(
+                'You\'re on a legacy trial',
+                style: localeFont(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                endsLabel,
+                style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+              ),
             ],
           ),
         ),
-      );
-      widgets.add(const SizedBox(height: KuberSpacing.xl));
-    });
-    return widgets;
-  }
-
-  void _purchase(BuildContext context, WidgetRef ref, ProPlan plan) {
-    // Kicks off the native Play Billing sheet. Entitlement, the success sheet,
-    // and every failure snackbar are handled centrally by PurchaseService's
-    // purchase-stream listener — the result can arrive after this screen is
-    // gone (a pending UPI payment), so nothing here awaits the outcome.
-    ref.read(purchaseServiceProvider).buyProduct(productIdForPlan(plan));
+        const SizedBox(height: KuberSpacing.md),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline_rounded,
+                size: 16, color: cs.onSurfaceVariant),
+            const SizedBox(width: KuberSpacing.sm),
+            Expanded(
+              child: Text(
+                'Legacy trial from an earlier version. No card required.',
+                style: localeFont(
+                  fontSize: 12,
+                  color: cs.onSurfaceVariant,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
 
-class _PricingCard extends StatelessWidget {
+enum _PlanTag { none, bestValue, payOnce }
+
+class _PlanCard extends StatelessWidget {
   final ProPlan plan;
   final String title;
   final String price;
-  final String priceSuffix;
-  final String caption;
-  final bool highlighted;
-  final bool isTrial;
-  final VoidCallback onSelect;
+  final String suffix;
+  final String benefit;
+  final bool benefitAccent;
+  final _PlanTag tag;
+  final bool selected;
+  final VoidCallback onTap;
 
-  const _PricingCard({
+  const _PlanCard({
     required this.plan,
     required this.title,
     required this.price,
-    required this.priceSuffix,
-    required this.caption,
-    required this.isTrial,
-    required this.onSelect,
-    this.highlighted = false,
+    required this.suffix,
+    required this.benefit,
+    required this.selected,
+    required this.onTap,
+    this.benefitAccent = false,
+    this.tag = _PlanTag.none,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return InkWell(
       borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: onSelect,
+      onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.all(KuberSpacing.md),
         decoration: BoxDecoration(
-          // The recommended card gets a SUBTLE primary tint (~9% alpha) but
-          // keeps the neutral outline like every other row — the "MOST
-          // POPULAR" badge already marks it, so a colored border would be
-          // redundant emphasis.
-          color: highlighted
+          color: selected
               ? cs.primary.withValues(alpha: 0.09)
               : cs.surfaceContainer,
           borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          border: Border.all(color: selected ? cs.primary : cs.outline),
         ),
         child: Row(
           children: [
+            _Radio(selected: selected),
+            const SizedBox(width: KuberSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    spacing: KuberSpacing.sm,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         title,
@@ -451,70 +615,314 @@ class _PricingCard extends StatelessWidget {
                           color: cs.onSurface,
                         ),
                       ),
-                      if (highlighted) ...[
-                        const SizedBox(width: KuberSpacing.sm),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            borderRadius: BorderRadius.circular(KuberRadius.sm),
-                          ),
-                          child: Text(
-                            'MOST POPULAR',
-                            style: localeFont(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                      if (tag != _PlanTag.none) _tagChip(cs),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
-                    caption,
+                    benefit,
                     style: localeFont(
                       fontSize: 12,
-                      color: cs.onSurfaceVariant,
+                      fontWeight: benefitAccent ? FontWeight.w600 : FontWeight.w400,
+                      color: benefitAccent ? cs.primary : cs.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: KuberSpacing.sm),
             RichText(
               text: TextSpan(
                 children: [
                   TextSpan(
                     text: price,
                     style: localeFont(
-                      fontSize: 20,
+                      fontSize: 19,
                       fontWeight: FontWeight.w800,
                       color: cs.onSurface,
                     ),
                   ),
-                  TextSpan(
-                    text: priceSuffix,
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant,
+                  if (suffix.isNotEmpty)
+                    TextSpan(
+                      text: suffix,
+                      style: localeFont(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: cs.onSurfaceVariant,
             ),
           ],
         ),
       ),
     );
   }
+
+  Widget _tagChip(ColorScheme cs) {
+    if (tag == _PlanTag.bestValue) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: cs.primary,
+          borderRadius: BorderRadius.circular(KuberRadius.sm),
+        ),
+        child: Text(
+          'BEST VALUE',
+          style: localeFont(
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(KuberRadius.sm),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Text(
+        'PAY ONCE',
+        style: localeFont(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+          color: cs.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+}
+
+class _Radio extends StatelessWidget {
+  final bool selected;
+  const _Radio({required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? cs.primary : cs.outlineVariant,
+          width: 2,
+        ),
+      ),
+      child: selected
+          ? Center(
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: cs.primary,
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+}
+
+class _TipJarSection extends StatelessWidget {
+  const _TipJarSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Not ready for Pro? Support Kuber.',
+          style: localeFont(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'One-time thanks. No subscription, no unlocks. Just fuel for '
+          'development.',
+          style: localeFont(
+            fontSize: 12.5,
+            color: cs.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.md),
+        const BuyMeCoffeeButton(),
+      ],
+    );
+  }
+}
+
+class _TrustFooter extends StatelessWidget {
+  const _TrustFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        Text(
+          'Managed by Google Play. Cancel anytime in Play Store. Restore works '
+          'across your devices.',
+          textAlign: TextAlign.center,
+          style: localeFont(
+            fontSize: 11.5,
+            color: cs.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: KuberSpacing.sm),
+        Consumer(
+          builder: (context, ref, _) => Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () => restorePurchases(context, ref),
+                child: Text(
+                  'Restore purchases',
+                  style: localeFont(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: cs.primary,
+                  ),
+                ),
+              ),
+              Text('·', style: localeFont(color: cs.onSurfaceVariant)),
+              TextButton(
+                onPressed: () => showRedeemPromoCodeSheet(context),
+                child: Text(
+                  'Redeem promo code',
+                  style: localeFont(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: cs.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Bottom bar hosting the sticky Continue button (sell + grandfathered modes).
+class _StickyContinue extends StatelessWidget {
+  final Widget child;
+  const _StickyContinue({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        border: Border(top: BorderSide(color: cs.outline)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            KuberSpacing.lg,
+            KuberSpacing.md,
+            KuberSpacing.lg,
+            KuberSpacing.md,
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Display-only badge above the plan cards describing an active launch offer,
+/// e.g. "Get 1 year free · Then ₹1,099/year. Applies at checkout." The discount
+/// is applied by attaching the offer token when Yearly is purchased; Play does
+/// not expose the offer's calendar end date, so no "ends on" line is shown.
+class _OfferBadge extends StatelessWidget {
+  final SubscriptionOfferInfo offer;
+  const _OfferBadge({required this.offer});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final first = offer.firstPhase;
+    final recurring = offer.recurringPhase;
+    final main = first.isFree
+        ? 'Get ${first.durationLabel} free'
+        : '${first.formattedPrice} for ${first.durationLabel}';
+    final sub =
+        'Then ${recurring.formattedPrice}/${recurring.periodLabel}. Applies at '
+        'checkout.';
+
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.md),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.primary),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.local_offer_rounded, size: 18, color: cs.primary),
+          const SizedBox(width: KuberSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'LAUNCH OFFER',
+                  style: localeFont(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  main,
+                  style: localeFont(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                Text(
+                  sub,
+                  style: localeFont(
+                    fontSize: 12,
+                    color: cs.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _shortDate(DateTime d) {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  return '${d.day} ${months[d.month - 1]} ${d.year}';
 }

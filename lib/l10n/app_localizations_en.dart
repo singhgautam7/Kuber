@@ -2400,7 +2400,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreManageTitle => 'Manage';
 
   @override
-  String get moreToolsTitle => 'Tools';
+  String get moreToolsTitle => 'Signature';
 
   @override
   String get moreAppTitle => 'App';

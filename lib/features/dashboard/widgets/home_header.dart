@@ -18,8 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-// PAYMENT-HIDDEN (KYC pending): restore with the PremiumHomeButton below.
-// import '../../pro/home/premium_home_button.dart';
+import '../../pro/home/premium_home_button.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
 
@@ -50,10 +49,7 @@ class HomeHeader extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 0),
           child: Row(
             children: [
-              // PAYMENT-HIDDEN (KYC pending): the Pro status button is hidden
-              // while Play Billing KYC is pending. Restore `PremiumHomeButton`
-              // here when re-enabling payments (see specs/pro-gating-disabled.md).
-              // const PremiumHomeButton(),
+              const PremiumHomeButton(),
               const Spacer(),
               _HeaderIconButton(
                 key: TutorialStepKeys.privacyModeIcon,

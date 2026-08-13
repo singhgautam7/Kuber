@@ -2434,7 +2434,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get moreManageTitle => 'மேலாண்மை';
 
   @override
-  String get moreToolsTitle => 'கருவிகள்';
+  String get moreToolsTitle => 'சிக்னேச்சர்';
 
   @override
   String get moreAppTitle => 'செயலி';

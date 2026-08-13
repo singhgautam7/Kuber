@@ -2408,7 +2408,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get moreManageTitle => 'ব্যবস্থাপনা';
 
   @override
-  String get moreToolsTitle => 'টুলস';
+  String get moreToolsTitle => 'সিগনেচার';
 
   @override
   String get moreAppTitle => 'অ্যাপ';

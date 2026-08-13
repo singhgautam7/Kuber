@@ -2402,7 +2402,7 @@ class AppLocalizationsMr extends AppLocalizations {
   String get moreManageTitle => 'व्यवस्थापन';
 
   @override
-  String get moreToolsTitle => 'साधने';
+  String get moreToolsTitle => 'सिग्नेचर';
 
   @override
   String get moreAppTitle => 'अॅप';

@@ -6,6 +6,7 @@ import '../../features/settings/providers/settings_provider.dart';
 import '../../core/utils/icon_mapper.dart';
 import '../../core/models/info_config.dart';
 import '../../core/models/overflow_config.dart';
+import '../../core/services/shortcut_pin_service.dart';
 import '../../core/utils/locale_font.dart';
 import 'kuber_info_bottom_sheet.dart';
 
@@ -15,6 +16,11 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final bool showBack;
   final double? horizontalPadding;
   final KuberOverflowConfig? overflowConfig;
+
+  /// When set, adds an "Add to home screen" item to the overflow menu that pins
+  /// a launcher shortcut for the current screen. Null (default) hides it, so
+  /// existing app bars are unchanged.
+  final PinShortcutSpec? pinShortcut;
 
   const KuberAppBar({
     super.key,
@@ -27,6 +33,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.overflowConfig,
     this.onBack,
     this.showBrand = true,
+    this.pinShortcut,
   });
 
   final bool showHome;
@@ -49,6 +56,18 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final cs = Theme.of(context).colorScheme;
     final currency = ref.watch(currencyProvider);
     final padding = horizontalPadding ?? KuberSpacing.lg;
+
+    // Merge any configured overflow items with the optional "Add to home
+    // screen" pin action, so a screen can have either or both.
+    final overflowItems = <KuberOverflowItem>[
+      ...?overflowConfig?.items,
+      if (pinShortcut != null)
+        KuberOverflowItem(
+          icon: Icons.add_to_home_screen_rounded,
+          label: 'Add to home screen',
+          onTap: () => requestPinShortcut(context, pinShortcut!),
+        ),
+    ];
 
     return SafeArea(
       bottom: false,
@@ -124,7 +143,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: 4),
               ],
-              if (overflowConfig != null && overflowConfig!.items.isNotEmpty) ...[
+              if (overflowItems.isNotEmpty) ...[
                 PopupMenuButton<KuberOverflowItem>(
                   onSelected: (item) => item.onTap(),
                   offset: const Offset(0, 40),
@@ -134,7 +153,7 @@ class KuberAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     borderRadius: BorderRadius.circular(KuberRadius.md),
                     side: BorderSide(color: cs.outline),
                   ),
-                  itemBuilder: (ctx) => overflowConfig!.items.map((item) {
+                  itemBuilder: (ctx) => overflowItems.map((item) {
                     final color = item.isDestructive ? cs.error : cs.onSurface;
                     return PopupMenuItem<KuberOverflowItem>(
                       value: item,

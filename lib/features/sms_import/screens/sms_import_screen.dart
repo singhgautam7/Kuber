@@ -9,6 +9,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../core/models/overflow_config.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../data/sms_transaction.dart';
@@ -273,6 +274,13 @@ class _SmsImportScreenState extends ConsumerState<SmsImportScreen> {
       showBack: true,
       showHome: true,
       title: '',
+      pinShortcut: const PinShortcutSpec(
+        shortcutId: 'sms_import',
+        shortLabel: 'SMS Import',
+        longLabel: 'Import from SMS',
+        iconDrawable: 'ic_shortcut_sms',
+        deepLink: 'kuber://app/sms-import',
+      ),
       infoConfig: InfoConstants.smsImport,
       onBack: _selectionMode ? _exitSelection : null,
       overflowConfig: _selectionMode

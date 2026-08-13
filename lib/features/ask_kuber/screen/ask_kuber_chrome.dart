@@ -2,9 +2,20 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import 'kuber_mark.dart';
+
+/// Pin spec for the Ask Kuber home-screen shortcut (overflow > Add to home
+/// screen). Mirrors the static `ask_kuber` shortcut in shortcuts.xml.
+const _kAskKuberPinSpec = PinShortcutSpec(
+  shortcutId: 'ask_kuber',
+  shortLabel: 'Ask Kuber',
+  longLabel: 'Ask Kuber',
+  iconDrawable: 'ic_shortcut_ask',
+  deepLink: 'kuber://app/ask-kuber',
+);
 
 /// Ask Kuber top bar: the pulsing Kuber mark, the title, and the overflow menu
 /// (How it works / Copy last response / Clear chat).
@@ -64,17 +75,27 @@ class AskKuberHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(KuberRadius.md),
                 side: BorderSide(color: cs.outline),
               ),
-              onSelected: (v) => switch (v) {
-                0 => onHowItWorks(),
-                1 => onCopy(),
-                2 => onFeedback(),
-                _ => onClear(),
+              onSelected: (v) {
+                switch (v) {
+                  case 0:
+                    onHowItWorks();
+                  case 1:
+                    onCopy();
+                  case 2:
+                    onFeedback();
+                  case 4:
+                    requestPinShortcut(context, _kAskKuberPinSpec);
+                  default:
+                    onClear();
+                }
               },
               itemBuilder: (context) => [
                 _item(cs, 0, Icons.info_outline_rounded, 'How it works'),
                 _item(cs, 1, Icons.content_copy_rounded, 'Copy last response',
                     enabled: canCopy),
                 _item(cs, 2, Icons.feedback_outlined, 'Share Feedback'),
+                _item(cs, 4, Icons.add_to_home_screen_rounded,
+                    'Add to home screen'),
                 const PopupMenuDivider(height: 9),
                 _item(cs, 3, Icons.delete_outline_rounded, 'Clear chat',
                     danger: true),

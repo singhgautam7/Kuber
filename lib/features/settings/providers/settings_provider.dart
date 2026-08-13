@@ -344,6 +344,18 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     _syncWidgetsForTheme();
   }
 
+  /// PRO-GATE: reverts a free user off a Pro accent family back to Kuber
+  /// Signature. Called when entitlement drops (a Pro user who selected an accent
+  /// family, then lapsed / had their trial end / was Force-Free'd in debug).
+  /// Signature and the light/dark mode are always free, so mode is untouched.
+  /// No-op when the user has Pro access or is already on Signature.
+  Future<void> reconcileThemeEntitlement({required bool hasProAccess}) async {
+    final cur = state.valueOrNull;
+    if (cur == null) return;
+    if (hasProAccess || cur.themeVariant == ThemeVariant.signature) return;
+    await setThemeVariant(ThemeVariant.signature);
+  }
+
   Timer? _widgetSyncDebounce;
 
   /// Pushes the new palette to the native home-screen widgets shortly after a

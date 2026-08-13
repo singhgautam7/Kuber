@@ -3,8 +3,6 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
@@ -16,15 +14,9 @@ import '../../dev/providers/dev_mode_provider.dart';
 import '../../tutorial/providers/tutorial_provider.dart';
 import '../../tutorial/providers/tutorial_sandbox_provider.dart';
 import '../../tutorial/services/tutorial_mock_data_service.dart';
-import '../../tutorial/models/tutorial_step_keys.dart';
-import '../../ask_kuber/screen/kuber_mark.dart';
-import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
-import '../../pro/feature_gates/gate_sheet_sms_import.dart';
-import '../../pro/feature_gates/gate_sheet_kuber_cards.dart';
-import '../../pro/feature_gates/pro_gate.dart';
-// PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
-// import '../../pro/more/more_premium_card.dart';
-// import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
+import '../../pro/more/more_premium_card.dart';
+import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
+import '../more_content.dart';
 import 'more_screen_modern.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -40,6 +32,9 @@ class MoreScreen extends ConsumerWidget {
   }
 }
 
+/// The classic ("simple") More layout: a uniform list of bordered sections.
+/// All content comes from [buildMoreSections] (the single source of truth in
+/// `more_content.dart`); this screen only maps each entry to a `_MenuItem`.
 class MoreScreenSimple extends ConsumerWidget {
   const MoreScreenSimple({super.key});
 
@@ -75,280 +70,28 @@ class MoreScreenSimple extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // PAYMENT-HIDDEN (KYC pending): Kuber Pro entry point hidden
-                // while Play Billing KYC is pending. Restore when re-enabling
-                // payments (see specs/pro-gating-disabled.md).
-                // const MorePremiumCardClassic(),
-                // const SizedBox(height: KuberSpacing.xl),
-                // Manage section
-                _MenuSection(
-                  title: context.l10n.moreManageTitle,
-                  items: [
-                    _MenuItem(
-                      icon: Icons.account_balance_wallet,
-                      label: context.l10n.menuAccounts,
-                      subtitle: context.l10n.menuAccountsDesc,
-                      onTap: () => context.push('/more/accounts'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.category,
-                      label: context.l10n.menuCategories,
-                      subtitle: context.l10n.menuCategoriesDesc,
-                      onTap: () => context.push('/more/categories'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.label_rounded,
-                      label: context.l10n.menuTags,
-                      subtitle: context.l10n.menuTagsDesc,
-                      onTap: () => context.push('/more/tags'),
-                    ),
-                    _MenuItem(
-                      key: TutorialStepKeys.moreBudgetsItem,
-                      icon: Icons.pie_chart_rounded,
-                      label: context.l10n.menuBudgets,
-                      subtitle: context.l10n.menuBudgetsDesc,
-                      onTap: () => context.push('/more/budgets'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.sync_rounded,
-                      label: context.l10n.menuRecurring,
-                      subtitle: context.l10n.menuRecurringDesc,
-                      onTap: () => context.push('/more/recurring'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.handshake,
-                      label: context.l10n.menuLedger,
-                      subtitle: context.l10n.menuLedgerDesc,
-                      onTap: () => context.push('/more/ledger'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.account_balance_outlined,
-                      label: context.l10n.menuLoans,
-                      subtitle: context.l10n.menuLoansDesc,
-                      onTap: () => context.push('/more/loans'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.show_chart,
-                      label: context.l10n.menuInvestments,
-                      subtitle: context.l10n.menuInvestmentsDesc,
-                      onTap: () => context.push('/more/investments'),
-                    ),
-                    // Reminders (English-only feature, like SMS import).
-                    _MenuItem(
-                      icon: Icons.notifications_active_outlined,
-                      label: 'Reminders',
-                      subtitle: 'Never miss anything money-related',
-                      onTap: () => context.push('/more/reminders'),
-                    ),
-                  ],
-                ),
-
+                const MorePremiumCardClassic(),
                 const SizedBox(height: KuberSpacing.xl),
-
-                // Tools section
-                _MenuSection(
-                  title: context.l10n.moreToolsTitle,
-                  items: [
-                    _MenuItem(
-                      key: TutorialStepKeys.moreAskKuberItem,
-                      icon: Icons.auto_awesome_rounded,
-                      label: context.l10n.menuAskKuber,
-                      subtitle: context.l10n.menuAskKuberDesc,
-                      iconWidget: const KuberMarkWidget(size: 20, bare: true),
-                      onTap: () => context.push('/more/ask-kuber'),
-                    ),
-                    // SMS import (English-only feature, like Ask Kuber).
-                    _MenuItem(
-                      icon: Icons.sms_outlined,
-                      label: 'Import from SMS',
-                      subtitle: 'Read bank SMS for transactions',
-                      onTap: () {
-                        if (proGate(context, ref, showSmsImportGateSheet)) {
-                          context.push('/more/sms-import');
-                        }
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.insert_chart_outlined_rounded,
-                      label: 'Advanced Analytics',
-                      subtitle: 'Deep analytical views of your finances',
-                      showProPill: true,
-                      onTap: () {
-                        if (proGate(
-                          context,
-                          ref,
-                          showAdvancedAnalyticsGateSheet,
-                        )) {
-                          context.push('/advanced-analytics');
-                        }
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.calculate_rounded,
-                      label: context.l10n.menuCalculators,
-                      subtitle: context.l10n.menuCalculatorsDesc,
-                      onTap: () => context.push('/more/tools'),
-                    ),
-                    // Kuber Notes + Upcoming Events (English-only features).
-                    _MenuItem(
-                      icon: Icons.sticky_note_2_outlined,
-                      label: 'Kuber Notes',
-                      subtitle: 'Jot expenses and do quick math',
-                      onTap: () => context.push('/more/notes'),
-                    ),
-                    // Kuber Cards, directly after Notes. Pro-gated entry.
-                    _MenuItem(
-                      icon: Icons.credit_card_rounded,
-                      label: 'Kuber Cards',
-                      subtitle: 'Encrypted vault to save all your cards',
-                      onTap: () {
-                        if (proGate(context, ref, showKuberCardsGateSheet)) {
-                          context.push('/cards');
-                        }
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.flash_on_rounded,
-                      label: 'Quick Add',
-                      subtitle: 'Type or speak to log transactions',
-                      onTap: () => context.push('/quick-add'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.calendar_month_rounded,
-                      label: 'Upcoming Events',
-                      subtitle: 'Everything coming up, in one place',
-                      onTap: () => context.push('/more/upcoming-events'),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // App section
-                _MenuSection(
-                  title: context.l10n.moreAppTitle,
-                  items: [
-                    _MenuItem(
-                      icon: Icons.settings,
-                      label: context.l10n.menuSettings,
-                      subtitle: context.l10n.menuSettingsDesc,
-                      onTap: () => context.push('/more/settings'),
-                    ),
-                    _MenuItem(
-                      key: TutorialStepKeys.moreDataItem,
-                      icon: Icons.storage_rounded,
-                      label: context.l10n.menuData,
-                      subtitle: context.l10n.menuDataDesc,
-                      onTap: () => context.push('/more/data'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.auto_stories_rounded,
-                      label: context.l10n.menuStoriesArchive,
-                      subtitle: context.l10n.menuStoriesArchiveDesc,
-                      onTap: () => context.push('/more/stories-archive'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.widgets_outlined,
-                      label: context.l10n.menuWidgets,
-                      subtitle: context.l10n.menuWidgetsDesc,
-                      onTap: () => context.push('/more/widgets-gallery'),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // Tutorial Section
-                _MenuSection(
-                  title: context.l10n.moreTutorialTitle,
-                  items: [
-                    _MenuItem(
-                      icon: Icons.school_rounded,
-                      label: context.l10n.menuTutorial,
-                      subtitle: context.l10n.menuTutorialDesc,
-                      onTap: () => launchTutorialFromMore(context, ref),
-                    ),
-                    _MenuItem(
-                      icon: Icons.auto_stories_rounded,
-                      label: context.l10n.menuWelcomeTour,
-                      subtitle: context.l10n.menuWelcomeTourDesc,
-                      onTap: () => context.push('/onboarding?replay=true'),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // Contact Us section
-                _MenuSection(
-                  title: context.l10n.moreHelpUsTitle,
-                  items: [
-                    _MenuItem(
-                      icon: Icons.star_rate_rounded,
-                      label: context.l10n.menuRateUs,
-                      subtitle: context.l10n.menuRateUsDesc,
-                      onTap: () {
-                        launchUrl(
-                          Uri.parse(
-                            'https://play.google.com/store/apps/details?id=com.grs.kuber',
-                          ),
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.share_rounded,
-                      label: context.l10n.menuShareApp,
-                      subtitle: context.l10n.menuShareAppDesc,
-                      onTap: () {
-                        SharePlus.instance.share(
-                          ShareParams(text: context.l10n.shareMessage),
-                        );
-                      },
-                    ),
-                    _MenuItem(
-                      icon: Icons.feedback,
-                      label: context.l10n.menuFeedback,
-                      subtitle: context.l10n.menuFeedbackDesc,
-                      onTap: () => context.push('/more/feedback'),
-                    ),
-                  ],
-                ),
-
-                // PAYMENT-HIDDEN (KYC pending): Buy Me a Coffee support button
-                // hidden while Play Billing KYC is pending. Restore the button
-                // and its spacing when re-enabling payments
-                // (see specs/pro-gating-disabled.md).
-                // const SizedBox(height: KuberSpacing.lg),
-                // const BuyMeCoffeeButton(),
-                const SizedBox(height: KuberSpacing.xl),
-
-                // About section
-                _MenuSection(
-                  title: context.l10n.moreAboutTitle,
-                  items: [
-                    _MenuItem(
-                      icon: Icons.info_outline_rounded,
-                      label: context.l10n.menuAbout,
-                      subtitle: context.l10n.menuAboutDesc,
-                      onTap: () => context.pushNamed('about'),
-                    ),
-                    _MenuItem(
-                      icon: Icons.security_outlined,
-                      label: context.l10n.menuPermissions,
-                      subtitle: context.l10n.menuPermissionsDesc,
-                      onTap: () => context.pushNamed('permissions'),
-                    ),
-                    if (isDevMode)
-                      _MenuItem(
-                        icon: Icons.bug_report,
-                        label: context.l10n.menuDevTools,
-                        subtitle: context.l10n.menuDevToolsDesc,
-                        onTap: () => context.push('/more/dev-tools'),
-                      ),
-                  ],
-                ),
-
+                for (final section
+                    in buildMoreSections(context, ref, isDevMode: isDevMode)) ...[
+                  _MenuSection(
+                    title: section.title,
+                    items: [
+                      for (final e in section.entries)
+                        _MenuItem(
+                          key: e.tutorialKey,
+                          icon: e.icon,
+                          iconWidget: e.iconWidget,
+                          label: e.label,
+                          subtitle: e.subtitle,
+                          showProPill: e.proPill,
+                          onTap: e.onTap,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: KuberSpacing.xl),
+                ],
+                const BuyMeCoffeeButton(),
                 const SizedBox(height: KuberSpacing.xxl),
 
                 // Footer

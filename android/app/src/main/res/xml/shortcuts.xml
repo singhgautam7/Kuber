@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Shortcut order matters: Samsung One UI (and some other launchers) show only
+  the first 4 on long-press, in declared order. Keep the 4 most important first:
+  Add Transaction, Ask Kuber, Kuber Cards, Kuber Notes. History and Tools follow
+  for launchers that show more than 4.
+-->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
 
     <shortcut
@@ -10,18 +16,6 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:data="kuber://app/add-transaction" />
-        <categories android:name="android.shortcut.conversation" />
-    </shortcut>
-
-    <shortcut
-        android:shortcutId="view_transactions"
-        android:enabled="true"
-        android:shortcutShortLabel="@string/shortcut_history_short"
-        android:shortcutLongLabel="@string/shortcut_history_long"
-        android:icon="@drawable/ic_shortcut_history">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="kuber://app/history" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
@@ -38,14 +32,14 @@
     </shortcut>
 
     <shortcut
-        android:shortcutId="tools"
+        android:shortcutId="cards"
         android:enabled="true"
-        android:shortcutShortLabel="@string/shortcut_tools_short"
-        android:shortcutLongLabel="@string/shortcut_tools_long"
-        android:icon="@drawable/ic_shortcut_tools">
+        android:shortcutShortLabel="@string/shortcut_cards_short"
+        android:shortcutLongLabel="@string/shortcut_cards_long"
+        android:icon="@drawable/ic_shortcut_cards">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="kuber://app/tools" />
+            android:data="kuber://app/cards" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
@@ -62,14 +56,26 @@
     </shortcut>
 
     <shortcut
-        android:shortcutId="cards"
+        android:shortcutId="view_transactions"
         android:enabled="true"
-        android:shortcutShortLabel="@string/shortcut_cards_short"
-        android:shortcutLongLabel="@string/shortcut_cards_long"
-        android:icon="@drawable/ic_shortcut_cards">
+        android:shortcutShortLabel="@string/shortcut_history_short"
+        android:shortcutLongLabel="@string/shortcut_history_long"
+        android:icon="@drawable/ic_shortcut_history">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="kuber://app/cards" />
+            android:data="kuber://app/history" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="tools"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_tools_short"
+        android:shortcutLongLabel="@string/shortcut_tools_long"
+        android:icon="@drawable/ic_shortcut_tools">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="kuber://app/tools" />
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
 
