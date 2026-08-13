@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/breakpoints.dart';
 import '../../core/utils/l10n_ext.dart';
 import '../../core/constants/tools_l10n.dart';
+import '../../core/services/shortcut_pin_service.dart';
 import '../../shared/widgets/kuber_app_bar.dart';
 import '../../shared/widgets/kuber_page_header.dart';
 import 'saved/providers/recent_use_provider.dart';
@@ -53,7 +54,18 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               const SliverToBoxAdapter(
-                child: KuberAppBar(title: '', showBack: true, showHome: true),
+                child: KuberAppBar(
+                  title: '',
+                  showBack: true,
+                  showHome: true,
+                  pinShortcut: PinShortcutSpec(
+                    shortcutId: 'kuber_tools',
+                    shortLabel: 'Tools',
+                    longLabel: 'Calculators and Tools',
+                    iconDrawable: 'ic_shortcut_tools',
+                    deepLink: 'kuber://app/tools',
+                  ),
+                ),
               ),
             SliverToBoxAdapter(
               child: KuberPageHeader(

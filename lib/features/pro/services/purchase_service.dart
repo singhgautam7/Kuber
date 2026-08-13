@@ -3,10 +3,15 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+// Transitive with in_app_purchase; imported directly to attach a subscription
+// offer token to the purchase (GooglePlayPurchaseParam).
+// ignore: depend_on_referenced_packages
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 import '../../../core/router/app_router.dart';
 import '../paywall/billing_ui_state.dart';
 import '../paywall/pro_state.dart';
+import '../paywall/subscription_offer.dart';
 import '../purchase_states/purchase_failure_snackbar.dart';
 import '../purchase_states/purchase_success_sheet.dart';
 import '../support/support_success_sheets.dart';
@@ -67,7 +72,15 @@ class PurchaseService {
   final InAppPurchase _iap = InAppPurchase.instance;
 
   StreamSubscription<List<PurchaseDetails>>? _sub;
+
+  /// Best-pick product per id (the chosen offer for a subscription; the sole
+  /// entry for a one-time product). Drives the buy path and the price display.
   final Map<String, ProductDetails> _products = {};
+
+  /// Every ProductDetails Play returned per id. A subscription with a base plan
+  /// plus offers (free trial, launch promo) yields several entries sharing one
+  /// id — Play only ever includes offers the current user is eligible for.
+  final Map<String, List<ProductDetails>> _offers = {};
 
   bool _available = false;
   bool _initialized = false;
@@ -139,17 +152,41 @@ class PurchaseService {
 
     try {
       final resp = await _iap.queryProductDetails(ids);
-      for (final p in resp.productDetails) {
-        _products[p.id] = p;
-      }
       if (resp.notFoundIDs.isNotEmpty) {
         debugPrint('Kuber: products not found on Play: ${resp.notFoundIDs}');
       }
 
+      // Group the response by product id. A subscription returns one entry per
+      // base-plan/offer combination, so we can't keep just the last — we pick
+      // the best offer per id. Only the ids present in this response are
+      // touched, so a lazy single-id retry never wipes the others.
+      final byId = <String, List<ProductDetails>>{};
+      for (final p in resp.productDetails) {
+        (byId[p.id] ??= <ProductDetails>[]).add(p);
+      }
+      byId.forEach((id, list) {
+        _offers[id] = list;
+        _products[id] = pickBestSubscriptionOffer(list) ?? list.first;
+      });
+
+      // Publish the chosen subscription offers so the paywall can render the
+      // launch-offer badge and attach the offer token at purchase.
+      final offerInfos = <String, SubscriptionOfferInfo>{};
+      for (final id in kProProductIds) {
+        final info = offerInfoFrom(_products[id]);
+        if (info != null) offerInfos[id] = info;
+      }
+      _ref.read(subscriptionOffersProvider.notifier).state = offerInfos;
+
       // Persist last-known Pro-plan prices for the offline paywall fallback.
+      // For a subscription this is the RECURRING price (what the user pays after
+      // any free/intro phase), never the intro "Free" — the intro benefit is
+      // surfaced separately as the offer badge.
       final prices = <String, String>{
         for (final id in kProProductIds)
-          if (_products[id] != null) id: _products[id]!.price,
+          if (_products[id] != null)
+            id: offerInfos[id]?.recurringPhase.formattedPrice ??
+                _products[id]!.price,
       };
       if (prices.isNotEmpty) {
         await _ref.read(cachedProductPricesProvider.notifier).update(prices);
@@ -191,7 +228,7 @@ class PurchaseService {
       return;
     }
 
-    final param = PurchaseParam(productDetails: product);
+    final param = _purchaseParamFor(product, consumable: consumable);
     try {
       if (consumable) {
         // autoConsume (default true) makes Play consume the token for us, so
@@ -208,6 +245,27 @@ class PurchaseService {
             overlay: overlay,
           ));
     }
+  }
+
+  /// Builds the purchase params. For a subscription we must hand Play the
+  /// specific offer token, or the chosen offer's discount (a free trial, the
+  /// launch promo) won't apply — Play would fall back to the base plan. One-time
+  /// products (lifetime, support tips) carry no offer, so they use the plain
+  /// [PurchaseParam].
+  PurchaseParam _purchaseParamFor(
+    ProductDetails product, {
+    required bool consumable,
+  }) {
+    if (!consumable && product is GooglePlayProductDetails) {
+      final info = offerInfoFrom(product);
+      if (info != null) {
+        return GooglePlayPurchaseParam(
+          productDetails: product,
+          offerToken: info.offerToken,
+        );
+      }
+    }
+    return PurchaseParam(productDetails: product);
   }
 
   /// Shows a snackbar from the global purchase service, which only holds a
@@ -345,6 +403,17 @@ class PurchaseService {
         );
       }
     }
+  }
+
+  /// Best-effort detection of Play Billing's "item already owned" response
+  /// across plugin versions: the code/message is not a stable enum here, so we
+  /// match on the substring. A false negative simply falls back to the generic
+  /// "payment failed" snackbar, so this is safe.
+  bool _isAlreadyOwned(IAPError? error) {
+    if (error == null) return false;
+    final haystack =
+        '${error.code} ${error.message} ${error.details}'.toLowerCase();
+    return haystack.contains('already') && haystack.contains('own');
   }
 
   /// The real purchase timestamp when Play reports one, else now. On Android

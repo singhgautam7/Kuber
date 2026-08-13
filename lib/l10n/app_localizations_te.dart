@@ -2414,7 +2414,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get moreManageTitle => 'నిర్వహణ';
 
   @override
-  String get moreToolsTitle => 'సాధనాలు';
+  String get moreToolsTitle => 'సిగ్నేచర్';
 
   @override
   String get moreAppTitle => 'యాప్';

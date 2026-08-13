@@ -2421,7 +2421,7 @@ class AppLocalizationsKn extends AppLocalizations {
   String get moreManageTitle => 'ನಿರ್ವಹಣೆ';
 
   @override
-  String get moreToolsTitle => 'ಉಪಕರಣಗಳು';
+  String get moreToolsTitle => 'ಸಿಗ್ನೇಚರ್';
 
   @override
   String get moreAppTitle => 'ಅಪ್ಲಿಕೇಶನ್';

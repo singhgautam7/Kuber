@@ -2423,7 +2423,7 @@ class AppLocalizationsMl extends AppLocalizations {
   String get moreManageTitle => 'മാനേജ്മെന്റ്';
 
   @override
-  String get moreToolsTitle => 'ഉപകരണങ്ങൾ';
+  String get moreToolsTitle => 'സിഗ്നേച്ചർ';
 
   @override
   String get moreAppTitle => 'ആപ്പ്';

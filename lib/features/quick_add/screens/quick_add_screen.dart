@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/models/info_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -239,6 +240,13 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
               KuberAppBar(
                 showBack: true,
                 showBrand: false,
+                pinShortcut: const PinShortcutSpec(
+                  shortcutId: 'quick_add',
+                  shortLabel: 'Quick Add',
+                  longLabel: 'Quick Add',
+                  iconDrawable: 'ic_shortcut_quickadd',
+                  deepLink: 'kuber://app/quick-add',
+                ),
                 infoConfig: _infoConfig(),
               ),
               Expanded(

@@ -7,6 +7,9 @@ import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../pro/feature_gates/gate_sheet_themes.dart';
+import '../../pro/feature_gates/pro_gate.dart';
+import '../../pro/paywall/pro_state.dart';
 import '../providers/settings_provider.dart';
 import 'theme_family_icons.dart';
 
@@ -75,6 +78,13 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
 
   void _onVariantSelected(ThemeVariant variant) {
     if (variant == _selectedVariant) return;
+    // PRO-GATE: Kuber Signature (light + dark) is free; every other accent
+    // family is Pro. A free user tapping a Pro family gets the gate sheet and
+    // no theme change.
+    if (variant != ThemeVariant.signature &&
+        !proGate(context, ref, showThemesGateSheet)) {
+      return;
+    }
     HapticFeedback.selectionClick();
     setState(() => _selectedVariant = variant);
     ref.read(settingsProvider.notifier).setThemeVariant(variant);
@@ -117,6 +127,10 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
         (_selectedMode == _initialMode);
     final variants = ThemeVariant.values;
     final brightness = _previewBrightness;
+    // PRO-GATE: free users can pick only Kuber Signature; the other families
+    // show a lock affordance and route to the gate sheet on tap.
+    final hasPro =
+        ref.watch(kuberProStateProvider.select((s) => s.hasProAccess));
 
     return PopScope(
       onPopInvokedWithResult: (didPop, _) => _onPopInvoked(didPop),
@@ -176,6 +190,7 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
                         variant: variants[i],
                         brightness: brightness,
                         selected: variants[i] == _selectedVariant,
+                        locked: !hasPro && variants[i] != ThemeVariant.signature,
                         onTap: () => _onVariantSelected(variants[i]),
                       ),
                     ),
@@ -186,6 +201,8 @@ class _ThemeSheetState extends ConsumerState<ThemeSheet> {
                               variant: variants[i + 1],
                               brightness: brightness,
                               selected: variants[i + 1] == _selectedVariant,
+                              locked: !hasPro &&
+                                  variants[i + 1] != ThemeVariant.signature,
                               onTap: () => _onVariantSelected(variants[i + 1]),
                             )
                           : const SizedBox.shrink(),
@@ -206,6 +223,7 @@ class _FamilyPreviewCard extends StatelessWidget {
   final ThemeVariant variant;
   final Brightness brightness;
   final bool selected;
+  final bool locked;
   final VoidCallback onTap;
 
   const _FamilyPreviewCard({
@@ -213,6 +231,7 @@ class _FamilyPreviewCard extends StatelessWidget {
     required this.brightness,
     required this.selected,
     required this.onTap,
+    this.locked = false,
   });
 
   @override
@@ -223,7 +242,8 @@ class _FamilyPreviewCard extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      label: themeFamilyName(variant),
+      label: locked ? '${themeFamilyName(variant)}, Kuber Pro'
+          : themeFamilyName(variant),
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
@@ -259,7 +279,9 @@ class _FamilyPreviewCard extends StatelessWidget {
                     ),
                   ),
                   if (selected)
-                    Icon(Icons.check_circle_rounded, size: 16, color: t.primary),
+                    Icon(Icons.check_circle_rounded, size: 16, color: t.primary)
+                  else if (locked)
+                    Icon(Icons.lock_rounded, size: 14, color: t.textSecondary),
                 ],
               ),
               const SizedBox(height: 10),

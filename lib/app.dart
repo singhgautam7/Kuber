@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -135,8 +136,18 @@ class _KuberAppState extends ConsumerState<KuberApp>
       // the notifier hydrates from Isar (synchronous), then clear the
       // Pro-bootstrap gate that keeps the Settings card skeleton and the
       // hidden trial pill in their loading state.
-      ref.read(kuberProStateProvider);
+      final proState = ref.read(kuberProStateProvider);
       ref.read(proBootstrapLoadingProvider.notifier).state = false;
+
+      // PRO-GATE: heal a free user still persisted on a Pro accent family
+      // (selected before gating was re-enabled). One-shot; the runtime listener
+      // in build() covers later drops.
+      if (!proState.hasProAccess) {
+        await ref.read(settingsProvider.future);
+        await ref
+            .read(settingsProvider.notifier)
+            .reconcileThemeEntitlement(hasProAccess: false);
+      }
 
       await ref.read(purchaseServiceProvider).initialize();
     } catch (e, stack) {
@@ -415,6 +426,22 @@ class _KuberAppState extends ConsumerState<KuberApp>
       _lightTheme = AppTheme.light(locale, themeVariant);
       _darkTheme = AppTheme.dark(locale, themeVariant);
     }
+
+    // PRO-GATE: when Pro access drops mid-session (trial end, debug Force-Free),
+    // revert a Pro accent family back to free Kuber Signature. The cold-start
+    // case (a lapsed user still persisted on a Pro theme) is healed once in
+    // `_initPurchases`, since a listener without an immediate fire won't see a
+    // state that was already free on first build.
+    ref.listen<bool>(
+      kuberProStateProvider.select((s) => s.hasProAccess),
+      (prev, next) {
+        if (!next) {
+          ref
+              .read(settingsProvider.notifier)
+              .reconcileThemeEntitlement(hasProAccess: next);
+        }
+      },
+    );
 
     // Watch these so the widget rebuilds (and the notification listener
     // re-evaluates) when tab or selection state changes.

@@ -27,34 +27,17 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../dev/providers/dev_mode_provider.dart';
-import '../../notifications/providers/notification_provider.dart';
-import '../../notifications/utils/deep_link_handler.dart';
-import '../../notifications/widgets/notifications_sheet.dart';
 import '../../settings/providers/settings_provider.dart'
     show appVersionProvider;
-import '../../tutorial/models/tutorial_step_keys.dart';
-// TODO: re-use the existing `launchTutorialFromMore(context, ref)` helper
-// declared in more_screen.dart — export it from there or move it into a
-// shared helper file in lib/features/more/.
-import '../screens/more_screen.dart' show launchTutorialFromMore;
-import '../../ask_kuber/screen/kuber_mark.dart';
-import '../../pro/feature_gates/gate_sheet_advanced_analytics.dart';
-import '../../pro/feature_gates/gate_sheet_sms_import.dart';
-import '../../pro/feature_gates/gate_sheet_kuber_cards.dart';
-import '../../pro/feature_gates/pro_gate.dart';
-// PAYMENT-HIDDEN (KYC pending): restore with the payment widgets below.
-// import '../../pro/more/more_premium_card.dart';
-// import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
+import '../more_content.dart';
+import '../../pro/more/more_premium_card.dart';
+import '../../pro/support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
 
 class MoreScreenModern extends ConsumerWidget {
   const MoreScreenModern({super.key});
@@ -104,6 +87,17 @@ class MoreScreenModern extends ConsumerWidget {
     final accounts = ref.watch(accountListProvider).valueOrNull ?? const [];
     final accountCount = accounts.length;
 
+    // Content comes from the single source of truth (more_content.dart); this
+    // layout only maps each entry to its bespoke widget (hero, grid, strip).
+    final sections = buildMoreSections(context, ref, isDevMode: isDevMode);
+    final manage = sections.firstWhere((s) => s.id == MoreSectionId.manage);
+    final signature =
+        sections.firstWhere((s) => s.id == MoreSectionId.signature);
+    final app = sections.firstWhere((s) => s.id == MoreSectionId.app);
+    final tutorial = sections.firstWhere((s) => s.id == MoreSectionId.tutorial);
+    final about = sections.firstWhere((s) => s.id == MoreSectionId.about);
+    final helpUs = sections.firstWhere((s) => s.id == MoreSectionId.helpUs);
+
     return Scaffold(
       backgroundColor: cs.surface,
       body: CustomScrollView(
@@ -123,336 +117,103 @@ class MoreScreenModern extends ConsumerWidget {
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // PAYMENT-HIDDEN (KYC pending): Kuber Pro entry point hidden
-                // while Play Billing KYC is pending. Restore when re-enabling
-                // payments (see specs/pro-gating-disabled.md).
-                // const MorePremiumHeroCard(),
-                // const SizedBox(height: KuberSpacing.xl),
-                // 01 / MANAGE -------------------------------------------------
-                // No item-count hint here: it was hardcoded ("8 spaces"), out
-                // of sync with the actual count, and added no value.
-                _GroupHead(num: '01', name: context.l10n.moreManageTitle),
+                const MorePremiumHeroCard(),
+                const SizedBox(height: KuberSpacing.xl),
+                // 01 / MANAGE — Accounts hero + grid of the rest.
+                _GroupHead(num: '01', name: manage.title),
                 _HeroTile(
-                  icon: Icons.account_balance_wallet,
-                  label: context.l10n.menuAccounts.toUpperCase(),
-                  title: context.l10n.menuAccountsDesc,
+                  icon: manage.entries.first.icon,
+                  label: manage.entries.first.label.toUpperCase(),
+                  title: manage.entries.first.subtitle,
                   meta: _accountsTrackedLabel(context, accountCount),
-                  onTap: () => context.push('/more/accounts'),
+                  onTap: manage.entries.first.onTap,
                 ),
                 const SizedBox(height: KuberSpacing.sm),
                 _ManageGrid(
                   items: [
-                    _ManageTileData(
-                      icon: Icons.category,
-                      label: context.l10n.menuCategories,
-                      sub: context.l10n.menuCategoriesDesc,
-                      onTap: () => context.push('/more/categories'),
-                    ),
-                    _ManageTileData(
-                      icon: Icons.label_rounded,
-                      label: context.l10n.menuTags,
-                      sub: context.l10n.menuTagsDesc,
-                      onTap: () => context.push('/more/tags'),
-                    ),
-                    _ManageTileData(
-                      key: TutorialStepKeys.moreBudgetsItem,
-                      icon: Icons.pie_chart_rounded,
-                      label: context.l10n.menuBudgets,
-                      sub: context.l10n.menuBudgetsDesc,
-                      onTap: () => context.push('/more/budgets'),
-                    ),
-                    _ManageTileData(
-                      icon: Icons.sync_rounded,
-                      label: context.l10n.menuRecurring,
-                      sub: context.l10n.menuRecurringDesc,
-                      onTap: () => context.push('/more/recurring'),
-                    ),
-                    _ManageTileData(
-                      icon: Icons.handshake,
-                      label: context.l10n.menuLedger,
-                      sub: context.l10n.menuLedgerDesc,
-                      onTap: () => context.push('/more/ledger'),
-                    ),
-                    _ManageTileData(
-                      icon: Icons.account_balance_outlined,
-                      label: context.l10n.menuLoans,
-                      sub: context.l10n.menuLoansDesc,
-                      onTap: () => context.push('/more/loans'),
-                    ),
-                    _ManageTileData(
-                      icon: Icons.show_chart_rounded,
-                      label: context.l10n.menuInvestments,
-                      sub: context.l10n.menuInvestmentsDesc,
-                      onTap: () => context.push('/more/investments'),
-                    ),
-                    // Reminders (English-only feature, like SMS import).
-                    _ManageTileData(
-                      icon: Icons.notifications_active_outlined,
-                      label: 'Reminders',
-                      sub: 'Never miss anything money-related',
-                      onTap: () => context.push('/more/reminders'),
-                    ),
-                    // Entry point for the nav-bar long-press Quick Actions grid,
-                    // so it's discoverable without knowing the gesture.
-                    _ManageTileData(
-                      icon: Icons.bolt_rounded,
-                      label: 'Customize Shortcuts',
-                      sub: 'Arrange the Quick Actions grid',
-                      onTap: () => context.push('/settings/quick-actions'),
-                    ),
+                    for (final e in manage.entries.skip(1))
+                      _ManageTileData(
+                        key: e.tutorialKey,
+                        icon: e.icon,
+                        label: e.label,
+                        sub: e.subtitle,
+                        onTap: e.onTap,
+                      ),
                   ],
                 ),
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // 02 / TOOLS --------------------------------------------------
-                _GroupHead(num: '02', name: context.l10n.moreToolsTitle),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ToolCard(
-                        key: TutorialStepKeys.moreAskKuberItem,
-                        icon: Icons.auto_awesome_rounded,
-                        title: context.l10n.askKuber,
-                        subtitle: context.l10n.menuAskKuberDesc,
-                        accent: _ToolAccent.primary,
-                        iconWidget: const KuberMarkWidget(size: 22, bare: true),
-                        showBetaPill: true,
-                        onTap: () => context.push('/more/ask-kuber'),
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      // SMS import (English-only feature, like Ask Kuber).
-                      child: _ToolCard(
-                        icon: Icons.sms_outlined,
-                        title: 'Import from SMS',
-                        subtitle: 'Read bank SMS for transactions',
-                        accent: _ToolAccent.primary,
-                        onTap: () {
-                          if (proGate(context, ref, showSmsImportGateSheet)) {
-                            context.push('/more/sms-import');
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ToolCard(
-                        icon: Icons.insert_chart_outlined_rounded,
-                        title: 'Advanced Analytics',
-                        subtitle: 'Deep analytical views of your finances',
-                        accent: _ToolAccent.primary,
-                        onTap: () {
-                          if (proGate(
-                            context,
-                            ref,
-                            showAdvancedAnalyticsGateSheet,
-                          )) {
-                            context.push('/advanced-analytics');
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: _ToolCard(
-                        icon: Icons.calculate_rounded,
-                        title: context.l10n.menuCalculators,
-                        subtitle: context.l10n.menuCalculatorsDesc,
-                        accent: _ToolAccent.primary,
-                        onTap: () => context.push('/more/tools'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      // Kuber Notes (English-only feature).
-                      child: _ToolCard(
-                        icon: Icons.sticky_note_2_outlined,
-                        title: 'Kuber Notes',
-                        subtitle: 'Jot expenses and do quick math',
-                        accent: _ToolAccent.primary,
-                        onTap: () => context.push('/more/notes'),
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      // Kuber Cards, directly after Notes. Pro-gated entry.
-                      child: _ToolCard(
-                        icon: Icons.credit_card_rounded,
-                        title: 'Kuber Cards',
-                        subtitle: 'Encrypted vault to save all your cards',
-                        accent: _ToolAccent.primary,
-                        onTap: () {
-                          if (proGate(context, ref, showKuberCardsGateSheet)) {
-                            context.push('/cards');
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      // Quick Add (English-only feature).
-                      child: _ToolCard(
-                        icon: Icons.flash_on_rounded,
-                        title: 'Quick Add',
-                        subtitle: 'Type or speak to log transactions',
-                        accent: _ToolAccent.primary,
-                        onTap: () => context.push('/quick-add'),
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    const Expanded(child: SizedBox()),
-                  ],
-                ),
+                // 02 / SIGNATURE — 2-column card grid.
+                _GroupHead(num: '02', name: signature.title),
+                ..._toolGrid(signature.entries),
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // 03 / APP ----------------------------------------------------
-                _GroupHead(num: '03', name: context.l10n.moreAppTitle),
+                // 03 / APP
+                _GroupHead(num: '03', name: app.title),
                 _CompactList(
                   rows: [
-                    _CompactRowData(
-                      icon: Icons.settings,
-                      label: context.l10n.menuSettings,
-                      sub: context.l10n.menuSettingsDesc,
-                      onTap: () => context.push('/more/settings'),
-                    ),
-                    _CompactRowData(
-                      key: TutorialStepKeys.moreDataItem,
-                      icon: Icons.storage_rounded,
-                      label: context.l10n.menuData,
-                      sub: context.l10n.menuDataDesc,
-                      onTap: () => context.push('/more/data'),
-                    ),
-                    _CompactRowData(
-                      icon: Icons.notifications_outlined,
-                      label: context.l10n.menuNotifications,
-                      sub: context.l10n.menuNotificationsDesc,
-                      onTap: () => _openNotificationsSheet(context, ref),
-                    ),
-                    // Upcoming Events sits right below Notifications
-                    // (English-only feature).
-                    _CompactRowData(
-                      icon: Icons.calendar_month_rounded,
-                      label: 'Upcoming Events',
-                      sub: 'Everything coming up, in one place',
-                      onTap: () => context.push('/more/upcoming-events'),
-                    ),
-                    _CompactRowData(
-                      icon: Icons.auto_stories_rounded,
-                      label: context.l10n.menuStoriesArchive,
-                      sub: context.l10n.menuStoriesArchiveDesc,
-                      onTap: () => context.push('/more/stories-archive'),
-                    ),
-                    _CompactRowData(
-                      icon: Icons.widgets_outlined,
-                      label: context.l10n.menuWidgets,
-                      sub: context.l10n.menuWidgetsDesc,
-                      onTap: () => context.push('/more/widgets-gallery'),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // 04 / TUTORIAL -----------------------------------------------
-                _GroupHead(num: '04', name: context.l10n.moreTutorialTitle),
-                _DenseList(
-                  rows: [
-                    _DenseRowData(
-                      icon: Icons.school_rounded,
-                      label: context.l10n.menuAppTutorialShort,
-                      labelSuffix: '(Beta)',
-                      onTap: () => launchTutorialFromMore(context, ref),
-                    ),
-                    _DenseRowData(
-                      icon: Icons.auto_stories_rounded,
-                      label: context.l10n.menuWelcomeTour,
-                      onTap: () => context.push('/onboarding?replay=true'),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // 05 / ABOUT ---------------------------------------------
-                _GroupHead(num: '05', name: context.l10n.moreAboutTitle),
-                _DenseList(
-                  rows: [
-                    _DenseRowData(
-                      icon: Icons.info_outline_rounded,
-                      label: context.l10n.menuAbout,
-                      onTap: () => context.pushNamed('about'),
-                    ),
-                    _DenseRowData(
-                      icon: Icons.security_outlined,
-                      label: context.l10n.menuPermissions,
-                      onTap: () => context.pushNamed('permissions'),
-                    ),
-                    if (isDevMode)
-                      _DenseRowData(
-                        icon: Icons.bug_report,
-                        label: context.l10n.menuDevTools,
-                        onTap: () => context.push('/more/dev-tools'),
+                    for (final e in app.entries)
+                      _CompactRowData(
+                        key: e.tutorialKey,
+                        icon: e.icon,
+                        label: e.label,
+                        sub: e.subtitle,
+                        onTap: e.onTap,
                       ),
                   ],
                 ),
 
                 const SizedBox(height: KuberSpacing.xl),
 
-                // 06 / HELP US ------------------------------------------------
-                _GroupHead(
-                  num: '06',
-                  name: context.l10n.moreHelpUsTitle,
-                  hint: context.l10n.menuHelpUsHint,
+                // 04 / TUTORIAL
+                _GroupHead(num: '04', name: tutorial.title),
+                _DenseList(
+                  rows: [
+                    for (final e in tutorial.entries)
+                      _DenseRowData(
+                        icon: e.icon,
+                        label: e.label,
+                        onTap: e.onTap,
+                      ),
+                  ],
                 ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // 05 / ABOUT
+                _GroupHead(num: '05', name: about.title),
+                _DenseList(
+                  rows: [
+                    for (final e in about.entries)
+                      _DenseRowData(
+                        icon: e.icon,
+                        label: e.label,
+                        onTap: e.onTap,
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: KuberSpacing.xl),
+
+                // 06 / HELP US
+                _GroupHead(num: '06', name: helpUs.title, hint: helpUs.hint),
                 _HelpStrip(
                   actions: [
-                    _HelpAction(
-                      icon: Icons.star_rate_rounded,
-                      label: context.l10n.menuRateKuber,
-                      accent: _HelpAccent.warning,
-                      onTap: () => launchUrl(
-                        Uri.parse(
-                          'https://play.google.com/store/apps/details?id=com.grs.kuber',
-                        ),
-                        mode: LaunchMode.externalApplication,
+                    for (int i = 0; i < helpUs.entries.length; i++)
+                      _HelpAction(
+                        icon: helpUs.entries[i].icon,
+                        label: helpUs.entries[i].label,
+                        accent:
+                            i == 0 ? _HelpAccent.warning : _HelpAccent.primary,
+                        onTap: helpUs.entries[i].onTap,
                       ),
-                    ),
-                    _HelpAction(
-                      icon: Icons.share_rounded,
-                      label: context.l10n.menuShare,
-                      onTap: () => SharePlus.instance.share(
-                        ShareParams(text: context.l10n.shareMessage),
-                      ),
-                    ),
-                    _HelpAction(
-                      icon: Icons.feedback,
-                      label: context.l10n.menuFeedbackShort,
-                      onTap: () => context.push('/more/feedback'),
-                    ),
                   ],
                 ),
 
-                // PAYMENT-HIDDEN (KYC pending): Buy Me a Coffee support button
-                // hidden while Play Billing KYC is pending. Restore the button
-                // and its spacing when re-enabling payments
-                // (see specs/pro-gating-disabled.md).
-                // const SizedBox(height: KuberSpacing.md),
-                // const BuyMeCoffeeButton(),
+                const SizedBox(height: KuberSpacing.md),
+                const BuyMeCoffeeButton(),
 
                 const SizedBox(height: KuberSpacing.xxl),
 
@@ -467,6 +228,42 @@ class MoreScreenModern extends ConsumerWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Signature grid: maps the shared content entries into the 2-column card grid.
+// ---------------------------------------------------------------------------
+
+List<Widget> _toolGrid(List<MoreEntry> entries) {
+  final rows = <Widget>[];
+  for (var i = 0; i < entries.length; i += 2) {
+    if (i > 0) rows.add(const SizedBox(height: KuberSpacing.sm));
+    final left = entries[i];
+    final right = i + 1 < entries.length ? entries[i + 1] : null;
+    rows.add(
+      Row(
+        children: [
+          Expanded(child: _toolCard(left)),
+          const SizedBox(width: KuberSpacing.sm),
+          Expanded(
+            child: right != null ? _toolCard(right) : const SizedBox(),
+          ),
+        ],
+      ),
+    );
+  }
+  return rows;
+}
+
+Widget _toolCard(MoreEntry e) => _ToolCard(
+      key: e.tutorialKey,
+      icon: e.icon,
+      title: e.label,
+      subtitle: e.subtitle,
+      accent: _ToolAccent.primary,
+      iconWidget: e.iconWidget,
+      showBetaPill: e.betaPill,
+      onTap: e.onTap,
+    );
 
 // ---------------------------------------------------------------------------
 // Group header
@@ -1038,12 +835,10 @@ class _CompactRow extends StatelessWidget {
 class _DenseRowData {
   final IconData icon;
   final String label;
-  final String? labelSuffix;
   final VoidCallback onTap;
   _DenseRowData({
     required this.icon,
     required this.label,
-    this.labelSuffix,
     required this.onTap,
   });
 }
@@ -1101,17 +896,6 @@ class _DenseRow extends StatelessWidget {
                   ),
                   children: [
                     TextSpan(text: data.label),
-                    if (data.labelSuffix case final suffix?) ...[
-                      const TextSpan(text: '  '),
-                      TextSpan(
-                        text: suffix,
-                        style: localeFont(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -1273,25 +1057,3 @@ class _MadeInIndiaFooter extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Notifications sheet opener — mirrors dashboard's _openNotificationsSheet
-// ---------------------------------------------------------------------------
-
-Future<void> _openNotificationsSheet(
-  BuildContext context,
-  WidgetRef ref,
-) async {
-  final repo = ref.read(notificationRepositoryProvider);
-  final list = await repo.list();
-  if (!context.mounted) return;
-  await NotificationsSheet.show(
-    context,
-    notifications: list,
-    onClearAll: () async {
-      await repo.clearAll();
-    },
-    onTapNotification: (n) async {
-      await handleNotificationTap(context, ref, n);
-    },
-  );
-  await repo.markAllRead();
-}

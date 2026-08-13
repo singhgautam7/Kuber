@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+  <!-- Amber circle background -->
+  <path
+      android:fillColor="#F59E0B"
+      android:pathData="M24,24m-24,0a24,24,0,1,0,48,0a24,24,0,1,0,-48,0"/>
+  <!-- White flash/bolt icon, centered in 48×48 -->
+  <group android:translateX="12" android:translateY="12">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7,2v11h3v9l7,-12h-4l4,-8z"/>
+  </group>
+</vector>

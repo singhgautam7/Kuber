@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/utils/prefs_keys.dart';
+import 'subscription_offer.dart';
 
 /// True until the app's one-time Pro entitlement bootstrap
 /// (`ensureEntitlementBootstrap()` + the first `kuberProStateProvider` read)
@@ -60,3 +61,12 @@ final cachedProductPricesProvider =
     NotifierProvider<CachedProductPricesNotifier, Map<String, String>>(
   CachedProductPricesNotifier.new,
 );
+
+/// The best eligible Play Billing offer for each subscription product id
+/// (`kProMonthlyId` / `kProYearlyId`), as computed by `PurchaseService` after a
+/// successful `queryProductDetails()`. Populated once at startup and reused —
+/// the paywall reads it synchronously to render a launch-offer badge and to
+/// attach the offer token at purchase. Empty until the product query lands, or
+/// when Play returns no offers (then the paywall shows the plain price).
+final subscriptionOffersProvider =
+    StateProvider<Map<String, SubscriptionOfferInfo>>((ref) => const {});

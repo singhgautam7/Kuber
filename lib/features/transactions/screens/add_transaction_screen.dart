@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
+import '../../../core/utils/locale_font.dart';
 import '../../../core/services/attachment_service.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
@@ -39,6 +41,16 @@ import '../../tags/data/tag.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
 import '../../tutorial/models/tutorial_step_keys.dart';
+
+/// Pin spec for the Add Transaction home-screen shortcut (app-bar overflow >
+/// Add to home screen). Mirrors the static `add_transaction` shortcut.
+const _kAddTxnPinSpec = PinShortcutSpec(
+  shortcutId: 'add_transaction',
+  shortLabel: 'Add',
+  longLabel: 'Add Transaction',
+  iconDrawable: 'ic_shortcut_add',
+  deepLink: 'kuber://app/add-transaction',
+);
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -257,6 +269,37 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
+        // Add-mode only: an overflow to pin the Add Transaction shortcut to the
+        // home screen. Hidden while editing an existing transaction.
+        actions: _isEditing
+            ? null
+            : [
+                PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant),
+                  color: cs.surfaceContainerHigh,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    side: BorderSide(color: cs.outline),
+                  ),
+                  onSelected: (_) =>
+                      requestPinShortcut(context, _kAddTxnPinSpec),
+                  itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                      value: 0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.add_to_home_screen_rounded,
+                              size: 18, color: cs.onSurfaceVariant),
+                          const SizedBox(width: 10),
+                          Text('Add to home screen',
+                              style: localeFont(fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),

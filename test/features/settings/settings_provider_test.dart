@@ -97,6 +97,8 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
   @override
   Future<void> setCurrency(String currency) async {}
   @override
+  Future<void> reconcileThemeEntitlement({required bool hasProAccess}) async {}
+  @override
   Future<void> setDateFormat(String format) async {}
   @override
   Future<void> setNumberSystem(NumberSystem system) async {}

@@ -4433,7 +4433,7 @@ abstract class AppLocalizations {
   /// No description provided for @moreToolsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tools'**
+  /// **'Signature'**
   String get moreToolsTitle;
 
   /// No description provided for @moreAppTitle.

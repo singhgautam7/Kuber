@@ -15,6 +15,9 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -28,6 +31,7 @@ class MainActivity : FlutterFragmentActivity() {
     private val channelName = "com.grs.kuber/saf_backups"
     private val smsChannelName = "com.grs.kuber/sms"
     private val widgetsChannelName = "com.grs.kuber/widgets"
+    private val shortcutsChannelName = "com.grs.kuber/shortcuts"
     private val secureChannelName = "com.grs.kuber/secure_screen"
     private val keystoreChannelName = "com.grs.kuber/cards_keystore"
     private val pickFolderRequest = 24017
@@ -110,6 +114,33 @@ class MainActivity : FlutterFragmentActivity() {
                         result.error("bad_args", "Missing widget provider name", null)
                     } else {
                         result.success(requestPin(provider))
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // User-triggered pin-to-home-screen for app shortcuts (overflow menu).
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            shortcutsChannelName
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isPinShortcutSupported" ->
+                    result.success(ShortcutManagerCompat.isRequestPinShortcutSupported(this))
+                "pinShortcut" -> {
+                    try {
+                        result.success(
+                            pinShortcut(
+                                call.argument<String>("id"),
+                                call.argument<String>("shortLabel"),
+                                call.argument<String>("longLabel"),
+                                call.argument<String>("icon"),
+                                call.argument<String>("deepLink")
+                            )
+                        )
+                    } catch (e: Throwable) {
+                        result.error("pin_error", e.message, null)
                     }
                 }
                 else -> result.notImplemented()
@@ -212,6 +243,39 @@ class MainActivity : FlutterFragmentActivity() {
     private fun clearCardsSecret() {
         getSharedPreferences(cardsPrefs, Context.MODE_PRIVATE)
             .edit().remove(cardsPinEntry).apply()
+    }
+
+    /**
+     * Pins an app shortcut to the home screen via ShortcutManagerCompat. The
+     * intent mirrors the static shortcuts in shortcuts.xml (ACTION_VIEW + a
+     * kuber:// deep link, kept inside this package), so a pinned shortcut opens
+     * the same route. Returns false on unsupported launchers / bad args.
+     */
+    private fun pinShortcut(
+        id: String?,
+        shortLabel: String?,
+        longLabel: String?,
+        icon: String?,
+        deepLink: String?
+    ): Boolean {
+        if (id == null || shortLabel == null || longLabel == null || deepLink == null) {
+            return false
+        }
+        if (!ShortcutManagerCompat.isRequestPinShortcutSupported(this)) return false
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(deepLink)).apply {
+            setPackage(packageName)
+        }
+        val builder = ShortcutInfoCompat.Builder(this, id)
+            .setShortLabel(shortLabel)
+            .setLongLabel(longLabel)
+            .setIntent(intent)
+        if (icon != null) {
+            val resId = resources.getIdentifier(icon, "drawable", packageName)
+            if (resId != 0) {
+                builder.setIcon(IconCompat.createWithResource(this, resId))
+            }
+        }
+        return ShortcutManagerCompat.requestPinShortcut(this, builder.build(), null)
     }
 
     /** Whether the launcher supports pin-to-home (API 26+ and launcher opt-in). */

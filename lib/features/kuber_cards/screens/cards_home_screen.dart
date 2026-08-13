@@ -8,6 +8,7 @@ import '../../../core/models/overflow_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
@@ -26,9 +27,17 @@ import '../widgets/card_list_row.dart';
 import '../widgets/stored_card_visual.dart';
 import 'setup_flow_screen.dart';
 
-/// Route target for `/cards`. The single Pro-gate choke point for the feature,
-/// then decides setup vs home; the home screen handles the unlock gate via
-/// [CardsSecureScaffold].
+/// PRO-GATE: free-tier Kuber Cards limit. Free users see and manage the first
+/// [kFreeCardLimit] cards fully; the rest are blurred behind the paywall, and
+/// adding beyond the limit routes to the gate sheet. Pro is unlimited.
+const kFreeCardLimit = 2;
+
+/// Route target for `/cards`, then decides setup vs home; the home screen
+/// handles the unlock gate via [CardsSecureScaffold].
+///
+/// PRO-GATE: Kuber Cards is reachable on the free tier — a free user may add up
+/// to 2 cards. There is NO entry-level Pro gate; the only gate is the 3rd-card
+/// blur in the home list (`i >= 2`). See specs/pro-gating-enabled.md.
 class KuberCardsEntry extends ConsumerStatefulWidget {
   const KuberCardsEntry({super.key});
 
@@ -37,29 +46,8 @@ class KuberCardsEntry extends ConsumerStatefulWidget {
 }
 
 class _KuberCardsEntryState extends ConsumerState<KuberCardsEntry> {
-  bool _gatePassed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // PRO-GATE: every entry to Kuber Cards (nav shortcut, deep link, settings)
-    // funnels through here. Gating is OFF now (hasProAccess == true), so this
-    // always passes. See specs/pro-gating-disabled.md.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (proGate(context, ref, showKuberCardsGateSheet)) {
-        setState(() => _gatePassed = true);
-      } else if (context.canPop()) {
-        context.pop();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (!_gatePassed) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
     final metaAsync = ref.watch(cardVaultMetaProvider);
     return metaAsync.when(
       loading: () => const Scaffold(
@@ -138,6 +126,13 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                 showBack: true,
                 showHome: true,
                 showBrand: false,
+                pinShortcut: const PinShortcutSpec(
+                  shortcutId: 'kuber_cards',
+                  shortLabel: 'Cards',
+                  longLabel: 'Kuber Cards',
+                  iconDrawable: 'ic_shortcut_cards',
+                  deepLink: 'kuber://app/cards',
+                ),
                 infoConfig: aboutKuberCardsInfo,
                 overflowConfig: KuberOverflowConfig(
                   items: [
@@ -172,7 +167,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                 description: 'Your cards, encrypted on-device',
                 actionIcon: Icons.add_rounded,
                 actionTooltip: 'Add card',
-                onAction: () => context.push('/cards/add'),
+                onAction: _onAddCard,
               ),
             ),
             if (unlocked)
@@ -221,8 +216,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
 
     final filtered = _applyFilters(cards, sort);
     // PRO-GATE: Kuber Cards free tier shows 2 cards fully; the 3rd onward is
-    // blurred behind the paywall. Gating is globally OFF right now
-    // (hasProAccess == true), so nothing blurs today. See specs/pro-gating-disabled.md.
+    // blurred behind the paywall. See specs/pro-gating-enabled.md.
     final hasPro = ref.watch(kuberProStateProvider).hasProAccess;
 
     return [
@@ -375,7 +369,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
       itemBuilder: (context, i) {
         final card = cards[i];
         // PRO-GATE: free users see cards[0] and cards[1]; blur the rest.
-        final locked = !hasPro && i >= 2;
+        final locked = !hasPro && i >= kFreeCardLimit;
         return Padding(
           padding: EdgeInsets.only(top: i == 0 ? 0 : KuberSpacing.md),
           child: locked
@@ -391,7 +385,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
       itemCount: cards.length,
       itemBuilder: (context, i) {
         final card = cards[i];
-        final locked = !hasPro && i >= 2; // PRO-GATE
+        final locked = !hasPro && i >= kFreeCardLimit; // PRO-GATE
         return CardListRow(
           card: card,
           locked: locked,
@@ -407,6 +401,20 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
   }
 
   void _openDetail(StoredCard card) => showCardDetailSheet(context, ref, card);
+
+  /// PRO-GATE: free users may hold up to [kFreeCardLimit] cards. Once at the
+  /// limit, the "Add card" action opens the gate sheet instead of the add flow,
+  /// so a non-Pro user cannot create a 3rd card (any extras that arrive from a
+  /// backup restore still appear, blurred, in the list). Pro is unlimited.
+  void _onAddCard() {
+    final hasPro = ref.read(kuberProStateProvider).hasProAccess;
+    final count = ref.read(storedCardsProvider).valueOrNull?.length ?? 0;
+    if (!hasPro && count >= kFreeCardLimit) {
+      showKuberCardsGateSheet(context);
+      return;
+    }
+    context.push('/cards/add');
+  }
 
   List<StoredCard> _applyFilters(List<StoredCard> cards, CardsSortMode sort) {
     var list = cards.where((c) {
@@ -681,7 +689,7 @@ class _FilterChip extends StatelessWidget {
 
 /// Free-tier blurred card + paywall CTA.
 /// PRO-GATE: only rendered when the user is not Pro and the card is beyond the
-/// 2 free slots. Gating is OFF right now, so this never appears.
+/// 2 free slots.
 class _BlurredCard extends ConsumerWidget {
   final StoredCard card;
   const _BlurredCard({required this.card});

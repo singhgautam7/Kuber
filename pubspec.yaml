@@ -1,7 +1,7 @@
 name: kuber
 description: "Kuber, a local-first expense manager"
 publish_to: 'none'
-version: 5.0.0+52
+version: 5.1.0+53
 
 environment:
   sdk: ^3.11.1
@@ -71,7 +71,11 @@ dependencies:
   # Native Android home-screen widgets (Flutter <-> RemoteViews bridge)
   home_widget: ^0.7.0
 
-  # Google Play Billing (Kuber Pro subscriptions + Buy Me a Coffee)
+  # Google Play Billing (Kuber Pro subscriptions + Buy Me a Coffee).
+  # The Android implementation (in_app_purchase_android) is used transitively;
+  # it is imported directly in a couple of billing files to read subscription
+  # offer tokens / pricing phases (with a depend_on_referenced_packages ignore),
+  # so it is intentionally NOT listed here as a direct dependency.
   in_app_purchase: ^3.2.0
 
 dev_dependencies:

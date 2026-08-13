@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -207,6 +208,13 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
         showBack: true,
         showHome: true,
         showBrand: false,
+        pinShortcut: const PinShortcutSpec(
+          shortcutId: 'kuber_notes',
+          shortLabel: 'Notes',
+          longLabel: 'Kuber Notes',
+          iconDrawable: 'ic_shortcut_notes',
+          deepLink: 'kuber://app/notes',
+        ),
         infoConfig: kAboutNotesInfoConfig,
         onBack: selectionMode
             ? () => ref.read(notesSelectionProvider.notifier).state = {}
