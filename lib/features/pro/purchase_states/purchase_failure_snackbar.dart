@@ -45,6 +45,17 @@ void showAlreadyOwnedSnackbar(
   );
 }
 
+/// Friendly confirmation for a silently-recovered entitlement (e.g. the buy
+/// flow reported "already owned" and the follow-up query found the purchase).
+void showProRestoredSnackbar(BuildContext context, {OverlayState? overlay}) {
+  showKuberSnackBar(
+    context,
+    'Kuber Pro restored',
+    isError: false,
+    overlay: overlay,
+  );
+}
+
 void showPlayStoreUnavailableSnackbar(BuildContext context,
     {OverlayState? overlay}) {
   // Round 2: softened copy. This fires for a transient Play Services hiccup

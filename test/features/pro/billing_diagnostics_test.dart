@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:kuber/features/pro/paywall/pro_state.dart' show ProPlan;
@@ -63,6 +65,39 @@ void main() {
       expect(productIdForPlan(ProPlan.monthly), kProMonthlyId);
       expect(productIdForPlan(ProPlan.yearly), kProYearlyId);
       expect(productIdForPlan(ProPlan.lifetime), kProLifetimeId);
+    });
+  });
+
+  group('pollForProEntitlement', () {
+    test('returns true immediately when already Pro (no wait)', () async {
+      final sw = Stopwatch()..start();
+      final result = await pollForProEntitlement(() => true);
+      sw.stop();
+      expect(result, isTrue);
+      // Never entered the delay loop.
+      expect(sw.elapsed, lessThan(const Duration(milliseconds: 100)));
+    });
+
+    test('resolves true as soon as the flag flips mid-poll', () async {
+      var granted = false;
+      // Flip to Pro after ~250ms, simulating a restored purchase landing on
+      // the stream while we poll.
+      Timer(const Duration(milliseconds: 250), () => granted = true);
+      final result = await pollForProEntitlement(
+        () => granted,
+        timeout: const Duration(seconds: 2),
+        interval: const Duration(milliseconds: 50),
+      );
+      expect(result, isTrue);
+    });
+
+    test('returns false after timeout when never Pro (real Free user)', () async {
+      final result = await pollForProEntitlement(
+        () => false,
+        timeout: const Duration(milliseconds: 300),
+        interval: const Duration(milliseconds: 50),
+      );
+      expect(result, isFalse);
     });
   });
 }

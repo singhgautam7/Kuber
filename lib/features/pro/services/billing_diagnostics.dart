@@ -51,7 +51,7 @@ class BillingDiagnostics {
     _logs.add(entry);
 
     if (kDebugMode) {
-      debugPrint('KuberBilling: $entry');
+      debugPrint('[BILLING] $entry');
     }
   }
 

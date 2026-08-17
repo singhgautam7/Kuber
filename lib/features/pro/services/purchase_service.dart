@@ -134,9 +134,16 @@ class PurchaseService {
 
     // Reconcile with Play on cold start — the "detected on app open via
     // queryPurchases" promise. Restored purchases arrive on the stream as
-    // PurchaseStatus.restored and re-grant entitlement silently.
+    // PurchaseStatus.restored and re-grant entitlement silently. Uses the retry
+    // ladder so a returning owner whose Play cache is cold on first launch is
+    // still caught within a few seconds, while a genuine Free install stays
+    // Free. Fire-and-forget: the ladder's waits must not hold up initialize().
+    unawaited(_startupReconcile());
+  }
+
+  Future<void> _startupReconcile() async {
     try {
-      await restorePurchases(source: 'startup');
+      await reconcileWithRetries(source: 'startup');
     } catch (e) {
       debugPrint('Kuber: startup restore failed (non-fatal): $e');
     }
@@ -314,11 +321,21 @@ class PurchaseService {
   /// "No previous purchase found" feedback is owned by
   /// `restore_purchases_flow.dart`, which reads entitlement state after this
   /// resolves.
-  Future<void> restorePurchases({String source = 'manual'}) async {
+  Future<void> restorePurchases({String source = 'manual', bool force = false}) async {
     if (!_available) {
       BillingDiagnostics.instance.log('RESTORE_SKIP', 'Play Billing is not available');
       return;
     }
+
+    // A forced restore is a deliberately FRESH Play query, never coalesced onto
+    // an in-flight one. It exists for the itemAlreadyOwned recovery and the
+    // retry ladder: Play has just reconciled server→local cache, so reusing a
+    // future that started *before* that reconcile would return the stale empty
+    // result and defeat the whole fix.
+    if (force) {
+      return _performRestore(source);
+    }
+
     if (_inFlightRestore != null) {
       BillingDiagnostics.instance.log(
         'RESTORE_COALESCED',
@@ -333,6 +350,54 @@ class PurchaseService {
     });
     return _inFlightRestore!;
   }
+
+  /// Fires a fresh restore query and, if entitlement doesn't land, retries
+  /// after 3s then 8s. Each attempt is a forced (uncoalesced) Play query.
+  ///
+  /// This is the core of the "returning owner whose Play cache was cold on the
+  /// first query" fix: a real owner is caught within the ladder as Play's local
+  /// cache warms, while a genuine Free account simply stays Free after all
+  /// attempts return empty — no false Pro. Restored purchases land on the stream
+  /// and grant entitlement via [_deliver]; this only drives the queries and
+  /// waits a beat for that to happen.
+  ///
+  /// Returns true as soon as Pro is detected. Best-effort: individual query
+  /// failures are logged and do not abort the ladder.
+  Future<bool> reconcileWithRetries({required String source}) async {
+    const retryDelays = <Duration>[
+      Duration.zero,
+      Duration(seconds: 3),
+      Duration(seconds: 8),
+    ];
+    for (var attempt = 0; attempt < retryDelays.length; attempt++) {
+      if (retryDelays[attempt] > Duration.zero) {
+        // Short-circuit if entitlement already landed while we waited.
+        if (_ref.read(kuberProStateProvider).isPro) return true;
+        await Future<void>.delayed(retryDelays[attempt]);
+      }
+      if (_ref.read(kuberProStateProvider).isPro) return true;
+
+      BillingDiagnostics.instance.log(
+        'RESTORE_RETRY',
+        'Reconcile attempt ${attempt + 1}/${retryDelays.length}',
+        {'source': source},
+      );
+      try {
+        await restorePurchases(source: '$source:try${attempt + 1}', force: true);
+      } catch (e) {
+        BillingDiagnostics.instance.recordError('reconcileWithRetries', e);
+      }
+      // Give the purchase stream a beat to deliver + apply before deciding.
+      if (await _pollForPro(timeout: const Duration(seconds: 2))) return true;
+    }
+    return _ref.read(kuberProStateProvider).isPro;
+  }
+
+  /// Waits for [kuberProStateProvider] to report Pro, up to [timeout].
+  Future<bool> _pollForPro({required Duration timeout}) => pollForProEntitlement(
+        () => _ref.read(kuberProStateProvider).isPro,
+        timeout: timeout,
+      );
 
   Future<void> _performRestore(String source) async {
     final sw = Stopwatch()..start();
@@ -382,15 +447,18 @@ class PurchaseService {
         // stream fires again with purchased/error once Play resolves it.
         break;
       case PurchaseStatus.error:
-        // "Item already owned" is not a real failure — the user has the
-        // entitlement, the app just hasn't reconciled it. Point them at Restore
-        // instead of showing a scary "payment failed".
+        // "Item already owned" is not a real failure — the user owns the
+        // entitlement, the app just hasn't reconciled it. The failed buy flow
+        // *forces Play to refresh its local cache from Google's servers*, so a
+        // query fired right now finally sees the purchase. Recover silently
+        // instead of dumping a confusing "already owned" error on the user.
         if (_isAlreadyOwned(purchase.error)) {
-          _snack((ctx, overlay) => showAlreadyOwnedSnackbar(
-                ctx,
-                onRestore: restorePurchases,
-                overlay: overlay,
-              ));
+          BillingDiagnostics.instance.log(
+            'ALREADY_OWNED',
+            'Buy reported itemAlreadyOwned; auto-restoring',
+            {'productId': purchase.productID},
+          );
+          unawaited(_recoverAlreadyOwned());
           break;
         }
         _snack((ctx, overlay) => showPurchaseFailedSnackbar(
@@ -483,6 +551,38 @@ class PurchaseService {
     return haystack.contains('already') && haystack.contains('own');
   }
 
+  /// Silent recovery after a buy attempt returned itemAlreadyOwned. Fires a
+  /// FRESH query (Play's local cache is now warm from the failed buy) and waits
+  /// for the owned purchase to land on the stream. On success we apply
+  /// entitlement (via [_deliver]) and show a friendly "Kuber Pro restored"
+  /// snackbar — never the confusing "already owned" error. Only if the
+  /// follow-up query STILL finds nothing do we fall back to the manual
+  /// already-owned/Restore snackbar (extreme edge case).
+  Future<void> _recoverAlreadyOwned() async {
+    try {
+      await restorePurchases(source: 'already_owned', force: true);
+    } catch (e) {
+      BillingDiagnostics.instance.recordError('recoverAlreadyOwned', e);
+    }
+    final granted = await _pollForPro(timeout: const Duration(seconds: 5));
+    BillingDiagnostics.instance.log(
+      'ALREADY_OWNED_RESULT',
+      granted
+          ? 'Entitlement restored after itemAlreadyOwned refresh'
+          : 'Query still empty after itemAlreadyOwned refresh',
+      {'granted': granted},
+    );
+    if (granted) {
+      _snack((ctx, overlay) => showProRestoredSnackbar(ctx, overlay: overlay));
+    } else {
+      _snack((ctx, overlay) => showAlreadyOwnedSnackbar(
+            ctx,
+            onRestore: () => restorePurchases(force: true),
+            overlay: overlay,
+          ));
+    }
+  }
+
   /// The real purchase timestamp when Play reports one, else now. On Android
   /// `transactionDate` is epoch-milliseconds-as-string.
   DateTime _purchaseDate(PurchaseDetails purchase) {
@@ -532,6 +632,26 @@ class PurchaseService {
 /// Play Billing free-trial length configured on the yearly base plan in Play
 /// Console. Keep in sync with that configuration.
 const kProTrialDuration = Duration(days: 14);
+
+/// Polls [isPro] every [interval] until it returns true or [timeout] elapses,
+/// returning the final value. Restored purchases grant entitlement
+/// asynchronously on the purchase stream, so callers that drive a restore need
+/// to wait a beat before reading the result — this is that wait, in one place
+/// (the restore flow, the promo sheets, and the service's own already-owned
+/// recovery all share it instead of re-rolling a poll loop).
+Future<bool> pollForProEntitlement(
+  bool Function() isPro, {
+  Duration timeout = const Duration(seconds: 2),
+  Duration interval = const Duration(milliseconds: 150),
+}) async {
+  if (isPro()) return true;
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    await Future<void>.delayed(interval);
+    if (isPro()) return true;
+  }
+  return isPro();
+}
 
 /// App-wide singleton. Initialized post-first-frame from `app.dart`; read from
 /// buy sites (paywall, Buy Me a Coffee, restore link).

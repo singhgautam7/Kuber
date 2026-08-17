@@ -39,23 +39,24 @@ Future<void> restorePurchases(BuildContext context, WidgetRef ref) async {
   bool isTimeout = false;
   Object? caughtError;
 
+  final service = ref.read(purchaseServiceProvider);
   try {
-    // 1. Issue the query (with mutex and internal 10s timeout).
-    await ref.read(purchaseServiceProvider).restorePurchases(source: 'manual_ui');
+    // 1. First query — a forced, fresh Play reconcile. Surfacing connectivity
+    //    failures (offline / Play timeout) explicitly here keeps them from
+    //    being mislabeled as "no purchase found".
+    await service.restorePurchases(source: 'manual_ui', force: true);
 
-    // 2. Dynamically wait for the entitlement to update rather than a static sleep.
-    // Restored PurchaseDetails arrive on the purchaseStream asynchronously.
-    // Poll every 100ms up to 2.5s; exit immediately as soon as Pro is granted.
-    for (var i = 0; i < 25; i++) {
-      if (ref.read(kuberProStateProvider).isPro) {
-        success = true;
-        break;
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-    }
+    // 2. Wait a beat for a restored purchase to land on the stream.
+    success = await pollForProEntitlement(
+      () => ref.read(kuberProStateProvider).isPro,
+      timeout: const Duration(seconds: 2),
+    );
 
+    // 3. Still nothing? Run the 3s/8s retry ladder. A returning owner whose
+    //    Play cache was cold on the first query is caught here — we do NOT
+    //    show "No purchase found" until every retry has come back empty.
     if (!success) {
-      success = ref.read(kuberProStateProvider).isPro;
+      success = await service.reconcileWithRetries(source: 'manual_ui');
     }
   } on TimeoutException catch (e) {
     isTimeout = true;

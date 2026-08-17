@@ -73,13 +73,11 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                     try {
                       await ref
                           .read(purchaseServiceProvider)
-                          .restorePurchases(source: 'promo_return');
-                      for (var i = 0; i < 25; i++) {
-                        if (ref.read(kuberProStateProvider).isPro) break;
-                        await Future<void>.delayed(
-                          const Duration(milliseconds: 100),
-                        );
-                      }
+                          .restorePurchases(source: 'promo_return', force: true);
+                      await pollForProEntitlement(
+                        () => ref.read(kuberProStateProvider).isPro,
+                        timeout: const Duration(milliseconds: 2500),
+                      );
                       if (context.mounted) {
                         final current = ref.read(kuberProStateProvider);
                         if (current.isPro) {
@@ -113,15 +111,14 @@ void showPromoCodeSheet(BuildContext context, WidgetRef ref) {
                     duration: const Duration(seconds: 3),
                   );
                   try {
-                    await ref
-                        .read(purchaseServiceProvider)
-                        .restorePurchases(source: 'promo_already_redeemed');
-                    for (var i = 0; i < 25; i++) {
-                      if (ref.read(kuberProStateProvider).isPro) break;
-                      await Future<void>.delayed(
-                        const Duration(milliseconds: 100),
-                      );
-                    }
+                    await ref.read(purchaseServiceProvider).restorePurchases(
+                          source: 'promo_already_redeemed',
+                          force: true,
+                        );
+                    await pollForProEntitlement(
+                      () => ref.read(kuberProStateProvider).isPro,
+                      timeout: const Duration(milliseconds: 2500),
+                    );
                   } catch (_) {}
                   if (!context.mounted) return;
                   final current = ref.read(kuberProStateProvider);

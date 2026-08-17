@@ -190,40 +190,31 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // keeping frequent resumes from repeating the notification plugin calls.
   DateTime? _lastCreditReminderMaintenanceDay;
 
-  // Timestamp of the last on-resume Play Billing reconcile. Throttled and
-  // strictly capped to at most 3 automatic triggers per session to eliminate
-  // unprompted background operations.
+  // Timestamp of the last on-resume Play Billing reconcile. Entitlement changes
+  // slowly (a lapse/renewal is a day-scale event), so throttling to once per 15
+  // minutes keeps frequent app switches from re-querying Play needlessly.
   DateTime? _lastEntitlementReconcile;
-  int _resumeReconcileCount = 0;
-  static const int _kMaxAutoResumeReconciles = 3;
 
-  /// Asks Play Billing to re-report purchases on resume ONLY when needed:
-  /// 1. A subscription or trial has reached its expiry date and needs renewal check.
-  /// 2. Capped to at most 3 automatic triggers per app session to avoid background overhead.
-  /// Lifetime owners and valid cached subscriptions remain fully offline/local.
+  /// Asks Play Billing to re-report purchases on resume so entitlement reflects
+  /// a lapse / renewal / promo redemption that happened while backgrounded — and
+  /// so a purchase Play couldn't yet see on cold start (a cold local cache on a
+  /// fresh install) is caught the next time the user returns. Silent (a restored
+  /// purchase never pops a sheet), throttled to once per 15 minutes, and fully
+  /// guarded — billing is never allowed to affect the foreground path.
+  ///
+  /// A per-session cap was deliberately NOT added: a returning owner whose
+  /// entitlement hasn't synced yet is exactly who needs another background look,
+  /// and the 15-minute throttle already bounds the work.
   Future<void> _reconcileEntitlementOnResume() async {
-    final proState = ref.read(kuberProStateProvider);
-
-    // Lifetime never expires; unprompted background queries are skipped.
-    if (proState.plan == ProPlan.lifetime) return;
+    // Lifetime never expires and, once known, never needs re-checking.
+    if (ref.read(kuberProStateProvider).plan == ProPlan.lifetime) return;
 
     final now = DateTime.now();
-    final expiry = proState.expiryDate;
-    final trialEnd = proState.trialEndsAt;
-    final isExpired = (expiry != null && now.isAfter(expiry)) ||
-        (trialEnd != null && now.isAfter(trialEnd));
-
-    // Cap automatic background checks to at most 3 per session unless a subscription expired.
-    if (!isExpired && _resumeReconcileCount >= _kMaxAutoResumeReconciles) {
-      return;
-    }
-
     final last = _lastEntitlementReconcile;
     if (last != null && now.difference(last) < const Duration(minutes: 15)) {
       return;
     }
     _lastEntitlementReconcile = now;
-    _resumeReconcileCount++;
 
     try {
       await ref.read(purchaseServiceProvider).restorePurchases(source: 'resume');
