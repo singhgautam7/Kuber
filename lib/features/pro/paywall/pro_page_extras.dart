@@ -91,8 +91,8 @@ const kProComparisonRows = <ComparisonEntry>[
   ComparisonRow(
     icon: Icons.sms_outlined,
     feature: 'SMS Import',
-    free: 'Not included',
-    pro: 'Included',
+    free: '5 per week',
+    pro: 'Unlimited',
   ),
   ComparisonRow(
     icon: Icons.notifications_active_outlined,

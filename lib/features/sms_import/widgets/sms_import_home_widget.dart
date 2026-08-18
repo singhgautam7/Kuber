@@ -5,8 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
-import '../../pro/feature_gates/gate_sheet_sms_import.dart';
-import '../../pro/feature_gates/pro_gate.dart';
 import '../providers/sms_import_provider.dart';
 
 /// Home dashboard widget for SMS import. Deliberately lightweight: it reads
@@ -95,11 +93,9 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
 }
 
 void _openImport(BuildContext context, WidgetRef ref, SmsImportTabArg tab) {
-  // SMS Import is a Kuber Pro feature. Free users get the gate sheet instead
-  // of the screen; Pro and trial users pass straight through.
-  if (proGate(context, ref, showSmsImportGateSheet)) {
-    context.push('/more/sms-import?tab=${tab.name}');
-  }
+  // SMS Import is free to open for everyone; the weekly import cap is enforced
+  // at the import action, not at the entry point.
+  context.push('/more/sms-import?tab=${tab.name}');
 }
 
 /// Tab the widget deep-links to. Mirrors SmsImportTab without importing the

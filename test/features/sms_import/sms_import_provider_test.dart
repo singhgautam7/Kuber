@@ -10,6 +10,7 @@ import 'package:kuber/features/transactions/providers/transaction_provider.dart'
 import 'package:kuber/features/tutorial/providers/tutorial_sandbox_provider.dart';
 import 'package:kuber/features/sms_import/services/sms_inbox_service.dart';
 import 'package:kuber/features/sms_import/engine/scan_progress.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/isar_test_helper.dart';
 
 SmsTransaction _staged({
@@ -39,6 +40,9 @@ void main() {
   setUpAll(initialiseIsarForTests);
 
   setUp(() async {
+    // Free-tier weekly counter lives in SharedPreferences; start each test with
+    // an empty store (no entitlement row in the test Isar ⇒ free tier).
+    SharedPreferences.setMockInitialValues({});
     isar = await openTestIsar();
     container = ProviderContainer(
       overrides: [
@@ -114,6 +118,112 @@ void main() {
 
     final txns = await container.read(transactionListProvider.future);
     expect(txns.length, 2);
+  });
+
+  test('free tier: gated single import blocks after the weekly limit', () async {
+    final repo = container.read(smsImportRepositoryProvider);
+    final notifier = container.read(smsImportProvider.notifier);
+    await container.read(smsImportProvider.future);
+
+    // Import the full weekly allowance (5), one at a time.
+    for (var i = 0; i < 5; i++) {
+      final sms = (await repo.getById(
+        await repo.put(_staged(raw: 'INR ${100 + i} debited row $i')),
+      ))!;
+      final outcome = await notifier.importSingleGated(
+        sms,
+        name: 'T$i',
+        amount: (100 + i).toDouble(),
+        type: 'expense',
+        accountId: '1',
+        date: DateTime(2026, 6, 5),
+      );
+      expect(outcome, SmsSingleImportOutcome.imported);
+    }
+    expect((await container.read(transactionListProvider.future)).length, 5);
+
+    // The 6th is blocked and creates no transaction.
+    final sixth = (await repo.getById(
+      await repo.put(_staged(raw: 'INR 999 debited row 6')),
+    ))!;
+    final blocked = await notifier.importSingleGated(
+      sixth,
+      name: 'sixth',
+      amount: 999,
+      type: 'expense',
+      accountId: '1',
+      date: DateTime(2026, 6, 5),
+    );
+    expect(blocked, SmsSingleImportOutcome.blocked);
+    expect((await container.read(transactionListProvider.future)).length, 5);
+  });
+
+  test('paste imports (countsTowardLimit: false) never hit the weekly cap',
+      () async {
+    final repo = container.read(smsImportRepositoryProvider);
+    final notifier = container.read(smsImportProvider.notifier);
+    await container.read(smsImportProvider.future);
+
+    for (var i = 0; i < 7; i++) {
+      final sms = (await repo.getById(
+        await repo.put(_staged(raw: 'INR ${10 + i} debited paste $i')),
+      ))!;
+      final outcome = await notifier.importSingleGated(
+        sms,
+        name: 'P$i',
+        amount: (10 + i).toDouble(),
+        type: 'expense',
+        accountId: '1',
+        date: DateTime(2026, 6, 5),
+        countsTowardLimit: false,
+      );
+      expect(outcome, SmsSingleImportOutcome.imported);
+    }
+    expect((await container.read(transactionListProvider.future)).length, 7);
+  });
+
+  test('free tier: gated batch imports only up to the remaining allowance',
+      () async {
+    final repo = container.read(smsImportRepositoryProvider);
+    final notifier = container.read(smsImportProvider.notifier);
+    await container.read(smsImportProvider.future);
+
+    // Spend 3 of the 5 with single imports.
+    for (var i = 0; i < 3; i++) {
+      final sms = (await repo.getById(
+        await repo.put(_staged(raw: 'INR ${100 + i} debited pre $i')),
+      ))!;
+      await notifier.importSingleGated(
+        sms,
+        name: 'pre$i',
+        amount: (100 + i).toDouble(),
+        type: 'expense',
+        accountId: '1',
+        date: DateTime(2026, 6, 5),
+      );
+    }
+
+    // A batch of 4 should import only the remaining 2 and block 2.
+    final drafts = <SmsImportDraft>[];
+    for (var i = 0; i < 4; i++) {
+      final sms = (await repo.getById(
+        await repo.put(_staged(raw: 'INR ${200 + i} debited batch $i')),
+      ))!;
+      drafts.add(SmsImportDraft(
+        sms: sms,
+        name: 'b$i',
+        amount: (200 + i).toDouble(),
+        type: 'expense',
+        accountId: '1',
+        date: DateTime(2026, 6, 6),
+      ));
+    }
+    final outcome = await notifier.importBatchGated(drafts);
+    expect(outcome.importedCount, 2);
+    expect(outcome.blockedCount, 2);
+    expect(outcome.hasBlocked, isTrue);
+    // 3 singles + 2 from the batch = 5 total.
+    expect((await container.read(transactionListProvider.future)).length, 5);
   });
 
   test('findDuplicate flags same amount/account within +/- 1 day', () async {

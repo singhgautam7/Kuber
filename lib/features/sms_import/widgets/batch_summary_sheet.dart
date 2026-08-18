@@ -6,10 +6,13 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
+import '../data/sms_import_usage.dart';
 import '../data/sms_transaction.dart';
 import '../providers/sms_import_provider.dart';
 import '../screens/sms_import_widgets.dart';
@@ -251,10 +254,29 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
               date: s.parsedDate,
             ))
         .toList();
-    await ref.read(smsImportProvider.notifier).importBatch(drafts);
+    // Capture the host navigator/context before popping — this sheet's context
+    // is defunct once dismissed, but the free-tier limit sheet/snackbar need a
+    // live context.
+    final nav = Navigator.of(context);
+    final hostContext = nav.context;
+    final outcome =
+        await ref.read(smsImportProvider.notifier).importBatchGated(drafts);
     if (!mounted) return;
-    Navigator.pop(context);
+    nav.pop();
     widget.onImported();
+    if (!outcome.hasBlocked || !hostContext.mounted) return;
+
+    // Free-tier weekly cap: some (or all) rows were left staged.
+    final resetDate = await SmsImportUsage.resetDate();
+    if (!hostContext.mounted) return;
+    if (outcome.importedCount > 0) {
+      showKuberSnackBar(
+        hostContext,
+        'Imported ${outcome.importedCount}, '
+        '${outcome.blockedCount} left for next week',
+      );
+    }
+    showSmsImportLimitGateSheet(hostContext, resetDate: resetDate);
   }
 }
 

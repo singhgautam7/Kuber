@@ -95,7 +95,8 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
         .stageFromPaste(result);
     if (!hostContext.mounted) return;
     nav.pop(); // close paste sheet
-    showSmsReviewSheet(hostContext, staged);
+    // Paste-a-SMS is always free and never counts toward the weekly cap.
+    showSmsReviewSheet(hostContext, staged, countsTowardLimit: false);
   }
 
   @override

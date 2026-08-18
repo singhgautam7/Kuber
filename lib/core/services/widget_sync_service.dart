@@ -14,7 +14,9 @@ import '../../features/budgets/data/budget.dart';
 import '../../features/categories/data/category.dart';
 import '../../features/notes/data/kuber_note.dart';
 import '../../features/notes/utils/note_format.dart';
+import '../../features/pro/paywall/pro_state.dart';
 import '../../features/sms_import/data/sms_import_repository.dart';
+import '../../features/sms_import/data/sms_import_usage.dart';
 import '../../features/transactions/data/transaction.dart';
 import '../../features/upcoming_events/engine/event_aggregator.dart';
 import '../../features/settings/providers/settings_provider.dart';
@@ -206,8 +208,14 @@ class WidgetSyncService {
 
   Future<void> _syncSmsBadge() async {
     final count = await SmsImportRepository(_isar).countUnreviewed();
+    // How many of the detected messages a free user can still import this week;
+    // -1 for Pro/trial (unlimited). Written for forward-compat — the native
+    // caption still renders `count`; a later native pass surfaces `importable`.
+    final unlimited = ref.read(kuberProStateProvider).hasProAccess;
+    final importable = unlimited ? -1 : await SmsImportUsage.remainingThisWeek();
     await _save('sms_badge', {
       'count': count,
+      'importable': importable,
       'updatedMillis': _nowMs,
     }, 'SmsImportBadgeWidgetProvider');
   }

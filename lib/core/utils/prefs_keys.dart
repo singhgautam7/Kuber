@@ -93,6 +93,13 @@ class PrefsKeys {
   // with no cleanup job.
   static const askKuberWeekPrefix = 'ask_kuber_messages_week_';
 
+  // Kuber Pro — SMS Import weekly free-tier counter. Anchored 7-day window: the
+  // first counted import stamps `windowStart`; `windowCount` accumulates until
+  // the window lapses (now - windowStart >= 7d), then re-anchors on the next
+  // import. Self-resetting, no cleanup job. See sms_import/data/sms_import_usage.dart.
+  static const smsImportWindowStart = 'sms_import_window_start';
+  static const smsImportWindowCount = 'sms_import_window_count';
+
   // Kuber Pro — DEBUG-ONLY entitlement override (Settings > Developer >
   // Entitlement Override). Only ever read/written under kDebugMode; the code
   // path is tree-shaken out of release builds. Never present in production.

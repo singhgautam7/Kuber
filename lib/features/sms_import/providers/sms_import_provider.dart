@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../pro/paywall/pro_state.dart';
+import '../data/sms_import_usage.dart';
 import '../../transactions/data/transaction.dart';
 import '../../transactions/providers/transaction_provider.dart';
 import '../../transactions/services/suggestion_service.dart';
@@ -481,6 +483,68 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
     state = AsyncData(await _load());
   }
 
+  /// Free-tier gated single import. Pro/trial users import with no cap. Free
+  /// users are checked against the weekly allowance ([SmsImportUsage]); the paste
+  /// flow passes [countsTowardLimit] == false so it never counts. Returns whether
+  /// the row was imported or blocked by the cap.
+  ///
+  /// This is the authoritative gate: entitlement + usage live here so both the
+  /// review sheet and the batch sheet share one enforcement point.
+  Future<SmsSingleImportOutcome> importSingleGated(
+    SmsTransaction sms, {
+    required String name,
+    required double amount,
+    required String type,
+    required String accountId,
+    String? categoryId,
+    required DateTime date,
+    bool countsTowardLimit = true,
+  }) async {
+    final free = !ref.read(kuberProStateProvider).hasProAccess;
+    final gated = free && countsTowardLimit;
+    if (gated && await SmsImportUsage.atWeeklyLimit()) {
+      return SmsSingleImportOutcome.blocked;
+    }
+    await importSingle(
+      sms,
+      name: name,
+      amount: amount,
+      type: type,
+      accountId: accountId,
+      categoryId: categoryId,
+      date: date,
+    );
+    if (gated) await SmsImportUsage.increment(1);
+    return SmsSingleImportOutcome.imported;
+  }
+
+  /// Free-tier gated batch import. Pro/trial imports everything uncapped. Free
+  /// users import up to the remaining weekly allowance and leave the rest staged;
+  /// the returned counts let the caller show the limit sheet for the remainder.
+  Future<SmsBatchImportOutcome> importBatchGated(
+    List<SmsImportDraft> drafts,
+  ) async {
+    final free = !ref.read(kuberProStateProvider).hasProAccess;
+    if (!free) {
+      await importBatch(drafts);
+      return SmsBatchImportOutcome(
+        importedCount: drafts.length,
+        blockedCount: 0,
+      );
+    }
+    final allowance = await SmsImportUsage.remainingThisWeek();
+    final toImport =
+        drafts.length <= allowance ? drafts : drafts.take(allowance).toList();
+    if (toImport.isNotEmpty) {
+      await importBatch(toImport);
+      await SmsImportUsage.increment(toImport.length);
+    }
+    return SmsBatchImportOutcome(
+      importedCount: toImport.length,
+      blockedCount: drafts.length - toImport.length,
+    );
+  }
+
   Future<void> dismiss(SmsTransaction sms) async {
     await ref.read(smsImportRepositoryProvider).markDismissed(sms.id);
     state = AsyncData(await _load());
@@ -543,6 +607,23 @@ class SmsImportNotifier extends AsyncNotifier<SmsImportState> {
       await _runScan(ScanTrigger.backgroundRefresh);
     }
   }
+}
+
+/// Result of a gated single import: whether the row was imported or blocked by
+/// the free-tier weekly cap.
+enum SmsSingleImportOutcome { imported, blocked }
+
+/// Result of a gated batch import: how many rows were imported vs left staged
+/// because the free-tier weekly allowance ran out.
+class SmsBatchImportOutcome {
+  final int importedCount;
+  final int blockedCount;
+  const SmsBatchImportOutcome({
+    required this.importedCount,
+    required this.blockedCount,
+  });
+
+  bool get hasBlocked => blockedCount > 0;
 }
 
 /// Confirmed values for a single transaction in a batch import.

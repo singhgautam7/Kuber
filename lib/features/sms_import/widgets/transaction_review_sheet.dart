@@ -11,29 +11,44 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
+import '../../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
 import '../data/sms_import_repository.dart';
+import '../data/sms_import_usage.dart';
 import '../data/sms_transaction.dart';
 import '../providers/sms_account_mapping_provider.dart';
 import '../providers/sms_import_provider.dart';
 
 /// Opens the review sheet for a staged SMS. Returns true if the transaction was
-/// imported, false/null otherwise.
-Future<bool?> showSmsReviewSheet(BuildContext context, SmsTransaction sms) {
+/// imported, false/null otherwise. [countsTowardLimit] is false for the paste
+/// flow (always free) and true for list-tap imports (counted for free users).
+Future<bool?> showSmsReviewSheet(
+  BuildContext context,
+  SmsTransaction sms, {
+  bool countsTowardLimit = true,
+}) {
   return showModalBottomSheet<bool>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => TransactionReviewSheet(sms: sms),
+    builder: (_) => TransactionReviewSheet(
+      sms: sms,
+      countsTowardLimit: countsTowardLimit,
+    ),
   );
 }
 
 class TransactionReviewSheet extends ConsumerStatefulWidget {
   final SmsTransaction sms;
-  const TransactionReviewSheet({super.key, required this.sms});
+  final bool countsTowardLimit;
+  const TransactionReviewSheet({
+    super.key,
+    required this.sms,
+    this.countsTowardLimit = true,
+  });
 
   @override
   ConsumerState<TransactionReviewSheet> createState() =>
@@ -525,7 +540,7 @@ class _TransactionReviewSheetState
     }
 
     setState(() => _saving = true);
-    await notifier.importSingle(
+    final outcome = await notifier.importSingleGated(
       widget.sms,
       name: _name,
       amount: _amount,
@@ -533,7 +548,18 @@ class _TransactionReviewSheetState
       accountId: accountId,
       categoryId: _categoryId?.toString(),
       date: _date,
+      countsTowardLimit: widget.countsTowardLimit,
     );
+    if (!mounted) return;
+    if (outcome == SmsSingleImportOutcome.blocked) {
+      // Weekly free-tier cap hit: keep the sheet open and surface the limit.
+      setState(() => _saving = false);
+      final resetDate = await SmsImportUsage.resetDate();
+      if (mounted) {
+        showSmsImportLimitGateSheet(context, resetDate: resetDate);
+      }
+      return;
+    }
     if (mounted) Navigator.pop(context, true);
   }
 

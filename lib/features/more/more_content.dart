@@ -10,7 +10,6 @@ import '../notifications/providers/notification_provider.dart';
 import '../notifications/utils/deep_link_handler.dart';
 import '../notifications/widgets/notifications_sheet.dart';
 import '../pro/feature_gates/gate_sheet_advanced_analytics.dart';
-import '../pro/feature_gates/gate_sheet_sms_import.dart';
 import '../pro/feature_gates/pro_gate.dart';
 import '../tutorial/models/tutorial_step_keys.dart';
 import 'screens/more_screen.dart' show launchTutorialFromMore;
@@ -157,11 +156,7 @@ List<MoreSection> buildMoreSections(
           icon: Icons.sms_outlined,
           label: 'Import from SMS',
           subtitle: 'Read bank SMS for transactions',
-          onTap: () {
-            if (proGate(context, ref, showSmsImportGateSheet)) {
-              context.push('/more/sms-import');
-            }
-          },
+          onTap: () => context.push('/more/sms-import'),
         ),
         MoreEntry(
           icon: Icons.insert_chart_outlined_rounded,

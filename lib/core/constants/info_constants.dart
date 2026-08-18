@@ -633,6 +633,12 @@ class InfoConstants {
         description:
             'Messages are parsed on your phone. OTP and verification messages are always skipped.',
       ),
+      KuberInfoItem(
+        icon: Icons.workspace_premium_rounded,
+        title: '5 free imports a week',
+        description:
+            'Free accounts import up to 5 bank SMS a week. Pasting a single SMS is always free. Upgrade to Kuber Pro for unlimited imports.',
+      ),
     ],
   );
 
