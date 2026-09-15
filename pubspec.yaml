@@ -1,7 +1,7 @@
 name: kuber
 description: "Kuber, a local-first expense manager"
 publish_to: 'none'
-version: 5.5.2+56
+version: 5.5.5+57
 
 environment:
   sdk: ^3.11.1
@@ -98,5 +98,21 @@ flutter:
     # Pre-bundled Inter weights (subset to Latin + punctuation + currency/
     # arrow/symbol ranges). google_fonts loads these from assets before any
     # network fetch, so the primary UI font is available instantly and offline.
-    # Secondary fonts (Playfair Display, JetBrains Mono) still lazy-fetch.
+    # Playfair Display (About screen only) still lazy-fetches.
     - assets/google_fonts/
+    - assets/fonts/JetBrainsMono-OFL.txt
+
+  # JetBrains Mono is an engine-registered font, not a google_fonts runtime
+  # load: a runtime FontLoader.load parses on the UI thread and then fires
+  # fontsChange, which relayouts the whole route stack (measured 25 ms stall +
+  # 24 ms build on first open of the SMS Import screen). Use `monoFont()` from
+  # core/utils/locale_font.dart, never GoogleFonts.jetBrainsMono.
+  fonts:
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono-SemiBold.ttf
+          weight: 600

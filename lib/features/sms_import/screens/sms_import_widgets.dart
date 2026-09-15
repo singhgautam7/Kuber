@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
@@ -329,7 +328,7 @@ class SmsImportCard extends ConsumerWidget {
                     const SizedBox(width: 6),
                     Text(
                       sms.senderId,
-                      style: GoogleFonts.jetBrainsMono(
+                      style: monoFont(
                         fontSize: 10,
                         color: cs.onSurfaceVariant,
                       ),

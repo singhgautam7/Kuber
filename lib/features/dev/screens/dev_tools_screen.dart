@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
+import '../../pro/debug/billing_diagnostic_sheet.dart';
 import '../../pro/debug/entitlement_override_sheet.dart';
 import '../../pro/services/billing_diagnostics.dart';
 import '../../settings/widgets/settings_widgets.dart'; // for SquircleIcon
@@ -130,6 +131,17 @@ class DevToolsScreen extends ConsumerWidget {
                         label: 'Entitlement Override',
                         subtitle: 'Force Free / Trial / Monthly / Yearly / Lifetime',
                         onTap: () => showEntitlementOverrideSheet(context),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+                          size: 20,
+                        ),
+                      ),
+                      _SettingsTile(
+                        icon: Icons.fact_check_outlined,
+                        label: 'Billing Diagnostic',
+                        subtitle: 'Read-only queryPurchases() vs resolver',
+                        onTap: () => showBillingDiagnosticSheet(context),
                         trailing: Icon(
                           Icons.chevron_right_rounded,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.5),

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
@@ -189,7 +188,7 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
                             maxLines: null,
                             expands: true,
                             textAlignVertical: TextAlignVertical.top,
-                            style: GoogleFonts.jetBrainsMono(
+                            style: monoFont(
                               fontSize: 13,
                               height: 1.5,
                               color: cs.onSurface,
@@ -203,7 +202,7 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
                               hintText:
                                   'e.g. "INR 648.50 debited from A/c XX4521 '
                                   'on 05-Jun-26..."',
-                              hintStyle: GoogleFonts.jetBrainsMono(
+                              hintStyle: monoFont(
                                 fontSize: 13,
                                 height: 1.5,
                                 color:
@@ -326,7 +325,7 @@ class _ParsedPreview extends ConsumerWidget {
                   const TextSpan(text: 'Matched '),
                   TextSpan(
                     text: result.patternMatched,
-                    style: GoogleFonts.jetBrainsMono(color: cs.onSurface),
+                    style: monoFont(color: cs.onSurface),
                   ),
                 ],
               ),

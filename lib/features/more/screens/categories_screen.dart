@@ -3,7 +3,6 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/utils/breakpoints.dart';
@@ -1090,7 +1089,7 @@ class _GroupHeader extends StatelessWidget {
           if (serial != null) ...[
             Text(
               serial!,
-              style: GoogleFonts.jetBrainsMono(
+              style: monoFont(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,

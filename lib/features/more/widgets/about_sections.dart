@@ -227,7 +227,7 @@ class AboutKuberMeaningSection extends StatelessWidget {
                   ),
                   child: Text(
                     abL10n('SANSKRIT', lang).toUpperCase(),
-                    style: GoogleFonts.jetBrainsMono(
+                    style: monoFont(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,

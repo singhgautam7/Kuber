@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:open_filex/open_filex.dart';
 
@@ -440,7 +439,7 @@ class _TransactionDetailSheetState
                 ),
                 child: Text(
                   transaction.importedFromSms!,
-                  style: GoogleFonts.jetBrainsMono(
+                  style: monoFont(
                     fontSize: 12,
                     height: 1.55,
                     color: cs.onSurfaceVariant,

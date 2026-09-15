@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../main.dart' show onOpenBatchReadyProvider;
 import '../../../core/utils/locale_font.dart';
 import '../providers/sms_import_provider.dart';
 
@@ -26,7 +27,20 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeBackgroundScan());
+    // Wait until the app is interactive (cold-start splash gone) before touching
+    // the inbox: the platform-thread SMS read + isolate spawn otherwise land in
+    // the splash animation. If already interactive (widget re-created later),
+    // run now.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (ref.read(onOpenBatchReadyProvider)) {
+        _maybeBackgroundScan();
+        return;
+      }
+      ref.listenManual<bool>(onOpenBatchReadyProvider, (prev, ready) {
+        if (ready) _maybeBackgroundScan();
+      });
+    });
   }
 
   /// Deferred, gated background refresh. Reads the LIGHTWEIGHT info first; only

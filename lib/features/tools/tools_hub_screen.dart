@@ -69,7 +69,7 @@ class _ToolsHubScreenState extends ConsumerState<ToolsHubScreen> {
               ),
             SliverToBoxAdapter(
               child: KuberPageHeader(
-                title: context.l10n.moreToolsTitle,
+                title: context.l10n.menuCalculators,
                 description: tL10n(
                     'Quick calculations for everyday financial decisions', lang),
               ),

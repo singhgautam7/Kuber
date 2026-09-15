@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,13 +31,13 @@ final automaticBackupDueProvider = StateProvider<bool>((ref) {
   return false;
 });
 
-/// Set true by the recurring-loader when it hands off to Home. On a first-of-day
-/// cold start the app opens on the loader, so running KuberApp's full on-open
-/// maintenance batch (backup, widget sync, ledger/reminder passes, tab warm-up)
-/// in the first post-frame callback would saturate the main thread and stutter
-/// the loader animation. KuberApp instead waits on this flag and runs the batch
-/// once Home is actually shown. On a normal cold start (no loader) the batch
-/// still runs immediately post-first-frame.
+/// "The app is interactive": the cold-start splash has finished fading and, on
+/// a first-of-day start, the recurring-loader has handed off to Home. KuberApp
+/// runs its on-open maintenance batch (backup, widget sync, ledger/reminder
+/// passes, billing, tab warm-up) only once this is true, and any other
+/// on-app-open work (e.g. the Home SMS background scan) must gate on it too.
+/// Measured: running the batch in the first post-frame callback put a 31 ms
+/// widget-sync stall and a 25 ms tab warm-up stall inside the splash animation.
 final onOpenBatchReadyProvider = StateProvider<bool>((ref) {
   return false;
 });
@@ -82,6 +83,12 @@ void main() async {
   // future slow widget doesn't get silently absorbed by the home/analytics
   // progressive-reveal ramp. No-op in release; see FrameBudgetMonitor docs.
   FrameBudgetMonitor.attach();
+  // Bundled JetBrains Mono (pubspec fonts:) is OFL; surface its license in
+  // the licenses page like google_fonts does for the fonts it loads.
+  LicenseRegistry.addLicense(() async* {
+    final text = await rootBundle.loadString('assets/fonts/JetBrainsMono-OFL.txt');
+    yield LicenseEntryWithLineBreaks(const ['JetBrains Mono'], text);
+  });
   await _bootstrap();
 }
 

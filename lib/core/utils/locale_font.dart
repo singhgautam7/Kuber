@@ -7,6 +7,31 @@ class AppLocale {
   static Locale current = const Locale('en');
 }
 
+/// Monospace style for raw SMS text, sender ids, hashes and similar. Backed by
+/// the JetBrains Mono weights bundled in pubspec `fonts:`, so the engine has
+/// it from the first frame. Do not use GoogleFonts.jetBrainsMono: a runtime
+/// font load parses on the UI thread and relayouts every route on arrival.
+TextStyle monoFont({
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+  double? letterSpacing,
+  double? height,
+  TextDecoration? decoration,
+  List<FontFeature>? fontFeatures,
+}) {
+  return TextStyle(
+    fontFamily: 'JetBrainsMono',
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    letterSpacing: letterSpacing,
+    height: height,
+    decoration: decoration,
+    fontFeatures: fontFeatures,
+  );
+}
+
 /// Returns a TextStyle in the script-appropriate family for `locale`,
 /// matching Inter's weight scale across all four families. The
 /// `height` value is family-aware.

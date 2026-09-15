@@ -326,20 +326,24 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         key: TutorialStepKeys.analyticsPage,
         slivers: [
           // ── Header (always eager) ─────────────────────────────────
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: KuberSpacing.xl),
-                // const KuberAppBar(title: 'Analytics'),
-                KuberPageHeader(
-                  title: context.l10n.analyticsTitle,
-                  description: context.l10n.analyticsDescription,
-                ),
-                const TopFilterRow(),
-                const SizedBox(height: KuberSpacing.lg),
-              ]),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: KuberSpacing.xl),
+          ),
+          // Same structure as History: KuberPageHeader supplies its own
+          // horizontal padding, so it must not sit inside the body's
+          // SliverPadding or the title drifts right of the content edge.
+          SliverToBoxAdapter(
+            child: KuberPageHeader(
+              title: context.l10n.analyticsTitle,
+              description: context.l10n.analyticsDescription,
             ),
+          ),
+          const SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            sliver: SliverToBoxAdapter(child: TopFilterRow()),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: KuberSpacing.lg),
           ),
 
           // ── Analytics widgets (dynamic order + visibility from editor) ─

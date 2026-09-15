@@ -20,15 +20,18 @@ List<DateGroup> groupTransactionsByDate(List<Transaction> transactions) {
   // Filter out income legs of transfers (show only expense/FROM leg)
   final displayList = transactions.validForFeed.toList();
 
-  final groups = <String, List<Transaction>>{};
+  // Int day key (yyyymmdd) rather than an ISO string round-trip: this runs
+  // over every filtered transaction each time History re-derives its view.
+  final groups = <int, List<Transaction>>{};
   for (final t in displayList) {
-    final key = DateTime(t.createdAt.year, t.createdAt.month, t.createdAt.day)
-        .toIso8601String();
+    final c = t.createdAt;
+    final key = c.year * 10000 + c.month * 100 + c.day;
     groups.putIfAbsent(key, () => []).add(t);
   }
 
   final result = groups.entries.map((e) {
-    final date = DateTime.parse(e.key);
+    final key = e.key;
+    final date = DateTime(key ~/ 10000, (key ~/ 100) % 100, key % 100);
     final txns = e.value..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     double dayTotal = 0;

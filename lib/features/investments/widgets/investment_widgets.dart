@@ -20,7 +20,6 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -123,7 +122,7 @@ class PortfolioHero extends ConsumerWidget {
                       ),
                       child: Text(
                         monthLabel,
-                        style: GoogleFonts.jetBrainsMono(
+                        style: monoFont(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: cs.onSurfaceVariant,

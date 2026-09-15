@@ -65,26 +65,47 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // On-open processing deferred to after the first frame so it never delays
     // cold start. Uses ProviderScope's overrides (Isar etc), so it must run
     // after the scope is in place.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // On a first-of-day cold start the app opens on the recurring/backup
-      // loader, not Home. Running the heavy on-open batch here would fight the
-      // loader's animation for the main thread (the visible "loader lags before
-      // Home" bug). Defer it until the loader hands off to Home; on a normal
-      // cold start (Home first) run it immediately as before.
-      final startedOnLoader =
-          ref.read(initialLocationProvider) == '/recurring-loader';
-      if (startedOnLoader) {
-        ref.listenManual<bool>(onOpenBatchReadyProvider, (prev, next) {
-          if (next) _runOnOpenBatch();
-        });
-      } else {
-        _runOnOpenBatch();
-      }
-    });
+    // On a first-of-day cold start the app opens on the recurring/backup
+    // loader, not Home, and the loader flips `onOpenBatchReadyProvider` when
+    // it hands off. Wait for that too; otherwise the splash alone gates the
+    // batch (see _onSplashFinished).
+    _loaderHandedOff =
+        ref.read(initialLocationProvider) != '/recurring-loader';
+    if (!_loaderHandedOff) {
+      ref.listenManual<bool>(onOpenBatchReadyProvider, (prev, next) {
+        if (next) {
+          _loaderHandedOff = true;
+          _maybeRunOnOpenBatch();
+        }
+      });
+    }
   }
 
-  /// The post-first-frame on-open maintenance batch. Best-effort; each item is
-  /// individually guarded. Runs once per cold start, after Home's first frame.
+  bool _splashFinished = false;
+  late bool _loaderHandedOff;
+  bool _onOpenBatchRan = false;
+
+  /// Runs the on-open batch once, and only after the cold-start splash has
+  /// fully faded AND (first-of-day) the loader has handed off to Home. Anything
+  /// earlier competes with the splash / loader animation for the UI thread.
+  void _maybeRunOnOpenBatch() {
+    if (_onOpenBatchRan || !_splashFinished || !_loaderHandedOff) return;
+    _onOpenBatchRan = true;
+    // Publish "interactive" for other on-app-open work (Home SMS scan etc).
+    ref.read(onOpenBatchReadyProvider.notifier).state = true;
+    _runOnOpenBatch();
+  }
+
+  void _onSplashFinished() {
+    if (!mounted) return;
+    setState(() => _showColdSplash = false);
+    _splashFinished = true;
+    _maybeRunOnOpenBatch();
+  }
+
+  /// The on-open maintenance batch. Best-effort; each item is individually
+  /// guarded. Runs once per cold start, after the splash has finished (see
+  /// _maybeRunOnOpenBatch).
   void _runOnOpenBatch() {
     ref.read(budgetServiceProvider).checkAllOnAppOpen();
     _runOnOpenLedgerReminders();
@@ -95,9 +116,10 @@ class _KuberAppState extends ConsumerState<KuberApp>
     _runWidgetSync();
     _initPurchases();
     _initPromoConfig();
-    // Warm the non-Home tabs' providers ~1.5s later — late enough that Home has
-    // finished its own hydration, early enough that a user tapping Analytics or
-    // History hits cached data.
+    // Warm the non-Home tabs' providers ~1.5s later — late enough that Home's
+    // reveal and the batch above have settled, early enough that a user tapping
+    // Analytics or History hits cached data. Must never overlap the splash
+    // fade-out: the warm-up blocks the UI isolate ~25 ms on a 6k-row ledger.
     Future.delayed(const Duration(milliseconds: 1500), _warmTabProviders);
   }
 
@@ -513,11 +535,7 @@ class _KuberAppState extends ConsumerState<KuberApp>
                       if (_showColdSplash)
                         Positioned.fill(
                           child: ColdStartSplash(
-                            onFinished: () {
-                              if (mounted) {
-                                setState(() => _showColdSplash = false);
-                              }
-                            },
+                            onFinished: _onSplashFinished,
                           ),
                         ),
                     ],

@@ -1,7 +1,6 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:isar_community/isar.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -513,9 +512,9 @@ class _DbCollectionScreenState extends ConsumerState<DbCollectionScreen> {
         label: Expanded(
           child: Text(
             key,
-            style: GoogleFonts.jetBrainsMono(
+            style: monoFont(
               fontSize: 13,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
             ),
             softWrap: false,

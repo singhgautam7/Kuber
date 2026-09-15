@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
@@ -67,7 +66,7 @@ void showRawSmsSheet(
         ),
         child: Text(
           rawSms,
-          style: GoogleFonts.jetBrainsMono(
+          style: monoFont(
             fontSize: 12.5,
             height: 1.55,
             color: cs.onSurface,

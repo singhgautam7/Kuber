@@ -87,7 +87,7 @@ class AboutScreen extends ConsumerWidget {
                                   ),
                                   child: Text(
                                     "v$version",
-                                    style: GoogleFonts.jetBrainsMono(
+                                    style: monoFont(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: cs.onSurface,
@@ -580,7 +580,7 @@ class _DeveloperLetter extends StatelessWidget {
                               children: [
                                 Text(
                                   "singhgautam.com",
-                                  style: GoogleFonts.jetBrainsMono(
+                                  style: monoFont(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: cs.onSurfaceVariant,

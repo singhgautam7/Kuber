@@ -1,7 +1,6 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -79,7 +78,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
                 flex: 2,
                 child: Text(
                   entry.key,
-                  style: GoogleFonts.jetBrainsMono(
+                  style: monoFont(
                     fontSize: 13,
                     color: cs.onSurfaceVariant,
                   ),
@@ -125,7 +124,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
           ),
           child: Text(
             value.toString(),
-            style: GoogleFonts.jetBrainsMono(
+            style: monoFont(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: value ? Colors.green : Colors.red,
@@ -168,7 +167,7 @@ class _RecordDetailSheetState extends State<RecordDetailSheet> {
       ),
       child: SelectableText(
         jsonStr,
-        style: GoogleFonts.jetBrainsMono(
+        style: monoFont(
           fontSize: 13,
           color: cs.onSurface,
         ),

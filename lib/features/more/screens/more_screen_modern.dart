@@ -27,7 +27,6 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
@@ -285,7 +284,7 @@ class _GroupHead extends StatelessWidget {
         children: [
           Text(
             num,
-            style: GoogleFonts.jetBrainsMono(
+            style: monoFont(
               fontSize: 10.5,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,

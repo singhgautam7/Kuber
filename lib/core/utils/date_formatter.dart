@@ -3,16 +3,32 @@ import 'package:kuber/l10n/app_localizations.dart';
 import 'package:kuber/core/utils/locale_font.dart';
 
 class DateFormatter {
+  // groupHeader runs once per day-group when History derives its list (over
+  // a thousand groups on a multi-year ledger). Building a DateFormat and an
+  // AppLocalizations per call dominated that pass, so cache both per locale.
+  static String? _headerLocale;
+  static late AppLocalizations _headerL10n;
+  static late DateFormat _headerOtherYear;
+  static late DateFormat _headerThisYear;
+
   static String groupHeader(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dateOnly = DateTime(date.year, date.month, date.day);
-    final l10n = lookupAppLocalizations(AppLocale.current);
+    final localeKey = '${AppLocale.current}|${Intl.defaultLocale}';
+    if (_headerLocale != localeKey) {
+      _headerLocale = localeKey;
+      _headerL10n = lookupAppLocalizations(AppLocale.current);
+      _headerOtherYear = DateFormat('d MMM yyyy');
+      _headerThisYear = DateFormat('EEE, d MMM');
+    }
 
-    if (dateOnly == today) return l10n.todayLabel;
-    if (dateOnly == today.subtract(const Duration(days: 1))) return l10n.yesterdayLabel;
-    if (date.year != now.year) return DateFormat('d MMM yyyy').format(date);
-    return DateFormat('EEE, d MMM').format(date);
+    if (dateOnly == today) return _headerL10n.todayLabel;
+    if (dateOnly == today.subtract(const Duration(days: 1))) {
+      return _headerL10n.yesterdayLabel;
+    }
+    if (date.year != now.year) return _headerOtherYear.format(date);
+    return _headerThisYear.format(date);
   }
 
   static String time(DateTime date) {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -917,7 +916,7 @@ class _LearnedBanner extends StatelessWidget {
                   ),
                   TextSpan(
                     text: sender,
-                    style: GoogleFonts.jetBrainsMono(color: cs.onSurface),
+                    style: monoFont(color: cs.onSurface),
                   ),
                 ],
               ),
@@ -1014,7 +1013,7 @@ class _SmsDisclosure extends StatelessWidget {
             ),
             child: Text(
               sms.rawSms,
-              style: GoogleFonts.jetBrainsMono(
+              style: monoFont(
                 fontSize: 12,
                 height: 1.55,
                 color: cs.onSurfaceVariant,

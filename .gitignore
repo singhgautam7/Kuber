@@ -47,7 +47,6 @@ app.*.map.json
 # specs are local working files, except the checked-in code review + plan
 /specs/*
 !/specs/code-review/
-/CLAUDE.md
 /design_handoff_bill_splitter
 
 /android/key.properties

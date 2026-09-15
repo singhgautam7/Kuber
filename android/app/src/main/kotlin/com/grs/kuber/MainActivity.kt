@@ -8,6 +8,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.DocumentsContract
 import android.provider.Telephony
 import android.security.keystore.KeyGenParameterSpec
@@ -22,6 +24,7 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.security.KeyStore
+import java.util.concurrent.Executors
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -35,6 +38,14 @@ class MainActivity : FlutterFragmentActivity() {
     private val secureChannelName = "com.grs.kuber/secure_screen"
     private val keystoreChannelName = "com.grs.kuber/cards_keystore"
     private val pickFolderRequest = 24017
+
+    // Inbox reads run here, not on the platform thread: a ContentResolver query
+    // over a large SMS inbox blocks the main looper, and on Android that is the
+    // thread Flutter's vsync arrives on, so the UI freezes even though the Dart
+    // isolate is idle. Results are posted back to the main looper because
+    // MethodChannel.Result must be completed there.
+    private val smsExecutor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var pendingPickResult: MethodChannel.Result? = null
 
     // Kuber Cards biometric-convenience PIN store (Android Keystore).
@@ -50,6 +61,11 @@ class MainActivity : FlutterFragmentActivity() {
         // only, never the deprecated bar-color setters).
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        smsExecutor.shutdown()
+        super.onDestroy()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -303,41 +319,48 @@ class MainActivity : FlutterFragmentActivity() {
      * we return an error.
      */
     private fun readInbox(sinceMillis: Long, result: MethodChannel.Result) {
-        try {
-            val messages = mutableListOf<Map<String, Any?>>()
-            val projection = arrayOf(
-                Telephony.Sms.ADDRESS,
-                Telephony.Sms.BODY,
-                Telephony.Sms.DATE
-            )
-            val selection = "${Telephony.Sms.DATE} >= ?"
-            val selectionArgs = arrayOf(sinceMillis.toString())
-            contentResolver.query(
-                Telephony.Sms.Inbox.CONTENT_URI,
-                projection,
-                selection,
-                selectionArgs,
-                "${Telephony.Sms.DATE} DESC"
-            )?.use { cursor ->
-                val addressIdx = cursor.getColumnIndex(Telephony.Sms.ADDRESS)
-                val bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY)
-                val dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE)
-                while (cursor.moveToNext()) {
-                    messages.add(
-                        mapOf(
-                            "address" to cursor.getString(addressIdx),
-                            "body" to cursor.getString(bodyIdx),
-                            "date" to cursor.getLong(dateIdx)
-                        )
-                    )
-                }
+        smsExecutor.execute {
+            try {
+                val messages = queryInbox(sinceMillis)
+                mainHandler.post { result.success(messages) }
+            } catch (security: SecurityException) {
+                mainHandler.post { result.error("permission_denied", security.message, null) }
+            } catch (error: Throwable) {
+                mainHandler.post { result.error("read_error", error.message, null) }
             }
-            result.success(messages)
-        } catch (security: SecurityException) {
-            result.error("permission_denied", security.message, null)
-        } catch (error: Throwable) {
-            result.error("read_error", error.message, null)
         }
+    }
+
+    private fun queryInbox(sinceMillis: Long): List<Map<String, Any?>> {
+        val messages = mutableListOf<Map<String, Any?>>()
+        val projection = arrayOf(
+            Telephony.Sms.ADDRESS,
+            Telephony.Sms.BODY,
+            Telephony.Sms.DATE
+        )
+        val selection = "${Telephony.Sms.DATE} >= ?"
+        val selectionArgs = arrayOf(sinceMillis.toString())
+        contentResolver.query(
+            Telephony.Sms.Inbox.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            "${Telephony.Sms.DATE} DESC"
+        )?.use { cursor ->
+            val addressIdx = cursor.getColumnIndex(Telephony.Sms.ADDRESS)
+            val bodyIdx = cursor.getColumnIndex(Telephony.Sms.BODY)
+            val dateIdx = cursor.getColumnIndex(Telephony.Sms.DATE)
+            while (cursor.moveToNext()) {
+                messages.add(
+                    mapOf(
+                        "address" to cursor.getString(addressIdx),
+                        "body" to cursor.getString(bodyIdx),
+                        "date" to cursor.getLong(dateIdx)
+                    )
+                )
+            }
+        }
+        return messages
     }
 
     private fun pickFolder(result: MethodChannel.Result) {

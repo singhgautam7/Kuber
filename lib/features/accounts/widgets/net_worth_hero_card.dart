@@ -15,7 +15,6 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 
 import '../../../core/theme/app_theme.dart';
@@ -297,7 +296,7 @@ class _MonthPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: GoogleFonts.jetBrainsMono(
+        style: monoFont(
           fontSize: 10,
           fontWeight: FontWeight.w500,
           color: cs.onSurfaceVariant,
@@ -503,7 +502,7 @@ class _SparklinePainter extends CustomPainter {
     if (labels.length == data.length) {
       final tp = TextPainter(textDirection: TextDirection.ltr);
       final style = TextStyle(
-        fontFamily: GoogleFonts.jetBrainsMono().fontFamily,
+        fontFamily: 'JetBrainsMono',
         fontSize: 9,
         color: tickColor,
         letterSpacing: 0.3,

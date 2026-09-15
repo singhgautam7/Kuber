@@ -1,333 +1,257 @@
-# Plan — SMS Import: Pro-gated → free with 5 imports/week
+# Plan — four fixes (Analytics header, Tools title, CLAUDE.md, cold-start jank)
 
-Goal: SMS Import becomes fully accessible to everyone. The **import-to-transaction**
-action is capped at **5 per rolling week** for free users; Pro/trial is unlimited.
-Paste-a-SMS and inbox scanning/staging stay free and uncapped.
+Status legend: `[ ]` planned, `[x]` done, `[?]` waiting on confirmation.
 
 ---
 
-## Locked decisions (confirmed)
+## Bug 1 — Analytics title misaligned `[x]` (verified on device, Obsidian + Alabaster)
 
-1. **Storage: SharedPreferences** (like `AskKuberUsage`), **not** Isar. No new
-   `@collection`, no schema registration, no `build_runner`.
-2. **Reset: anchored 7-day window** — first import stamps a reset anchor; window runs 7
-   days, then re-anchors. Stored as an anchor timestamp + a count (not ISO-week buckets,
-   not a per-message list).
-3. **No on-screen counter** — strict mirror of Ask Kuber. The limit sheet is the only
-   surfaced signal. (Item 6 dropped.)
-4. **Native widget deferred** — Flutter writes an `importable` field into the widget prefs
-   for forward-compat, but `SmsImportBadgeWidgetProvider.kt` caption is left unchanged for
-   v1.
+### Finding
+`KuberPageHeader` (`lib/shared/widgets/kuber_page_header.dart:30`) already pads
+itself `EdgeInsets.fromLTRB(20, 8, 20, 24)`. Every screen in the app renders it as a
+bare `SliverToBoxAdapter` / child, *except* Analytics.
 
-Sections below are updated to match these choices.
+- History (`transaction_list_screen.dart:102`): `SliverToBoxAdapter(child: KuberPageHeader(...))`
+  → title at 20 px; filter row / summary / cards at `KuberSpacing.lg` (16 px).
+- Analytics (`analytics_screen.dart:329-343`): header **and** `TopFilterRow` nested in
+  `SliverPadding(horizontal: KuberSpacing.lg)` → title at 16 + 20 = **36 px**, body at 16 px.
+  `advanced_analytics_landing.dart:47` even has a comment warning about exactly this.
 
----
-
-## 0. Important findings the brief did not anticipate (read first)
-
-These changed the shape of the work; all now resolved by the locked decisions above.
-
-### F1. "Mirror Ask Kuber exactly" conflicts with "new Isar collection" **[DECIDE]**
-`ask_kuber/data/ask_kuber_usage.dart` does **not** use Isar and is **not** a sliding
-window. It is a static class over **SharedPreferences**, keyed per **ISO calendar week**
-(`ask_kuber_messages_week_YYYY-Www`). It resets on Monday automatically because a new
-week reads an absent key as 0. There is no `lastResetAt`, no `currentWeekCount`, no Isar
-row.
-
-The brief instead specifies a **new Isar collection `SmsImportUsage` (id 0)** with
-`lastResetAt` + `currentWeekCount`, and the testing checklist says to "backdate the reset
-timestamp **via Isar**." Those two directions are mutually exclusive.
-
-- **Recommendation: follow the brief — build the Isar collection.** It is specified in
-  three places (behavior #3, the DO-NOT-CHANGE list, the testing checklist), so it is the
-  clearer intent. I will interpret "mirror Ask Kuber" as *mirror the limit semantics*
-  (5/week free, unlimited Pro, check-before-action, increment-after, silent for Pro), not
-  the storage mechanism.
-- Alternative if you'd rather truly mirror Ask Kuber: skip Isar, add a
-  `sms_import_week_` SharedPreferences prefix and copy `AskKuberUsage` almost verbatim.
-  Less code, no schema migration, but diverges from the brief's field spec and the
-  "backdate via Isar" test step.
-
-### F2. "Rolling / sliding window" vs the two-field schema **[DECIDE]**
-A true sliding window ("imports in the last 7 days") needs a timestamp per import. The
-specified fields (`lastResetAt` + a single `currentWeekCount`) can only express an
-**anchored fixed window**: the first import stamps `lastResetAt = now`; the window runs 7
-days from there; once `now - lastResetAt >= 7 days`, the count resets to 0 and re-anchors
-on the next import.
-
-- **Recommendation: anchored 7-day window** (matches the two fields exactly, gives a
-  concrete reset date for the limit sheet: `lastResetAt + 7 days`). I'll document it as
-  "rolling weekly cap," not a literal per-message sliding window.
-- If you want a literal sliding window, the schema needs a `List<DateTime> importTimes`
-  instead of a single count — say the word and I'll spec that instead.
-
-### F3. Ask Kuber shows **no** on-screen counter **[DECIDE]**
-The brief's item 6 says "mirror Ask Kuber's counter." Ask Kuber has **no visible
-counter** — it silently blocks the 6th send. Strict mirroring = no counter, but the
-testing checklist expects "counter shows 4 remaining this week."
-
-- **Recommendation: add a small counter to the SMS Import screen** (free users only; Pro
-  sees nothing or "Unlimited"), because the checklist and item 6 clearly want it. This is
-  additive and low-risk. Placement below the page header, in the existing `_footer`
-  muted-text style. I'll note in code that this intentionally exceeds Ask Kuber's UI.
-
-### F4. Background scan does **not** auto-import today (simplifies item 5)
-`SmsImportNotifier._runScan` only **stages** parsed rows as `unreviewed`
-(`repo.insertNew`). It never creates a `Transaction`. So there is no background
-auto-import to cap. "Detected/pending" == unreviewed staging, which is scanning, not
-importing, and stays free per the DO-NOT-CHANGE rule ("ability to scan is different from
-importing"). The cap only ever bites at the **user-initiated import** action (review
-sheet / batch sheet). Item 5 is therefore satisfied by design: excess pending rows simply
-remain in the Unreviewed tab. No change to `_runScan` needed.
-
-### F5. Paste and single-list-import share one code path
-Paste → `stageFromPaste` → `showSmsReviewSheet` → `_addToKuber` → `importSingle`.
-List card tap → `showSmsReviewSheet` → `_addToKuber` → `importSingle`.
-Batch → `importBatch`.
-
-Paste is separate from **bulk** import (never touches `importBatch`), but it shares the
-review sheet + `importSingle` with normal single imports. To keep paste free while
-list-imports count, I'll thread a `countsTowardLimit` flag through
-`showSmsReviewSheet` → `TransactionReviewSheet` → `importSingle` (default `true`; paste
-passes `false`). Confirmed: paste is a distinct entry, so the flag cleanly separates it.
+### Change
+`analytics_screen.dart` only: move `KuberPageHeader` out of the `SliverPadding` into its
+own `SliverToBoxAdapter` (identical to History). `TopFilterRow` has no padding of its own,
+so it stays inside a `SliverPadding(lg)` like History's filter row. No component changes,
+no magic numbers.
 
 ---
 
-## 1. Where SMS Import is gated today (entry points to open up)
+## Bug 2 — Tools hub titled "Signature" `[x]` (verified on device, Obsidian + Alabaster)
 
-| # | Site | Current | Change |
+### Finding
+`tools_hub_screen.dart:72` renders `context.l10n.moreToolsTitle`. That key is the
+**More-tab section header** (`app_en.arb:1472`), renamed "More" → "Signature" in
+`29671fb`. Only two consumers: `more_content.dart:144` (correct) and the Tools hub (wrong).
+
+Siblings checked, all pass their own titles, none reuse the key:
+Ask Kuber (KuberAppBar), SMS Import `'Import from\nSMS'`, Kuber Notes `'Kuber Notes'`,
+Kuber Cards `'Kuber Cards'`, Quick Add `'Quick Add'`.
+
+### Change
+`tools_hub_screen.dart:72` → `context.l10n.menuCalculators` ("Calculators & Tools",
+already translated in all 9 ARBs, it's the More-tab tile label for this page). No ARB edits.
+
+---
+
+## Bug 3 — CLAUDE.md `[x]` (note: `.gitignore:50` ignores `/CLAUDE.md`; un-ignore if it should ship)
+
+Existing `CLAUDE.md` is short and Vault-correct but missing: product positioning, shared
+component inventory, feature map / Pro model, spec locations, hard rules the brief lists.
+Rewrite in place (scannable sections, reference specs by path, no spec duplication).
+
+Facts verified from the repo, not invented:
+- Commands: `flutter run`, `flutter run -d chrome`, `flutter build apk`, `flutter test`,
+  `flutter analyze`, `dart run build_runner build`, `flutter gen-l10n` (l10n.yaml present),
+  `flutter run --dart-define=KUBER_UNLOCK_PRO=true` (from `specs/pro-gating-enabled.md`).
+- Shared components that actually exist: `KuberAppBar`, `KuberPageHeader`, `AppButton`
+  (there is no `KuberButton` class), `KuberBottomSheet`, `InfoTable`, `SheetButtonSection`,
+  `KuberInfoBottomSheet` + `KuberInfoConfig`, `showKuberSnackBar`, `KuberEmptyState`,
+  `KuberSkeleton`. `enableSnap` does not exist in the codebase; not documented.
+
+---
+
+## Bug 4 — Cold-start / SMS-import jank `[x]` diagnosed, fixed, re-measured
+
+### Architecture (what actually runs, from code reading)
+
+**Before `runApp` (native splash showing, no custom splash yet)** — `main.dart:_bootstrap`:
+Isar open → seed → migrations → `ensureEntitlementBootstrap` → SharedPreferences →
+`NotificationService.init` → `RecurringProcessor.processAll()` → backup-due query →
+`maybeSeedWelcomeStory`. All awaited on the main isolate. This delays time-to-first-frame
+but **cannot stutter the custom splash** (it hasn't been built yet).
+
+**Custom splash** = `ColdStartSplash` overlay (`cold_start_splash.dart`), 400 ms fade+rise
+entrance, 900 ms hold, 320 ms fade-out. It is painted **on top of Home**, which is built
+from frame 1. So splash stutter == anything that blocks the UI thread in the first
+~1.6 s: Home's first build + provider hydration + the on-open batch.
+
+**First post-frame callback** (`app.dart:63-82`) on a normal cold start fires
+`_runOnOpenBatch()` **immediately** — 9 concurrent tasks during the splash entrance:
+budget check, ledger reminders, due backup, SMS cleanup, reminder maintenance,
+credit-card reminders, **widget sync (loads ALL transactions + categories)**, purchase init
+(Play Billing connect + `queryPurchases`), promo config (HTTP). Then tab pre-warm at +1.5 s.
+The code comment at `main.dart:34` already acknowledges this batch "saturates the main
+thread" — the loader path was fixed, the plain Home path was not.
+
+**Also in frame 1's post-frame** — `SmsImportHomeWidget` (`sms_import_home_widget.dart:29`)
+starts a background SMS scan if last scan > 30 min ago (true on every first-of-day open):
+platform-thread inbox read + `Isolate.spawn`.
+
+**Home hydration** — `transactionListProvider` = `isar.transactions.where()...findAll()`
+(async, but Isar deserialises 6000 objects on the main isolate when the future resolves),
+then `monthlySummaryProvider`, `homeIncomeExpenseProvider`, `homeWidgetsProvider`, etc.
+derive from it synchronously.
+
+**SMS Import page, first open**:
+1. `readInbox` (`MainActivity.kt:305`) runs the ContentResolver query, builds
+   `List<Map>` and the StandardMessageCodec encode **synchronously on the Android
+   platform thread**. On Android, Flutter's vsync comes from Choreographer on that thread,
+   so blocking it freezes frames even though the Dart UI isolate is idle. Dart-side decode
+   of N maps then lands on the UI isolate. This is my prime suspect for the SMS page.
+2. `SmsScanController.run` copies the whole raw list into a new isolate (main-isolate cost
+   proportional to inbox size).
+3. Regex parse is already off-thread (`sms_scan_runner.dart`) — not a suspect.
+4. `GoogleFonts.jetBrainsMono` in the list rows (`sms_import_widgets.dart:332`,
+   `sms_badge.dart:70`) is **not bundled** (only Inter is). First use = cache-file read +
+   main-isolate font parse + relayout of every visible row. Classic "first open only" jank.
+5. `_toStagingRows` does one Isar `getForSender` per parsed message (async N+1; not a
+   frame blocker, noted only).
+
+### STEP A — measurement plan (to run next, before any fix)
+Device: OnePlus CPH2723 (6000+ txns) via `~/Library/Android/sdk/platform-tools/adb`.
+1. `flutter run --profile --trace-startup -d 3be442` → `build/start_up_info.json`
+   (engine init / first frame / first useful frame).
+2. Temporary `SchedulerBinding.addTimingsCallback` logging frames > 16.7 ms with a
+   `KUBER_JANK` prefix + `Timeline.startSync` markers around each `_runOnOpenBatch` item,
+   Home first build, `transactionListProvider` resolve, `readRawInbox`, `Isolate.spawn`,
+   font load. All removed before finishing.
+3. Cold start = `adb shell am force-stop com.grs.kuber` then launch. Capture 3 runs.
+4. SMS page: cold start, wait for idle, open Import from SMS, capture the same log.
+5. Results table (before) goes in the section below; after-fix table added post-fix.
+
+### STEP A results — BEFORE (measured 2026-09-15, OnePlus CPH2723, 120 Hz, profile build, 5,899 txns)
+
+Method: temporary `lib/core/utils/perf_probe.dart` (process-clock probes, frame timings
+> 12 ms with `vsyncOverhead`, and a 2 ms timer that logs any UI-isolate stall > 12 ms).
+Cold start = `am force-stop` then `am start -W`. 5 runs; run 4 shown, others consistent.
+
+**Cold start timeline (ms from `main()`)**
+
+| t | event |
+|---|---|
+| 0 → 49 | `_bootstrap` total: Isar open 36, seed 6, migrations/entitlement/prefs/notifications/recurring/welcome 7. **Not a problem.** |
+| 49 | `runApp()`; `am start` TotalTime 450–585 ms, so ~430 ms is native process + engine init (native splash, untouchable) |
+| 55 | first frame; `_runOnOpenBatch` fires all 9 tasks; Home `SmsImportHomeWidget` also fires (scan gated to >30 min since last) |
+| 67 → 82 | widget sync re-loads all 5,899 txns (2nd full load); `transactionListProvider.getAll` 90 → 98 (8 ms, async) |
+| 55 → 155 | **frame#1: 100 ms, raster 65 ms** (20–111 across runs). First raster of Home under the opaque splash = Impeller/Vulkan pipeline + first paint. Raster thread, not Dart. |
+| 60 → 270 | **frame#2: 118 ms, build 3.6 ms, raster 11 ms**: queued behind frame#1's raster. Same root as frame#1. |
+| 172 → 365 | Home rebuilds every ~15 ms (progressive-reveal ramp) hidden under the splash; builds 0–8 ms each; frames #9/#12 at 14/19 ms |
+| **236 → 267** | **UI isolate blocked 31 ms inside `_syncCharts`** (widget sync; 6 `_bucket` passes with per-txn `DateTime` allocation + 5 PNG renders). Lands mid splash entrance (entrance = 55 → 455). → frame#8 22 ms, `vsyncWait 18.5` |
+| 255 → 276 | (run 1 only, scan due) `readRawInbox` 21 ms on the **platform thread** even for an incremental query returning 0 msgs; `Isolate.spawn` 4 ms. Run 1 had extra frames #8 37 ms and #11 23 ms vs runs without the scan |
+| 1556 | `_warmTabProviders` → **UI isolate blocked 25 ms** (analytics O(N) compute). Splash fade-out runs 1355 → 1675, so this lands in the middle of the fade. |
+| 1673 | splash `onFinished` → frame#37 15 ms (`vsyncWait 14.4`, overlay removal + Home reveal) |
+
+Jank frames in the splash window (55 → 1675 ms): 5–7 per run (2 unavoidable first-raster,
+1 from `_syncCharts`, 1–2 from the reveal ramp, 1 from warm-up, +2 when the SMS scan runs).
+
+**Not the cause (ruled out):** Isar open/migrations (36 ms, before any UI), sync Isar
+reads (none on transactions), `getAll` deserialisation (8 ms async, no stall logged),
+purchases/promo/backup/reminder tasks (all < 10 ms, no stalls), Home first build (2–3 ms).
+
+**Side finding:** `didChangeAppLifecycleState(resumed)` runs a full widget sync on *every*
+resume; measured 3 × 13–15 ms stalls + `accountBalances` 52 ms wall when a deep link
+resumed the app. Same root as `_syncCharts` above.
+
+**SMS Import, true first open in a session** (cold start → idle → tap More → Import from SMS;
+provider cold, no scan due):
+
+| t (ms) | event |
+|---|---|
+| 0 | `initState`; +3 first frame; +7 `smsImportProvider` build (3 `getByStatus` reads + prefs + permission) |
+| +15 → +28 | UI isolate stall 13 ms |
+| +52 → +77 | **UI isolate stall 25 ms** |
+| frames #157–161 | **31 / 25 / 44 / 20 / 18 ms** (#159 build = 24 ms) — the visible stutter |
+
+Cause: `GoogleFonts.jetBrainsMono` (3 weights: regular/500/600, confirmed present in the
+app's runtime font cache `files/JetBrainsMono_*.ttf`) is loaded on first use each session:
+file read → `loadFontFromList` parse on the UI thread → `fontsChange` → full relayout of
+the route stack (the 24 ms build). A warm re-open of the same page in the same process
+showed a single 20 ms frame and no stalls, which isolates the cost to first-use font
+loading. The inbox scan / regex parse is **not** on this path (already on a worker isolate).
+
+### STEP B — fixes implemented (only confirmed blockers)
+
+| # | Confirmed by | Fix | User-visible change |
 |---|---|---|---|
-| 1 | `sms_import/widgets/sms_import_home_widget.dart:100` `_openImport` | `if (proGate(...showSmsImportGateSheet)) push` | Remove gate; push directly. |
-| 2 | `more/more_content.dart:161` | `if (proGate(...showSmsImportGateSheet)) push` | Remove gate; push directly (match Ask Kuber row above it). |
-| 3 | `pro/feature_gates/gate_sheet_sms_import.dart` | `showSmsImportGateSheet` = "SMS Import is a Pro feature" entry gate | Repurpose to **limit-reached** sheet (see §5). |
+| B1 | 31 ms `_syncCharts` stall + SMS scan at 255 ms, both inside the splash entrance | Gate `_runOnOpenBatch` on the splash's `onFinished` (reuse `onOpenBatchReadyProvider`, exactly the loader path's pattern). Loader path unchanged. | Widgets / backup / entitlement refresh start ~1.6 s later. Nothing visible. |
+| B2 | 25 ms warm-up stall inside the splash fade-out | Start the 1.5 s warm-up timer from splash `onFinished` instead of first frame (it is already part of the batch, so B1 covers it) | Analytics/History warm ~1.6 s later; still before a human reaches the tab |
+| B3 | `SmsImportHomeWidget` scan during the splash | Same gate: the widget waits for `onOpenBatchReadyProvider` before `_maybeBackgroundScan` | "Last checked" on the Home SMS card updates ~1.6 s later |
+| B4 | `readInbox` 21 ms on the platform thread (blocks Choreographer/vsync) | `MainActivity.readInbox`: run the cursor loop on a background thread, post `result.success` on the main looper. ~10 lines Kotlin, no Dart change | None |
+| B5 | SMS page 25 ms stall + 24 ms relayout from runtime font load | Declare JetBrains Mono (Regular/Medium/SemiBold, Latin subset like Inter) in pubspec `fonts:` and switch the 7 `GoogleFonts.jetBrainsMono(...)` call sites to `fontFamily: 'JetBrainsMono'`. Engine-registered fonts never trigger `fontsChange`, so no relayout and no first-use parse on the UI thread. Size: ~3 × 40 KB subset (~120 KB) vs 17 MB budget. Alternative with zero call-site change is dropping the TTFs into `assets/google_fonts/`, but that only removes the file read, not the parse + relayout, so I recommend the pubspec route | Mono text renders correctly on the very first frame instead of snapping in after the font loads |
+| B6 (optional) | `_syncCharts` 31 ms of sync CPU (also hits every resume) | Pre-extract `(dayOffset, isIncome, amount)` once per sync so the 6 `_bucket` passes are int math instead of 6 × 5,899 `DateTime` allocations. Small, contained in `widget_sync_service.dart` | None |
 
-No `proPill` is shown on either entry today, so nothing to remove there. Grep confirms
-these are the only two `showSmsImportGateSheet` call sites.
+Not fixing: frames #1/#2 (first raster, Impeller already active; only a shader-warmup
+bundle could help and that is out of scope), the Home reveal ramp under the splash (design
+choice: Home is settled when the splash lifts), `getAll` deserialisation (8 ms, async).
 
----
+### STEP A results — AFTER (same device, same method, 5 cold starts + 1 first SMS open)
 
-## 2. New usage tracker — `lib/features/sms_import/data/sms_import_usage.dart`
+**Cold start, splash window (first frame → splash finished, ~55 → 1690 ms)**
 
-A static class over **SharedPreferences**, structured like `AskKuberUsage` but with an
-**anchored 7-day window** instead of ISO-week keys.
+| Metric | BEFORE | AFTER |
+|---|---|---|
+| UI-isolate stalls > 12 ms inside the splash | 31 ms (`_syncCharts`) at 236 ms; 25 ms (warm-up) at 1564 ms; +21 ms platform-thread inbox read when a scan was due | **none** (one 14–19 ms right after `getAll` resolves = Isar deserialisation of 5,899 rows, unchanged) |
+| Frames > 16.7 ms inside the splash | 5–7 per run | 2 on a truly cold process (first raster, 34–46 ms), **0** on runs 2–5 (worst frame 15.1 ms) |
+| `_syncCharts` wall time | 132 ms with a 31 ms sync block | 44–57 ms, no block |
+| Warm-up stall | 25 ms, inside the fade-out | ≤19 ms (run 4), below 12 ms (run 5), at 3.2 s on idle Home |
+| Widget sync second full-table load | 15–19 ms deserialisation per sync | removed (reuses `transactionListProvider`) |
+| `am start` TotalTime | 449–585 ms | 386–474 ms |
 
-**Const:** `const smsImportFreeWeeklyLimit = 5;`
+Remaining frames inside the splash are the Home reveal-ramp frames at 12–15 ms (1.5 frames
+at 120 Hz, all under the 16.7 ms bar) and the first-raster frame on a cold process.
 
-**Two SharedPreferences keys** (registered in `core/utils/prefs_keys.dart` alongside
-`askKuberWeekPrefix`):
-- `sms_import_window_start` — ISO-8601 string, the anchor of the current 7-day window.
-- `sms_import_window_count` — int, imports counted inside the window.
+**SMS Import, true first open in a session**
 
-**`class SmsImportUsage` (private ctor, all static):**
-- `Future<int> importsThisWeek()` — read both keys; if the anchor is absent or
-  `now.difference(start) >= 7d`, the effective count is **0** (window lapsed).
-- `Future<int> remainingThisWeek()` — `(limit - importsThisWeek()).clamp(0, limit)`.
-- `Future<bool> atWeeklyLimit()` — `importsThisWeek() >= limit`.
-- `Future<DateTime?> resetDate()` — `start + 7d` when a live window exists (for the sheet
-  copy); `null` when no window is active.
-- `Future<void> increment(int n)` — if window lapsed/absent: set
-  `sms_import_window_start = now`, `sms_import_window_count = n`. Else:
-  `sms_import_window_count += n`. `n` = number actually imported (≥ 1).
+| Metric | BEFORE | AFTER |
+|---|---|---|
+| UI-isolate stalls | 13 ms + **25 ms** (font parse) | 13 ms (provider's 3 Isar reads) |
+| Frames > 12 ms | 31 / 25 / **44** / 20 / 18 ms (5 frames, 24 ms relayout build) | 29 / 18 / 16 / 12 ms (route push first build + raster; no relayout) |
+| Mono text | snaps in after font load | correct on first frame |
 
-No Isar, no `build_runner`, no schema registration. Fresh install has no keys ⇒ count 0 ⇒
-full 5 available. To backdate for testing, edit `sms_import_window_start` in prefs (or use
-Dev Tools if we add a hook — not required).
+The remaining 29 ms is the route's own first build + raster of the header and cards, the
+same shape as any pushed screen. `readInbox` now runs on a background executor; it was
+not exercised in the AFTER run (no scan due), verified by code + build only.
 
-**Perf:** all reads are async and off `build` (perf.md §3). Only touched on the import
-action and in the widget-sync post-frame pass — never on startup routing or scroll.
-Because there is **no on-screen counter**, no `FutureProvider` for remaining is needed for
-UI; the widget-sync path reads `remainingThisWeek()` directly.
+**Other:** every app resume ran a full widget sync with a second full-table load; that
+load is gone and the chart pass is 4× cheaper, so resume hitches shrink too (not
+re-measured).
 
----
+**Size:** arm64 release APK 17.19 MB; the three bundled JetBrains Mono weights are
+~100 KB compressed of that. HEAD cannot be built on this SDK for a true baseline.
 
-## 3. Counting rules (one transaction = one count)
 
-Centralize gating in `SmsImportNotifier` so both entry points share it and Pro is checked
-in exactly one place (`ref.read(kuberProStateProvider).hasProAccess`).
+## Files changed
 
-- **Single import** (`importSingle`, gains `{bool countsTowardLimit = true}`):
-  - Pro/trial → import, no count.
-  - Free + `countsTowardLimit == false` (paste) → import, no count.
-  - Free + counts + allowance > 0 → import, `SmsImportUsage.increment(1)`.
-  - Free + counts + allowance == 0 → **do not import**; return a "blocked" outcome so the
-    caller shows the limit sheet.
-  - Return type becomes a small result (e.g. `SmsImportResult { imported, blocked }`) so
-    `_addToKuber` knows whether to pop-success or show the sheet.
-- **Batch import** (`importBatch` → `importBatchGated` semantics):
-  - Pro/trial → import all, no count.
-  - Free → `r = SmsImportUsage.remainingThisWeek()`; import first `min(r, N)` drafts; `SmsImportUsage.increment(min(r,N))`;
-    skip the rest (they stay `unreviewed`); return `(importedCount, blockedCount)`. If
-    `blockedCount > 0`, caller shows the limit sheet; a snackbar reports
-    "Imported X, Y left for next week" (no em dash).
-- **Skipped/duplicate/dismissed never count.** Dismiss and duplicate-skip do not call the
-  counted path. Duplicates the user chooses to "Add anyway" **do** count (they become real
-  transactions) — consistent with "one imported transaction = one count."
+Bug 1
+- `lib/features/analytics/screens/analytics_screen.dart` — header moved out of the horizontal `SliverPadding` (History structure)
 
-`_doImport` stays pure (no counting) so counting lives only in the two public entry
-methods.
+Bug 2
+- `lib/features/tools/tools_hub_screen.dart` — `moreToolsTitle` → `menuCalculators`
 
----
+Bug 3
+- `CLAUDE.md` — rewritten (product, stack, specs, commands, hard rules, component inventory, feature map, layout, performance rules). Note: `.gitignore:50` ignores `/CLAUDE.md`
+- `specs/performance.md` — §6 rewritten for the splash-gated batch; new §6b (fonts, platform channels, per-group loops)
 
-## 4. Import-action gating call sites
+Bug 4
+- `lib/main.dart` — `onOpenBatchReadyProvider` doc now means "app interactive"; OFL license registration for the bundled font
+- `lib/app.dart` — on-open batch gated on splash `onFinished` + loader hand-off (`_maybeRunOnOpenBatch`); warm-up rides on the batch
+- `lib/features/sms_import/widgets/sms_import_home_widget.dart` — background scan waits for `onOpenBatchReadyProvider`
+- `android/app/src/main/kotlin/com/grs/kuber/MainActivity.kt` — `readInbox` on a single-thread executor, result posted to the main looper; executor shut down in `onDestroy`
+- `lib/core/services/widget_sync_service.dart` — reuse `transactionListProvider` instead of a second `findAll`; `_syncCharts` pre-filters to the last 6 months; two `return await` fixes for the SDK's new `unawaited_return_in_try_block` lint
+- `lib/core/utils/date_formatter.dart` — `groupHeader` caches `DateFormat` + l10n per locale
+- `lib/features/history/utils/history_utils.dart` — int day key instead of ISO string round-trip
+- `pubspec.yaml` — `fonts:` JetBrainsMono (400/500/600) + OFL asset
+- `assets/fonts/JetBrainsMono-{Regular,Medium,SemiBold}.ttf` (Latin subset, same coverage as the bundled Inter), `assets/fonts/JetBrainsMono-OFL.txt`
+- `lib/core/utils/locale_font.dart` — `monoFont()` helper
+- 15 files: `GoogleFonts.jetBrainsMono(...)` → `monoFont(...)` (sms_import ×5, more ×4, accounts, loans, investments, dev ×2, shared transaction_detail_sheet); one dev screen `bold` → `w600`
 
-- `transaction_review_sheet.dart` `_addToKuber`: call `importSingle(..., countsTowardLimit: <fromList>)`;
-  on `blocked`, `showSmsImportLimitGateSheet(context, resetDate: await SmsImportUsage.resetDate())`
-  and keep the sheet open (do not pop as success). `showSmsReviewSheet` gains a
-  `countsTowardLimit` param (default `true`).
-- `paste_sms_sheet.dart` `_review`: opens the review sheet with `countsTowardLimit: false`.
-  Paste itself (`stageFromPaste`) already only stages — no change there.
-- `batch_summary_sheet.dart` `_confirm`: use the batch outcome; when `blockedCount > 0`,
-  show the limit sheet + snackbar ("Imported X, Y left for next week"); still call
-  `onImported()` so selection mode exits.
-- The authoritative block lives in the notifier (single place); no pre-check UI is added
-  (no counter).
+Toolchain
+- `pubspec.lock` — `flutter_quill` 11.5.0 → 11.5.1 (repo did not compile on Flutter 3.47.2; within `^11.5.0`)
+- `android/gradle.properties` — two flags added by the Flutter migrator during the build (re-added on every build with this SDK)
 
----
+Pre-existing, untouched: `lib/features/dev/screens/dev_tools_screen.dart` and
+`lib/features/pro/debug/billing_diagnostic_sheet.dart` were already modified/untracked
+in the working tree before this session.
 
-## 5. Repurpose the gate sheet (`gate_sheet_sms_import.dart`)
-
-Replace the entry-gate function with a limit-reached one, keeping the shared
-`showFeatureGateSheet` shell (no new component; matches `showAskKuberLimitGateSheet`):
-
-```dart
-void showSmsImportLimitGateSheet(BuildContext context, {DateTime? resetDate}) {
-  final resetLine = resetDate != null
-      ? 'or wait until ${DateFormat('d MMM').format(resetDate)} for your weekly count to reset.'
-      : 'or wait for your weekly count to reset.';
-  showFeatureGateSheet(
-    context,
-    icon: Icons.sms_outlined,
-    featureName: 'SMS Import',
-    headline: 'Weekly SMS import limit reached',
-    body:
-        'Free accounts get 5 SMS imports a week. Upgrade to Kuber Pro for '
-        'unlimited imports, $resetLine',
-  );
-}
-```
-- Old copy ("SMS Import is a Kuber Pro feature") is deleted; there is no entry gate now.
-- Because the only former callers were the two entry points (now ungated), no dangling
-  references remain. New callers are the import paths in §4.
-- No em dashes; ₹/Indian formatting not needed here (no amounts).
-
----
-
-## 6. Counter on the SMS Import screen — DROPPED
-
-Strict mirror of Ask Kuber: **no on-screen counter.** The limit-reached sheet is the only
-surfaced signal, exactly as Ask Kuber blocks silently on the 6th send. No new provider,
-no header/footer text change.
-
----
-
-## 7. Home widget badge (`SmsImportBadgeWidgetProvider`) (item 7)
-
-**Native deferred for v1.** Flutter side — `widget_sync_service.dart` `_syncSmsBadge`:
-- Keep `count` = unreviewed detected count (unchanged big number).
-- Also write `importable`: for free users `SmsImportUsage.remainingThisWeek()`; for Pro
-  `-1` (unlimited sentinel). This is one extra prefs read inside the already-post-frame
-  sync (perf.md §6/§7) — negligible; still loads txns/categories once (perf.md §7).
-- Forward-compat only: the native `.kt` caption is **not** changed now, so this field is
-  written but unread until a later native pass. No `strings.xml` or `.kt` edits in this
-  change.
-
----
-
-## 8. Paywall comparison table (`pro_page_extras.dart`, item 8)
-
-Change the SMS Import row (currently `free: 'Not included', pro: 'Included'`) to:
-```dart
-ComparisonRow(
-  icon: Icons.sms_outlined,
-  feature: 'SMS Import',
-  free: '5 per week',      // matches the Ask Kuber row's phrasing for consistency
-  pro: 'Unlimited',
-),
-```
-Same `ComparisonRow` styling as the existing Ask Kuber row. (Brief says "5 imports per
-week"; I'll use "5 per week" to match the adjacent Ask Kuber row exactly — flag if you
-want the longer text.)
-
----
-
-## 9. Info sheet (`InfoConstants.smsImport`, item 9)
-
-The current info config never claims it's Pro-only, but I'll add/adjust an item to state
-the limits explicitly, e.g. a new `KuberInfoItem` (icon `Icons.workspace_premium_rounded`
-or reuse `lock_outline_rounded`):
-- Title "5 free imports a week"
-- Desc "Free accounts import up to 5 bank SMS a week. Pasting a single SMS is always
-  free. Upgrade to Kuber Pro for unlimited imports."
-No em dashes.
-
----
-
-## 10. `specs/pro-gating-enabled.md` (item 10)
-
-- SMS Import row in the features table:
-  - Free-tier limit: `5 imports / week`
-  - Gate sheet: `gate_sheet_sms_import.dart` (repurposed → limit-reached)
-  - Primary check site: `sms_import/providers/sms_import_provider.dart`
-    (`importSingle` / `importBatch`); limit in
-    `sms_import/data/sms_import_usage.dart` (`smsImportFreeWeeklyLimit = 5`). Note entry
-    points (`sms_import_home_widget.dart`, `more_content.dart`) are **no longer gated**.
-  - The Ask Kuber row already reads "5 messages / week"; mirror it. Also update the
-    top-line "gated features (8)" framing note if it calls SMS Import "entirely Pro".
-- New "SMS Import specifics" subsection: paste-a-SMS always free; inbox scan/staging
-  always free and uncapped (background staging is not importing); cap applies only to the
-  review/batch import action; home widget writes an importable-within-cap field (native
-  render deferred); storage/reset model (SharedPreferences anchored 7-day window, keys
-  `sms_import_window_start` / `sms_import_window_count`).
-
----
-
-## 11. Files touched (summary)
-
-**New**
-- `lib/features/sms_import/data/sms_import_usage.dart` (SharedPreferences static class, no `.g.dart`)
-
-**Edited — Dart**
-- `core/utils/prefs_keys.dart` — add the two SMS window keys.
-- `providers/sms_import_provider.dart` — gating + counting in `importSingle`/`importBatch`, result types (reads `kuberProStateProvider`).
-- `widgets/transaction_review_sheet.dart` — `countsTowardLimit`, outcome handling.
-- `widgets/paste_sms_sheet.dart` — pass `countsTowardLimit: false`.
-- `widgets/batch_summary_sheet.dart` — batch outcome + limit sheet/snackbar.
-- `widgets/sms_import_home_widget.dart` — remove entry gate.
-- `more/more_content.dart` — remove entry gate.
-- `pro/feature_gates/gate_sheet_sms_import.dart` — limit-reached copy.
-- `pro/paywall/pro_page_extras.dart` — comparison row.
-- `core/constants/info_constants.dart` — info item.
-- `core/services/widget_sync_service.dart` — write `importable` field.
-
-No Isar schema registration, no `build_runner`, no `screens/sms_import_screen.dart`
-change (counter dropped).
-
-**Native:** none this change (deferred).
-
-**Docs**
-- `specs/pro-gating-enabled.md`
-
-**Tests** (new): `SmsImportUsage` unit test (limit, increment, anchored 7-day reset, Pro
-bypass), batch partial-allowance behavior, paste-does-not-count. Existing suite must stay
-green; `flutter analyze` clean.
-
----
-
-## 12. Risk vs `specs/performance.md`
-
-- Usage reads are async SharedPreferences reads, never in `build`, only on the import
-  action and in the widget-sync post-frame pass (§3, §6). No startup-routing cost.
-- No counter, so no new provider and no scan-progress rebuild surface (§1, §8).
-- Widget sync adds one prefs read within the existing once-per-sync run; txns and
-  categories still loaded once (§7).
-- No new packages. No new shared components (reuse `showFeatureGateSheet`, existing
-  `KuberInfoItem`, `showKuberSnackBar`). All colors via `colorScheme`, radii via
-  `KuberRadius`, Inter via `localeFont`. No hex, no shadows, no em dashes.
-
----
-
-## Decisions — all resolved
-1. Storage: **SharedPreferences** (not Isar).
-2. Reset: **anchored 7-day window**.
-3. Counter: **none** (strict Ask Kuber mirror).
-4. Native widget: **deferred** (write `importable` field only).
+Verification: `flutter analyze` clean apart from 5 pre-existing SDK deprecation infos in
+untouched files; `flutter test` 723/723; release + profile builds succeed; Bugs 1 and 2
+screenshot-verified on device in Obsidian and Alabaster.
