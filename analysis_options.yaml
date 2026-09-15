@@ -29,6 +29,13 @@ analyzer:
     # Design handoff bundle from Claude Design — reference HTML/CSS mocks
     # plus standalone Dart drafts that aren't part of the package context.
     - specs/**
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
   errors:
     experimental_member_use: ignore
     unnecessary_underscores: ignore
