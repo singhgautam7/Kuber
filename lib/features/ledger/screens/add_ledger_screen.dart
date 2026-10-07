@@ -7,6 +7,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +20,8 @@ import '../../../shared/widgets/kuber_calculator.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/data/category.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart'
+    show currencyProvider, formatterProvider, NumberSystem;
 import '../../transactions/widgets/account_picker_sheet.dart';
 import '../../tools/bill_splitter/providers/people_provider.dart';
 import '../data/ledger.dart';
@@ -51,7 +53,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   final _nameController = TextEditingController();
   final _notesController = TextEditingController();
   final _nameFocusNode = FocusNode();
-  
+
   DateTime _date = DateTime.now();
   DateTime? _expectedDate;
   String? _selectedAccountId;
@@ -72,7 +74,8 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     if (e != null) {
       _isEditing = true;
       _type = e.type;
-      _amountController.text = e.originalAmount == e.originalAmount.truncateToDouble()
+      _amountController.text =
+          e.originalAmount == e.originalAmount.truncateToDouble()
           ? e.originalAmount.toInt().toString()
           : e.originalAmount.toStringAsFixed(2);
       _nameController.text = e.personName;
@@ -85,13 +88,13 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       _type = prefill?.type ?? 'lent';
       final amountOnly = widget.amountPrefill;
       if (prefill == null && amountOnly != null && amountOnly > 0) {
-        _amountController.text =
-            amountOnly == amountOnly.truncateToDouble()
-                ? amountOnly.toInt().toString()
-                : amountOnly.toStringAsFixed(2);
+        _amountController.text = amountOnly == amountOnly.truncateToDouble()
+            ? amountOnly.toInt().toString()
+            : amountOnly.toStringAsFixed(2);
       }
       if (prefill != null) {
-        _amountController.text = prefill.amount == prefill.amount.truncateToDouble()
+        _amountController.text =
+            prefill.amount == prefill.amount.truncateToDouble()
             ? prefill.amount.toInt().toString()
             : prefill.amount.toStringAsFixed(2);
         _nameController.text = prefill.personName;
@@ -114,157 +117,164 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
-    final tone = _type == 'lent' ? HeroAmountTone.expense : HeroAmountTone.income;
+    final tone = _type == 'lent'
+        ? HeroAmountTone.expense
+        : HeroAmountTone.income;
     final isIndian = ref.watch(formatterProvider).system == NumberSystem.indian;
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: cs.onSurface),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _isEditing ? context.l10n.editEntry : context.l10n.newEntry,
-          style: localeFont(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurface,
-          ),
-        ),
+      appBar: KuberAppBar(
+        showBack: true,
+        closeIcon: true,
+        onBack: () => context.pop(),
+        title: _isEditing ? context.l10n.editEntry : context.l10n.newEntry,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
         child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── TYPE ─────────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.typeLabel,
-              topGap: 0,
-              children: [
-                KuberSegmented<String>(
-                  groupValue: _type,
-                  enabled: !_isEditing, // PRESERVED — locked while editing
-                  onChanged: (v) => setState(() => _type = v),
-                  segments: [
-                    KuberSegment(
-                      value: 'lent',
-                      label: context.l10n.lentLabel,
-                      icon: Icons.arrow_outward_rounded,
-                      tone: SegmentTone.expense,
-                    ),
-                    KuberSegment(
-                      value: 'borrowed',
-                      label: context.l10n.borrowedLabel,
-                      icon: Icons.south_west_rounded,
-                      tone: SegmentTone.income,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-
-            // ── IDENTITY ─────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.identity,
-              children: [
-                KuberHeroAmountInput(
-                  label: _type == 'lent' ? context.l10n.amountLent : context.l10n.amountBorrowed,
-                  currencySymbol: symbol,
-                  controller: _amountController,
-                  inputFormatters: [CurrencyInputFormatter(isIndian: isIndian)],
-                  tone: tone,
-                  onChanged: (_) => setState(() {}),
-                  onCalculatorTap: () => _openCalculatorFor(_amountController),
-                ),
-                KuberFieldLabel(context.l10n.personLabel),
-                RawAutocomplete<LedgerPersonSuggestion>(
-                  textEditingController: _nameController,
-                  focusNode: _nameFocusNode,
-                  displayStringForOption: (s) => s.personName,
-                  optionsBuilder: (textEditingValue) {
-                    final query = textEditingValue.text.trim();
-                    if (query.isEmpty) return const [];
-                    return ref.read(ledgerPersonSuggestionsProvider(query));
-                  },
-                  onSelected: (suggestion) {
-                    _nameController.text = suggestion.personName;
-                    setState(() {});
-                  },
-                  fieldViewBuilder:
-                      (context, controller, focusNode, onFieldSubmitted) {
-                    return TextField(
-                      controller: controller,
-                      focusNode: focusNode,
-                      textCapitalization: TextCapitalization.words,
-                      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                      onChanged: (_) => setState(() {}),
-                      style: localeFont(color: cs.onSurface, fontSize: 15),
-                      decoration: InputDecoration(
-                        hintText: context.l10n.whoHint,
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 140),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── TYPE ─────────────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.typeLabel,
+                topGap: 0,
+                children: [
+                  KuberSegmented<String>(
+                    groupValue: _type,
+                    enabled: !_isEditing, // PRESERVED — locked while editing
+                    onChanged: (v) => setState(() => _type = v),
+                    segments: [
+                      KuberSegment(
+                        value: 'lent',
+                        label: context.l10n.lentLabel,
+                        icon: Icons.arrow_outward_rounded,
+                        tone: SegmentTone.expense,
                       ),
-                    );
-                  },
-                  optionsViewBuilder: (context, onSelected, options) {
-                    return LedgerSuggestionOverlay(
-                      options: options,
-                      onSelected: onSelected,
-                    );
-                  },
-                ),
-                _DuplicatePersonWarning(
-                  personName: _nameController.text,
-                  type: _type,
-                  isEditing: _isEditing,
-                ),
-                KuberFieldLabel(_type == 'lent' ? context.l10n.fromAccountLabel : context.l10n.toAccountLabel),
-                _accountPickerRow(),
-              ],
-            ),
-
-            // ── SCHEDULE ─────────────────────────────────────────────
-            KuberFormSection(
-              label: context.l10n.schedule,
-              tinted: true,
-              children: [
-                KuberFieldLabel(context.l10n.dateLabel),
-                _dateRow(
-                  label: _type == 'lent' ? context.l10n.lentOn : context.l10n.borrowedOn,
-                  date: _date,
-                  onTap: _pickDate,
-                ),
-                KuberFieldLabel(context.l10n.expectedReturn, optional: true),
-                _expectedReturnRow(),
-              ],
-            ),
-
-            KuberFormSection(
-              label: context.l10n.notesLabel,
-              children: [
-                TextField(
-                  controller: _notesController,
-                  maxLines: 3,
-                  minLines: 1,
-                  textCapitalization: TextCapitalization.sentences,
-                  onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                  style: localeFont(color: cs.onSurface, fontSize: 14),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.ledgerNotesHint,
+                      KuberSegment(
+                        value: 'borrowed',
+                        label: context.l10n.borrowedLabel,
+                        icon: Icons.south_west_rounded,
+                        tone: SegmentTone.income,
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-          ],
+              // ── IDENTITY ─────────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.identity,
+                children: [
+                  KuberHeroAmountInput(
+                    label: _type == 'lent'
+                        ? context.l10n.amountLent
+                        : context.l10n.amountBorrowed,
+                    currencySymbol: symbol,
+                    controller: _amountController,
+                    inputFormatters: [
+                      CurrencyInputFormatter(isIndian: isIndian),
+                    ],
+                    tone: tone,
+                    onChanged: (_) => setState(() {}),
+                    onCalculatorTap: () =>
+                        _openCalculatorFor(_amountController),
+                  ),
+                  KuberFieldLabel(context.l10n.personLabel),
+                  RawAutocomplete<LedgerPersonSuggestion>(
+                    textEditingController: _nameController,
+                    focusNode: _nameFocusNode,
+                    displayStringForOption: (s) => s.personName,
+                    optionsBuilder: (textEditingValue) {
+                      final query = textEditingValue.text.trim();
+                      if (query.isEmpty) return const [];
+                      return ref.read(ledgerPersonSuggestionsProvider(query));
+                    },
+                    onSelected: (suggestion) {
+                      _nameController.text = suggestion.personName;
+                      setState(() {});
+                    },
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onFieldSubmitted) {
+                          return TextField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            textCapitalization: TextCapitalization.words,
+                            onTapOutside: (_) =>
+                                FocusManager.instance.primaryFocus?.unfocus(),
+                            onChanged: (_) => setState(() {}),
+                            style: localeFont(
+                              color: cs.onSurface,
+                              fontSize: 16,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: context.l10n.whoHint,
+                            ),
+                          );
+                        },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return LedgerSuggestionOverlay(
+                        options: options,
+                        onSelected: onSelected,
+                      );
+                    },
+                  ),
+                  _DuplicatePersonWarning(
+                    personName: _nameController.text,
+                    type: _type,
+                    isEditing: _isEditing,
+                  ),
+                  KuberFieldLabel(
+                    _type == 'lent'
+                        ? context.l10n.fromAccountLabel
+                        : context.l10n.toAccountLabel,
+                  ),
+                  _accountPickerRow(),
+                ],
+              ),
+
+              // ── SCHEDULE ─────────────────────────────────────────────
+              KuberFormSection(
+                label: context.l10n.schedule,
+                tinted: true,
+                children: [
+                  KuberFieldLabel(context.l10n.dateLabel),
+                  _dateRow(
+                    label: _type == 'lent'
+                        ? context.l10n.lentOn
+                        : context.l10n.borrowedOn,
+                    date: _date,
+                    onTap: _pickDate,
+                  ),
+                  KuberFieldLabel(context.l10n.expectedReturn, optional: true),
+                  _expectedReturnRow(),
+                ],
+              ),
+
+              KuberFormSection(
+                label: context.l10n.notesLabel,
+                children: [
+                  TextField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    minLines: 1,
+                    textCapitalization: TextCapitalization.sentences,
+                    onTapOutside: (_) =>
+                        FocusManager.instance.primaryFocus?.unfocus(),
+                    style: localeFont(color: cs.onSurface, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.ledgerNotesHint,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ),
       bottomNavigationBar: KuberSaveButton(
         label: _isEditing ? context.l10n.saveChanges : context.l10n.addToLedger,
         onPressed: _canSave ? _save : null,
@@ -276,9 +286,7 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
     final accs = ref.watch(accountListProvider).valueOrNull ?? [];
     final acc = _selectedAccountId == null
         ? null
-        : accs
-            .where((a) => a.id.toString() == _selectedAccountId)
-            .firstOrNull;
+        : accs.where((a) => a.id.toString() == _selectedAccountId).firstOrNull;
     return KuberPickerRow(
       leading: acc == null
           ? KuberLeadingSwatch(
@@ -320,11 +328,14 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       leading: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        child: Icon(Icons.calendar_today_rounded,
-            size: 16, color: cs.onSurface),
+        child: Icon(
+          Icons.calendar_today_rounded,
+          size: 16,
+          color: cs.onSurface,
+        ),
       ),
       label: label,
       value: DateFormat('d MMM yyyy').format(date),
@@ -353,8 +364,8 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       leading: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Icon(Icons.event_outlined, size: 16, color: cs.onSurface),
       ),
@@ -411,8 +422,9 @@ class _AddLedgerScreenState extends ConsumerState<AddLedgerScreen> {
       useRootNavigator: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => KuberCalculator(
         initialValue: _amount,
@@ -516,10 +528,7 @@ class _DuplicatePersonWarning extends ConsumerWidget {
     final query = personName.trim().toLowerCase();
     final ledgers = ref.watch(ledgerListProvider).valueOrNull ?? [];
     final hasDuplicate = ledgers.any(
-      (l) =>
-          l.personNameLower == query &&
-          l.type == type &&
-          !l.isSettled,
+      (l) => l.personNameLower == query && l.type == type && !l.isSettled,
     );
     if (!hasDuplicate) return const SizedBox.shrink();
     return Padding(
@@ -529,11 +538,7 @@ class _DuplicatePersonWarning extends ConsumerWidget {
           type == 'lent'
               ? context.l10n.ledgerDuplicateWarningLent(personName.trim())
               : context.l10n.ledgerDuplicateWarningBorrow(personName.trim()),
-          style: localeFont(
-            fontSize: 12.5,
-            color: cs.onSurface,
-            height: 1.5,
-          ),
+          style: localeFont(fontSize: 12, color: cs.onSurface, height: 1.5),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../providers/advanced_analytics_provider.dart';
 import 'advanced_analytics_charts.dart';
 import 'analytics_common.dart';
@@ -15,7 +16,7 @@ class SavingsRateSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(savingsRateProvider);
     final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
+    final warning = context.kuberMoney.warning;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +27,7 @@ class SavingsRateSection extends ConsumerWidget {
             section: AdvancedAnalyticsSection.savings,
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         async.when(
           loading: () => const AnalyticsSkeletonBlock(),
           error: (error, _) => KuberEmptyState(
@@ -45,11 +46,12 @@ class SavingsRateSection extends ConsumerWidget {
             }
 
             final rateColor = data.overallRate >= 20
-                ? cs.tertiary
+                ? context.kuberMoney.income
                 : data.overallRate >= 10
-                    ? warning
-                    : cs.error;
-            final avg = data.months
+                ? warning
+                : context.kuberMoney.expense;
+            final avg =
+                data.months
                     .map((m) => m.savingsRate)
                     .fold<double>(0, (s, r) => s + r) /
                 data.months.length;
@@ -60,99 +62,103 @@ class SavingsRateSection extends ConsumerWidget {
             final insight = isNewBest
                 ? 'You saved more this month than any previous month.'
                 : data.assessment == 'Negative'
-                    ? 'Your savings rate has dipped into the negative recently.'
-                    : data.assessment == 'Consistent'
-                        ? "You've kept a consistent savings streak."
-                        : 'Your savings rate varies month to month.';
+                ? 'Your savings rate has dipped into the negative recently.'
+                : data.assessment == 'Consistent'
+                ? "You've kept a consistent savings streak."
+                : 'Your savings rate varies month to month.';
+
+            final tt = Theme.of(context).textTheme;
+            final small = tt.bodySmall!.copyWith(color: cs.onSurfaceVariant);
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(
+                // Board "Savings rate tracker": hero, chart card, figures.
+                KuberCard(
+                  hero: true,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'CURRENT SAVINGS RATE',
-                        style: localeFont(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.6,
-                          color: cs.onSurfaceVariant,
-                        ),
+                        style: sectionHeaderStyle(context),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: KuberSpace.xs),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            aaPercent(data.overallRate),
+                            style: tt.headlineMedium!.copyWith(
+                              color: rateColor,
+                            ),
+                          ),
+                          const SizedBox(width: KuberSpace.sm),
+                          Text(
+                            'target 20%',
+                            style: tt.bodyMedium!.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: KuberSpace.sm),
                       Text(
-                        aaPercent(data.overallRate),
-                        style: localeFont(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w800,
-                          color: rateColor,
-                        ),
+                        insight,
+                        style: tt.bodyMedium!.copyWith(color: cs.onSurface),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
-                SavingsRateLineChart(
-                  values: data.months.map((m) => m.savingsRate).toList(),
-                  labels: data.months.map((m) => m.label).toList(),
+                const SizedBox(height: KuberSpace.sectionGap - 4),
+                AnalyticsSectionCard(
+                  title: 'By month',
+                  icon: Icons.show_chart_rounded,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SavingsRateLineChart(
+                        values: data.months.map((m) => m.savingsRate).toList(),
+                        labels: data.months.map((m) => m.label).toList(),
+                      ),
+                      const SizedBox(height: KuberSpace.sm),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('20% target', style: small),
+                          Text('10% baseline', style: small),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: KuberSpacing.xs),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('20% target',
-                        style: localeFont(
-                            fontSize: 9.5, color: cs.onSurfaceVariant)),
-                    Text('10% baseline',
-                        style: localeFont(
-                            fontSize: 9.5, color: cs.onSurfaceVariant)),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.md),
                 Row(
                   children: [
                     Expanded(
                       child: _Kpi(
-                        label: 'AVERAGE',
+                        label: 'Average',
                         value: aaPercent(avg),
                         color: cs.onSurface,
                       ),
                     ),
-                    const SizedBox(width: KuberSpacing.sm),
+                    const SizedBox(width: KuberSpace.sm),
                     Expanded(
                       child: _Kpi(
-                        label: 'BEST MONTH',
+                        label: 'Best month',
                         value: aaPercent(best),
-                        color: cs.tertiary,
+                        color: context.kuberMoney.income,
                       ),
                     ),
-                    const SizedBox(width: KuberSpacing.sm),
+                    const SizedBox(width: KuberSpace.sm),
                     Expanded(
                       child: _Kpi(
-                        label: 'WORST MONTH',
+                        label: 'Worst month',
                         value: aaPercent(worst),
-                        color: cs.error,
+                        color: context.kuberMoney.expense,
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: KuberSpacing.md),
-                Container(
-                  padding: const EdgeInsets.all(KuberSpacing.md),
-                  decoration: BoxDecoration(
-                    color: cs.tertiary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.tertiary.withValues(alpha: 0.35)),
-                  ),
-                  child: Text(
-                    insight,
-                    style: localeFont(
-                      fontSize: 12.5,
-                      color: cs.onSurface,
-                      height: 1.4,
-                    ),
-                  ),
                 ),
               ],
             );
@@ -173,38 +179,32 @@ class _Kpi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.sm,
-        vertical: KuberSpacing.md,
+        horizontal: KuberSpace.sm,
+        vertical: KuberSpace.md,
       ),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: localeFont(
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.3,
-              color: cs.onSurfaceVariant,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              style: tt.labelSmall!.copyWith(
+                letterSpacing: 0.6,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: localeFont(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
-          ),
+          const SizedBox(height: 2),
+          Text(value, style: tt.titleMedium!.copyWith(color: color)),
         ],
       ),
     );

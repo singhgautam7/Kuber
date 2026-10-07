@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/utils/chart_bucket.dart';
 import 'income_expense_chart_controls.dart';
 import 'income_expense_chart_model.dart';
@@ -58,8 +58,7 @@ class IncomeExpenseChart extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<IncomeExpenseChart> createState() =>
-      _IncomeExpenseChartState();
+  ConsumerState<IncomeExpenseChart> createState() => _IncomeExpenseChartState();
 }
 
 class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
@@ -68,7 +67,7 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
   final _scrollController = ScrollController();
   int _lastCount = -1;
 
-  static const double _axisW = 30;
+  static const double _axisW = 36;
   static const double _slot = 46;
   static const double _bottomAxis = 22;
 
@@ -109,26 +108,25 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final toggle = IncomeExpenseChartModeToggle(
+      mode: _mode,
+      onChanged: (m) => setState(() {
+        _mode = m;
+        _selectedIndex = null;
+      }),
+    );
+
+    // One chart-card header pattern (screens/analytics.md): Home = period
+    // dropdown chip + Bar | Line; Analytics = titleMedium, the bucket dropdown
+    // under it, Bar | Line trailing.
+    final Widget header;
+    if (widget.compact) {
+      header = Row(
         children: [
-          if (widget.showTitle)
-            Text(widget.title,
-                style: localeFont(
-                    fontSize: widget.compact ? 14 : 15,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface)),
-          if (widget.compact && widget.rangeTabs.isNotEmpty) ...[
-            if (widget.showTitle) const SizedBox(height: 12),
+          if (widget.rangeTabs.isNotEmpty)
             CompactRangeTabs(
               tabs: widget.rangeTabs,
               selectedId: widget.selectedRangeId,
@@ -137,34 +135,52 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
                 widget.onRangeSelected?.call(id);
               },
             ),
-          ],
-          if (!widget.compact &&
-              widget.bucket != null &&
-              widget.onBucketChanged != null) ...[
-            const SizedBox(height: 12),
-            IncomeExpenseChartRangeSwitcher(
-              selected: widget.bucket!,
-              available: widget.availableBuckets,
-              onChanged: (b) {
-                _clearSelection();
-                widget.onBucketChanged!(b);
-              },
-            ),
-          ],
-          // Bar | Line toggle sits below the title (and range chips), per the
-          // design spec.
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: IncomeExpenseChartModeToggle(
-              mode: _mode,
-              onChanged: (m) => setState(() {
-                _mode = m;
-                _selectedIndex = null;
-              }),
+          const Spacer(),
+          toggle,
+        ],
+      );
+    } else {
+      header = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.showTitle)
+                  Text(
+                    widget.title,
+                    style: theme.textTheme.titleMedium!.copyWith(
+                      color: cs.onSurface,
+                    ),
+                  ),
+                if (widget.bucket != null &&
+                    widget.onBucketChanged != null) ...[
+                  const SizedBox(height: KuberSpace.sm),
+                  IncomeExpenseChartRangeSwitcher(
+                    selected: widget.bucket!,
+                    available: widget.availableBuckets,
+                    onChanged: (b) {
+                      _clearSelection();
+                      widget.onBucketChanged!(b);
+                    },
+                  ),
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(width: KuberSpace.md),
+          toggle,
+        ],
+      );
+    }
+
+    return KuberCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header,
+          const SizedBox(height: KuberSpace.lg),
           TapRegion(
             onTapOutside: (_) => _clearSelection(),
             child: SizedBox(
@@ -174,14 +190,12 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
                   : LayoutBuilder(builder: _buildChartArea),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: KuberSpace.md),
           Row(
             children: [
-              _legendDot(cs.tertiary, 'Income',
-                  square: _mode == IncomeExpenseChartMode.bar),
-              const SizedBox(width: 16),
-              _legendDot(cs.error, 'Expense',
-                  square: _mode == IncomeExpenseChartMode.bar),
+              _legendDot(context.kuberMoney.income, 'Income'),
+              const SizedBox(width: KuberSpace.lg),
+              _legendDot(context.kuberMoney.expense, 'Expense'),
             ],
           ),
         ],
@@ -203,20 +217,35 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
       _lastCount = n;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
-          _scrollController
-              .jumpTo(_scrollController.position.maxScrollExtent);
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
         }
       });
     } else if (!scroll) {
       _lastCount = n;
     }
 
+    final sel = _selectedIndex;
+    final slotW = plotWidth / n;
     final plot = SizedBox(
       width: plotWidth,
       height: _chartHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Selected group: rounded highlight column behind it.
+          if (sel != null && sel < n)
+            Positioned(
+              left: sel * slotW + 4,
+              width: slotW - 8,
+              top: -4,
+              bottom: 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: chartSelectionColumn(cs),
+                  borderRadius: BorderRadius.circular(kChartSelectionRadius),
+                ),
+              ),
+            ),
           _mode == IncomeExpenseChartMode.bar
               ? _buildBarChart(cs, maxY)
               : _buildLineChart(cs, maxY),
@@ -229,11 +258,6 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: _axisW,
-          height: _chartHeight,
-          child: IncomeExpenseYAxis(maxY: maxY, plotHeight: _plotHeight),
-        ),
         Expanded(
           // Clip horizontally so scrollable bars never paint outside the card,
           // but leave the top open so the tooltip can float above the bars.
@@ -249,6 +273,11 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
                 : plot,
           ),
         ),
+        SizedBox(
+          width: _axisW,
+          height: _chartHeight,
+          child: IncomeExpenseYAxis(maxY: maxY, plotHeight: _plotHeight),
+        ),
       ],
     );
   }
@@ -263,7 +292,10 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
     final bottom = _bottomAxis + barTopFromPlotBottom + 8;
     final center = (_selectedIndex! + 0.5) * plotWidth / n;
     var left = center - IncomeExpenseChartTooltip.width / 2;
-    left = left.clamp(0.0, math.max(0.0, plotWidth - IncomeExpenseChartTooltip.width));
+    left = left.clamp(
+      0.0,
+      math.max(0.0, plotWidth - IncomeExpenseChartTooltip.width),
+    );
     return Positioned(
       left: left,
       bottom: bottom,
@@ -274,23 +306,23 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
     );
   }
 
-  Widget _legendDot(Color color, String label, {required bool square}) {
-    final cs = Theme.of(context).colorScheme;
+  Widget _legendDot(Color color, String label) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: square ? BoxShape.rectangle : BoxShape.circle,
-            borderRadius: square ? BorderRadius.circular(2) : null,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: KuberSpace.sm),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall!.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(width: 6),
-        Text(label,
-            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant)),
       ],
     );
   }
@@ -299,12 +331,9 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
 
   FlTitlesData _titles(ColorScheme cs) {
     return FlTitlesData(
-      topTitles:
-          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      rightTitles:
-          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      leftTitles:
-          const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       bottomTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
@@ -320,12 +349,9 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 widget.points[i].label,
-                style: localeFont(
-                  fontSize: 8.5,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color: selected
-                      ? cs.onSurface
-                      : cs.onSurfaceVariant.withValues(alpha: 0.7),
+                style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? cs.onSurface : cs.onSurfaceVariant,
                 ),
               ),
             );
@@ -336,14 +362,16 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
   }
 
   FlGridData _grid(ColorScheme cs, double maxY) => FlGridData(
-        show: true,
-        drawVerticalLine: false,
-        horizontalInterval: maxY / 2,
-        getDrawingHorizontalLine: (value) => FlLine(
-          color: cs.outline.withValues(alpha: value == 0 ? 1 : 0.55),
-          strokeWidth: 1,
-        ),
-      );
+    show: true,
+    drawVerticalLine: false,
+    horizontalInterval: maxY / 2,
+    // 1dp dashed 4/4 gridlines, solid baseline (tokens.md §6).
+    getDrawingHorizontalLine: (value) => FlLine(
+      color: cs.outlineVariant,
+      strokeWidth: 1,
+      dashArray: value == 0 ? null : const [4, 4],
+    ),
+  );
 
   // ── Bar variant (4a/4c) ───────────────────────────────────────────────────
 
@@ -369,25 +397,24 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
           for (var i = 0; i < n; i++)
             BarChartGroupData(
               x: i,
-              barsSpace: 3,
+              barsSpace: 2,
               barRods: [
-                // Both rods of the selected group turn solid primary blue so
-                // the whole period reads as selected.
+                // Selection dims the other groups to 38% (tokens.md §6).
                 BarChartRodData(
                   toY: widget.points[i].income,
-                  width: 13,
-                  borderRadius: BorderRadius.circular(3),
-                  color: i == _selectedIndex
-                      ? cs.primary
-                      : cs.tertiary.withValues(alpha: 0.85),
+                  width: widget.compact ? 8 : 10,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(KuberShape.extraSmall),
+                  ),
+                  color: _dim(context.kuberMoney.income, i),
                 ),
                 BarChartRodData(
                   toY: widget.points[i].expense,
-                  width: 13,
-                  borderRadius: BorderRadius.circular(3),
-                  color: i == _selectedIndex
-                      ? cs.primary
-                      : cs.error.withValues(alpha: 0.85),
+                  width: widget.compact ? 8 : 10,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(KuberShape.extraSmall),
+                  ),
+                  color: _dim(context.kuberMoney.expense, i),
                 ),
               ],
             ),
@@ -395,4 +422,8 @@ class _IncomeExpenseChartState extends ConsumerState<IncomeExpenseChart> {
       ),
     );
   }
+
+  Color _dim(Color c, int i) => _selectedIndex != null && i != _selectedIndex
+      ? c.withValues(alpha: KuberChartTheme.unselectedAlpha)
+      : c;
 }

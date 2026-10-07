@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/utils/locale_font.dart';
+import 'package:kuber/shared/widgets/kuber_list.dart';
 import '../../../../shared/widgets/kuber_home_widget_title.dart';
 import '../../ask_kuber/screen/kuber_mark.dart';
 
@@ -79,58 +79,70 @@ class _AskKuberHomeWidgetState extends State<AskKuberHomeWidget>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
+    // Board 3.2a: card pad 12, a 48 prompt pill with a filled 36 arrow, then
+    // a scrolling row of assist chips.
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const KuberHomeWidgetTitle(title: 'Ask Kuber'),
-        Container(
-          padding: const EdgeInsets.all(KuberSpacing.md),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-            border: Border.all(color: cs.outline),
-          ),
+        KuberCard(
+          padding: const EdgeInsets.all(KuberSpace.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => _open(context),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.md,
-                    vertical: 13,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline),
-                  ),
-                  child: Row(
-                    children: [
-                      KuberMarkWidget(size: 22, bare: true, color: cs.primary),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Ask about your money…',
-                          style: localeFont(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: cs.onSurfaceVariant,
+              Material(
+                color: cs.surfaceContainerHigh,
+                shape: const StadiumBorder(),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _open(context),
+                  child: SizedBox(
+                    height: 48,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 6),
+                      child: Row(
+                        children: [
+                          KuberMarkWidget(
+                            size: 20,
+                            bare: true,
+                            color: cs.primary,
                           ),
-                        ),
+                          const SizedBox(width: KuberSpace.md),
+                          Expanded(
+                            child: Text(
+                              'Ask about your money…',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyLarge!.copyWith(
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: cs.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 18,
+                              color: cs.onPrimary,
+                            ),
+                          ),
+                        ],
                       ),
-                      Icon(Icons.arrow_forward_rounded, size: 18, color: cs.primary),
-                    ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
               SizedBox(
-                height: 34,
+                height: 32,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _picks.length,
@@ -156,27 +168,29 @@ class _SuggestionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // M3 assist chip: h32, radius 8, 1dp outlineVariant, 18 primary icon.
     return Material(
-      color: cs.surface,
-      shape: StadiumBorder(side: BorderSide(color: cs.outline)),
+      color: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.smallR,
+        side: BorderSide(color: cs.outlineVariant),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        splashColor: cs.primary.withValues(alpha: 0.12),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.only(left: 8, right: 16),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(suggestion.icon, size: 14, color: cs.primary),
-              const SizedBox(width: 6),
+              Icon(suggestion.icon, size: 18, color: cs.primary),
+              const SizedBox(width: 8),
               Text(
                 suggestion.label,
-                style: localeFont(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurface,
+                style: theme.textTheme.labelLarge!.copyWith(
+                  color: cs.onSurfaceVariant,
                 ),
               ),
             ],

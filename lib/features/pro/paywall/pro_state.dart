@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,8 +34,10 @@ class KuberProState {
   /// Null means the user is not in any trial.
   final DateTime? trialEndsAt;
   final DateTime? promoEndsAt; // set when source == promo, null = free forever
-  final DateTime? expiryDate; // set when source == purchased && plan != lifetime
-  final DateTime? activatedAt; // when Pro/promo first turned on, for "N days as Pro"
+  final DateTime?
+  expiryDate; // set when source == purchased && plan != lifetime
+  final DateTime?
+  activatedAt; // when Pro/promo first turned on, for "N days as Pro"
 
   const KuberProState({
     this.source = ProSource.free,
@@ -67,15 +68,14 @@ class KuberProState {
     DateTime? activatedAt,
     DateTime? trialEndsAt,
   }) => KuberProState(
-        source: ProSource.purchased,
-        plan: plan,
-        expiryDate: expiryDate,
-        activatedAt: activatedAt ?? DateTime.now(),
-        trialEndsAt: trialEndsAt,
-      );
+    source: ProSource.purchased,
+    plan: plan,
+    expiryDate: expiryDate,
+    activatedAt: activatedAt ?? DateTime.now(),
+    trialEndsAt: trialEndsAt,
+  );
 
-  bool get isPro =>
-      source == ProSource.purchased || source == ProSource.promo;
+  bool get isPro => source == ProSource.purchased || source == ProSource.promo;
 
   /// Legacy app-managed trial only (unpaid). A Play Billing free trial is a
   /// real active subscription, so it reads as [isPro], not [isTrial].
@@ -209,7 +209,7 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
   KuberProState build() {
     // DEBUG-ONLY: a forced entitlement (Dev Tools > Entitlement Override) wins
     // over the real Isar-derived state. Compiled out of release builds.
-    if (kDebugMode) {
+    if (kEntitlementOverrideEnabled) {
       final forced = DebugEntitlementOverride.state;
       if (forced != null) return forced;
     }
@@ -224,7 +224,7 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
     });
     // A live debug override stays authoritative even after a real write (e.g. a
     // purchase completing while an override is forced). Compiled out of release.
-    if (kDebugMode) {
+    if (kEntitlementOverrideEnabled) {
       final forced = DebugEntitlementOverride.state;
       if (forced != null) {
         state = forced;
@@ -316,8 +316,8 @@ class KuberProStateNotifier extends Notifier<KuberProState> {
 /// [KuberProStateNotifier]'s named mutators write it.
 final kuberProStateProvider =
     NotifierProvider<KuberProStateNotifier, KuberProState>(
-  KuberProStateNotifier.new,
-);
+      KuberProStateNotifier.new,
+    );
 
 /// Ensures the [UserEntitlement] singleton exists. Call from bootstrap on
 /// every launch.
@@ -422,8 +422,9 @@ class PromoConfig {
       headline: headline,
       message: message,
       code: (code == null || code.isEmpty) ? null : code,
-      productHighlight:
-          (highlight == null || highlight.isEmpty) ? null : highlight,
+      productHighlight: (highlight == null || highlight.isEmpty)
+          ? null
+          : highlight,
     );
   }
 }
@@ -458,8 +459,7 @@ class PromoConfigNotifier extends Notifier<PromoConfig?> {
 
 /// The live promo campaign, or null when none is running. Hydrated from the
 /// cached remote config on cold start.
-final promoConfigProvider =
-    NotifierProvider<PromoConfigNotifier, PromoConfig?>(
+final promoConfigProvider = NotifierProvider<PromoConfigNotifier, PromoConfig?>(
   PromoConfigNotifier.new,
 );
 

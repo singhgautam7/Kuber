@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../models/chip_action.dart';
 
 /// Horizontally-scrolling strip of follow-up chips that sits directly above the
@@ -34,11 +33,14 @@ class ChipStrip extends StatelessWidget {
       curve: Curves.easeOutCubic,
       builder: (context, t, child) => Opacity(
         opacity: t,
-        child: Transform.translate(offset: Offset(0, (1 - t) * 4), child: child),
+        child: Transform.translate(
+          offset: Offset(0, (1 - t) * 4),
+          child: child,
+        ),
       ),
       child: Container(
         color: cs.surface,
-        padding: const EdgeInsets.only(top: KuberSpacing.sm),
+        padding: const EdgeInsets.only(top: KuberSpace.sm),
         child: ShaderMask(
           shaderCallback: (rect) => LinearGradient(
             begin: Alignment.centerLeft,
@@ -49,7 +51,7 @@ class ChipStrip extends StatelessWidget {
           blendMode: BlendMode.dstIn,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: KuberSpacing.lg, right: 28),
+            padding: const EdgeInsets.only(left: KuberSpace.lg, right: 28),
             child: Row(
               children: [
                 for (final action in actions) _chip(context, cs, action),
@@ -64,23 +66,23 @@ class ChipStrip extends StatelessWidget {
   Widget _chip(BuildContext context, ColorScheme cs, ChipAction action) {
     return switch (action) {
       AskChipAction(:final query) => _AskChip(
-          label: query,
-          onTap: () => onAsk(query),
-          cs: cs,
-        ),
+        label: query,
+        onTap: () => onAsk(query),
+        cs: cs,
+      ),
       NavChipAction(:final label, :final route) => _FilledChip(
-          label: label,
-          icon: Icons.arrow_forward_rounded,
-          onTap: () => onNavigate(route),
-          cs: cs,
-        ),
+        label: label,
+        icon: Icons.arrow_forward_rounded,
+        onTap: () => onNavigate(route),
+        cs: cs,
+      ),
       EmailChipAction(:final label, :final subject, :final body) => _FilledChip(
-          label: label,
-          icon: Icons.mail_outline_rounded,
-          iconLeading: true,
-          onTap: () => onEmail(subject, body),
-          cs: cs,
-        ),
+        label: label,
+        icon: Icons.mail_outline_rounded,
+        iconLeading: true,
+        onTap: () => onEmail(subject, body),
+        cs: cs,
+      ),
     };
   }
 }
@@ -96,19 +98,24 @@ class _AskChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Material(
-        color: cs.surfaceContainer,
-        shape: StadiumBorder(side: BorderSide(color: cs.outline)),
+        // M3 suggestion chip (board 3.8b): r8, outline.
+        color: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: KuberShape.mediumR,
+          side: BorderSide(color: cs.outline),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           splashColor: cs.primary.withValues(alpha: 0.12),
           highlightColor: cs.primary.withValues(alpha: 0.08),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 7, 12, 7),
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
             child: Text(
               label,
-              style: localeFont(
-                  fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface),
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge!.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         ),
@@ -138,15 +145,16 @@ class _FilledChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Text(
       label,
-      style: localeFont(
-          fontSize: 13, fontWeight: FontWeight.w500, color: cs.onPrimary),
+      style: Theme.of(
+        context,
+      ).textTheme.labelLarge!.copyWith(color: cs.onPrimary),
     );
-    final iconWidget = Icon(icon, size: 13, color: cs.onPrimary);
+    final iconWidget = Icon(icon, size: 16, color: cs.onPrimary);
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Material(
         color: cs.primary,
-        shape: const StadiumBorder(),
+        shape: const RoundedRectangleBorder(borderRadius: KuberShape.mediumR),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
@@ -154,8 +162,8 @@ class _FilledChip extends StatelessWidget {
           highlightColor: cs.onPrimary.withValues(alpha: 0.10),
           child: Padding(
             padding: iconLeading
-                ? const EdgeInsets.fromLTRB(9, 7, 12, 7)
-                : const EdgeInsets.fromLTRB(12, 7, 9, 7),
+                ? const EdgeInsets.fromLTRB(8, 6, 12, 6)
+                : const EdgeInsets.fromLTRB(12, 6, 8, 6),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: iconLeading

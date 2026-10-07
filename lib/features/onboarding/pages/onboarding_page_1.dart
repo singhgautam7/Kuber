@@ -33,37 +33,31 @@ class OnboardingPageOne extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const OrbitingCoinAnimation(size: 264),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 80),
                   child: _VersionBadge(version: version),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 160),
                   child: Text(
                     context.l10n.yourMoneyYourRules,
                     textAlign: TextAlign.center,
-                    style: localeFont(
-                      fontSize: 32,
-                      height: 1.05,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      letterSpacing: -1,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineLarge!.copyWith(color: cs.onSurface),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 260),
                   child: Text(
                     context.l10n.onboardingPage1Description,
                     textAlign: TextAlign.center,
-                    style: localeFont(
-                      fontSize: 14,
-                      height: 1.45,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
               ],
@@ -84,14 +78,11 @@ class _VersionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: KuberSpacing.sm,
-      ),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.md),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.full),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.smallR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -100,20 +91,18 @@ class _VersionBadge extends StatelessWidget {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: cs.tertiary,
+              color: context.kuberMoney.income,
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           Text(
             context.l10n.offlineFirstBadge(
               version.isEmpty ? 'V' : version.toUpperCase(),
             ),
-            style: localeFont(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+            style: Theme.of(context).textTheme.labelMedium!.copyWith(
               color: cs.onSurfaceVariant,
-              letterSpacing: 1.4,
+              letterSpacing: 1,
             ),
           ),
         ],
@@ -179,7 +168,6 @@ class _CoinOrbitPainter extends CustomPainter {
   static const _goldMid = Color(0xFFE3A51A);
   static const _goldDark = Color(0xFF8D6208);
   static const _goldRim = Color(0xFFB57F10);
-  static const _orbitBlue = Color(0xFF3B82F6);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -212,7 +200,7 @@ class _CoinOrbitPainter extends CustomPainter {
       center,
       orbitRadius * 0.96,
       progress * math.pi * 2 + math.pi * 0.96,
-      _orbitBlue,
+      colorScheme.primary,
     );
     _drawOrbitDot(
       canvas,
@@ -326,7 +314,7 @@ class _CoinOrbitPainter extends CustomPainter {
         text: '₹',
         style: localeFont(
           fontSize: radius * 1.12,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w700,
           color: _goldDark.withValues(alpha: large ? 0.95 : 0.8),
         ),
       ),

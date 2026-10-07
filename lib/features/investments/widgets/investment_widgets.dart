@@ -16,11 +16,11 @@
 //   - New optional `assetAllocationProvider` returns
 //     `List<({String label, Color color, double valueRupees})>` sorted desc.
 
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -36,7 +36,10 @@ class PortfolioHero extends ConsumerWidget {
   final double invested;
   final double gainLoss; // current - invested
   final double gainLossPercent;
-  final List<double>? history; // 6 points, oldest -> newest
+
+  /// Allocation by asset type, drawn as the gapped bar + legend inside the
+  /// card (board 3.22).
+  final List<AssetSlice> allocation;
 
   const PortfolioHero({
     super.key,
@@ -44,326 +47,132 @@ class PortfolioHero extends ConsumerWidget {
     required this.invested,
     required this.gainLoss,
     required this.gainLossPercent,
-    this.history,
+    this.allocation = const [],
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
     final isGain = gainLoss >= 0;
-    final gainColor = isGain ? cs.tertiary : cs.error;
-    final gainBg = isGain
-        ? cs.tertiary.withValues(alpha: 0.12)
-        : cs.error.withValues(alpha: 0.12);
+    final gainColor = isGain
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
+    final total = allocation.fold<double>(0, (a, s) => a + s.value);
 
-    final series =
-        history ??
-        List.generate(6, (i) {
-          final t = i / 5.0;
-          final base = currentValue * 0.78;
-          return base + (currentValue - base) * (t * t * (3 - 2 * t));
-        });
-
-    final monthLabel = DateFormat(
-      'MMM yyyy',
-    ).format(DateTime.now()).toUpperCase();
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Color.alphaBlend(
-              gainColor.withValues(alpha: 0.16),
-              cs.surfaceContainer,
-            ),
-            cs.surfaceContainer,
-          ],
-          stops: const [0.0, 0.75],
+    Widget fact(String label, String value, [Color? color]) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+        Text(
+          value,
+          style: tt.titleSmall!.copyWith(color: color ?? cs.onSurface),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
+      ],
+    );
+
+    return KuberCard(
+      hero: true,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.l10n.portfolioValue,
-                        style: localeFont(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 1.4,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        border: Border.all(color: cs.outline),
-                        borderRadius: BorderRadius.circular(KuberRadius.sm),
-                      ),
-                      child: Text(
-                        monthLabel,
-                        style: monoFont(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: cs.onSurfaceVariant,
-                          letterSpacing: 0.4,
-                        ),
-                      ),
-                    ),
-                  ],
+          Text(
+            context.l10n.portfolioValue,
+            style: tt.labelMedium!.copyWith(
+              letterSpacing: 0.8,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            maskAmount(fmt.formatCurrency(currentValue), masked),
+            style: tt.headlineMedium!.copyWith(color: cs.onSurface),
+          ),
+          const SizedBox(height: KuberSpace.md),
+          Row(
+            children: [
+              Expanded(
+                child: fact(
+                  context.l10n.investedLabel,
+                  maskAmount(fmt.formatCurrency(invested), masked),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        maskAmount(fmt.formatCurrency(currentValue), masked),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: localeFont(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          letterSpacing: -0.8,
-                          height: 1.1,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 4, left: 8),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(6, 3, 8, 3),
-                        decoration: BoxDecoration(
-                          color: gainBg,
-                          borderRadius: BorderRadius.circular(KuberRadius.full),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isGain
-                                  ? Icons.trending_up_rounded
-                                  : Icons.trending_down_rounded,
-                              size: 14,
-                              color: gainColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
-                              style: localeFont(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w700,
-                                color: gainColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${isGain ? '+' : '−'}${maskAmount(fmt.formatCurrency(gainLoss.abs()), masked)} '
-                  '${isGain ? 'unrealised gain' : 'unrealised loss'} · since you started',
-                  style: localeFont(
-                    fontSize: 11.5,
-                    color: cs.onSurfaceVariant,
+              ),
+              Expanded(
+                child: fact(
+                  context.l10n.gainLabel,
+                  maskAmount(
+                    '${isGain ? '+' : '−'}${fmt.formatCurrency(gainLoss.abs())}',
+                    masked,
                   ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 12, 8, 4),
-            child: SizedBox(
-              height: 68,
-              child: CustomPaint(
-                painter: _SparkPainter(
-                  data: series,
-                  lineColor: gainColor,
-                  fillColor: gainColor.withValues(alpha: 0.18),
-                  dotRingColor: cs.surfaceContainer,
+                  gainColor,
                 ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 4, 18, 18),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cs.surface,
-                border: Border.all(color: cs.outline),
-                borderRadius: BorderRadius.circular(KuberRadius.lg),
+              Expanded(
+                child: fact(
+                  context.l10n.returnLabel,
+                  '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
+                  gainColor,
+                ),
               ),
+            ],
+          ),
+          if (allocation.isNotEmpty && total > 0) ...[
+            const SizedBox(height: KuberSpace.lg),
+            SizedBox(
+              height: 8,
               child: Row(
                 children: [
-                  Expanded(
-                    child: _BreakdownColumn(
-                      label: context.l10n.investedUpper,
-                      value: maskAmount(fmt.formatCurrency(invested), masked),
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  Expanded(
-                    child: _BreakdownColumn(
-                      label: context.l10n.currentUpper,
-                      value: maskAmount(
-                        fmt.formatCurrency(currentValue),
-                        masked,
+                  for (final (i, sl) in allocation.indexed) ...[
+                    if (i > 0) const SizedBox(width: 4),
+                    Expanded(
+                      flex: (sl.value / total * 1000).round().clamp(1, 1000),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: categoryVizColor(context, sl.color),
+                          borderRadius: KuberShape.fullR,
+                        ),
                       ),
-                      color: gainColor,
-                      alignEnd: true,
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
-          ),
+            const SizedBox(height: KuberSpace.md),
+            Wrap(
+              spacing: KuberSpace.lg,
+              runSpacing: KuberSpace.sm,
+              children: [
+                for (final sl in allocation)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: categoryVizColor(context, sl.color),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        sl.label,
+                        style: tt.bodySmall!.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 }
-
-class _BreakdownColumn extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-  final bool alignEnd;
-  const _BreakdownColumn({
-    required this.label,
-    required this.value,
-    required this.color,
-    this.alignEnd = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: alignEnd
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: localeFont(
-            fontSize: 9.5,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.6,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: localeFont(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: color,
-            letterSpacing: -0.2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SparkPainter extends CustomPainter {
-  final List<double> data;
-  final Color lineColor;
-  final Color fillColor;
-  final Color dotRingColor;
-  _SparkPainter({
-    required this.data,
-    required this.lineColor,
-    required this.fillColor,
-    required this.dotRingColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (data.length < 2) return;
-    const padTop = 6.0;
-    final plotH = size.height - padTop;
-    final minV = data.reduce((a, b) => a < b ? a : b);
-    final maxV = data.reduce((a, b) => a > b ? a : b);
-    final range = (maxV - minV).abs() < 1e-6 ? 1 : (maxV - minV);
-
-    Offset pt(int i) {
-      final x = i * size.width / (data.length - 1);
-      final y = padTop + plotH * (1 - (data[i] - minV) / range);
-      return Offset(x, y);
-    }
-
-    final line = Path();
-    final fill = Path()..moveTo(0, padTop + plotH);
-    for (int i = 0; i < data.length; i++) {
-      final p = pt(i);
-      if (i == 0) {
-        line.moveTo(p.dx, p.dy);
-      } else {
-        final prev = pt(i - 1);
-        final cx = (prev.dx + p.dx) / 2;
-        line.cubicTo(cx, prev.dy, cx, p.dy, p.dx, p.dy);
-      }
-      fill.lineTo(p.dx, p.dy);
-    }
-    fill.lineTo(size.width, padTop + plotH);
-    fill.close();
-
-    final fillPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [fillColor, fillColor.withValues(alpha: 0)],
-      ).createShader(Rect.fromLTWH(0, padTop, size.width, plotH));
-    canvas.drawPath(fill, fillPaint);
-
-    final linePaint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(line, linePaint);
-
-    final last = pt(data.length - 1);
-    canvas.drawCircle(last, 5, Paint()..color = dotRingColor);
-    canvas.drawCircle(last, 3, Paint()..color = lineColor);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SparkPainter old) =>
-      !identical(old.data, data) || old.lineColor != lineColor;
-}
-
-// ---------------------------------------------------------------------------
-// Asset allocation strip
-// ---------------------------------------------------------------------------
 
 class AssetSlice {
   final String label;
@@ -376,135 +185,14 @@ class AssetSlice {
   });
 }
 
-class AssetAllocationStrip extends StatelessWidget {
-  final List<AssetSlice> slices; // sorted descending
-  const AssetAllocationStrip({super.key, required this.slices});
-
-  @override
-  Widget build(BuildContext context) {
-    if (slices.isEmpty) return const SizedBox.shrink();
-    final cs = Theme.of(context).colorScheme;
-    final total = slices.fold<double>(0, (a, s) => a + s.value);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-      ),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            context.l10n.assetAllocation,
-            style: localeFont(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: SizedBox(
-              height: 10,
-              child: Row(
-                children: [
-                  for (final s in slices)
-                    Expanded(
-                      flex: ((s.value / total) * 1000).round().clamp(1, 1000),
-                      child: ColoredBox(color: s.color),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final s in slices)
-                _AllocChip(
-                  label: s.label,
-                  color: s.color,
-                  percent: total <= 0 ? 0 : (s.value / total * 100),
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AllocChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final double percent;
-  const _AllocChip({
-    required this.label,
-    required this.color,
-    required this.percent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.full),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 7,
-            height: 7,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: localeFont(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            '${percent.toStringAsFixed(0)}%',
-            style: localeFont(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Investment card
-// ---------------------------------------------------------------------------
-
+/// One investment row (board 3.22): tile in the re-toned type colour, name,
+/// "SIP ₹5,000 · Type", value with the return % under it.
 class InvestmentCard extends ConsumerWidget {
   final String name;
-  final String assetTypeLabel; // "STOCKS", "MUTUAL FUND", "GOLD", etc
+  final String assetTypeLabel;
   final IconData icon;
   final Color iconColor;
-  final String? quantityLabel; // "40 shares", "42.5 g", "SIP ₹10,000"
+  final String? quantityLabel; // "SIP ₹10,000"
   final double currentValue;
   final double gainLossPercent;
   final VoidCallback onTap;
@@ -523,143 +211,42 @@ class InvestmentCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tt = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
     final masked = ref.watch(privacyModeProvider);
     final isGain = gainLossPercent >= 0;
-    final gainColor = isGain ? cs.tertiary : cs.error;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            border: Border.all(color: cs.outline),
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-          ),
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.12),
-                  border: Border.all(color: iconColor.withValues(alpha: 0.30)),
-                  borderRadius: BorderRadius.circular(KuberRadius.md + 2),
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 22, color: iconColor),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      name,
-                      overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Text(
-                          assetTypeLabel.toUpperCase(),
-                          style: localeFont(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurfaceVariant,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        if (quantityLabel != null) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            width: 3,
-                            height: 3,
-                            decoration: BoxDecoration(
-                              color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              quantityLabel!,
-                              overflow: TextOverflow.ellipsis,
-                              style: localeFont(
-                                fontSize: 11,
-                                color: cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    maskAmount(fmt.formatCurrency(currentValue), masked),
-                    style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: gainColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(KuberRadius.sm),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isGain
-                              ? Icons.trending_up_rounded
-                              : Icons.trending_down_rounded,
-                          size: 11,
-                          color: gainColor,
-                        ),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
-                          style: localeFont(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: gainColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    final tones = categoryTones(context, iconColor);
+    return KuberListRow(
+      onTap: onTap,
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: tones.container,
+          borderRadius: KuberShape.mediumR,
         ),
+        child: Icon(icon, size: 20, color: tones.fg),
+      ),
+      title: name,
+      subtitle: [?quantityLabel, assetTypeLabel].join(' · '),
+      trailing: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            maskAmount(fmt.formatCurrency(currentValue), masked),
+            style: tt.titleMedium!.copyWith(color: cs.onSurface),
+          ),
+          Text(
+            '${isGain ? '+' : '−'}${gainLossPercent.abs().toStringAsFixed(1)}%',
+            style: tt.labelSmall!.copyWith(
+              color: isGain
+                  ? context.kuberMoney.income
+                  : context.kuberMoney.expense,
+            ),
+          ),
+        ],
       ),
     );
   }

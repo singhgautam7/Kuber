@@ -27,18 +27,18 @@ class KuberPreviewRow extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         child: Ink(
-          padding: const EdgeInsets.all(KuberSpacing.md),
+          padding: const EdgeInsets.all(KuberSpace.md),
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Row(
             children: [
               leading,
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +50,7 @@ class KuberPreviewRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: localeFont(
                         fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w600,
                         letterSpacing: 1.2,
                         color: cs.onSurfaceVariant,
                       ),
@@ -61,7 +61,7 @@ class KuberPreviewRow extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: localeFont(
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),

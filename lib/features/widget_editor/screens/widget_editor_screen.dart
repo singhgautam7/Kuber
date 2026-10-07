@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
@@ -20,8 +22,7 @@ class WidgetEditorScreen extends ConsumerStatefulWidget {
   const WidgetEditorScreen({super.key, required this.scope});
 
   @override
-  ConsumerState<WidgetEditorScreen> createState() =>
-      _WidgetEditorScreenState();
+  ConsumerState<WidgetEditorScreen> createState() => _WidgetEditorScreenState();
 }
 
 class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
@@ -79,7 +80,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(
           context.l10n.discardChangesConfirm,
-          style: localeFont(fontWeight: FontWeight.w800),
+          style: localeFont(fontWeight: FontWeight.w700),
         ),
         content: Text(
           context.l10n.discardChangesBody,
@@ -97,10 +98,7 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               context.l10n.discardLabel,
-              style: localeFont(
-                fontWeight: FontWeight.w700,
-                color: cs.error,
-              ),
+              style: localeFont(fontWeight: FontWeight.w700, color: cs.error),
             ),
           ),
         ],
@@ -135,133 +133,105 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
       },
       child: Scaffold(
         backgroundColor: cs.surface,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: () async {
+        body: KuberScrollAwayHeader(
+          header: KuberAppBar(
+            showBack: true,
+            closeIcon: true,
+            title: widget.scope.title,
+            onBack: () async {
               if (await _confirmDiscard()) {
                 if (!context.mounted) return;
                 Navigator.pop(context);
               }
             },
           ),
-          title: Text(
-            widget.scope.title,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          centerTitle: true,
-        ),
-        body: loaded
-            ? Column(
-                children: [
-                  const SizedBox(height: KuberSpacing.sm),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: KuberSpacing.lg,
-                        vertical: KuberSpacing.sm),
-                    child: Row(
-                      children: [
-                        Icon(Icons.drag_indicator_rounded,
-                            size: 14,
-                            color: cs.onSurfaceVariant
-                                .withValues(alpha: 0.7)),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'Drag the handle to reorder. Toggle to show/hide.',
-                            style: localeFont(
-                              fontSize: 12,
-                              color: cs.onSurfaceVariant,
-                            ),
+          body: loaded
+              ? Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin,
+                        0,
+                        KuberSpace.screenMargin,
+                        KuberSpace.md,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Drag the handle to reorder. Toggle to show/hide.',
+                          style: tt.bodyMedium?.copyWith(
+                            color: cs.onSurfaceVariant,
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: ReorderableListView.builder(
-                      padding: const EdgeInsets.fromLTRB(
-                          KuberSpacing.lg, 8, KuberSpacing.lg, 120),
-                      buildDefaultDragHandles: false,
-                      itemCount: _widgets!.length,
-                      onReorder: (oldI, newI) => setState(() {
-                        if (newI > oldI) newI -= 1;
-                        final w = _widgets!.removeAt(oldI);
-                        _widgets!.insert(newI, w);
-                      }),
-                      proxyDecorator: (child, idx, anim) {
-                        return Material(
-                          color: Colors.transparent,
-                          child: AnimatedBuilder(
-                            animation: anim,
-                            builder: (ctx, _) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(KuberRadius.md),
-                                  border: Border.all(
-                                      color: cs.primary, width: 1.5),
-                                  color: cs.surfaceContainerHigh,
-                                ),
-                                child: child,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      itemBuilder: (ctx, i) {
-                        final w = _widgets![i];
-                        return _WidgetRow(
-                          key: ValueKey(w.id),
-                          index: i,
-                          widget: w,
-                          onToggle: (v) => _toggle(i, v),
-                        );
-                      },
+                    Expanded(
+                      child: ReorderableListView.builder(
+                        padding: const EdgeInsets.fromLTRB(
+                          KuberSpace.screenMargin,
+                          0,
+                          KuberSpace.screenMargin,
+                          120,
+                        ),
+                        buildDefaultDragHandles: false,
+                        itemCount: _widgets!.length,
+                        onReorder: (oldI, newI) => setState(() {
+                          if (newI > oldI) newI -= 1;
+                          final w = _widgets!.removeAt(oldI);
+                          _widgets!.insert(newI, w);
+                        }),
+                        proxyDecorator: (child, idx, anim) {
+                          return Material(
+                            color: Colors.transparent,
+                            child: AnimatedBuilder(
+                              animation: anim,
+                              builder: (ctx, _) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: KuberShape.cardR,
+                                    color: cs.surfaceContainerHigh,
+                                  ),
+                                  child: child,
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        itemBuilder: (ctx, i) {
+                          final w = _widgets![i];
+                          return _WidgetRow(
+                            key: ValueKey(w.id),
+                            index: i,
+                            isLast: i == _widgets!.length - 1,
+                            widget: w,
+                            onToggle: (v) => _toggle(i, v),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              )
-            : const Center(child: CircularProgressIndicator()),
+                  ],
+                )
+              : const Center(child: CircularProgressIndicator()),
+        ),
         bottomSheet: loaded
             ? Container(
-                  padding: EdgeInsets.fromLTRB(
-                      KuberSpacing.lg, 12, KuberSpacing.lg,
-                      12 + systemNavBarInset(context)),
-                  decoration: BoxDecoration(
-                    color: cs.surface,
-                    border: Border(
-                      top: BorderSide(
-                          color: cs.outline.withValues(alpha: 0.4)),
-                    ),
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: _dirty ? _save : null,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: cs.primary,
-                        foregroundColor: cs.onPrimary,
-                        disabledBackgroundColor: cs.surfaceContainerHigh,
-                        disabledForegroundColor:
-                            cs.onSurfaceVariant.withValues(alpha: 0.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(KuberRadius.md),
-                        ),
-                      ),
-                      child: Text(
-                        context.l10n.saveChanges,
-                        style: localeFont(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
+                padding: EdgeInsets.fromLTRB(
+                  KuberSpace.screenMargin,
+                  12,
+                  KuberSpace.screenMargin,
+                  24 + systemNavBarInset(context),
+                ),
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  border: Border(top: BorderSide(color: cs.outlineVariant)),
+                ),
+                child: AppButton(
+                  label: context.l10n.saveChanges,
+                  type: AppButtonType.primary,
+                  fullWidth: true,
+                  onPressed: _dirty ? _save : null,
+                ),
+              )
             : null,
       ),
     );
@@ -270,41 +240,49 @@ class _WidgetEditorScreenState extends ConsumerState<WidgetEditorScreen> {
 
 class _WidgetRow extends StatelessWidget {
   final int index;
+  final bool isLast;
   final HomeWidgetConfig widget;
   final ValueChanged<bool> onToggle;
 
   const _WidgetRow({
     super.key,
     required this.index,
+    required this.isLast,
     required this.widget,
     required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // Rows read as one grouped list (board 3.2c): rounded ends, shared 1dp
+    // edges (each row overlaps the previous by its top border).
+    const r = Radius.circular(KuberShape.largeIncreased);
+    return Transform.translate(
+      offset: Offset(0, -index.toDouble()),
       child: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.vertical(
+            top: index == 0 ? r : Radius.zero,
+            bottom: isLast ? r : Radius.zero,
+          ),
+          border: Border.all(color: cs.outlineVariant),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.sm,
-          vertical: KuberSpacing.sm,
-        ),
+        constraints: const BoxConstraints(minHeight: KuberSpace.listItem2),
+        padding: const EdgeInsets.fromLTRB(4, 8, 16, 8),
         child: Row(
           children: [
             ReorderableDragStartListener(
               index: index,
-              child: Container(
-                padding: const EdgeInsets.all(10),
+              child: SizedBox(
+                width: 48,
+                height: 48,
                 child: Icon(
                   Icons.drag_indicator_rounded,
                   color: cs.onSurfaceVariant,
-                  size: 22,
+                  size: 24,
                 ),
               ),
             ),
@@ -316,33 +294,25 @@ class _WidgetRow extends StatelessWidget {
                 children: [
                   Text(
                     localizedWidgetName(context, widget.id),
-                    style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       color: cs.onSurface,
                     ),
                   ),
-                  if (widget.description != null) ...[
-                    const SizedBox(height: 2),
+                  if (widget.description != null)
                     Text(
-                      localizedWidgetDesc(context, widget.id) ?? widget.description!,
+                      localizedWidgetDesc(context, widget.id) ??
+                          widget.description!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                        fontSize: 12,
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
                     ),
-                  ],
                 ],
               ),
             ),
-            const SizedBox(width: KuberSpacing.sm),
-            Switch(
-              value: widget.enabled,
-              onChanged: onToggle,
-              activeTrackColor: cs.primary,
-            ),
+            const SizedBox(width: KuberSpace.md),
+            Switch(value: widget.enabled, onChanged: onToggle),
           ],
         ),
       ),

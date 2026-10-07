@@ -1,39 +1,40 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_theme.dart';
+import '../../core/utils/color_harmonizer.dart';
+
+/// Category tile (components/transaction-item.md): radius 12, the category
+/// colour re-toned to a container tone with the glyph in the strong tone.
 class CategoryIcon extends StatelessWidget {
   final IconData icon;
   final Color rawColor;
   final double size;
-  final double borderRadius;
 
   const CategoryIcon.square({
     super.key,
     required this.icon,
     required this.rawColor,
-    this.size = 48,
-  }) : borderRadius = 8;
+    this.size = 40,
+  });
 
   const CategoryIcon.roundedSquare({
     super.key,
     required this.icon,
     required this.rawColor,
-    this.size = 64,
-  }) : borderRadius = 8;
+    this.size = 56,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final tones = categoryTones(context, rawColor);
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: rawColor.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(borderRadius),
+        color: tones.container,
+        borderRadius: KuberShape.mediumR,
       ),
-      child: Icon(
-        icon,
-        color: rawColor,
-        size: size * 0.5,
-      ),
+      child: Icon(icon, color: tones.fg, size: size * 0.55),
     );
   }
 }

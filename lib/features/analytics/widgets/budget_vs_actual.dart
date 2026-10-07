@@ -27,42 +27,50 @@ class BudgetVsActualCard extends ConsumerWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(KuberSpacing.lg),
+            padding: const EdgeInsets.all(KuberSpace.lg),
             child: Text(
               context.l10n.budgetVsActual,
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           const Divider(height: 1),
           budgetsAsync.when(
             loading: () => _buildLoading(context),
             error: (e, _) => Padding(
-              padding: const EdgeInsets.all(KuberSpacing.lg),
+              padding: const EdgeInsets.all(KuberSpace.lg),
               child: _EmptyState(message: context.l10n.errorLoadingBudgets),
             ),
             data: (results) {
               // Filter: show top 5 OR budgets >= 60% usage
-              final filtered = results.where((r) => r.progress.percentage >= 60).toList();
-              final displayList = filtered.length >= 3 ? filtered : results.take(5).toList();
+              final filtered = results
+                  .where((r) => r.progress.percentage >= 60)
+                  .toList();
+              final displayList = filtered.length >= 3
+                  ? filtered
+                  : results.take(5).toList();
 
               if (displayList.isEmpty) {
                 return Padding(
-                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  padding: const EdgeInsets.all(KuberSpace.lg),
                   child: _EmptyState(message: context.l10n.noActiveBudgets),
                 );
               }
 
               return Padding(
-                padding: const EdgeInsets.all(KuberSpacing.lg),
+                padding: const EdgeInsets.all(KuberSpace.lg),
                 child: Column(
-                  children: displayList.map((r) => _BudgetVsActualRow(result: r)).toList(),
+                  children: displayList
+                      .map((r) => _BudgetVsActualRow(result: r))
+                      .toList(),
                 ),
               );
             },
@@ -79,10 +87,10 @@ class BudgetVsActualCard extends ConsumerWidget {
       highlightColor: cs.surfaceContainerLowest,
       child: Container(
         height: 200,
-        margin: const EdgeInsets.all(KuberSpacing.lg),
+        margin: const EdgeInsets.all(KuberSpace.lg),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.medium),
         ),
       ),
     );
@@ -126,11 +134,14 @@ class _BudgetVsActualRow extends ConsumerWidget {
       statusLabel = context.l10n.budgetOnTrack;
     }
 
-    final remaining = (progress.limit - progress.spent).clamp(0.0, double.infinity);
+    final remaining = (progress.limit - progress.spent).clamp(
+      0.0,
+      double.infinity,
+    );
 
     return InkWell(
       onTap: () => context.go('/history?categoryId=${budget.categoryId}'),
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+      borderRadius: BorderRadius.circular(KuberShape.medium),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Column(
@@ -139,18 +150,20 @@ class _BudgetVsActualRow extends ConsumerWidget {
               children: [
                 // Category Icon
                 Container(
-                  padding: const EdgeInsets.all(KuberSpacing.sm),
+                  padding: const EdgeInsets.all(KuberSpace.sm),
                   decoration: BoxDecoration(
                     color: catColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
                   ),
                   child: Icon(
-                    category != null ? IconMapper.fromString(category.icon) : Icons.category_outlined,
+                    category != null
+                        ? IconMapper.fromString(category.icon)
+                        : Icons.category_outlined,
                     color: catColor,
                     size: 18,
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.md),
+                const SizedBox(width: KuberSpace.md),
 
                 // Main Info
                 Expanded(
@@ -161,7 +174,7 @@ class _BudgetVsActualRow extends ConsumerWidget {
                         category?.name ?? context.l10n.categoryLabel,
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
+                          fontSize: 16,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -169,14 +182,16 @@ class _BudgetVsActualRow extends ConsumerWidget {
                         text: TextSpan(
                           children: [
                             TextSpan(
-                              text: '${maskAmount(fmt.formatCurrency(progress.spent), isPrivate)} ',
+                              text:
+                                  '${maskAmount(fmt.formatCurrency(progress.spent), isPrivate)} ',
                               style: textTheme.bodySmall?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: cs.onSurface,
                               ),
                             ),
                             TextSpan(
-                              text: '/ ${maskAmount(fmt.formatCurrency(progress.limit), isPrivate)}',
+                              text:
+                                  '/ ${maskAmount(fmt.formatCurrency(progress.limit), isPrivate)}',
                               style: textTheme.bodySmall?.copyWith(
                                 color: cs.onSurfaceVariant,
                               ),
@@ -198,16 +213,21 @@ class _BudgetVsActualRow extends ConsumerWidget {
 
                 // Percentage Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: badgeColor.withValues(alpha: 0.2)),
+                    borderRadius: BorderRadius.circular(KuberShape.full),
+                    border: Border.all(
+                      color: badgeColor.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Text(
                     '${progress.percentage.toInt()}%',
                     style: textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       color: badgeColor,
                     ),
                   ),
@@ -216,10 +236,10 @@ class _BudgetVsActualRow extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             ClipRRect(
-              borderRadius: BorderRadius.circular(100),
+              borderRadius: BorderRadius.circular(KuberShape.full),
               child: LinearProgressIndicator(
                 value: (progress.percentage / 100).clamp(0.0, 1.0),
-                backgroundColor: cs.outline.withValues(alpha: 0.2),
+                backgroundColor: cs.outlineVariant.withValues(alpha: 0.2),
                 color: cs.primary, // Static primary color as requested
                 minHeight: 8,
               ),
@@ -230,9 +250,9 @@ class _BudgetVsActualRow extends ConsumerWidget {
               child: Text(
                 statusLabel,
                 style: textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,
-                  fontSize: 10,
+                  fontSize: 11,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -253,11 +273,11 @@ class _EmptyState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+      padding: const EdgeInsets.symmetric(vertical: KuberSpace.xl),
       child: Center(
         child: Text(
           message,
-          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
+          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
         ),
       ),
     );

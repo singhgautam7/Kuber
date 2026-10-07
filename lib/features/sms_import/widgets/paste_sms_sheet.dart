@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../core/utils/locale_font.dart' show monoFont;
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../engine/sms_parser.dart';
 import '../providers/sms_import_provider.dart';
@@ -100,180 +102,112 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final canReview = _state == _PasteState.parsed;
+    final isOtp = _state == _PasteState.otp;
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: KuberShape.largeR,
+      borderSide: BorderSide(
+        color: isOtp ? context.kuberMoney.warning : cs.primary,
+        width: 2,
+      ),
+    );
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.84,
-      ),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 12),
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+    // Board 3.9a "Paste a single SMS": title + one-line description, a mono
+    // multi-line field, the detected summary, Review.
+    return KuberBottomSheet(
+      title: 'Paste an SMS',
+      description: 'Paste one bank message to import it',
+      actions: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_state == _PasteState.cantParse)
+            AppButton(
+              label: 'Add manually instead',
+              type: AppButtonType.outline,
+              fullWidth: true,
+              icon: Icons.add_rounded,
+              onPressed: () {
+                Navigator.pop(context);
+                context.push('/add-transaction');
+              },
+            )
+          else
+            AppButton(
+              label: 'Review',
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: canReview ? _review : null,
             ),
-            // Header + text area + live preview share one scrollable region so
-            // nothing fixed forces an overflow when the keyboard is open.
-            Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Paste an SMS',
-                            style: localeFont(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurface,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Long-press your bank SMS, copy, and paste here. '
-                            'Kuber parses it locally.',
-                            style: localeFont(
-                              fontSize: 12.5,
-                              color: cs.onSurfaceVariant,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Text area — single bordered box; the field fills it.
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 8, 18, 0),
-                      child: SizedBox(
-                        height: 150,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: cs.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(KuberRadius.md),
-                            border: Border.all(
-                              color: _state == _PasteState.otp
-                                  ? context.kuberColors.warning
-                                      .withValues(alpha: 0.5)
-                                  : cs.primary,
-                              width: 1.5,
-                            ),
-                          ),
-                          child: TextField(
-                            controller: _controller,
-                            onChanged: _onChanged,
-                            autofocus: true,
-                            maxLines: null,
-                            expands: true,
-                            textAlignVertical: TextAlignVertical.top,
-                            style: monoFont(
-                              fontSize: 13,
-                              height: 1.5,
-                              color: cs.onSurface,
-                            ),
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.all(14),
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              filled: false,
-                              hintText:
-                                  'e.g. "INR 648.50 debited from A/c XX4521 '
-                                  'on 05-Jun-26..."',
-                              hintStyle: monoFont(
-                                fontSize: 13,
-                                height: 1.5,
-                                color:
-                                    cs.onSurfaceVariant.withValues(alpha: 0.6),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
-                      child: _buildBody(cs),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 8, 18, 12),
-              child: Column(
-                children: [
-                  if (_state == _PasteState.cantParse)
-                    AppButton(
-                      label: 'Add manually instead',
-                      type: AppButtonType.outline,
-                      fullWidth: true,
-                      icon: Icons.add_rounded,
-                      onPressed: () {
-                        Navigator.pop(context);
-                        context.push('/add-transaction');
-                      },
-                    )
-                  else
-                    AppButton(
-                      label: 'Review this transaction',
-                      type: AppButtonType.primary,
-                      fullWidth: true,
-                      onPressed: canReview ? _review : null,
-                    ),
-                  if (_state == _PasteState.otp) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'Disabled while an OTP is detected.',
-                      textAlign: TextAlign.center,
-                      style: localeFont(
-                        fontSize: 11,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
+          if (isOtp) ...[
+            const SizedBox(height: KuberSpace.sm),
+            Text(
+              'Disabled while an OTP is detected.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall!.copyWith(
+                color: cs.onSurfaceVariant,
               ),
             ),
           ],
-        ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            height: 132,
+            child: TextField(
+              controller: _controller,
+              onChanged: _onChanged,
+              autofocus: true,
+              maxLines: null,
+              expands: true,
+              textAlignVertical: TextAlignVertical.top,
+              style: monoFont(fontSize: 14, height: 1.5, color: cs.onSurface),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: cs.surfaceContainerHigh,
+                contentPadding: const EdgeInsets.all(16),
+                border: fieldBorder,
+                enabledBorder: fieldBorder,
+                focusedBorder: fieldBorder,
+                hintText:
+                    'e.g. "INR 648.50 debited from A/c XX4521 on '
+                    '05-Jun-26..."',
+                hintStyle: monoFont(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: KuberSpace.md),
+          _buildBody(cs),
+        ],
       ),
     );
   }
 
   Widget _buildBody(ColorScheme cs) {
+    final small = Theme.of(
+      context,
+    ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant);
     switch (_state) {
       case _PasteState.empty:
         return Row(
           children: [
-            Icon(Icons.shield_outlined, size: 14, color: cs.onSurfaceVariant),
-            const SizedBox(width: 6),
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 16,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: KuberSpace.sm),
             Expanded(
               child: Text(
                 'Parsed on-device. Nothing is sent anywhere.',
-                style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+                style: small,
               ),
             ),
           ],
@@ -281,16 +215,13 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
       case _PasteState.parsing:
         return Row(
           children: [
-            SizedBox(
+            const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2, color: cs.primary),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            const SizedBox(width: 10),
-            Text(
-              'Parsing…',
-              style: localeFont(fontSize: 12.5, color: cs.onSurfaceVariant),
-            ),
+            const SizedBox(width: KuberSpace.sm),
+            Text('Parsing…', style: small),
           ],
         );
       case _PasteState.parsed:
@@ -303,6 +234,7 @@ class _PasteSmsSheetState extends ConsumerState<PasteSmsSheet> {
   }
 }
 
+/// "Detected: expense ₹412 · Swiggy · ····4321" with a success check.
 class _ParsedPreview extends ConsumerWidget {
   final SmsParseResult result;
   const _ParsedPreview({required this.result});
@@ -310,83 +242,26 @@ class _ParsedPreview extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final amountColor =
-        result.type == 'income' ? cs.tertiary : cs.error;
-    return Column(
+    final parts = [
+      '${result.type} ${signedAmount(ref, result.amount, result.type).substring(1)}',
+      if (result.merchant != null) result.merchant!,
+      if (result.accountSuffix != null) '····${result.accountSuffix}',
+    ];
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(Icons.check_rounded, size: 14, color: cs.tertiary),
-            const SizedBox(width: 8),
-            Text.rich(
-              TextSpan(
-                children: [
-                  const TextSpan(text: 'Matched '),
-                  TextSpan(
-                    text: result.patternMatched,
-                    style: monoFont(color: cs.onSurface),
-                  ),
-                ],
-              ),
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
-            ),
-          ],
+        Icon(
+          Icons.check_circle_rounded,
+          size: 16,
+          color: context.kuberMoney.income,
         ),
-        const SizedBox(height: 12),
-        // Mini list-card preview matching the import card anatomy.
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SmsTypeGlyph(type: result.type),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            result.merchant ?? 'Transaction',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: localeFont(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          signedAmount(ref, result.amount, result.type),
-                          style: localeFont(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: amountColor,
-                          ).copyWith(fontFeatures: const [
-                            FontFeature.tabularFigures(),
-                          ]),
-                        ),
-                      ],
-                    ),
-                    if (result.accountSuffix != null) ...[
-                      const SizedBox(height: 7),
-                      SmsChip(label: '····${result.accountSuffix}'),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+        const SizedBox(width: KuberSpace.sm),
+        Expanded(
+          child: Text(
+            'Detected: ${parts.join(' · ')}',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
           ),
         ),
       ],
@@ -397,14 +272,13 @@ class _ParsedPreview extends ConsumerWidget {
 class _OtpWarning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
+    final m = context.kuberMoney;
+    final tt = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: warning.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: warning.withValues(alpha: 0.30)),
+        color: m.warningContainer,
+        borderRadius: KuberShape.largeR,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,10 +287,14 @@ class _OtpWarning extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: warning.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(10),
+              color: m.onWarningContainer.withValues(alpha: 0.12),
+              borderRadius: KuberShape.mediumR,
             ),
-            child: Icon(Icons.lock_outline_rounded, size: 22, color: warning),
+            child: Icon(
+              Icons.lock_outline_rounded,
+              size: 20,
+              color: m.onWarningContainer,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -425,22 +303,13 @@ class _OtpWarning extends StatelessWidget {
               children: [
                 Text(
                   'This looks like an OTP.',
-                  style: localeFont(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                    height: 1.25,
-                  ),
+                  style: tt.titleSmall!.copyWith(color: m.onWarningContainer),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Kuber never imports messages with verification codes. Paste '
                   'a transaction confirmation instead.',
-                  style: localeFont(
-                    fontSize: 12.5,
-                    color: cs.onSurfaceVariant,
-                    height: 1.5,
-                  ),
+                  style: tt.bodySmall!.copyWith(color: m.onWarningContainer),
                 ),
               ],
             ),
@@ -453,48 +322,11 @@ class _OtpWarning extends StatelessWidget {
 
 class _CantParse extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Column(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: cs.outline),
-              ),
-              child: Icon(Icons.info_outline_rounded,
-                  size: 26, color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              "Couldn't read this message.",
-              style: localeFont(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-                letterSpacing: -0.2,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'No amount or transaction type found. Try pasting the full '
-              'original message from your bank.',
-              textAlign: TextAlign.center,
-              style: localeFont(
-                fontSize: 12.5,
-                color: cs.onSurfaceVariant,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const KuberEmptyState(
+    icon: Icons.info_outline_rounded,
+    title: "Couldn't read this message.",
+    description:
+        'No amount or transaction type found. Try pasting the '
+        'full original message from your bank.',
+  );
 }

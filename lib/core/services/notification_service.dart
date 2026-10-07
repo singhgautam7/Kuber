@@ -110,7 +110,7 @@ class NotificationService {
 
     try {
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
+          AndroidInitializationSettings('@drawable/ic_stat_kuber');
 
       const DarwinInitializationSettings initializationSettingsDarwin =
           DarwinInitializationSettings();

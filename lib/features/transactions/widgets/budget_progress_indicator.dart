@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/l10n_ext.dart';
@@ -20,41 +22,61 @@ class BudgetProgressIndicator extends ConsumerWidget {
 
         final progressAsync = ref.watch(budgetProgressProvider(budget));
         return progressAsync.when(
-          data: (p) => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.account_balance_wallet_outlined, size: 14, color: cs.primary),
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n.budgetLabel,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.primary,
+          data: (p) {
+            final state = p.percentage >= 100
+                ? KuberProgressState.overLimit
+                : p.percentage >= 50
+                ? KuberProgressState.nearLimit
+                : KuberProgressState.normal;
+            final fmt = ref.watch(formatterProvider);
+            final small = Theme.of(context).textTheme.bodySmall!;
+            // Board 3.4: surfaceContainerHigh r16 block, label row + progress.
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: KuberShape.largeR,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet_outlined,
+                        size: 16,
+                        color: cs.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        context.l10n.budgetLabel,
+                        style: small.copyWith(color: cs.onSurfaceVariant),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${fmt.formatCurrency(p.spent)} / ${fmt.formatCurrency(p.limit)} · ${p.percentage.toStringAsFixed(0)}% ${context.l10n.usedLabel}',
+                          textAlign: TextAlign.end,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: small.copyWith(
+                            color: p.percentage >= 100
+                                ? context.kuberMoney.expense
+                                : cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${ref.watch(formatterProvider).formatCurrency(p.spent)} / ${ref.watch(formatterProvider).formatCurrency(p.limit)} (${p.percentage.toStringAsFixed(0)}% ${context.l10n.usedLabel})',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: p.percentage >= 100 ? cs.error : cs.onSurfaceVariant,
-                    ),
+                  const SizedBox(height: KuberSpace.sm),
+                  KuberLinearProgress(
+                    value: (p.percentage / 100).clamp(0.0, 1.0),
+                    state: state,
                   ),
-                ),
-                if (p.percentage >= 100)
-                  Icon(Icons.warning_amber_rounded, size: 14, color: cs.error),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          },
           loading: () => const SizedBox.shrink(),
           error: (_, __) => const SizedBox.shrink(),
         );

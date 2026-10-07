@@ -46,18 +46,14 @@ class _TutorialNudgeSheet extends ConsumerWidget {
               child: Text(context.l10n.goToTutorials),
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           SizedBox(
             height: 48,
             child: FilledButton(
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: true).pop(),
+              onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
               child: Text(
                 context.l10n.gotIt,
-                style: localeFont(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: localeFont(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -70,7 +66,7 @@ class _TutorialNudgeSheet extends ConsumerWidget {
             title: context.l10n.exploreAtOwnPace,
             body: context.l10n.exploreAtOwnPaceBody,
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           _NudgeRow(
             icon: Icons.map_rounded,
             title: context.l10n.walkthroughNearby,
@@ -101,7 +97,7 @@ class _NudgeRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SquircleIcon(icon: icon, color: cs.primary),
-        const SizedBox(width: KuberSpacing.md),
+        const SizedBox(width: KuberSpace.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,15 +106,15 @@ class _NudgeRow extends StatelessWidget {
                 title,
                 style: localeFont(
                   fontSize: 14,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
               ),
-              const SizedBox(height: KuberSpacing.xs),
+              const SizedBox(height: KuberSpace.xs),
               Text(
                 body,
                 style: localeFont(
-                  fontSize: 13,
+                  fontSize: 14,
                   height: 1.45,
                   color: cs.onSurfaceVariant,
                 ),

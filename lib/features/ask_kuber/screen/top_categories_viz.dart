@@ -22,23 +22,30 @@ class TopCategoriesVizView extends ConsumerWidget {
 
     final rows = data.rows.take(5).toList();
     if (rows.isEmpty) return const SizedBox.shrink();
-    final maxAmount = rows.map((r) => r.amount).fold<double>(0, (m, a) => a > m ? a : m);
+    final maxAmount = rows
+        .map((r) => r.amount)
+        .fold<double>(0, (m, a) => a > m ? a : m);
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+        color: cs.surfaceContainerLow,
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.all(KuberSpace.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final row in rows)
             _Row(
               row: row,
-              fraction: maxAmount > 0 ? (row.amount / maxAmount).clamp(0.0, 1.0) : 0,
-              amountText: formatter.formatCurrency(row.amount.round(), symbol: symbol),
+              fraction: maxAmount > 0
+                  ? (row.amount / maxAmount).clamp(0.0, 1.0)
+                  : 0,
+              amountText: formatter.formatCurrency(
+                row.amount.round(),
+                symbol: symbol,
+              ),
               cs: cs,
             ),
         ],
@@ -62,7 +69,7 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = harmonizeCategory(context, row.color);
+    final color = categoryVizColor(context, row.color);
     return SizedBox(
       height: 22,
       child: Row(
@@ -82,7 +89,7 @@ class _Row extends StatelessWidget {
               height: 8,
               decoration: BoxDecoration(
                 color: cs.onSurface.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(KuberShape.full),
               ),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -91,7 +98,7 @@ class _Row extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(KuberShape.small),
                       border: Border.all(color: color.withValues(alpha: 0.5)),
                     ),
                   ),
@@ -107,8 +114,11 @@ class _Row extends StatelessWidget {
               textAlign: TextAlign.right,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: localeFont(fontSize: 12, fontWeight: FontWeight.w600, color: cs.onSurface)
-                  .copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
+              style: localeFont(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
             ),
           ),
         ],

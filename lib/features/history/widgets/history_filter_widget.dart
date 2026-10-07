@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/history_filter.dart';
 import '../providers/history_filter_provider.dart';
@@ -82,8 +84,10 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
 
     final hasSearchQuery =
         filter.searchQuery != null && filter.searchQuery!.isNotEmpty;
-    final showFiltersLabel = !hasSearchQuery && !_isSearching;
 
+    // Board 3.5: Exp / Inc filter chips on the left; clear (only when
+    // something is applied), search and tune icon buttons on the right.
+    // Search swaps the row for an inline pill field.
     return PopScope(
       canPop: !_isSearching,
       onPopInvokedWithResult: (didPop, result) {
@@ -92,108 +96,123 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
           _onSearchCancel();
         }
       },
-      child: Container(
+      child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: 4,
+          horizontal: KuberSpace.screenMargin,
+          vertical: KuberSpace.xs,
         ),
-        height: 56,
-        child: Row(
-          children: [
-            // Left side elements: FILTERS label OR Back button + Search Input
-            if (_isSearching || hasSearchQuery)
-              Expanded(child: _buildSearchInput(cs))
-            else ...[
-              // FILTERS Label
-              if (showFiltersLabel)
-                Text(
-                  context.l10n.filtersUpper,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+        child: SizedBox(
+          height: 48,
+          // Chips row <-> inline search cross-fade (review round 3).
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0.04, 0),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
+              ),
+            ),
+            child: (_isSearching || hasSearchQuery)
+                ? KeyedSubtree(
+                    key: const ValueKey('history-search'),
+                    child: _buildSearchInput(cs),
+                  )
+                : Row(
+                    key: const ValueKey('history-chips'),
+                    children: [
+                      Tooltip(
+                        message: context.l10n.filterExpensesTooltip,
+                        triggerMode: TooltipTriggerMode.longPress,
+                        child: KuberChip(
+                          label: context.l10n.filterExp,
+                          pill: true,
+                          selected: filter.types.contains('expense'),
+                          onTap: () => notifier.setType('expense'),
+                        ),
+                      ),
+                      const SizedBox(width: KuberSpace.sm),
+                      Tooltip(
+                        message: context.l10n.filterIncomeTooltip,
+                        triggerMode: TooltipTriggerMode.longPress,
+                        child: KuberChip(
+                          label: context.l10n.filterInc,
+                          pill: true,
+                          selected: filter.types.contains('income'),
+                          onTap: () => notifier.setType('income'),
+                        ),
+                      ),
+                      const Spacer(),
+                      Transform.translate(
+                        offset: const Offset(4, 0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Clear grows / shrinks in instead of popping.
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 220),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              transitionBuilder: (child, anim) =>
+                                  FadeTransition(
+                                    opacity: anim,
+                                    child: SizeTransition(
+                                      axis: Axis.horizontal,
+                                      sizeFactor: anim,
+                                      child: ScaleTransition(
+                                        scale: anim,
+                                        child: child,
+                                      ),
+                                    ),
+                                  ),
+                              child: filter.isEmpty
+                                  ? const SizedBox.shrink(
+                                      key: ValueKey('no-clear'),
+                                    )
+                                  : AppIconButton(
+                                      key: const ValueKey('clear-filters'),
+                                      icon: Icons.filter_alt_off_rounded,
+                                      kind: AppIconButtonKind.danger,
+                                      semanticLabel:
+                                          context.l10n.clearFiltersTooltip,
+                                      onPressed: () {
+                                        notifier.clearAll();
+                                        _searchController.clear();
+                                      },
+                                    ),
+                            ),
+                            AppIconButton(
+                              key: const ValueKey('search_icon'),
+                              icon: Icons.search_rounded,
+                              semanticLabel:
+                                  context.l10n.searchTransactionsTooltip,
+                              onPressed: _onSearchToggle,
+                            ),
+                            AppIconButton(
+                              key: TutorialStepKeys.historyFilterIcon,
+                              icon: Icons.tune_rounded,
+                              kind: filter.isAdvanced
+                                  ? AppIconButtonKind.tonal
+                                  : AppIconButtonKind.standard,
+                              semanticLabel:
+                                  context.l10n.advancedFiltersTooltip,
+                              badge: filter.activeFiltersCount > 0
+                                  ? '${filter.activeFiltersCount}'
+                                  : null,
+                              badgeColor: cs.primary,
+                              onBadgeColor: cs.onPrimary,
+                              onPressed: widget.onAdvancedTap,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              const Spacer(),
-              // Quick Filters: Exp / Inc
-              Tooltip(
-                message: context.l10n.filterExpensesTooltip,
-                triggerMode: TooltipTriggerMode.longPress,
-                child: _QuickFilterButton(
-                  label: context.l10n.filterExp,
-                  isSelected: filter.types.contains('expense'),
-                  onTap: () => notifier.setType('expense'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Tooltip(
-                message: context.l10n.filterIncomeTooltip,
-                triggerMode: TooltipTriggerMode.longPress,
-                child: _QuickFilterButton(
-                  label: context.l10n.filterInc,
-                  isSelected: filter.types.contains('income'),
-                  onTap: () => notifier.setType('income'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Search Icon (to expand)
-              _buildSearchIcon(cs),
-            ],
-
-            // Right side elements: Advanced Filter and Clear buttons
-            // They should always be visible (unless we want to hide them when searching, but user explicitly asked:
-            // "The clear all filters and advance filters option should still be visible.")
-            const SizedBox(width: 8),
-            // Filter Icon with Badge
-            Tooltip(
-              message: context.l10n.advancedFiltersTooltip,
-              triggerMode: TooltipTriggerMode.longPress,
-              child: _FilterIconButton(
-                key: TutorialStepKeys.historyFilterIcon,
-                count: filter.activeFiltersCount,
-                isActive: filter.isAdvanced,
-                onTap: widget.onAdvancedTap,
-              ),
-            ),
-            const SizedBox(width: 8),
-            // Clear Button
-            Tooltip(
-              message: context.l10n.clearFiltersTooltip,
-              triggerMode: TooltipTriggerMode.longPress,
-              child: _ClearButton(
-                isEnabled: !filter.isEmpty,
-                onTap: () {
-                  notifier.clearAll();
-                  _searchController.clear();
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchIcon(ColorScheme cs) {
-    return Tooltip(
-      message: context.l10n.searchTransactionsTooltip,
-      triggerMode: TooltipTriggerMode.longPress,
-      child: GestureDetector(
-        key: const ValueKey('search_icon'),
-        onTap: _onSearchToggle,
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-          ),
-          child: Icon(
-            Icons.search_rounded,
-            size: 20,
-            color: cs.onSurfaceVariant,
           ),
         ),
       ),
@@ -202,208 +221,55 @@ class _HistoryFilterWidgetState extends ConsumerState<HistoryFilterWidget> {
 
   Widget _buildSearchInput(ColorScheme cs) {
     final theme = Theme.of(context);
-    return TextField(
-      controller: _searchController,
-      focusNode: _focusNode,
-      textAlignVertical: TextAlignVertical.center,
-      style: theme.textTheme.bodyMedium?.copyWith(
-        fontSize: 14,
-        color: cs.onSurface,
+    final focused = _focusNode.hasFocus;
+    // Inline search pill (board 3.5): back, query, apply.
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: KuberShape.fullR,
+        border: Border.all(
+          color: focused ? cs.primary : cs.outlineVariant,
+          width: focused ? 2 : 1,
+        ),
       ),
-      textInputAction: TextInputAction.search,
-      decoration: InputDecoration(
-        hintText: context.l10n.searchTransactionsHint,
-        hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          fontSize: 14,
-          color: cs.onSurfaceVariant,
-        ),
-        prefixIcon: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            size: 20,
-            color: cs.onSurfaceVariant,
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
+        children: [
+          AppIconButton(
+            icon: Icons.arrow_back_rounded,
+            kind: AppIconButtonKind.plain,
+            semanticLabel: 'Back',
+            onPressed: _onSearchCancel,
           ),
-          onPressed: _onSearchCancel,
-        ),
-        filled: true,
-        fillColor: cs.surfaceContainer,
-        contentPadding: const EdgeInsets.symmetric(vertical: 0),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: BorderSide(color: cs.outline),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: BorderSide(color: cs.outline),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: BorderSide(color: cs.outline),
-        ),
-        suffixIcon: Tooltip(
-          message: context.l10n.applySearchTooltip,
-          child: IconButton(
-            icon: Icon(Icons.check_rounded, color: cs.primary, size: 20),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              focusNode: _focusNode,
+              textAlignVertical: TextAlignVertical.center,
+              style: theme.textTheme.bodyLarge?.copyWith(color: cs.onSurface),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: context.l10n.searchTransactionsHint,
+                hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+                filled: false,
+                isCollapsed: true,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+              ),
+              onSubmitted: _onSearchSubmit,
+            ),
+          ),
+          AppIconButton(
+            icon: Icons.check_rounded,
+            kind: AppIconButtonKind.plain,
+            tint: cs.primary,
+            semanticLabel: context.l10n.applySearchTooltip,
             onPressed: () => _onSearchSubmit(_searchController.text),
           ),
-        ),
-      ),
-      onSubmitted: _onSearchSubmit,
-    );
-  }
-}
-
-class _QuickFilterButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _QuickFilterButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: isSelected ? Colors.white : cs.onSurfaceVariant,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterIconButton extends StatelessWidget {
-  final int count;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _FilterIconButton({
-    super.key,
-    required this.count,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(
-                color: isActive
-                    ? cs.primary
-                    : cs.outline.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Icon(
-              Icons.tune_rounded,
-              size: 20,
-              color: isActive ? cs.primary : cs.onSurfaceVariant,
-            ),
-          ),
-          if (count > 0)
-            Positioned(
-              top: -5,
-              right: -5,
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 300),
-                tween: Tween(begin: 0.0, end: 1.0),
-                builder: (context, value, child) {
-                  return Transform.scale(scale: value, child: child);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
-                    border: Border.all(color: cs.surface, width: 2),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 18,
-                    minHeight: 18,
-                  ),
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
         ],
-      ),
-    );
-  }
-}
-
-class _ClearButton extends StatelessWidget {
-  final bool isEnabled;
-  final VoidCallback onTap;
-
-  const _ClearButton({required this.isEnabled, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: isEnabled ? onTap : null,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isEnabled ? 1.0 : 0.3,
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: isEnabled
-                ? Border.all(color: cs.error.withValues(alpha: 0.5))
-                : null,
-          ),
-          child: Icon(
-            Icons.delete_sweep_rounded, // Use a "clear all" style icon
-            size: 20,
-            color: isEnabled ? cs.error : cs.onSurfaceVariant,
-          ),
-        ),
       ),
     );
   }

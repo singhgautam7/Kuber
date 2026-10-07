@@ -52,13 +52,13 @@ class StatusPill extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: KuberSpacing.sm,
+        horizontal: KuberSpace.md,
+        vertical: KuberSpace.sm,
       ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.full),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.full),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -66,13 +66,13 @@ class StatusPill extends StatelessWidget {
           Text(
             label,
             style: localeFont(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           Text(
             value,
             style: localeFont(

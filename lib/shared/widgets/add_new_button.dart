@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class AddNewButton extends StatelessWidget {
@@ -25,9 +26,9 @@ class AddNewButton extends StatelessWidget {
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
             foregroundColor: cs.onSurface,
-            side: BorderSide(color: cs.outline, width: 1),
+            side: BorderSide(color: cs.outlineVariant, width: 1),
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(KuberShape.medium)),
             backgroundColor: Colors.transparent,
           ),
           icon: Icon(Icons.add_rounded,

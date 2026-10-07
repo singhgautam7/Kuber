@@ -57,10 +57,13 @@ class QuickAddVoiceOverlay extends StatelessWidget {
                   ),
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.all(KuberSpacing.lg),
+                    padding: const EdgeInsets.all(KuberSpace.lg),
                     child: switch (state) {
-                      VoiceState.listening =>
-                        _listening(context, cs, reducedMotion),
+                      VoiceState.listening => _listening(
+                        context,
+                        cs,
+                        reducedMotion,
+                      ),
                       VoiceState.processing => _processing(context, cs),
                       VoiceState.error => _error(context, cs),
                       VoiceState.idle => const SizedBox.shrink(),
@@ -84,29 +87,32 @@ class QuickAddVoiceOverlay extends StatelessWidget {
           color: cs.primary,
           reducedMotion: reducedMotion,
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
         ValueListenableBuilder<String>(
           valueListenable: controller.transcript,
           builder: (context, text, _) => Text(
             text.isEmpty ? 'Listening…' : text,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 22,
               height: 1.35,
               color: text.isEmpty ? cs.onSurfaceVariant : cs.onSurface,
             ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_outline_rounded,
-                size: 13, color: cs.onSurfaceVariant),
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 13,
+              color: cs.onSurfaceVariant,
+            ),
             const SizedBox(width: 6),
             Text(
               'On-device · nothing leaves your phone',
-              style: TextStyle(fontSize: 11.5, color: cs.onSurfaceVariant),
+              style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
             ),
           ],
         ),
@@ -122,7 +128,7 @@ class QuickAddVoiceOverlay extends StatelessWidget {
                 onPressed: onCancel,
               ),
             ),
-            const SizedBox(width: KuberSpacing.md),
+            const SizedBox(width: KuberSpace.md),
             Expanded(
               child: AppButton(
                 label: 'Okay',
@@ -144,25 +150,27 @@ class QuickAddVoiceOverlay extends StatelessWidget {
         const Spacer(),
         QuickAddWaveform(
           amplitude: controller.amplitude,
-          color: context.kuberColors.borderMuted,
+          color: Theme.of(context).colorScheme.outlineVariant,
           frozen: true,
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
         SizedBox(
           width: 22,
           height: 22,
           child: CircularProgressIndicator(strokeWidth: 2.5, color: cs.primary),
         ),
-        const SizedBox(height: KuberSpacing.md),
-        Text('Understanding…',
-            style: TextStyle(fontSize: 15, color: cs.onSurfaceVariant)),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.md),
+        Text(
+          'Understanding…',
+          style: TextStyle(fontSize: 16, color: cs.onSurfaceVariant),
+        ),
+        const SizedBox(height: KuberSpace.sm),
         ValueListenableBuilder<String>(
           valueListenable: controller.transcript,
           builder: (context, text, _) => Text(
             text,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+            style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
           ),
         ),
         const Spacer(),
@@ -195,17 +203,24 @@ class QuickAddVoiceOverlay extends StatelessWidget {
           ),
           child: Icon(Icons.mic_off_rounded, size: 36, color: cs.error),
         ),
-        const SizedBox(height: KuberSpacing.lg),
-        Text('Didn’t catch that',
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface)),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.lg),
+        Text(
+          'Didn’t catch that',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
+          ),
+        ),
+        const SizedBox(height: KuberSpace.sm),
         Text(
           'No speech detected. Try again in a quieter spot, or type it instead.',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, height: 1.4, color: cs.onSurfaceVariant),
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.4,
+            color: cs.onSurfaceVariant,
+          ),
         ),
         const Spacer(),
         Row(
@@ -220,7 +235,7 @@ class QuickAddVoiceOverlay extends StatelessWidget {
                 onPressed: onTypeInstead,
               ),
             ),
-            const SizedBox(width: KuberSpacing.md),
+            const SizedBox(width: KuberSpace.md),
             Expanded(
               child: AppButton(
                 label: 'Try again',
@@ -236,5 +251,4 @@ class QuickAddVoiceOverlay extends StatelessWidget {
       ],
     );
   }
-
 }

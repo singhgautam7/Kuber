@@ -9,17 +9,20 @@ import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../transactions/providers/stats_provider.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, privacyModeProvider;
+import '../../settings/providers/settings_provider.dart'
+    show formatterProvider, privacyModeProvider;
 import 'analytics_toggle.dart';
 
 class CategoryGroupStatsWidget extends ConsumerStatefulWidget {
   const CategoryGroupStatsWidget({super.key});
 
   @override
-  ConsumerState<CategoryGroupStatsWidget> createState() => _CategoryGroupStatsWidgetState();
+  ConsumerState<CategoryGroupStatsWidget> createState() =>
+      _CategoryGroupStatsWidgetState();
 }
 
-class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWidget> {
+class _CategoryGroupStatsWidgetState
+    extends ConsumerState<CategoryGroupStatsWidget> {
   bool _isGroupView = false;
   int? _touchedIndex;
 
@@ -37,26 +40,33 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(KuberSpacing.lg, KuberSpacing.lg, KuberSpacing.lg, 0),
+            padding: const EdgeInsets.fromLTRB(
+              KuberSpace.lg,
+              KuberSpace.lg,
+              KuberSpace.lg,
+              0,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
                     context.l10n.spendingDistribution,
-                    style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.md),
+                const SizedBox(width: KuberSpace.md),
                 AnalyticsCardSmallTabs(
                   labels: [context.l10n.categoryLabel, context.l10n.groupLabel],
                   selectedIndex: _isGroupView ? 1 : 0,
@@ -71,28 +81,25 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
           statsAsync.when(
             loading: () => _buildLoading(context),
             error: (e, _) => Padding(
-              padding: const EdgeInsets.all(KuberSpacing.lg),
+              padding: const EdgeInsets.all(KuberSpace.lg),
               child: _EmptyState(message: context.l10n.errorLoadingData),
             ),
             data: (stats) {
               if (stats.isEmpty) {
                 return Padding(
-                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  padding: const EdgeInsets.all(KuberSpace.lg),
                   child: _EmptyState(message: context.l10n.noDataAvailable),
                 );
               }
 
               return Column(
                 children: [
-                  const SizedBox(height: KuberSpacing.md),
-                  SizedBox(
-                    height: 200,
-                    child: _buildPieChart(stats),
-                  ),
-                  const SizedBox(height: KuberSpacing.md),
+                  const SizedBox(height: KuberSpace.md),
+                  SizedBox(height: 200, child: _buildPieChart(stats)),
+                  const SizedBox(height: KuberSpace.md),
                   const Divider(height: 1),
                   Padding(
-                    padding: const EdgeInsets.all(KuberSpacing.lg),
+                    padding: const EdgeInsets.all(KuberSpace.lg),
                     child: Column(
                       children: stats.map((s) {
                         if (s is CategoryStat) {
@@ -101,7 +108,10 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
                             amount: s.total,
                             percentage: s.percentage,
                             icon: IconMapper.fromString(s.category.icon),
-                            color: harmonizeCategory(context, Color(s.category.colorValue)),
+                            color: categoryVizColor(
+                              context,
+                              Color(s.category.colorValue),
+                            ),
                           );
                         } else if (s is GroupStat) {
                           return _StatRow(
@@ -127,71 +137,78 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
 
   Widget _buildPieChart(List<dynamic> stats) {
     final cs = Theme.of(context).colorScheme;
-    
+
     return RepaintBoundary(
       child: PieChart(
-      key: ValueKey(_isGroupView),
-      PieChartData(
-        pieTouchData: PieTouchData(
-          touchCallback: (FlTouchEvent event, pieTouchResponse) {
-            // Only respond to actual user "actions" (tap up, pan end) to toggle
-            final bool isAction = event is FlTapUpEvent || event is FlPanEndEvent;
-            
-            if (isAction) {
-              if (pieTouchResponse == null || pieTouchResponse.touchedSection == null) {
-                return;
+        key: ValueKey(_isGroupView),
+        PieChartData(
+          pieTouchData: PieTouchData(
+            touchCallback: (FlTouchEvent event, pieTouchResponse) {
+              // Only respond to actual user "actions" (tap up, pan end) to toggle
+              final bool isAction =
+                  event is FlTapUpEvent || event is FlPanEndEvent;
+
+              if (isAction) {
+                if (pieTouchResponse == null ||
+                    pieTouchResponse.touchedSection == null) {
+                  return;
+                }
+                final index =
+                    pieTouchResponse.touchedSection!.touchedSectionIndex;
+                if (index >= 0 && index < stats.length) {
+                  setState(() {
+                    _touchedIndex = (_touchedIndex == index) ? null : index;
+                  });
+                }
               }
-              final index = pieTouchResponse.touchedSection!.touchedSectionIndex;
-              if (index >= 0 && index < stats.length) {
-                setState(() {
-                  _touchedIndex = (_touchedIndex == index) ? null : index;
-                });
-              }
+            },
+          ),
+          borderData: FlBorderData(show: false),
+          sectionsSpace: 2,
+          centerSpaceRadius: 40,
+          sections: List.generate(stats.length, (i) {
+            final isTouched = i == _touchedIndex;
+            final double radius = isTouched ? 65.0 : 50.0;
+
+            final s = stats[i];
+            Color color;
+            String name;
+            double percentage;
+
+            if (s is CategoryStat) {
+              color = categoryVizColor(context, Color(s.category.colorValue));
+              name = s.category.name;
+              percentage = s.percentage;
+            } else {
+              color = Color.lerp(
+                cs.primary,
+                context.kuberMoney.income,
+                i / stats.length.clamp(1, 100),
+              )!;
+              name = s.groupName;
+              percentage = s.percentage;
             }
-          },
+
+            return PieChartSectionData(
+              color: color,
+              value: percentage,
+              title: isTouched
+                  ? '$name\n${ref.watch(formatterProvider).formatPercentage(percentage)}'
+                  : '',
+              radius: radius,
+              titlePositionPercentageOffset: 0.55,
+              titleStyle: TextStyle(
+                fontSize: isTouched ? 11 : 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: const [Shadow(color: Colors.black26, blurRadius: 4)],
+              ),
+            );
+          }),
         ),
-        borderData: FlBorderData(show: false),
-        sectionsSpace: 2,
-        centerSpaceRadius: 40,
-        sections: List.generate(stats.length, (i) {
-          final isTouched = i == _touchedIndex;
-          final double radius = isTouched ? 65.0 : 50.0;
-          
-          final s = stats[i];
-          Color color;
-          String name;
-          double percentage;
-
-          if (s is CategoryStat) {
-            color = harmonizeCategory(context, Color(s.category.colorValue));
-            name = s.category.name;
-            percentage = s.percentage;
-          } else {
-            color = Color.lerp(cs.primary, cs.tertiary, i / stats.length.clamp(1, 100))!;
-            name = s.groupName;
-            percentage = s.percentage;
-          }
-
-          return PieChartSectionData(
-            color: color,
-            value: percentage,
-            title: isTouched ? '$name\n${ref.watch(formatterProvider).formatPercentage(percentage)}' : '',
-            radius: radius,
-            titlePositionPercentageOffset: 0.55,
-            titleStyle: TextStyle(
-              fontSize: isTouched ? 11 : 10,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              shadows: const [Shadow(color: Colors.black26, blurRadius: 4)],
-            ),
-          );
-        }),
       ),
-    ),
     );
   }
-
-
 
   Widget _buildLoading(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -200,17 +217,15 @@ class _CategoryGroupStatsWidgetState extends ConsumerState<CategoryGroupStatsWid
       highlightColor: cs.surfaceContainerLowest,
       child: Container(
         height: 250,
-        margin: const EdgeInsets.all(KuberSpacing.lg),
+        margin: const EdgeInsets.all(KuberSpace.lg),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.medium),
         ),
       ),
     );
   }
 }
-
-
 
 class _StatRow extends ConsumerWidget {
   final String label;
@@ -234,11 +249,11 @@ class _StatRow extends ConsumerWidget {
     final textTheme = theme.textTheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+      padding: const EdgeInsets.only(bottom: KuberSpace.md),
       child: Row(
         children: [
           CategoryIcon.square(icon: icon, rawColor: color, size: 36),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,10 +261,20 @@ class _StatRow extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(label, style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
                     Text(
-                      maskAmount(ref.watch(formatterProvider).formatCurrency(amount), ref.watch(privacyModeProvider)),
-                      style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                      label,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      maskAmount(
+                        ref.watch(formatterProvider).formatCurrency(amount),
+                        ref.watch(privacyModeProvider),
+                      ),
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
@@ -258,7 +283,7 @@ class _StatRow extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
+                        borderRadius: BorderRadius.circular(KuberShape.full),
                         child: LinearProgressIndicator(
                           value: (percentage / 100).clamp(0, 1),
                           backgroundColor: color.withValues(alpha: 0.1),
@@ -270,7 +295,10 @@ class _StatRow extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text(
                       ref.watch(formatterProvider).formatPercentage(percentage),
-                      style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant, fontSize: 10),
+                      style: textTheme.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -292,15 +320,15 @@ class _EmptyState extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.xl),
+      padding: const EdgeInsets.all(KuberSpace.xl),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
       ),
       child: Center(
         child: Text(
           message,
-          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
+          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
         ),
       ),
     );

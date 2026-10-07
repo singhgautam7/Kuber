@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../settings/providers/settings_provider.dart'
     show formatterProvider, privacyModeProvider;
 import '../data/reminder.dart';
@@ -50,8 +50,8 @@ String reminderDueLabel(Reminder r) {
     final ago = days <= 0
         ? 'earlier today'
         : days == 1
-            ? 'yesterday'
-            : '$days days ago';
+        ? 'yesterday'
+        : '$days days ago';
     return 'Was due $when, $time · $ago';
   }
   if (dueDay == today) return 'Today, $time';
@@ -64,8 +64,9 @@ String reminderDueLabel(Reminder r) {
   return '${DateFormat('d MMM yyyy').format(r.dueAt)} · $time';
 }
 
-/// One reminder card in the landing list (screen 2a). Overdue cards get a
-/// red-tinted border and red due-label.
+/// One reminder row (board 3.25): status ring (error for overdue, check
+/// when done), title, due line, amount + repeat glyph. Lives inside a
+/// [KuberGroup]; completed rows are struck through at 55%.
 class ReminderRow extends ConsumerWidget {
   final Reminder reminder;
   final VoidCallback onTap;
@@ -75,6 +76,7 @@ class ReminderRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final overdue = reminder.isOverdue;
     final completed = reminder.isCompleted;
     final fmt = ref.watch(formatterProvider);
@@ -83,112 +85,46 @@ class ReminderRow extends ConsumerWidget {
     final amount = reminder.amount;
     final isIncome = reminder.transactionType == 'income';
 
-    return GestureDetector(
+    final row = KuberListRow(
       onTap: onTap,
-      child: Opacity(
-        opacity: completed ? 0.6 : 1,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 9),
-          padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            // Overdue is signalled by the red section title + red due label,
-            // not a red card border.
-            border: Border.all(color: cs.outline),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      reminder.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                        decoration:
-                            completed ? TextDecoration.lineThrough : null,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      completed
-                          ? 'Completed ${reminder.completedAt == null ? '' : DateFormat('d MMM').format(reminder.completedAt!)}'
-                          : reminderDueLabel(reminder),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: localeFont(
-                        fontSize: 11.5,
-                        color: overdue ? cs.error : cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+      leading: Icon(
+        completed
+            ? Icons.check_circle_rounded
+            : Icons.radio_button_unchecked_rounded,
+        size: 24,
+        color: completed
+            ? cs.primary
+            : overdue
+            ? cs.error
+            : cs.onSurfaceVariant,
+      ),
+      title: reminder.title,
+      titleDecoration: completed ? TextDecoration.lineThrough : null,
+      subtitle: completed
+          ? 'Completed ${reminder.completedAt == null ? '' : DateFormat('d MMM').format(reminder.completedAt!)}'
+          : reminderDueLabel(reminder),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (amount != null)
+            Text(
+              maskAmount(
+                '${isIncome ? '+' : '−'}${fmt.formatCurrency(amount)}',
+                isPrivate,
               ),
-              const SizedBox(width: 10),
-              if (amount != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      maskAmount(
-                        '${isIncome ? '+' : '−'}${fmt.formatCurrency(amount)}',
-                        isPrivate,
-                      ),
-                      style: localeFont(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: isIncome ? cs.tertiary : cs.error,
-                      ),
-                    ),
-                    if (reminder.repeat != null) ...[
-                      const SizedBox(height: 3),
-                      _RepeatPill(label: reminder.repeat!.toUpperCase()),
-                    ],
-                  ],
-                )
-              else if (reminder.repeat != null)
-                _RepeatPill(label: reminder.repeat!.toUpperCase())
-              else
-                Icon(Icons.chevron_right_rounded,
-                    size: 17, color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
-            ],
-          ),
-        ),
+              style: tt.titleMedium!.copyWith(
+                color: isIncome
+                    ? context.kuberMoney.income
+                    : context.kuberMoney.expense,
+              ),
+            ),
+          if (reminder.repeat != null) ...[
+            const SizedBox(width: 6),
+            Icon(Icons.repeat_rounded, size: 16, color: cs.onSurfaceVariant),
+          ],
+        ],
       ),
     );
-  }
-}
-
-class _RepeatPill extends StatelessWidget {
-  final String label;
-
-  const _RepeatPill({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.4,
-          color: cs.primary,
-        ),
-      ),
-    );
+    return completed ? Opacity(opacity: 0.55, child: row) : row;
   }
 }

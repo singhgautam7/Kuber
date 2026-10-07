@@ -227,8 +227,12 @@ class _StoryViewerState extends State<StoryViewer>
       Navigator.of(context).maybePop();
       return;
     }
-    final currentUnread = widget.bubbles[_bubbleIndex].stories.any((s) => !s.seen);
-    final nextUnread = widget.bubbles[_bubbleIndex + 1].stories.any((s) => !s.seen);
+    final currentUnread = widget.bubbles[_bubbleIndex].stories.any(
+      (s) => !s.seen,
+    );
+    final nextUnread = widget.bubbles[_bubbleIndex + 1].stories.any(
+      (s) => !s.seen,
+    );
     // From an unread bubble we only continue into more unread bubbles; once
     // there is nothing unread ahead, close. From a read bubble (or archive),
     // walk to the next bubble regardless.
@@ -236,7 +240,10 @@ class _StoryViewerState extends State<StoryViewer>
       Navigator.of(context).maybePop();
       return;
     }
-    _pageController.nextPage(duration: _bubbleTransition, curve: Curves.easeOutCubic);
+    _pageController.nextPage(
+      duration: _bubbleTransition,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _backwardBubble({bool closeAtStart = false}) {
@@ -274,7 +281,9 @@ class _StoryViewerState extends State<StoryViewer>
     if (v < -100) {
       _forwardBubble(); // swipe right-to-left (closes past the last bubble)
     } else if (v > 100) {
-      _backwardBubble(closeAtStart: true); // swipe left-to-right (closes before the first)
+      _backwardBubble(
+        closeAtStart: true,
+      ); // swipe left-to-right (closes before the first)
     }
   }
 
@@ -308,7 +317,9 @@ class _StoryViewerState extends State<StoryViewer>
                       final flat = isActive
                           ? _slides
                           : _flatten(widget.bubbles[i]);
-                      if (flat.isEmpty) return const ColoredBox(color: Colors.black);
+                      if (flat.isEmpty) {
+                        return const ColoredBox(color: Colors.black);
+                      }
                       final slideIndex = isActive ? _slideIndex : 0;
                       final switcher = AnimatedSwitcher(
                         duration: const Duration(milliseconds: 220),
@@ -371,7 +382,7 @@ class _ProgressBars extends StatelessWidget {
                 height: 2.5,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.30),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(KuberShape.full),
                 ),
                 child: i < currentIndex
                     ? _bar(1)
@@ -400,7 +411,7 @@ class _ProgressBars extends StatelessWidget {
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(KuberShape.small),
       ),
     ),
   );
@@ -430,7 +441,7 @@ class _TopChrome extends StatelessWidget {
             height: 24,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.medium),
             ),
             alignment: Alignment.center,
             child: Icon(storyIcon(story.icon), size: 15, color: Colors.white),
@@ -445,8 +456,8 @@ class _TopChrome extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.inter.copyWith(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
                   ),
@@ -455,7 +466,7 @@ class _TopChrome extends StatelessWidget {
                 Text(
                   story.timeLabel,
                   style: AppTextStyles.inter.copyWith(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withValues(alpha: 0.6),
                   ),

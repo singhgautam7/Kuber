@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+  <!-- Themed icon (Android 13+). One tone, tinted by the launcher. A 2.5dp gap where the leg folds over the bowl keeps the overlap readable. -->
+  <group>
+    <clip-path android:pathData="M0,0H108V108H0Z M41.19,48.75 L32.60,59.16 L62.56,83.90 L71.15,73.49Z"/>
+    <path android:pathData="M40.4 32.75H67.6" android:strokeColor="#FF000000" android:strokeWidth="8.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000"/>
+    <path android:pathData="M50.6 32.75A12.75 12.75 0 0 1 50.6 58.25H42.1" android:strokeColor="#FF000000" android:strokeWidth="8.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000"/>
+    <path android:pathData="M40.4 45.5H67.6" android:strokeColor="#FF000000" android:strokeWidth="8.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000"/>
+  </group>
+    <path android:pathData="M42.1 58.25L61.65 74.4" android:strokeColor="#FF000000" android:strokeWidth="8.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:fillColor="#00000000"/>
+</vector>

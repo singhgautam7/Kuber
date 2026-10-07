@@ -32,8 +32,8 @@ void showFeatureGateSheet(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: cs.primaryContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            color: cs.secondaryContainer,
+            borderRadius: BorderRadius.circular(KuberShape.medium),
           ),
           child: Icon(icon, color: cs.primary, size: 20),
         ),

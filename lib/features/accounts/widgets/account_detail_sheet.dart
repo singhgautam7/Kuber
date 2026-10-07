@@ -31,8 +31,9 @@ class AccountDetailSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final balanceAsync = ref.watch(accountBalanceProvider(account.id));
-    final latestTxnAsync =
-        ref.watch(accountLatestTransactionProvider(account.id));
+    final latestTxnAsync = ref.watch(
+      accountLatestTransactionProvider(account.id),
+    );
     final defaultAccountId = ref.watch(
       settingsProvider.select((s) => s.valueOrNull?.defaultAccountId),
     );
@@ -111,9 +112,9 @@ class AccountDetailSheet extends ConsumerWidget {
           onPressed: () {
             Navigator.of(context).pop();
             ref.read(historyFilterProvider.notifier).clearAll();
-            ref.read(historyFilterProvider.notifier).setFilters(
-                  accountIds: {account.id.toString()},
-                );
+            ref
+                .read(historyFilterProvider.notifier)
+                .setFilters(accountIds: {account.id.toString()});
             context.go('/history');
           },
         ),
@@ -165,8 +166,10 @@ class AccountDetailSheet extends ConsumerWidget {
                 child: Center(child: CircularProgressIndicator()),
               ),
             ),
-            error: (e, _) => Text(context.l10n.errorLoadingBalance,
-                style: localeFont(color: cs.error)),
+            error: (e, _) => Text(
+              context.l10n.errorLoadingBalance,
+              style: localeFont(color: context.kuberMoney.expense),
+            ),
             data: (balance) {
               if (account.isCreditCard) {
                 return _buildCreditCardSection(context, ref, balance);
@@ -175,8 +178,8 @@ class AccountDetailSheet extends ConsumerWidget {
                 caption: context.l10n.currentAvailableBalance,
                 amount: ref.watch(formatterProvider).formatCurrency(balance),
                 amountColor: balance < 0
-                    ? cs.error
-                    : (balance > 0 ? cs.tertiary : cs.onSurface),
+                    ? context.kuberMoney.expense
+                    : (balance > 0 ? context.kuberMoney.income : cs.onSurface),
               );
             },
           ),
@@ -203,12 +206,12 @@ class AccountDetailSheet extends ConsumerWidget {
             Navigator.pop(context);
             context.push('/cards');
           },
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.medium),
           child: Ink(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: cs.primary.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               border: Border.all(color: cs.primary.withValues(alpha: 0.25)),
             ),
             child: Row(
@@ -219,14 +222,17 @@ class AccountDetailSheet extends ConsumerWidget {
                   child: Text(
                     'Linked to a card in Kuber Cards',
                     style: localeFont(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded,
-                    size: 18, color: cs.onSurfaceVariant),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: cs.onSurfaceVariant,
+                ),
               ],
             ),
           ),
@@ -236,9 +242,9 @@ class AccountDetailSheet extends ConsumerWidget {
   }
 
   void _toggleDefault(BuildContext context, WidgetRef ref, bool isDefault) {
-    ref.read(settingsProvider.notifier).setDefaultAccountId(
-          isDefault ? null : account.id.toString(),
-        );
+    ref
+        .read(settingsProvider.notifier)
+        .setDefaultAccountId(isDefault ? null : account.id.toString());
     showKuberSnackBar(
       context,
       isDefault
@@ -262,13 +268,13 @@ class AccountDetailSheet extends ConsumerWidget {
       return;
     }
 
-    final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text(context.l10n.disableAccount,
-            style: localeFont(fontWeight: FontWeight.bold)),
+        title: Text(
+          context.l10n.disableAccount,
+          style: localeFont(fontWeight: FontWeight.bold),
+        ),
         content: Text(context.l10n.disableAccountConfirm, style: localeFont()),
         actions: [
           TextButton(
@@ -302,7 +308,10 @@ class AccountDetailSheet extends ConsumerWidget {
   }
 
   Widget _buildCreditCardSection(
-      BuildContext context, WidgetRef ref, double balance) {
+    BuildContext context,
+    WidgetRef ref,
+    double balance,
+  ) {
     final cs = Theme.of(context).colorScheme;
     final formatter = ref.watch(formatterProvider);
     final limit = account.creditLimit ?? 0.1; // avoid div by 0
@@ -323,7 +332,7 @@ class AccountDetailSheet extends ConsumerWidget {
                   context.l10n.limitSpent,
                   style: localeFont(
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
                     letterSpacing: 0.5,
                   ),
@@ -333,7 +342,7 @@ class AccountDetailSheet extends ConsumerWidget {
                   formatter.formatCurrency(utilized),
                   style: localeFont(
                     fontSize: 28,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: utilized > 0 ? cs.error : cs.onSurface,
                     letterSpacing: -0.5,
                   ),
@@ -347,7 +356,7 @@ class AccountDetailSheet extends ConsumerWidget {
                   context.l10n.totalLimit,
                   style: localeFont(
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
                     letterSpacing: 0.5,
                   ),
@@ -356,8 +365,8 @@ class AccountDetailSheet extends ConsumerWidget {
                 Text(
                   formatter.formatCurrency(account.creditLimit ?? 0),
                   style: localeFont(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
@@ -381,7 +390,7 @@ class AccountDetailSheet extends ConsumerWidget {
               '${context.l10n.remainingUpper}: ${formatter.formatCurrency(remaining)}',
               style: localeFont(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
               ),
             ),
@@ -389,7 +398,7 @@ class AccountDetailSheet extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(100),
+          borderRadius: BorderRadius.circular(KuberShape.full),
           child: LinearProgressIndicator(
             value: percent,
             minHeight: 8,
@@ -402,7 +411,6 @@ class AccountDetailSheet extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) async {
-    final cs = Theme.of(context).colorScheme;
     final repo = ref.read(accountRepositoryProvider);
     final hasTxns = await repo.hasTransactions(account.id);
 
@@ -412,12 +420,14 @@ class AccountDetailSheet extends ConsumerWidget {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: cs.surface,
-          title: Text(context.l10n.cannotDeleteAccount,
-              style: localeFont(fontWeight: FontWeight.bold)),
+          title: Text(
+            context.l10n.cannotDeleteAccount,
+            style: localeFont(fontWeight: FontWeight.bold),
+          ),
           content: Text(
-              context.l10n.cannotDeleteAccountBody,
-              style: localeFont()),
+            context.l10n.cannotDeleteAccountBody,
+            style: localeFont(),
+          ),
           actions: [
             AppButton(
               label: context.l10n.okLabel,
@@ -431,12 +441,14 @@ class AccountDetailSheet extends ConsumerWidget {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: cs.surface,
-          title: Text(context.l10n.deleteAccountConfirm,
-              style: localeFont(fontWeight: FontWeight.bold)),
+          title: Text(
+            context.l10n.deleteAccountConfirm,
+            style: localeFont(fontWeight: FontWeight.bold),
+          ),
           content: Text(
-              context.l10n.deleteAccountBody(account.name),
-              style: localeFont()),
+            context.l10n.deleteAccountBody(account.name),
+            style: localeFont(),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),

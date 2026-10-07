@@ -6,7 +6,7 @@ import '../../../core/utils/locale_font.dart';
 import '../../../core/utils/supported_locales.dart';
 import '../../../l10n/app_localizations.dart';
 import '../providers/settings_provider.dart';
-import 'settings_widgets.dart';
+import 'settings_section.dart' show SettingsTile;
 import 'language_picker_bottom_sheet.dart';
 
 /// A settings row that displays the current language selection and opens
@@ -26,7 +26,11 @@ class SettingsLanguageRow extends ConsumerWidget {
     final localizations = lookupAppLocalizations(locale);
     final labelText = localizations.language;
 
-    return InkWell(
+    // Same plain-icon row as every other setting (board 3.11); it shows a
+    // value, so it drops its description.
+    return SettingsTile(
+      icon: Icons.language_rounded,
+      label: labelText,
       onTap: () => showLanguagePicker(
         context: context,
         ref: ref,
@@ -35,63 +39,24 @@ class SettingsLanguageRow extends ConsumerWidget {
           ref.read(settingsProvider.notifier).setLocale(newLocale);
         },
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.md,
-        ),
-        child: Row(
-          children: [
-            const SquircleIcon(
-              icon: Icons.language_rounded,
-              size: 18,
-              padding: 8,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            lang.nativeName,
+            style: localeFont(
+              locale: lang.locale,
+              fontSize: 14,
+              color: cs.onSurfaceVariant,
             ),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    labelText,
-                    style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  Text(
-                    localizations.chooseAppLanguage,
-                    style: localeFont(
-                      fontSize: 11,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  lang.nativeName,
-                  style: localeFont(
-                    locale: lang.locale,
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: KuberSpacing.sm),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                  size: 20,
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: KuberSpace.sm),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: cs.onSurfaceVariant,
+            size: 20,
+          ),
+        ],
       ),
     );
   }

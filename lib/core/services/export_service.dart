@@ -101,7 +101,7 @@ class ExportService {
         alignment: pw.Alignment.centerRight,
         child: pw.Text(
           'Page ${context.pageNumber} of ${context.pagesCount}',
-          style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted),
+          style: pw.TextStyle(font: bodyFont, fontSize: 11, color: _pdfTextMuted),
         ),
       ),
       build: (context) {
@@ -117,7 +117,7 @@ class ExportService {
                     padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                     child: pw.Text(h,
                         style: pw.TextStyle(
-                            font: headerFont, fontSize: 9, color: _pdfTextPrimary)),
+                            font: headerFont, fontSize: 11, color: _pdfTextPrimary)),
                   ))
               .toList(),
         ));
@@ -195,7 +195,7 @@ class ExportService {
       {bool flex = false, pw.TextAlign align = pw.TextAlign.left}) {
   final child = pw.Text(
     _s(text),
-    style: pw.TextStyle(font: font, fontSize: 8, color: color),
+    style: pw.TextStyle(font: font, fontSize: 11, color: color),
     textAlign: align,
     maxLines: 1,
   );
@@ -231,16 +231,16 @@ static String _s(String? text) {
             if (data.userName.isNotEmpty) 'Exported by: ${data.userName}',
             'Period: ${data.periodLabel}',
           ].join('  |  ')),
-          style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted),
+          style: pw.TextStyle(font: bodyFont, fontSize: 11, color: _pdfTextMuted),
         ),
         if (filterParts.isNotEmpty) ...[
           pw.SizedBox(height: 2),
           pw.Text(_s(filterParts.join('  |  ')),
-              style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted)),
+              style: pw.TextStyle(font: bodyFont, fontSize: 11, color: _pdfTextMuted)),
         ],
         pw.SizedBox(height: 2),
         pw.Text(_s('${data.totalCount} transactions'),
-            style: pw.TextStyle(font: bodyFont, fontSize: 9, color: _pdfTextMuted)),
+            style: pw.TextStyle(font: bodyFont, fontSize: 11, color: _pdfTextMuted)),
         pw.SizedBox(height: 8),
         pw.Divider(color: _pdfBorder, thickness: 0.5),
       ],
@@ -289,7 +289,7 @@ static String _s(String? text) {
       String label, String value, PdfColor color, pw.Font bold, pw.Font regular) {
   return pw.Column(
     children: [
-      pw.Text(_s(label), style: pw.TextStyle(font: regular, fontSize: 9, color: _pdfTextMuted)),
+      pw.Text(_s(label), style: pw.TextStyle(font: regular, fontSize: 11, color: _pdfTextMuted)),
       pw.SizedBox(height: 4),
       pw.Text(_s(value), style: pw.TextStyle(font: bold, fontSize: 12, color: color)),
     ],
@@ -315,11 +315,11 @@ static String _s(String? text) {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(_s('Kuber Report - ${data.periodLabel}'),
-            style: pw.TextStyle(font: headerFont, fontSize: 18, color: _pdfTextPrimary)),
+            style: pw.TextStyle(font: headerFont, fontSize: 16, color: _pdfTextPrimary)),
         if (data.userName.isNotEmpty) ...[
           pw.SizedBox(height: 4),
           pw.Text(_s('Exported by ${data.userName}'),
-              style: pw.TextStyle(font: bodyFont, fontSize: 10, color: _pdfTextMuted)),
+              style: pw.TextStyle(font: bodyFont, fontSize: 11, color: _pdfTextMuted)),
         ],
         pw.SizedBox(height: 20),
 
@@ -386,11 +386,11 @@ static String _s(String? text) {
                 children: [
                   pw.Text(_s(insight.typeLabel),
                       style: pw.TextStyle(
-                          font: headerFont, fontSize: 9, color: _pdfPrimary)),
+                          font: headerFont, fontSize: 11, color: _pdfPrimary)),
                   pw.SizedBox(height: 4),
                   pw.Text(insight.message,
                       style: pw.TextStyle(
-                          font: bodyFont, fontSize: 10, color: _pdfTextPrimary)),
+                          font: bodyFont, fontSize: 11, color: _pdfTextPrimary)),
                 ],
               ),
             )),
@@ -415,7 +415,7 @@ static String _s(String? text) {
                           vertical: 6, horizontal: 4),
                       child: pw.Text(h,
                           style: pw.TextStyle(
-                              font: headerFont, fontSize: 9, color: _pdfTextPrimary)),
+                              font: headerFont, fontSize: 11, color: _pdfTextPrimary)),
                     ))
                 .toList(),
           ),
@@ -479,7 +479,7 @@ static String _s(String? text) {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(label,
-              style: pw.TextStyle(font: regular, fontSize: 9, color: _pdfTextMuted)),
+              style: pw.TextStyle(font: regular, fontSize: 11, color: _pdfTextMuted)),
           pw.SizedBox(height: 4),
           pw.Text(value, style: pw.TextStyle(font: bold, fontSize: 14, color: accent)),
         ],
@@ -492,7 +492,7 @@ static String _s(String? text) {
       List<BarBucketRow> buckets, String symbol, pw.Font font) {
   if (buckets.isEmpty) {
     return pw.Text(_s('No data'),
-        style: pw.TextStyle(font: font, fontSize: 10, color: _pdfTextMuted));
+        style: pw.TextStyle(font: font, fontSize: 11, color: _pdfTextMuted));
   }
 
   const chartHeight = 150.0;
@@ -542,7 +542,7 @@ static String _s(String? text) {
         mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
         children: buckets
             .map((b) => pw.Text(b.label,
-                style: pw.TextStyle(font: font, fontSize: 7, color: _pdfTextMuted)))
+                style: pw.TextStyle(font: font, fontSize: 11, color: _pdfTextMuted)))
             .toList(),
       ),
       pw.SizedBox(height: 8),
@@ -565,7 +565,7 @@ static String _s(String? text) {
       pw.Container(width: 8, height: 8, color: color),
       pw.SizedBox(width: 4),
       pw.Text(label,
-          style: pw.TextStyle(font: font, fontSize: 8, color: _pdfTextMuted)),
+          style: pw.TextStyle(font: font, fontSize: 11, color: _pdfTextMuted)),
     ],
   );
 }
@@ -585,7 +585,7 @@ static String _s(String? text) {
                 padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                 child: pw.Text(h,
                     style: pw.TextStyle(
-                        font: headerFont, fontSize: 9, color: _pdfTextPrimary)),
+                        font: headerFont, fontSize: 11, color: _pdfTextPrimary)),
               ))
           .toList(),
     ),
@@ -617,7 +617,7 @@ static String _s(String? text) {
               ),
               pw.SizedBox(width: 4),
               pw.Text('${c.percentage.toStringAsFixed(1)}%',
-                  style: pw.TextStyle(font: bodyFont, fontSize: 8, color: _pdfTextMuted)),
+                  style: pw.TextStyle(font: bodyFont, fontSize: 11, color: _pdfTextMuted)),
             ],
           ),
         ),

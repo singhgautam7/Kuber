@@ -15,14 +15,19 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_date_range_selector.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../analytics/providers/analytics_provider.dart' show FilterType;
 
 class AdvancedFilterScreen extends ConsumerStatefulWidget {
   const AdvancedFilterScreen({super.key});
 
   @override
-  ConsumerState<AdvancedFilterScreen> createState() => _AdvancedFilterScreenState();
+  ConsumerState<AdvancedFilterScreen> createState() =>
+      _AdvancedFilterScreenState();
 }
 
 class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
@@ -37,10 +42,14 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
     _localFilter = ref.read(historyFilterProvider);
     _searchCtrl = TextEditingController(text: _localFilter.searchQuery ?? '');
     _minAmountCtrl = TextEditingController(
-      text: _localFilter.minAmount != null ? _localFilter.minAmount!.toStringAsFixed(0) : '',
+      text: _localFilter.minAmount != null
+          ? _localFilter.minAmount!.toStringAsFixed(0)
+          : '',
     );
     _maxAmountCtrl = TextEditingController(
-      text: _localFilter.maxAmount != null ? _localFilter.maxAmount!.toStringAsFixed(0) : '',
+      text: _localFilter.maxAmount != null
+          ? _localFilter.maxAmount!.toStringAsFixed(0)
+          : '',
     );
   }
 
@@ -129,34 +138,15 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.close_rounded),
-        ),
-        title: Text(
-          context.l10n.advancedFiltersTitle,
-          style: localeFont(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
+      appBar: KuberAppBar(
+        title: context.l10n.advancedFiltersTitle,
+        showBack: true,
+        closeIcon: true,
         actions: [
           TextButton(
             onPressed: _reset,
-            child: Text(
-              context.l10n.clearAll,
-              style: localeFont(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: cs.primary,
-                letterSpacing: 0.5,
-              ),
-            ),
+            child: Text(sentenceCase(context.l10n.clearAll)),
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: Stack(
@@ -167,48 +157,32 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
               // 1. DATE RANGE
               _Section(
                 title: context.l10n.dateRangeLabel,
-                child: InkWell(
-                  onTap: _selectDateRange,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  child: Container(
-                    padding: const EdgeInsets.all(KuberSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainer,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(
-                        color: _localFilter.from != null ? cs.primary : cs.outline.withValues(alpha: 0.3),
+                child: KuberGroup(
+                  children: [
+                    KuberListRow(
+                      onTap: _selectDateRange,
+                      leading: KuberIconTile(
+                        icon: Icons.calendar_today_rounded,
+                        tone: _localFilter.from != null
+                            ? KuberTone.secondary
+                            : KuberTone.neutral,
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.calendar_today_rounded, size: 20, color: _localFilter.from != null ? cs.primary : cs.onSurfaceVariant),
-                        const SizedBox(width: KuberSpacing.md),
-                        Text(
+                      title:
                           _localFilter.from != null && _localFilter.to != null
-                              ? '${DateFormat('MMM d, y').format(_localFilter.from!)} - ${DateFormat('MMM d, y').format(_localFilter.to!)}'
-                              : context.l10n.selectDateRange,
-                          style: localeFont(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: _localFilter.from != null ? cs.onSurface : cs.onSurfaceVariant,
-                          ),
-                        ),
-                        const Spacer(),
-                        Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant),
-                      ],
+                          ? '${DateFormat('MMM d, y').format(_localFilter.from!)} - ${DateFormat('MMM d, y').format(_localFilter.to!)}'
+                          : context.l10n.selectDateRange,
+                      trailing: const KuberChevron(),
                     ),
-                  ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KuberSpace.sectionGap),
               // 2. TRANSACTION NAME
               _Section(
                 title: context.l10n.transactionNameLabel,
                 child: TextField(
                   controller: _searchCtrl,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: cs.onSurface,
-                  ),
+                  style: textTheme.bodyLarge?.copyWith(color: cs.onSurface),
                   decoration: InputDecoration(
                     hintText: context.l10n.searchViaName,
                     hintStyle: textTheme.bodyLarge?.copyWith(
@@ -217,13 +191,13 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KuberSpace.sectionGap),
               // 3. TYPE
               _Section(
                 title: context.l10n.typeFilterLabel,
                 child: Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: KuberSpace.sm,
+                  runSpacing: KuberSpace.sm,
                   children: [
                     _TypePill(
                       label: context.l10n.expenseLabel,
@@ -245,7 +219,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                       isSelected: _localFilter.isRecurring == true,
                       onTap: () => setState(() {
                         _localFilter = _localFilter.copyWith(
-                          isRecurring: _localFilter.isRecurring == true ? null : true,
+                          isRecurring: _localFilter.isRecurring == true
+                              ? null
+                              : true,
                           clearRecurring: _localFilter.isRecurring == true,
                         );
                       }),
@@ -253,7 +229,7 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KuberSpace.sectionGap),
               // 4. AMOUNT RANGE
               _Section(
                 title: context.l10n.amountRangeLabel,
@@ -262,7 +238,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                     Expanded(
                       child: TextField(
                         controller: _minAmountCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
@@ -278,7 +256,9 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                     Expanded(
                       child: TextField(
                         controller: _maxAmountCtrl,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         style: textTheme.bodyLarge?.copyWith(
                           color: cs.onSurface,
                         ),
@@ -293,90 +273,89 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KuberSpace.sectionGap),
               // 5. ACCOUNTS
               _Section(
                 title: context.l10n.accountsLabel,
                 child: accountsAsync.when(
                   data: (accounts) {
-                    final sorted = [...accounts]..sort((a, b) {
-                      int typePriority(account) {
-                        if (account.isCreditCard) return 2;
-                        if (account.type == 'cash') return 0;
-                        return 1;
-                      }
-                      final tp = typePriority(a).compareTo(typePriority(b));
-                      if (tp != 0) return tp;
-                      return a.name.compareTo(b.name);
-                    });
+                    final sorted = [...accounts]
+                      ..sort((a, b) {
+                        int typePriority(account) {
+                          if (account.isCreditCard) return 2;
+                          if (account.type == 'cash') return 0;
+                          return 1;
+                        }
+
+                        final tp = typePriority(a).compareTo(typePriority(b));
+                        if (tp != 0) return tp;
+                        return a.name.compareTo(b.name);
+                      });
                     return Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: sorted.map((a) => _AccountPill(
-                        account: a,
-                        isSelected: _localFilter.accountIds.contains(a.id.toString()),
-                        onTap: () => _toggleAccount(a.id.toString()),
-                      )).toList(),
+                      children: sorted
+                          .map(
+                            (a) => _AccountPill(
+                              account: a,
+                              isSelected: _localFilter.accountIds.contains(
+                                a.id.toString(),
+                              ),
+                              onTap: () => _toggleAccount(a.id.toString()),
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                   loading: () => _SkeletonGrid(itemCount: 3),
                   error: (_, __) => Text(context.l10n.errorLoadingAccounts),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KuberSpace.sectionGap),
               // 6. CATEGORIES
               _Section(
                 title: context.l10n.categoriesLabel,
                 child: categoriesAsync.when(
                   data: (categories) {
-                    final sorted = [...categories]..sort((a, b) => a.name.compareTo(b.name));
+                    final sorted = [...categories]
+                      ..sort((a, b) => a.name.compareTo(b.name));
                     return Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: sorted.map((c) => _CategoryPill(
-                        category: c,
-                        isSelected: _localFilter.categoryIds.contains(c.id.toString()),
-                        onTap: () => _toggleCategory(c.id.toString()),
-                      )).toList(),
+                      children: sorted
+                          .map(
+                            (c) => _CategoryPill(
+                              category: c,
+                              isSelected: _localFilter.categoryIds.contains(
+                                c.id.toString(),
+                              ),
+                              onTap: () => _toggleCategory(c.id.toString()),
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                   loading: () => _SkeletonGrid(itemCount: 6),
                   error: (_, __) => Text(context.l10n.errorLoadingCategories),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: KuberSpace.sectionGap),
               // 7. TAGS
               _Section(
                 title: context.l10n.tagsUpper,
                 child: tagsAsync.when(
                   data: (tags) {
-                    final sorted = [...tags]..sort((a, b) => a.name.compareTo(b.name));
+                    final sorted = [...tags]
+                      ..sort((a, b) => a.name.compareTo(b.name));
                     return Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: sorted.map((t) {
                         final isSelected = _localFilter.tagIds.contains(t.id);
-                        return GestureDetector(
+                        return KuberChip(
+                          label: '#${t.name}',
+                          selected: isSelected,
                           onTap: () => _toggleTag(t.id),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(
-                                color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Text(
-                              '#${t.name.toUpperCase()}',
-                              style: localeFont(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
                         );
                       }).toList(),
                     );
@@ -391,7 +370,12 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + MediaQuery.of(context).padding.bottom),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                20,
+                20,
+                20 + MediaQuery.of(context).padding.bottom,
+              ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -403,23 +387,11 @@ class _AdvancedFilterScreenState extends ConsumerState<AdvancedFilterScreen> {
                   ],
                 ),
               ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: FilledButton(
-                  onPressed: _apply,
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(KuberRadius.md)),
-                  ),
-                  child: Text(
-                    context.l10n.applyFilters,
-                    style: localeFont(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
+              child: AppButton(
+                label: sentenceCase(context.l10n.applyFilters),
+                type: AppButtonType.primary,
+                fullWidth: true,
+                onPressed: _apply,
               ),
             ),
           ),
@@ -477,20 +449,11 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: localeFont(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: 16),
+        Text(title.toUpperCase(), style: sectionHeaderStyle(context)),
+        const SizedBox(height: KuberSpace.sectionHeaderGap),
         child,
       ],
     );
@@ -502,34 +465,15 @@ class _TypePill extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _TypePill({required this.label, required this.isSelected, required this.onTap});
+  const _TypePill({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
-          ),
-        ),
-        child: Text(
-          label,
-          style: localeFont(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: isSelected ? cs.onPrimary : cs.onSurface,
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      KuberChip(label: label, selected: isSelected, onTap: onTap);
 }
 
 class _AccountPill extends StatelessWidget {
@@ -549,14 +493,13 @@ class _AccountPill extends StatelessWidget {
     final iconData = resolveAccountIcon(account);
     final iconColor = resolveAccountColor(account);
     final typeLabel = (account.isCreditCard
-            ? context.l10n.creditShort
-            : switch (account.type.toLowerCase()) {
-                'bank' => context.l10n.bankLabel,
-                'wallet' => context.l10n.walletLabel,
-                'cash' => context.l10n.cashLabel,
-                _ => account.type,
-              })
-        .toUpperCase();
+        ? context.l10n.creditShort
+        : switch (account.type.toLowerCase()) {
+            'bank' => context.l10n.bankLabel,
+            'wallet' => context.l10n.walletLabel,
+            'cash' => context.l10n.cashLabel,
+            _ => account.type,
+          });
 
     return GestureDetector(
       onTap: onTap,
@@ -565,11 +508,10 @@ class _AccountPill extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 44),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          color: isSelected ? cs.secondaryContainer : Colors.transparent,
+          borderRadius: KuberShape.smallR,
           border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
+            color: isSelected ? cs.secondaryContainer : cs.outlineVariant,
           ),
         ),
         child: Row(
@@ -578,8 +520,8 @@ class _AccountPill extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                color: categoryTones(context, iconColor).container,
+                borderRadius: KuberShape.mediumR,
               ),
               child: Icon(iconData, size: 20, color: iconColor),
             ),
@@ -591,17 +533,19 @@ class _AccountPill extends StatelessWidget {
                 Text(
                   account.name,
                   style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: isSelected ? cs.primary : cs.onSurface,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? cs.onSecondaryContainer : cs.onSurface,
                   ),
                 ),
                 Text(
                   typeLabel,
                   style: localeFont(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: isSelected ? cs.primary : cs.onSurfaceVariant.withValues(alpha: 0.6),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected
+                        ? cs.onSecondaryContainer
+                        : cs.onSurfaceVariant,
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -638,11 +582,10 @@ class _CategoryPill extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 44),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          color: isSelected ? cs.secondaryContainer : Colors.transparent,
+          borderRadius: KuberShape.smallR,
           border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
+            color: isSelected ? cs.secondaryContainer : cs.outlineVariant,
           ),
         ),
         child: Row(
@@ -651,8 +594,8 @@ class _CategoryPill extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                color: categoryTones(context, iconColor).container,
+                borderRadius: KuberShape.mediumR,
               ),
               child: Icon(iconData, size: 20, color: iconColor),
             ),
@@ -660,9 +603,9 @@ class _CategoryPill extends StatelessWidget {
             Text(
               category.name,
               style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: isSelected ? cs.primary : cs.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? cs.onSecondaryContainer : cs.onSurface,
               ),
             ),
           ],
@@ -687,14 +630,17 @@ class _SkeletonGrid extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: List.generate(itemCount, (index) => Container(
-          width: (MediaQuery.of(context).size.width - 48) / 2,
-          height: height,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+        children: List.generate(
+          itemCount,
+          (index) => Container(
+            width: (MediaQuery.of(context).size.width - 48) / 2,
+            height: height,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh,
+              borderRadius: KuberShape.smallR,
+            ),
           ),
-        )),
+        ),
       ),
     );
   }

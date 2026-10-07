@@ -4891,4 +4891,128 @@ class AppLocalizationsPa extends AppLocalizations {
   String billDueCrossMonthHint(String billOrdinal, String dueOrdinal) {
     return 'The bill generates on the $billOrdinal and payment is due on the $dueOrdinal, so payment falls in the next month.';
   }
+
+  @override
+  String get rangeFrom => 'ਤੋਂ';
+
+  @override
+  String get rangeTo => 'ਤੱਕ';
+
+  @override
+  String get changeView => 'ਵਿਊ ਬਦਲੋ';
+
+  @override
+  String get iconAndColour => 'ਆਈਕਨ ਅਤੇ ਰੰਗ';
+
+  @override
+  String get chooseIcon => 'ਆਈਕਨ ਚੁਣੋ';
+
+  @override
+  String get chooseColour => 'ਰੰਗ ਚੁਣੋ';
+
+  @override
+  String get budgetsTitle => 'ਬਜਟ';
+
+  @override
+  String get activeBudgetsSection => 'ਸਰਗਰਮ';
+
+  @override
+  String get pausedAndEnded => 'ਰੋਕੇ ਅਤੇ ਖਤਮ';
+
+  @override
+  String get gainLabel => 'ਲਾਭ';
+
+  @override
+  String get returnLabel => 'ਰਿਟਰਨ';
+
+  @override
+  String moreCountAccounts(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ਖਾਤੇ',
+      one: '1 ਖਾਤਾ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountCategories(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ਸ਼੍ਰੇਣੀਆਂ',
+      one: '1 ਸ਼੍ਰੇਣੀ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ਟੈਗ',
+      one: '1 ਟੈਗ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountActive(int count) {
+    return '$count ਸਰਗਰਮ';
+  }
+
+  @override
+  String moreCountRules(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ਨਿਯਮ',
+      one: '1 ਨਿਯਮ',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String moreCountOpen(int count) {
+    return '$count ਖੁੱਲ੍ਹੇ';
+  }
+
+  @override
+  String moreCountHoldings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ਨਿਵੇਸ਼',
+      one: '1 ਨਿਵੇਸ਼',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get netBalanceUpper => 'ਸ਼ੁੱਧ ਬਕਾਇਆ';
+
+  @override
+  String get netWorthUpper => 'ਸ਼ੁੱਧ ਸੰਪਤੀ';
+
+  @override
+  String nothingMatchesQuery(Object query) {
+    return '\"$query\" ਨਾਲ ਕੁਝ ਵੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।';
+  }
+
+  @override
+  String get searchBudgetsHint => 'ਬਜਟ ਖੋਜੋ';
+
+  @override
+  String get searchRecurringHint => 'ਦੁਹਰਾਉਣ ਵਾਲੇ ਖੋਜੋ';
+
+  @override
+  String get searchLoansHint => 'ਕਰਜ਼ੇ ਖੋਜੋ';
+
+  @override
+  String get searchLedgerHint => 'ਲੋਕ ਖੋਜੋ';
+
+  @override
+  String get searchInvestmentsHint => 'ਨਿਵੇਸ਼ ਖੋਜੋ';
 }

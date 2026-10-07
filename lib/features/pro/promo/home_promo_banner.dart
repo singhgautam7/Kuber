@@ -30,16 +30,16 @@ class HomePromoBanner extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: KuberSpacing.lg),
+      margin: const EdgeInsets.only(bottom: KuberSpace.lg),
       padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.md,
-        KuberSpacing.md,
-        KuberSpacing.md,
+        KuberSpace.lg,
+        KuberSpace.md,
+        KuberSpace.md,
+        KuberSpace.md,
       ),
       decoration: BoxDecoration(
-        color: cs.primaryContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        color: cs.secondaryContainer,
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.primary.withValues(alpha: 0.35)),
       ),
       child: Row(
@@ -50,15 +50,15 @@ class HomePromoBanner extends ConsumerWidget {
             height: 34,
             decoration: BoxDecoration(
               color: cs.primary,
-              borderRadius: BorderRadius.circular(KuberRadius.sm),
+              borderRadius: BorderRadius.circular(KuberShape.small),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.workspace_premium_rounded,
-              color: Colors.white,
+              color: cs.onPrimary,
               size: 18,
             ),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,27 +67,27 @@ class HomePromoBanner extends ConsumerWidget {
                   promo.headline,
                   style: localeFont(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onPrimaryContainer,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSecondaryContainer,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   promo.message,
                   style: localeFont(
-                    fontSize: 12.5,
-                    color: cs.onPrimaryContainer.withValues(alpha: 0.85),
+                    fontSize: 12,
+                    color: cs.onSecondaryContainer.withValues(alpha: 0.85),
                     height: 1.35,
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
                 GestureDetector(
                   onTap: () => showPromoCodeSheet(context, ref),
                   child: Text(
                     'Get code',
                     style: localeFont(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                       color: cs.primary,
                     ),
                   ),
@@ -101,7 +101,7 @@ class HomePromoBanner extends ConsumerWidget {
             icon: Icon(
               Icons.close_rounded,
               size: 18,
-              color: cs.onPrimaryContainer.withValues(alpha: 0.7),
+              color: cs.onSecondaryContainer.withValues(alpha: 0.7),
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints.tightFor(width: 28, height: 28),

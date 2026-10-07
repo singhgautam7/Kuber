@@ -2821,5 +2821,80 @@
         "type": "String"
       }
     }
-  }
+  },
+  "rangeFrom": "From",
+  "rangeTo": "To",
+  "changeView": "Change view",
+  "iconAndColour": "Icon & colour",
+  "chooseIcon": "Choose icon",
+  "chooseColour": "Choose colour",
+  "budgetsTitle": "Budgets",
+  "activeBudgetsSection": "Active",
+  "pausedAndEnded": "Paused and ended",
+  "gainLabel": "Gain",
+  "returnLabel": "Return",
+  "moreCountAccounts": "{count, plural, =1{1 account} other{{count} accounts}}",
+  "@moreCountAccounts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCountCategories": "{count, plural, =1{1 category} other{{count} categories}}",
+  "@moreCountCategories": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCountTags": "{count, plural, =1{1 tag} other{{count} tags}}",
+  "@moreCountTags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCountActive": "{count} active",
+  "@moreCountActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCountRules": "{count, plural, =1{1 rule} other{{count} rules}}",
+  "@moreCountRules": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCountOpen": "{count} open",
+  "@moreCountOpen": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCountHoldings": "{count, plural, =1{1 holding} other{{count} holdings}}",
+  "@moreCountHoldings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "netBalanceUpper": "NET BALANCE",
+  "netWorthUpper": "NET WORTH",
+  "nothingMatchesQuery": "Nothing matches \"{query}\".",
+  "searchBudgetsHint": "Search budgets",
+  "searchRecurringHint": "Search recurring",
+  "searchLoansHint": "Search loans",
+  "searchLedgerHint": "Search people",
+  "searchInvestmentsHint": "Search investments"
 }

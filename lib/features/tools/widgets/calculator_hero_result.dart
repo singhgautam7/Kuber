@@ -21,43 +21,61 @@ class ToolHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final valueStyle = localeFont(
-      fontSize: 34,
-      fontWeight: FontWeight.w800,
-      color: color,
-      letterSpacing: -1,
-      height: 1.1,
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: localeFont(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.2,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.sm),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          // Plain Text (no rolling animation): the hero is inside a lazily-built
-          // SliverList, so an implicit animation would re-trigger every time the
-          // card scrolls back into view.
-          child: Text(value, style: valueStyle),
-        ),
-        if (sub != null) ...[
-          const SizedBox(height: 3),
+    final tt = Theme.of(context).textTheme;
+    // Result hero (board 3.32): primaryContainer, radius 28. [color] is kept
+    // for API compatibility; on the container everything reads
+    // onPrimaryContainer.
+    return _HeroShell(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
           Text(
-            sub!,
-            style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+            label,
+            style: tt.bodyMedium!.copyWith(color: cs.onPrimaryContainer),
           ),
+          const SizedBox(height: KuberSpace.xs),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            // Plain Text (no rolling animation): the hero is inside a lazily
+            // built SliverList, so an implicit animation would re-trigger
+            // every time the card scrolls back into view.
+            child: Text(
+              value,
+              style: tt.displaySmall!.copyWith(
+                color: cs.onPrimaryContainer,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          if (sub != null) ...[
+            const SizedBox(height: KuberSpace.xs),
+            Text(
+              sub!,
+              style: tt.bodyMedium!.copyWith(color: cs.onPrimaryContainer),
+            ),
+          ],
         ],
-      ],
+      ),
+    );
+  }
+}
+
+class _HeroShell extends StatelessWidget {
+  final Widget child;
+  const _HeroShell({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpace.screenMargin),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: child,
     );
   }
 }
@@ -95,42 +113,33 @@ class ToolDualHero extends StatelessWidget {
 
   Widget _side(BuildContext context, HeroSide s) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            s.label.toUpperCase(),
-            style: localeFont(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
+            s.label,
             maxLines: 2,
+            style: tt.bodyMedium!.copyWith(color: cs.onPrimaryContainer),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: KuberSpace.xs),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               s.value,
-              style: localeFont(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: s.color,
-                letterSpacing: -0.6,
-                height: 1.02,
+              style: tt.headlineMedium!.copyWith(
+                color: cs.onPrimaryContainer,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          if (s.sub != null) ...[
-            const SizedBox(height: 2),
+          if (s.sub != null)
             Text(
               s.sub!,
-              style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant),
+              style: tt.bodySmall!.copyWith(color: cs.onPrimaryContainer),
             ),
-          ],
         ],
       ),
     );
@@ -139,36 +148,39 @@ class ToolDualHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final bannerColor = bannerIsPositive ? cs.tertiary : cs.primary;
+    final bannerColor = bannerIsPositive
+        ? context.kuberMoney.income
+        : cs.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _side(context, left),
-            const SizedBox(width: KuberSpacing.md),
-            _side(context, right),
-          ],
+        _HeroShell(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _side(context, left),
+              const SizedBox(width: KuberSpace.md),
+              _side(context, right),
+            ],
+          ),
         ),
         if (bannerText != null) ...[
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.md,
+              horizontal: KuberSpace.md,
               vertical: 9,
             ),
             decoration: BoxDecoration(
               color: bannerColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: bannerColor.withValues(alpha: 0.32)),
+              borderRadius: KuberShape.cardR,
             ),
             child: Text(
               bannerText!,
               textAlign: TextAlign.center,
               style: localeFont(
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: bannerColor,
               ),
@@ -198,64 +210,56 @@ class ToolStatCols extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
       ),
       // IntrinsicHeight gives the Row a bounded height so the equal-height
       // columns (CrossAxisAlignment.stretch + vertical dividers) don't try to
       // grow to infinity inside the scroll view.
       child: IntrinsicHeight(
         child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < items.length; i++)
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.md,
-                  vertical: 11,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    left: i == 0
-                        ? BorderSide.none
-                        : BorderSide(color: cs.outline),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < items.length; i++)
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpace.md,
+                    vertical: 11,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      items[i].label.toUpperCase(),
-                      style: localeFont(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 0.6,
-                      ),
-                      maxLines: 2,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: i == 0
+                          ? BorderSide.none
+                          : BorderSide(color: cs.outlineVariant),
                     ),
-                    const SizedBox(height: 4),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        items[i].value,
-                        style: localeFont(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: items[i].color ?? cs.onSurface,
-                          letterSpacing: -0.3,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        items[i].label,
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        maxLines: 2,
+                      ),
+                      const SizedBox(height: 4),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          items[i].value,
+                          style: Theme.of(context).textTheme.titleMedium!
+                              .copyWith(color: items[i].color ?? cs.onSurface),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

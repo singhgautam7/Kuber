@@ -48,7 +48,8 @@ class DataExportBottomSheet extends ConsumerStatefulWidget {
   const DataExportBottomSheet({super.key});
 
   @override
-  ConsumerState<DataExportBottomSheet> createState() => _DataExportBottomSheetState();
+  ConsumerState<DataExportBottomSheet> createState() =>
+      _DataExportBottomSheetState();
 }
 
 class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
@@ -77,14 +78,16 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.xl,
-        KuberSpacing.lg,
-        KuberSpacing.xl,
-        viewPadding > 0 ? viewPadding + KuberSpacing.lg : KuberSpacing.xxl,
+        KuberSpace.xl,
+        KuberSpace.lg,
+        KuberSpace.xl,
+        viewPadding > 0 ? viewPadding + KuberSpace.lg : KuberSpace.xxl,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -95,10 +98,10 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
             height: 4,
             decoration: BoxDecoration(
               color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(KuberShape.full),
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
 
           // Close button
           Row(
@@ -113,12 +116,16 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                     color: cs.surfaceContainerHigh,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                  child: Icon(
+                    Icons.close,
+                    size: 18,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           switch (_stage) {
             _Stage.options => _buildOptions(cs),
@@ -145,24 +152,24 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
             context.l10n.dataExportTitle,
             style: localeFont(
               fontSize: 22,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
               letterSpacing: -0.3,
             ),
           ),
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         Text(
           'SELECT FORMAT',
           style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
             letterSpacing: 0.8,
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         SettingsCardSelector<_ExportFmt>(
           options: [
             SelectorOption(
@@ -181,21 +188,21 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
           selectedValue: _format,
           onSelected: (val) => setState(() => _format = val),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
 
         // Format info
         Container(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
+          padding: const EdgeInsets.all(KuberSpace.lg),
           decoration: BoxDecoration(
             color: cs.primary.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             border: Border.all(color: cs.primary.withValues(alpha: 0.12)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(Icons.info_outline_rounded, size: 18, color: cs.primary),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: Text(
                   isCsv
@@ -211,7 +218,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         AppButton(
           label: context.l10n.exportLabel,
@@ -228,15 +235,15 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
 
   Widget _buildProgress(ColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xxl),
+      padding: const EdgeInsets.symmetric(vertical: KuberSpace.xxl),
       child: Column(
         children: [
           CircularProgressIndicator(color: cs.primary),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
           Text(
             'Preparing your export…',
             style: localeFont(
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
             ),
@@ -277,30 +284,30 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
           ),
           child: Icon(Icons.check_circle_rounded, size: 32, color: cs.primary),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         Text(
           context.l10n.exportSuccessful,
           style: localeFont(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           context.l10n.fileReady,
-          style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         // File info card
         Container(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
+          padding: const EdgeInsets.all(KuberSpace.lg),
           decoration: BoxDecoration(
             color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -309,15 +316,17 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                 height: 40,
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(KuberShape.medium),
                 ),
                 child: Icon(
-                  isJson ? Icons.data_object_rounded : Icons.description_outlined,
+                  isJson
+                      ? Icons.data_object_rounded
+                      : Icons.description_outlined,
                   size: 20,
                   color: cs.primary,
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,8 +334,8 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                     Text(
                       fileName,
                       style: localeFont(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurface,
                       ),
                       maxLines: 1,
@@ -335,7 +344,10 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
                     const SizedBox(height: 2),
                     Text(
                       sizeText,
-                      style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+                      style: localeFont(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
@@ -343,7 +355,7 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
 
         AppButton(
           label: context.l10n.openFile,
@@ -352,15 +364,17 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
           fullWidth: true,
           onPressed: _openFile,
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         AppButton(
-          label: _isSaving ? context.l10n.savingEllipsis : context.l10n.saveToFolder,
+          label: _isSaving
+              ? context.l10n.savingEllipsis
+              : context.l10n.saveToFolder,
           icon: Icons.save_alt_rounded,
           type: AppButtonType.normal,
           fullWidth: true,
           onPressed: _isSaving ? null : _saveToFolder,
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         AppButton(
           label: context.l10n.shareLabel,
           icon: Icons.share_outlined,
@@ -386,29 +400,29 @@ class _DataExportBottomSheetState extends ConsumerState<DataExportBottomSheet> {
           ),
           child: Icon(Icons.error_outline_rounded, size: 36, color: cs.error),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         Text(
           context.l10n.exportFailed,
           style: localeFont(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
         Text(
           _errorMessage,
           style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
         AppButton(
           label: context.l10n.tryAgain,
           type: AppButtonType.primary,
           fullWidth: true,
           onPressed: () => setState(() => _stage = _Stage.options),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         AppButton(
           label: context.l10n.cancelLabel,
           type: AppButtonType.normal,

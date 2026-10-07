@@ -10,14 +10,13 @@ void main() {
 
   // Variant names must match google_fonts' `toApiFilenamePart()` mapping so the
   // bundled-asset lookup (`Inter-<Variant>.ttf`) resolves.
+  // Light / ExtraBold / Black were dropped in the M3 redesign (no M3 type
+  // role uses them; see specs/m3-redesign/performance-review.md).
   const variants = [
-    'Light', // w300
     'Regular', // w400
     'Medium', // w500
     'SemiBold', // w600
     'Bold', // w700
-    'ExtraBold', // w800
-    'Black', // w900
   ];
 
   for (final variant in variants) {

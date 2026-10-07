@@ -6,6 +6,7 @@ import '../../../core/services/biometric_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../data/card_keystore.dart';
 import '../providers/kuber_cards_provider.dart';
@@ -161,7 +162,7 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
                 ),
               ),
               _PageCounter(current: _step + 1, total: _pageCount),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
               _footer(cs),
             ],
           ),
@@ -176,16 +177,20 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
     final Widget content;
     switch (_step) {
       case _stepIntro:
-        content = _primaryButton(cs, 'Get started',
-            onPressed: () => _goTo(_stepSetPin));
+        content = _primaryButton(
+          cs,
+          'Get started',
+          onPressed: () => _goTo(_stepSetPin),
+        );
       case _stepSetPin:
         content = ValueListenableBuilder<String>(
           valueListenable: _pin,
           builder: (_, pin, __) => _primaryButton(
             cs,
             'Continue',
-            onPressed:
-                pin.length == _pinLength ? () => _goTo(_stepConfirmPin) : null,
+            onPressed: pin.length == _pinLength
+                ? () => _goTo(_stepConfirmPin)
+                : null,
           ),
         );
       case _stepConfirmPin:
@@ -211,17 +216,13 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
           children: [
             // Skip sits ABOVE the primary action, which stays bottom-aligned
             // like every other page.
-            TextButton(
-              onPressed: _finish,
-              child: Text('Skip for now',
-                  style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant)),
+            TextButton(onPressed: _finish, child: const Text('Skip for now')),
+            const SizedBox(height: KuberSpace.xs),
+            _primaryButton(
+              cs,
+              'Enable biometrics',
+              onPressed: _enableBiometric,
             ),
-            const SizedBox(height: KuberSpacing.xs),
-            _primaryButton(cs, 'Enable biometrics',
-                onPressed: _enableBiometric),
           ],
         );
     }
@@ -230,10 +231,10 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
       top: false,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.xl,
+          KuberSpace.screenMargin,
           0,
-          KuberSpacing.xl,
-          KuberSpacing.lg,
+          KuberSpace.screenMargin,
+          KuberSpace.lg,
         ),
         child: AnimatedSize(
           duration: const Duration(milliseconds: 260),
@@ -260,18 +261,18 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
         style: FilledButton.styleFrom(
           backgroundColor: cs.primary,
           foregroundColor: cs.onPrimary,
-          disabledBackgroundColor: cs.primary.withValues(alpha: 0.35),
-          disabledForegroundColor: cs.onPrimary.withValues(alpha: 0.6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
+          disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.12),
+          disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
+          shape: const StadiumBorder(),
         ),
         child: loading
             ? SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: cs.onPrimary),
+                  strokeWidth: 2,
+                  color: cs.onPrimary,
+                ),
               )
             : AnimatedSwitcher(
                 duration: const Duration(milliseconds: 180),
@@ -297,12 +298,9 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
                         label,
                         softWrap: false,
                         overflow: TextOverflow.visible,
-                        style: localeFont(
-                            fontSize: 16, fontWeight: FontWeight.w800),
+                        style: Theme.of(context).textTheme.labelLarge,
                       ),
                     ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    const Icon(Icons.arrow_forward_rounded, size: 24),
                   ],
                 ),
               ),
@@ -312,48 +310,41 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
 
   // ── Page 1: intro ──────────────────────────────────────────────────────────
   Widget _intro(ColorScheme cs) {
+    final tt = Theme.of(context).textTheme;
+    Widget row(IconData icon, String label) => KuberListRow(
+      dense: true,
+      leading: Icon(icon, size: 20, color: cs.onSurfaceVariant),
+      title: label,
+    );
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 40),
-          _tile(cs, Icons.credit_card_rounded, cs.primary, 0.10),
-          const SizedBox(height: KuberSpacing.lg),
-          Text('Kuber Cards',
-              style: localeFont(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface)),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
+          _tile(cs, Icons.credit_card_rounded),
+          const SizedBox(height: KuberSpace.lg),
+          Text(
+            'Kuber Cards',
+            style: tt.headlineMedium!.copyWith(color: cs.onSurface),
+          ),
+          const SizedBox(height: KuberSpace.sm),
           Text(
             'Store your cards, encrypted, on your device. They never leave your phone.',
-            textAlign: TextAlign.center,
-            style: localeFont(
-                fontSize: 15, color: cs.onSurfaceVariant, height: 1.5),
+            style: tt.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
           ),
-          const SizedBox(height: KuberSpacing.xl),
-          _highlight(cs, Icons.lock_rounded, 'Encrypted at rest'),
-          _highlight(cs, Icons.wifi_off_rounded, 'Works fully offline'),
-          _highlight(
-              cs, Icons.credit_card_off_rounded, 'Your CVV is never stored'),
-          _highlight(cs, Icons.pin_rounded, 'Locked behind your PIN'),
-          _highlight(
-              cs, Icons.fingerprint_rounded, 'Biometric unlock for convenience'),
-        ],
-      ),
-    );
-  }
-
-  Widget _highlight(ColorScheme cs, IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: cs.primary),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(label,
-                style: localeFont(fontSize: 14, color: cs.onSurface)),
+          const SizedBox(height: KuberSpace.lg),
+          KuberGroup(
+            children: [
+              row(Icons.lock_outline_rounded, 'Encrypted at rest'),
+              row(Icons.wifi_off_rounded, 'Works fully offline'),
+              row(Icons.credit_card_off_outlined, 'Your CVV is never stored'),
+              row(Icons.pin_outlined, 'Locked behind your PIN'),
+              row(
+                Icons.fingerprint_rounded,
+                'Biometric unlock for convenience',
+              ),
+            ],
           ),
         ],
       ),
@@ -402,52 +393,52 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
 
   // ── Page 4: backup warning ───────────────────────────────────────────────────
   Widget _backupWarning(ColorScheme cs) {
-    final warning = context.kuberColors.warning;
+    final tt = Theme.of(context).textTheme;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: KuberSpace.sm),
           Container(
-            width: 56,
-            height: 56,
+            padding: const EdgeInsets.all(KuberSpace.lg),
             decoration: BoxDecoration(
-              color: warning.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.warning_amber_rounded, size: 28, color: warning),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: context.kuberColors.warningSubtle,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: warning.withValues(alpha: 0.35)),
+              color: cs.errorContainer,
+              borderRadius: KuberShape.largeR,
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Icon(
+                  Icons.warning_rounded,
+                  size: 24,
+                  color: cs.onErrorContainer,
+                ),
+                const SizedBox(height: KuberSpace.md),
                 Text(
                   'There is no way to recover this PIN',
-                  textAlign: TextAlign.center,
-                  style: localeFont(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface),
+                  style: tt.headlineSmall!.copyWith(color: cs.onErrorContainer),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.sm),
                 Text(
                   'If you forget your PIN, your cards are gone for good. We cannot '
                   'reset it, and neither can anyone else. That is what keeps them '
                   'private.',
-                  textAlign: TextAlign.center,
-                  style: localeFont(
-                      fontSize: 14, color: cs.onSurfaceVariant, height: 1.5),
+                  style: tt.bodyMedium!.copyWith(color: cs.onErrorContainer),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                InkWell(
-                  onTap: () => setState(() => _understood = !_understood),
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
+              ],
+            ),
+          ),
+          const SizedBox(height: KuberSpace.md),
+          KuberGroup(
+            children: [
+              InkWell(
+                onTap: () => setState(() => _understood = !_understood),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
                   child: Row(
                     children: [
                       Checkbox(
@@ -456,15 +447,16 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
                             setState(() => _understood = v ?? false),
                       ),
                       Expanded(
-                        child: Text('I understand there is no recovery.',
-                            style: localeFont(
-                                fontSize: 14, color: cs.onSurface)),
+                        child: Text(
+                          'I understand there is no recovery.',
+                          style: tt.labelLarge!.copyWith(color: cs.onSurface),
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -473,41 +465,40 @@ class _SetupFlowScreenState extends ConsumerState<SetupFlowScreen> {
 
   // ── Page 5: biometric ─────────────────────────────────────────────────────────
   Widget _biometricStep(ColorScheme cs) {
+    final tt = Theme.of(context).textTheme;
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 40),
-          _tile(cs, Icons.fingerprint_rounded, cs.primary, 0.10),
-          const SizedBox(height: KuberSpacing.lg),
-          Text('Unlock faster with biometrics',
-              textAlign: TextAlign.center,
-              style: localeFont(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface)),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
+          _tile(cs, Icons.fingerprint_rounded),
+          const SizedBox(height: KuberSpace.lg),
+          Text(
+            'Unlock faster with biometrics',
+            style: tt.headlineMedium!.copyWith(color: cs.onSurface),
+          ),
+          const SizedBox(height: KuberSpace.sm),
           Text(
             'Use your fingerprint or face to unlock Kuber Cards. Your PIN still '
             'works and stays the master key.',
-            textAlign: TextAlign.center,
-            style: localeFont(
-                fontSize: 15, color: cs.onSurfaceVariant, height: 1.5),
+            style: tt.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
     );
   }
 
-  Widget _tile(ColorScheme cs, IconData icon, Color color, double alpha) {
+  /// 56 primary tile, r16 (board 3.24 intro).
+  Widget _tile(ColorScheme cs, IconData icon) {
     return Container(
-      width: 72,
-      height: 72,
+      width: 56,
+      height: 56,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: alpha),
-        shape: BoxShape.circle,
+        color: cs.primary,
+        borderRadius: KuberShape.largeR,
       ),
-      child: Icon(icon, size: 32, color: color),
+      child: Icon(icon, size: 28, color: cs.onPrimary),
     );
   }
 }
@@ -540,7 +531,7 @@ class _PinPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
       child: Column(
         children: [
           // Header scrolls if it can't fit; the keypad stays pinned to the
@@ -550,18 +541,22 @@ class _PinPage extends StatelessWidget {
               child: Column(
                 children: [
                   const SizedBox(height: 24),
-                  Text(title,
-                      style: localeFont(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface)),
-                  const SizedBox(height: KuberSpacing.sm),
-                  Text(subtitle,
-                      textAlign: TextAlign.center,
-                      style:
-                          localeFont(fontSize: 14, color: cs.onSurfaceVariant)),
+                  Text(
+                    title,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineSmall!.copyWith(color: cs.onSurface),
+                  ),
+                  const SizedBox(height: KuberSpace.sm),
+                  Text(
+                    subtitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
                   if (topExtra != null) ...[
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     topExtra!,
                   ],
                 ],
@@ -571,20 +566,28 @@ class _PinPage extends StatelessWidget {
           ValueListenableBuilder<String>(
             valueListenable: pin,
             builder: (_, value, __) => CardsPinDots(
-                length: pinLength, filled: value.length, error: error),
+              length: pinLength,
+              filled: value.length,
+              error: error,
+            ),
           ),
           if (error && errorText != null) ...[
             const SizedBox(height: 10),
-            Text(errorText!, style: localeFont(fontSize: 13, color: cs.error)),
+            Text(
+              errorText!,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: cs.error),
+            ),
           ],
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
           KuberPinPad(
             length: pinLength,
             value: pin,
             onChanged: onChanged,
             onSubmit: (_) {},
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
         ],
       ),
     );
@@ -605,7 +608,7 @@ class _PageCounter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(KuberShape.full),
       ),
       child: Text.rich(
         TextSpan(
@@ -613,16 +616,18 @@ class _PageCounter extends StatelessWidget {
             TextSpan(
               text: '$current',
               style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: cs.primary),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: cs.primary,
+              ),
             ),
             TextSpan(
               text: ' / $total',
               style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurfaceVariant),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ],
         ),

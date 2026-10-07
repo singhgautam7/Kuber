@@ -6,7 +6,9 @@ import 'package:collection/collection.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/locale_font.dart';
-import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
 import '../../categories/providers/category_provider.dart';
 import '../providers/advanced_analytics_provider.dart';
@@ -20,6 +22,10 @@ final _moneyFormat = NumberFormat.currency(
 String aaMoney(double amount) => _moneyFormat.format(amount);
 String aaPercent(double value) => '${value.toStringAsFixed(1)}%';
 
+/// One block of an Advanced Analytics screen (board "Trends"): a caps
+/// section header (with an optional trailing control and a bodySmall
+/// subtitle under it) over a bordered surfaceContainer card. [icon] is kept
+/// for callers but no longer drawn: the screen header already names it.
 class AnalyticsSectionCard extends StatelessWidget {
   final String title;
   final String? subtitle;
@@ -39,59 +45,45 @@ class AnalyticsSectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      margin: const EdgeInsets.only(bottom: KuberSpacing.lg),
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap - 4),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                child: Icon(icon, color: cs.primary, size: 20),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: localeFont(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
+          Padding(
+            padding: const EdgeInsets.only(bottom: KuberSpace.sectionHeaderGap),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        subtitle!,
-                        style: localeFont(
-                          fontSize: 12,
-                          color: cs.onSurfaceVariant,
-                        ),
+                        title.toUpperCase(),
+                        style: sectionHeaderStyle(context),
                       ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle!,
+                          style: Theme.of(context).textTheme.bodySmall!
+                              .copyWith(color: cs.onSurfaceVariant),
+                        ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              ?trailing,
-            ],
+                ?trailing,
+              ],
+            ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
-          child,
+          Container(
+            padding: const EdgeInsets.all(KuberSpace.lg),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainer,
+              borderRadius: KuberShape.largeR,
+              border: Border.all(color: cs.outlineVariant),
+            ),
+            child: child,
+          ),
         ],
       ),
     );
@@ -114,12 +106,18 @@ class StatPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final accent = color ?? cs.primary;
+    final tt = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpace.lg,
+        KuberSpace.md,
+        KuberSpace.lg,
+        KuberSpace.md,
+      ),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
+        color: cs.surfaceContainer,
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,17 +126,16 @@ class StatPill extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+            style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
           ),
-          const SizedBox(height: KuberSpacing.xs),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: localeFont(
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              color: accent,
+          const SizedBox(height: 2),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: tt.titleMedium!.copyWith(color: accent),
             ),
           ),
         ],
@@ -155,13 +152,13 @@ class AnalyticsSkeletonBlock extends StatelessWidget {
     return const Column(
       children: [
         KuberSkeleton(height: 44),
-        SizedBox(height: KuberSpacing.md),
+        SizedBox(height: KuberSpace.md),
         KuberSkeleton(height: 120),
-        SizedBox(height: KuberSpacing.md),
+        SizedBox(height: KuberSpace.md),
         Row(
           children: [
             Expanded(child: KuberSkeleton(height: 58)),
-            SizedBox(width: KuberSpacing.sm),
+            SizedBox(width: KuberSpace.sm),
             Expanded(child: KuberSkeleton(height: 58)),
           ],
         ),
@@ -203,7 +200,7 @@ class TinyBars extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: barColor.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(KuberRadius.sm),
+                      borderRadius: BorderRadius.circular(KuberShape.small),
                     ),
                   ),
                 ),
@@ -240,7 +237,7 @@ class CategoryLabel extends ConsumerWidget {
           size: 16,
           color: Color(category.colorValue),
         ),
-        const SizedBox(width: KuberSpacing.xs),
+        const SizedBox(width: KuberSpace.xs),
         Flexible(
           child: Text(
             category.name,
@@ -250,6 +247,57 @@ class CategoryLabel extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A grouped-list row for a category (boards "Forecast", "Year over year"):
+/// 40 tile in the category colour (re-toned), name, optional subtitle and
+/// trailing. Falls back to "Category id" when the category is gone.
+class AnalyticsCategoryRow extends ConsumerWidget {
+  final String categoryId;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+
+  const AnalyticsCategoryRow({
+    super.key,
+    required this.categoryId,
+    this.subtitle,
+    this.trailing,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final categories = ref.watch(categoryListProvider).valueOrNull ?? const [];
+    final id = int.tryParse(categoryId);
+    final category = categories.where((c) => c.id == id).firstOrNull;
+    final tones = categoryTones(
+      context,
+      category == null ? cs.outline : Color(category.colorValue),
+    );
+    return KuberListRow(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: tones.container,
+          borderRadius: KuberShape.mediumR,
+        ),
+        child: Icon(
+          category == null
+              ? Icons.category_outlined
+              : IconMapper.fromString(category.icon),
+          size: 20,
+          color: tones.fg,
+        ),
+      ),
+      title: category?.name ?? 'Category $categoryId',
+      subtitle: subtitle,
+      trailing: trailing,
+      onTap: onTap,
     );
   }
 }
@@ -264,106 +312,17 @@ class SectionDateRangePicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final range = ref.watch(advancedAnalyticsRangeProvider(section));
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: () => showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        useRootNavigator: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => _RangeSheet(section: section),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.calendar_today_rounded, size: 14, color: cs.primary),
-            const SizedBox(width: 7),
-            Flexible(
-              child: Text(
-                range.pillLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-                style: localeFont(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.expand_more_rounded, size: 16, color: cs.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RangeSheet extends ConsumerWidget {
-  final AdvancedAnalyticsSection section;
-
-  const _RangeSheet({required this.section});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final selected = ref.watch(advancedAnalyticsRangeProvider(section));
-    return KuberBottomSheet(
-      title: 'Date range',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final r in AdvancedAnalyticsRange.values)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: selected == r
-                      ? cs.primaryContainer
-                      : cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                child: Icon(
-                  Icons.calendar_today_rounded,
-                  size: 18,
-                  color: selected == r ? cs.primary : cs.onSurfaceVariant,
-                ),
-              ),
-              title: Text(
-                r.longLabel,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight:
-                      selected == r ? FontWeight.w600 : FontWeight.w400,
-                  color: cs.onSurface,
-                ),
-              ),
-              trailing: selected == r
-                  ? Icon(Icons.check_rounded, color: cs.primary, size: 20)
-                  : null,
-              onTap: () {
-                ref.read(advancedAnalyticsRangeProvider(section).notifier)
-                    .state = r;
-                Navigator.pop(context);
-              },
-            ),
-        ],
-      ),
+    return KuberDropdownChip<AdvancedAnalyticsRange>(
+      value: range,
+      icon: Icons.calendar_today_outlined,
+      label: range.longLabel,
+      options: [
+        for (final r in AdvancedAnalyticsRange.values)
+          KuberDropdownOption(r, r.longLabel),
+      ],
+      onChanged: (r) =>
+          ref.read(advancedAnalyticsRangeProvider(section).notifier).state = r,
     );
   }
 }

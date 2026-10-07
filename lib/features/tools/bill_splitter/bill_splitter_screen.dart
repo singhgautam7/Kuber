@@ -9,7 +9,7 @@ import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../settings/providers/settings_provider.dart';
 import 'data/bill.dart';
 import 'providers/bill_net_provider.dart';
@@ -26,29 +26,25 @@ class BillSplitterScreen extends ConsumerWidget {
     final billsAsync = ref.watch(billsListProvider);
 
     return Scaffold(
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: 'New Split',
+        onPressed: () => context.push('/more/tools/split-calculator/add'),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
       body: CustomScrollView(
         slivers: [
           // ── App Bar ────────────────────────────────────────────────────
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: '',
+              title: 'Split Calculator',
               showBack: true,
-              showHome: true,
               infoConfig: InfoConstants.splitCalculator,
             ),
           ),
 
           // ── Page Header with action button ─────────────────────────────
-          SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'Split\nCalculator',
-              description: 'Save simple splits and send dues to Lend/Borrow.',
-              onAction: () => context.push('/more/tools/split-calculator/add'),
-              actionTooltip: 'New Split',
-            ),
-          ),
-
           const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
           // ── SAVED SPLITS section ───────────────────────────────────────
@@ -67,15 +63,12 @@ class BillSplitterScreen extends ConsumerWidget {
                 if (activeBills.isEmpty && archivedBills.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
-                      vertical: KuberSpacing.xxl,
+                      vertical: KuberSpace.xxl,
                     ),
                     child: KuberEmptyState(
                       icon: Icons.receipt_long_outlined,
                       title: 'No splits yet',
                       description: 'Tap + to calculate your first split',
-                      actionLabel: 'New Split',
-                      onAction: () =>
-                          context.push('/more/tools/split-calculator/add'),
                     ),
                   );
                 }
@@ -146,7 +139,7 @@ class _RecentBillsSection extends ConsumerWidget {
                 title,
                 style: localeFont(
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 1.2,
                   color: cs.onSurfaceVariant,
                 ),
@@ -155,7 +148,7 @@ class _RecentBillsSection extends ConsumerWidget {
                 countLabel,
                 style: localeFont(
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 0.6,
                   color: cs.onSurfaceVariant,
                 ),
@@ -166,7 +159,7 @@ class _RecentBillsSection extends ConsumerWidget {
 
         // Bill cards
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+          padding: const EdgeInsets.symmetric(horizontal: KuberSpace.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -228,10 +221,14 @@ class _BillRow extends StatelessWidget {
     final String statusLabel;
     switch (status) {
       case BillStatus.youLent:
-        statusColor = isArchived ? cs.onSurfaceVariant : cs.tertiary;
+        statusColor = isArchived
+            ? cs.onSurfaceVariant
+            : context.kuberMoney.income;
         statusLabel = 'OWES YOU';
       case BillStatus.youOwe:
-        statusColor = isArchived ? cs.onSurfaceVariant : cs.error;
+        statusColor = isArchived
+            ? cs.onSurfaceVariant
+            : context.kuberMoney.expense;
         statusLabel = 'YOU OWE';
       case BillStatus.settled:
         statusColor = cs.onSurfaceVariant;
@@ -252,7 +249,7 @@ class _BillRow extends StatelessWidget {
       child: Container(
         decoration: ShapeDecoration(
           color: cs.surfaceContainer,
-          shape: bsSquircle(14, side: BorderSide(color: cs.outline)),
+          shape: bsSquircle(14, side: BorderSide(color: cs.outlineVariant)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -271,7 +268,7 @@ class _BillRow extends StatelessWidget {
                       color: cs.surfaceContainerHigh,
                       shape: bsSquircle(
                         12,
-                        side: BorderSide(color: cs.outline),
+                        side: BorderSide(color: cs.outlineVariant),
                       ),
                     ),
                     alignment: Alignment.center,
@@ -290,8 +287,8 @@ class _BillRow extends StatelessWidget {
                         Text(
                           bill.name,
                           style: localeFont(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: -0.1,
                             color: cs.onSurface,
                           ),
@@ -302,7 +299,7 @@ class _BillRow extends StatelessWidget {
                         Text(
                           'Paid by ${bill.paidByPersonName} · ${bill.participants.length} people · ${DateFormat('d MMM').format(bill.createdAt)}',
                           style: localeFont(
-                            fontSize: 11.5,
+                            fontSize: 11,
                             color: cs.onSurfaceVariant,
                           ),
                           maxLines: 1,
@@ -316,8 +313,8 @@ class _BillRow extends StatelessWidget {
                   Text(
                     formattedAmount,
                     style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: -0.3,
                       color: cs.onSurface,
                       fontFeatures: const [FontFeature.tabularFigures()],
@@ -333,7 +330,7 @@ class _BillRow extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: cs.outline, width: 1),
+                      top: BorderSide(color: cs.outlineVariant, width: 1),
                     ),
                   ),
                   child: Row(
@@ -355,8 +352,10 @@ class _BillRow extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: cs.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: cs.outline),
+                          borderRadius: BorderRadius.circular(
+                            KuberShape.medium,
+                          ),
+                          border: Border.all(color: cs.outlineVariant),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -370,8 +369,8 @@ class _BillRow extends StatelessWidget {
                             Text(
                               _splitLabel(bill.splitType),
                               style: localeFont(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0.6,
                                 color: cs.onSurfaceVariant,
                               ),
@@ -391,8 +390,8 @@ class _BillRow extends StatelessWidget {
                             Text(
                               statusLabel,
                               style: localeFont(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0.8,
                                 color: cs.onSurfaceVariant,
                               ),
@@ -400,8 +399,8 @@ class _BillRow extends StatelessWidget {
                             Text(
                               _signedShare(status, formatter, yourShare),
                               style: localeFont(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: -0.2,
                                 color: statusColor,
                                 fontFeatures: const [
@@ -492,14 +491,17 @@ class _AvatarStack extends StatelessWidget {
                 height: 24,
                 decoration: ShapeDecoration(
                   color: cs.surfaceContainerHigh,
-                  shape: bsSquircle(8, side: BorderSide(color: cs.outline)),
+                  shape: bsSquircle(
+                    8,
+                    side: BorderSide(color: cs.outlineVariant),
+                  ),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '+$overflow',
                   style: localeFont(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
                   ),
                 ),

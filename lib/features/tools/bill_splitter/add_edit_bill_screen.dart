@@ -290,7 +290,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
           isEdit ? 'Edit Split' : 'New Split',
           style: localeFont(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
@@ -302,7 +302,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         decoration: BoxDecoration(
           color: cs.surface,
-          border: Border(top: BorderSide(color: cs.outline)),
+          border: Border(top: BorderSide(color: cs.outlineVariant)),
         ),
         child: SafeArea(
           top: false,
@@ -330,7 +330,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
               textCapitalization: TextCapitalization.words,
               onChanged: (_) => setState(() {}),
               style: localeFont(
-                fontSize: 15,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
@@ -348,15 +348,15 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                   vertical: 14,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  borderSide: BorderSide(color: cs.outline),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
+                  borderSide: BorderSide(color: cs.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.large),
                   borderSide: BorderSide(color: cs.primary, width: 2),
                 ),
               ),
@@ -370,15 +370,15 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: Row(
                 children: [
                   Text(
                     currency.symbol,
                     style: localeFont(
-                      fontSize: 26,
+                      fontSize: 28,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
                     ),
@@ -394,7 +394,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                       onChanged: (_) => setState(() {}),
                       style: localeFont(
                         fontSize: 36,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: cs.onSurface,
                         letterSpacing: -1.2,
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -403,7 +403,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                         hintText: '0',
                         hintStyle: localeFont(
                           fontSize: 36,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: cs.onSurfaceVariant.withValues(alpha: 0.4),
                         ),
                         border: InputBorder.none,
@@ -421,7 +421,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                       color: cs.surfaceContainerHigh,
                       shape: bsSquircle(
                         10,
-                        side: BorderSide(color: cs.outline),
+                        side: BorderSide(color: cs.outlineVariant),
                       ),
                     ),
                     child: Icon(
@@ -482,7 +482,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               'ADD / EDIT',
                               style: localeFont(
                                 fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0.4,
                                 color: canPickParticipants
                                     ? cs.primary
@@ -514,7 +514,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                             ? 'You'
                                             : name.split(' ').first,
                                         style: localeFont(
-                                          fontSize: 10,
+                                          fontSize: 11,
                                           fontWeight: FontWeight.w600,
                                           color: cs.onSurfaceVariant,
                                         ),
@@ -563,8 +563,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(color: cs.outline),
+                        borderRadius: BorderRadius.circular(KuberShape.medium),
+                        border: Border.all(color: cs.outlineVariant),
                       ),
                       child: Row(
                         children: [
@@ -586,7 +586,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                   ? (_paidBy ?? 'Select person')
                                   : 'Add participants first',
                               style: localeFont(
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: _paidBy != null && canPickPayer
                                     ? FontWeight.w600
                                     : FontWeight.w500,
@@ -624,8 +624,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                     height: 38,
                     decoration: BoxDecoration(
                       color: cs.surfaceContainer,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(color: cs.outline),
+                      borderRadius: BorderRadius.circular(KuberShape.medium),
+                      border: Border.all(color: cs.outlineVariant),
                     ),
                     child: Row(
                       children: _splitTabs.map((tab) {
@@ -643,7 +643,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                     ? cs.primary.withValues(alpha: 0.14)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(
-                                  KuberRadius.sm,
+                                  KuberShape.small,
                                 ),
                                 border: sel && canConfigureSplit
                                     ? Border.all(
@@ -658,7 +658,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                 tab.label,
                                 style: localeFont(
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w600,
                                   letterSpacing: 0.3,
                                   color: sel && canConfigureSplit
                                       ? cs.primary
@@ -681,8 +681,10 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
               Container(
                 decoration: BoxDecoration(
                   color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
+                  borderRadius: BorderRadius.circular(
+                    KuberShape.largeIncreased,
+                  ),
+                  border: Border.all(color: cs.outlineVariant),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -695,7 +697,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: cs.surfaceContainerHigh,
-                        border: Border(bottom: BorderSide(color: cs.outline)),
+                        border: Border(
+                          bottom: BorderSide(color: cs.outlineVariant),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -704,7 +708,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               _breakdownHeader(total),
                               style: localeFont(
                                 fontSize: 11,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: 0.8,
                                 color: cs.onSurfaceVariant,
                               ),
@@ -714,10 +718,10 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                             balance.label,
                             style: localeFont(
                               fontSize: 11,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                               color: balance.balanced
-                                  ? cs.tertiary
-                                  : context.kuberColors.warning,
+                                  ? context.kuberMoney.income
+                                  : context.kuberMoney.warning,
                             ),
                           ),
                         ],
@@ -736,7 +740,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                         decoration: BoxDecoration(
                           border: isLast
                               ? null
-                              : Border(bottom: BorderSide(color: cs.outline)),
+                              : Border(
+                                  bottom: BorderSide(color: cs.outlineVariant),
+                                ),
                         ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
@@ -754,7 +760,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                     name,
                                     style: localeFont(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w600,
                                       color: cs.onSurface,
                                       letterSpacing: -0.1,
                                     ),
@@ -780,7 +786,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                                 computed.toStringAsFixed(0),
                                 style: localeFont(
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w600,
                                   color: cs.onSurface,
                                   fontFeatures: const [
                                     FontFeature.tabularFigures(),
@@ -827,7 +833,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                    borderRadius: BorderRadius.circular(
+                      KuberShape.largeIncreased,
+                    ),
                     border: Border.all(
                       color: cs.primary.withValues(alpha: 0.25),
                     ),
@@ -849,7 +857,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                               ? 'Percentages must add up to 100%. Computed amounts update live.'
                               : 'Each person gets a share proportional to their parts.',
                           style: localeFont(
-                            fontSize: 11.5,
+                            fontSize: 11,
                             color: cs.onSurface,
                             height: 1.4,
                           ),
@@ -862,9 +870,9 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
             ],
 
             if (previewBill != null) ...[
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
               const _LendBorrowPrompt(),
-              const SizedBox(height: KuberSpacing.sm),
+              const SizedBox(height: KuberSpace.sm),
               _LendBorrowSummary(
                 bill: previewBill,
                 formatter: formatter,
@@ -901,7 +909,7 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
           borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(KuberRadius.lg),
+            top: Radius.circular(KuberShape.extraLarge),
           ),
         ),
         child: SafeArea(
@@ -913,8 +921,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: cs.outline,
-                  borderRadius: BorderRadius.circular(2),
+                  color: cs.outlineVariant,
+                  borderRadius: BorderRadius.circular(KuberShape.full),
                 ),
               ),
               const SizedBox(height: 16),
@@ -923,8 +931,8 @@ class _AddEditBillScreenState extends ConsumerState<AddEditBillScreen> {
                 child: Text(
                   'Who Paid?',
                   style: localeFont(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
@@ -983,7 +991,7 @@ class _ProgressiveSection extends StatelessWidget {
         children: [
           IgnorePointer(ignoring: !enabled, child: child),
           if (!enabled) ...[
-            const SizedBox(height: KuberSpacing.xs),
+            const SizedBox(height: KuberSpace.xs),
             Row(
               children: [
                 Icon(
@@ -991,7 +999,7 @@ class _ProgressiveSection extends StatelessWidget {
                   size: 13,
                   color: cs.onSurfaceVariant,
                 ),
-                const SizedBox(width: KuberSpacing.xs),
+                const SizedBox(width: KuberSpace.xs),
                 Expanded(
                   child: Text(
                     message,
@@ -1023,16 +1031,16 @@ class _LockedRow extends StatelessWidget {
 
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
           Icon(icon, size: 18, color: cs.onSurfaceVariant),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           Text(
             text,
             style: localeFont(
@@ -1055,10 +1063,10 @@ class _LendBorrowPrompt extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.primary.withValues(alpha: 0.24)),
       ),
       child: Row(
@@ -1069,7 +1077,7 @@ class _LendBorrowPrompt extends StatelessWidget {
             size: 16,
             color: cs.primary,
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           Expanded(
             child: Text(
               'Do you want to add this to your Lend/Borrow section for easier transaction tracking?',
@@ -1108,8 +1116,8 @@ class _LendBorrowSummary extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -1118,7 +1126,7 @@ class _LendBorrowSummary extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              border: Border(bottom: BorderSide(color: cs.outline)),
+              border: Border(bottom: BorderSide(color: cs.outlineVariant)),
             ),
             child: Row(
               children: [
@@ -1127,7 +1135,7 @@ class _LendBorrowSummary extends StatelessWidget {
                     'LEND / BORROW',
                     style: localeFont(
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 0.8,
                       color: cs.onSurfaceVariant,
                     ),
@@ -1170,8 +1178,8 @@ class _LendBorrowSummary extends StatelessWidget {
               final debt = entry.value;
               final isLast = entry.key == debts.length - 1;
               final color = debt.isLent
-                  ? cs.tertiary
-                  : cs.error;
+                  ? context.kuberMoney.income
+                  : context.kuberMoney.expense;
               final label = debt.isLent
                   ? '${debt.personName} owes You'
                   : 'You owe ${debt.personName}';
@@ -1180,7 +1188,7 @@ class _LendBorrowSummary extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: isLast
                       ? null
-                      : Border(bottom: BorderSide(color: cs.outline)),
+                      : Border(bottom: BorderSide(color: cs.outlineVariant)),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -1197,8 +1205,8 @@ class _LendBorrowSummary extends StatelessWidget {
                           Text(
                             label,
                             style: localeFont(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                               color: color,
                               letterSpacing: -0.1,
                             ),
@@ -1230,7 +1238,7 @@ class _LendBorrowSummary extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: cs.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(KuberRadius.sm),
+                          borderRadius: BorderRadius.circular(KuberShape.small),
                           border: Border.all(
                             color: cs.primary.withValues(alpha: 0.35),
                           ),
@@ -1239,7 +1247,7 @@ class _LendBorrowSummary extends StatelessWidget {
                           'ADD',
                           style: localeFont(
                             fontSize: 11,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                             color: cs.primary,
                           ),
@@ -1265,7 +1273,7 @@ class _FieldLabel extends StatelessWidget {
       text,
       style: localeFont(
         fontSize: 11,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w600,
         letterSpacing: 1.1,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
@@ -1299,7 +1307,7 @@ class _SplitInput extends StatelessWidget {
         textAlign: TextAlign.right,
         style: localeFont(
           fontSize: 14,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: cs.onSurface,
           fontFeatures: const [FontFeature.tabularFigures()],
         ),
@@ -1317,15 +1325,15 @@ class _SplitInput extends StatelessWidget {
             vertical: 8,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.large),
+            borderSide: BorderSide(color: cs.outlineVariant),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.large),
+            borderSide: BorderSide(color: cs.outlineVariant),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(KuberShape.large),
             borderSide: BorderSide(color: cs.primary),
           ),
         ),

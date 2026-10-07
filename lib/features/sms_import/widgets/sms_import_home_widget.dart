@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../main.dart' show onOpenBatchReadyProvider;
-import '../../../core/utils/locale_font.dart';
 import '../providers/sms_import_provider.dart';
 
 /// Home dashboard widget for SMS import. Deliberately lightweight: it reads
@@ -50,7 +51,8 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
     if (!mounted || !info.hasPermission) return;
     final last = info.lastScannedAt;
     final due =
-        last != null && DateTime.now().difference(last) > const Duration(minutes: 30);
+        last != null &&
+        DateTime.now().difference(last) > const Duration(minutes: 30);
     if (!due) return;
 
     final notifier = ref.read(smsImportProvider.notifier);
@@ -65,7 +67,6 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final infoAsync = ref.watch(smsHomeInfoProvider);
 
     final Widget card = infoAsync.when(
@@ -80,22 +81,11 @@ class _SmsImportHomeWidgetState extends ConsumerState<SmsImportHomeWidget> {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 12),
-            child: Text(
-              'SMS IMPORT',
-              style: localeFont(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
+          const KuberSectionHeader(title: 'SMS IMPORT'),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: card,
@@ -144,56 +134,17 @@ class _LastCheckedCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: () => _openImport(context, ref, SmsImportTabArg.unreviewed),
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+    // Review state: a one-row grouped list (board 3.2a).
+    return KuberGroup(
+      children: [
+        KuberListRow(
+          leading: const KuberIconTile(icon: Icons.sms_outlined),
+          title: 'Import from SMS',
+          subtitle: _label(),
+          trailing: const KuberChevron(),
+          onTap: () => _openImport(context, ref, SmsImportTabArg.unreviewed),
         ),
-        child: Row(
-          children: [
-            _IconBadge(
-              bg: cs.primary.withValues(alpha: 0.10),
-              border: cs.primary.withValues(alpha: 0.25),
-              color: cs.primary,
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Import from SMS',
-                    style: localeFont(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    _label(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(
-                      fontSize: 12,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded,
-                size: 20, color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }
@@ -203,46 +154,32 @@ class _PermissionNeededCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // Permission / CTA state: a card with a tonal action (board 3.2a).
+    return KuberCard(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _IconBadge(
-                bg: cs.surfaceContainerHigh,
-                border: cs.outline,
-                color: cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: 14),
+              const KuberIconTile(icon: Icons.sms_outlined),
+              const SizedBox(width: KuberSpace.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Auto-detect transactions',
-                      style: localeFont(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                      style: theme.textTheme.titleMedium!.copyWith(
                         color: cs.onSurface,
-                        letterSpacing: -0.2,
-                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 4),
                     Text(
                       'Enable SMS to read bank messages',
-                      style: localeFont(
-                        fontSize: 12,
+                      style: theme.textTheme.bodyMedium!.copyWith(
                         color: cs.onSurfaceVariant,
-                        height: 1.4,
                       ),
                     ),
                   ],
@@ -250,66 +187,20 @@ class _PermissionNeededCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          SizedBox(
-            height: 38,
-            width: double.infinity,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                backgroundColor: cs.surfaceContainerHigh,
-                foregroundColor: cs.onSurface,
-                side: BorderSide(color: cs.outline),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-              ),
+          const SizedBox(height: KuberSpace.md),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AppButton(
+              label: 'Set up',
+              icon: Icons.arrow_forward_rounded,
+              iconAfterLabel: true,
+              height: 40,
               onPressed: () =>
                   _openImport(context, ref, SmsImportTabArg.unreviewed),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Set up',
-                    style: localeFont(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(Icons.arrow_forward_rounded,
-                      size: 13, color: cs.onSurface),
-                ],
-              ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _IconBadge extends StatelessWidget {
-  final Color bg;
-  final Color border;
-  final Color color;
-  const _IconBadge({
-    required this.bg,
-    required this.border,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 46,
-      height: 46,
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: border),
-      ),
-      child: Icon(Icons.sms_outlined, size: 22, color: color),
     );
   }
 }

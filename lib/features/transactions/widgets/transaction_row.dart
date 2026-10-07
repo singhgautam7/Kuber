@@ -3,6 +3,7 @@ import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -40,39 +41,29 @@ class DateGroupHeader extends ConsumerWidget {
           : '−${formatter.formatCurrency(dayTotal.abs())}',
       isPrivate,
     );
-    final totalColor = isPositive ? cs.tertiary : cs.onSurfaceVariant;
-
+    // Day header = section header (board 3.5): caps label, total trailing.
     return Padding(
       padding: const EdgeInsets.only(
-        top: KuberSpacing.sm,
-        bottom: KuberSpacing.sm,
+        top: KuberSpace.sm,
+        bottom: KuberSpace.sectionHeaderGap,
       ),
       child: Row(
         children: [
-          Text(
-            label,
-            style: textTheme.labelSmall?.copyWith(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 1.0,
-                ),
-          ),
-          const SizedBox(width: KuberSpacing.sm),
           Expanded(
-            child: Container(
-              height: 0.5,
-              color: cs.outline,
+            child: Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.labelMedium?.copyWith(
+                letterSpacing: 0.8,
+                color: cs.onSurfaceVariant,
+              ),
             ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           Text(
             totalText,
-            style: textTheme.titleSmall?.copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: totalColor,
-                ),
+            style: textTheme.labelLarge?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -110,10 +101,11 @@ class TransactionDayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    // One grouped list per day, rows divided by 1dp outlineVariant (grouping
+    // over boxing, density-audit #1).
+    return KuberGroup(
       children: [
-        for (int i = 0; i < transactions.length; i++) ...[
-          if (i > 0) const SizedBox(height: 8),
+        for (int i = 0; i < transactions.length; i++)
           TransactionRow(
             transaction: transactions[i],
             onDelete: () => onDelete(transactions[i]),
@@ -126,7 +118,6 @@ class TransactionDayCard extends StatelessWidget {
             transferPairAccountId: transferPairAccountId,
             tagNames: tagNamesMap[transactions[i].id] ?? const [],
           ),
-        ],
       ],
     );
   }
@@ -169,100 +160,66 @@ class TransactionRow extends ConsumerWidget {
     return hasAttachments || hasNotes || hasTags;
   }
 
-  /// Builds a styled TextSpan with tags in accent color and attachment/notes chips.
-  InlineSpan _buildIndicatorSpan(BuildContext context, ColorScheme cs) {
+  /// Tags (labelMedium primary) and 20-high badge pills (attachments count,
+  /// note), per components/transaction-item.md.
+  Widget _buildIndicatorRow(BuildContext context, ThemeData theme) {
+    final cs = theme.colorScheme;
     final hasAttachments = transaction.attachmentPaths.isNotEmpty;
     final hasNotes = transaction.notes?.isNotEmpty == true;
     final hasTags = tagNames.isNotEmpty;
-    const goldColor = Color(0xFFD4A017);
-    final blueColor = cs.primary;
-    final baseStyle = TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w400,
+    final pillText = theme.textTheme.labelSmall!.copyWith(
       color: cs.onSurfaceVariant,
-    );
-    final tagStyle = TextStyle(
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
-      color: cs.primary,
+      height: 1.0,
     );
 
-    final spans = <InlineSpan>[];
+    Widget pill(IconData icon, [String? count]) => Container(
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: KuberShape.fullR,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: cs.onSurfaceVariant),
+          if (count != null) ...[
+            const SizedBox(width: 2),
+            Text(count, style: pillText),
+          ],
+        ],
+      ),
+    );
 
-    if (hasAttachments) {
-      spans.add(WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Container(
-          height: 16,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: goldColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: goldColor.withValues(alpha: 0.25)),
+    final tagText = hasTags
+        ? [
+            tagNames.take(2).map((t) => '#$t').join(' '),
+            if (tagNames.length > 2)
+              context.l10n.tagsMoreCount('${tagNames.length - 2}'),
+          ].join(' ')
+        : null;
+
+    return Row(
+      children: [
+        if (hasAttachments) ...[
+          pill(
+            Icons.attach_file_rounded,
+            '${transaction.attachmentPaths.length}',
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.attach_file_rounded, size: 11, color: goldColor),
-              const SizedBox(width: 2),
-              Text(
-                '${transaction.attachmentPaths.length}',
-                style: const TextStyle(
-                  fontSize: 10,
-                  height: 1.0,
-                  fontWeight: FontWeight.w600,
-                  color: goldColor,
-                ),
-              ),
-            ],
+          const SizedBox(width: 4),
+        ],
+        if (hasNotes) ...[pill(Icons.notes_rounded), const SizedBox(width: 4)],
+        if (tagText != null)
+          Flexible(
+            child: Text(
+              tagText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium!.copyWith(color: cs.primary),
+            ),
           ),
-        ),
-      ));
-    }
-
-    if (hasAttachments && hasNotes) {
-      spans.add(const WidgetSpan(child: SizedBox(width: 4)));
-    }
-
-    if (hasNotes) {
-      spans.add(WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Container(
-          height: 16,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: blueColor.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: blueColor.withValues(alpha: 0.25)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.notes_rounded, size: 11, color: blueColor),
-            ],
-          ),
-        ),
-      ));
-    }
-
-    if ((hasAttachments || hasNotes) && hasTags) {
-      spans.add(TextSpan(text: '  \u00B7  ', style: baseStyle));
-    }
-
-    if (hasTags) {
-      final visible = tagNames.take(2).map((t) => '#$t').join(' ');
-      spans.add(TextSpan(text: visible, style: tagStyle));
-      final remaining = tagNames.length - 2;
-      if (remaining > 0) {
-        spans.add(TextSpan(
-            text: ' ${context.l10n.tagsMoreCount('$remaining')}',
-            style: baseStyle));
-      }
-    }
-
-    return TextSpan(children: spans);
+      ],
+    );
   }
 
   @override
@@ -311,11 +268,11 @@ class TransactionRow extends ConsumerWidget {
       subtitle = context.l10n.accountCorrectionSubtitle;
       // Income (+) adjustments read green like any other inflow; expense stays
       // neutral.
-      amountColor = isIncome ? cs.tertiary : cs.onSurface;
+      amountColor = isIncome ? context.kuberMoney.income : cs.onSurface;
       amountPrefix = isIncome ? '+' : '-';
     } else if (isTransfer) {
       iconData = Icons.swap_horiz_rounded;
-      iconColor = const Color(0xFF78909C);
+      iconColor = cs.onSurfaceVariant;
       displayName =
           '${fromName ?? context.l10n.unknownLabel} → ${toName ?? context.l10n.unknownLabel}';
       subtitle =
@@ -332,74 +289,85 @@ class TransactionRow extends ConsumerWidget {
       displayName = transaction.name;
       subtitle =
           '${category?.name ?? context.l10n.unknownLabel} · ${account?.name ?? context.l10n.unknownLabel}';
-      amountColor = isIncome ? cs.tertiary : cs.onSurface;
+      amountColor = isIncome
+          ? context.kuberMoney.income
+          : context.kuberMoney.expense;
       amountPrefix = isIncome ? '+' : '-';
     }
 
-    final swipeMode = ref.watch(settingsProvider.select(
-      (async) => async.valueOrNull?.swipeMode ?? SwipeMode.changeTabs,
-    ));
+    final swipeMode = ref.watch(
+      settingsProvider.select(
+        (async) => async.valueOrNull?.swipeMode ?? SwipeMode.changeTabs,
+      ),
+    );
+
+    final hasIndicator = _hasIndicator();
+    final Widget lead = isSelectionMode && isSelected
+        ? Container(
+            key: const ValueKey('check'),
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: cs.primary,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.check_rounded, color: cs.onPrimary, size: 22),
+          )
+        : (isTransfer || isAdjustment)
+        ? Container(
+            key: const ValueKey('neutral'),
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHigh,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(iconData, color: cs.onSurfaceVariant, size: 22),
+          )
+        : CategoryIcon.square(
+            key: const ValueKey('icon'),
+            icon: iconData,
+            rawColor: iconColor,
+          );
 
     final content = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: isSelected ? cs.primary.withValues(alpha: 0.2) : cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(
-          color: isSelected ? cs.primary.withValues(alpha: 0.4) : cs.outline,
-          width: isSelected ? 1.5 : 1,
-        ),
-      ),
+      color: isSelected ? cs.secondaryContainer : Colors.transparent,
       child: InkWell(
         onTap: () {
           if (isSelectionMode) {
-            ref.read(transactionSelectionProvider.notifier).toggle(transaction.id);
+            ref
+                .read(transactionSelectionProvider.notifier)
+                .toggle(transaction.id);
           } else {
             onTap();
           }
         },
         onLongPress: () {
-          ref.read(transactionSelectionProvider.notifier).toggle(transaction.id);
+          ref
+              .read(transactionSelectionProvider.notifier)
+              .toggle(transaction.id);
         },
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Padding(
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: hasIndicator
+                ? KuberSpace.listItem3
+                : KuberSpace.listItem2,
+          ),
           padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.lg,
-            vertical: KuberSpacing.md,
+            horizontal: KuberSpace.listRowPadH,
+            vertical: KuberSpace.listRowPadV,
           ),
           child: Row(
             children: [
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                child: isSelectionMode
-                    ? Container(
-                        key: const ValueKey('checkbox'),
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: isSelected 
-                              ? cs.primary.withValues(alpha: 0.15) 
-                              : cs.onSurfaceVariant.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
-                        ),
-                        child: isSelected 
-                            ? Icon(
-                                Icons.check_rounded,
-                                color: cs.primary,
-                                size: 24,
-                              )
-                            : null,
-                      )
-                    : CategoryIcon.square(
-                        key: const ValueKey('icon'),
-                        icon: iconData,
-                        rawColor: iconColor,
-                        size: 42,
-                      ),
+                child: lead,
               ),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.lg),
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -407,11 +375,11 @@ class TransactionRow extends ConsumerWidget {
                         Flexible(
                           child: Text(
                             displayName,
-                            style: textTheme.bodyMedium?.copyWith(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.onSurface,
-                                ),
+                            style: textTheme.titleMedium?.copyWith(
+                              color: isSelected
+                                  ? cs.onSecondaryContainer
+                                  : cs.onSurface,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -422,25 +390,23 @@ class TransactionRow extends ConsumerWidget {
                             onTap: transaction.importedFromSms == null
                                 ? null
                                 : () => showRawSmsSheet(
-                                      context,
-                                      rawSms: transaction.importedFromSms!,
-                                    ),
+                                    context,
+                                    rawSms: transaction.importedFromSms!,
+                                  ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
                     Row(
                       children: [
                         Flexible(
                           child: Text(
                             subtitle,
-                            style:
-                                textTheme.bodySmall?.copyWith(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                      color: cs.onSurfaceVariant,
-                                    ),
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: isSelected
+                                  ? cs.onSecondaryContainer
+                                  : cs.onSurfaceVariant,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -448,62 +414,49 @@ class TransactionRow extends ConsumerWidget {
                         if (isAdjustment) ...[
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
+                            height: 20,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh,
-                              borderRadius:
-                                  BorderRadius.circular(KuberRadius.sm),
-                              border: Border.all(
-                                color: cs.outline.withValues(alpha: 0.5),
-                              ),
+                              borderRadius: KuberShape.fullR,
+                              border: Border.all(color: cs.outlineVariant),
                             ),
                             child: Text(
                               context.l10n.adjustmentLabel,
                               style: textTheme.labelSmall?.copyWith(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurfaceVariant,
-                                    letterSpacing: 0.5,
-                                  ),
+                                color: cs.onSurfaceVariant,
+                                height: 1.0,
+                              ),
                             ),
                           ),
                         ],
                       ],
                     ),
-                    if (_hasIndicator()) ...[
+                    if (hasIndicator) ...[
                       const SizedBox(height: 2),
-                      Text.rich(
-                        _buildIndicatorSpan(context, cs),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      _buildIndicatorRow(context, theme),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(width: KuberSpacing.sm),
+              const SizedBox(width: KuberSpace.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    maskAmount('$amountPrefix${formatter.formatCurrency(transaction.amount)}', ref.watch(privacyModeProvider)),
-                    style: textTheme.bodyMedium?.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: amountColor,
-                        ),
+                    maskAmount(
+                      '$amountPrefix${formatter.formatCurrency(transaction.amount)}',
+                      ref.watch(privacyModeProvider),
+                    ),
+                    style: textTheme.titleMedium?.copyWith(color: amountColor),
                   ),
-                  const SizedBox(height: 2),
                   Text(
                     DateFormatter.time(transaction.createdAt),
                     style: textTheme.bodySmall?.copyWith(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                          color: cs.onSurfaceVariant,
-                        ),
+                      color: isSelected
+                          ? cs.onSecondaryContainer
+                          : cs.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -519,21 +472,15 @@ class TransactionRow extends ConsumerWidget {
         direction: DismissDirection.horizontal,
         background: Container(
           alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: KuberSpacing.xl),
-          decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-          child: Icon(Icons.edit_outlined, color: cs.primary),
+          padding: const EdgeInsets.only(left: KuberSpace.xl),
+          color: cs.secondaryContainer,
+          child: Icon(Icons.edit_outlined, color: cs.onSecondaryContainer),
         ),
         secondaryBackground: Container(
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: KuberSpacing.xl),
-          decoration: BoxDecoration(
-            color: cs.error.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-          child: Icon(Icons.delete_outline, color: cs.error),
+          padding: const EdgeInsets.only(right: KuberSpace.xl),
+          color: cs.errorContainer,
+          child: Icon(Icons.delete_outline, color: cs.onErrorContainer),
         ),
         confirmDismiss: (direction) async {
           if (direction == DismissDirection.endToStart) {

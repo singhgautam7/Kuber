@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
-import '../../../core/utils/locale_font.dart';
-import 'income_expense_chart_controls.dart' show KuberSegmentedTabs;
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../transactions/providers/stats_provider.dart';
 import 'category_donut_parts.dart';
 
@@ -31,8 +31,7 @@ class CategoryDonutChart extends ConsumerStatefulWidget {
   const CategoryDonutChart({super.key});
 
   @override
-  ConsumerState<CategoryDonutChart> createState() =>
-      _CategoryDonutChartState();
+  ConsumerState<CategoryDonutChart> createState() => _CategoryDonutChartState();
 }
 
 class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
@@ -51,7 +50,10 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
             amount: stats[i].total,
             percentage: stats[i].percentage,
             color: Color.lerp(
-                cs.primary, cs.tertiary, i / stats.length.clamp(1, 100))!,
+              cs.primary,
+              context.kuberMoney.income,
+              i / stats.length.clamp(1, 100),
+            )!,
           ),
       ];
     }
@@ -63,7 +65,7 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
           label: s.category.name,
           amount: s.total,
           percentage: s.percentage,
-          color: harmonizeCategory(context, Color(s.category.colorValue)),
+          color: categoryVizColor(context, Color(s.category.colorValue)),
         ),
     ];
   }
@@ -81,123 +83,124 @@ class _CategoryDonutChartState extends ConsumerState<CategoryDonutChart> {
       onTapOutside: (_) {
         if (_selectedIndex != null) setState(() => _selectedIndex = null);
       },
-      child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Spending by category',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: localeFont(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: KuberSegmentedTabs(
-              labels: const ['Category', 'Group'],
-              selectedIndex: _groupMode ? 1 : 0,
-              onChanged: (i) => setState(() {
-                _groupMode = i == 1;
-                _selectedIndex = null;
-              }),
-            ),
-          ),
-          if (slices.isEmpty)
-            DonutEmptyState(cs: cs)
-          else ...[
-            const SizedBox(height: 20),
-            Center(
-              child: SizedBox(
-                width: 180,
-                height: 180,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PieChart(
-                      PieChartData(
-                        startDegreeOffset: -90,
-                        sectionsSpace: 2,
-                        centerSpaceRadius: 60,
-                        pieTouchData: PieTouchData(
-                          touchCallback: (event, response) {
-                            final isAction = event is FlTapUpEvent ||
-                                event is FlPanEndEvent;
-                            if (!isAction) return;
-                            final index = response
-                                ?.touchedSection?.touchedSectionIndex;
-                            setState(() {
-                              _selectedIndex =
-                                  (index == null || index < 0 ||
-                                          index == _selectedIndex)
-                                      ? null
-                                      : index;
-                            });
-                          },
-                        ),
-                        sections: [
-                          for (var i = 0; i < slices.length; i++)
-                            PieChartSectionData(
-                              value: slices[i].percentage.clamp(0.1, 100),
-                              title: '',
-                              color: selected == null || selected == i
-                                  ? slices[i].color
-                                  : slices[i]
-                                      .color
-                                      .withValues(alpha: 0.4),
-                              radius: selected == i ? 28 : 24,
-                            ),
-                        ],
-                      ),
-                      duration: const Duration(milliseconds: 150),
-                      curve: Curves.easeOut,
-                    ),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 150),
-                      child: selected == null
-                          ? DonutCenterTotal(
-                              key: const ValueKey('total'),
-                              slices: slices,
-                              groupMode: _groupMode,
-                            )
-                          : DonutCenterSelected(
-                              key: ValueKey('sel$selected'),
-                              slice: slices[selected],
-                              total: slices.fold(
-                                  0.0, (s, x) => s + x.amount),
-                            ),
-                    ),
+      child: KuberCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Spending by category',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: cs.onSurface),
+                  ),
+                ),
+                KuberDropdownChip<bool>(
+                  value: _groupMode,
+                  options: const [
+                    KuberDropdownOption(false, 'Category'),
+                    KuberDropdownOption(true, 'Group'),
                   ],
+                  onChanged: (g) => setState(() {
+                    _groupMode = g;
+                    _selectedIndex = null;
+                  }),
+                ),
+              ],
+            ),
+            if (slices.isEmpty)
+              DonutEmptyState(cs: cs)
+            else ...[
+              const SizedBox(height: KuberSpace.lg),
+              Center(
+                // 176 ring + room for the +6 selected slice.
+                child: SizedBox(
+                  width: 188,
+                  height: 188,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      PieChart(
+                        PieChartData(
+                          startDegreeOffset: -90,
+                          sectionsSpace: 3,
+                          centerSpaceRadius: 68,
+                          pieTouchData: PieTouchData(
+                            touchCallback: (event, response) {
+                              final isAction =
+                                  event is FlTapUpEvent ||
+                                  event is FlPanEndEvent;
+                              if (!isAction) return;
+                              final index =
+                                  response?.touchedSection?.touchedSectionIndex;
+                              setState(() {
+                                _selectedIndex =
+                                    (index == null ||
+                                        index < 0 ||
+                                        index == _selectedIndex)
+                                    ? null
+                                    : index;
+                              });
+                            },
+                          ),
+                          sections: [
+                            for (var i = 0; i < slices.length; i++)
+                              PieChartSectionData(
+                                value: slices[i].percentage.clamp(0.1, 100),
+                                title: '',
+                                color: selected == null || selected == i
+                                    ? slices[i].color
+                                    : slices[i].color.withValues(
+                                        alpha: KuberChartTheme.unselectedAlpha,
+                                      ),
+                                radius: selected == i ? 26 : 20,
+                              ),
+                          ],
+                        ),
+                        duration: const Duration(milliseconds: 150),
+                        curve: Curves.easeOut,
+                      ),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 150),
+                        child: selected == null
+                            ? DonutCenterTotal(
+                                key: const ValueKey('total'),
+                                slices: slices,
+                                groupMode: _groupMode,
+                              )
+                            : DonutCenterSelected(
+                                key: ValueKey('sel$selected'),
+                                slice: slices[selected],
+                                total: slices.fold(0.0, (s, x) => s + x.amount),
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            // Show ALL categories/groups, not just the top few.
-            for (var i = 0; i < slices.length; i++)
-              DonutTopRow(
-                slice: slices[i],
-                dimmed: selected != null && selected != i,
-                // No default highlight — a row is highlighted only when its
-                // segment is actually selected.
-                highlighted: selected == i,
-                onTap: () => setState(() {
-                  _selectedIndex = _selectedIndex == i ? null : i;
-                }),
-              ),
+              const SizedBox(height: KuberSpace.lg),
+              // Show ALL categories/groups, not just the top few.
+              for (var i = 0; i < slices.length; i++) ...[
+                if (i > 0)
+                  Divider(height: 1, thickness: 1, color: cs.outlineVariant),
+                DonutTopRow(
+                  slice: slices[i],
+                  dimmed: selected != null && selected != i,
+                  // No default highlight — a row is highlighted only when its
+                  // segment is actually selected.
+                  highlighted: selected == i,
+                  onTap: () => setState(() {
+                    _selectedIndex = _selectedIndex == i ? null : i;
+                  }),
+                ),
+              ],
+            ],
           ],
-        ],
-      ),
+        ),
       ),
     );
   }

@@ -27,14 +27,14 @@ class WIPBottomSheet extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.xl,
-        KuberSpacing.lg,
-        KuberSpacing.xl,
-        viewPadding > 0 ? viewPadding + KuberSpacing.lg : KuberSpacing.xxl,
+        KuberSpace.xl,
+        KuberSpace.lg,
+        KuberSpace.xl,
+        viewPadding > 0 ? viewPadding + KuberSpace.lg : KuberSpace.xxl,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)), // Kept 28 for visual match with image
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberShape.extraLarge)), // Kept 28 for visual match with image
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -45,10 +45,10 @@ class WIPBottomSheet extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(KuberShape.full),
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           
           // Close button row
           Row(
@@ -68,7 +68,7 @@ class WIPBottomSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           // Central Icon
           Container(
@@ -76,7 +76,7 @@ class WIPBottomSheet extends StatelessWidget {
             height: 100,
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(KuberShape.medium),
             ),
             child: Icon(
               icon,
@@ -84,19 +84,19 @@ class WIPBottomSheet extends StatelessWidget {
               color: cs.primary,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
 
           // Title
           Text(
             title,
             style: localeFont(
               fontSize: 28,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: cs.onSurface,
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           // Subtitle
           if (subtitle != null)
@@ -104,21 +104,21 @@ class WIPBottomSheet extends StatelessWidget {
               subtitle!.toUpperCase(),
               style: localeFont(
                 fontSize: 14,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w600,
                 color: cs.primary,
                 letterSpacing: 1.5,
               ),
             ),
-          const SizedBox(height: KuberSpacing.xxl),
+          const SizedBox(height: KuberSpace.xxl),
 
           // Description
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            padding: const EdgeInsets.symmetric(horizontal: KuberSpace.lg),
             child: content ?? Text(
               description ?? '',
               textAlign: TextAlign.center,
               style: localeFont(
-                fontSize: 15,
+                fontSize: 16,
                 height: 1.6,
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
@@ -136,14 +136,14 @@ class WIPBottomSheet extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: cs.primary,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.lg),
+                  borderRadius: BorderRadius.circular(KuberShape.medium),
                 ),
               ),
               child: Text(
                 buttonText,
                 style: localeFont(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),

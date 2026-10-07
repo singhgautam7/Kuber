@@ -11,9 +11,8 @@ class DateSeparator extends StatelessWidget {
   final DateTime date;
   const DateSeparator({super.key, required this.date});
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  /// "Today", "Yesterday", a weekday within the week, else "d MMM yyyy".
+  static String labelFor(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -30,16 +29,23 @@ class DateSeparator extends StatelessWidget {
     } else {
       label = DateFormat('d MMM yyyy').format(date);
     }
+    return label;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final label = labelFor(date);
 
     Widget line() =>
-        Expanded(child: Divider(color: cs.outline.withValues(alpha: 0.45)));
+        Expanded(child: Divider(color: cs.outlineVariant.withValues(alpha: 0.45)));
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
+      padding: const EdgeInsets.symmetric(vertical: KuberSpace.md),
       child: Row(children: [
         line(),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: KuberSpace.md),
           child: Text(label,
               style: localeFont(
                   fontSize: 11,

@@ -24,12 +24,12 @@ void showTrialEndingSheet(BuildContext context) {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: context.kuberColors.warningSubtle,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            color: context.kuberMoney.warningContainer,
+            borderRadius: BorderRadius.circular(KuberShape.medium),
           ),
           child: Icon(
             Icons.hourglass_bottom_rounded,
-            color: context.kuberColors.warning,
+            color: context.kuberMoney.warning,
             size: 20,
           ),
         ),

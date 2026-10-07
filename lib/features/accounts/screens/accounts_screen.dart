@@ -27,12 +27,12 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/account_helpers.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../settings/providers/info_provider.dart';
 import '../../settings/providers/settings_provider.dart' show settingsProvider;
 import '../data/account.dart';
@@ -76,6 +76,12 @@ class AccountsScreen extends ConsumerWidget {
     });
 
     return Scaffold(
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: context.l10n.addAccount,
+        onPressed: () => context.push('/accounts/add'),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       body: accountsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -90,12 +96,27 @@ class AccountsScreen extends ConsumerWidget {
   }
 }
 
-class _AccountsBody extends ConsumerWidget {
+class _AccountsBody extends ConsumerStatefulWidget {
   final List<Account> accounts;
   const _AccountsBody({required this.accounts});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AccountsBody> createState() => _AccountsBodyState();
+}
+
+class _AccountsBodyState extends ConsumerState<_AccountsBody> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accounts = widget.accounts;
     // Sum balances. We watch one provider per account; mirrors the existing
     // implementation. With 50+ accounts this should be batched via a single
     // aggregate provider, but that's outside the scope of this design pass.
@@ -123,33 +144,43 @@ class _AccountsBody extends ConsumerWidget {
       settingsProvider.select((s) => s.valueOrNull?.defaultAccountId),
     );
 
+    // Header search: name, type or last 4 digits.
+    final q = _query.trim().toLowerCase();
+    final shown = q.isEmpty
+        ? accounts
+        : [
+            for (final a in accounts)
+              if (a.name.toLowerCase().contains(q) ||
+                  a.type.toLowerCase().contains(q) ||
+                  (a.last4Digits ?? '').contains(q))
+                a,
+          ];
+
     return CustomScrollView(
       slivers: [
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: KuberAppBar(
             showBack: true,
-            showHome: true,
-            title: '',
+            title: sentenceCase(context.l10n.accountsLabel),
             infoConfig: InfoConstants.accounts,
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: KuberPageHeader(
-            title: context.l10n.manageAccounts,
-            description: '',
-            actionTooltip: context.l10n.addAccount,
-            onAction: () => context.push('/accounts/add'),
+            search: accounts.isEmpty
+                ? null
+                : KuberHeaderSearch(
+                    controller: _searchController,
+                    hint: context.l10n.searchAccountsHint,
+                    onChanged: (v) => setState(() => _query = v),
+                  ),
           ),
         ),
 
         // Hero — only when there's something to show
-        if (accounts.isNotEmpty)
+        if (accounts.isNotEmpty && q.isEmpty)
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
+              KuberSpace.screenMargin,
               0,
-              KuberSpacing.lg,
-              KuberSpacing.lg,
+              KuberSpace.screenMargin,
+              KuberSpace.sectionGap,
             ),
             sliver: SliverToBoxAdapter(
               child: NetWorthHeroCard(
@@ -160,54 +191,63 @@ class _AccountsBody extends ConsumerWidget {
             ),
           ),
 
+        if (shown.isEmpty && q.isNotEmpty)
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: KuberEmptyState(
+              icon: Icons.search_off_rounded,
+              title: context.l10n.noMatches,
+              description: context.l10n.noAccountsMatch(_query.trim()),
+            ),
+          )
         // Empty state
-        if (accounts.isEmpty)
+        else if (accounts.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
             child: KuberEmptyState(
               icon: Icons.account_balance_wallet_outlined,
               title: context.l10n.noAccountsYet,
               description: context.l10n.addFirstAccount,
-              actionLabel: context.l10n.addAccount,
-              onAction: () => context.push('/accounts/add'),
             ),
           )
         else
+          // One grouped list with the count in the section header; the
+          // create action is the bottom-centre FAB (board 3.15).
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-            sliver: SliverList.separated(
-              itemCount: accounts.length + 1, // +1 for "Add another"
-              separatorBuilder: (_, i) => SizedBox(
-                height: i == accounts.length - 1
-                    ? KuberSpacing.lg
-                    : KuberSpacing.sm + 2,
+            padding: const EdgeInsets.symmetric(
+              horizontal: KuberSpace.screenMargin,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  KuberSectionHeader(
+                    title: sentenceCase(context.l10n.accountsLabel),
+                    trailing: Text(
+                      '${shown.length}',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  KuberGroup(
+                    children: [
+                      for (final a in shown)
+                        AccountCard(
+                          account: a,
+                          balance: balances[a.id] ?? a.initialBalance,
+                          isDefault: a.id.toString() == defaultId,
+                          onTap: () => _openDetailSheet(context, a),
+                        ),
+                    ],
+                  ),
+                ],
               ),
-              itemBuilder: (ctx, i) {
-                if (i == accounts.length) {
-                  return _AddAnotherAccountChip(
-                    onTap: () => context.push('/accounts/add'),
-                  );
-                }
-                final a = accounts[i];
-                return AccountCard(
-                  account: a,
-                  balance: balances[a.id] ?? a.initialBalance,
-                  isDefault: a.id.toString() == defaultId,
-                  onTap: () => _openDetailSheet(context, a),
-                  onQuickAdd: () {
-                    // TODO: route to AddTransactionScreen with this account
-                    // pre-selected. The simplest hook is to push
-                    // `/add-transaction?accountId=${a.id}` and have
-                    // AddTransactionScreen read that query param.
-                    context.push('/add-transaction?accountId=${a.id}');
-                  },
-                );
-              },
             ),
           ),
 
-        SliverToBoxAdapter(
-          child: SizedBox(height: navBarBottomPadding(context)),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: KuberExtendedFab.clearance),
         ),
       ],
     );
@@ -225,46 +265,6 @@ class _AccountsBody extends ConsumerWidget {
   }
 }
 
-class _AddAnotherAccountChip extends StatelessWidget {
-  final VoidCallback onTap;
-  const _AddAnotherAccountChip({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.lg),
-      child: DottedBorderBox(
-        color: cs.outlineVariant,
-        radius: KuberRadius.lg,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_circle_outline_rounded,
-                size: 18,
-                color: cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Text(
-                context.l10n.addAnotherAccount,
-                style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Cheap dashed-border container that doesn't add a package dependency.
 /// Paints a 1px dashed outline using `CustomPaint` and `PathMetrics`.
 class DottedBorderBox extends StatelessWidget {
@@ -275,7 +275,7 @@ class DottedBorderBox extends StatelessWidget {
     super.key,
     required this.child,
     required this.color,
-    this.radius = KuberRadius.md,
+    this.radius = KuberShape.medium,
   });
 
   @override

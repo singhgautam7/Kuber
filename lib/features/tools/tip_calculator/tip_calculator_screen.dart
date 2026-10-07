@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../widgets/calculator_widgets.dart';
 
@@ -63,24 +62,17 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.tipCalculator,
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
               title: 'Tip Calculator',
-              description: 'Calculate tips quickly',
+              showBack: true,
+              infoConfig: InfoConstants.tipCalculator,
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
+              KuberSpace.lg,
               0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+              KuberSpace.lg,
+              KuberSpace.xl,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
@@ -93,9 +85,9 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                       onChanged: (_) => setState(() {}),
                       formatAsAmount: true,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     const ToolInputLabel('TIP PERCENTAGE'),
-                    const SizedBox(height: KuberSpacing.sm),
+                    const SizedBox(height: KuberSpace.sm),
                     ToolTextField(
                       controller: _tipPctCtrl,
                       suffix: '%',
@@ -107,40 +99,52 @@ class _TipCalculatorScreenState extends ConsumerState<TipCalculatorScreen> {
                       max: 100,
                       divisions: 100,
                       activeColor: cs.primary,
-                      inactiveColor: cs.outline,
+                      inactiveColor: cs.outlineVariant,
                       label: '${_tipPercent.toStringAsFixed(0)}%',
                       onChanged: _onSliderChanged,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('0%',
-                            style: localeFont(
-                                fontSize: 11, color: cs.onSurfaceVariant)),
-                        Text('100%',
-                            style: localeFont(
-                                fontSize: 11, color: cs.onSurfaceVariant)),
+                        Text(
+                          '0%',
+                          style: localeFont(
+                            fontSize: 11,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          '100%',
+                          style: localeFont(
+                            fontSize: 11,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 ToolResultCard(
                   children: result == null
                       ? [const ToolEmptyResult()]
                       : [
                           ToolHeroResult(
                             label: 'Total Amount',
-                            value: formatter.formatCurrency(result.total,
-                                symbol: currency.symbol),
+                            value: formatter.formatCurrency(
+                              result.total,
+                              symbol: currency.symbol,
+                            ),
                             color: cs.primary,
                           ),
-                          const SizedBox(height: KuberSpacing.lg),
+                          const SizedBox(height: KuberSpace.lg),
                           ToolStatRow(
                             label: 'Tip Amount',
-                            value: formatter.formatCurrency(result.tip,
-                                symbol: currency.symbol),
-                            valueColor: cs.tertiary,
+                            value: formatter.formatCurrency(
+                              result.tip,
+                              symbol: currency.symbol,
+                            ),
+                            valueColor: context.kuberMoney.income,
                           ),
                         ],
                 ),

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../engine/analytics_engine_adapter.dart';
 import '../providers/advanced_analytics_provider.dart';
 import 'advanced_analytics_charts.dart';
@@ -23,7 +23,7 @@ class CashFlowSection extends ConsumerWidget {
         const SectionDateRangePicker(
           section: AdvancedAnalyticsSection.cashFlow,
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.lg),
         async.when(
           loading: () => const AnalyticsSkeletonBlock(),
           error: (error, _) => KuberEmptyState(
@@ -56,97 +56,88 @@ class CashFlowSection extends ConsumerWidget {
             );
             String mon(MonthlyAggregate m) => DateFormat('MMM').format(m.month);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            Widget pair(Widget a, Widget b) => Row(
               children: [
-                CashFlowAreaChart(
-                  incomes: months.map((m) => m.income).toList(),
-                  expenses: months.map((m) => m.expense).toList(),
-                  nets: months.map((m) => m.net).toList(),
-                  labels: months.map((m) => m.label).toList(),
-                ),
-                const SizedBox(height: KuberSpacing.md),
-                // 4 primary KPIs, 2 per row.
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatPill(
-                        label: 'Total income',
-                        value: aaMoney(income),
-                        color: cs.tertiary,
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: StatPill(
-                        label: 'Total expense',
-                        value: aaMoney(expense),
-                        color: cs.error,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-                Row(
-                  children: [
-                    Expanded(
-                      child: StatPill(
-                        label: 'Net position',
-                        value: aaMoney(net),
-                        color: net >= 0 ? cs.onSurface : cs.error,
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: StatPill(
-                        label: 'Savings rate',
-                        value: aaPercent(savingsRate),
-                        color: cs.primary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.md),
+                Expanded(child: a),
+                const SizedBox(width: KuberSpace.sm),
+                Expanded(child: b),
+              ],
+            );
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Board "Cash flow": status banner, 2x2 totals, the three
+                // callouts, then the chart and the monthly ledger.
                 _HealthBanner(months: months),
-                const SizedBox(height: KuberSpacing.md),
-                // 3 callouts.
-                Row(
-                  children: [
-                    Expanded(
-                      child: _Callout(
-                        label: 'BEST INCOME',
-                        value: '${mon(bestIncome)} · ${aaMoney(bestIncome.income)}',
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: _Callout(
-                        label: 'BEST SAVINGS',
-                        value:
-                            '${mon(bestSavings)} · ${aaPercent(bestSavings.savingsRate)}',
-                      ),
-                    ),
-                    const SizedBox(width: KuberSpacing.sm),
-                    Expanded(
-                      child: _Callout(
-                        label: 'HIGHEST EXPENSE',
-                        value:
-                            '${mon(highestExpense)} · ${aaMoney(highestExpense.expense)}',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: KuberSpacing.lg),
-                Text(
-                  'MONTHLY LEDGER',
-                  style: localeFont(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.4,
-                    color: cs.onSurfaceVariant,
+                const SizedBox(height: KuberSpace.md),
+                pair(
+                  StatPill(
+                    label: 'Total income',
+                    value: aaMoney(income),
+                    color: context.kuberMoney.income,
+                  ),
+                  StatPill(
+                    label: 'Total expense',
+                    value: aaMoney(expense),
+                    color: context.kuberMoney.expense,
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
+                pair(
+                  StatPill(
+                    label: 'Net position',
+                    value: '${net >= 0 ? '+' : ''}${aaMoney(net)}',
+                    color: net >= 0
+                        ? context.kuberMoney.income
+                        : context.kuberMoney.expense,
+                  ),
+                  StatPill(
+                    label: 'Savings rate',
+                    value: aaPercent(savingsRate),
+                    color: cs.onSurface,
+                  ),
+                ),
+                const SizedBox(height: KuberSpace.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _Callout(
+                        label: 'Best income',
+                        value: mon(bestIncome),
+                        detail: aaMoney(bestIncome.income),
+                      ),
+                    ),
+                    const SizedBox(width: KuberSpace.sm),
+                    Expanded(
+                      child: _Callout(
+                        label: 'Best savings',
+                        value: mon(bestSavings),
+                        detail: aaPercent(bestSavings.savingsRate),
+                      ),
+                    ),
+                    const SizedBox(width: KuberSpace.sm),
+                    Expanded(
+                      child: _Callout(
+                        label: 'Highest expense',
+                        value: mon(highestExpense),
+                        detail: aaMoney(highestExpense.expense),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpace.sectionGap - 4),
+                AnalyticsSectionCard(
+                  title: 'Income and expense',
+                  icon: Icons.ssid_chart_rounded,
+                  child: CashFlowAreaChart(
+                    incomes: months.map((m) => m.income).toList(),
+                    expenses: months.map((m) => m.expense).toList(),
+                    nets: months.map((m) => m.net).toList(),
+                    labels: months.map((m) => m.label).toList(),
+                  ),
+                ),
+                const KuberSectionHeader(title: 'Monthly ledger'),
                 if (months.length <= 1)
                   const KuberEmptyState(
                     icon: Icons.table_rows_rounded,
@@ -172,37 +163,38 @@ class _HealthBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final negative = months.where((m) => m.net < 0).length;
-    final (String label, Color color, IconData icon) = negative == 0
-        ? ('Consistent positive cash flow', cs.tertiary, Icons.check_circle_rounded)
+    final (String label, KuberTone tone, IconData icon) = negative == 0
+        ? (
+            'Consistent positive cash flow',
+            KuberTone.income,
+            Icons.check_circle_rounded,
+          )
         : negative > months.length / 2
-            ? (
-                "You've had months of negative cash flow",
-                cs.error,
-                Icons.error_rounded
-              )
-            : ('Cash flow is variable', context.kuberColors.warning, Icons.info_rounded);
+        ? (
+            "You've had months of negative cash flow",
+            KuberTone.expense,
+            Icons.error_rounded,
+          )
+        : ('Cash flow is variable', KuberTone.warning, Icons.info_rounded);
+    final (bg, fg) = kuberToneColors(context, tone);
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpace.lg,
+        vertical: KuberSpace.md,
       ),
+      decoration: BoxDecoration(color: bg, borderRadius: KuberShape.mediumR),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: KuberSpacing.sm),
+          Icon(icon, size: 18, color: fg),
+          const SizedBox(width: KuberSpace.sm),
           Expanded(
             child: Text(
               label,
-              style: localeFont(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall!.copyWith(color: fg),
             ),
           ),
         ],
@@ -211,48 +203,53 @@ class _HealthBanner extends StatelessWidget {
   }
 }
 
+/// Caps label, the month, and its figure under it, centred.
 class _Callout extends StatelessWidget {
   final String label;
   final String value;
+  final String detail;
 
-  const _Callout({required this.label, required this.value});
+  const _Callout({
+    required this.label,
+    required this.value,
+    required this.detail,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.sm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpace.sm,
+        vertical: KuberSpace.md,
+      ),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: localeFont(
-              fontSize: 8.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
             child: Text(
-              value,
+              label.toUpperCase(),
               maxLines: 1,
-              style: localeFont(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
+              style: tt.labelSmall!.copyWith(
+                letterSpacing: 0.6,
+                color: cs.onSurfaceVariant,
               ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(value, style: tt.titleMedium!.copyWith(color: cs.onSurface)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              detail,
+              maxLines: 1,
+              style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
             ),
           ),
         ],
@@ -302,63 +299,87 @@ class _LedgerTableState extends State<_LedgerTable> {
       }
     });
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        sortColumnIndex: _sortCol,
-        sortAscending: _asc,
-        headingRowColor: WidgetStatePropertyAll(cs.surfaceContainerHigh),
-        columnSpacing: 22,
-        columns: [
-          DataColumn(label: const Text('Month'), onSort: (_, __) => onSort(0)),
-          DataColumn(
-            label: const Text('Income'),
-            numeric: true,
-            onSort: (_, __) => onSort(1),
-          ),
-          DataColumn(
-            label: const Text('Expense'),
-            numeric: true,
-            onSort: (_, __) => onSort(2),
-          ),
-          DataColumn(
-            label: const Text('Net'),
-            numeric: true,
-            onSort: (_, __) => onSort(3),
-          ),
-          DataColumn(
-            label: const Text('Savings'),
-            numeric: true,
-            onSort: (_, __) => onSort(4),
-          ),
-          DataColumn(
-            label: const Text('Count'),
-            numeric: true,
-            onSort: (_, __) => onSort(5),
-          ),
-        ],
-        rows: [
-          for (final m in rows)
-            DataRow(
-              cells: [
-                DataCell(Text(m.label)),
-                DataCell(_amt(aaMoney(m.income), cs.tertiary)),
-                DataCell(_amt(aaMoney(m.expense), cs.error)),
-                DataCell(_amt(
-                  '${m.net >= 0 ? '+' : ''}${aaMoney(m.net)}',
-                  m.net >= 0 ? cs.tertiary : cs.error,
-                )),
-                DataCell(Text(aaPercent(m.savingsRate))),
-                DataCell(Text('${m.transactionCount}')),
-              ],
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          headingTextStyle: Theme.of(
+            context,
+          ).textTheme.labelMedium!.copyWith(color: cs.onSurfaceVariant),
+          dataTextStyle: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: cs.onSurface),
+          dividerThickness: 0.5,
+          sortColumnIndex: _sortCol,
+          sortAscending: _asc,
+          headingRowColor: WidgetStatePropertyAll(cs.surfaceContainerHigh),
+          columnSpacing: 22,
+          columns: [
+            DataColumn(
+              label: const Text('Month'),
+              onSort: (_, __) => onSort(0),
             ),
-        ],
+            DataColumn(
+              label: const Text('Income'),
+              numeric: true,
+              onSort: (_, __) => onSort(1),
+            ),
+            DataColumn(
+              label: const Text('Expense'),
+              numeric: true,
+              onSort: (_, __) => onSort(2),
+            ),
+            DataColumn(
+              label: const Text('Net'),
+              numeric: true,
+              onSort: (_, __) => onSort(3),
+            ),
+            DataColumn(
+              label: const Text('Savings'),
+              numeric: true,
+              onSort: (_, __) => onSort(4),
+            ),
+            DataColumn(
+              label: const Text('Count'),
+              numeric: true,
+              onSort: (_, __) => onSort(5),
+            ),
+          ],
+          rows: [
+            for (final m in rows)
+              DataRow(
+                cells: [
+                  DataCell(Text(m.label)),
+                  DataCell(_amt(aaMoney(m.income), context.kuberMoney.income)),
+                  DataCell(
+                    _amt(aaMoney(m.expense), context.kuberMoney.expense),
+                  ),
+                  DataCell(
+                    _amt(
+                      '${m.net >= 0 ? '+' : ''}${aaMoney(m.net)}',
+                      m.net >= 0
+                          ? context.kuberMoney.income
+                          : context.kuberMoney.expense,
+                    ),
+                  ),
+                  DataCell(Text(aaPercent(m.savingsRate))),
+                  DataCell(Text('${m.transactionCount}')),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _amt(String text, Color color) => Text(
-        text,
-        style: localeFont(color: color, fontWeight: FontWeight.w700),
-      );
+    text,
+    style: Theme.of(context).textTheme.titleSmall!.copyWith(color: color),
+  );
 }

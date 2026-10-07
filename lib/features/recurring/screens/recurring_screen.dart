@@ -1,19 +1,18 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/prefs_keys.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -26,7 +25,14 @@ import '../widgets/recurring_widgets.dart';
 
 final recurringMonthlyCostProvider =
     FutureProvider<
-      ({double net, int activeCount, List<UpcomingCharge> upcoming})
+      ({
+        double net,
+        double income,
+        double expense,
+        int activeCount,
+        int pausedCount,
+        List<UpcomingCharge> upcoming,
+      })
     >((ref) async {
       final rules = await ref.watch(recurringListProvider.future);
       final active = rules
@@ -71,16 +77,33 @@ final recurringMonthlyCostProvider =
 
       return (
         net: netAutomationCost,
+        income: recurringIncome,
+        expense: recurringExpenses,
         activeCount: active.length,
+        pausedCount: rules.where((r) => r.isPaused).length,
         upcoming: upcoming.take(3).toList(),
       );
     });
 
-class RecurringScreen extends ConsumerWidget {
+class RecurringScreen extends ConsumerStatefulWidget {
   const RecurringScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecurringScreen> createState() => _RecurringScreenState();
+}
+
+class _RecurringScreenState extends ConsumerState<RecurringScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final rulesAsync = ref.watch(recurringListProvider);
     final categoryMapAsync = ref.watch(categoryMapProvider);
@@ -103,154 +126,203 @@ class RecurringScreen extends ConsumerWidget {
     );
 
     return Scaffold(
+      floatingActionButton: KuberExtendedFab(
+        icon: Icons.add_rounded,
+        label: context.l10n.addRecurring,
+        onPressed: () => context.push('/recurring/add'),
+      ),
+      floatingActionButtonLocation: kuberFabLocation,
       backgroundColor: cs.surface,
       body: rulesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
-        data: (rules) {
+        error: (e, _) =>
+            Center(child: Text(context.l10n.errorWithDetails(e.toString()))),
+        data: (allRules) {
           final catMap = categoryMapAsync.valueOrNull ?? {};
           final accounts = accountsAsync.valueOrNull ?? [];
+          // Header search: rule name or category name. While searching only
+          // the matching rules show (no hero, no recently processed).
+          final q = _query.trim().toLowerCase();
+          final rules = q.isEmpty
+              ? allRules
+              : [
+                  for (final r in allRules)
+                    if (r.name.toLowerCase().contains(q) ||
+                        (catMap[int.tryParse(r.categoryId)]?.name
+                                .toLowerCase()
+                                .contains(q) ??
+                            false))
+                      r,
+                ];
 
           return CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  showHome: true,
-                  title: '',
+                  title: context.l10n.recurringModule,
                   infoConfig: InfoConstants.recurring,
+                  search: allRules.isEmpty
+                      ? null
+                      : KuberHeaderSearch(
+                          controller: _searchController,
+                          hint: context.l10n.searchRecurringHint,
+                          onChanged: (v) => setState(() => _query = v),
+                        ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: KuberPageHeader(
-                  title: context.l10n.recurringTitle,
-                  description: '',
-                  actionTooltip: context.l10n.addRecurring,
-                  onAction: () => context.push('/recurring/add'),
-                ),
-              ),
-              if (rules.isEmpty)
+
+              if (rules.isEmpty && q.isNotEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: KuberEmptyState(
+                    icon: Icons.search_off_rounded,
+                    title: context.l10n.noMatches,
+                    description: context.l10n.nothingMatchesQuery(
+                      _query.trim(),
+                    ),
+                  ),
+                )
+              else if (rules.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: KuberEmptyState(
                     icon: Icons.repeat_rounded,
                     title: context.l10n.noRecurring,
                     description: context.l10n.recurringEmptyDesc,
-                    actionLabel: context.l10n.addRecurring,
-                    onAction: () => context.push('/recurring/add'),
                   ),
                 )
               else
                 SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    KuberSpacing.lg,
+                  padding: const EdgeInsets.fromLTRB(
+                    KuberSpace.screenMargin,
                     0,
-                    KuberSpacing.lg,
-                    navBarBottomPadding(context) + KuberSpacing.lg,
+                    KuberSpace.screenMargin,
+                    KuberExtendedFab.clearance,
                   ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      ref
-                          .watch(recurringMonthlyCostProvider)
-                          .when(
-                            data: (summary) => RecurringHero(
-                              monthlyNet: summary.net,
-                              activeCount: summary.activeCount,
-                              upcoming: summary.upcoming,
+                      if (q.isEmpty) ...[
+                        ref
+                            .watch(recurringMonthlyCostProvider)
+                            .when(
+                              data: (summary) => RecurringHero(
+                                monthlyIncome: summary.income,
+                                monthlyExpense: summary.expense,
+                                activeCount: summary.activeCount,
+                                pausedCount: summary.pausedCount,
+                              ),
+                              loading: () => const SizedBox(
+                                height: 180,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                              error: (_, __) => const SizedBox.shrink(),
                             ),
-                            loading: () => const SizedBox(
-                              height: 180,
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                            error: (_, __) => const SizedBox.shrink(),
-                          ),
-                      const SizedBox(height: KuberSpacing.lg),
-                      _SectionLabel(context.l10n.rulesUpper),
-                      const SizedBox(height: KuberSpacing.sm),
-                      ...rules.map((rule) {
-                        final catId = int.tryParse(rule.categoryId);
-                        final cat = catId != null ? catMap[catId] : null;
-                        final accountName = accounts
-                            .where((a) => a.id.toString() == rule.accountId)
-                            .firstOrNull
-                            ?.name;
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: KuberSpacing.sm,
-                          ),
-                          child: RecurringRuleCard(
-                            ruleName: rule.name,
-                            frequencyLabel: _frequencyLabelLocalized(context, rule.frequency),
-                            accountName: accountName,
-                            icon: cat != null
-                                ? IconMapper.fromString(cat.icon)
-                                : Icons.category_outlined,
-                            iconColor: cat != null
-                                ? harmonizeCategory(
-                                    context,
-                                    Color(cat.colorValue),
-                                  )
-                                : cs.primary,
-                            amount: rule.type == 'expense'
-                                ? -rule.amount
-                                : rule.amount,
-                            nextChargeOn: rule.nextDueAt,
-                            onTap: () =>
-                                showRecurringDetailSheet(context, ref, rule),
-                          ),
-                        );
-                      }),
-                      recentlyProcessedAsync.when(
-                        data: (transactions) {
-                          if (transactions.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: KuberSpacing.lg),
-                              _SectionLabel(context.l10n.recentlyProcessed),
-                              const SizedBox(height: KuberSpacing.sm),
-                              ...transactions.map((t) {
-                                final catId = int.tryParse(t.categoryId);
-                                final cat = catId != null
-                                    ? catMap[catId]
-                                    : null;
-                                final accountName = accounts
-                                    .where(
-                                      (a) => a.id.toString() == t.accountId,
-                                    )
-                                    .firstOrNull
-                                    ?.name;
-                                return RecurringProcessedRow(
-                                  ruleName: t.name,
-                                  accountName: accountName,
-                                  processedAt: t.createdAt,
-                                  icon: cat != null
-                                      ? IconMapper.fromString(cat.icon)
-                                      : Icons.category_outlined,
-                                  iconColor: cat != null
-                                      ? harmonizeCategory(
-                                          context,
-                                          Color(cat.colorValue),
-                                        )
-                                      : cs.primary,
-                                  amount: t.type == 'expense'
-                                      ? -t.amount
-                                      : t.amount,
-                                  onTap: () => showTransactionDetailSheet(
-                                    context,
-                                    ref,
-                                    t,
-                                  ),
-                                );
-                              }),
-                            ],
-                          );
-                        },
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
+                        const SizedBox(height: KuberSpace.sectionGap),
+                      ],
+                      KuberSectionHeader(title: context.l10n.rulesUpper),
+                      KuberGroup(
+                        children: [
+                          ...rules.map((rule) {
+                            final catId = int.tryParse(rule.categoryId);
+                            final cat = catId != null ? catMap[catId] : null;
+                            final accountName = accounts
+                                .where((a) => a.id.toString() == rule.accountId)
+                                .firstOrNull
+                                ?.name;
+                            // Paused rules stay in the list at 50% (board 3.19).
+                            return Opacity(
+                              opacity: rule.isPaused ? 0.5 : 1,
+                              child: RecurringRuleCard(
+                                ruleName: rule.name,
+                                frequencyLabel: _frequencyLabelLocalized(
+                                  context,
+                                  rule.frequency,
+                                ),
+                                accountName: accountName,
+                                icon: cat != null
+                                    ? IconMapper.fromString(cat.icon)
+                                    : Icons.category_outlined,
+                                iconColor: cat != null
+                                    ? harmonizeCategory(
+                                        context,
+                                        Color(cat.colorValue),
+                                      )
+                                    : cs.primary,
+                                amount: rule.type == 'expense'
+                                    ? -rule.amount
+                                    : rule.amount,
+                                nextChargeOn: rule.nextDueAt,
+                                onTap: () => showRecurringDetailSheet(
+                                  context,
+                                  ref,
+                                  rule,
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
                       ),
+                      if (q.isEmpty)
+                        recentlyProcessedAsync.when(
+                          data: (transactions) {
+                            if (transactions.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: KuberSpace.sectionGap),
+                                KuberSectionHeader(
+                                  title: context.l10n.recentlyProcessed,
+                                ),
+                                KuberGroup(
+                                  children: [
+                                    ...transactions.map((t) {
+                                      final catId = int.tryParse(t.categoryId);
+                                      final cat = catId != null
+                                          ? catMap[catId]
+                                          : null;
+                                      final accountName = accounts
+                                          .where(
+                                            (a) =>
+                                                a.id.toString() == t.accountId,
+                                          )
+                                          .firstOrNull
+                                          ?.name;
+                                      return RecurringProcessedRow(
+                                        ruleName: t.name,
+                                        accountName: accountName,
+                                        processedAt: t.createdAt,
+                                        icon: cat != null
+                                            ? IconMapper.fromString(cat.icon)
+                                            : Icons.category_outlined,
+                                        iconColor: cat != null
+                                            ? harmonizeCategory(
+                                                context,
+                                                Color(cat.colorValue),
+                                              )
+                                            : cs.primary,
+                                        amount: t.type == 'expense'
+                                            ? -t.amount
+                                            : t.amount,
+                                        onTap: () => showTransactionDetailSheet(
+                                          context,
+                                          ref,
+                                          t,
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ],
+                            );
+                          },
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
                     ]),
                   ),
                 ),
@@ -260,7 +332,6 @@ class RecurringScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 String _frequencyLabelLocalized(BuildContext context, String frequency) {
@@ -275,23 +346,4 @@ String _frequencyLabelLocalized(BuildContext context, String frequency) {
     _ => l.freqMonthly,
   };
   return label.toUpperCase();
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String label;
-  const _SectionLabel(this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Text(
-      label,
-      style: localeFont(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: cs.onSurfaceVariant,
-        letterSpacing: 1.0,
-      ),
-    );
-  }
 }

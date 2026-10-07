@@ -5,7 +5,11 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../tool_catalog.dart';
@@ -43,8 +47,10 @@ class _SavedCalculationsScreenState
       builder: (ctx) {
         final cs = Theme.of(ctx).colorScheme;
         return AlertDialog(
-          title: Text('Delete $count calculation${count == 1 ? '' : 's'}?',
-              style: localeFont(fontWeight: FontWeight.w700)),
+          title: Text(
+            'Delete $count calculation${count == 1 ? '' : 's'}?',
+            style: localeFont(fontWeight: FontWeight.w700),
+          ),
           content: Text(
             'This cannot be undone.',
             style: localeFont(color: cs.onSurfaceVariant),
@@ -68,7 +74,10 @@ class _SavedCalculationsScreenState
         .read(savedCalculationsProvider.notifier)
         .deleteMany(_selected.toList());
     if (!mounted) return;
-    showKuberSnackBar(context, 'Deleted $count calculation${count == 1 ? '' : 's'}.');
+    showKuberSnackBar(
+      context,
+      'Deleted $count calculation${count == 1 ? '' : 's'}.',
+    );
     _clearSelection();
   }
 
@@ -80,8 +89,9 @@ class _SavedCalculationsScreenState
 
     // Fall back to "all" when the selected tool no longer has saves (e.g. its
     // last calc was deleted). Derived locally — never mutate state in build().
-    final effectiveFilter =
-        (_filter != 'all' && !tools.contains(_filter)) ? 'all' : _filter;
+    final effectiveFilter = (_filter != 'all' && !tools.contains(_filter))
+        ? 'all'
+        : _filter;
 
     return PopScope(
       // While selecting, the system/back gesture cancels the selection instead
@@ -91,185 +101,122 @@ class _SavedCalculationsScreenState
         if (!didPop) _clearSelection();
       },
       child: Scaffold(
-      backgroundColor: cs.surface,
-      // History-style multi-select bar (KuberAppBar stays untouched).
-      bottomNavigationBar: _selecting
-          ? _SelectionBar(
-              count: _selected.length,
-              onCancel: _clearSelection,
-              onDelete: _confirmDelete,
-            )
-          : null,
-      body: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
-        child: CustomScrollView(
-          slivers: [
-          SliverToBoxAdapter(
-            child: KuberAppBar(
-              title: 'Saved Calculations',
-              showBack: true,
-              onBack: _selecting ? _clearSelection : null,
-            ),
-          ),
-          ...async.when(
-            loading: () => [
-              const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+        backgroundColor: cs.surface,
+        body: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+          child: CustomScrollView(
+            slivers: [
+              // Selecting swaps in the one-line contextual header.
+              SliverToBoxAdapter(
+                child: _selecting
+                    ? KuberAppBar(
+                        title: '${_selected.length} selected',
+                        showBack: true,
+                        closeIcon: true,
+                        background: cs.surfaceContainer,
+                        onBack: _clearSelection,
+                        actions: [
+                          AppIconButton(
+                            icon: Icons.delete_outline_rounded,
+                            kind: AppIconButtonKind.danger,
+                            semanticLabel: 'Delete',
+                            onPressed: _confirmDelete,
+                          ),
+                        ],
+                      )
+                    : const KuberAppBar(
+                        title: 'Saved Calculations',
+                        showBack: true,
+                      ),
               ),
-            ],
-            error: (e, _) => [
-              SliverFillRemaining(
-                child: Center(
-                  child: Text('Could not load saved calculations',
-                      style: localeFont(color: cs.onSurfaceVariant)),
-                ),
-              ),
-            ],
-            data: (list) {
-              if (list.isEmpty) {
-                return [
+              ...async.when(
+                loading: () => [
                   const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Padding(
-                      padding: EdgeInsets.all(KuberSpacing.xl),
-                      child: KuberEmptyState(
-                        icon: Icons.bookmark_border_rounded,
-                        title: 'No saved calculations yet',
-                        description:
-                            'Save calculations from any tool to revisit them later.',
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ],
+                error: (e, _) => [
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Text(
+                        'Could not load saved calculations',
+                        style: localeFont(color: cs.onSurfaceVariant),
                       ),
                     ),
                   ),
-                ];
-              }
-              final filtered = effectiveFilter == 'all'
-                  ? list
-                  : list.where((c) => c.tool == effectiveFilter).toList();
-              return [
-                SliverToBoxAdapter(
-                  child: _FilterChips(
-                    tools: tools,
-                    selected: effectiveFilter,
-                    onSelect: (f) => setState(() => _filter = f),
-                  ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(KuberSpacing.lg, 0,
-                      KuberSpacing.lg, KuberSpacing.xl),
-                  sliver: SliverList.separated(
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: KuberSpacing.sm),
-                    itemBuilder: (context, i) {
-                      final c = filtered[i];
-                      return _SavedCard(
-                        calc: c,
-                        selected: _selected.contains(c.id),
-                        selecting: _selecting,
-                        onTap: () {
-                          if (_selecting) {
-                            _toggle(c.id);
-                          } else {
-                            context.push(
-                                '/more/tools/${c.tool}?savedId=${c.id}');
-                          }
-                        },
-                        onLongPress: () => _toggle(c.id),
-                      );
-                    },
-                  ),
-                ),
-              ];
-            },
-          ),
-          ],
-        ),
-      ),
-      ),
-    );
-  }
-}
-
-/// History-style bottom multi-select bar: Cancel · count · Delete.
-class _SelectionBar extends StatelessWidget {
-  final int count;
-  final VoidCallback onCancel;
-  final VoidCallback onDelete;
-  const _SelectionBar({
-    required this.count,
-    required this.onCancel,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Material(
-      elevation: 8,
-      color: cs.surfaceContainerHigh,
-      child: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.sm, vertical: KuberSpacing.md),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: cs.outline)),
-          ),
-          child: Row(
-            children: [
-              _BarButton(
-                icon: Icons.close_rounded,
-                color: cs.onSurface,
-                borderColor: cs.outline.withValues(alpha: 0.3),
-                onTap: onCancel,
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Expanded(
-                child: Text(
-                  '$count selected',
-                  style: localeFont(
-                      fontWeight: FontWeight.w700, color: cs.onSurface),
-                ),
-              ),
-              _BarButton(
-                icon: Icons.delete_outline_rounded,
-                color: cs.error,
-                borderColor: cs.error.withValues(alpha: 0.5),
-                onTap: onDelete,
+                ],
+                data: (list) {
+                  if (list.isEmpty) {
+                    return [
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Padding(
+                          padding: EdgeInsets.all(KuberSpace.xl),
+                          child: KuberEmptyState(
+                            icon: Icons.bookmark_border_rounded,
+                            title: 'No saved calculations yet',
+                            description:
+                                'Save calculations from any tool to revisit them later.',
+                          ),
+                        ),
+                      ),
+                    ];
+                  }
+                  final filtered = effectiveFilter == 'all'
+                      ? list
+                      : list.where((c) => c.tool == effectiveFilter).toList();
+                  return [
+                    SliverToBoxAdapter(
+                      child: _FilterChips(
+                        tools: tools,
+                        selected: effectiveFilter,
+                        onSelect: (f) => setState(() => _filter = f),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin,
+                        0,
+                        KuberSpace.screenMargin,
+                        KuberSpace.xl,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            KuberSectionHeader(
+                              title: '${filtered.length} saved',
+                            ),
+                            KuberGroup(
+                              children: [
+                                for (final c in filtered)
+                                  _SavedCard(
+                                    calc: c,
+                                    selected: _selected.contains(c.id),
+                                    selecting: _selecting,
+                                    onTap: () {
+                                      if (_selecting) {
+                                        _toggle(c.id);
+                                      } else {
+                                        context.push(
+                                          '/more/tools/${c.tool}?savedId=${c.id}',
+                                        );
+                                      }
+                                    },
+                                    onLongPress: () => _toggle(c.id),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ];
+                },
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BarButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final Color borderColor;
-  final VoidCallback onTap;
-  const _BarButton({
-    required this.icon,
-    required this.color,
-    required this.borderColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: borderColor),
-        ),
-        child: Icon(icon, size: 18, color: color),
       ),
     );
   }
@@ -280,8 +227,11 @@ class _FilterChips extends StatelessWidget {
   final String selected;
   final ValueChanged<String> onSelect;
 
-  const _FilterChips(
-      {required this.tools, required this.selected, required this.onSelect});
+  const _FilterChips({
+    required this.tools,
+    required this.selected,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -290,52 +240,24 @@ class _FilterChips extends StatelessWidget {
       for (final t in tools) (t, ToolCatalog.byKey(t)?.name ?? t),
     ];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.md),
-      child: Wrap(
-        spacing: KuberSpacing.sm,
-        runSpacing: KuberSpacing.sm,
-        children: [
-          for (final e in entries)
-            _Pill(
-              label: e.$2,
-              selected: selected == e.$1,
-              onTap: () => onSelect(e.$1),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Pill extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _Pill({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.full),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.12)
-              : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.full),
-          border: Border.all(color: selected ? cs.primary : cs.outline),
-        ),
-        child: Text(
-          label,
-          style: localeFont(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: selected ? cs.primary : cs.onSurfaceVariant,
+      padding: const EdgeInsets.only(bottom: KuberSpace.lg),
+      child: SizedBox(
+        height: 32,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpace.screenMargin,
           ),
+          children: [
+            for (final (i, e) in entries.indexed) ...[
+              if (i > 0) const SizedBox(width: KuberSpace.sm),
+              KuberChip(
+                label: e.$2,
+                selected: selected == e.$1,
+                onTap: () => onSelect(e.$1),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -361,83 +283,37 @@ class _SavedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final meta = ToolCatalog.byKey(calc.tool);
-    final accent = meta?.accent ?? cs.primary;
-    final dateStr =
-        'SAVED ${DateFormat('dd MMM yyyy').format(calc.updatedAt).toUpperCase()}';
+    final tones = categoryTones(context, meta?.accent ?? cs.primary);
+    final now = DateTime.now();
+    final dateStr = DateFormat(
+      calc.updatedAt.year == now.year ? 'MMM d' : 'MMM d, y',
+    ).format(calc.updatedAt);
 
-    return InkWell(
+    return KuberListRow(
+      selected: selected,
       onTap: onTap,
       onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
+      leading: Container(
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.06)
-              : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: selected ? cs.primary : cs.outline),
+          color: selected ? cs.primary : tones.container,
+          borderRadius: KuberShape.mediumR,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: accent.withValues(alpha: 0.18)),
-              ),
-              alignment: Alignment.center,
-              child: Icon(meta?.icon ?? Icons.calculate_rounded,
-                  color: accent, size: 19),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    calc.name,
-                    style: localeFont(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    calc.summary,
-                    style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    dateStr,
-                    style: localeFont(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Icon(
-              selecting
-                  ? (selected
-                      ? Icons.check_circle_rounded
-                      : Icons.circle_outlined)
-                  : Icons.chevron_right_rounded,
-              size: selecting ? 20 : 18,
-              color: selected ? cs.primary : cs.onSurfaceVariant,
-            ),
-          ],
+        child: Icon(
+          selected
+              ? Icons.check_rounded
+              : (meta?.icon ?? Icons.calculate_rounded),
+          color: selected ? cs.onPrimary : tones.fg,
+          size: 20,
+        ),
+      ),
+      title: calc.name,
+      subtitle: calc.summary,
+      trailing: Text(
+        dateStr,
+        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+          color: selected ? cs.onSecondaryContainer : cs.onSurfaceVariant,
         ),
       ),
     );

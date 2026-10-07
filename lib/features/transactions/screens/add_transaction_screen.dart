@@ -1,15 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../core/services/attachment_service.dart';
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../core/utils/account_helpers.dart';
-import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../core/utils/transfer_helpers.dart';
 import '../../accounts/data/account.dart';
@@ -214,7 +214,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Color get _typeColor {
     final cs = Theme.of(context).colorScheme;
     if (_type == 'transfer') return cs.primary;
-    return _type == 'income' ? cs.tertiary : cs.error;
+    return _type == 'income'
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
   }
 
   // ── Build ──────────────────────────────────────────────────────────────────
@@ -255,51 +257,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          _isEditing
-              ? (_type == 'transfer'
-                    ? context.l10n.editTransfer
-                    : context.l10n.editTransaction)
-              : context.l10n.addTransaction,
-          style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-        // Add-mode only: an overflow to pin the Add Transaction shortcut to the
-        // home screen. Hidden while editing an existing transaction.
-        actions: _isEditing
-            ? null
-            : [
-                PopupMenuButton<int>(
-                  icon: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant),
-                  color: cs.surfaceContainerHigh,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    side: BorderSide(color: cs.outline),
-                  ),
-                  onSelected: (_) =>
-                      requestPinShortcut(context, _kAddTxnPinSpec),
-                  itemBuilder: (context) => [
-                    PopupMenuItem<int>(
-                      value: 0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.add_to_home_screen_rounded,
-                              size: 18, color: cs.onSurfaceVariant),
-                          const SizedBox(width: 10),
-                          Text('Add to home screen',
-                              style: localeFont(fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+      // Full-screen form header (board 3.4): close, title, overflow with
+      // "Add to home screen" in add mode only.
+      appBar: KuberAppBar(
+        showBack: true,
+        closeIcon: true,
+        onBack: () => context.pop(),
+        title: _isEditing
+            ? (_type == 'transfer'
+                  ? context.l10n.editTransfer
+                  : context.l10n.editTransaction)
+            : context.l10n.addTransaction,
+        pinShortcut: _isEditing ? null : _kAddTxnPinSpec,
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -310,14 +279,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               child: SingleChildScrollView(
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
+                padding: const EdgeInsets.fromLTRB(
+                  KuberSpace.screenMargin,
+                  KuberSpace.xs,
+                  KuberSpace.screenMargin,
+                  KuberSpace.xl,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: KuberSpacing.lg),
-
                     // Type segmented button
                     TransactionTypeSelector(
                       key: TutorialStepKeys.transactionTypeToggle,
@@ -325,14 +295,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                       onSelected: _onTypeChanged,
                       enabled: !_isEditing,
                     ),
-                    const SizedBox(height: KuberSpacing.xl),
+                    const SizedBox(height: KuberSpace.lg),
 
                     if (_type == 'transfer')
                       _buildTransferForm(cs, textTheme, accounts)
                     else ...[
                       // Name field with autocomplete
                       _buildAutocompleteField(cs, textTheme),
-                      const SizedBox(height: KuberSpacing.xl),
+                      const SizedBox(height: KuberSpace.sm),
 
                       // Amount input
                       AmountInput(
@@ -340,17 +310,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         controller: _amountController,
                         amountColor: _typeColor,
                       ),
-                      const SizedBox(height: KuberSpacing.lg),
+                      const SizedBox(height: KuberSpace.lg),
 
                       // Category + Account selector tiles
                       _buildCategoryAccountRow(cs, categoryMap, accounts),
                       if (_selectedCategoryId != null) ...[
-                        const SizedBox(height: KuberSpacing.md),
+                        const SizedBox(height: KuberSpace.md),
                         BudgetProgressIndicator(
                           categoryId: _selectedCategoryId!.toString(),
                         ),
                       ],
-                      const SizedBox(height: KuberSpacing.md),
+                      const SizedBox(height: KuberSpace.lg),
 
                       // Shared form fields
                       ..._buildSharedFormFields(showNotesPrefixIcon: false),
@@ -367,7 +337,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                         fullWidth: true,
                         onPressed: () => _save(keepOpen: true),
                       ),
-                      const SizedBox(height: KuberSpacing.lg),
                     ],
                   ],
                 ),
@@ -385,32 +354,34 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   /// Shared form fields: Date, Tags, Notes, Attachments.
   /// Used by both normal and transfer forms.
   List<Widget> _buildSharedFormFields({required bool showNotesPrefixIcon}) {
+    // Date, Tags and Attachments as one grouped list of navigation rows, then
+    // the note field (board 3.4, density-audit: 5 tiles -> 1 group).
     return [
-      DateTimeTile(selectedDate: _selectedDate, onTap: _pickDate),
-      const SizedBox(height: KuberSpacing.md),
-
-      TagsTile(
-        key: TutorialStepKeys.tagsPicker,
-        selectedTags: _selectedTags,
-        onTap: _showTagSelector,
+      KuberGroup(
+        children: [
+          DateTimeTile(selectedDate: _selectedDate, onTap: _pickDate),
+          TagsTile(
+            key: TutorialStepKeys.tagsPicker,
+            selectedTags: _selectedTags,
+            onTap: _showTagSelector,
+          ),
+          AttachmentsSection(
+            displayPaths: _displayPaths,
+            canAdd: _totalAttachmentCount < 5,
+            onFileAdded: (path) =>
+                setState(() => _pendingAttachments.add(path)),
+            onFileRemoved: _removeAttachment,
+          ),
+        ],
       ),
-      const SizedBox(height: KuberSpacing.md),
-
+      const SizedBox(height: KuberSpace.lg),
       NotesField(
         key: TutorialStepKeys.notesField,
         controller: _notesController,
         focusNode: showNotesPrefixIcon ? null : _notesFocusNode,
         showPrefixIcon: showNotesPrefixIcon,
       ),
-      const SizedBox(height: KuberSpacing.md),
-
-      AttachmentsSection(
-        displayPaths: _displayPaths,
-        canAdd: _totalAttachmentCount < 5,
-        onFileAdded: (path) => setState(() => _pendingAttachments.add(path)),
-        onFileRemoved: _removeAttachment,
-      ),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.lg),
     ];
   }
 
@@ -437,15 +408,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     Color bgColor;
     Color txtColor;
+    // Subtype badge colours (board 3.4): CC payment income container, CC
+    // withdrawal expense container, CC transfer warning container.
+    final money = context.kuberMoney;
     if (subtype == TransferSubtype.creditCardPayment) {
-      bgColor = cs.tertiary.withValues(alpha: 0.15);
-      txtColor = cs.tertiary;
+      bgColor = money.incomeContainer;
+      txtColor = money.onIncomeContainer;
     } else if (subtype == TransferSubtype.creditCardWithdrawal) {
-      bgColor = cs.error.withValues(alpha: 0.15);
-      txtColor = cs.error;
+      bgColor = money.expenseContainer;
+      txtColor = money.onExpenseContainer;
     } else if (subtype == TransferSubtype.creditCardTransfer) {
-      bgColor = context.kuberColors.warning.withValues(alpha: 0.15);
-      txtColor = context.kuberColors.warning;
+      bgColor = money.warningContainer;
+      txtColor = money.onWarningContainer;
     } else {
       bgColor = cs.primaryContainer;
       txtColor = cs.onPrimaryContainer;
@@ -460,28 +434,24 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           child: subtype != null && subtype != TransferSubtype.normalTransfer
               ? Container(
                   key: ValueKey(subtype),
-                  margin: const EdgeInsets.only(top: KuberSpacing.xl),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.md,
-                    vertical: KuberSpacing.sm,
+                    horizontal: KuberSpace.md,
+                    vertical: KuberSpace.sm,
                   ),
                   decoration: BoxDecoration(
                     color: bgColor,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: KuberShape.mediumR,
                   ),
                   child: Text(
                     transferSubtypeLabel(context.l10n, subtype),
-                    style: textTheme.labelMedium?.copyWith(
-                      color: txtColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textTheme.labelLarge?.copyWith(color: txtColor),
                     textAlign: TextAlign.center,
                   ),
                 )
               : const SizedBox.shrink(key: ValueKey('empty')),
         ),
         if (subtype != null && subtype != TransferSubtype.normalTransfer)
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
         // Amount input (shared widget)
         AmountInput(
@@ -490,56 +460,61 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           focusNode: _amountFocusNode,
           amountColor: cs.onSurface,
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
 
-        // FROM Account tile
-        TransferAccountTile(
-          label: context.l10n.fromAccount,
-          account: fromAccount,
-          onTap: () => _showTransferAccountPicker(
-            isFrom: true,
-            excludeId: _selectedToAccountId,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.sm),
-
-        // Swap button
-        Center(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                final temp = _selectedFromAccountId;
-                _selectedFromAccountId = _selectedToAccountId;
-                _selectedToAccountId = temp;
-              });
-            },
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: cs.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.swap_vert_rounded,
-                color: cs.onPrimary,
-                size: 22,
+        // From / To in one grouped list, the swap button sitting on the
+        // divider between them (board 3.4).
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            KuberGroup(
+              children: [
+                TransferAccountTile(
+                  label: context.l10n.fromAccount,
+                  account: fromAccount,
+                  onTap: () => _showTransferAccountPicker(
+                    isFrom: true,
+                    excludeId: _selectedToAccountId,
+                  ),
+                ),
+                TransferAccountTile(
+                  label: context.l10n.toAccount,
+                  account: toAccount,
+                  onTap: () => _showTransferAccountPicker(
+                    isFrom: false,
+                    excludeId: _selectedFromAccountId,
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              right: 56,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    final temp = _selectedFromAccountId;
+                    _selectedFromAccountId = _selectedToAccountId;
+                    _selectedToAccountId = temp;
+                  });
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: cs.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.swap_vert_rounded,
+                    color: cs.onPrimary,
+                    size: 22,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: KuberSpacing.sm),
-
-        // TO Account tile
-        TransferAccountTile(
-          label: context.l10n.toAccount,
-          account: toAccount,
-          onTap: () => _showTransferAccountPicker(
-            isFrom: false,
-            excludeId: _selectedFromAccountId,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.lg),
 
         // Shared form fields (date, tags, notes, attachments)
         ..._buildSharedFormFields(showNotesPrefixIcon: true),
@@ -609,8 +584,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       children: [
         Expanded(
           child: categoryMap.when(
-            loading: () => _buildSelectorTilePlaceholder(context.l10n.categoryUpper),
-            error: (_, _) => _buildSelectorTilePlaceholder(context.l10n.categoryUpper),
+            loading: () =>
+                _buildSelectorTilePlaceholder(context.l10n.categoryUpper),
+            error: (_, _) =>
+                _buildSelectorTilePlaceholder(context.l10n.categoryUpper),
             data: (catMap) {
               final cat = _selectedCategoryId != null
                   ? catMap[_selectedCategoryId]
@@ -622,19 +599,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ? IconMapper.fromString(cat.icon)
                     : Icons.category_outlined,
                 value: cat?.name ?? context.l10n.selectLabel,
+                isPlaceholder: cat == null,
                 iconColor: cat != null
-                    ? harmonizeCategory(context, Color(cat.colorValue))
+                    ? Color(cat.colorValue)
                     : cs.onSurfaceVariant,
                 onTap: () => _showCategoryPicker(),
               );
             },
           ),
         ),
-        const SizedBox(width: KuberSpacing.md),
+        const SizedBox(width: KuberSpace.md),
         Expanded(
           child: accounts.when(
-            loading: () => _buildSelectorTilePlaceholder(context.l10n.fromAccount),
-            error: (_, _) => _buildSelectorTilePlaceholder(context.l10n.fromAccount),
+            loading: () =>
+                _buildSelectorTilePlaceholder(context.l10n.fromAccount),
+            error: (_, _) =>
+                _buildSelectorTilePlaceholder(context.l10n.fromAccount),
             data: (accs) {
               final acc = _selectedAccountId != null
                   ? accs.where((a) => a.id == _selectedAccountId).firstOrNull
@@ -646,6 +626,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     ? resolveAccountIcon(acc)
                     : Icons.account_balance_wallet_outlined,
                 value: acc?.name ?? context.l10n.selectLabel,
+                isPlaceholder: acc == null,
                 iconColor: acc != null
                     ? resolveAccountColor(acc)
                     : cs.onSurfaceVariant,
@@ -663,14 +644,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Widget _buildSaveButton(ColorScheme cs) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.md,
-        KuberSpacing.lg,
-        MediaQuery.of(context).viewPadding.bottom + KuberSpacing.lg,
+        KuberSpace.screenMargin,
+        KuberSpace.md,
+        KuberSpace.screenMargin,
+        MediaQuery.of(context).viewPadding.bottom + KuberSpace.xl,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outline)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: AppButton(
         label: _isEditing
@@ -697,6 +678,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       label: label,
       icon: Icons.hourglass_empty,
       value: '...',
+      isPlaceholder: true,
       iconColor: cs.onSurfaceVariant,
       onTap: () {},
     );
@@ -711,12 +693,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
+      backgroundColor: cs.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: KuberShape.sheetR),
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: _selectedCategoryId,
         defaultType: _type == 'transfer' ? null : _type,
@@ -739,12 +717,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
+      backgroundColor: cs.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: KuberShape.sheetR),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: _selectedAccountId,
         onSelected: (id) {
@@ -766,12 +740,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-      ),
+      backgroundColor: cs.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: KuberShape.sheetR),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: isFrom
             ? _selectedFromAccountId
@@ -840,7 +810,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
+          top: Radius.circular(KuberShape.extraLarge),
         ),
       ),
       builder: (_) => TagSelectorBottomSheet(
@@ -930,11 +900,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     );
 
     if (name.isEmpty) {
-      showKuberSnackBar(
-        context,
-        l10n.enterTransactionName,
-        isError: true,
-      );
+      showKuberSnackBar(context, l10n.enterTransactionName, isError: true);
       return;
     }
     if (amount == null || amount <= 0) {
@@ -1019,10 +985,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         'Transaction added',
         actionLabel: 'Mark reminder done',
         onAction: () {
-          ref
-              .read(remindersRepositoryProvider)
-              .markDone(reminderId)
-              .ignore();
+          ref.read(remindersRepositoryProvider).markDone(reminderId).ignore();
         },
       );
     } else {
@@ -1059,27 +1022,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       return;
     }
     if (_selectedFromAccountId == null) {
-      showKuberSnackBar(
-        context,
-        l10n.selectSourceAccount,
-        isError: true,
-      );
+      showKuberSnackBar(context, l10n.selectSourceAccount, isError: true);
       return;
     }
     if (_selectedToAccountId == null) {
-      showKuberSnackBar(
-        context,
-        l10n.selectDestinationAccount,
-        isError: true,
-      );
+      showKuberSnackBar(context, l10n.selectDestinationAccount, isError: true);
       return;
     }
     if (_selectedFromAccountId == _selectedToAccountId) {
-      showKuberSnackBar(
-        context,
-        l10n.accountsMustDiffer,
-        isError: true,
-      );
+      showKuberSnackBar(context, l10n.accountsMustDiffer, isError: true);
       return;
     }
 

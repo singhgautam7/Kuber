@@ -32,16 +32,16 @@ class KuberEmptyState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
+                color: cs.secondaryContainer,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
-                color: cs.primary,
+                color: cs.onSecondaryContainer,
                 size: 32,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: KuberSpace.md),
             Text(
               title,
               style: localeFont(
@@ -51,30 +51,19 @@ class KuberEmptyState extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: KuberSpace.xs),
             Text(
               description,
               style: localeFont(
-                fontSize: 13,
+                fontSize: 14,
                 color: cs.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
             if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: KuberSpace.md),
               FilledButton.icon(
                 onPressed: onAction,
-                style: FilledButton.styleFrom(
-                  backgroundColor: cs.primary,
-                  foregroundColor: cs.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
                 icon: const Icon(Icons.add_rounded, size: 20),
                 label: Text(
                   actionLabel!,

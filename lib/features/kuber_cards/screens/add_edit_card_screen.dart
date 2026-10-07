@@ -10,6 +10,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/card_color_gradient_picker.dart';
 import '../../../shared/widgets/icon_picker_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/widgets/settings_choice_sheet.dart';
@@ -24,35 +25,83 @@ import '../widgets/stored_card_visual.dart';
 import '../../../shared/widgets/kuber_info_bottom_sheet.dart';
 
 const _cardTypeChoices = <SettingsChoice<String>>[
-  SettingsChoice(value: 'debit', label: 'Debit', icon: Icons.credit_card_rounded),
-  SettingsChoice(value: 'credit', label: 'Credit', icon: Icons.credit_score_rounded),
-  SettingsChoice(value: 'prepaid', label: 'Prepaid', icon: Icons.account_balance_wallet_rounded),
-  SettingsChoice(value: 'forex', label: 'Forex', icon: Icons.currency_exchange_rounded),
-  SettingsChoice(value: 'gift', label: 'Gift', icon: Icons.card_giftcard_rounded),
+  SettingsChoice(
+    value: 'debit',
+    label: 'Debit',
+    icon: Icons.credit_card_rounded,
+  ),
+  SettingsChoice(
+    value: 'credit',
+    label: 'Credit',
+    icon: Icons.credit_score_rounded,
+  ),
+  SettingsChoice(
+    value: 'prepaid',
+    label: 'Prepaid',
+    icon: Icons.account_balance_wallet_rounded,
+  ),
+  SettingsChoice(
+    value: 'forex',
+    label: 'Forex',
+    icon: Icons.currency_exchange_rounded,
+  ),
+  SettingsChoice(
+    value: 'gift',
+    label: 'Gift',
+    icon: Icons.card_giftcard_rounded,
+  ),
   SettingsChoice(value: 'travel', label: 'Travel', icon: Icons.flight_rounded),
-  SettingsChoice(value: 'fuel', label: 'Fuel', icon: Icons.local_gas_station_rounded),
+  SettingsChoice(
+    value: 'fuel',
+    label: 'Fuel',
+    icon: Icons.local_gas_station_rounded,
+  ),
   SettingsChoice(value: 'meal', label: 'Meal', icon: Icons.restaurant_rounded),
-  SettingsChoice(value: 'corporate', label: 'Corporate', icon: Icons.business_rounded),
-  SettingsChoice(value: 'other', label: 'Others', icon: Icons.more_horiz_rounded),
+  SettingsChoice(
+    value: 'corporate',
+    label: 'Corporate',
+    icon: Icons.business_rounded,
+  ),
+  SettingsChoice(
+    value: 'other',
+    label: 'Others',
+    icon: Icons.more_horiz_rounded,
+  ),
 ];
 
 const _networkChoices = <SettingsChoice<String>>[
   SettingsChoice(value: 'visa', label: 'Visa', icon: Icons.payment_rounded),
-  SettingsChoice(value: 'mastercard', label: 'Mastercard', icon: Icons.payment_rounded),
+  SettingsChoice(
+    value: 'mastercard',
+    label: 'Mastercard',
+    icon: Icons.payment_rounded,
+  ),
   SettingsChoice(value: 'rupay', label: 'RuPay', icon: Icons.payment_rounded),
   SettingsChoice(value: 'amex', label: 'Amex', icon: Icons.payment_rounded),
-  SettingsChoice(value: 'discover', label: 'Discover', icon: Icons.payment_rounded),
+  SettingsChoice(
+    value: 'discover',
+    label: 'Discover',
+    icon: Icons.payment_rounded,
+  ),
   SettingsChoice(value: 'other', label: 'Others', icon: Icons.payment_rounded),
 ];
 
-const _riskyLabels = ['cvv', 'cvc', 'pin', 'otp', 'password', 'passcode', 'secret'];
+const _riskyLabels = [
+  'cvv',
+  'cvc',
+  'pin',
+  'otp',
+  'password',
+  'passcode',
+  'secret',
+];
 
 class _CustomFieldRow {
   final TextEditingController label;
   final TextEditingController value;
   _CustomFieldRow({String label = '', String value = ''})
-      : label = TextEditingController(text: label),
-        value = TextEditingController(text: value);
+    : label = TextEditingController(text: label),
+      value = TextEditingController(text: value);
   void dispose() {
     label.dispose();
     value.dispose();
@@ -113,8 +162,9 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
       setState(() => _loading = false);
       return;
     }
-    final dec =
-        await ref.read(cardVaultServiceProvider).decryptCard(key: key, card: card);
+    final dec = await ref
+        .read(cardVaultServiceProvider)
+        .decryptCard(key: key, card: card);
     if (!mounted) return;
     setState(() {
       _cardholder.text = dec.cardholder ?? '';
@@ -152,6 +202,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
         backgroundColor: cs.surface,
         appBar: KuberAppBar(
           showBack: true,
+          closeIcon: true,
           title: _isEditing ? 'Edit card' : 'Add card',
         ),
         body: _loading
@@ -160,7 +211,12 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
                 onTap: () => FocusScope.of(context).unfocus(),
                 behavior: HitTestBehavior.opaque,
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.fromLTRB(
+                    KuberSpace.screenMargin,
+                    0,
+                    KuberSpace.screenMargin,
+                    KuberSpace.lg,
+                  ),
                   child: _form(cs),
                 ),
               ),
@@ -186,80 +242,89 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
           isGradient: _isGradient,
         ),
 
-        // DETAILS
+        // CARD
         KuberFormSection(
-          label: 'Details',
+          label: 'Card',
           children: [
-            _labeled('Nickname', _field(_nickname, hint: 'HDFC Regalia',
-                capitalization: TextCapitalization.words)),
-            _labeled(
-              'Card number',
-              _field(
-                _number,
-                hint: '•••• •••• •••• ••••',
-                keyboardType: TextInputType.number,
-                // Masking is done by the controller (digits -> •, spaces kept),
-                // so the grouping survives while hidden. No obscureText here.
-                obscure: false,
-                inputFormatters: [_CardNumberFormatter()],
-                suffix: IconButton(
-                  icon: Icon(
-                    _numberObscured
-                        ? Icons.visibility_off_rounded
-                        : Icons.visibility_rounded,
-                    size: 20,
-                    color: cs.onSurfaceVariant,
-                  ),
-                  onPressed: () => setState(() {
-                    _numberObscured = !_numberObscured;
-                    _number.obscure = _numberObscured;
-                  }),
+            _field(
+              _nickname,
+              label: 'Nickname',
+              hint: 'HDFC Regalia',
+              capitalization: TextCapitalization.words,
+            ),
+            _field(
+              _number,
+              label: 'Card number',
+              hint: '•••• •••• •••• ••••',
+              keyboardType: TextInputType.number,
+              // Masking is done by the controller (digits -> •, spaces kept),
+              // so the grouping survives while hidden. No obscureText here.
+              obscure: false,
+              inputFormatters: [_CardNumberFormatter()],
+              suffix: IconButton(
+                icon: Icon(
+                  _numberObscured
+                      ? Icons.visibility_off_rounded
+                      : Icons.visibility_rounded,
+                  size: 20,
+                  color: cs.onSurfaceVariant,
                 ),
+                onPressed: () => setState(() {
+                  _numberObscured = !_numberObscured;
+                  _number.obscure = _numberObscured;
+                }),
               ),
             ),
-            _labeled('Cardholder name', _field(_cardholder, hint: 'John Doe',
-              capitalization: TextCapitalization.words),
-              optional: true),
-            _labeled(
-              'Expiry',
-              _field(
-                _expiry,
-                hint: 'MM/YY',
-                keyboardType: TextInputType.number,
-                inputFormatters: [_ExpiryFormatter()],
-              ),
-              optional: true,
+            _field(
+              _expiry,
+              label: 'Expiry (optional)',
+              hint: 'MM/YY',
+              keyboardType: TextInputType.number,
+              inputFormatters: [_ExpiryFormatter()],
+            ),
+            _field(
+              _cardholder,
+              label: 'Name on card (optional)',
+              hint: 'John Doe',
+              capitalization: TextCapitalization.words,
             ),
           ],
         ),
 
-        // CLASSIFICATION
+        // NETWORK
         KuberFormSection(
-          label: 'Classification',
+          label: 'Network',
           children: [
-            KuberPickerRow(
-              leading: KuberLeadingSwatch(
-                color: cs.primary,
-                icon: _cardType == null
-                    ? Icons.style_outlined
-                    : _iconForType(_cardType!),
-                empty: _cardType == null,
-              ),
-              label: 'Card type',
-              value: _cardType == null ? 'Choose type' : _titleCase(_cardType!),
-              valueIsPlaceholder: _cardType == null,
-              onTap: _pickCardType,
+            Wrap(
+              spacing: KuberSpace.sm,
+              runSpacing: KuberSpace.sm,
+              children: [
+                for (final c in _networkChoices)
+                  KuberChip(
+                    label: c.label,
+                    selected: _network == c.value,
+                    onTap: () => setState(() => _network = c.value),
+                  ),
+              ],
             ),
-            KuberPickerRow(
-              leading: KuberLeadingSwatch(
-                color: cs.primary,
-                icon: Icons.payment_rounded,
-                empty: _network == null,
-              ),
-              label: 'Network',
-              value: _network == null ? 'Choose network' : _networkLabel(_network!),
-              valueIsPlaceholder: _network == null,
-              onTap: _pickNetwork,
+          ],
+        ),
+
+        // TYPE
+        KuberFormSection(
+          label: 'Type',
+          children: [
+            Wrap(
+              spacing: KuberSpace.sm,
+              runSpacing: KuberSpace.sm,
+              children: [
+                for (final c in _cardTypeChoices)
+                  KuberChip(
+                    label: c.label,
+                    selected: _cardType == c.value,
+                    onTap: () => setState(() => _cardType = c.value),
+                  ),
+              ],
             ),
           ],
         ),
@@ -271,19 +336,24 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
             KuberPickerRow(
               leading: _bankIcon == null
                   ? KuberLeadingSwatch(
-                      color: cs.primary, icon: Icons.account_balance_rounded,
-                      empty: true)
+                      color: cs.primary,
+                      icon: Icons.account_balance_rounded,
+                      empty: true,
+                    )
                   : SizedBox(
-                      width: 36,
-                      height: 36,
+                      width: 40,
+                      height: 40,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: cs.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
+                          color: cs.secondaryContainer,
+                          borderRadius: KuberShape.mediumR,
                         ),
                         alignment: Alignment.center,
                         child: CardIcon(
-                            iconKey: _bankIcon, size: 18, color: cs.primary),
+                          iconKey: _bankIcon,
+                          size: 20,
+                          color: cs.onSecondaryContainer,
+                        ),
                       ),
                     ),
               label: 'Icon',
@@ -307,7 +377,7 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
                           ],
                         )
                       : null,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: KuberShape.mediumR,
                 ),
               ),
               label: 'Color',
@@ -331,8 +401,11 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
         KuberFormSection(
           label: 'Custom fields',
           trailing: IconButton(
-            icon: Icon(Icons.info_outline_rounded,
-                size: 18, color: cs.onSurfaceVariant),
+            icon: Icon(
+              Icons.info_outline_rounded,
+              size: 18,
+              color: cs.onSurfaceVariant,
+            ),
             onPressed: () =>
                 KuberInfoBottomSheet.show(context, aboutCustomFieldsInfo),
           ),
@@ -363,24 +436,26 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
       children: [
         if (i > 0) ...[
           const SizedBox(height: 4),
-          Divider(
-              height: 1,
-              thickness: 1,
-              color: cs.outline.withValues(alpha: 0.6)),
+          Divider(height: 1, thickness: 1, color: cs.outlineVariant),
           const SizedBox(height: 14),
         ],
         Row(
           children: [
             // Title-case the label for consistency with Nickname / Cardholder.
             Expanded(
-              child: _field(row.label,
-                  hint: 'Label',
-                  capitalization: TextCapitalization.words),
+              child: _field(
+                row.label,
+                label: 'Label',
+                capitalization: TextCapitalization.words,
+              ),
             ),
             const SizedBox(width: 4),
             IconButton(
-              icon:
-                  Icon(Icons.close_rounded, size: 20, color: cs.onSurfaceVariant),
+              icon: Icon(
+                Icons.close_rounded,
+                size: 20,
+                color: cs.onSurfaceVariant,
+              ),
               onPressed: () => setState(() {
                 _custom.removeAt(i).dispose();
               }),
@@ -388,25 +463,16 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
           ],
         ),
         const SizedBox(height: 10),
-        _field(row.value, hint: 'Value'),
+        _field(row.value, label: 'Value'),
       ],
     );
   }
 
   // ── Field helpers ──────────────────────────────────────────────────────────
 
-  Widget _labeled(String label, Widget field, {bool optional = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        KuberFieldLabel(label, optional: optional),
-        field,
-      ],
-    );
-  }
-
   Widget _field(
     TextEditingController c, {
+    String? label,
     String? hint,
     TextInputType? keyboardType,
     bool obscure = false,
@@ -422,46 +488,18 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
       inputFormatters: inputFormatters,
       textCapitalization: capitalization,
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      style: localeFont(fontSize: 15, color: cs.onSurface),
-      decoration: InputDecoration(hintText: hint, suffixIcon: suffix),
+      style: Theme.of(
+        context,
+      ).textTheme.bodyLarge!.copyWith(color: cs.onSurface),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        suffixIcon: suffix,
+      ),
     );
   }
 
   // ── Pickers ──────────────────────────────────────────────────────────────────
-
-  void _pickCardType() {
-    FocusScope.of(context).unfocus();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<String>(
-        title: 'Card type',
-        choices: _cardTypeChoices,
-        selectedValue: _cardType ?? '',
-        onSelected: (v) => setState(() => _cardType = v),
-      ),
-    );
-  }
-
-  void _pickNetwork() {
-    FocusScope.of(context).unfocus();
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => SettingsChoiceSheet<String>(
-        title: 'Network',
-        choices: _networkChoices,
-        selectedValue: _network ?? '',
-        onSelected: (v) => setState(() => _network = v),
-      ),
-    );
-  }
 
   void _pickIcon() {
     // Reuses the exact searchable icon picker from Add/Edit Account & Category,
@@ -470,8 +508,10 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     // works across all of them. See specs/plans/kuber-cards.md §5.1.
     final keys = <String>[
       ...kBankIconKeys,
-      ...{...IconMapper.kAccountIconKeys, ...IconMapper.kCategoryIconKeys}
-          .where((k) => !kBankIconKeys.contains(k)),
+      ...{
+        ...IconMapper.kAccountIconKeys,
+        ...IconMapper.kCategoryIconKeys,
+      }.where((k) => !kBankIconKeys.contains(k)),
     ];
     final tags = <String, List<String>>{
       ...IconMapper.kIconTags,
@@ -504,7 +544,9 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     final input = CardInput(
       nickname: _nickname.text.trim(),
       number: _number.text.trim().isEmpty ? null : _number.text.trim(),
-      cardholder: _cardholder.text.trim().isEmpty ? null : _cardholder.text.trim(),
+      cardholder: _cardholder.text.trim().isEmpty
+          ? null
+          : _cardholder.text.trim(),
       expiry: _expiry.text.trim().isEmpty ? null : _expiry.text.trim(),
       cardType: _cardType,
       network: _network,
@@ -514,15 +556,16 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
       customFields: [
         for (final r in _custom)
           if (r.label.text.trim().isNotEmpty || r.value.text.trim().isNotEmpty)
-            CardCustomField(label: r.label.text.trim(), value: r.value.text.trim()),
+            CardCustomField(
+              label: r.label.text.trim(),
+              value: r.value.text.trim(),
+            ),
       ],
     );
 
-    await ref.read(cardVaultServiceProvider).saveCard(
-          key: key,
-          input: input,
-          existing: widget.card,
-        );
+    await ref
+        .read(cardVaultServiceProvider)
+        .saveCard(key: key, input: input, existing: widget.card);
     await ref.read(storedCardsProvider.notifier).reload();
     if (!mounted) return;
     Navigator.pop(context);
@@ -542,9 +585,10 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title:
-            Text('Storing sensitive values', style: localeFont(fontWeight: FontWeight.w700)),
+        title: Text(
+          'Storing sensitive values',
+          style: localeFont(fontWeight: FontWeight.w700),
+        ),
         content: Text(
           'Kuber Cards is encrypted, but security codes like CVV, PIN, and OTP '
           'are safest kept out of any app. You can still save this if you want to.',
@@ -566,15 +610,6 @@ class _AddEditCardScreenState extends ConsumerState<AddEditCardScreen> {
   }
 
   // ── Misc ─────────────────────────────────────────────────────────────────────
-
-  IconData _iconForType(String type) =>
-      _cardTypeChoices.firstWhere((c) => c.value == type).icon;
-
-  String _networkLabel(String v) =>
-      _networkChoices.firstWhere((c) => c.value == v).label;
-
-  String _titleCase(String s) =>
-      s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
 
   String? _deriveLast4(String number) {
     final digits = number.replaceAll(RegExp(r'\D'), '');
@@ -608,7 +643,10 @@ class _MaskedNumberController extends TextEditingController {
   }) {
     if (!obscure) {
       return super.buildTextSpan(
-          context: context, style: style, withComposing: withComposing);
+        context: context,
+        style: style,
+        withComposing: withComposing,
+      );
     }
     final masked = text.replaceAllMapped(RegExp(r'\d'), (_) => '•');
     return TextSpan(style: style, text: masked);
@@ -619,7 +657,9 @@ class _MaskedNumberController extends TextEditingController {
 class _CardNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
     final capped = digits.length > 19 ? digits.substring(0, 19) : digits;
     final buf = StringBuffer();
@@ -639,7 +679,9 @@ class _CardNumberFormatter extends TextInputFormatter {
 class _ExpiryFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
     final capped = digits.length > 4 ? digits.substring(0, 4) : digits;
     String text;

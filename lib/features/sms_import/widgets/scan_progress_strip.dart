@@ -50,8 +50,8 @@ class _StripContent extends StatelessWidget {
     final Color bg;
     final Color border;
     if (complete && newCount > 0) {
-      bg = cs.tertiary.withValues(alpha: 0.10);
-      border = cs.tertiary.withValues(alpha: 0.30);
+      bg = context.kuberMoney.income.withValues(alpha: 0.10);
+      border = context.kuberMoney.income.withValues(alpha: 0.30);
     } else {
       bg = cs.primary.withValues(alpha: 0.10);
       border = cs.primary.withValues(alpha: 0.25);
@@ -61,20 +61,25 @@ class _StripContent extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: border),
       ),
       child: Row(
         children: [
-          _leading(cs, complete, newCount),
+          _leading(context, cs, complete, newCount),
           const SizedBox(width: 10),
-          Expanded(child: _label(cs, complete, newCount)),
+          Expanded(child: _label(context, cs, complete, newCount)),
         ],
       ),
     );
   }
 
-  Widget _leading(ColorScheme cs, bool complete, int newCount) {
+  Widget _leading(
+    BuildContext context,
+    ColorScheme cs,
+    bool complete,
+    int newCount,
+  ) {
     if (!complete) {
       return SizedBox(
         width: 14,
@@ -86,14 +91,26 @@ class _StripContent extends StatelessWidget {
       return Container(
         width: 16,
         height: 16,
-        decoration: BoxDecoration(color: cs.tertiary, shape: BoxShape.circle),
-        child: const Icon(Icons.check_rounded, size: 10, color: Colors.white),
+        decoration: BoxDecoration(
+          color: context.kuberMoney.income,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(Icons.check_rounded, size: 10, color: cs.onPrimary),
       );
     }
-    return Icon(Icons.check_circle_outline_rounded, size: 16, color: cs.primary);
+    return Icon(
+      Icons.check_circle_outline_rounded,
+      size: 16,
+      color: cs.primary,
+    );
   }
 
-  Widget _label(ColorScheme cs, bool complete, int newCount) {
+  Widget _label(
+    BuildContext context,
+    ColorScheme cs,
+    bool complete,
+    int newCount,
+  ) {
     if (!complete) {
       final total = progress.totalMessages;
       final scanned = progress.scannedMessages;
@@ -117,9 +134,11 @@ class _StripContent extends StatelessWidget {
           children: [
             const TextSpan(text: 'Up to date - '),
             TextSpan(
-              text:
-                  '$newCount new transaction${newCount == 1 ? '' : 's'}',
-              style: TextStyle(color: cs.tertiary, fontWeight: FontWeight.w700),
+              text: '$newCount new transaction${newCount == 1 ? '' : 's'}',
+              style: TextStyle(
+                color: context.kuberMoney.income,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const TextSpan(text: ' found'),
           ],

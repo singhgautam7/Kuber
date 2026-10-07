@@ -15,8 +15,9 @@ extension _NoteEditorActions on _NoteEditorScreenState {
     QuickActionsSheet.show(
       context,
       amount: amount.abs(),
-      noteTitle:
-          _titleController.text.trim().isEmpty ? 'Untitled note' : _titleController.text.trim(),
+      noteTitle: _titleController.text.trim().isEmpty
+          ? 'Untitled note'
+          : _titleController.text.trim(),
       fromNoteId: note.id,
       inheritedCategoryId: note.categoryId,
     );
@@ -25,8 +26,7 @@ extension _NoteEditorActions on _NoteEditorScreenState {
   /// Custom text-selection toolbar: prepends a Bold toggle to the default
   /// cut / copy / paste / select-all set. Positioned via Quill's anchors so
   /// it sits above the selection (not over it).
-  Widget _buildContextMenu(
-      BuildContext context, QuillRawEditorState rawState) {
+  Widget _buildContextMenu(BuildContext context, QuillRawEditorState rawState) {
     final controller = _controller;
     if (controller == null) {
       return AdaptiveTextSelectionToolbar.buttonItems(
@@ -34,10 +34,8 @@ extension _NoteEditorActions on _NoteEditorScreenState {
         buttonItems: rawState.contextMenuButtonItems,
       );
     }
-    final boldActive = controller
-            .getSelectionStyle()
-            .attributes[Attribute.bold.key]
-            ?.value ==
+    final boldActive =
+        controller.getSelectionStyle().attributes[Attribute.bold.key]?.value ==
         true;
     // Nudge the toolbar's primary (above) anchor upward so it sits clearly
     // above the selection instead of overlapping the selected text.
@@ -52,9 +50,11 @@ extension _NoteEditorActions on _NoteEditorScreenState {
         ContextMenuButtonItem(
           label: boldActive ? 'Unbold' : 'Bold',
           onPressed: () {
-            controller.formatSelection(boldActive
-                ? Attribute.clone(Attribute.bold, null)
-                : Attribute.bold);
+            controller.formatSelection(
+              boldActive
+                  ? Attribute.clone(Attribute.bold, null)
+                  : Attribute.bold,
+            );
             rawState.hideToolbar();
           },
         ),
@@ -82,8 +82,10 @@ extension _NoteEditorActions on _NoteEditorScreenState {
   TextStyle _styleFor(Attribute attribute) {
     if (attribute.key == NumberHighlightAttribute.kKey &&
         attribute.value != null) {
-      return NumberHighlightStyle.regular(context,
-          negative: attribute.value == 'neg');
+      return NumberHighlightStyle.regular(
+        context,
+        negative: attribute.value == 'neg',
+      );
     }
     if (attribute.key == ArithResultAttribute.kKey && attribute.value != null) {
       return NumberHighlightStyle.result(context);
@@ -106,8 +108,9 @@ extension _NoteEditorActions on _NoteEditorScreenState {
     final note = _note;
     final c = _controller;
     if (note == null || c == null) return;
-    final title =
-        _titleController.text.trim().isEmpty ? 'Untitled note' : _titleController.text.trim();
+    final title = _titleController.text.trim().isEmpty
+        ? 'Untitled note'
+        : _titleController.text.trim();
     final body = c.document.toPlainText().trimRight();
     await SharePlus.instance.share(ShareParams(text: '$title\n\n$body'));
   }
@@ -166,7 +169,9 @@ extension _NoteEditorActions on _NoteEditorScreenState {
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => TagSelectorBottomSheet(
         initialSelectedTags: selected,

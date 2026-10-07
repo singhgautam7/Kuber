@@ -58,6 +58,14 @@ class MigrationService {
       await prefs.remove(PrefsKeys.lastStoryGenerationDate);
       await prefs.setBool(PrefsKeys.migratedStoryResetV1, true);
     }
+
+    // Migration 8: the More tab defaults to the classic (simple) layout. Put
+    // every installed user on it once after the update; changing it later in
+    // Settings sticks because this never runs again.
+    if (!(prefs.getBool(PrefsKeys.migratedMoreLayoutClassicV1) ?? false)) {
+      await prefs.setInt(PrefsKeys.moreTabLayout, 0); // MoreTabLayout.simple
+      await prefs.setBool(PrefsKeys.migratedMoreLayoutClassicV1, true);
+    }
   }
 
   static Future<void> _clearLegacyStories(Isar isar) async {

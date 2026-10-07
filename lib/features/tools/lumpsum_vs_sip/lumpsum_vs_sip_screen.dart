@@ -59,10 +59,10 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'total': _totalCtrl.text,
-        'rate': _rateCtrl.text,
-        'tenure': _tenureCtrl.text,
-      };
+    'total': _totalCtrl.text,
+    'rate': _rateCtrl.text,
+    'tenure': _tenureCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -83,8 +83,10 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final t = formatter.formatCurrency(parseAmount(_totalCtrl.text),
-        symbol: currency.symbol);
+    final t = formatter.formatCurrency(
+      parseAmount(_totalCtrl.text),
+      symbol: currency.symbol,
+    );
     if (r == null) return 'Lumpsum vs SIP $t';
     final winner = r.lumpsumWins ? 'Lumpsum' : 'SIP';
     return '$t @ ${_rateCtrl.text}% / ${_years}y → $winner wins (+${r.differencePercent.round()}%)';
@@ -114,40 +116,43 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _totalCtrl,
-            label: 'TOTAL INVESTMENT',
-            prefix: currency.symbol,
-            helper: 'Invested upfront, or spread monthly',
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 50000,
-            max: 10000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'EXPECTED RETURN',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 30,
-            divisions: 290,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _tenureCtrl,
-            label: 'TENURE',
-            suffix: 'years',
-            onChanged: recompute,
-            min: 1,
-            max: 40,
-            divisions: 39,
-          ),
-        ]),
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _totalCtrl,
+              label: 'TOTAL INVESTMENT',
+              prefix: currency.symbol,
+              helper: 'Invested upfront, or spread monthly',
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 50000,
+              max: 10000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'EXPECTED RETURN',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 30,
+              divisions: 290,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _tenureCtrl,
+              label: 'TENURE',
+              suffix: 'years',
+              onChanged: recompute,
+              min: 1,
+              max: 40,
+              divisions: 39,
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -168,12 +173,16 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
                           'Winner: ${result.lumpsumWins ? 'Lumpsum' : 'SIP'} — ahead by ${money(result.difference.abs())} (${result.differencePercent.round()}%)',
                       bannerIsPositive: true,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol('Difference', money(result.difference.abs())),
-                      StatCol(
-                          'Difference %', '${result.differencePercent.round()}%'),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol('Difference', money(result.difference.abs())),
+                        StatCol(
+                          'Difference %',
+                          '${result.differencePercent.round()}%',
+                        ),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -186,17 +195,14 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
                 BarCompareSeries(
                   name: 'Final value',
                   color: ToolAccents.emerald,
-                  values: [
-                    result.lumpsum.futureValue,
-                    result.sip.futureValue
-                  ],
+                  values: [result.lumpsum.futureValue, result.sip.futureValue],
                 ),
                 BarCompareSeries(
                   name: 'Invested',
                   color: cs.onSurfaceVariant,
                   values: [
                     result.lumpsum.totalInvested,
-                    result.sip.totalInvested
+                    result.sip.totalInvested,
                   ],
                 ),
               ],
@@ -208,13 +214,15 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Lumpsum',
-                    points: result.lumpsum.valueSeries,
-                    color: ToolAccents.emerald),
+                  name: 'Lumpsum',
+                  points: result.lumpsum.valueSeries,
+                  color: ToolAccents.emerald,
+                ),
                 ChartSeries(
-                    name: 'SIP',
-                    points: result.sip.valueSeries,
-                    color: cs.primary),
+                  name: 'SIP',
+                  points: result.sip.valueSeries,
+                  color: cs.primary,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < result.lumpsum.valueSeries.length; i++)
@@ -238,7 +246,10 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
               rows: _scheduleMode == 1
                   ? [
                       for (final m in sipMonthlyRows(
-                          result.monthlySip, rate, _years))
+                        result.monthlySip,
+                        rate,
+                        _years,
+                      ))
                         [
                           'M${m[0].toInt()}',
                           money(total * pow(1 + rate / 100, m[0] / 12)),
@@ -248,14 +259,20 @@ class _LumpsumVsSipScreenState extends ConsumerState<LumpsumVsSipScreen>
                         ],
                     ]
                   : [
-                      for (var y = 1; y < result.lumpsum.valueSeries.length; y++)
+                      for (
+                        var y = 1;
+                        y < result.lumpsum.valueSeries.length;
+                        y++
+                      )
                         [
                           'Y$y',
                           money(result.lumpsum.valueSeries[y]),
                           money(result.sip.investedSeries[y]),
                           money(result.sip.valueSeries[y]),
-                          money(result.lumpsum.valueSeries[y] -
-                              result.sip.valueSeries[y]),
+                          money(
+                            result.lumpsum.valueSeries[y] -
+                                result.sip.valueSeries[y],
+                          ),
                         ],
                     ],
             ),

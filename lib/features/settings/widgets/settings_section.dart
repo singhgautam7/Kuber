@@ -2,61 +2,33 @@ import 'package:kuber/core/utils/locale_font.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import 'settings_widgets.dart' show SquircleIcon;
 
 /// Shared settings-list primitives, lifted verbatim from `settings_screen.dart`
 /// so the Kuber Cards settings page reads identically to the main Settings page.
 /// (The main screen aliases its old private names to these.)
 
-/// Uppercase section heading (primary-tinted).
+/// Caps section heading (board 3.11: the shared section header style).
 class SettingsSectionLabel extends StatelessWidget {
   final String label;
   const SettingsSectionLabel({super.key, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(left: KuberSpacing.xs),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-          color: cs.primary,
-        ),
-      ),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionHeaderGap),
+      child: Text(label.toUpperCase(), style: sectionHeaderStyle(context)),
     );
   }
 }
 
-/// Muted one-line description below a [SettingsSectionLabel].
+/// Section descriptions are dropped in the M3 settings pattern (board 3.11);
+/// kept as a no-op so call sites and their strings stay intact.
 class SettingsSectionDescription extends StatelessWidget {
   final String text;
   const SettingsSectionDescription(this.text, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        KuberSpacing.xs,
-        4,
-        KuberSpacing.xs,
-        KuberSpacing.sm,
-      ),
-      child: Text(
-        text,
-        style: localeFont(
-          fontSize: 12.5,
-          color: cs.onSurfaceVariant,
-          height: 1.4,
-          letterSpacing: -0.1,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 /// Bordered card wrapping a column of [SettingsTile]s.
@@ -67,12 +39,13 @@ class SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+    return Material(
+      color: cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.cardR,
+        side: BorderSide(color: cs.outlineVariant),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(children: children),
     );
   }
@@ -99,42 +72,42 @@ class SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
 
+    // Board 3.11 row: plain 24 icon, titleMedium label, value / chevron right.
     return InkWell(
       onTap: onTap,
-      child: Padding(
+      child: Container(
+        constraints: const BoxConstraints(minHeight: KuberSpace.listItem1),
         padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg,
-          vertical: KuberSpacing.md,
+          horizontal: KuberSpace.lg,
+          vertical: KuberSpace.md,
         ),
         child: Row(
           children: [
-            SquircleIcon(icon: icon, size: 18, padding: 8),
-            const SizedBox(width: KuberSpacing.md),
+            Icon(icon, size: 24, color: cs.onSurfaceVariant),
+            const SizedBox(width: KuberSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
+                    style: tt.titleMedium!.copyWith(color: cs.onSurface),
                   ),
                   if (subtitle case final s?)
                     Text(
                       s,
-                      style: localeFont(
-                        fontSize: 11,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: tt.bodyMedium!.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
                     ),
                 ],
               ),
             ),
-            const SizedBox(width: KuberSpacing.sm),
+            const SizedBox(width: KuberSpace.sm),
             if (trailing case final Widget t) t,
           ],
         ),

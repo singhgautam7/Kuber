@@ -117,9 +117,10 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     final localizations = AppLocalizations.of(context);
     final primaryLabel = switch (_currentPage) {
       0 => localizations?.getStarted ?? 'Get started',
-      3 => _saving
-          ? (localizations?.starting ?? 'Starting...')
-          : (localizations?.startJourney ?? 'Start my journey'),
+      3 =>
+        _saving
+            ? (localizations?.starting ?? 'Starting...')
+            : (localizations?.startJourney ?? 'Start my journey'),
       _ => localizations?.continueLabel ?? 'Continue',
     };
 
@@ -164,6 +165,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
             OnboardingNavBar(
               currentPage: _currentPage,
               showBack: _currentPage != 0,
+              busy: _currentPage == 3 && _saving,
               onBack: _currentPage == 0
                   ? null
                   : () => _goToPage(_currentPage - 1),

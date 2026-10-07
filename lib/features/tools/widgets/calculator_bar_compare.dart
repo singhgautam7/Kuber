@@ -66,39 +66,41 @@ class ToolBarCompare extends ConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  formatter.formatCompactCurrency(s.values[ci],
-                                      symbol: currency.symbol),
+                                  formatter.formatCompactCurrency(
+                                    s.values[ci],
+                                    symbol: currency.symbol,
+                                  ),
                                   style: localeFont(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
                                     color: s.color,
                                   ),
                                 ),
                                 const SizedBox(height: 5),
                                 Container(
                                   width: 30,
-                                  height: (s.values[ci] / safeMax *
-                                          barAreaHeight)
-                                      .clamp(4, barAreaHeight)
-                                      .toDouble(),
+                                  height:
+                                      (s.values[ci] / safeMax * barAreaHeight)
+                                          .clamp(4, barAreaHeight)
+                                          .toDouble(),
                                   decoration: BoxDecoration(
                                     color: s.color,
                                     borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(KuberRadius.sm),
+                                      top: Radius.circular(KuberShape.medium),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(width: KuberSpacing.sm),
+                            const SizedBox(width: KuberSpace.sm),
                           ],
                         ],
                       ),
-                      const SizedBox(height: KuberSpacing.sm),
+                      const SizedBox(height: KuberSpace.sm),
                       Text(
                         categories[ci],
                         style: localeFont(
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
                         ),
@@ -109,11 +111,11 @@ class ToolBarCompare extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         Wrap(
           alignment: WrapAlignment.center,
-          spacing: KuberSpacing.lg,
-          runSpacing: KuberSpacing.sm,
+          spacing: KuberSpace.lg,
+          runSpacing: KuberSpace.sm,
           children: [
             for (final s in series)
               Row(
@@ -124,13 +126,14 @@ class ToolBarCompare extends ConsumerWidget {
                     height: 10,
                     decoration: BoxDecoration(
                       color: s.color,
-                      borderRadius: BorderRadius.circular(KuberRadius.sm),
+                      borderRadius: BorderRadius.circular(KuberShape.small),
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(s.name,
-                      style: localeFont(
-                          fontSize: 11.5, color: cs.onSurfaceVariant)),
+                  Text(
+                    s.name,
+                    style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+                  ),
                 ],
               ),
           ],

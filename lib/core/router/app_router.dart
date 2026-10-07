@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../features/settings/screens/theme_screen.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/screens/analytics_screen.dart';
@@ -85,7 +86,6 @@ import '../../features/widgets_gallery/screens/widgets_gallery_screen.dart';
 import '../../features/widgets_gallery/screens/account_widget_config_screen.dart';
 import '../../features/widgets_gallery/screens/trends_widget_config_screen.dart';
 import '../../features/quick_actions/screens/configure_shortcuts_screen.dart';
-import '../../features/splash/screens/splash_screen.dart';
 import '../../features/pro/paywall/paywall_screen.dart';
 import '../../features/kuber_cards/data/stored_card.dart';
 import '../../features/kuber_cards/screens/cards_home_screen.dart';
@@ -152,11 +152,8 @@ class GoRouterRefreshStream extends ChangeNotifier {
 /// The location the router boots at. Computed in `main._bootstrap` (from the
 /// onboarded flag + recurring/backup state) and injected via override, so the
 /// app opens directly on its real destination — Home, Onboarding or the
-/// recurring loader — instead of a separate `/splash` route we then animate
-/// away from. The brand splash is now a fade-out overlay (see
-/// `ColdStartSplash` in app.dart) painted ON TOP of that already-built
-/// destination, so the heavy first build happens hidden behind it and never
-/// shows as a stuck/juddering frame during a route transition.
+/// recurring loader. The brand splash is the native launch screen
+/// (flutter_native_splash), dismissed by the engine on the first frame.
 final initialLocationProvider = Provider<String>((ref) => '/');
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -190,9 +187,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Widget configuration activities boot straight onto these routes.
       if (state.matchedLocation.startsWith('/widget-config')) return null;
 
-      // Allow splash screen to show
-      if (state.matchedLocation == '/splash') return null;
-
       // If opening for the first time, go to onboarding
       if (!onboarded && !state.matchedLocation.startsWith('/onboarding')) {
         return '/onboarding';
@@ -210,11 +204,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/splash',
-        parentNavigatorKey: rootNavigatorKey,
-        builder: (context, state) => const SplashScreen(),
-      ),
       GoRoute(
         path: '/onboarding',
         parentNavigatorKey: rootNavigatorKey,
@@ -480,6 +469,13 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'settings',
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (_, _) => const SettingsScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'theme',
+                        parentNavigatorKey: rootNavigatorKey,
+                        builder: (_, _) => const ThemeScreen(),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'how-to-use',

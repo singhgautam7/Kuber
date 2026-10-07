@@ -32,7 +32,8 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
   DateTime _selectedDate = DateTime.now();
   final _noteController = TextEditingController();
 
-  double get _amount => double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
+  double get _amount =>
+      double.tryParse(_amountController.text.trim().replaceAll(',', '')) ?? 0;
 
   @override
   void initState() {
@@ -75,7 +76,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             context.l10n.amountUpper,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
@@ -83,28 +84,30 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
           const SizedBox(height: 8),
           TextField(
             controller: _amountController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             inputFormatters: [
-              CurrencyInputFormatter(isIndian: ref.watch(formatterProvider).system == NumberSystem.indian),
+              CurrencyInputFormatter(
+                isIndian:
+                    ref.watch(formatterProvider).system == NumberSystem.indian,
+              ),
             ],
             style: localeFont(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               hintText: '0',
               hintStyle: localeFont(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
               ),
               prefixText: '$symbol ',
               prefixStyle: localeFont(
-                fontSize: 20,
-                fontWeight: FontWeight.w300,
+                fontSize: 22,
+                fontWeight: FontWeight.w400,
                 color: cs.onSurfaceVariant,
               ),
               suffixIcon: GestureDetector(
@@ -114,17 +117,19 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
                   height: 44,
                   margin: const EdgeInsets.only(right: 4),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline),
+                    borderRadius: BorderRadius.circular(KuberShape.medium),
+                    border: Border.all(color: cs.outlineVariant),
                   ),
-                  child: Icon(Icons.calculate_outlined,
-                      color: cs.onSurfaceVariant),
+                  child: Icon(
+                    Icons.calculate_outlined,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ),
               filled: true,
               fillColor: cs.surfaceContainerHighest,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.large),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -137,7 +142,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             context.l10n.accountUpper,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
@@ -147,11 +152,10 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             onTap: () => _pickAccount(context),
             child: Container(
               width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
               child: Row(
                 children: [
@@ -167,8 +171,11 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
                       ),
                     ),
                   ),
-                  Icon(Icons.chevron_right,
-                      color: cs.onSurfaceVariant, size: 20),
+                  Icon(
+                    Icons.chevron_right,
+                    color: cs.onSurfaceVariant,
+                    size: 20,
+                  ),
                 ],
               ),
             ),
@@ -181,7 +188,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             context.l10n.dateUpper,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
@@ -191,16 +198,18 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             onTap: () => _pickDate(context),
             child: Container(
               width: double.infinity,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today,
-                      size: 16, color: cs.onSurfaceVariant),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: cs.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     DateFormat('MMM d, yyyy').format(_selectedDate),
@@ -222,7 +231,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
             context.l10n.noteOptionalUpper,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
@@ -237,7 +246,7 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
               filled: true,
               fillColor: cs.surfaceContainerHighest,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.large),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -255,8 +264,9 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => KuberCalculator(
         initialValue: _amount,
@@ -279,8 +289,9 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: int.tryParse(_selectedAccountId ?? ''),
@@ -306,7 +317,9 @@ class _AddContributionSheetState extends ConsumerState<AddContributionSheet> {
 
   void _save(BuildContext context) {
     final note = _noteController.text.trim();
-    ref.read(investmentListProvider.notifier).addContribution(
+    ref
+        .read(investmentListProvider.notifier)
+        .addContribution(
           investment: widget.investment,
           amount: _amount,
           date: _selectedDate,

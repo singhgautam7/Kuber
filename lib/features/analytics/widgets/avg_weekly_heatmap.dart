@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -34,16 +35,28 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
       return _buildSkeleton();
     }
 
-    final dailyAverages = widget.precomputedDailyAverages ?? _calculateDailyAverages();
-    final maxAvg = dailyAverages.values.fold<double>(0, (max, val) => val > max ? val : max);
+    final dailyAverages =
+        widget.precomputedDailyAverages ?? _calculateDailyAverages();
+    final maxAvg = dailyAverages.values.fold<double>(
+      0,
+      (max, val) => val > max ? val : max,
+    );
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
+    final ramp = context.kuberChart.ramp;
+    // Intensity -> one of the 5 ramp steps (tokens.md §6).
+    Color cellColor(double avg) => maxAvg <= 0
+        ? ramp.first
+        : ramp[((avg / maxAvg) * (ramp.length - 1)).round().clamp(
+            0,
+            ramp.length - 1,
+          )];
 
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.all(KuberSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -56,17 +69,13 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                     children: [
                       Text(
                         context.l10n.avgWeeklyHeatmap,
-                        style: tt.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
+                        style: tt.titleMedium?.copyWith(color: cs.onSurface),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
                       Text(
                         context.l10n.basedOnSelectedFilter,
-                        style: tt.bodySmall?.copyWith(
+                        style: tt.bodyMedium?.copyWith(
                           color: cs.onSurfaceVariant,
                         ),
                         maxLines: 1,
@@ -75,7 +84,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                     ],
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.md),
+                const SizedBox(width: KuberSpace.md),
                 // Icon(
                 //   Icons.grid_view_rounded,
                 //   color: cs.onSurfaceVariant.withValues(alpha: 0.5),
@@ -83,7 +92,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                 // ),
               ],
             ),
-            const SizedBox(height: KuberSpacing.xl),
+            const SizedBox(height: KuberSpace.lg),
 
             // Heatmap Row
             Row(
@@ -91,7 +100,7 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
               children: List.generate(7, (index) {
                 final dayName = _getDayName(index);
                 final avg = dailyAverages[dayName] ?? 0;
-                final opacity = maxAvg > 0 ? (0.1 + (avg / maxAvg) * 0.8) : 0.05;
+                final selected = _selectedDayIndex == index;
 
                 return Expanded(
                   child: Column(
@@ -110,26 +119,30 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
                         },
                         child: Container(
                           height: 40,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
                           decoration: BoxDecoration(
-                            color: cs.primary.withValues(alpha: opacity),
-                            borderRadius: BorderRadius.circular(KuberRadius.sm),
-                            border: Border.all(
-                              color: _selectedDayIndex == index
-                                ? cs.primary
-                                : Colors.transparent,
-                              width: 1.5,
-                            ),
+                            color: cellColor(avg),
+                            borderRadius: KuberShape.smallR,
                           ),
+                          foregroundDecoration: selected
+                              ? BoxDecoration(
+                                  borderRadius: KuberShape.smallR,
+                                  border: Border.all(
+                                    color: cs.onSurface,
+                                    width: 2,
+                                  ),
+                                )
+                              : null,
                         ),
                       ),
-                      const SizedBox(height: KuberSpacing.sm),
+                      const SizedBox(height: 6),
                       Text(
                         _getDayShortName(index),
                         style: tt.labelSmall?.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurfaceVariant,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: selected ? cs.onSurface : cs.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -138,31 +151,30 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
               }),
             ),
 
-            const SizedBox(height: KuberSpacing.lg),
-            const Divider(),
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.lg),
 
             // Intensity Legend
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  context.l10n.intensity,
-                  style: tt.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+                  context.l10n.intensity.toUpperCase(),
+                  style: tt.labelMedium?.copyWith(
+                    letterSpacing: 0.8,
                     color: cs.onSurfaceVariant,
                   ),
                 ),
                 Row(
-                  children: [0.1, 0.35, 0.6, 0.9].map((opacity) {
+                  children: ramp.map((c) {
                     return Container(
                       width: 12,
                       height: 12,
                       margin: const EdgeInsets.only(left: 4),
                       decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: opacity),
-                        borderRadius: BorderRadius.circular(2),
+                        color: c,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(KuberShape.extraSmall),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -171,54 +183,45 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
             ),
 
             if (_isExpanded) ...[
-              const SizedBox(height: KuberSpacing.lg),
-              ...List.generate(7, (index) {
-                final dayName = _getDayName(index);
-                final avg = dailyAverages[dayName] ?? 0;
-                final isSelected = _selectedDayIndex == index;
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                  padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
-                  decoration: BoxDecoration(
-                    color: isSelected ? cs.primary.withValues(alpha: 0.1) : cs.surfaceContainerHighest.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(
-                      color: isSelected ? cs.primary.withValues(alpha: 0.3) : cs.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        dayName.toUpperCase(),
-                        style: tt.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: isSelected ? cs.primary : cs.onSurfaceVariant,
+              const SizedBox(height: KuberSpace.sm),
+              // Daily averages as a grouped list, selected day in
+              // secondaryContainer (board 3.6b).
+              KuberGroup(
+                children: List.generate(7, (index) {
+                  final dayName = _getDayName(index);
+                  final avg = dailyAverages[dayName] ?? 0;
+                  final isSelected = _selectedDayIndex == index;
+                  return Container(
+                    height: 44,
+                    color: isSelected ? cs.secondaryContainer : null,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          dayName,
+                          style: tt.bodyMedium?.copyWith(
+                            color: isSelected
+                                ? cs.onSecondaryContainer
+                                : cs.onSurface,
+                          ),
                         ),
-                      ),
-                      if (isSelected) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            shape: BoxShape.circle,
+                        const Spacer(),
+                        Text(
+                          maskAmount(
+                            ref.watch(formatterProvider).formatCurrency(avg),
+                            ref.watch(privacyModeProvider),
+                          ),
+                          style: tt.titleSmall?.copyWith(
+                            color: isSelected
+                                ? cs.onSecondaryContainer
+                                : cs.onSurface,
                           ),
                         ),
                       ],
-                      const Spacer(),
-                      Text(
-                        maskAmount(ref.watch(formatterProvider).formatCurrency(avg), ref.watch(privacyModeProvider)),
-                        style: tt.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
+                    ),
+                  );
+                }),
+              ),
             ],
           ],
         ),
@@ -227,7 +230,9 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
   }
 
   Map<String, double> _calculateDailyAverages() {
-    final expenses = widget.transactions.where((t) => t.type == 'expense').toList();
+    final expenses = widget.transactions
+        .where((t) => t.type == 'expense')
+        .toList();
     if (expenses.isEmpty) return {};
 
     final Map<String, List<double>> dayAmounts = {
@@ -252,7 +257,15 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
   }
 
   String _getDayName(int index) {
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
     return days[index];
   }
 
@@ -265,23 +278,42 @@ class _AvgWeeklyHeatmapState extends ConsumerState<AvgWeeklyHeatmap> {
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.all(KuberSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(width: 150, height: 20, color: Colors.white10),
+            Container(
+              width: 150,
+              height: 20,
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            ),
             const SizedBox(height: 8),
-            Container(width: 120, height: 14, color: Colors.white10),
-            const SizedBox(height: KuberSpacing.xl),
+            Container(
+              width: 120,
+              height: 14,
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            ),
+            const SizedBox(height: KuberSpace.xl),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(7, (index) => Column(
-                children: [
-                  Container(width: 40, height: 40, color: Colors.white10),
-                  const SizedBox(height: 8),
-                  Container(width: 30, height: 10, color: Colors.white10),
-                ],
-              )),
+              children: List.generate(
+                7,
+                (index) => Column(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 30,
+                      height: 10,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

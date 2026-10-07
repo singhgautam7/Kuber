@@ -7,7 +7,11 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../settings/providers/settings_provider.dart'
-    show currencyProvider, settingsProvider, thresholdCeilingProvider, thresholdFloorProvider;
+    show
+        currencyProvider,
+        settingsProvider,
+        thresholdCeilingProvider,
+        thresholdFloorProvider;
 
 class ThresholdSettingsSheet extends ConsumerStatefulWidget {
   const ThresholdSettingsSheet({super.key});
@@ -27,10 +31,10 @@ class _ThresholdSettingsSheetState
     super.initState();
     final floor = ref.read(thresholdFloorProvider);
     final ceiling = ref.read(thresholdCeilingProvider);
-    _floorController =
-        TextEditingController(text: floor.toInt().toString());
-    _ceilingController =
-        TextEditingController(text: ceiling.toInt().toString());
+    _floorController = TextEditingController(text: floor.toInt().toString());
+    _ceilingController = TextEditingController(
+      text: ceiling.toInt().toString(),
+    );
   }
 
   @override
@@ -57,66 +61,66 @@ class _ThresholdSettingsSheetState
     return Padding(
       padding: EdgeInsets.only(bottom: keyboardPadding),
       child: KuberBottomSheet(
-      title: context.l10n.thresholdSettings,
-      actions: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.resetToDefaults,
-                  icon: Icons.refresh_rounded,
-                  type: AppButtonType.normal,
-                  onPressed: () {
-                    setState(() {
-                      _floorController.text = '500';
-                      _ceilingController.text = '2000';
-                    });
-                  },
+        title: context.l10n.thresholdSettings,
+        actions: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: context.l10n.resetToDefaults,
+                    icon: Icons.refresh_rounded,
+                    type: AppButtonType.normal,
+                    onPressed: () {
+                      setState(() {
+                        _floorController.text = '500';
+                        _ceilingController.text = '2000';
+                      });
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: AppButton(
-                  label: context.l10n.saveLabel,
-                  icon: Icons.check_rounded,
-                  type: AppButtonType.primary,
-                  onPressed: _save,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppButton(
+                    label: context.l10n.saveLabel,
+                    icon: Icons.check_rounded,
+                    type: AppButtonType.primary,
+                    onPressed: _save,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ThresholdField(
-            heading: context.l10n.thresholdFloorHeading,
-            description: context.l10n.thresholdSmallDesc,
-            controller: _floorController,
-            symbol: symbol,
-            cs: cs,
-            onChanged: () => setState(() {}),
-          ),
-          const SizedBox(height: 28),
-          _ThresholdField(
-            heading: context.l10n.thresholdCeilingHeading,
-            description: context.l10n.thresholdLargeDesc,
-            controller: _ceilingController,
-            symbol: symbol,
-            cs: cs,
-            onChanged: () => setState(() {}),
-          ),
-          const SizedBox(height: 28),
-          _PreviewLogic(
-            floor: _previewFloor,
-            ceiling: _previewCeiling,
-            symbol: symbol,
-            cs: cs,
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _ThresholdField(
+              heading: context.l10n.thresholdFloorHeading,
+              description: context.l10n.thresholdSmallDesc,
+              controller: _floorController,
+              symbol: symbol,
+              cs: cs,
+              onChanged: () => setState(() {}),
+            ),
+            const SizedBox(height: 28),
+            _ThresholdField(
+              heading: context.l10n.thresholdCeilingHeading,
+              description: context.l10n.thresholdLargeDesc,
+              controller: _ceilingController,
+              symbol: symbol,
+              cs: cs,
+              onChanged: () => setState(() {}),
+            ),
+            const SizedBox(height: 28),
+            _PreviewLogic(
+              floor: _previewFloor,
+              ceiling: _previewCeiling,
+              symbol: symbol,
+              cs: cs,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -155,17 +159,14 @@ class _ThresholdField extends StatelessWidget {
           heading,
           style: localeFont(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           description,
-          style: localeFont(
-            fontSize: 13,
-            color: cs.onSurfaceVariant,
-          ),
+          style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -183,7 +184,7 @@ class _ThresholdField extends StatelessWidget {
             filled: true,
             fillColor: cs.surfaceContainerHighest,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.large),
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(
@@ -218,10 +219,10 @@ class _PreviewLogic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,21 +230,30 @@ class _PreviewLogic extends StatelessWidget {
           Text(
             context.l10n.previewLogic,
             style: localeFont(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
           ),
           const SizedBox(height: 12),
-          _PreviewRow(label: context.l10n.sizeSmall, value: '< ${_fmt(floor)}', cs: cs),
+          _PreviewRow(
+            label: context.l10n.sizeSmall,
+            value: '< ${_fmt(floor)}',
+            cs: cs,
+          ),
           const SizedBox(height: 8),
           _PreviewRow(
-              label: context.l10n.sizeMedium,
-              value: '${_fmt(floor)} - ${_fmt(ceiling)}',
-              cs: cs),
+            label: context.l10n.sizeMedium,
+            value: '${_fmt(floor)} - ${_fmt(ceiling)}',
+            cs: cs,
+          ),
           const SizedBox(height: 8),
-          _PreviewRow(label: context.l10n.sizeLarge, value: '> ${_fmt(ceiling)}', cs: cs),
+          _PreviewRow(
+            label: context.l10n.sizeLarge,
+            value: '> ${_fmt(ceiling)}',
+            cs: cs,
+          ),
         ],
       ),
     );
@@ -268,24 +278,15 @@ class _PreviewRow extends StatelessWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: cs.primary,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
         ),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: localeFont(
-            fontSize: 14,
-            color: cs.onSurface,
-          ),
-        ),
+        Text(label, style: localeFont(fontSize: 14, color: cs.onSurface)),
         const Spacer(),
         Text(
           value,
           style: localeFont(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
           ),

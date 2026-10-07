@@ -64,7 +64,11 @@ Future<void> restorePurchases(BuildContext context, WidgetRef ref) async {
     BillingDiagnostics.instance.recordError('restorePurchasesFlow:timeout', e);
   } catch (e, stack) {
     caughtError = e;
-    BillingDiagnostics.instance.recordError('restorePurchasesFlow:error', e, stack);
+    BillingDiagnostics.instance.recordError(
+      'restorePurchasesFlow:error',
+      e,
+      stack,
+    );
   } finally {
     // 3. Always dismiss the loading dialog defensively.
     if (context.mounted) {
@@ -121,15 +125,14 @@ void showPlayStoreCacheHelpDialog(BuildContext context) {
   showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
-      backgroundColor: cs.surfaceContainerHigh,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
+        borderRadius: BorderRadius.circular(KuberShape.extraLarge),
       ),
       title: Text(
         'Didn\'t find your purchase?',
         style: localeFont(
-          fontWeight: FontWeight.w700,
-          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
           color: cs.onSurface,
         ),
       ),
@@ -141,27 +144,24 @@ void showPlayStoreCacheHelpDialog(BuildContext context) {
             Text(
               'If you already bought Kuber Pro on this Google account, Google Play Store may need a moment to refresh its purchase cache:',
               style: localeFont(
-                fontSize: 13.5,
+                fontSize: 14,
                 color: cs.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: KuberSpacing.md),
-            _StepRow(
-              number: '1',
-              text: 'Open the Google Play Store app.',
-            ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.md),
+            _StepRow(number: '1', text: 'Open the Google Play Store app.'),
+            const SizedBox(height: KuberSpace.sm),
             _StepRow(
               number: '2',
               text: 'Tap your profile icon in the top right corner.',
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             _StepRow(
               number: '3',
               text: 'Tap "Manage apps & device" or pull down to refresh.',
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             _StepRow(
               number: '4',
               text: 'Return to Kuber and tap "Restore purchases" again.',
@@ -188,7 +188,7 @@ void showPlayStoreCacheHelpDialog(BuildContext context) {
           },
           style: FilledButton.styleFrom(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.medium),
             ),
           ),
           child: Text(
@@ -225,20 +225,16 @@ class _StepRow extends StatelessWidget {
             number,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.primary,
             ),
           ),
         ),
-        const SizedBox(width: KuberSpacing.sm),
+        const SizedBox(width: KuberSpace.sm),
         Expanded(
           child: Text(
             text,
-            style: localeFont(
-              fontSize: 13,
-              color: cs.onSurface,
-              height: 1.35,
-            ),
+            style: localeFont(fontSize: 14, color: cs.onSurface, height: 1.35),
           ),
         ),
       ],
@@ -258,7 +254,7 @@ class RestorePurchasesLink extends ConsumerWidget {
       child: Text(
         'Restore purchases',
         style: localeFont(
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
           color: cs.primary,
         ),

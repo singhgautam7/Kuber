@@ -61,7 +61,7 @@ class PersonAvatar extends StatelessWidget {
       height: dim,
       decoration: BoxDecoration(
         color: _bgColor.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
       ),
       alignment: Alignment.center,
       child: Text(

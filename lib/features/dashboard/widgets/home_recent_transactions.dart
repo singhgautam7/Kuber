@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/transaction_detail_sheet.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -31,33 +33,22 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
     final textTheme = theme.textTheme;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         KuberHomeWidgetTitle(
           title: context.l10n.recentTransactions,
-          trailing: GestureDetector(
+          trailing: KuberSectionAction(
+            label: sentenceCase(context.l10n.viewAll),
             onTap: () => context.go('/history'),
-            child: Text(
-              context.l10n.viewAll,
-              style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.0,
-                color: cs.primary,
-              ),
-            ),
           ),
         ),
         recentAsync.when(
           loading: () => const _RecentTransactionsSkeleton(),
-          error: (e, _) => Center(child: Text('${context.l10n.errorLabel}: $e')),
+          error: (e, _) =>
+              Center(child: Text('${context.l10n.errorLabel}: $e')),
           data: (transactions) {
             if (transactions.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(KuberSpacing.xl),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-                ),
+              return KuberCard(
                 child: Center(
                   child: Text(
                     context.l10n.noTransactionsYet,
@@ -90,8 +81,10 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
             final groups = groupTransactionsByDate(transactions);
 
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: groups.map((group) {
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DateGroupHeader(
                       label: group.label,
@@ -99,7 +92,8 @@ class HomeRecentTransactionsCard extends ConsumerWidget {
                     ),
                     TransactionDayCard(
                       transactions: group.transactions,
-                      onDelete: (t) => deleteTransactionWithUndo(context, ref, t),
+                      onDelete: (t) =>
+                          deleteTransactionWithUndo(context, ref, t),
                       onTap: (t) => showTransactionDetailSheet(context, ref, t),
                       onEdit: (t) => context.push('/add-transaction', extra: t),
                       formatter: fmt,
@@ -126,45 +120,39 @@ class _RecentTransactionsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.md,
-        vertical: KuberSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        children: [
-          for (var i = 0; i < 4; i++)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.sm),
+    return KuberGroup(
+      children: [
+        for (var i = 0; i < 3; i++)
+          const SizedBox(
+            height: KuberSpace.listItem2,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: const [
-                  SkeletonBlock(width: 38, height: 38, borderRadius: 10),
-                  SizedBox(width: KuberSpacing.md),
+                children: [
+                  SkeletonBlock(width: 40, height: 40, borderRadius: 12),
+                  SizedBox(width: KuberSpace.lg),
                   Expanded(
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SkeletonBlock(
-                            width: 130, height: 13, borderRadius: 5),
-                        SizedBox(height: 7),
-                        SkeletonBlock(
-                            width: 80, height: 11, borderRadius: 5),
+                          width: 130,
+                          height: 12,
+                          borderRadius: 999,
+                        ),
+                        SizedBox(height: 8),
+                        SkeletonBlock(width: 80, height: 10, borderRadius: 999),
                       ],
                     ),
                   ),
-                  SizedBox(width: KuberSpacing.md),
-                  SkeletonBlock(width: 60, height: 14, borderRadius: 5),
+                  SizedBox(width: KuberSpace.md),
+                  SkeletonBlock(width: 56, height: 12, borderRadius: 999),
                 ],
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

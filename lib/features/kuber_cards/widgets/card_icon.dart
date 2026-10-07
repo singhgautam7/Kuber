@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:kuber/core/theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,14 +23,16 @@ bool _bankCacheWarmed = false;
 Future<void> warmBankIconCache() async {
   if (_bankCacheWarmed) return;
   _bankCacheWarmed = true;
-  await Future.wait(kBankIconKeys.map((key) async {
-    final name = key.substring(kBankIconPrefix.length);
-    try {
-      await SvgAssetLoader('assets/bank_icons/$name.svg').loadBytes(null);
-    } catch (_) {
-      // A missing/broken asset just falls back to the neutral glyph at render.
-    }
-  }));
+  await Future.wait(
+    kBankIconKeys.map((key) async {
+      final name = key.substring(kBankIconPrefix.length);
+      try {
+        await SvgAssetLoader('assets/bank_icons/$name.svg').loadBytes(null);
+      } catch (_) {
+        // A missing/broken asset just falls back to the neutral glyph at render.
+      }
+    }),
+  );
 }
 
 /// Resolves a Kuber Cards icon key to a rendered, tinted glyph. Handles three
@@ -59,7 +62,7 @@ class CardIcon extends StatelessWidget {
       // stat on every list-row build/scroll. `Image.file` decodes via Flutter's
       // path-keyed image cache and its errorBuilder covers a missing file.
       return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
         child: Image.file(
           File(path),
           width: size,

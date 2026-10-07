@@ -4,17 +4,148 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../categories/providers/category_provider.dart';
 import '../../tags/providers/tag_providers.dart';
 import '../data/kuber_note.dart';
 import '../data/notes_repository.dart';
 import '../utils/note_format.dart';
 
-/// List-view note card (screen 1a): pinned icon + one-line bold title +
-/// two-line muted preview + relative date / category chip / tag chip /
-/// read-only chip row.
-class NoteListCard extends ConsumerWidget {
+final _numberRe = RegExp(r'\d(?:[\d,]*\d)?(?:\.\d+)?');
+
+/// Preview text with numbers tinted primary (board 3.23) so quick math reads
+/// at a glance.
+TextSpan _previewSpan(String text, TextStyle base, Color numberColor) {
+  final spans = <TextSpan>[];
+  var last = 0;
+  for (final m in _numberRe.allMatches(text)) {
+    if (m.start > last) {
+      spans.add(TextSpan(text: text.substring(last, m.start)));
+    }
+    spans.add(
+      TextSpan(
+        text: m.group(0),
+        style: TextStyle(color: numberColor, fontWeight: FontWeight.w600),
+      ),
+    );
+    last = m.end;
+  }
+  if (last < text.length) spans.add(TextSpan(text: text.substring(last)));
+  return TextSpan(style: base, children: spans);
+}
+
+/// Title line shared by list rows and grid cards: selection circle, pin,
+/// title, lock.
+class _NoteTitle extends StatelessWidget {
+  final KuberNote note;
+  final bool selectionMode;
+  final bool selected;
+  final TextStyle style;
+
+  const _NoteTitle({
+    required this.note,
+    required this.selectionMode,
+    required this.selected,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final fg = selected ? cs.onSecondaryContainer : cs.onSurface;
+    return Row(
+      children: [
+        if (selectionMode) ...[
+          Icon(
+            selected
+                ? Icons.check_circle_rounded
+                : Icons.radio_button_unchecked_rounded,
+            size: 20,
+            color: selected ? cs.primary : cs.onSurfaceVariant,
+          ),
+          const SizedBox(width: KuberSpace.md),
+        ],
+        if (note.pinned) ...[
+          Icon(Icons.push_pin_rounded, size: 14, color: fg),
+          const SizedBox(width: 6),
+        ],
+        Flexible(
+          child: Text(
+            note.title.isEmpty ? 'Untitled note' : note.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: style.copyWith(color: fg),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Date + category pill + tag / read-only pills.
+class _NoteMeta extends ConsumerWidget {
+  final KuberNote note;
+  final bool compact;
+
+  const _NoteMeta({required this.note, this.compact = false});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final category = ref.watch(
+      categoryListProvider.select(
+        (async) => async.valueOrNull?.firstWhereOrNull(
+          (c) => c.id.toString() == note.categoryId,
+        ),
+      ),
+    );
+    final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
+    final firstTag = allTags.firstWhereOrNull(
+      (t) => note.tagIds.contains(t.id.toString()),
+    );
+
+    Widget pill(String label, Color bg, Color fg) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
+      decoration: BoxDecoration(color: bg, borderRadius: KuberShape.fullR),
+      child: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: tt.labelSmall!.copyWith(color: fg),
+      ),
+    );
+
+    final pills = <Widget>[
+      if (category != null)
+        () {
+          final t = categoryTones(context, Color(category.colorValue));
+          return pill(category.name, t.container, t.fg);
+        }(),
+      if (firstTag != null && (!compact || category == null))
+        pill('#${firstTag.name}', cs.surfaceContainerHigh, cs.onSurfaceVariant),
+      if (note.isReadOnly && !compact)
+        pill('Read-only', cs.surfaceContainerHigh, cs.onSurfaceVariant),
+    ];
+
+    return Row(
+      children: [
+        Text(
+          noteRelativeTime(note.updatedAt),
+          style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+        ),
+        for (final p in pills) ...[
+          const SizedBox(width: KuberSpace.sm),
+          Flexible(child: p),
+        ],
+      ],
+    );
+  }
+}
+
+/// List-view note row (board 3.23): pin + title, two-line preview with
+/// tinted numbers, date + pills. Lives inside a [KuberGroup]; selected rows
+/// fill secondaryContainer.
+class NoteListCard extends StatelessWidget {
   final KuberNote note;
   final bool selectionMode;
   final bool selected;
@@ -31,128 +162,65 @@ class NoteListCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final preview = notePlainText(note).replaceAll('\n', ' ').trim();
+    final inset = selectionMode ? 20.0 + KuberSpace.md : 0.0;
 
-    final category = ref.watch(categoryListProvider.select(
-      (async) => async.valueOrNull
-          ?.firstWhereOrNull((c) => c.id.toString() == note.categoryId),
-    ));
-    final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
-    final firstTag = allTags
-        .firstWhereOrNull((t) => note.tagIds.contains(t.id.toString()));
-
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 9),
-        padding: const EdgeInsets.fromLTRB(13, 12, 13, 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: selected ? cs.primary : cs.outline,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (selectionMode) ...[
-                  Icon(
-                    selected
-                        ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    size: 18,
-                    color: selected ? cs.primary : cs.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 7),
-                ],
-                if (note.pinned) ...[
-                  Icon(Icons.push_pin_rounded, size: 13, color: cs.primary),
-                  const SizedBox(width: 7),
-                ],
-                Expanded(
-                  child: Text(
-                    note.title.isEmpty ? 'Untitled note' : note.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ),
-                if (note.isReadOnly)
-                  Icon(Icons.lock_outline_rounded,
-                      size: 13, color: cs.onSurfaceVariant),
-              ],
-            ),
-            if (preview.isNotEmpty) ...[
-              const SizedBox(height: 5),
-              Text(
-                preview,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: localeFont(
-                  fontSize: 12,
-                  color: cs.onSurfaceVariant,
-                  height: 1.5,
+    return Material(
+      color: selected ? cs.secondaryContainer : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _NoteTitle(
+                note: note,
+                selectionMode: selectionMode,
+                selected: selected,
+                style: tt.titleMedium!,
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: inset),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (preview.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text.rich(
+                        _previewSpan(
+                          preview,
+                          tt.bodyMedium!.copyWith(
+                            color: selected
+                                ? cs.onSecondaryContainer
+                                : cs.onSurfaceVariant,
+                          ),
+                          cs.primary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: 6),
+                    _NoteMeta(note: note),
+                  ],
                 ),
               ),
             ],
-            const SizedBox(height: 9),
-            Row(
-              children: [
-                Text(
-                  noteRelativeTime(note.updatedAt),
-                  style: localeFont(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                  ),
-                ),
-                if (category != null || firstTag != null || note.isReadOnly)
-                  Container(
-                    width: 3,
-                    height: 3,
-                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                    decoration: BoxDecoration(
-                      color: cs.outline,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                if (category != null) ...[
-                  _Chip(
-                    label: category.name,
-                    color: harmonizeCategory(
-                        context, Color(category.colorValue)),
-                    tinted: true,
-                  ),
-                  const SizedBox(width: 6),
-                ],
-                if (firstTag != null) ...[
-                  _Chip(label: '#${firstTag.name}', color: cs.onSurfaceVariant),
-                  const SizedBox(width: 6),
-                ],
-                if (note.isReadOnly)
-                  _Chip(label: 'Read-only', color: cs.onSurfaceVariant),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Grid-view note card (screen 1b): title + preview + a compact meta row
-/// (relative time, category and first tag) like the list card.
-class NoteGridCard extends ConsumerWidget {
+/// Grid-view note card (board 3.23): title, preview with tinted numbers,
+/// date + one pill at the bottom.
+class NoteGridCard extends StatelessWidget {
   final KuberNote note;
   final bool selectionMode;
   final bool selected;
@@ -169,139 +237,52 @@ class NoteGridCard extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final preview = notePlainText(note).trim();
-    final category = ref.watch(categoryListProvider.select(
-      (async) => async.valueOrNull
-          ?.firstWhereOrNull((c) => c.id.toString() == note.categoryId),
-    ));
-    final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
-    final firstTag = allTags
-        .firstWhereOrNull((t) => note.tagIds.contains(t.id.toString()));
-
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        padding: const EdgeInsets.all(11),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: selected ? cs.primary : cs.outline,
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                if (selectionMode) ...[
-                  Icon(
-                    selected
-                        ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    size: 15,
-                    color: selected ? cs.primary : cs.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 5),
-                ],
-                if (note.pinned) ...[
-                  Icon(Icons.push_pin_rounded, size: 11, color: cs.primary),
-                  const SizedBox(width: 5),
-                ],
-                Expanded(
-                  child: Text(
-                    note.title.isEmpty ? 'Untitled note' : note.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: localeFont(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (preview.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Expanded(
-                child: Text(
-                  preview,
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                    height: 1.55,
-                  ),
-                ),
-              ),
-            ] else
-              const Spacer(),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  noteRelativeTime(note.updatedAt),
-                  style: localeFont(
-                    fontSize: 10,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                  ),
-                ),
-                if (category != null) ...[
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: _Chip(
-                      label: category.name,
-                      color: harmonizeCategory(
-                          context, Color(category.colorValue)),
-                      tinted: true,
-                    ),
-                  ),
-                ] else if (firstTag != null) ...[
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: _Chip(
-                        label: '#${firstTag.name}',
-                        color: cs.onSurfaceVariant),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final bool tinted;
-
-  const _Chip({required this.label, required this.color, this.tinted = false});
-
-  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-      decoration: BoxDecoration(
-        color: tinted ? color.withValues(alpha: 0.12) : cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: tinted ? null : Border.all(color: cs.outline),
+    final tt = Theme.of(context).textTheme;
+    final preview = notePlainText(note).trim();
+
+    return Material(
+      color: selected ? cs.secondaryContainer : cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.cardR,
+        side: BorderSide(color: cs.outlineVariant),
       ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 10,
-          fontWeight: tinted ? FontWeight.w600 : FontWeight.w400,
-          color: tinted ? color : cs.onSurfaceVariant,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
+          padding: const EdgeInsets.all(KuberSpace.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _NoteTitle(
+                note: note,
+                selectionMode: selectionMode,
+                selected: selected,
+                style: tt.titleSmall!,
+              ),
+              const SizedBox(height: 6),
+              Expanded(
+                child: Text.rich(
+                  _previewSpan(
+                    preview,
+                    tt.bodySmall!.copyWith(
+                      color: selected
+                          ? cs.onSecondaryContainer
+                          : cs.onSurfaceVariant,
+                    ),
+                    cs.primary,
+                  ),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: KuberSpace.sm),
+              _NoteMeta(note: note, compact: true),
+            ],
+          ),
         ),
       ),
     );

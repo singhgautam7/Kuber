@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../core/models/info_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../data/widget_catalog.dart';
 import '../widgets/widget_detail_sheet.dart';
 
@@ -21,20 +20,13 @@ class WidgetsGalleryScreen extends StatelessWidget {
             child: KuberAppBar(
               title: 'Widgets',
               showBack: true,
-              showHome: true,
               infoConfig: _aboutWidgetsInfo,
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: 'Widgets',
-              description: 'Home screen widgets to keep Kuber in view',
             ),
           ),
           _group(context, 'SMALL WIDGETS', WidgetSizeGroup.small),
           _group(context, 'MEDIUM WIDGETS', WidgetSizeGroup.medium),
           _group(context, 'LARGE WIDGETS', WidgetSizeGroup.large),
-          const SliverToBoxAdapter(child: SizedBox(height: KuberSpacing.xxl)),
+          const SliverToBoxAdapter(child: SizedBox(height: KuberSpace.xxl)),
         ],
       ),
     );
@@ -44,16 +36,21 @@ class WidgetsGalleryScreen extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final entries = kWidgetCatalog.where((e) => e.group == group).toList();
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpace.lg,
+        0,
+        KuberSpace.lg,
+        KuberSpace.lg,
+      ),
       sliver: SliverList(
         delegate: SliverChildListDelegate([
           Padding(
-            padding: const EdgeInsets.only(bottom: KuberSpacing.sm, left: 4),
+            padding: const EdgeInsets.only(bottom: KuberSpace.sm, left: 4),
             child: Text(
               heading,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 1.2,
                 color: cs.onSurfaceVariant,
               ),
@@ -62,13 +59,20 @@ class WidgetsGalleryScreen extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outlineVariant),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+              border: Border.all(color: cs.outline),
             ),
             child: Column(
               children: [
                 for (var i = 0; i < entries.length; i++) ...[
-                  if (i > 0) Divider(height: 1, thickness: 0.5, color: cs.outlineVariant, indent: 16, endIndent: 16),
+                  if (i > 0)
+                    Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: cs.outline,
+                      indent: 16,
+                      endIndent: 16,
+                    ),
                   _row(context, entries[i]),
                 ],
               ],
@@ -82,7 +86,7 @@ class WidgetsGalleryScreen extends StatelessWidget {
   Widget _row(BuildContext context, WidgetCatalogEntry entry) {
     final cs = Theme.of(context).colorScheme;
     return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+      borderRadius: BorderRadius.circular(KuberShape.full),
       onTap: () => showWidgetDetailSheet(context, entry),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -92,9 +96,19 @@ class WidgetsGalleryScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(entry.name, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                  Text(
+                    entry.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(entry.description, style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant)),
+                  Text(
+                    entry.description,
+                    style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                  ),
                 ],
               ),
             ),
@@ -103,13 +117,24 @@ class WidgetsGalleryScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
-                border: Border.all(color: cs.outlineVariant),
+                borderRadius: BorderRadius.circular(KuberShape.small),
+                border: Border.all(color: cs.outline),
               ),
-              child: Text(entry.sizeLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+              child: Text(
+                entry.sizeLabel,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.chevron_right_rounded, color: cs.onSurfaceVariant.withValues(alpha: 0.5), size: 20),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 20,
+            ),
           ],
         ),
       ),

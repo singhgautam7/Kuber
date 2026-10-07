@@ -21,6 +21,9 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../core/utils/color_harmonizer.dart';
+import '../../../shared/widgets/kuber_progress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -39,12 +42,19 @@ class LedgerHero extends ConsumerWidget {
   final int receiveCount;
   final int oweCount;
 
+  /// Unsettled entries and the distinct people behind them (board 3.20
+  /// footer: "3 active entries · across 3 people").
+  final int activeEntries;
+  final int peopleCount;
+
   const LedgerHero({
     super.key,
     required this.toReceive,
     required this.owed,
     required this.receiveCount,
     required this.oweCount,
+    required this.activeEntries,
+    required this.peopleCount,
   });
 
   @override
@@ -58,210 +68,121 @@ class LedgerHero extends ConsumerWidget {
     final netColor = isFlat
         ? cs.onSurface
         : isFavour
-        ? cs.tertiary
-        : cs.error;
-    final activeCount = receiveCount + oweCount;
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            Color.alphaBlend(
-              netColor.withValues(alpha: 0.16),
-              cs.surfaceContainer,
-            ),
-            cs.surfaceContainer,
-          ],
-          stops: const [0.0, 0.75],
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.netPosition,
-                  style: localeFont(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  isFlat
-                      ? '₹0'
-                      : '${isFavour ? '+' : '−'}'
-                            '${maskAmount(fmt.formatCurrency(net.abs()), masked)}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: netColor,
-                    letterSpacing: -0.8,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text.rich(
-                  TextSpan(
-                    style: localeFont(
-                      fontSize: 11.5,
-                      color: cs.onSurfaceVariant,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: isFlat
-                            ? context.l10n.ledgerEvensOut
-                            : isFavour
-                            ? context.l10n.ledgerInYourFavour
-                            : context.l10n.ledgerOwedToOthers,
-                      ),
-                      const TextSpan(text: ' · '),
-                      TextSpan(
-                        text: context.l10n.ledgerActiveEntries(activeCount),
-                        style: localeFont(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SideCard(
-                    side: _Side.receive,
-                    amount: toReceive,
-                    peopleCount: receiveCount,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _SideCard(
-                    side: _Side.owe,
-                    amount: owed,
-                    peopleCount: oweCount,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    final tt = Theme.of(context).textTheme;
+    final m = context.kuberMoney;
+    final total = toReceive + owed;
+    Widget dot(Color c) => Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(color: c, shape: BoxShape.circle),
     );
-  }
-}
+    Widget bar(Color c) => Container(
+      height: 8,
+      decoration: BoxDecoration(color: c, borderRadius: KuberShape.fullR),
+    );
 
-enum _Side { receive, owe }
-
-class _SideCard extends ConsumerWidget {
-  final _Side side;
-  final double amount;
-  final int peopleCount;
-  const _SideCard({
-    required this.side,
-    required this.amount,
-    required this.peopleCount,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final fmt = ref.watch(formatterProvider);
-    final masked = ref.watch(privacyModeProvider);
-
-    final isReceive = side == _Side.receive;
-    final accent = isReceive ? cs.tertiary : cs.error;
-    final iconData = isReceive
-        ? Icons.arrow_downward_rounded
-        : Icons.arrow_upward_rounded;
-    final label = isReceive ? context.l10n.youWillReceive : context.l10n.youOwe;
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.md + 4),
-      ),
+    // Board 3.20: the hero card pattern. Net (+ "in your favour"), a
+    // lent / borrowed split bar, the legend and the entry count.
+    return KuberCard(
+      hero: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            context.l10n.netBalanceUpper,
+            style: tt.labelMedium!.copyWith(
+              letterSpacing: 0.8,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
-              Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(KuberRadius.sm + 2),
-                ),
-                alignment: Alignment.center,
-                child: Icon(iconData, size: 14, color: accent),
+              Text(
+                isFlat
+                    ? '₹0'
+                    : '${isFavour ? '+' : '−'}'
+                          '${maskAmount(fmt.formatCurrency(net.abs()), masked)}',
+                style: tt.headlineMedium!.copyWith(color: netColor),
               ),
-              const SizedBox(width: 6),
-              Expanded(
+              const SizedBox(width: 8),
+              Flexible(
                 child: Text(
-                  label.toUpperCase(),
+                  isFlat
+                      ? context.l10n.ledgerEvensOut
+                      : isFavour
+                      ? context.l10n.ledgerInYourFavour
+                      : context.l10n.ledgerOwedToOthers,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 0.6,
-                  ),
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            maskAmount(fmt.formatCurrency(amount), masked),
-            style: localeFont(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: accent,
-              letterSpacing: -0.3,
+          const SizedBox(height: KuberSpace.lg),
+          if (total == 0)
+            bar(cs.surfaceContainerHighest)
+          else
+            Row(
+              children: [
+                if (toReceive > 0)
+                  Expanded(
+                    flex: (toReceive / total * 1000).round().clamp(1, 1000),
+                    child: bar(m.income),
+                  ),
+                if (toReceive > 0 && owed > 0) const SizedBox(width: 4),
+                if (owed > 0)
+                  Expanded(
+                    flex: (owed / total * 1000).round().clamp(1, 1000),
+                    child: bar(m.expense),
+                  ),
+              ],
             ),
+          const SizedBox(height: KuberSpace.md),
+          Row(
+            children: [
+              dot(m.income),
+              const SizedBox(width: 6),
+              Text(
+                context.l10n.lentLabel,
+                style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                maskAmount(fmt.formatCurrency(toReceive), masked),
+                style: tt.titleSmall!.copyWith(color: cs.onSurface),
+              ),
+              const Spacer(),
+              dot(m.expense),
+              const SizedBox(width: 6),
+              Text(
+                context.l10n.borrowedLabel,
+                style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                maskAmount(fmt.formatCurrency(owed), masked),
+                style: tt.titleSmall!.copyWith(color: cs.onSurface),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: KuberSpace.md),
           Text(
-            peopleCount == 0
-                ? context.l10n.ledgerNoOne
-                : context.l10n.ledgerAcrossPeople(peopleCount),
-            style: localeFont(
-              fontSize: 10.5,
-              color: cs.onSurfaceVariant,
-            ),
+            '${context.l10n.ledgerActiveEntries(activeEntries)}'
+            '${peopleCount > 0 ? ' · ${context.l10n.ledgerAcrossPeople(peopleCount)}' : ''}',
+            style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Entry card
-// ---------------------------------------------------------------------------
 
 enum LedgerEntryType { lent, borrowed }
 
@@ -298,166 +219,111 @@ class LedgerEntryCard extends ConsumerWidget {
     final masked = ref.watch(privacyModeProvider);
 
     final isLent = type == LedgerEntryType.lent;
-    final accent = isLent ? cs.tertiary : cs.error;
+    final accent = isLent
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
 
     final dueLabel = isSettled
         ? settledAt == null
               ? context.l10n.settledUpper
-              : context.l10n.settledOnUpper(
-                  DateFormat('MMM d').format(settledAt!).toUpperCase())
+              // Sentence-case the template, keep the month capitalised
+              // ("Due Oct 27", not "Due oct 27").
+              : sentenceCase(context.l10n.settledOnUpper('§')).replaceFirst(
+                  '§',
+                  DateFormat('MMM d').format(settledAt!),
+                )
         : expectedDate == null
         ? context.l10n.noDueDate
-        : context.l10n.dueOnUpper(
-            DateFormat('MMM d').format(expectedDate!).toUpperCase());
+        : sentenceCase(context.l10n.dueOnUpper('§')).replaceFirst(
+            '§',
+            DateFormat('MMM d').format(expectedDate!),
+          );
 
     final overdue =
         !isSettled &&
         expectedDate != null &&
         expectedDate!.isBefore(DateTime.now());
 
-    return Opacity(
-      opacity: isSettled ? 0.55 : 1.0,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          child: Container(
-            decoration: BoxDecoration(
-              color: cs.surfaceContainer,
-              border: Border.all(color: cs.outline),
-              borderRadius: BorderRadius.circular(KuberRadius.lg),
-            ),
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final theme = Theme.of(context);
+    // Board 3.20 row: initial avatar, name, due / settled line, signed amount
+    // with the type under it; the wavy bar shows partial repayment.
+    final amountText = isSettled
+        ? maskAmount(fmt.formatCurrency(originalAmount), masked)
+        : maskAmount(
+            '${isLent ? '+' : '−'}${fmt.formatCurrency(remaining)}',
+            masked,
+          );
+    final row = InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    _Avatar(name: personName),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  personName,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: localeFont(
-                                    fontSize: 14.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.onSurface,
-                                    letterSpacing: -0.2,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              _TypePill(type: type, isSettled: isSettled),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text.rich(
-                            TextSpan(
-                              style: localeFont(
-                                fontSize: 10.5,
-                                color: cs.onSurfaceVariant,
-                                letterSpacing: 0.4,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: dueLabel,
-                                  style: localeFont(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: overdue
-                                        ? cs.error
-                                        : cs.onSurfaceVariant,
-                                    letterSpacing: 0.4,
-                                  ),
-                                ),
-                                if (overdue)
-                                  TextSpan(
-                                    text: ' · ${context.l10n.overdueLower}',
-                                    style: localeFont(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: cs.error,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      maskAmount(fmt.formatCurrency(originalAmount), masked),
-                      style: localeFont(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        letterSpacing: -0.3,
-                        decoration: isSettled
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-                if (!isSettled) ...[
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(2),
-                    child: SizedBox(
-                      height: 4,
-                      child: Stack(
-                        children: [
-                          Container(color: cs.surfaceContainerHigh),
-                          FractionallySizedBox(
-                            widthFactor: progress.clamp(0.0, 1.0),
-                            child: Container(color: accent),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
+                _Avatar(name: personName),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          isLent
-                              ? context.l10n.pctReceived(
-                                  (progress * 100).toStringAsFixed(0))
-                              : context.l10n.pctPaidBack(
-                                  (progress * 100).toStringAsFixed(0)),
-                          style: localeFont(
-                            fontSize: 10.5,
-                            color: cs.onSurfaceVariant,
-                          ),
+                      Text(
+                        personName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          color: cs.onSurface,
                         ),
                       ),
                       Text(
-                        context.l10n.amountRemaining(
-                            maskAmount(fmt.formatCurrency(remaining), masked)),
-                        style: localeFont(
-                          fontSize: 10.5,
-                          color: cs.onSurfaceVariant,
+                        dueLabel +
+                            (overdue ? ' · ${context.l10n.overdueLower}' : ''),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: overdue ? cs.error : cs.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      amountText,
+                      style: theme.textTheme.titleMedium!.copyWith(
+                        color: isSettled ? cs.onSurfaceVariant : accent,
+                      ),
+                    ),
+                    Text(
+                      (isSettled
+                              ? context.l10n.settledUpper
+                              : isLent
+                              ? context.l10n.lentLabel
+                              : context.l10n.borrowedLabel)
+                          .toUpperCase(),
+                      style: theme.textTheme.labelSmall!.copyWith(
+                        letterSpacing: 0.6,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ),
+            if (!isSettled && progress > 0) ...[
+              const SizedBox(height: KuberSpace.md),
+              KuberLinearProgress(value: progress.clamp(0.0, 1.0)),
+            ],
+          ],
         ),
       ),
     );
+    return isSettled ? Opacity(opacity: 0.55, child: row) : row;
   }
 }
 
@@ -475,72 +341,22 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    // Tinted from the categorical palette by name, re-toned (board 3.20).
+    final palette = context.kuberChart.categorical;
+    final tones = categoryTones(
+      context,
+      palette[name.hashCode.abs() % palette.length],
+    );
     return Container(
       width: 40,
       height: 40,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        border: Border.all(color: cs.outline),
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: tones.container, shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Text(
         _initials(),
-        style: localeFont(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: cs.onSurface,
-          letterSpacing: -0.1,
-        ),
-      ),
-    );
-  }
-}
-
-class _TypePill extends StatelessWidget {
-  final LedgerEntryType type;
-  final bool isSettled;
-  const _TypePill({required this.type, required this.isSettled});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final Color fg;
-    final Color bg;
-    final Color border;
-    final String label;
-    if (isSettled) {
-      label = context.l10n.settledUpper;
-      fg = cs.onSurfaceVariant;
-      bg = cs.surfaceContainerHigh;
-      border = cs.outline;
-    } else if (type == LedgerEntryType.lent) {
-      label = context.l10n.lentUpper;
-      fg = cs.tertiary;
-      bg = cs.tertiary.withValues(alpha: 0.12);
-      border = cs.tertiary.withValues(alpha: 0.30);
-    } else {
-      label = context.l10n.borrowedUpper;
-      fg = cs.error;
-      bg = cs.error.withValues(alpha: 0.12);
-      border = cs.error.withValues(alpha: 0.30);
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-      decoration: BoxDecoration(
-        color: bg,
-        border: Border.all(color: border),
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-      ),
-      child: Text(
-        label,
-        style: localeFont(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          color: fg,
-          letterSpacing: 0.6,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium!.copyWith(color: tones.fg),
       ),
     );
   }

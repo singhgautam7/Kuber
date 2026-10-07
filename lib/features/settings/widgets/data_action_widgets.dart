@@ -1,6 +1,7 @@
 import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_list.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/loading_widgets.dart';
@@ -36,14 +37,16 @@ class ConfirmActionSheet extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.xl,
-        KuberSpacing.lg,
-        KuberSpacing.xl,
-        viewPadding > 0 ? viewPadding + KuberSpacing.lg : KuberSpacing.xxl,
+        KuberSpace.xl,
+        KuberSpace.lg,
+        KuberSpace.xl,
+        viewPadding > 0 ? viewPadding + KuberSpace.lg : KuberSpace.xxl,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -54,10 +57,10 @@ class ConfirmActionSheet extends StatelessWidget {
             height: 4,
             decoration: BoxDecoration(
               color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(KuberShape.full),
             ),
           ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
 
           // Icon
           Container(
@@ -66,7 +69,7 @@ class ConfirmActionSheet extends StatelessWidget {
             decoration: BoxDecoration(
               color: destructive
                   ? cs.error.withValues(alpha: 0.1)
-                  : cs.primaryContainer.withValues(alpha: 0.4),
+                  : cs.secondaryContainer.withValues(alpha: 0.4),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -75,36 +78,36 @@ class ConfirmActionSheet extends StatelessWidget {
               color: destructive ? cs.error : cs.primary,
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
 
           // Title
           Text(
             title,
             style: localeFont(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
               letterSpacing: -0.3,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
 
           // Description
           if (warnDescription)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(KuberSpacing.lg),
+              padding: const EdgeInsets.all(KuberSpace.lg),
               decoration: BoxDecoration(
                 color: cs.error.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(KuberRadius.md),
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
                 border: Border.all(color: cs.error.withValues(alpha: 0.3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.warning_amber_rounded, size: 18, color: cs.error),
-                  const SizedBox(width: KuberSpacing.md),
+                  const SizedBox(width: KuberSpace.md),
                   Expanded(
                     child: Text(
                       description,
@@ -122,13 +125,13 @@ class ConfirmActionSheet extends StatelessWidget {
             Text(
               description,
               style: localeFont(
-                fontSize: 13,
+                fontSize: 14,
                 color: cs.onSurfaceVariant,
                 height: 1.45,
               ),
               textAlign: TextAlign.center,
             ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
 
           // Confirm button
           SizedBox(
@@ -144,7 +147,7 @@ class ConfirmActionSheet extends StatelessWidget {
                 foregroundColor: destructive ? cs.onError : cs.onPrimary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.medium),
                 ),
               ),
               child: Text(
@@ -153,7 +156,7 @@ class ConfirmActionSheet extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
 
           // Cancel button
           SizedBox(
@@ -166,8 +169,10 @@ class ConfirmActionSheet extends StatelessWidget {
                 foregroundColor: cs.onSurface,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  side: BorderSide(color: cs.outline.withValues(alpha: 0.1)),
+                  borderRadius: BorderRadius.circular(KuberShape.medium),
+                  side: BorderSide(
+                    color: cs.outlineVariant.withValues(alpha: 0.1),
+                  ),
                 ),
               ),
               child: Text(
@@ -193,6 +198,10 @@ class DataActionRow extends StatelessWidget {
   final VoidCallback onPressed;
   final bool destructive;
 
+  /// Something needs attention (e.g. last backup failed): error tile and an
+  /// error-coloured description.
+  final bool alert;
+
   const DataActionRow({
     super.key,
     required this.icon,
@@ -200,78 +209,52 @@ class DataActionRow extends StatelessWidget {
     required this.description,
     required this.onPressed,
     this.destructive = false,
+    this.alert = false,
   });
 
+  /// One row of a [KuberGroup] (board 3.12): tone tile, title, description,
+  /// chevron. Destructive rows use an errorContainer tile and error title.
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final tt = theme.textTheme;
-
-    final iconBg = destructive
-        ? cs.errorContainer.withValues(alpha: 0.5)
-        : cs.surfaceContainerHigh;
-    final iconColor = destructive ? cs.error : cs.onSurfaceVariant;
-    final borderColor = destructive
-        ? cs.error.withValues(alpha: 0.2)
-        : cs.outline.withValues(alpha: 0.4);
-
-    return Material(
-      color: cs.surfaceContainer,
-      borderRadius: BorderRadius.circular(KuberRadius.lg),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-            border: Border.all(color: borderColor),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(KuberSpacing.sm),
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: tt.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: destructive ? cs.error : cs.onSurface,
-                        letterSpacing: -0.1,
-                      ),
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final danger = destructive || alert;
+    return InkWell(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpace.lg,
+          vertical: KuberSpace.md,
+        ),
+        child: Row(
+          children: [
+            KuberIconTile(
+              icon: icon,
+              tone: danger ? KuberTone.error : KuberTone.secondary,
+            ),
+            const SizedBox(width: KuberSpace.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: tt.titleMedium!.copyWith(
+                      color: destructive ? cs.error : cs.onSurface,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      description,
-                      style: tt.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        height: 1.4,
-                      ),
+                  ),
+                  Text(
+                    description,
+                    style: tt.bodyMedium!.copyWith(
+                      color: alert ? cs.error : cs.onSurfaceVariant,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: KuberSpacing.sm),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: destructive
-                    ? cs.error.withValues(alpha: 0.7)
-                    : cs.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: KuberSpace.sm),
+            const KuberChevron(),
+          ],
         ),
       ),
     );
@@ -321,13 +304,13 @@ class _DataLoadingOverlayState extends State<DataLoadingOverlay>
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           decoration: BoxDecoration(
             color: cs.surface,
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SweepRingWidget(controller: _controller),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
               Text(
                 widget.message,
                 style: localeFont(

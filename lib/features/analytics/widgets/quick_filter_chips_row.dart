@@ -1,4 +1,6 @@
+import '../../../shared/widgets/kuber_chips.dart';
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/l10n_ext.dart';
 
@@ -16,41 +18,21 @@ class QuickFilterChipsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final types = FilterType.values.where((t) => t != FilterType.custom).toList();
+    final types = FilterType.values
+        .where((t) => t != FilterType.custom)
+        .toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    // Presets as wrapping filter chips (board 6, date range).
+    return Wrap(
+      spacing: KuberSpace.sm,
+      runSpacing: KuberSpace.sm,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            context.l10n.quickFilters,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.5,
-            ),
+        for (final type in types)
+          KuberChip(
+            label: sentenceCase(_typeLabel(context, type)),
+            selected: selectedType == type,
+            onTap: () => onTypeSelected(type),
           ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: types.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final type = types[index];
-              final isSelected = selectedType == type;
-              return _FilterChip(
-                label: _typeLabel(context, type),
-                selected: isSelected,
-                onTap: () => onTypeSelected(type),
-              );
-            },
-          ),
-        ),
       ],
     );
   }
@@ -74,38 +56,5 @@ class QuickFilterChipsRow extends StatelessWidget {
       case FilterType.custom:
         return context.l10n.filterCustom;
     }
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _FilterChip({required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? cs.primary : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          label,
-          style: localeFont(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            color: selected ? cs.onPrimary : cs.onSurfaceVariant,
-            letterSpacing: 0.5,
-          ),
-        ),
-      ),
-    );
   }
 }

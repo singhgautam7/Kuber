@@ -40,18 +40,18 @@ const kAllProductIds = <String>{...kProProductIds, ...kSupportProductIds};
 /// Maps a Play product id to its Pro plan, or null for a non-entitlement
 /// product (a support consumable or an unknown id).
 ProPlan? planForProductId(String id) => switch (id) {
-      kProMonthlyId => ProPlan.monthly,
-      kProYearlyId => ProPlan.yearly,
-      kProLifetimeId => ProPlan.lifetime,
-      _ => null,
-    };
+  kProMonthlyId => ProPlan.monthly,
+  kProYearlyId => ProPlan.yearly,
+  kProLifetimeId => ProPlan.lifetime,
+  _ => null,
+};
 
 /// Maps a Pro plan back to its Play product id.
 String productIdForPlan(ProPlan plan) => switch (plan) {
-      ProPlan.monthly => kProMonthlyId,
-      ProPlan.yearly => kProYearlyId,
-      ProPlan.lifetime => kProLifetimeId,
-    };
+  ProPlan.monthly => kProMonthlyId,
+  ProPlan.yearly => kProYearlyId,
+  ProPlan.lifetime => kProLifetimeId,
+};
 
 /// Owns the app's single connection to Google Play Billing.
 ///
@@ -120,7 +120,13 @@ class PurchaseService {
       BillingDiagnostics.instance.recordError('initialize:isAvailable', e);
       _available = false;
     }
-    if (!_available) return;
+    if (!_available) {
+      // Settle the billing UI flags (loading off, error on) so the paywall
+      // and the coffee sheet leave their skeletons. Without this the loading
+      // flag kept its initial `true` forever on devices without Play.
+      await loadProducts(kAllProductIds);
+      return;
+    }
 
     _sub = _iap.purchaseStream.listen(
       _onPurchaseUpdated,
@@ -169,10 +175,15 @@ class PurchaseService {
     }
 
     final sw = Stopwatch()..start();
-    BillingDiagnostics.instance.recordQueryStart('loadProducts', source: ids.join(','));
+    BillingDiagnostics.instance.recordQueryStart(
+      'loadProducts',
+      source: ids.join(','),
+    );
 
     try {
-      final resp = await _iap.queryProductDetails(ids).timeout(
+      final resp = await _iap
+          .queryProductDetails(ids)
+          .timeout(
             const Duration(seconds: 10),
             onTimeout: () => throw TimeoutException('loadProducts timed out'),
           );
@@ -220,7 +231,8 @@ class PurchaseService {
       final prices = <String, String>{
         for (final id in kProProductIds)
           if (_products[id] != null)
-            id: offerInfos[id]?.recurringPhase.formattedPrice ??
+            id:
+                offerInfos[id]?.recurringPhase.formattedPrice ??
                 _products[id]!.price,
       };
       if (prices.isNotEmpty) {
@@ -246,8 +258,10 @@ class PurchaseService {
 
   Future<void> _launch(String productId, {required bool consumable}) async {
     if (!_available) {
-      _snack((ctx, overlay) =>
-          showPlayStoreUnavailableSnackbar(ctx, overlay: overlay));
+      _snack(
+        (ctx, overlay) =>
+            showPlayStoreUnavailableSnackbar(ctx, overlay: overlay),
+      );
       return;
     }
 
@@ -258,8 +272,10 @@ class PurchaseService {
       product = _products[productId];
     }
     if (product == null) {
-      _snack((ctx, overlay) =>
-          showPlayStoreUnavailableSnackbar(ctx, overlay: overlay));
+      _snack(
+        (ctx, overlay) =>
+            showPlayStoreUnavailableSnackbar(ctx, overlay: overlay),
+      );
       return;
     }
 
@@ -274,11 +290,13 @@ class PurchaseService {
       }
     } catch (e) {
       debugPrint('Kuber: buy launch failed for $productId: $e');
-      _snack((ctx, overlay) => showPurchaseFailedSnackbar(
-            ctx,
-            onRetry: () => _launch(productId, consumable: consumable),
-            overlay: overlay,
-          ));
+      _snack(
+        (ctx, overlay) => showPurchaseFailedSnackbar(
+          ctx,
+          onRetry: () => _launch(productId, consumable: consumable),
+          overlay: overlay,
+        ),
+      );
     }
   }
 
@@ -321,9 +339,15 @@ class PurchaseService {
   /// "No previous purchase found" feedback is owned by
   /// `restore_purchases_flow.dart`, which reads entitlement state after this
   /// resolves.
-  Future<void> restorePurchases({String source = 'manual', bool force = false}) async {
+  Future<void> restorePurchases({
+    String source = 'manual',
+    bool force = false,
+  }) async {
     if (!_available) {
-      BillingDiagnostics.instance.log('RESTORE_SKIP', 'Play Billing is not available');
+      BillingDiagnostics.instance.log(
+        'RESTORE_SKIP',
+        'Play Billing is not available',
+      );
       return;
     }
 
@@ -383,7 +407,10 @@ class PurchaseService {
         {'source': source},
       );
       try {
-        await restorePurchases(source: '$source:try${attempt + 1}', force: true);
+        await restorePurchases(
+          source: '$source:try${attempt + 1}',
+          force: true,
+        );
       } catch (e) {
         BillingDiagnostics.instance.recordError('reconcileWithRetries', e);
       }
@@ -394,18 +421,23 @@ class PurchaseService {
   }
 
   /// Waits for [kuberProStateProvider] to report Pro, up to [timeout].
-  Future<bool> _pollForPro({required Duration timeout}) => pollForProEntitlement(
+  Future<bool> _pollForPro({required Duration timeout}) =>
+      pollForProEntitlement(
         () => _ref.read(kuberProStateProvider).isPro,
         timeout: timeout,
       );
 
   Future<void> _performRestore(String source) async {
     final sw = Stopwatch()..start();
-    BillingDiagnostics.instance.recordQueryStart('restorePurchases', source: source);
+    BillingDiagnostics.instance.recordQueryStart(
+      'restorePurchases',
+      source: source,
+    );
     try {
       await _iap.restorePurchases().timeout(
         const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('restorePurchases timed out after 10s'),
+        onTimeout: () =>
+            throw TimeoutException('restorePurchases timed out after 10s'),
       );
       sw.stop();
       BillingDiagnostics.instance.recordQueryEnd(
@@ -461,18 +493,22 @@ class PurchaseService {
           unawaited(_recoverAlreadyOwned());
           break;
         }
-        _snack((ctx, overlay) => showPurchaseFailedSnackbar(
-              ctx,
-              onRetry: () => _launch(
-                purchase.productID,
-                consumable: kSupportProductIds.contains(purchase.productID),
-              ),
-              overlay: overlay,
-            ));
+        _snack(
+          (ctx, overlay) => showPurchaseFailedSnackbar(
+            ctx,
+            onRetry: () => _launch(
+              purchase.productID,
+              consumable: kSupportProductIds.contains(purchase.productID),
+            ),
+            overlay: overlay,
+          ),
+        );
         break;
       case PurchaseStatus.canceled:
-        _snack((ctx, overlay) =>
-            showPurchaseCancelledSnackbar(ctx, overlay: overlay));
+        _snack(
+          (ctx, overlay) =>
+              showPurchaseCancelledSnackbar(ctx, overlay: overlay),
+        );
         break;
       case PurchaseStatus.purchased:
         _deliver(purchase, restored: false);
@@ -489,7 +525,9 @@ class PurchaseService {
       try {
         await _iap.completePurchase(purchase);
       } catch (e) {
-        debugPrint('Kuber: completePurchase failed for ${purchase.productID}: $e');
+        debugPrint(
+          'Kuber: completePurchase failed for ${purchase.productID}: $e',
+        );
       }
     }
   }
@@ -516,7 +554,9 @@ class PurchaseService {
     if (plan == null) return; // unknown product; ignore defensively.
 
     final activatedAt = _purchaseDate(purchase);
-    _ref.read(kuberProStateProvider.notifier).applyPurchase(
+    _ref
+        .read(kuberProStateProvider.notifier)
+        .applyPurchase(
           plan: plan,
           expiryDate: _expiryFor(plan, activatedAt, restored: restored),
           productId: productId,
@@ -546,8 +586,8 @@ class PurchaseService {
   /// "payment failed" snackbar, so this is safe.
   bool _isAlreadyOwned(IAPError? error) {
     if (error == null) return false;
-    final haystack =
-        '${error.code} ${error.message} ${error.details}'.toLowerCase();
+    final haystack = '${error.code} ${error.message} ${error.details}'
+        .toLowerCase();
     return haystack.contains('already') && haystack.contains('own');
   }
 
@@ -575,11 +615,13 @@ class PurchaseService {
     if (granted) {
       _snack((ctx, overlay) => showProRestoredSnackbar(ctx, overlay: overlay));
     } else {
-      _snack((ctx, overlay) => showAlreadyOwnedSnackbar(
-            ctx,
-            onRestore: () => restorePurchases(force: true),
-            overlay: overlay,
-          ));
+      _snack(
+        (ctx, overlay) => showAlreadyOwnedSnackbar(
+          ctx,
+          onRestore: () => restorePurchases(force: true),
+          overlay: overlay,
+        ),
+      );
     }
   }
 
@@ -599,8 +641,11 @@ class PurchaseService {
   /// subscription, but we can't know its true next-renewal date from the
   /// client, and a stale computed date would wrongly read as expired. Null
   /// renders as "Active" and never downgrades the user.
-  DateTime? _expiryFor(ProPlan plan, DateTime activatedAt,
-      {required bool restored}) {
+  DateTime? _expiryFor(
+    ProPlan plan,
+    DateTime activatedAt, {
+    required bool restored,
+  }) {
     if (plan == ProPlan.lifetime) return null;
     if (restored) return null;
     return switch (plan) {

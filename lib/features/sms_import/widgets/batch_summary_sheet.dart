@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/color_harmonizer.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -29,10 +29,8 @@ void showBatchSummarySheet(
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (_) => BatchSummarySheet(
-      selected: selected,
-      onImported: onImported,
-    ),
+    builder: (_) =>
+        BatchSummarySheet(selected: selected, onImported: onImported),
   );
 }
 
@@ -110,16 +108,10 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
             isLoading: _importing,
             onPressed: importable.isEmpty ? null : _confirm,
           ),
+          const SizedBox(height: KuberSpace.sm),
           TextButton(
             onPressed: _importing ? null : () => Navigator.pop(context),
-            child: Text(
-              'Review individually',
-              style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
+            child: const Text('Review individually'),
           ),
         ],
       ),
@@ -129,33 +121,27 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
           if (dupCount > 0) _DupBanner(count: dupCount),
           // Common account / category, applied to rows missing their own.
           if (_missingAccount > 0 || _missingCategory > 0) ...[
-            Text(
-              'APPLY TO ALL MISSING',
-              style: localeFont(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                letterSpacing: 0.8,
-              ),
+            const KuberSectionHeader(title: 'Apply to all missing'),
+            KuberGroup(
+              children: [
+                _CommonPickerRow(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: 'Account',
+                  value: _commonAccountName(),
+                  hint: '$_missingAccount missing',
+                  onTap: _pickCommonAccount,
+                ),
+                _CommonPickerRow(
+                  icon: Icons.category_outlined,
+                  label: 'Category',
+                  value: _commonCategoryName(),
+                  dotColor: _commonCategoryColor(context),
+                  hint: '$_missingCategory missing',
+                  onTap: _pickCommonCategory,
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            _CommonPickerRow(
-              icon: Icons.account_balance_wallet_outlined,
-              label: 'Account',
-              value: _commonAccountName(),
-              hint: '$_missingAccount missing',
-              onTap: _pickCommonAccount,
-            ),
-            const SizedBox(height: 8),
-            _CommonPickerRow(
-              icon: Icons.category_outlined,
-              label: 'Category',
-              value: _commonCategoryName(),
-              dotColor: _commonCategoryColor(context),
-              hint: '$_missingCategory missing',
-              onTap: _pickCommonCategory,
-            ),
-            const SizedBox(height: 14),
+            const SizedBox(height: KuberSpace.lg),
           ],
           if (needsReview > 0)
             Padding(
@@ -163,21 +149,24 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
               child: Text(
                 '$needsReview selected still need an account. Pick a common '
                 'account above, or review them individually.',
-                style: localeFont(
-                  fontSize: 11.5,
-                  color: cs.onSurfaceVariant,
-                  height: 1.4,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
-          // Compact list.
-          ...importable.map((s) => _BatchRow(sms: s)),
-          const SizedBox(height: 12),
-          Divider(height: 1, color: cs.outline),
-          const SizedBox(height: 12),
-          _TotalRow(label: 'Expense', amount: expenseTotal, type: 'expense'),
-          const SizedBox(height: 6),
-          _TotalRow(label: 'Income', amount: incomeTotal, type: 'income'),
+          KuberSectionHeader(title: '${importable.length} selected'),
+          KuberGroup(children: [for (final s in importable) _BatchRow(sms: s)]),
+          const SizedBox(height: KuberSpace.lg),
+          KuberGroup(
+            children: [
+              _TotalRow(
+                label: 'Expense',
+                amount: expenseTotal,
+                type: 'expense',
+              ),
+              _TotalRow(label: 'Income', amount: incomeTotal, type: 'income'),
+            ],
+          ),
         ],
       ),
     );
@@ -196,20 +185,18 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
   Color? _commonCategoryColor(BuildContext context) {
     if (_commonCategoryId == null) return null;
     final cat = ref.read(categoryMapProvider).valueOrNull?[_commonCategoryId];
-    return cat == null ? null : harmonizeCategory(context, Color(cat.colorValue));
+    return cat == null
+        ? null
+        : harmonizeCategory(context, Color(cat.colorValue));
   }
 
   void _pickCommonAccount() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: const RoundedRectangleBorder(borderRadius: KuberShape.sheetR),
       builder: (_) => AccountPickerSheet(
         selectedAccountId: _commonAccountId,
         onSelected: (id) {
@@ -221,16 +208,11 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
   }
 
   void _pickCommonCategory() {
-    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: cs.surfaceContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: _commonCategoryId,
         onSelected: (id) {
@@ -244,23 +226,26 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
   Future<void> _confirm() async {
     setState(() => _importing = true);
     final drafts = _importable
-        .map((s) => SmsImportDraft(
-              sms: s,
-              name: s.parsedMerchant ?? s.senderId,
-              amount: s.parsedAmount,
-              type: s.parsedType,
-              accountId: _accountFor(s)!,
-              categoryId: _categoryFor(s),
-              date: s.parsedDate,
-            ))
+        .map(
+          (s) => SmsImportDraft(
+            sms: s,
+            name: s.parsedMerchant ?? s.senderId,
+            amount: s.parsedAmount,
+            type: s.parsedType,
+            accountId: _accountFor(s)!,
+            categoryId: _categoryFor(s),
+            date: s.parsedDate,
+          ),
+        )
         .toList();
     // Capture the host navigator/context before popping — this sheet's context
     // is defunct once dismissed, but the free-tier limit sheet/snackbar need a
     // live context.
     final nav = Navigator.of(context);
     final hostContext = nav.context;
-    final outcome =
-        await ref.read(smsImportProvider.notifier).importBatchGated(drafts);
+    final outcome = await ref
+        .read(smsImportProvider.notifier)
+        .importBatchGated(drafts);
     if (!mounted) return;
     nav.pop();
     widget.onImported();
@@ -280,7 +265,7 @@ class _BatchSummarySheetState extends ConsumerState<BatchSummarySheet> {
   }
 }
 
-/// A tappable "apply to all" picker row in the batch sheet.
+/// An "apply to all" row: value (or "n missing") as the title.
 class _CommonPickerRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -299,62 +284,13 @@ class _CommonPickerRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final hasValue = value != null;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: cs.onSurfaceVariant),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            const Spacer(),
-            if (hasValue && dotColor != null) ...[
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: dotColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 6),
-            ],
-            Flexible(
-              child: Text(
-                hasValue ? value! : hint,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: localeFont(
-                  fontSize: 13,
-                  fontWeight: hasValue ? FontWeight.w600 : FontWeight.w400,
-                  color: hasValue ? cs.onSurface : cs.onSurfaceVariant,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.chevron_right_rounded, size: 16, color: cs.onSurfaceVariant),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => KuberListRow(
+    leading: KuberIconTile(icon: icon),
+    title: value ?? hint,
+    subtitle: label,
+    trailing: const KuberChevron(),
+    onTap: onTap,
+  );
 }
 
 class _DupBanner extends StatelessWidget {
@@ -363,29 +299,29 @@ class _DupBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
+    final m = context.kuberMoney;
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: KuberSpace.md),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: warning.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: warning.withValues(alpha: 0.30)),
+        color: m.warningContainer,
+        borderRadius: KuberShape.largeR,
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, size: 16, color: warning),
-          const SizedBox(width: 10),
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 20,
+            color: m.onWarningContainer,
+          ),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Text(
               '$count of the selected transactions may already exist. '
               'Continue anyway?',
-              style: localeFont(
-                fontSize: 12,
-                color: cs.onSurface,
-                height: 1.4,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: m.onWarningContainer),
             ),
           ),
         ],
@@ -400,34 +336,17 @@ class _BatchRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final amountColor = sms.parsedType == 'income' ? cs.tertiary : cs.error;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              sms.parsedMerchant ?? sms.senderId,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: localeFont(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            signedAmount(ref, sms.parsedAmount, sms.parsedType),
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: amountColor,
-            ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
-          ),
-        ],
+    final theme = Theme.of(context);
+    final m = context.kuberMoney;
+    return KuberListRow(
+      dense: true,
+      leading: SmsTypeGlyph(type: sms.parsedType),
+      title: sms.parsedMerchant ?? sms.senderId,
+      trailing: Text(
+        signedAmount(ref, sms.parsedAmount, sms.parsedType),
+        style: theme.textTheme.titleSmall!.copyWith(
+          color: sms.parsedType == 'income' ? m.income : m.expense,
+        ),
       ),
     );
   }
@@ -445,28 +364,20 @@ class _TotalRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-    final color = type == 'income' ? cs.tertiary : cs.error;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: localeFont(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant,
-          ),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final color = type == 'income'
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
+    return KuberListRow(
+      dense: true,
+      title: label,
+      trailing: Text(
+        amount == 0 ? '-' : signedAmount(ref, amount, type),
+        style: theme.textTheme.titleMedium!.copyWith(
+          color: amount == 0 ? cs.onSurfaceVariant : color,
         ),
-        Text(
-          amount == 0 ? '-' : signedAmount(ref, amount, type),
-          style: localeFont(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: amount == 0 ? cs.onSurfaceVariant : color,
-          ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]),
-        ),
-      ],
+      ),
     );
   }
 }

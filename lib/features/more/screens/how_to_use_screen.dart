@@ -22,69 +22,61 @@ class HowToUseScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      appBar: KuberAppBar(showBack: true, showHome: true, title: ''),
-      body: ListView(
-        padding: EdgeInsets.only(
-          left: KuberSpacing.lg,
-          right: KuberSpacing.lg,
-          top: KuberSpacing.lg,
-          bottom: KuberSpacing.lg + systemNavBarInset(context),
-        ),
-        children: [
-          Text(
-            l.faqTitle,
-            style: localeFont(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
-              letterSpacing: -0.3,
-            ),
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(showBack: true, title: l.faqTitle),
+        body: ListView(
+          padding: EdgeInsets.only(
+            left: KuberSpace.screenMargin,
+            right: KuberSpace.screenMargin,
+            top: 0,
+            bottom: KuberSpace.lg + systemNavBarInset(context),
           ),
-          const SizedBox(height: KuberSpacing.lg),
-          for (final faq in faqs) ...[
-            Container(
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline),
-              ),
-              child: ExpansionTile(
-                shape: const Border(),
-                collapsedShape: const Border(),
-                tilePadding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
+          children: [
+            for (final faq in faqs) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainer,
+                  borderRadius: KuberShape.cardR,
+                  border: Border.all(color: cs.outlineVariant),
                 ),
-                childrenPadding: const EdgeInsets.fromLTRB(
-                  KuberSpacing.lg,
-                  0,
-                  KuberSpacing.lg,
-                  KuberSpacing.lg,
-                ),
-                title: Text(
-                  faq.title,
-                  style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
+                child: ExpansionTile(
+                  shape: const Border(),
+                  collapsedShape: const Border(),
+                  tilePadding: const EdgeInsets.symmetric(
+                    horizontal: KuberSpace.lg,
                   ),
-                ),
-                iconColor: cs.onSurfaceVariant,
-                collapsedIconColor: cs.onSurfaceVariant,
-                children: [
-                  Text(
-                    faq.body,
+                  childrenPadding: const EdgeInsets.fromLTRB(
+                    KuberSpace.lg,
+                    0,
+                    KuberSpace.lg,
+                    KuberSpace.lg,
+                  ),
+                  title: Text(
+                    faq.title,
                     style: localeFont(
-                      fontSize: 13,
-                      color: cs.onSurfaceVariant,
-                      height: 1.5,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
                     ),
                   ),
-                ],
+                  iconColor: cs.onSurfaceVariant,
+                  collapsedIconColor: cs.onSurfaceVariant,
+                  children: [
+                    Text(
+                      faq.body,
+                      style: localeFont(
+                        fontSize: 14,
+                        color: cs.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
+              const SizedBox(height: KuberSpace.sm),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

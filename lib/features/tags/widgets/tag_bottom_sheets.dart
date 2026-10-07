@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/color_harmonizer.dart';
 import '../data/tag.dart';
 import '../providers/tag_providers.dart';
 import '../../../core/utils/date_formatter.dart';
@@ -20,7 +21,8 @@ class AddEditTagBottomSheet extends ConsumerStatefulWidget {
   const AddEditTagBottomSheet({super.key, this.tag});
 
   @override
-  ConsumerState<AddEditTagBottomSheet> createState() => _AddEditTagBottomSheetState();
+  ConsumerState<AddEditTagBottomSheet> createState() =>
+      _AddEditTagBottomSheetState();
 }
 
 class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
@@ -71,110 +73,33 @@ class _AddEditTagBottomSheetState extends ConsumerState<AddEditTagBottomSheet> {
     final cs = Theme.of(context).colorScheme;
     final isEdit = widget.tag != null;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+    // Board 3.17 Add / Edit Tag: shared sheet, filled "Tag name" field with a
+    // # prefix, Save pinned.
+    return KuberBottomSheet(
+      title: isEdit ? context.l10n.editTag : context.l10n.newTag,
+      actions: AppButton(
+        label: isEdit ? context.l10n.updateTag : context.l10n.createTag,
+        type: AppButtonType.primary,
+        fullWidth: true,
+        onPressed: _save,
       ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + KuberSpacing.xl,
-        left: KuberSpacing.xl,
-        right: KuberSpacing.xl,
-        top: KuberSpacing.xl,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                isEdit ? context.l10n.editTag : context.l10n.newTag,
-                style: localeFont(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close_rounded),
-                style: IconButton.styleFrom(
-                  backgroundColor: cs.surfaceContainerHigh,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            onChanged: (val) {
-              if (_errorText != null) setState(() => _errorText = null);
-            },
-            style: localeFont(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
-            decoration: InputDecoration(
-              hintText: context.l10n.tagNameHint,
-              hintStyle: localeFont(
-                fontSize: 14,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-              ),
-              prefixIcon: Container(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  "#",
-                  style: localeFont(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: cs.primary,
-                  ),
-                ),
-              ),
-              errorText: _errorText,
-              filled: true,
-              fillColor: cs.surfaceContainerHigh,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.outline),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                borderSide: BorderSide(color: cs.primary, width: 2),
-              ),
-            ),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _save(),
-          ),
-          const SizedBox(height: 24),
-          AppButton(
-            label: isEdit ? context.l10n.updateTag : context.l10n.createTag,
-            type: AppButtonType.primary,
-            fullWidth: true,
-            onPressed: _save,
-          ),
-        ],
+      child: TextField(
+        controller: _controller,
+        autofocus: true,
+        onChanged: (val) {
+          if (_errorText != null) setState(() => _errorText = null);
+        },
+        style: Theme.of(
+          context,
+        ).textTheme.bodyLarge!.copyWith(color: cs.onSurface),
+        decoration: InputDecoration(
+          labelText: 'Tag name',
+          hintText: context.l10n.tagNameHint,
+          prefixText: '#',
+          errorText: _errorText,
+        ),
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => _save(),
       ),
     );
   }
@@ -203,7 +128,6 @@ class ViewTagBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final dateStr = DateFormat('MMM dd, yyyy').format(tag.createdAt);
 
     final count = ref.watch(tagTransactionCountProvider(tag.id)).valueOrNull;
@@ -236,24 +160,25 @@ class ViewTagBottomSheet extends ConsumerWidget {
     ];
 
     return KuberBottomSheet(
-      title: tag.name,
+      title: '#${tag.name}',
       subtitle: context.l10n.createdOnUpper(dateStr.toUpperCase()),
-      leadingIcon: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          "#",
-          style: localeFont(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: cs.primary,
-          ),
-        ),
+      leadingIcon: Builder(
+        builder: (context) {
+          final palette = context.kuberChart.categorical;
+          final tones = categoryTones(
+            context,
+            palette[tag.id % palette.length],
+          );
+          return Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: tones.container,
+              borderRadius: KuberShape.mediumR,
+            ),
+            child: Icon(Icons.sell_rounded, size: 24, color: tones.fg),
+          );
+        },
       ),
       actions: SheetButtonSection(
         padding: EdgeInsets.zero,
@@ -262,9 +187,9 @@ class ViewTagBottomSheet extends ConsumerWidget {
           icon: Icons.receipt_long_rounded,
           onPressed: () {
             ref.read(historyFilterProvider.notifier).clearAll();
-            ref.read(historyFilterProvider.notifier).setFilters(
-                  tagIds: {tag.id},
-                );
+            ref
+                .read(historyFilterProvider.notifier)
+                .setFilters(tagIds: {tag.id});
             context.go('/history');
           },
         ),
@@ -293,9 +218,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          InfoTable(rows: rows),
-        ],
+        children: [InfoTable(rows: rows)],
       ),
     );
   }
@@ -305,17 +228,13 @@ class ViewTagBottomSheet extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
-          side: BorderSide(color: cs.outline, width: 1),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
+          side: BorderSide(color: cs.outlineVariant, width: 1),
         ),
         title: Text(
           context.l10n.deleteTagConfirm,
-          style: localeFont(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: localeFont(fontWeight: FontWeight.w600, fontSize: 16),
         ),
         content: Text(
           context.l10n.deleteTagBody(tag.name),
@@ -330,7 +249,7 @@ class ViewTagBottomSheet extends ConsumerWidget {
             style: FilledButton.styleFrom(
               backgroundColor: cs.error,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                borderRadius: BorderRadius.circular(KuberShape.small),
               ),
             ),
             onPressed: () async {

@@ -37,7 +37,12 @@ class StorySlideView extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(26, 64, 26, 40 + systemNavBarInset(context)),
+            padding: EdgeInsets.fromLTRB(
+              26,
+              64,
+              26,
+              40 + systemNavBarInset(context),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -48,7 +53,7 @@ class StorySlideView extends StatelessWidget {
                     slide.header!.toUpperCase(),
                     style: AppTextStyles.inter.copyWith(
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 2,
                       color: _muted,
                     ),
@@ -58,7 +63,7 @@ class StorySlideView extends StatelessWidget {
                     Text(
                       slide.dateLabel!,
                       style: AppTextStyles.inter.copyWith(
-                        fontSize: 11.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: Colors.white.withValues(alpha: 0.55),
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -73,7 +78,7 @@ class StorySlideView extends StatelessWidget {
                   Text(
                     slide.footer!,
                     style: AppTextStyles.inter.copyWith(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: _muted,
                     ),
@@ -92,7 +97,7 @@ class StorySlideView extends StatelessWidget {
     height: 46,
     decoration: BoxDecoration(
       color: Colors.white.withValues(alpha: 0.16),
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+      borderRadius: BorderRadius.circular(KuberShape.medium),
     ),
     alignment: Alignment.center,
     child: Icon(storyIcon(slide.icon), size: 26, color: Colors.white),
@@ -116,7 +121,7 @@ class StorySlideView extends StatelessWidget {
           slide.hero!,
           style: AppTextStyles.inter.copyWith(
             fontSize: 62,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             height: 1,
             color: _fg,
           ),
@@ -125,8 +130,8 @@ class StorySlideView extends StatelessWidget {
       _emphasised(
         slide.title,
         base: AppTextStyles.inter.copyWith(
-          fontSize: 26,
-          fontWeight: FontWeight.w800,
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
           height: 1.1,
           color: _fg,
         ),
@@ -136,7 +141,7 @@ class StorySlideView extends StatelessWidget {
         _emphasised(
           slide.subtitle!,
           base: AppTextStyles.inter.copyWith(
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: FontWeight.w500,
             height: 1.45,
             color: _subtle,
@@ -153,8 +158,8 @@ class StorySlideView extends StatelessWidget {
       _emphasised(
         slide.title,
         base: AppTextStyles.inter.copyWith(
-          fontSize: 27,
-          fontWeight: FontWeight.w800,
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
           height: 1.1,
           color: _fg,
         ),
@@ -171,7 +176,7 @@ class StorySlideView extends StatelessWidget {
                 child: Text(
                   slide.stats[i].label,
                   style: AppTextStyles.inter.copyWith(
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: _subtle,
                   ),
@@ -180,8 +185,8 @@ class StorySlideView extends StatelessWidget {
               Text(
                 slide.stats[i].value,
                 style: AppTextStyles.inter.copyWith(
-                  fontSize: 23,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
                   color: _fg,
                 ),
               ),
@@ -201,7 +206,7 @@ class StorySlideView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: now ? 0.20 : 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +217,7 @@ class StorySlideView extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.inter.copyWith(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               letterSpacing: 0.3,
               color: _muted,
             ),
@@ -221,8 +226,8 @@ class StorySlideView extends StatelessWidget {
           Text(
             amt,
             style: AppTextStyles.inter.copyWith(
-              fontSize: 30,
-              fontWeight: FontWeight.w800,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
               color: _fg,
             ),
           ),
@@ -237,8 +242,8 @@ class StorySlideView extends StatelessWidget {
         _emphasised(
           slide.title,
           base: AppTextStyles.inter.copyWith(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
             height: 1.1,
             color: _fg,
           ),
@@ -252,7 +257,7 @@ class StorySlideView extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.18),
-            borderRadius: BorderRadius.circular(KuberRadius.full),
+            borderRadius: BorderRadius.circular(KuberShape.full),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -263,7 +268,7 @@ class StorySlideView extends StatelessWidget {
                 c.delta,
                 style: AppTextStyles.inter.copyWith(
                   fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: _fg,
                 ),
               ),
@@ -281,8 +286,8 @@ class StorySlideView extends StatelessWidget {
       _emphasised(
         slide.title,
         base: AppTextStyles.inter.copyWith(
-          fontSize: 30,
-          fontWeight: FontWeight.w800,
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
           height: 1.12,
           color: _fg,
         ),
@@ -292,7 +297,7 @@ class StorySlideView extends StatelessWidget {
         _emphasised(
           slide.subtitle!,
           base: AppTextStyles.inter.copyWith(
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: FontWeight.w500,
             height: 1.45,
             color: _subtle,
@@ -332,7 +337,7 @@ class StorySlideView extends StatelessWidget {
         TextSpan(
           text: text.substring(span.start, span.end),
           style: TextStyle(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: styleColor(span.style),
           ),
         ),

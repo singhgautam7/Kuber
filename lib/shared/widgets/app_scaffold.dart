@@ -1,4 +1,3 @@
-import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -236,18 +235,9 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
                 scale: (isSelectionMode || isKeyboardOpen) ? 0.0 : 1.0,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeOutCubic,
-                child: GestureDetector(
+                child: KuberNavFab(
+                  onTap: _onAddTapped,
                   onLongPress: _openAddMenu,
-                  child: FloatingActionButton(
-                    onPressed: _onAddTapped,
-                    backgroundColor: cs.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                    child: const Icon(Icons.add),
-                  ),
                 ),
               )
             : null,
@@ -310,99 +300,72 @@ class _ModernNavBar extends StatefulWidget {
 }
 
 class _ModernNavBarState extends State<_ModernNavBar> {
-  static const _animDuration = Duration(milliseconds: 200);
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final tt = theme.textTheme;
+    final cs = Theme.of(context).colorScheme;
     final hide = widget.isSelectionMode || widget.isKeyboardOpen;
+    final inset = MediaQuery.of(context).padding.bottom;
+    final bottom = inset > 22 ? inset : 22.0;
 
-    return AnimatedSlide(
-      offset: hide ? const Offset(0, 1.5) : Offset.zero,
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOutCubic,
-      child: Stack(
-        children: [
-          // Static scrim — covers the system nav bar inset so the Android
-          // gesture line / 3-button nav never clashes with scrolled content.
-          // Pure gradient paint — no GPU blur pass.
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      cs.surface.withValues(alpha: 0),
-                      cs.surface.withValues(alpha: 0.72),
-                      cs.surface,
-                    ],
-                    stops: const [0.0, 0.35, 1.0],
+    // Perch NavShell hide: translate down 72 and fade over 160 ms; the same
+    // two Kuber triggers as before (selection mode, keyboard).
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: hide ? 1.0 : 0.0),
+      duration: KuberMotion.of(context, KuberMotion.navHide),
+      curve: KuberMotion.decelerate,
+      builder: (context, t, child) => Opacity(
+        opacity: 1 - t,
+        child: Transform.translate(
+          offset: Offset(0, KuberMotion.reduced(context) ? 0 : 72 * t),
+          child: IgnorePointer(ignoring: t > 0.5, child: child),
+        ),
+      ),
+      child: SizedBox(
+        height: bottom + 56 + 32,
+        child: Stack(
+          children: [
+            // Static scrim so scrolled content fades out under the pill. Pure
+            // gradient paint, no blur.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        cs.surface.withValues(alpha: 0),
+                        cs.surface.withValues(alpha: 0.92),
+                        cs.surface,
+                      ],
+                      stops: const [0.0, 0.55, 1.0],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          // Pill + add button
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: bottom,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 10,
                 children: [
-                  // Pill — solid background, border only (no blur / shadow)
-                  Expanded(
-                    child: Container(
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(KuberRadius.xl),
-                        border: Border.all(color: cs.outlineVariant, width: 1),
-                      ),
-                      child: Row(
-                        children: List.generate(kuberNavItems.length, (i) {
-                          final item = kuberNavItems[i];
-                          final isSelected = i == widget.currentIndex;
-                          return Expanded(
-                            child: _NavBarItem(
-                              item: item,
-                              isSelected: isSelected,
-                              animDuration: _animDuration,
-                              onTap: () => widget.onTap(i),
-                              onLongPress: widget.onTabLongPress,
-                              cs: cs,
-                              tt: tt,
-                              fullTint: true,
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
+                  KuberNavPill(
+                    index: widget.currentIndex,
+                    onSelect: widget.onTap,
+                    onLongPress: widget.onTabLongPress,
                   ),
-                  // Add button — always visible in Modern mode
-                  const SizedBox(width: KuberSpacing.sm),
-                  GestureDetector(
+                  KuberNavFab(
                     onTap: widget.onAddTapped,
                     onLongPress: widget.onAddLongPress,
-                    child: Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius: BorderRadius.circular(KuberRadius.xl),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(Icons.add, color: cs.onPrimary, size: 26),
-                    ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -432,17 +395,12 @@ class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
     final cs = theme.colorScheme;
     final tt = theme.textTheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border(
-          top: BorderSide(color: cs.outline.withValues(alpha: 0.4)),
-        ),
-      ),
+    return ColoredBox(
+      color: cs.surfaceContainer,
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 64,
+          height: 80,
           child: Row(
             children: List.generate(kuberNavItems.length, (i) {
               final item = kuberNavItems[i];
@@ -466,21 +424,6 @@ class _KuberAnimatedNavBarState extends State<_KuberAnimatedNavBar> {
   }
 }
 
-String _localNavLabel(BuildContext context, String label) {
-  switch (label) {
-    case 'Home':
-      return context.l10n.navHome;
-    case 'History':
-      return context.l10n.navHistory;
-    case 'Analytics':
-      return context.l10n.navAnalytics;
-    case 'More':
-      return context.l10n.navMore;
-    default:
-      return label;
-  }
-}
-
 class _NavBarItem extends StatefulWidget {
   final KuberNavItem item;
   final bool isSelected;
@@ -489,7 +432,6 @@ class _NavBarItem extends StatefulWidget {
   final VoidCallback? onLongPress;
   final ColorScheme cs;
   final TextTheme tt;
-  final bool fullTint;
 
   const _NavBarItem({
     required this.item,
@@ -499,7 +441,6 @@ class _NavBarItem extends StatefulWidget {
     this.onLongPress,
     required this.cs,
     required this.tt,
-    this.fullTint = false,
   });
 
   @override
@@ -545,9 +486,6 @@ class _NavBarItemState extends State<_NavBarItem>
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = widget.cs.primary;
-    final unselectedColor = widget.cs.onSurfaceVariant;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.onTap,
@@ -556,64 +494,38 @@ class _NavBarItemState extends State<_NavBarItem>
         animation: _controller,
         builder: (context, _) {
           final t = _controller.value;
+          final cs = widget.cs;
+          final iconColor =
+              Color.lerp(cs.onSurfaceVariant, cs.onSecondaryContainer, t)!;
+          final index = kuberNavItems.indexOf(widget.item);
+          final labelStr = localNavLabel(context, widget.item.label);
 
-          // Single icon with interpolated color — no Opacity/compositing overhead
-          final iconColor = Color.lerp(unselectedColor, selectedColor, t)!;
-          final iconData = t > 0.5 ? widget.item.activeIcon : widget.item.icon;
-          final iconContent = Icon(iconData, size: 22, color: iconColor);
-          final labelStr = _localNavLabel(context, widget.item.label);
-
-          if (widget.fullTint) {
-            // Modern: no background tint — active state shown via icon/text color only
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(iconData, size: 24, color: iconColor),
-                  const SizedBox(height: 3),
-                  Text(
-                    labelStr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: widget.tt.labelSmall!.copyWith(
-                      fontSize: 11,
-                      fontWeight: t > 0.5 ? FontWeight.w700 : FontWeight.w500,
-                      color: t > 0.5 ? selectedColor : unselectedColor,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Classic: icon-only tint, label sits outside below
+          // Classic: M3 NavigationBar item (64x32 stadium indicator in
+          // secondaryContainer, labelMedium below). Same controller as before.
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ScaleTransition(
                 scale: _scaleAnim,
                 child: Container(
-                  width: 56,
+                  width: 64,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: widget.cs.primaryContainer.withValues(
-                      alpha: t * 0.1,
-                    ),
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
+                    color: cs.secondaryContainer.withValues(alpha: t),
+                    borderRadius: KuberShape.fullR,
                   ),
                   alignment: Alignment.center,
-                  child: iconContent,
+                  child: KuberNavGlyph(
+                    index: index,
+                    color: iconColor,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
               AnimatedDefaultTextStyle(
                 duration: widget.animDuration,
-                style: widget.tt.labelSmall!.copyWith(
-                  fontSize: 11,
-                  fontWeight: widget.isSelected
-                      ? FontWeight.w700
-                      : FontWeight.w500,
-                  color: widget.isSelected ? selectedColor : unselectedColor,
+                style: widget.tt.labelMedium!.copyWith(
+                  color: widget.isSelected ? cs.onSurface : cs.onSurfaceVariant,
                 ),
                 child: Text(labelStr),
               ),

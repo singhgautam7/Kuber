@@ -24,7 +24,7 @@ Future<void> showCardColorPicker({
     useRootNavigator: true,
     backgroundColor: cs.surfaceContainer,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberShape.extraLarge)),
     ),
     builder: (_) => _CardColorPickerSheet(
       selectedValue: selectedValue,
@@ -53,12 +53,12 @@ class _CardColorPickerSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _BankLabel(text: 'Solid'),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           _Grid(
             count: CardPalette.solids.length,
             decorationFor: (i) => BoxDecoration(
               color: Color(CardPalette.solids[i]),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
             ),
             selectedFor: (i) =>
@@ -68,9 +68,9 @@ class _CardColorPickerSheet extends StatelessWidget {
               Navigator.of(context, rootNavigator: true).pop();
             },
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           _BankLabel(text: 'Gradient'),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           _Grid(
             count: CardPalette.gradients.length,
             decorationFor: (i) => BoxDecoration(
@@ -82,7 +82,7 @@ class _CardColorPickerSheet extends StatelessWidget {
                   CardPalette.gradientColors(i).$2,
                 ],
               ),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
               border: Border.all(color: Colors.black.withValues(alpha: 0.12)),
             ),
             selectedFor: (i) => selectedIsGradient && selectedValue == i,
@@ -109,8 +109,8 @@ class _BankLabel extends StatelessWidget {
       child: Text(
         text.toUpperCase(),
         style: localeFont(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
           letterSpacing: 1.4,
           color: cs.onSurfaceVariant,
         ),
@@ -178,7 +178,7 @@ class _SwatchCell extends StatelessWidget {
             bottom: -3,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(KuberRadius.md + 3),
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased + 3),
                 border: Border.all(color: cs.primary, width: 2),
               ),
             ),
@@ -187,7 +187,7 @@ class _SwatchCell extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(KuberShape.medium),
             child: Ink(
               decoration: decoration,
               child: selected

@@ -1,5 +1,3 @@
-
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +9,8 @@ import '../../../core/models/export_data.dart';
 export '../../../core/models/export_data.dart' show ExportType;
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart'; // showKuberSnackBar
 import '../../analytics/providers/analytics_provider.dart';
 import '../../history/providers/history_filter_provider.dart';
@@ -81,99 +81,109 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final viewPadding = MediaQuery.of(context).viewPadding.bottom;
+    final l10n = context.l10n;
+    final optionsTitle = _isTransactions
+        ? l10n.exportHistory
+        : l10n.exportAnalytics;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        KuberSpacing.xl,
-        KuberSpacing.lg,
-        KuberSpacing.xl,
-        viewPadding > 0 ? viewPadding + KuberSpacing.lg : KuberSpacing.xxl,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(2),
+    // Shared sheet shell (title in the header, close disc, pinned actions).
+    return KuberBottomSheet(
+      title: switch (_stage) {
+        _ExportStage.complete => l10n.exportSuccessful,
+        _ExportStage.error => l10n.exportFailed,
+        _ => optionsTitle,
+      },
+      description: switch (_stage) {
+        _ExportStage.complete => l10n.reportReady,
+        _ExportStage.error => _errorMessage,
+        _ => null,
+      },
+      actions: switch (_stage) {
+        _ExportStage.options => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppButton(
+              label: l10n.generateReport,
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: _startExport,
             ),
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-
-          // Close button
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    shape: BoxShape.circle,
+          ],
+        ),
+        _ExportStage.progress => null,
+        _ExportStage.complete => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppButton(
+              label: l10n.openFile,
+              icon: Icons.open_in_new_rounded,
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: _openFile,
+            ),
+            const SizedBox(height: KuberSpace.md),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    label: _isSaving ? l10n.savingEllipsis : l10n.saveToFolder,
+                    icon: Icons.save_alt_rounded,
+                    fullWidth: true,
+                    onPressed: _isSaving ? null : _saveToFolder,
                   ),
-                  child: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.sm),
-
-          // Content based on stage
-          switch (_stage) {
-            _ExportStage.options => _buildOptions(cs),
-            _ExportStage.progress => _buildProgress(cs),
-            _ExportStage.complete => _buildComplete(cs),
-            _ExportStage.error => _buildError(cs),
-          },
-        ],
-      ),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
+                  child: AppButton(
+                    label: l10n.shareLabel,
+                    icon: Icons.share_outlined,
+                    fullWidth: true,
+                    onPressed: _shareReport,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        _ExportStage.error => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppButton(
+              label: l10n.tryAgain,
+              type: AppButtonType.primary,
+              fullWidth: true,
+              onPressed: () => setState(() => _stage = _ExportStage.options),
+            ),
+            const SizedBox(height: KuberSpace.md),
+            AppButton(
+              label: l10n.cancelLabel,
+              fullWidth: true,
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      },
+      child: switch (_stage) {
+        _ExportStage.options => _buildOptions(cs),
+        _ExportStage.progress => _buildProgress(cs),
+        _ExportStage.complete => _buildComplete(cs),
+        _ExportStage.error => const SizedBox.shrink(),
+      },
     );
   }
 
   // ---- Options state -------------------------------------------------------
 
   Widget _buildOptions(ColorScheme cs) {
-    final title = _isTransactions ? context.l10n.exportHistory : context.l10n.exportAnalytics;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title
-        Center(
-          child: Text(
-            title,
-            style: localeFont(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-              letterSpacing: -0.3,
-            ),
-          ),
+        KuberSectionHeader(
+          title: _isTransactions
+              ? context.l10n.selectFormat
+              : context.l10n.formatUpper,
         ),
-        const SizedBox(height: KuberSpacing.xl),
-
-        // FORMAT Section
-        Text(
-          _isTransactions ? context.l10n.selectFormat : context.l10n.formatUpper,
-          style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.md),
         if (_isTransactions)
           SettingsCardSelector<ExportFormat>(
             options: [
@@ -207,76 +217,33 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
             selectedValue: ExportFormat.pdf,
             onSelected: (_) {},
           ),
-        const SizedBox(height: KuberSpacing.xl),
-
+        const SizedBox(height: KuberSpace.xl),
         if (_isTransactions && _hasActiveFilters) ...[
-          // APPLY FILTERS Card
           _buildFiltersCard(cs),
-          const SizedBox(height: KuberSpacing.xl),
         ] else if (!_isTransactions) ...[
-          // SELECTED PERIOD Card for Analytics
           _buildPeriodCard(cs),
-          const SizedBox(height: KuberSpacing.md),
-          // Info Box
+          const SizedBox(height: KuberSpace.md),
           _buildInfoBox(cs),
-          const SizedBox(height: KuberSpacing.xl),
         ],
-
-        // CTA
-        AppButton(
-          label: context.l10n.generateReport,
-          icon: _isTransactions ? null : Icons.arrow_forward_rounded,
-          iconAfterLabel: !_isTransactions,
-          type: AppButtonType.primary,
-          fullWidth: true,
-          onPressed: _startExport,
-        ),
       ],
     );
   }
 
   Widget _buildFiltersCard(ColorScheme cs) {
-    return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.applyCurrentFilters,
-                  style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  context.l10n.applyFiltersDesc,
-                  style: localeFont(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.8),
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: KuberSpacing.md),
-          Switch.adaptive(
+    return KuberGroup(
+      children: [
+        KuberListRow(
+          leading: const KuberIconTile(icon: Icons.filter_alt_outlined),
+          title: context.l10n.applyCurrentFilters,
+          subtitle: context.l10n.applyFiltersDesc,
+          subtitleLines: 2,
+          onTap: () => setState(() => _applyFilters = !_applyFilters),
+          trailing: Switch(
             value: _applyFilters,
             onChanged: (val) => setState(() => _applyFilters = val),
-            activeTrackColor: cs.primary,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -289,38 +256,14 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.selectedPeriod,
-          style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(KuberSpacing.lg),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.calendar_today_outlined, size: 18, color: cs.onSurfaceVariant),
-              const SizedBox(width: KuberSpacing.md),
-              Text(
-                rangeText,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
-              ),
-            ],
-          ),
+        KuberSectionHeader(title: context.l10n.selectedPeriod),
+        KuberGroup(
+          children: [
+            KuberListRow(
+              leading: const KuberIconTile(icon: Icons.calendar_today_outlined),
+              title: rangeText,
+            ),
+          ],
         ),
       ],
     );
@@ -328,25 +271,26 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
 
   Widget _buildInfoBox(ColorScheme cs) {
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.1)),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.cardR,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline_rounded, size: 18, color: cs.primary),
-          const SizedBox(width: KuberSpacing.md),
+          Icon(
+            Icons.info_outline_rounded,
+            size: 20,
+            color: cs.onSecondaryContainer,
+          ),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Text(
               context.l10n.analyticsDateFilterInfo,
-              style: localeFont(
-                fontSize: 12,
-                color: cs.onSurfaceVariant,
-                height: 1.4,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(color: cs.onSecondaryContainer),
             ),
           ),
         ],
@@ -354,26 +298,20 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     );
   }
 
-
-
-
-
   // ---- Progress state ------------------------------------------------------
 
   Widget _buildProgress(ColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xxl),
+      padding: const EdgeInsets.symmetric(vertical: KuberSpace.xxl),
       child: Column(
         children: [
-          CircularProgressIndicator(color: cs.primary),
-          const SizedBox(height: KuberSpacing.xl),
+          const CircularProgressIndicator(),
+          const SizedBox(height: KuberSpace.xl),
           Text(
             'Generating your report\u2026',
-            style: localeFont(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurfaceVariant,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -401,120 +339,21 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       }
     } catch (_) {}
 
-    return Column(
+    return KuberGroup(
       children: [
-        // Success icon
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
+        KuberListRow(
+          leading: KuberIconTile(
+            icon: isPdf
+                ? Icons.picture_as_pdf_outlined
+                : Icons.description_outlined,
           ),
-          child: Icon(Icons.check_circle_rounded, size: 32, color: cs.primary),
-        ),
-        const SizedBox(height: KuberSpacing.lg),
-        Text(
-          context.l10n.exportSuccessful,
-          style: localeFont(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          context.l10n.reportReady,
-          style: localeFont(
-            fontSize: 13,
-            color: cs.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: KuberSpacing.xl),
-
-        // File info card
-        Container(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  isPdf ? Icons.picture_as_pdf_outlined : Icons.description_outlined,
-                  size: 20,
-                  color: cs.primary,
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      fileName,
-                      style: localeFont(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      sizeText,
-                      style: localeFont(
-                        fontSize: 12,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.xl),
-
-        // Action buttons
-        AppButton(
-          label: context.l10n.openFile,
-          icon: Icons.open_in_new_rounded,
-          type: AppButtonType.primary,
-          fullWidth: true,
-          onPressed: _openFile,
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        AppButton(
-          label: _isSaving ? context.l10n.savingEllipsis : context.l10n.saveToFolder,
-          icon: Icons.save_alt_rounded,
-          type: AppButtonType.normal,
-          fullWidth: true,
-          onPressed: _isSaving ? null : _saveToFolder,
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        AppButton(
-          label: context.l10n.shareLabel,
-          icon: Icons.share_outlined,
-          type: AppButtonType.normal,
-          fullWidth: true,
-          onPressed: _shareReport,
+          title: fileName,
+          subtitle: sizeText,
+          trailing: Icon(Icons.check_circle_rounded, color: cs.primary),
         ),
       ],
     );
   }
-
 
   Future<void> _openFile() async {
     final result = _exportResult;
@@ -525,7 +364,10 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     final mimeType = fileName.toLowerCase().endsWith('.csv')
         ? 'text/csv'
         : 'application/pdf';
-    final openResult = await OpenFilex.open(result.tempFile.path, type: mimeType);
+    final openResult = await OpenFilex.open(
+      result.tempFile.path,
+      type: mimeType,
+    );
     if (openResult.type != ResultType.done && mounted) {
       showKuberSnackBar(context, context.l10n.noAppToOpen);
     }
@@ -560,71 +402,18 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
       await SharePlus.instance.share(
         ShareParams(
           files: [
-            XFile.fromData(
-              result.bytes,
-              name: fileName,
-              mimeType: mimeType,
-            ),
+            XFile.fromData(result.bytes, name: fileName, mimeType: mimeType),
           ],
         ),
       );
     } catch (e) {
       if (mounted) {
-        showKuberSnackBar(context, context.l10n.couldNotShareFile(e.toString()));
+        showKuberSnackBar(
+          context,
+          context.l10n.couldNotShareFile(e.toString()),
+        );
       }
     }
-  }
-
-  // ---- Error state ---------------------------------------------------------
-
-  Widget _buildError(ColorScheme cs) {
-    return Column(
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: cs.error.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.error_outline_rounded, size: 36, color: cs.error),
-        ),
-        const SizedBox(height: KuberSpacing.lg),
-        Text(
-          context.l10n.exportFailed,
-          style: localeFont(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: cs.onSurface,
-          ),
-        ),
-        const SizedBox(height: KuberSpacing.sm),
-        Text(
-          _errorMessage,
-          style: localeFont(
-            fontSize: 14,
-            color: cs.onSurfaceVariant,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: KuberSpacing.xl),
-        AppButton(
-          label: context.l10n.tryAgain,
-          type: AppButtonType.primary,
-          fullWidth: true,
-          onPressed: () {
-            setState(() => _stage = _ExportStage.options);
-          },
-        ),
-        const SizedBox(height: KuberSpacing.md),
-        AppButton(
-          label: context.l10n.cancelLabel,
-          type: AppButtonType.normal,
-          fullWidth: true,
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
-    );
   }
 
   // ---- Export logic ---------------------------------------------------------
@@ -635,8 +424,10 @@ class _ExportBottomSheetState extends ConsumerState<ExportBottomSheet> {
     try {
       dynamic data;
       if (_isTransactions) {
-        data = buildTransactionExportData(ref,
-            applyFilters: _applyFilters && _hasActiveFilters);
+        data = buildTransactionExportData(
+          ref,
+          applyFilters: _applyFilters && _hasActiveFilters,
+        );
       } else {
         data = buildAnalyticsExportData(ref);
       }

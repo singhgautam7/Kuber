@@ -8905,6 +8905,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The bill generates on the {billOrdinal} and payment is due on the {dueOrdinal}, so payment falls in the next month.'**
   String billDueCrossMonthHint(String billOrdinal, String dueOrdinal);
+
+  /// No description provided for @rangeFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get rangeFrom;
+
+  /// No description provided for @rangeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get rangeTo;
+
+  /// No description provided for @changeView.
+  ///
+  /// In en, this message translates to:
+  /// **'Change view'**
+  String get changeView;
+
+  /// No description provided for @iconAndColour.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon & colour'**
+  String get iconAndColour;
+
+  /// No description provided for @chooseIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose icon'**
+  String get chooseIcon;
+
+  /// No description provided for @chooseColour.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose colour'**
+  String get chooseColour;
+
+  /// No description provided for @budgetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Budgets'**
+  String get budgetsTitle;
+
+  /// No description provided for @activeBudgetsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeBudgetsSection;
+
+  /// No description provided for @pausedAndEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused and ended'**
+  String get pausedAndEnded;
+
+  /// No description provided for @gainLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gain'**
+  String get gainLabel;
+
+  /// No description provided for @returnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Return'**
+  String get returnLabel;
+
+  /// No description provided for @moreCountAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 account} other{{count} accounts}}'**
+  String moreCountAccounts(int count);
+
+  /// No description provided for @moreCountCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 category} other{{count} categories}}'**
+  String moreCountCategories(int count);
+
+  /// No description provided for @moreCountTags.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tag} other{{count} tags}}'**
+  String moreCountTags(int count);
+
+  /// No description provided for @moreCountActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} active'**
+  String moreCountActive(int count);
+
+  /// No description provided for @moreCountRules.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 rule} other{{count} rules}}'**
+  String moreCountRules(int count);
+
+  /// No description provided for @moreCountOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} open'**
+  String moreCountOpen(int count);
+
+  /// No description provided for @moreCountHoldings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 holding} other{{count} holdings}}'**
+  String moreCountHoldings(int count);
+
+  /// No description provided for @netBalanceUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'NET BALANCE'**
+  String get netBalanceUpper;
+
+  /// No description provided for @netWorthUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'NET WORTH'**
+  String get netWorthUpper;
+
+  /// No description provided for @nothingMatchesQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches \"{query}\".'**
+  String nothingMatchesQuery(Object query);
+
+  /// No description provided for @searchBudgetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search budgets'**
+  String get searchBudgetsHint;
+
+  /// No description provided for @searchRecurringHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search recurring'**
+  String get searchRecurringHint;
+
+  /// No description provided for @searchLoansHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search loans'**
+  String get searchLoansHint;
+
+  /// No description provided for @searchLedgerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people'**
+  String get searchLedgerHint;
+
+  /// No description provided for @searchInvestmentsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search investments'**
+  String get searchInvestmentsHint;
 }
 
 class _AppLocalizationsDelegate

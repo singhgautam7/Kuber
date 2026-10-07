@@ -25,8 +25,8 @@
 //   • Type chips disabled while editing (existing behaviour)
 // =============================================================================
 
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
+import 'package:kuber/core/utils/locale_font.dart' show sentenceCase;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,14 +41,26 @@ import '../data/account.dart';
 import '../providers/account_provider.dart';
 
 // From the pickers-and-setup pass:
-import '../../../shared/widgets/icon_picker_bottom_sheet.dart';
-import '../../../shared/widgets/color_picker_bottom_sheet.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/icon_color_picker_sheet.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import 'credit_billing_cycle_section.dart';
 
 class AccountForm extends ConsumerStatefulWidget {
   final Account? account;
   final VoidCallback? onSave;
-  const AccountForm({super.key, this.account, this.onSave});
+
+  /// Full-screen use (Add Account route): the fields scroll and the save
+  /// button is pinned under them (board 3.15). Embedded use keeps the save
+  /// button at the end of the column.
+  final bool pinnedSave;
+  const AccountForm({
+    super.key,
+    this.account,
+    this.onSave,
+    this.pinnedSave = false,
+  });
 
   @override
   ConsumerState<AccountForm> createState() => _AccountFormState();
@@ -81,8 +93,8 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     _balanceController = TextEditingController(
       text: a != null
           ? (a.initialBalance % 1 == 0
-              ? a.initialBalance.toStringAsFixed(0)
-              : a.initialBalance.toStringAsFixed(2))
+                ? a.initialBalance.toStringAsFixed(0)
+                : a.initialBalance.toStringAsFixed(2))
           : '',
     );
     _limitController = TextEditingController(
@@ -129,10 +141,11 @@ class _AccountFormState extends ConsumerState<AccountForm> {
       ..initialBalance = _isEditing
           ? account.initialBalance
           : _isCreditCard
-              ? -(double.tryParse(_balanceController.text) ?? 0.0).abs()
-              : (double.tryParse(_balanceController.text) ?? 0.0)
-      ..creditLimit =
-          _isCreditCard ? double.tryParse(_limitController.text) : null
+          ? -(double.tryParse(_balanceController.text) ?? 0.0).abs()
+          : (double.tryParse(_balanceController.text) ?? 0.0)
+      ..creditLimit = _isCreditCard
+          ? double.tryParse(_limitController.text)
+          : null
       ..last4Digits = _last4Controller.text.isNotEmpty
           ? _last4Controller.text
           : null
@@ -156,132 +169,132 @@ class _AccountFormState extends ConsumerState<AccountForm> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final symbol = ref.watch(currencyProvider).symbol;
-    final swatch = Color(_selectedColor ?? AppColorPalette.kVibrant.first);
+    final iconKey = _selectedIcon ?? IconMapper.kAccountIconKeys.first;
+    final colorValue = _selectedColor ?? AppColorPalette.kVibrant.first;
+    final typeLabel = _isCreditCard
+        ? context.l10n.creditCardLabel
+        : _isCash
+        ? context.l10n.cashLabel
+        : context.l10n.bankLabel;
 
-    return Column(
+    // Board 3.15 add / edit: live preview, Identity, Balance, Appearance.
+    final fields = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // ── LIVE PREVIEW ─────────────────────────────────────────────
+        AnimatedBuilder(
+          animation: Listenable.merge([_nameController, _balanceController]),
+          builder: (context, _) => KuberCard(
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: KuberLeadingSwatch(
+                    color: Color(colorValue),
+                    icon: IconMapper.fromString(iconKey),
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _nameController.text.trim().isEmpty
+                            ? typeLabel
+                            : _nameController.text.trim(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '$typeLabel · ${sentenceCase(context.l10n.livePreview)}',
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '$symbol${_balanceController.text.isEmpty ? '0' : _balanceController.text}',
+                  style: theme.textTheme.titleMedium!.copyWith(
+                    color: cs.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
         // ── IDENTITY ─────────────────────────────────────────────────
         KuberFormSection(
           label: context.l10n.identity,
-          topGap: 0,
           children: [
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
-              onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-              style: localeFont(color: cs.onSurface, fontSize: 15),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
+              style: theme.textTheme.bodyLarge!.copyWith(color: cs.onSurface),
               decoration: InputDecoration(
+                labelText: sentenceCase(context.l10n.accountNameLabel),
                 hintText: _isCreditCard
                     ? context.l10n.creditCardName
                     : _isCash
-                        ? context.l10n.cashName
-                        : context.l10n.bankName,
+                    ? context.l10n.cashName
+                    : context.l10n.bankName,
               ),
             ),
-          ],
-        ),
-
-        // ── APPEARANCE ───────────────────────────────────────────────
-        KuberFormSection(
-          label: context.l10n.appearanceCategory,
-          children: [
-            KuberPickerRow(
-              leading: KuberLeadingSwatch(
-                color: swatch,
-                icon: IconMapper.fromString(
-                    _selectedIcon ?? IconMapper.kAccountIconKeys.first),
-              ),
-              label: context.l10n.iconLabel,
-              value: IconMapper.labelFor(
-                  _selectedIcon ?? IconMapper.kAccountIconKeys.first),
-              onTap: () => showIconPicker(
-                context: context,
-                iconKeys: IconMapper.kAccountIconKeys,
-                tags: IconMapper.kIconTags,
-                selected: _selectedIcon,
-                onSelected: (key) => setState(() => _selectedIcon = key),
-              ).unfocusOnComplete(context),
-            ),
-            KuberPickerRow(
-              leading: Container(
-                decoration: BoxDecoration(
-                  color: swatch,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                ),
-              ),
-              label: context.l10n.colorLabel,
-              value: AppColorPalette.nameFor(
-                  _selectedColor ?? AppColorPalette.kVibrant.first),
-              onTap: () => showColorPicker(
-                context: context,
-                selected: _selectedColor,
-                onSelected: (value) => setState(() => _selectedColor = value),
-              ).unfocusOnComplete(context),
-            ),
-          ],
-        ),
-
-        // ── TYPE ─────────────────────────────────────────────────────
-        KuberFormSection(
-          label: context.l10n.typeLabel,
-          children: [
-            KuberChipGrid<String>(
-              columns: 3,
-              selected: _selectedType,
-              onChanged: _isEditing
-                  ? (_) {} // disabled while editing (existing rule)
-                  : (v) => setState(() => _selectedType = v),
-              options: [
-                KuberChipOption(
-                    value: 'cash', label: context.l10n.cashLabel, icon: Icons.payments_rounded),
-                KuberChipOption(
-                    value: 'bank',
-                    label: context.l10n.bankLabel,
-                    icon: Icons.account_balance_rounded),
-                KuberChipOption(
-                    value: 'credit',
-                    label: context.l10n.creditCardLabel,
-                    icon: Icons.credit_card_rounded),
+            // Type as filter chips (disabled while editing, existing rule).
+            Wrap(
+              spacing: KuberSpace.sm,
+              runSpacing: KuberSpace.sm,
+              children: [
+                for (final (value, label) in [
+                  ('bank', context.l10n.bankLabel),
+                  ('cash', context.l10n.cashLabel),
+                  ('credit', context.l10n.creditCardLabel),
+                ])
+                  Opacity(
+                    opacity: _isEditing && _selectedType != value ? 0.38 : 1,
+                    child: KuberChip(
+                      label: label,
+                      selected: _selectedType == value,
+                      onTap: _isEditing
+                          ? null
+                          : () => setState(() => _selectedType = value),
+                    ),
+                  ),
               ],
             ),
-            // Last 4 — hidden for cash. Conditional rule preserved.
+            // Last 4: hidden for cash (existing rule).
             AnimatedSize(
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
               child: _isCash
                   ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: _last4Controller,
-                            maxLength: 4,
-                            keyboardType: TextInputType.number,
-                            onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            style: localeFont(
-                                color: cs.onSurface, fontSize: 15),
-                            decoration: InputDecoration(
-                              hintText: context.l10n.last4DigitsHint,
-                              counterText: '',
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            context.l10n.cardLast4Note,
-                            style: localeFont(
-                              fontSize: 11,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
+                  : TextField(
+                      controller: _last4Controller,
+                      maxLength: 4,
+                      keyboardType: TextInputType.number,
+                      onTapOutside: (_) =>
+                          FocusManager.instance.primaryFocus?.unfocus(),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      style: theme.textTheme.bodyLarge!.copyWith(
+                        color: cs.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: context.l10n.last4DigitsHint,
+                        helperText: context.l10n.cardLast4Note,
+                        helperMaxLines: 2,
+                        counterText: '',
                       ),
                     ),
             ),
@@ -289,36 +302,49 @@ class _AccountFormState extends ConsumerState<AccountForm> {
         ),
 
         // ── BALANCE ──────────────────────────────────────────────────
-        KuberFormSection(
-          label: context.l10n.balanceLabel,
-          children: [
-            // Initial balance — only when (!editing && !credit)
-            if (!_isEditing && !_isCreditCard)
-              KuberHeroAmountInput(
-                label: context.l10n.initialBalance,
-                currencySymbol: symbol,
-                controller: _balanceController,
-              ),
-            // Limit spent — only when (!editing && credit)
-            if (!_isEditing && _isCreditCard)
-              KuberHeroAmountInput(
-                label: context.l10n.limitSpentField,
-                currencySymbol: symbol,
-                controller: _balanceController,
-              ),
-            // Total limit — always when credit
-            if (_isCreditCard)
-              KuberHeroAmountInput(
-                label: context.l10n.totalLimitField,
-                currencySymbol: symbol,
-                controller: _limitController,
-              ),
-          ],
-        ),
+        if (!_isEditing || _isCreditCard)
+          KuberFormSection(
+            label: context.l10n.balanceLabel,
+            children: [
+              // Initial balance: only when (!editing && !credit)
+              if (!_isEditing && !_isCreditCard)
+                KuberHeroAmountInput(
+                  label: context.l10n.initialBalance,
+                  currencySymbol: symbol,
+                  controller: _balanceController,
+                  large: false,
+                ),
+              // Credit card: limit spent (add only) + total limit, side by side.
+              if (_isCreditCard)
+                Row(
+                  children: [
+                    if (!_isEditing) ...[
+                      Expanded(
+                        child: KuberHeroAmountInput(
+                          label: context.l10n.limitSpentField,
+                          currencySymbol: symbol,
+                          controller: _balanceController,
+                          large: false,
+                        ),
+                      ),
+                      const SizedBox(width: KuberSpace.md),
+                    ],
+                    Expanded(
+                      child: KuberHeroAmountInput(
+                        label: context.l10n.totalLimitField,
+                        currencySymbol: symbol,
+                        controller: _limitController,
+                        large: false,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
 
         // ── BILLING CYCLE (credit card only) ─────────────────────────
         if (_isCreditCard) ...[
-          const SizedBox(height: 22),
+          const SizedBox(height: KuberSpace.xl),
           CreditBillingCycleSection(
             billDay: _billGenerationDay,
             dueDay: _paymentDueDay,
@@ -331,10 +357,48 @@ class _AccountFormState extends ConsumerState<AccountForm> {
           ),
         ],
 
-        const SizedBox(height: 24),
-        // Save lives in the parent (bottom sheet or screen scaffold).
-        // The widget below is a fallback for callers that embed AccountForm
-        // directly without an outer bottom sheet button.
+        // ── APPEARANCE ───────────────────────────────────────────────
+        KuberFormSection(
+          label: context.l10n.appearanceCategory,
+          children: [
+            IconColorPickerRow(
+              iconKey: iconKey,
+              colorValue: colorValue,
+              label: context.l10n.iconAndColour,
+              onTap: () => showIconColorPicker(
+                context: context,
+                iconKeys: IconMapper.kAccountIconKeys,
+                tags: IconMapper.kIconTags,
+                iconKey: iconKey,
+                colorValue: colorValue,
+                onDone: (icon, color) => setState(() {
+                  _selectedIcon = icon;
+                  _selectedColor = color;
+                }),
+              ).unfocusOnComplete(context),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: KuberSpace.xl),
+        if (!widget.pinnedSave)
+          AppButton(
+            label: context.l10n.saveAccount,
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: _save,
+          ),
+      ],
+    );
+    if (!widget.pinnedSave) return fields;
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+            child: fields,
+          ),
+        ),
         KuberSaveButton(label: context.l10n.saveAccount, onPressed: _save),
       ],
     );

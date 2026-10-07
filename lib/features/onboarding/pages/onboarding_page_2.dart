@@ -1,11 +1,10 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../settings/widgets/settings_widgets.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../widgets/onboarding_entrance.dart';
 import '../widgets/onboarding_fit.dart';
 import '../widgets/onboarding_skip_button.dart';
@@ -46,45 +45,41 @@ class OnboardingPageTwo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Center(child: _PrivacyIllustration()),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 OnboardingEntrance(
                   child: Text(
                     context.l10n.privateByDesign,
-                    style: localeFont(
-                      fontSize: 28,
-                      height: 1.08,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      letterSpacing: -0.8,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium!.copyWith(color: cs.onSurface),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 OnboardingEntrance(
                   delay: const Duration(milliseconds: 90),
                   child: Text(
                     context.l10n.onboardingPage2Description,
-                    style: localeFont(
-                      fontSize: 13,
-                      height: 1.42,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
-                for (var i = 0; i < cards.length; i++) ...[
-                  OnboardingEntrance(
-                    delay: Duration(milliseconds: 140 + i * 120),
-                    child: _PrivacyFeatureCard(
-                      icon: cards[i].icon,
-                      title: cards[i].title,
-                      body: cards[i].body,
-                      highlighted: i == 0,
-                    ),
-                  ),
-                  if (i < cards.length - 1)
-                    const SizedBox(height: KuberSpacing.sm),
-                ],
+                const SizedBox(height: KuberSpace.xl),
+                // Three bordered cards become one grouped list (board 3.1).
+                KuberGroup(
+                  children: [
+                    for (var i = 0; i < cards.length; i++)
+                      OnboardingEntrance(
+                        delay: Duration(milliseconds: 140 + i * 120),
+                        child: _PrivacyFeatureCard(
+                          icon: cards[i].icon,
+                          title: cards[i].title,
+                          body: cards[i].body,
+                          highlighted: i == 0,
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -109,46 +104,31 @@ class _PrivacyFeatureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(
-          color: highlighted ? cs.primary.withValues(alpha: 0.75) : cs.outline,
-        ),
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpace.lg,
+        vertical: KuberSpace.md,
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SquircleIcon(
-            icon: icon,
-            color: highlighted ? cs.primary : cs.onSurfaceVariant,
-            size: 20,
-            padding: 10,
-          ),
-          const SizedBox(width: KuberSpacing.md),
+          KuberIconTile(icon: icon),
+          const SizedBox(width: KuberSpace.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: localeFont(
-                    fontSize: 18,
-                    height: 1.1,
-                    fontWeight: FontWeight.w800,
+                  style: theme.textTheme.titleMedium!.copyWith(
                     color: cs.onSurface,
-                    letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.xs),
                 Text(
                   body,
-                  style: localeFont(
-                    fontSize: 14,
-                    height: 1.32,
+                  style: theme.textTheme.bodyMedium!.copyWith(
                     color: cs.onSurfaceVariant,
                   ),
                 ),
@@ -290,7 +270,7 @@ class _PrivacyPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     final body = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center.translate(0, 8), width: 42, height: 34),
-      const Radius.circular(KuberRadius.md),
+      const Radius.circular(KuberShape.medium),
     );
     canvas.drawRRect(body, paint);
     canvas.drawArc(

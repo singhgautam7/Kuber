@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_menu.dart';
 import 'kuber_mark.dart';
 
 /// Pin spec for the Ask Kuber home-screen shortcut (overflow > Add to home
@@ -39,104 +40,101 @@ class AskKuberHeader extends StatelessWidget {
     required this.onClear,
   });
 
+  Future<void> _openMenu(BuildContext anchor) async {
+    final v = await showKuberMenu<int>(
+      context: anchor,
+      entries: [
+        const KuberMenuEntry(
+          value: 0,
+          icon: Icons.info_outline_rounded,
+          label: 'How it works',
+        ),
+        if (canCopy)
+          const KuberMenuEntry(
+            value: 1,
+            icon: Icons.content_copy_rounded,
+            label: 'Copy last response',
+          ),
+        const KuberMenuEntry(
+          value: 2,
+          icon: Icons.feedback_outlined,
+          label: 'Share Feedback',
+        ),
+        const KuberMenuEntry(
+          value: 4,
+          icon: Icons.add_to_home_screen_rounded,
+          label: 'Add to home screen',
+        ),
+        const KuberMenuEntry.divider(),
+        const KuberMenuEntry(
+          value: 3,
+          icon: Icons.delete_outline_rounded,
+          label: 'Clear chat',
+          destructive: true,
+        ),
+      ],
+    );
+    if (v == null || !anchor.mounted) return;
+    switch (v) {
+      case 0:
+        onHowItWorks();
+      case 1:
+        onCopy();
+      case 2:
+        onFeedback();
+      case 4:
+        requestPinShortcut(anchor, _kAskKuberPinSpec);
+      default:
+        onClear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    // Board 3.8: back, mark + title/subline, overflow.
     return SafeArea(
       bottom: false,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.md, KuberSpacing.sm, KuberSpacing.sm, KuberSpacing.sm),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
         child: Row(
           children: [
-            PulsingKuberMark(size: 34, pulse: pulse, thinking: thinking),
-            const SizedBox(width: KuberSpacing.sm),
+            AppIconButton(
+              icon: Icons.arrow_back_rounded,
+              semanticLabel: 'Back',
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
+            const SizedBox(width: 6),
+            PulsingKuberMark(size: 32, pulse: pulse, thinking: thinking),
+            const SizedBox(width: KuberSpace.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Ask Kuber',
-                      style: localeFont(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface)),
-                  Text('On-device • No internet required',
-                      style: localeFont(
-                          fontSize: 11, color: cs.onSurfaceVariant)),
+                  Text(
+                    'Ask Kuber',
+                    maxLines: 1,
+                    style: tt.titleLarge!.copyWith(color: cs.onSurface),
+                  ),
+                  Text(
+                    'On-device • No internet required',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+                  ),
                 ],
               ),
             ),
-            PopupMenuButton<int>(
-              icon: Icon(Icons.more_vert_rounded, color: cs.onSurfaceVariant),
-              color: cs.surfaceContainer,
-              elevation: 0,
-              menuPadding: const EdgeInsets.symmetric(vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                side: BorderSide(color: cs.outline),
+            Builder(
+              builder: (anchor) => AppIconButton(
+                icon: Icons.more_vert_rounded,
+                semanticLabel: 'More options',
+                onPressed: () => _openMenu(anchor),
               ),
-              onSelected: (v) {
-                switch (v) {
-                  case 0:
-                    onHowItWorks();
-                  case 1:
-                    onCopy();
-                  case 2:
-                    onFeedback();
-                  case 4:
-                    requestPinShortcut(context, _kAskKuberPinSpec);
-                  default:
-                    onClear();
-                }
-              },
-              itemBuilder: (context) => [
-                _item(cs, 0, Icons.info_outline_rounded, 'How it works'),
-                _item(cs, 1, Icons.content_copy_rounded, 'Copy last response',
-                    enabled: canCopy),
-                _item(cs, 2, Icons.feedback_outlined, 'Share Feedback'),
-                _item(cs, 4, Icons.add_to_home_screen_rounded,
-                    'Add to home screen'),
-                const PopupMenuDivider(height: 9),
-                _item(cs, 3, Icons.delete_outline_rounded, 'Clear chat',
-                    danger: true),
-              ],
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  PopupMenuItem<int> _item(
-    ColorScheme cs,
-    int value,
-    IconData icon,
-    String label, {
-    bool enabled = true,
-    bool danger = false,
-  }) {
-    final color = !enabled
-        ? cs.onSurfaceVariant.withValues(alpha: 0.4)
-        : danger
-            ? cs.error
-            : cs.onSurface;
-    final iconColor = !enabled
-        ? cs.onSurfaceVariant.withValues(alpha: 0.4)
-        : danger
-            ? cs.error
-            : cs.onSurfaceVariant;
-    return PopupMenuItem(
-      value: value,
-      enabled: enabled,
-      height: 36,
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: iconColor),
-          const SizedBox(width: 10),
-          Text(label,
-              style: localeFont(
-                  fontSize: 13.5, fontWeight: FontWeight.w500, color: color)),
-        ],
       ),
     );
   }
@@ -162,10 +160,10 @@ class ChatInputBar extends StatelessWidget {
     return Container(
       color: cs.surface,
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.sm,
-        KuberSpacing.lg,
-        math.max(KuberSpacing.md, MediaQuery.of(context).padding.bottom),
+        KuberSpace.screenMargin,
+        KuberSpace.sm,
+        KuberSpace.screenMargin,
+        math.max(KuberSpace.md, MediaQuery.of(context).padding.bottom),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -174,11 +172,10 @@ class ChatInputBar extends StatelessWidget {
             child: Opacity(
               opacity: isProcessing ? 0.6 : 1.0,
               child: Container(
-                constraints: const BoxConstraints(minHeight: 46),
+                constraints: const BoxConstraints(minHeight: 48),
                 decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.lg),
-                  border: Border.all(color: cs.outline),
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(24),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 alignment: Alignment.centerLeft,
@@ -187,21 +184,24 @@ class ChatInputBar extends StatelessWidget {
                   enabled: !isProcessing,
                   maxLines: 4,
                   minLines: 1,
-                  style: localeFont(
-                      fontSize: 14, fontWeight: FontWeight.w500, color: cs.onSurface),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge!.copyWith(color: cs.onSurface),
                   onTapOutside: (_) =>
                       FocusManager.instance.primaryFocus?.unfocus(),
                   decoration: InputDecoration(
                     isDense: true,
+                    // The pill is the field; no theme fill inside it.
+                    filled: false,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     disabledBorder: InputBorder.none,
-                    contentPadding:
-                        const EdgeInsets.symmetric(vertical: 13),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 13),
                     hintText: 'Ask about your money...',
-                    hintStyle:
-                        localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+                    hintStyle: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
                   ),
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) {
@@ -211,7 +211,7 @@ class ChatInputBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: KuberSpacing.sm),
+          const SizedBox(width: KuberSpace.sm),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
             builder: (context, value, child) {
@@ -221,13 +221,11 @@ class ChatInputBar extends StatelessWidget {
                 onTap: active ? onSend : null,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 150),
-                  width: 46,
-                  height: 46,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: active ? cs.primary : cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.lg),
-                    border: Border.all(
-                        color: active ? cs.primary : cs.outline),
+                    color: active ? cs.primary : cs.surfaceContainerHigh,
+                    shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: isProcessing
@@ -235,11 +233,14 @@ class ChatInputBar extends StatelessWidget {
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(
-                                strokeWidth: 2, color: cs.onSurfaceVariant),
+                              strokeWidth: 2,
+                              color: cs.onSurfaceVariant,
+                            ),
                           )
                         : KuberSendIcon(
                             size: 18,
-                            color: active ? cs.onPrimary : cs.onSurfaceVariant),
+                            color: active ? cs.onPrimary : cs.onSurfaceVariant,
+                          ),
                   ),
                 ),
               );

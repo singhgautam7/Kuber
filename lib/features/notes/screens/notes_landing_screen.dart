@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/locale_font.dart';
+import '../../../core/models/overflow_config.dart';
 import '../../../core/services/shortcut_pin_service.dart';
+import '../../../shared/widgets/app_icon_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_search_filter_bar.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../pro/feature_gates/gate_sheet_notes_limit.dart';
 import '../../pro/paywall/pro_state.dart';
@@ -17,17 +20,15 @@ import '../providers/notes_provider.dart';
 import '../widgets/about_notes_info_sheet.dart';
 import '../widgets/note_cards.dart';
 import '../widgets/note_dialogs.dart' show showNoteDeleteConfirmDialog;
-import '../widgets/notes_landing_sections.dart';
-import '../widgets/notes_landing_extras.dart';
 
-/// Kuber Notes landing page (screens 1a list / 1b grid / 1c empty).
-/// Universal landing pattern: KuberAppBar + KuberPageHeader (FAB right).
+/// Kuber Notes landing page (board 3.23: list / grid / multi-select / empty).
+/// Header with info + overflow (view mode), a summary row with search,
+/// filter and sort, grouped Pinned / Others, the New note FAB.
 class NotesLandingScreen extends ConsumerStatefulWidget {
   const NotesLandingScreen({super.key});
 
   @override
-  ConsumerState<NotesLandingScreen> createState() =>
-      _NotesLandingScreenState();
+  ConsumerState<NotesLandingScreen> createState() => _NotesLandingScreenState();
 }
 
 class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
@@ -90,8 +91,10 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
   Future<void> _bulkDelete() async {
     final selection = ref.read(notesSelectionProvider);
     if (selection.isEmpty) return;
-    final confirmed =
-        await showNoteDeleteConfirmDialog(context, count: selection.length);
+    final confirmed = await showNoteDeleteConfirmDialog(
+      context,
+      count: selection.length,
+    );
     if (confirmed != true || !mounted) return;
     await ref.read(notesRepositoryProvider).deleteMany(selection.toList());
     ref.read(notesSelectionProvider.notifier).state = {};
@@ -131,59 +134,38 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
     );
   }
 
-  void _showSortMenu(BuildContext anchorContext) {
-    final cs = Theme.of(context).colorScheme;
-    final box = anchorContext.findRenderObject() as RenderBox?;
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox?;
-    if (box == null || overlay == null) return;
-    final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        box.localToGlobal(Offset.zero, ancestor: overlay),
-        box.localToGlobal(box.size.bottomRight(Offset.zero),
-            ancestor: overlay),
-      ),
-      Offset.zero & overlay.size,
-    );
-    final current = ref.read(notesSortProvider);
-    showMenu<NotesSort>(
-      context: context,
-      position: position,
-      color: cs.surfaceContainerHigh,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        side: BorderSide(color: cs.outline),
-      ),
-      items: [
-        for (final (sort, label) in [
-          (NotesSort.modified, 'Modified'),
-          (NotesSort.created, 'Created'),
-          (NotesSort.title, 'Title A-Z'),
-        ])
-          PopupMenuItem<NotesSort>(
-            value: sort,
-            child: Row(
-              children: [
-                Icon(
-                  sort == current
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  size: 16,
-                  color: sort == current ? cs.primary : cs.onSurfaceVariant,
-                ),
-                const SizedBox(width: 10),
-                Text(label,
-                    style: localeFont(
-                        fontSize: 13.5, fontWeight: FontWeight.w500)),
-              ],
-            ),
-          ),
+  static String _sortLabel(NotesSort sort) => switch (sort) {
+    NotesSort.modified => 'Modified',
+    NotesSort.created => 'Created',
+    NotesSort.title => 'Title A-Z',
+  };
+
+  PreferredSizeWidget _selectionHeader(ColorScheme cs, int count) {
+    return KuberAppBar(
+      title: '$count selected',
+      showBack: true,
+      closeIcon: true,
+      background: cs.surfaceContainer,
+      onBack: () => ref.read(notesSelectionProvider.notifier).state = {},
+      actions: [
+        AppIconButton(
+          icon: Icons.push_pin_outlined,
+          semanticLabel: 'Pin',
+          onPressed: _bulkPin,
+        ),
+        AppIconButton(
+          icon: Icons.category_outlined,
+          semanticLabel: 'Category',
+          onPressed: _bulkAssignCategory,
+        ),
+        AppIconButton(
+          icon: Icons.delete_outline_rounded,
+          kind: AppIconButtonKind.danger,
+          semanticLabel: 'Delete',
+          onPressed: _bulkDelete,
+        ),
       ],
-    ).then((value) {
-      if (value != null) {
-        ref.read(notesSortProvider.notifier).state = value;
-      }
-    });
+    );
   }
 
   @override
@@ -203,54 +185,100 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
         }
       },
       child: Scaffold(
-      backgroundColor: cs.surface,
-      appBar: KuberAppBar(
-        showBack: true,
-        showHome: true,
-        showBrand: false,
-        pinShortcut: const PinShortcutSpec(
-          shortcutId: 'kuber_notes',
-          shortLabel: 'Notes',
-          longLabel: 'Kuber Notes',
-          iconDrawable: 'ic_shortcut_notes',
-          deepLink: 'kuber://app/notes',
-        ),
-        infoConfig: kAboutNotesInfoConfig,
-        onBack: selectionMode
-            ? () => ref.read(notesSelectionProvider.notifier).state = {}
-            : null,
-      ),
-      body: Column(
-        children: [
-          KuberPageHeader(
-            title: 'Kuber Notes',
-            description:
-                'Jot expenses, do quick math, convert to transactions',
-            actionTooltip: 'New note',
-            onAction: _createNote,
-          ),
-          Expanded(
-            child: allNotes == null
-                ? const SizedBox.shrink()
-                : allNotes.isEmpty
-                    ? NotesEmptyState(onViewDemo: _openDemoNote)
-                    : _buildBody(cs, notes, selectionMode, selection),
-          ),
-          if (selectionMode)
-            NotesSelectionBar(
-              count: selection.length,
-              onDelete: _bulkDelete,
-              onPin: _bulkPin,
-              onCategory: _bulkAssignCategory,
+        floatingActionButton: selectionMode
+            ? null
+            : KuberExtendedFab(
+                icon: Icons.add_rounded,
+                label: 'New note',
+                onPressed: _createNote,
+              ),
+        floatingActionButtonLocation: kuberFabLocation,
+        backgroundColor: cs.surface,
+        // The header scrolls away with the list (no sticky headers); while
+        // multi-selecting, the contextual header overlays the top instead.
+        body: Stack(
+          children: [
+            KuberScrollAwayHeader(
+              header: KuberAppBar(
+                title: 'Kuber Notes',
+                showBack: true,
+                pinShortcut: const PinShortcutSpec(
+                  shortcutId: 'kuber_notes',
+                  shortLabel: 'Notes',
+                  longLabel: 'Kuber Notes',
+                  iconDrawable: 'ic_shortcut_notes',
+                  deepLink: 'kuber://app/notes',
+                ),
+                infoConfig: kAboutNotesInfoConfig,
+                search: allNotes == null || allNotes.isEmpty
+                    ? null
+                    : KuberHeaderSearch(
+                        controller: _searchController,
+                        hint: 'Search notes',
+                        onChanged: (v) =>
+                            ref.read(notesSearchProvider.notifier).state = v,
+                      ),
+                // Sort lives in the overflow, Mull style (review round 3).
+                overflowConfig: KuberOverflowConfig(
+                  items: [
+                    for (final (i, sort) in NotesSort.values.indexed)
+                      KuberOverflowItem(
+                        icon: switch (sort) {
+                          NotesSort.modified => Icons.update_rounded,
+                          NotesSort.created => Icons.event_note_rounded,
+                          NotesSort.title => Icons.sort_by_alpha_rounded,
+                        },
+                        label: 'Sort: ${_sortLabel(sort)}',
+                        selected: ref.watch(notesSortProvider) == sort,
+                        dividerBefore: i == 0,
+                        onTap: () =>
+                            ref.read(notesSortProvider.notifier).state = sort,
+                      ),
+                  ],
+                ),
+              ),
+              body: allNotes == null
+                  ? const SizedBox.shrink()
+                  : allNotes.isEmpty
+                  ? KuberEmptyState(
+                      icon: Icons.sticky_note_2_outlined,
+                      title: 'No notes yet',
+                      description:
+                          'Tap + to create your first note, or create a '
+                          'tutorial note to see how quick math and '
+                          'tap-to-convert work.',
+                      actionLabel: 'Create tutorial note',
+                      onAction: _openDemoNote,
+                    )
+                  : _buildBody(
+                      cs,
+                      allNotes.length,
+                      notes,
+                      selectionMode,
+                      selection,
+                    ),
             ),
-        ],
-      ),
+            if (selectionMode)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: _selectionHeader(cs, selection.length),
+              ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBody(ColorScheme cs, List<KuberNote> notes, bool selectionMode,
-      Set<int> selection) {
+  Widget _buildBody(
+    ColorScheme cs,
+    int total,
+    List<KuberNote> notes,
+    bool selectionMode,
+    Set<int> selection,
+  ) {
+    final tt = Theme.of(context).textTheme;
     final viewMode = ref.watch(notesViewModeProvider);
     final filter = ref.watch(notesFilterProvider);
     final sort = ref.watch(notesSortProvider);
@@ -259,68 +287,98 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
     final others = notes.where((n) => !n.pinned).toList();
 
     return ListView(
-      padding: EdgeInsets.only(
-        left: KuberSpacing.lg,
-        right: KuberSpacing.lg,
-        bottom: navBarBottomPadding(context),
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpace.screenMargin,
+        0,
+        KuberSpace.screenMargin,
+        KuberExtendedFab.clearance,
       ),
       children: [
-        NotesSearchRow(
-          controller: _searchController,
-          filterActive: filter.isActive,
-          onChanged: (v) =>
-              ref.read(notesSearchProvider.notifier).state = v,
-          onFilterTap: () => context.push('/more/notes/filter'),
+        // Same top as Kuber Cards: the summary line with filter and change
+        // view buttons; search is in the header (round 4).
+        Padding(
+          padding: EdgeInsets.zero,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '$total ${total == 1 ? 'note' : 'notes'} · sorted by '
+                  '${_sortLabel(sort)}',
+                  style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                ),
+              ),
+              KuberFilterButton(
+                onPressed: () => context.push('/more/notes/filter'),
+                active: filter.isActive,
+              ),
+              KuberViewModeButton<NotesViewMode>(
+                value: viewMode,
+                options: const [
+                  (NotesViewMode.list, Icons.view_list_rounded, 'List view'),
+                  (NotesViewMode.grid, Icons.grid_view_rounded, 'Grid view'),
+                ],
+                onChanged: (m) =>
+                    ref.read(notesViewModeProvider.notifier).set(m),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 14),
-        NotesSortViewRow(
-          sortLabel: switch (sort) {
-            NotesSort.modified => 'Modified',
-            NotesSort.created => 'Created',
-            NotesSort.title => 'Title A-Z',
-          },
-          viewMode: viewMode,
-          onSortTap: _showSortMenu,
-          onViewModeChanged: (m) =>
-              ref.read(notesViewModeProvider.notifier).set(m),
-        ),
-        // Breathing room between the sort/view row and the note list.
-        const SizedBox(height: 6),
         if (notes.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 48),
             child: Center(
               child: Text(
                 'No notes match. Tap + to add one.',
-                style: localeFont(
-                  fontSize: 13,
-                  color: cs.onSurfaceVariant,
-                ),
+                style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
           )
-        else ...[
-          if (pinned.isNotEmpty) ...[
-            const NotesSectionCaption('PINNED'),
-            _notesGroup(pinned, viewMode, selectionMode, selection),
-            if (others.isNotEmpty) const NotesSectionCaption('OTHERS'),
-          ],
-          _notesGroup(others, viewMode, selectionMode, selection),
-        ],
+        else
+          // List <-> grid cross-fades (review round 3).
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
+            ),
+            child: Column(
+              key: ValueKey(viewMode),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (pinned.isNotEmpty) ...[
+                  const SizedBox(height: KuberSpace.md),
+                  const KuberSectionHeader(title: 'Pinned'),
+                  _notesGroup(pinned, viewMode, selectionMode, selection),
+                ],
+                if (others.isNotEmpty) ...[
+                  const SizedBox(height: KuberSpace.md),
+                  if (pinned.isNotEmpty)
+                    const KuberSectionHeader(title: 'Others'),
+                  _notesGroup(others, viewMode, selectionMode, selection),
+                ],
+              ],
+            ),
+          ),
       ],
     );
   }
 
-  Widget _notesGroup(List<KuberNote> notes, NotesViewMode viewMode,
-      bool selectionMode, Set<int> selection) {
+  Widget _notesGroup(
+    List<KuberNote> notes,
+    NotesViewMode viewMode,
+    bool selectionMode,
+    Set<int> selection,
+  ) {
     if (viewMode == NotesViewMode.grid) {
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          mainAxisSpacing: 9,
-          crossAxisSpacing: 9,
+          mainAxisSpacing: KuberSpace.sm,
+          crossAxisSpacing: KuberSpace.sm,
           childAspectRatio: 0.92,
         ),
         itemCount: notes.length,
@@ -333,7 +391,7 @@ class _NotesLandingScreenState extends ConsumerState<NotesLandingScreen> {
         ),
       );
     }
-    return Column(
+    return KuberGroup(
       children: [
         for (final note in notes)
           NoteListCard(

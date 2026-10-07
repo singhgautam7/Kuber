@@ -7,7 +7,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../pro/feature_gates/gate_sheet_backups.dart';
@@ -29,25 +28,26 @@ class AutomaticBackupsScreen extends ConsumerWidget {
         // instead of flashing a full-screen spinner.
         skipLoadingOnReload: true,
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(context.l10n.errorWithDetails(error.toString()))),
+        error: (error, _) => Center(
+          child: Text(context.l10n.errorWithDetails(error.toString())),
+        ),
         data: (s) => CustomScrollView(
           slivers: [
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: KuberAppBar(
                 showBack: true,
-                showHome: true,
-                title: '',
+                title: context.l10n.backupsTitle.replaceAll('\n', ' '),
                 infoConfig: InfoConstants.automaticBackups,
               ),
             ),
-            SliverToBoxAdapter(
-              child: KuberPageHeader(
-                title: context.l10n.backupsTitle,
-                description: context.l10n.backupsSubtitle,
-              ),
-            ),
+
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 40 + systemNavBarInset(context)),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                0,
+                20,
+                40 + systemNavBarInset(context),
+              ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _sectionLabel(context, context.l10n.statusSectionLabel),
@@ -85,24 +85,27 @@ class AutomaticBackupsScreen extends ConsumerWidget {
                     type: AppButtonType.primary,
                     fullWidth: true,
                     onPressed:
-                        s.enabled && s.folderPath != null && !s.backupJustCompleted
+                        s.enabled &&
+                            s.folderPath != null &&
+                            !s.backupJustCompleted
                         ? () async {
-                              final (success, message) = await ref
-                                  .read(backupSettingsProvider.notifier)
-                                  .backupNow();
-                              if (!context.mounted) return;
-                              showKuberSnackBar(
-                                context,
-                                message,
-                                isError: !success,
-                              );
-                            }
+                            final (success, message) = await ref
+                                .read(backupSettingsProvider.notifier)
+                                .backupNow();
+                            if (!context.mounted) return;
+                            showKuberSnackBar(
+                              context,
+                              message,
+                              isError: !success,
+                            );
+                          }
                         : null,
                   ),
                   // Helper line under the button: a real backup failure is an
                   // error (red); "already backed up today" is just an
                   // informational note (muted).
-                  if (s.status == BackupStatus.failed && s.failureReason != null)
+                  if (s.status == BackupStatus.failed &&
+                      s.failureReason != null)
                     _ButtonHelperText(text: s.failureReason!, isError: true)
                   else if (s.backupJustCompleted)
                     _ButtonHelperText(
@@ -126,7 +129,7 @@ class AutomaticBackupsScreen extends ConsumerWidget {
         text.toUpperCase(),
         style: localeFont(
           fontSize: 11,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           letterSpacing: 1.2,
           color: cs.onSurfaceVariant,
         ),
@@ -152,8 +155,7 @@ class _StatusBlock extends ConsumerWidget {
           title: context.l10n.lastBackupFailed,
           titleColor: cs.error,
           description:
-              settings.failureReason ??
-              context.l10n.backupFolderErrorDesc,
+              settings.failureReason ?? context.l10n.backupFolderErrorDesc,
           timestamp: settings.lastAttemptLabel == null
               ? null
               : context.l10n.attemptedOn(settings.lastAttemptLabel!),
@@ -166,15 +168,14 @@ class _StatusBlock extends ConsumerWidget {
       case BackupStatus.succeeded:
         return _StatusCard(
           icon: Icons.check_circle_outline_rounded,
-          tint: cs.tertiary,
-          tintBg: cs.tertiary.withValues(alpha: 0.10),
-          border: cs.tertiary.withValues(alpha: 0.28),
+          tint: context.kuberMoney.income,
+          tintBg: context.kuberMoney.income.withValues(alpha: 0.10),
+          border: context.kuberMoney.income.withValues(alpha: 0.28),
           title: settings.lastAttemptLabel == null
               ? context.l10n.backedUp
               : context.l10n.backedUpOn(settings.lastAttemptLabel!),
-          titleColor: cs.tertiary,
-          description:
-              context.l10n.lastCopySaved('${settings.retention}'),
+          titleColor: context.kuberMoney.income,
+          description: context.l10n.lastCopySaved('${settings.retention}'),
         );
       case BackupStatus.ready:
         // Turned on with a folder chosen, but no backup has run yet. English
@@ -182,11 +183,11 @@ class _StatusBlock extends ConsumerWidget {
         // entry across every locale can follow.
         return _StatusCard(
           icon: Icons.cloud_done_outlined,
-          tint: cs.tertiary,
-          tintBg: cs.tertiary.withValues(alpha: 0.10),
-          border: cs.tertiary.withValues(alpha: 0.28),
+          tint: context.kuberMoney.income,
+          tintBg: context.kuberMoney.income.withValues(alpha: 0.10),
+          border: context.kuberMoney.income.withValues(alpha: 0.28),
           title: 'Backups are on',
-          titleColor: cs.tertiary,
+          titleColor: context.kuberMoney.income,
           description:
               'Your first scheduled backup will run soon. Or back up now to '
               'save a copy immediately.',
@@ -196,11 +197,10 @@ class _StatusBlock extends ConsumerWidget {
           icon: Icons.backup_outlined,
           tint: cs.primary,
           tintBg: cs.primary.withValues(alpha: 0.10),
-          border: cs.outline,
+          border: cs.outlineVariant,
           title: context.l10n.neverLoseData,
           titleColor: cs.onSurface,
-          description:
-              context.l10n.neverLoseDataDesc,
+          description: context.l10n.neverLoseDataDesc,
         );
     }
   }
@@ -217,7 +217,7 @@ class _ButtonHelperText extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(top: KuberSpacing.sm),
+      padding: const EdgeInsets.only(top: KuberSpace.sm),
       child: Text(
         text,
         style: localeFont(
@@ -257,10 +257,10 @@ class _StatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: tintBg,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: border),
       ),
       child: Row(
@@ -271,12 +271,12 @@ class _StatusCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: tint.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.medium),
             ),
             alignment: Alignment.center,
             child: Icon(icon, size: 22, color: tint),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,8 +284,8 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   title,
                   style: localeFont(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: titleColor,
                   ),
                 ),
@@ -293,7 +293,7 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   description,
                   style: localeFont(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     height: 1.45,
                     color: cs.onSurfaceVariant,
                   ),
@@ -307,7 +307,7 @@ class _StatusCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
                         color: tint,
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        borderRadius: BorderRadius.circular(KuberShape.medium),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -317,7 +317,7 @@ class _StatusCard extends StatelessWidget {
                           Text(
                             action!.$1,
                             style: localeFont(
-                              fontSize: 13,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
@@ -357,11 +357,11 @@ class _MasterToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Row(
         children: [
@@ -371,18 +371,12 @@ class _MasterToggle extends StatelessWidget {
               children: [
                 Text(
                   context.l10n.automaticBackups,
-                  style: localeFont(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: localeFont(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   context.l10n.saveCopyOnSchedule,
-                  style: localeFont(
-                    fontSize: 12.5,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -407,8 +401,14 @@ class _ConfigGroup extends ConsumerWidget {
         _label(cs, context.l10n.frequencyLabel),
         SegmentedButton<BackupFrequency>(
           segments: [
-            ButtonSegment(value: BackupFrequency.daily, label: Text(context.l10n.freqDaily)),
-            ButtonSegment(value: BackupFrequency.weekly, label: Text(context.l10n.freqWeekly)),
+            ButtonSegment(
+              value: BackupFrequency.daily,
+              label: Text(context.l10n.freqDaily),
+            ),
+            ButtonSegment(
+              value: BackupFrequency.weekly,
+              label: Text(context.l10n.freqWeekly),
+            ),
             ButtonSegment(
               value: BackupFrequency.monthly,
               label: Text(context.l10n.freqMonthly),
@@ -432,7 +432,7 @@ class _ConfigGroup extends ConsumerWidget {
                       ref.read(backupSettingsProvider.notifier).setRetention(n),
                 ),
               ),
-              if (n != 10) const SizedBox(width: KuberSpacing.sm),
+              if (n != 10) const SizedBox(width: KuberSpace.sm),
             ],
           ],
         ),
@@ -443,20 +443,20 @@ class _ConfigGroup extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+              border: Border.all(color: cs.outlineVariant),
             ),
             child: Row(
               children: [
                 Icon(Icons.folder_outlined, size: 24, color: cs.primary),
-                const SizedBox(width: KuberSpacing.md),
+                const SizedBox(width: KuberSpace.md),
                 Expanded(
                   child: Text(
                     formatBackupFolderUri(settings.folderPath),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: localeFont(
-                      fontSize: 14.5,
+                      fontSize: 14,
                       fontWeight: settings.folderPath == null
                           ? FontWeight.w500
                           : FontWeight.w600,
@@ -485,13 +485,12 @@ class _ConfigGroup extends ConsumerWidget {
       text.toUpperCase(),
       style: localeFont(
         fontSize: 11,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         letterSpacing: 1.2,
         color: cs.onSurfaceVariant,
       ),
     ),
   );
-
 }
 
 class _RetentionPill extends StatelessWidget {
@@ -514,16 +513,18 @@ class _RetentionPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 11),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? cs.primaryContainer : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          color: selected ? cs.secondaryContainer : cs.surfaceContainer,
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
           border: Border.all(
-            color: selected ? cs.primary.withValues(alpha: 0.45) : cs.outline,
+            color: selected
+                ? cs.primary.withValues(alpha: 0.45)
+                : cs.outlineVariant,
           ),
         ),
         child: Text(
           '$count backup${count == 1 ? '' : 's'}',
           style: localeFont(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
             color: selected ? cs.primary : cs.onSurfaceVariant,
           ),

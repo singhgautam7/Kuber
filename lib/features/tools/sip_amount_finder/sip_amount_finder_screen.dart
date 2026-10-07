@@ -59,10 +59,10 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
 
   @override
   Map<String, dynamic> collectInputs() => {
-        'target': _targetCtrl.text,
-        'rate': _rateCtrl.text,
-        'tenure': _tenureCtrl.text,
-      };
+    'target': _targetCtrl.text,
+    'rate': _rateCtrl.text,
+    'tenure': _tenureCtrl.text,
+  };
 
   @override
   void applyInputs(Map<String, dynamic> json) {
@@ -83,8 +83,10 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
     final formatter = ref.read(formatterProvider);
     final currency = ref.read(currencyProvider);
     final r = _compute();
-    final t = formatter.formatCurrency(parseAmount(_targetCtrl.text),
-        symbol: currency.symbol);
+    final t = formatter.formatCurrency(
+      parseAmount(_targetCtrl.text),
+      symbol: currency.symbol,
+    );
     if (r == null) return 'Target $t';
     return '$t in ${_years}y @ ${_rateCtrl.text}% → ${formatter.formatCurrency(r.monthlyAmount, symbol: currency.symbol)}/mo';
   }
@@ -115,39 +117,42 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
       isModified: isModified,
       onUpdate: updateSaved,
       sections: [
-        ToolInputCard(children: [
-          ToolSliderField(
-            controller: _targetCtrl,
-            label: 'TARGET AMOUNT',
-            prefix: currency.symbol,
-            formatAsAmount: true,
-            onChanged: recompute,
-            min: 100000,
-            max: 50000000,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _rateCtrl,
-            label: 'EXPECTED ANNUAL RETURN',
-            suffix: '%',
-            onChanged: recompute,
-            min: 1,
-            max: 30,
-            divisions: 290,
-          ),
-          const SizedBox(height: KuberSpacing.lg),
-          ToolSliderField(
-            controller: _tenureCtrl,
-            label: 'TENURE',
-            suffix: 'years',
-            onChanged: recompute,
-            min: 1,
-            max: 40,
-            divisions: 39,
-          ),
-        ]),
+        ToolInputCard(
+          children: [
+            ToolSliderField(
+              controller: _targetCtrl,
+              label: 'TARGET AMOUNT',
+              prefix: currency.symbol,
+              formatAsAmount: true,
+              onChanged: recompute,
+              min: 100000,
+              max: 50000000,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _rateCtrl,
+              label: 'EXPECTED ANNUAL RETURN',
+              suffix: '%',
+              onChanged: recompute,
+              min: 1,
+              max: 30,
+              divisions: 290,
+            ),
+            const SizedBox(height: KuberSpace.lg),
+            ToolSliderField(
+              controller: _tenureCtrl,
+              label: 'TENURE',
+              suffix: 'years',
+              onChanged: recompute,
+              min: 1,
+              max: 40,
+              divisions: 39,
+            ),
+          ],
+        ),
         ToolSection(
           title: 'Result',
+          framed: false,
           child: result == null
               ? const ToolEmptyResult()
               : Column(
@@ -158,13 +163,20 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
                       value: money(result.monthlyAmount),
                       color: ToolAccents.purple,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    ToolStatCols(items: [
-                      StatCol(
-                          'Total Investment', money(result.totalInvestment)),
-                      StatCol('Total Gains', money(result.totalGains),
-                          color: cs.tertiary),
-                    ]),
+                    const SizedBox(height: KuberSpace.lg),
+                    ToolStatCols(
+                      items: [
+                        StatCol(
+                          'Total Investment',
+                          money(result.totalInvestment),
+                        ),
+                        StatCol(
+                          'Total Gains',
+                          money(result.totalGains),
+                          color: context.kuberMoney.income,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
         ),
@@ -175,11 +187,20 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
             child: ToolDonutBreakdown(
               segments: [
                 BreakdownSegment(
-                    'Investment', result.totalInvestment, cs.primary),
-                BreakdownSegment('Gains', result.totalGains, cs.tertiary),
+                  'Investment',
+                  result.totalInvestment,
+                  cs.primary,
+                ),
+                BreakdownSegment(
+                  'Gains',
+                  result.totalGains,
+                  context.kuberMoney.income,
+                ),
               ],
-              centerBig: formatter.formatCompactCurrency(target,
-                  symbol: currency.symbol),
+              centerBig: formatter.formatCompactCurrency(
+                target,
+                symbol: currency.symbol,
+              ),
               centerSmall: 'TARGET',
             ),
           ),
@@ -189,16 +210,17 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
             child: ToolLineChart(
               series: [
                 ChartSeries(
-                    name: 'Portfolio value',
-                    points: series.valueSeries,
-                    color: ToolAccents.purple,
-                    fill: true),
+                  name: 'Portfolio value',
+                  points: series.valueSeries,
+                  color: ToolAccents.purple,
+                  fill: true,
+                ),
               ],
               xLabels: [
                 for (var i = 0; i < series.valueSeries.length; i++) 'Y$i',
               ],
               target: target,
-              targetColor: cs.tertiary,
+              targetColor: context.kuberMoney.income,
               targetLabel: 'Target',
             ),
           ),
@@ -217,7 +239,10 @@ class _SipAmountFinderScreenState extends ConsumerState<SipAmountFinderScreen>
               rows: _scheduleMode == 1
                   ? [
                       for (final m in sipMonthlyRows(
-                          result.monthlyAmount, parseNum(_rateCtrl.text), _years))
+                        result.monthlyAmount,
+                        parseNum(_rateCtrl.text),
+                        _years,
+                      ))
                         [
                           'M${m[0].toInt()}',
                           money(m[1]),

@@ -32,7 +32,7 @@ class SpendingPatternsSection extends ConsumerWidget {
         const SectionDateRangePicker(
           section: AdvancedAnalyticsSection.patterns,
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         async.when(
           loading: () => const AnalyticsSkeletonBlock(),
           error: (error, _) => KuberEmptyState(
@@ -52,10 +52,14 @@ class SpendingPatternsSection extends ConsumerWidget {
 
             final peakDay = _argMax(data.weekdayAverages);
             final total = data.weekdaySpend + data.weekendSpend;
-            final weekendPct = total <= 0 ? 0 : (data.weekendSpend / total) * 100;
+            final weekendPct = total <= 0
+                ? 0
+                : (data.weekendSpend / total) * 100;
 
-            final timeTotal =
-                data.timeBuckets.values.fold<double>(0, (a, b) => a + b);
+            final timeTotal = data.timeBuckets.values.fold<double>(
+              0,
+              (a, b) => a + b,
+            );
             var maxBucket = 'Evening';
             var maxBucketVal = -1.0;
             data.timeBuckets.forEach((k, v) {
@@ -66,8 +70,9 @@ class SpendingPatternsSection extends ConsumerWidget {
             });
 
             final recTotal = data.recurringSpend + data.oneTimeSpend;
-            final recPct =
-                recTotal <= 0 ? 0.0 : (data.recurringSpend / recTotal) * 100;
+            final recPct = recTotal <= 0
+                ? 0.0
+                : (data.recurringSpend / recTotal) * 100;
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +83,7 @@ class SpendingPatternsSection extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _CardLabel('Day of week'),
-                      const SizedBox(height: KuberSpacing.sm),
+                      const SizedBox(height: KuberSpace.sm),
                       AaBarChart(
                         height: 110,
                         currentLabel: 'Spent',
@@ -89,24 +94,36 @@ class SpendingPatternsSection extends ConsumerWidget {
                         data: [
                           for (var i = 0; i < data.weekdayAverages.length; i++)
                             AaBarDatum(
-                              label: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+                              label: const [
+                                'M',
+                                'T',
+                                'W',
+                                'T',
+                                'F',
+                                'S',
+                                'S',
+                              ][i],
                               current: data.weekdayAverages[i],
                             ),
                         ],
                       ),
-                      const SizedBox(height: KuberSpacing.sm),
-                      _RichLine('You spend most on ', '${_weekdayNames[peakDay]}s', '.'),
+                      const SizedBox(height: KuberSpace.sm),
+                      _RichLine(
+                        'You spend most on ',
+                        '${_weekdayNames[peakDay]}s',
+                        '.',
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.sm),
                 // Time of day
                 _Card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _CardLabel('Time of day'),
-                      const SizedBox(height: KuberSpacing.sm),
+                      const SizedBox(height: KuberSpace.sm),
                       for (final chunk in [
                         ['Morning', 'Afternoon'],
                         ['Evening', 'Night'],
@@ -120,41 +137,49 @@ class SpendingPatternsSection extends ConsumerWidget {
                                   pct: timeTotal <= 0
                                       ? 0
                                       : ((data.timeBuckets[b] ?? 0) /
-                                                  timeTotal *
-                                                  100)
-                                              .round(),
+                                                timeTotal *
+                                                100)
+                                            .round(),
                                   highlight: b == maxBucket,
                                 ),
                               ),
                               if (b == chunk.first)
-                                const SizedBox(width: KuberSpacing.sm),
+                                const SizedBox(width: KuberSpace.sm),
                             ],
                           ],
                         ),
-                        const SizedBox(height: KuberSpacing.sm),
+                        const SizedBox(height: KuberSpace.sm),
                       ],
-                      _RichLine('Most of your spending happens in the ',
-                          maxBucket.toLowerCase(), '.'),
+                      _RichLine(
+                        'Most of your spending happens in the ',
+                        maxBucket.toLowerCase(),
+                        '.',
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.sm),
                 // Weekend vs weekday
                 _Card(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _CardLabel('Weekend vs weekday'),
-                      const SizedBox(height: KuberSpacing.sm),
-                      _KvLine('Weekend spending', aaMoney(data.weekendSpend)),
-                      _KvLine('Weekday spending', aaMoney(data.weekdaySpend)),
-                      const SizedBox(height: 4),
-                      _RichLine('Weekends are ', '${weekendPct.round()}%',
-                          ' of your total.'),
+                      const SizedBox(height: KuberSpace.sm),
+                      _SplitBar(
+                        weekend: data.weekendSpend,
+                        weekday: data.weekdaySpend,
+                      ),
+                      const SizedBox(height: KuberSpace.sm),
+                      _RichLine(
+                        'Weekends are ',
+                        '${weekendPct.round()}%',
+                        ' of your total.',
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.sm),
                 // Recurring vs one-time
                 _Card(
                   child: Row(
@@ -168,15 +193,16 @@ class SpendingPatternsSection extends ConsumerWidget {
                             SizedBox.expand(
                               child: CircularProgressIndicator(
                                 value: (recPct / 100).clamp(0.0, 1.0),
-                                strokeWidth: 9,
+                                strokeWidth: 8,
+                                strokeCap: StrokeCap.round,
                                 color: cs.primary,
-                                backgroundColor: cs.surfaceContainerHigh,
+                                backgroundColor: cs.surfaceContainerHighest,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: KuberSpacing.md),
+                      const SizedBox(width: KuberSpace.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,15 +211,13 @@ class SpendingPatternsSection extends ConsumerWidget {
                             const SizedBox(height: 6),
                             Text.rich(
                               TextSpan(
-                                style: localeFont(
-                                  fontSize: 12.5,
-                                  color: cs.onSurfaceVariant,
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium!
+                                    .copyWith(color: cs.onSurfaceVariant),
                                 children: [
                                   TextSpan(
                                     text: '${recPct.round()}% recurring',
                                     style: localeFont(
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.w700,
                                       color: cs.primary,
                                     ),
                                   ),
@@ -210,19 +234,23 @@ class SpendingPatternsSection extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.sm),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(KuberSpacing.md),
+                  padding: const EdgeInsets.all(KuberSpace.md),
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(
+                      KuberShape.largeIncreased,
+                    ),
+                    border: Border.all(
+                      color: cs.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text.rich(
                     TextSpan(
                       style: localeFont(
-                        fontSize: 12.5,
+                        fontSize: 12,
                         color: cs.onSurface,
                         height: 1.4,
                       ),
@@ -230,7 +258,7 @@ class SpendingPatternsSection extends ConsumerWidget {
                         const TextSpan(text: 'Recurring expenses make up '),
                         TextSpan(
                           text: '${recPct.round()}%',
-                          style: localeFont(fontWeight: FontWeight.w800),
+                          style: localeFont(fontWeight: FontWeight.w700),
                         ),
                         const TextSpan(text: ' of your spending.'),
                       ],
@@ -267,11 +295,11 @@ class _Card extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: child,
     );
@@ -286,10 +314,8 @@ class _CardLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: localeFont(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -304,14 +330,15 @@ class _RichLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     return Text.rich(
       TextSpan(
-        style: localeFont(fontSize: 12.5, color: cs.onSurfaceVariant, height: 1.4),
+        style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
         children: [
           TextSpan(text: pre),
           TextSpan(
             text: bold,
-            style: localeFont(fontWeight: FontWeight.w800, color: cs.onSurface),
+            style: tt.titleSmall!.copyWith(color: cs.onSurface),
           ),
           TextSpan(text: post),
         ],
@@ -320,31 +347,62 @@ class _RichLine extends StatelessWidget {
   }
 }
 
-class _KvLine extends StatelessWidget {
-  final String label;
-  final String value;
-  const _KvLine(this.label, this.value);
+/// Weekend | weekday split bar (4 gap) with the legend under it.
+class _SplitBar extends StatelessWidget {
+  final double weekend;
+  final double weekday;
+  const _SplitBar({required this.weekend, required this.weekday});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: localeFont(fontSize: 12.5, color: cs.onSurfaceVariant)),
-          Text(
-            value,
-            style: localeFont(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
+    final tt = Theme.of(context).textTheme;
+    final total = weekend + weekday;
+    final share = total <= 0 ? 0.5 : weekend / total;
+    Widget bar(Color c) => Container(
+      height: 8,
+      decoration: BoxDecoration(color: c, borderRadius: KuberShape.fullR),
+    );
+    Widget legend(Color c, String label, double v) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 6),
+        Text(label, style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant)),
+        const SizedBox(width: 6),
+        Text(aaMoney(v), style: tt.titleSmall!.copyWith(color: cs.onSurface)),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              flex: (share * 1000).round().clamp(1, 1000),
+              child: bar(cs.primary),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: 4),
+            Expanded(
+              flex: ((1 - share) * 1000).round().clamp(1, 1000),
+              child: bar(cs.primaryContainer),
+            ),
+          ],
+        ),
+        const SizedBox(height: KuberSpace.sm),
+        Wrap(
+          spacing: KuberSpace.lg,
+          runSpacing: 4,
+          children: [
+            legend(cs.primary, 'Weekend', weekend),
+            legend(cs.primaryContainer, 'Weekday', weekday),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -362,35 +420,32 @@ class _TimeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
+    final tt = Theme.of(context).textTheme;
+    final fg = highlight ? cs.onSecondaryContainer : cs.onSurface;
+    final sub = highlight ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
-        color: highlight
-            ? cs.primary.withValues(alpha: 0.12)
-            : cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: highlight
-            ? Border.all(color: cs.primary.withValues(alpha: 0.35))
-            : null,
+        color: highlight ? cs.secondaryContainer : cs.surfaceContainerHigh,
+        borderRadius: KuberShape.mediumR,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: localeFont(
-              fontSize: 11,
-              color: highlight ? cs.primary : cs.onSurfaceVariant,
-            ),
+          Icon(
+            switch (label) {
+              'Morning' => Icons.wb_twilight_rounded,
+              'Afternoon' => Icons.light_mode_outlined,
+              'Evening' => Icons.nights_stay_outlined,
+              _ => Icons.bedtime_outlined,
+            },
+            size: 20,
+            color: sub,
           ),
-          const SizedBox(height: 2),
-          Text(
-            '$pct%',
-            style: localeFont(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: highlight ? cs.primary : cs.onSurface,
-            ),
-          ),
+          const SizedBox(height: KuberSpace.sm),
+          Text(label, style: tt.bodySmall!.copyWith(color: sub)),
+          Text('$pct%', style: tt.titleMedium!.copyWith(color: fg)),
         ],
       ),
     );

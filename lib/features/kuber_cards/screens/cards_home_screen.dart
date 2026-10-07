@@ -10,10 +10,13 @@ import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_search_filter_bar.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_extended_fab.dart';
 import '../../pro/feature_gates/gate_sheet_kuber_cards.dart';
 import '../../pro/feature_gates/pro_gate.dart';
 import '../../pro/paywall/pro_state.dart';
@@ -50,12 +53,11 @@ class _KuberCardsEntryState extends ConsumerState<KuberCardsEntry> {
   Widget build(BuildContext context) {
     final metaAsync = ref.watch(cardVaultMetaProvider);
     return metaAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(
         body: Center(
-            child: Text('Could not open Kuber Cards', style: localeFont())),
+          child: Text('Could not open Kuber Cards', style: localeFont()),
+        ),
       ),
       data: (meta) {
         if (meta == null) {
@@ -115,6 +117,12 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
 
     return CardsSecureScaffold(
       child: Scaffold(
+        floatingActionButton: KuberExtendedFab(
+          icon: Icons.add_rounded,
+          label: 'Add card',
+          onPressed: _onAddCard,
+        ),
+        floatingActionButtonLocation: kuberFabLocation,
         backgroundColor: cs.surface,
         // Nothing here is pinned: the app bar, page header, and the search +
         // count rows all scroll with the card list (parity with the
@@ -123,9 +131,8 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: KuberAppBar(
+                title: 'Kuber Cards',
                 showBack: true,
-                showHome: true,
-                showBrand: false,
                 pinShortcut: const PinShortcutSpec(
                   shortcutId: 'kuber_cards',
                   shortLabel: 'Cards',
@@ -134,18 +141,22 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                   deepLink: 'kuber://app/cards',
                 ),
                 infoConfig: aboutKuberCardsInfo,
+                search:
+                    unlocked &&
+                        (ref
+                                .watch(storedCardsProvider)
+                                .valueOrNull
+                                ?.isNotEmpty ??
+                            false)
+                    ? KuberHeaderSearch(
+                        controller: _searchCtrl,
+                        hint: 'Search cards',
+                        onChanged: (v) =>
+                            setState(() => _query = v.trim().toLowerCase()),
+                      )
+                    : null,
                 overflowConfig: KuberOverflowConfig(
                   items: [
-                    KuberOverflowItem(
-                      icon: viewMode == CardsViewMode.card
-                          ? Icons.view_list_rounded
-                          : Icons.view_agenda_outlined,
-                      label: viewMode == CardsViewMode.card
-                          ? 'Switch to list view'
-                          : 'Switch to card view',
-                      onTap: () =>
-                          ref.read(cardsViewModeProvider.notifier).toggle(),
-                    ),
                     KuberOverflowItem(
                       icon: Icons.settings_outlined,
                       label: 'Settings',
@@ -161,34 +172,35 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: KuberPageHeader(
-                title: 'Kuber Cards',
-                description: 'Your cards, encrypted on-device',
-                actionIcon: Icons.add_rounded,
-                actionTooltip: 'Add card',
-                onAction: _onAddCard,
-              ),
-            ),
+
             if (unlocked)
-              ...ref.watch(storedCardsProvider).when(
-                loading: () => const [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                ],
-                error: (e, _) => [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                        child:
-                            Text('Could not load cards', style: localeFont())),
-                  ),
-                ],
-                data: (cards) =>
-                    _contentSlivers(cs, cards, viewMode, ref.watch(cardsSortProvider)),
-              )
+              ...ref
+                  .watch(storedCardsProvider)
+                  .when(
+                    loading: () => const [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ],
+                    error: (e, _) => [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Text(
+                            'Could not load cards',
+                            style: localeFont(),
+                          ),
+                        ),
+                      ),
+                    ],
+                    data: (cards) => _contentSlivers(
+                      cs,
+                      cards,
+                      viewMode,
+                      ref.watch(cardsSortProvider),
+                    ),
+                  )
             else
               const SliverToBoxAdapter(child: SizedBox.shrink()),
           ],
@@ -197,8 +209,12 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     );
   }
 
-  List<Widget> _contentSlivers(ColorScheme cs, List<StoredCard> cards,
-      CardsViewMode viewMode, CardsSortMode sort) {
+  List<Widget> _contentSlivers(
+    ColorScheme cs,
+    List<StoredCard> cards,
+    CardsViewMode viewMode,
+    CardsSortMode sort,
+  ) {
     if (cards.isEmpty) {
       return [
         SliverFillRemaining(
@@ -207,8 +223,6 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
             icon: Icons.credit_card_rounded,
             title: 'No cards yet',
             description: 'Add your first card to keep it safe here.',
-            actionLabel: 'Add card',
-            onAction: () => context.push('/cards/add'),
           ),
         ),
       ];
@@ -220,183 +234,108 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
     final hasPro = ref.watch(kuberProStateProvider).hasProAccess;
 
     return [
-      SliverToBoxAdapter(child: _controlsRow(cs, viewMode)),
       // "SHOWING N CARDS" eyebrow, mirroring the History tab's count row.
-      SliverToBoxAdapter(child: _countEyebrow(cs, filtered.length)),
+      SliverToBoxAdapter(child: _countRow(cs, filtered.length, viewMode)),
       SliverPadding(
-        padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
-        sliver: viewMode == CardsViewMode.card
-            ? _cardSliver(filtered, hasPro)
-            : _listSliver(cs, filtered, hasPro),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpace.screenMargin,
+        ),
+        // Card <-> list view cross-fades (review round 3).
+        sliver: SliverToBoxAdapter(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
+            ),
+            child: viewMode == CardsViewMode.card
+                ? KeyedSubtree(
+                    key: const ValueKey('cards-card'),
+                    child: _cardColumn(filtered, hasPro),
+                  )
+                : KeyedSubtree(
+                    key: const ValueKey('cards-list'),
+                    child: _listGroup(filtered, hasPro),
+                  ),
+          ),
+        ),
       ),
-      SliverToBoxAdapter(
-        child: SizedBox(height: MediaQuery.of(context).padding.bottom),
+      const SliverToBoxAdapter(
+        child: SizedBox(height: KuberExtendedFab.clearance),
       ),
     ];
   }
 
-  Widget _countEyebrow(ColorScheme cs, int count) {
+  /// "SHOWING N CARDS" + the card / list view toggle (board 3.24).
+  Widget _countRow(ColorScheme cs, int count, CardsViewMode viewMode) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-      child: RichText(
-        text: TextSpan(
-          style: localeFont(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1.2,
-            color: cs.onSurfaceVariant,
-          ),
-          children: [
-            const TextSpan(text: 'SHOWING '),
-            TextSpan(text: '$count ', style: TextStyle(color: cs.primary)),
-            TextSpan(text: count == 1 ? 'CARD' : 'CARDS'),
-          ],
-        ),
+      padding: const EdgeInsets.fromLTRB(
+        KuberSpace.screenMargin,
+        0,
+        KuberSpace.lg,
+        KuberSpace.sm,
       ),
-    );
-  }
-
-  Widget _controlsRow(ColorScheme cs, CardsViewMode viewMode) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
       child: Row(
         children: [
           Expanded(
-            child: SizedBox(
-              height: 42,
-              child: TextField(
-                controller: _searchCtrl,
-                onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
-                onTapOutside: (_) =>
-                    FocusManager.instance.primaryFocus?.unfocus(),
-                style: localeFont(fontSize: 14, color: cs.onSurface),
-                decoration: InputDecoration(
-                  isDense: true,
-                  hintText: 'Search cards',
-                  hintStyle:
-                      localeFont(fontSize: 14, color: cs.onSurfaceVariant),
-                  prefixIcon: Icon(Icons.search_rounded,
-                      size: 20, color: cs.onSurfaceVariant),
-                  filled: true,
-                  fillColor: cs.surfaceContainer,
-                  contentPadding: EdgeInsets.zero,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    borderSide: BorderSide(color: cs.outline),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    borderSide: BorderSide(color: cs.outline),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    borderSide: BorderSide(color: cs.outline),
-                  ),
-                ),
-              ),
+            child: Text(
+              'Showing $count ${count == 1 ? 'card' : 'cards'}'.toUpperCase(),
+              style: sectionHeaderStyle(context),
             ),
           ),
-          const SizedBox(width: 8),
-          // Badge marks an applied FILTER (type/network). Sort is a saved
-          // preference, not a filter, so it never lights up this button.
-          _iconBtn(cs, Icons.tune_rounded, 'Filter', _showFilterSheet,
-              active: _hasActiveFilters, badge: _hasActiveFilters),
-          const SizedBox(width: 8),
-          _iconBtn(
-            cs,
-            viewMode == CardsViewMode.card
-                ? Icons.view_list_rounded
-                : Icons.view_agenda_outlined,
-            'Toggle view',
-            () => ref.read(cardsViewModeProvider.notifier).toggle(),
+          // Filter + change view (round 4): the type / network filter sheet
+          // fills the filter button while applied; sort never lights it up.
+          KuberFilterButton(
+            onPressed: _showFilterSheet,
+            active: _hasActiveFilters,
+          ),
+          KuberViewModeButton<CardsViewMode>(
+            value: viewMode,
+            options: const [
+              (CardsViewMode.card, Icons.style_outlined, 'Card view'),
+              (CardsViewMode.list, Icons.view_list_rounded, 'List view'),
+            ],
+            onChanged: (_) => ref.read(cardsViewModeProvider.notifier).toggle(),
           ),
         ],
       ),
     );
   }
 
-  Widget _iconBtn(
-      ColorScheme cs, IconData icon, String tooltip, VoidCallback onTap,
-      {bool active = false, bool badge = false}) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Ink(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: active
-                      ? cs.primary.withValues(alpha: 0.10)
-                      : cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: active ? cs.primary : cs.outline),
-                ),
-                child: Icon(icon,
-                    size: 20, color: active ? cs.primary : cs.onSurfaceVariant),
-              ),
-              if (badge)
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: cs.primary,
-                      shape: BoxShape.circle,
-                      // Ring in the page background so the dot reads as a badge.
-                      border: Border.all(color: cs.surface, width: 2),
-                    ),
-                  ),
-                ),
-            ],
+  Widget _cardColumn(List<StoredCard> cards, bool hasPro) {
+    return Column(
+      children: [
+        for (final (i, card) in cards.indexed)
+          Padding(
+            padding: EdgeInsets.only(top: i == 0 ? 0 : KuberSpace.md),
+            // PRO-GATE: free users see cards[0] and cards[1]; blur the rest.
+            child: !hasPro && i >= kFreeCardLimit
+                ? _BlurredCard(card: card)
+                : _TappableCard(card: card, onTap: () => _openDetail(card)),
           ),
-        ),
-      ),
+      ],
     );
   }
 
-  Widget _cardSliver(List<StoredCard> cards, bool hasPro) {
-    return SliverList.builder(
-      itemCount: cards.length,
-      itemBuilder: (context, i) {
-        final card = cards[i];
-        // PRO-GATE: free users see cards[0] and cards[1]; blur the rest.
-        final locked = !hasPro && i >= kFreeCardLimit;
-        return Padding(
-          padding: EdgeInsets.only(top: i == 0 ? 0 : KuberSpacing.md),
-          child: locked
-              ? _BlurredCard(card: card)
-              : _TappableCard(card: card, onTap: () => _openDetail(card)),
-        );
-      },
-    );
-  }
-
-  Widget _listSliver(ColorScheme cs, List<StoredCard> cards, bool hasPro) {
-    return SliverList.builder(
-      itemCount: cards.length,
-      itemBuilder: (context, i) {
-        final card = cards[i];
-        final locked = !hasPro && i >= kFreeCardLimit; // PRO-GATE
-        return CardListRow(
-          card: card,
-          locked: locked,
-          isFirst: i == 0,
-          isLast: i == cards.length - 1,
-          // PRO-GATE: a locked row opens the gate sheet, never the detail sheet.
-          onTap: locked
-              ? () => proGate(context, ref, showKuberCardsGateSheet)
-              : () => _openDetail(card),
-        );
-      },
+  Widget _listGroup(List<StoredCard> cards, bool hasPro) {
+    return KuberGroup(
+      children: [
+        for (final (i, card) in cards.indexed)
+          () {
+            final locked = !hasPro && i >= kFreeCardLimit; // PRO-GATE
+            return CardListRow(
+              card: card,
+              locked: locked,
+              // PRO-GATE: a locked row opens the gate sheet, never the detail
+              // sheet.
+              onTap: locked
+                  ? () => proGate(context, ref, showKuberCardsGateSheet)
+                  : () => _openDetail(card),
+            );
+          }(),
+      ],
     );
   }
 
@@ -443,16 +382,26 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
       case CardsSortMode.oldest:
         list.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
       case CardsSortMode.nickname:
-        list.sort((a, b) =>
-            a.nickname.toLowerCase().compareTo(b.nickname.toLowerCase()));
+        list.sort(
+          (a, b) =>
+              a.nickname.toLowerCase().compareTo(b.nickname.toLowerCase()),
+        );
     }
     return list;
   }
 
   void _showFilterSheet() {
     const types = [
-      'debit', 'credit', 'prepaid', 'forex', 'gift',
-      'travel', 'fuel', 'meal', 'corporate', 'other',
+      'debit',
+      'credit',
+      'prepaid',
+      'forex',
+      'gift',
+      'travel',
+      'fuel',
+      'meal',
+      'corporate',
+      'other',
     ];
     const networks = <String, String>{
       'visa': 'Visa',
@@ -486,7 +435,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                     runSpacing: 8,
                     children: [
                       for (final t in types)
-                        _FilterChip(
+                        KuberChip(
                           label: t[0].toUpperCase() + t.substring(1),
                           selected: _typeFilter.contains(t),
                           onTap: () => setSheet(() {
@@ -497,14 +446,14 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: KuberSpacing.lg),
+                  const SizedBox(height: KuberSpace.lg),
                   const KuberFieldLabel('Network'),
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: [
                       for (final e in networks.entries)
-                        _FilterChip(
+                        KuberChip(
                           label: e.value,
                           selected: _networkFilter.contains(e.key),
                           onTap: () => setSheet(() {
@@ -515,39 +464,34 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: KuberSpacing.lg),
+                  const SizedBox(height: KuberSpace.lg),
                   const KuberFieldLabel('Sort by'),
-                  _SortOptionRow(
-                    label: 'Newest first',
-                    selected: sort == CardsSortMode.recent,
-                    onTap: () {
-                      setSheet(() => sort = CardsSortMode.recent);
-                      ref
-                          .read(cardsSortProvider.notifier)
-                          .set(CardsSortMode.recent);
-                    },
+                  KuberGroup(
+                    children: [
+                      for (final (mode, label) in const [
+                        (CardsSortMode.recent, 'Newest first'),
+                        (CardsSortMode.oldest, 'Oldest first'),
+                        (CardsSortMode.nickname, 'Name (A to Z)'),
+                      ])
+                        KuberListRow(
+                          dense: true,
+                          title: label,
+                          trailing: Icon(
+                            sort == mode
+                                ? Icons.radio_button_checked_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            color: sort == mode
+                                ? cs.primary
+                                : cs.onSurfaceVariant,
+                          ),
+                          onTap: () {
+                            setSheet(() => sort = mode);
+                            ref.read(cardsSortProvider.notifier).set(mode);
+                          },
+                        ),
+                    ],
                   ),
-                  _SortOptionRow(
-                    label: 'Oldest first',
-                    selected: sort == CardsSortMode.oldest,
-                    onTap: () {
-                      setSheet(() => sort = CardsSortMode.oldest);
-                      ref
-                          .read(cardsSortProvider.notifier)
-                          .set(CardsSortMode.oldest);
-                    },
-                  ),
-                  _SortOptionRow(
-                    label: 'Name (A to Z)',
-                    selected: sort == CardsSortMode.nickname,
-                    onTap: () {
-                      setSheet(() => sort = CardsSortMode.nickname);
-                      ref
-                          .read(cardsSortProvider.notifier)
-                          .set(CardsSortMode.nickname);
-                    },
-                  ),
-                  const SizedBox(height: KuberSpacing.md),
+                  const SizedBox(height: KuberSpace.md),
                   // Clears applied filters only. Sort is a saved preference, so
                   // it is left untouched here.
                   TextButton(
@@ -555,8 +499,7 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
                       _typeFilter.clear();
                       _networkFilter.clear();
                     }),
-                    child: Text('Clear filters',
-                        style: localeFont(color: cs.onSurfaceVariant)),
+                    child: const Text('Clear filters'),
                   ),
                 ],
               ),
@@ -565,64 +508,6 @@ class _CardsHomeScreenState extends ConsumerState<CardsHomeScreen> {
         );
       },
     ).whenComplete(() => setState(() {}));
-  }
-}
-
-/// A single-select sort option row (radio-style), matching the settings choice
-/// list look rather than a segmented tab.
-class _SortOptionRow extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _SortOptionRow(
-      {required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.xs),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: selected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(
-              color: selected ? cs.primary.withValues(alpha: 0.35) : cs.outline,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: localeFont(
-                    fontSize: 14.5,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                    color: selected ? cs.primary : cs.onSurface,
-                  ),
-                ),
-              ),
-              if (selected)
-                Icon(Icons.check_circle_rounded, color: cs.primary, size: 22)
-              else
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: cs.outline.withValues(alpha: 0.5), width: 2),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -636,7 +521,7 @@ class _TappableCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       onLongPress: onTap,
-      borderRadius: BorderRadius.circular(KuberRadius.xl),
+      borderRadius: BorderRadius.circular(KuberShape.medium),
       child: StoredCardVisual(
         nickname: card.nickname,
         last4: card.last4,
@@ -644,44 +529,6 @@ class _TappableCard extends StatelessWidget {
         network: card.network,
         colorValue: card.colorValue,
         isGradient: card.isGradient,
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-  const _FilterChip(
-      {required this.label, required this.selected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? cs.primary.withValues(alpha: 0.12)
-                : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: selected ? cs.primary : cs.outline),
-          ),
-          child: Text(
-            label,
-            style: localeFont(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: selected ? cs.primary : cs.onSurfaceVariant,
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -698,7 +545,7 @@ class _BlurredCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(KuberRadius.xl),
+      borderRadius: KuberShape.cardR,
       child: Stack(
         children: [
           ImageFiltered(
@@ -720,25 +567,15 @@ class _BlurredCard extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: cs.primary.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Icon(Icons.lock_rounded, size: 20, color: cs.primary),
-                    ),
-                    const SizedBox(height: KuberSpacing.sm),
+                    const KuberIconTile(icon: Icons.lock_rounded),
+                    const SizedBox(height: KuberSpace.sm),
                     Text(
                       'Unlock with Kuber Pro',
-                      style: localeFont(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleSmall!.copyWith(color: cs.onSurface),
                     ),
-                    const SizedBox(height: KuberSpacing.sm),
+                    const SizedBox(height: KuberSpace.sm),
                     AppButton(
                       label: 'See Kuber Pro',
                       type: AppButtonType.primary,

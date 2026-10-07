@@ -17,62 +17,57 @@ Future<void> showColorPicker({
   required int? selected,
   required ValueChanged<int> onSelected,
 }) {
-  final cs = Theme.of(context).colorScheme;
-
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     useRootNavigator: true,
-    backgroundColor: cs.surfaceContainer,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
-    ),
-    builder: (_) => _ColorPickerSheet(
-      banks: const <_ColorBank>[
-        _ColorBank('Vibrant', AppColorPalette.kVibrant),
-        _ColorBank('Muted', AppColorPalette.kMuted),
-        _ColorBank('Neutral', AppColorPalette.kNeutral),
-      ],
-      selected: selected,
-      onSelected: onSelected,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) => KuberBottomSheet(
+      title: 'Choose colour',
+      child: ColorPickerBody(
+        selected: selected,
+        onSelected: (value) {
+          onSelected(value);
+          Navigator.of(sheetContext, rootNavigator: true).pop();
+        },
+      ),
     ),
   );
 }
 
-class _ColorPickerSheet extends StatelessWidget {
-  final List<_ColorBank> banks;
+/// The colour banks (Vibrant / Muted / Neutral) as circular swatches.
+class ColorPickerBody extends StatelessWidget {
   final int? selected;
   final ValueChanged<int> onSelected;
 
-  const _ColorPickerSheet({
-    required this.banks,
+  const ColorPickerBody({
+    super.key,
     required this.selected,
     required this.onSelected,
   });
 
+  static const _banks = <_ColorBank>[
+    _ColorBank('Vibrant', AppColorPalette.kVibrant),
+    _ColorBank('Muted', AppColorPalette.kMuted),
+    _ColorBank('Neutral', AppColorPalette.kNeutral),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return KuberBottomSheet(
-      title: 'Choose color',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final bank in banks) ...[
-            _BankLabel(text: bank.label),
-            const SizedBox(height: KuberSpacing.sm),
-            _SwatchGrid(
-              swatches: bank.swatches,
-              selected: selected,
-              onTap: (value) {
-                onSelected(value);
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            ),
-            if (bank != banks.last) const SizedBox(height: KuberSpacing.lg),
-          ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final bank in _banks) ...[
+          _BankLabel(text: bank.label),
+          _SwatchGrid(
+            swatches: bank.swatches,
+            selected: selected,
+            onTap: onSelected,
+          ),
+          if (bank != _banks.last) const SizedBox(height: KuberSpace.lg),
         ],
-      ),
+      ],
     );
   }
 }
@@ -84,19 +79,9 @@ class _BankLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
-      child: Text(
-        text.toUpperCase(),
-        style: localeFont(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.4,
-          color: cs.onSurfaceVariant,
-        ),
-      ),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionHeaderGap),
+      child: Text(text.toUpperCase(), style: sectionHeaderStyle(context)),
     );
   }
 }
@@ -153,51 +138,45 @@ class _SwatchCell extends StatelessWidget {
     final swatchColor = Color(value);
     final isLight =
         ThemeData.estimateBrightnessForColor(swatchColor) == Brightness.light;
-    final tickColor = isLight ? cs.onSurface : Colors.white;
+    // A light tick on dark swatches in both themes (surface is white in light
+    // mode, onSurface is near-white in dark mode).
+    final lightTick =
+        cs.brightness == Brightness.dark ? cs.onSurface : cs.surface;
+    final darkTick =
+        cs.brightness == Brightness.dark ? cs.surface : cs.onSurface;
+    final tickColor = isLight ? darkTick : lightTick;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        if (isSelected)
-          Positioned(
-            left: -3,
-            right: -3,
-            top: -3,
-            bottom: -3,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(KuberRadius.md + 3),
-                border: Border.all(color: cs.primary, width: 2),
-              ),
+    // Circle swatch; selected = 2dp primary ring outside a 2dp gap + check.
+    return Material(
+      color: Colors.transparent,
+      shape: CircleBorder(
+        side: BorderSide(
+          color: isSelected ? cs.primary : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Ink(
+            decoration: BoxDecoration(
+              color: swatchColor,
+              shape: BoxShape.circle,
             ),
-          ),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: swatchColor,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(
-                  color: Colors.black.withValues(alpha: 0.12),
-                  width: 1,
-                ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: 18,
-                        color: tickColor,
-                      ),
-                    )
-                  : const SizedBox.expand(),
-            ),
+            child: isSelected
+                ? Center(
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: 18,
+                      color: tickColor,
+                    ),
+                  )
+                : const SizedBox.expand(),
           ),
         ),
-      ],
+      ),
     );
   }
 }

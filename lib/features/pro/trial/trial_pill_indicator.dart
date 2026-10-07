@@ -19,19 +19,19 @@ class TrialPillIndicator extends ConsumerWidget {
 
     final cs = Theme.of(context).colorScheme;
     final ending = proState.trialEndingSoon;
-    final warn = context.kuberColors.warning;
-    final warnSubtle = context.kuberColors.warningSubtle;
+    final warn = context.kuberMoney.warning;
+    final warnSubtle = context.kuberMoney.warningContainer;
 
     return InkWell(
       onTap: () => context.push('/pro'),
-      borderRadius: BorderRadius.circular(KuberRadius.full),
+      borderRadius: BorderRadius.circular(KuberShape.full),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: ending ? warnSubtle : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.full),
+          borderRadius: BorderRadius.circular(KuberShape.full),
           border: Border.all(
-            color: ending ? warn.withValues(alpha: 0.4) : cs.outline,
+            color: ending ? warn.withValues(alpha: 0.4) : cs.outlineVariant,
           ),
         ),
         child: Row(
@@ -46,8 +46,8 @@ class TrialPillIndicator extends ConsumerWidget {
             Text(
               'TRIAL · ${proState.trialDaysLeft} ${proState.trialDaysLeft == 1 ? 'day' : 'days'}',
               style: localeFont(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.4,
                 color: ending ? warn : cs.onSurfaceVariant,
               ),

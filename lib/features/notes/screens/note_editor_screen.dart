@@ -13,8 +13,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../categories/providers/category_provider.dart';
-import '../../settings/providers/settings_provider.dart'
-    show formatterProvider;
+import '../../settings/providers/settings_provider.dart' show formatterProvider;
 import '../../tags/providers/tag_providers.dart';
 import '../../tags/widgets/tag_selector_bottom_sheet.dart';
 import '../../transactions/widgets/category_picker_sheet.dart';
@@ -104,8 +103,9 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
 
     final formatter = ref.read(formatterProvider);
-    _highlighter =
-        QuillNumberHighlighter(formatAmount: (v) => formatter.formatCurrency(v));
+    _highlighter = QuillNumberHighlighter(
+      formatAmount: (v) => formatter.formatCurrency(v),
+    );
 
     final controller = QuillController(
       document: doc,
@@ -118,8 +118,10 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
       if (_highlighter.isApplying) return;
       _markDirty();
       _highlightDebounce?.cancel();
-      _highlightDebounce =
-          Timer(const Duration(milliseconds: 220), _runHighlighter);
+      _highlightDebounce = Timer(
+        const Duration(milliseconds: 220),
+        _runHighlighter,
+      );
     });
 
     setState(() {
@@ -128,7 +130,12 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     });
 
     // Re-verify saved highlights/results against current numbers on open.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _runHighlighter());
+    // The highlighter formats silently, and a read-only note has no later
+    // edit to repaint it, so rebuild once after this first pass.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _runHighlighter();
+      if (mounted) setState(() {});
+    });
   }
 
   void _runHighlighter() {
@@ -189,10 +196,7 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     if (c == null) return;
     _editorFocus.requestFocus();
     final end = (c.document.length - 1).clamp(0, 1 << 30);
-    c.updateSelection(
-      TextSelection.collapsed(offset: end),
-      ChangeSource.local,
-    );
+    c.updateSelection(TextSelection.collapsed(offset: end), ChangeSource.local);
   }
 
   /// True when the note has no title, no body text, no category and no tags.
@@ -251,13 +255,17 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
     }
 
     final readOnly = note.isReadOnly;
-    final category = ref.watch(categoryListProvider.select(
-      (async) => async.valueOrNull
-          ?.firstWhereOrNull((c) => c.id.toString() == note.categoryId),
-    ));
+    final category = ref.watch(
+      categoryListProvider.select(
+        (async) => async.valueOrNull?.firstWhereOrNull(
+          (c) => c.id.toString() == note.categoryId,
+        ),
+      ),
+    );
     final allTags = ref.watch(tagListProvider).valueOrNull ?? [];
-    final tags =
-        allTags.where((t) => note.tagIds.contains(t.id.toString())).toList();
+    final tags = allTags
+        .where((t) => note.tagIds.contains(t.id.toString()))
+        .toList();
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -281,106 +289,103 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (ctx, constraints) => SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 6, 20, 24),
+                  padding: const EdgeInsets.fromLTRB(
+                    KuberSpace.screenMargin,
+                    0,
+                    KuberSpace.screenMargin,
+                    24,
+                  ),
                   child: ConstrainedBox(
                     // Fill the viewport so the metadata/footer sit at the
                     // bottom even for an empty note; scroll when content grows.
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight - 30),
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 30,
+                    ),
                     child: IntrinsicHeight(
                       child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: _titleController,
-                      enabled: !readOnly,
-                      maxLines: null,
-                      onTapOutside: (_) =>
-                          FocusManager.instance.primaryFocus?.unfocus(),
-                      style: localeFont(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: readOnly
-                            ? cs.onSurface.withValues(alpha: 0.75)
-                            : cs.onSurface,
-                        letterSpacing: -0.4,
-                      ),
-                      // Override the global themed input borders — the title is
-                      // a plain field with no box (not in the design spec).
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.zero,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        filled: false,
-                        hintText: 'Untitled note',
-                        hintStyle: localeFont(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                    ),
-                    Divider(height: 28, thickness: 1, color: cs.outline),
-                    QuillEditor.basic(
-                      controller: controller,
-                      focusNode: _editorFocus,
-                      config: QuillEditorConfig(
-                        scrollable: false,
-                        placeholder: 'Start writing. Numbers become tappable.',
-                        customStyleBuilder: _styleFor,
-                        customRecognizerBuilder: _recognizerFor,
-                        contextMenuBuilder: _buildContextMenu,
-                        customStyles: DefaultStyles(
-                          paragraph: DefaultTextBlockStyle(
-                            localeFont(
-                              fontSize: 14.5,
-                              color: cs.onSurface,
-                              height: 1.9,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: _titleController,
+                            enabled: !readOnly,
+                            maxLines: null,
+                            onTapOutside: (_) =>
+                                FocusManager.instance.primaryFocus?.unfocus(),
+                            style: Theme.of(context).textTheme.headlineSmall!
+                                .copyWith(
+                                  color: readOnly
+                                      ? cs.onSurface.withValues(alpha: 0.75)
+                                      : cs.onSurface,
+                                ),
+                            // Override the global themed input borders — the title is
+                            // a plain field with no box (not in the design spec).
+                            decoration: InputDecoration(
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              filled: false,
+                              hintText: 'Untitled note',
+                              hintStyle: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall!
+                                  .copyWith(color: cs.onSurfaceVariant),
                             ),
-                            HorizontalSpacing.zero,
-                            const VerticalSpacing(4, 0),
-                            VerticalSpacing.zero,
-                            null,
                           ),
-                        ),
-                      ),
-                    ),
-                    // Fill the gap below a short note; tapping it focuses the
-                    // editor so the whole area is writable.
-                    Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: readOnly ? null : _focusEditorEnd,
-                        child: const SizedBox(width: double.infinity),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Divider between the note body and its metadata — the
-                    // note ends here (matches the title/body divider above).
-                    Divider(height: 1, thickness: 1, color: cs.outline),
-                    const SizedBox(height: 16),
-                    NoteMetadataRow(
-                      category: category,
-                      tags: tags,
-                      readOnly: readOnly,
-                      onCategoryTap: _pickCategory,
-                      onTagTap: _pickTags,
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Created ${noteShortDate(note.createdAt)} · '
-                      'Modified ${noteRelativeTime(note.updatedAt)}',
-                      style: localeFont(
-                        fontSize: 11,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
+                          const SizedBox(height: KuberSpace.md),
+                          NoteMetadataRow(
+                            category: category,
+                            tags: tags,
+                            readOnly: readOnly,
+                            onCategoryTap: _pickCategory,
+                            onTagTap: _pickTags,
+                          ),
+                          const SizedBox(height: KuberSpace.lg),
+                          QuillEditor.basic(
+                            controller: controller,
+                            focusNode: _editorFocus,
+                            config: QuillEditorConfig(
+                              scrollable: false,
+                              placeholder:
+                                  'Start writing. Numbers become tappable.',
+                              customStyleBuilder: _styleFor,
+                              customRecognizerBuilder: _recognizerFor,
+                              contextMenuBuilder: _buildContextMenu,
+                              customStyles: DefaultStyles(
+                                paragraph: DefaultTextBlockStyle(
+                                  localeFont(
+                                    fontSize: 14,
+                                    color: cs.onSurface,
+                                    height: 1.9,
+                                  ),
+                                  HorizontalSpacing.zero,
+                                  const VerticalSpacing(4, 0),
+                                  VerticalSpacing.zero,
+                                  null,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Fill the gap below a short note; tapping it focuses the
+                          // editor so the whole area is writable.
+                          Expanded(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: readOnly ? null : _focusEditorEnd,
+                              child: const SizedBox(width: double.infinity),
+                            ),
+                          ),
+                          const SizedBox(height: KuberSpace.lg),
+                          Text(
+                            'Created ${noteShortDate(note.createdAt)} · '
+                            'Modified ${noteRelativeTime(note.updatedAt)}',
+                            style: Theme.of(context).textTheme.bodySmall!
+                                .copyWith(color: cs.onSurfaceVariant),
+                          ),
+                        ],
                       ),
                     ),
                   ),

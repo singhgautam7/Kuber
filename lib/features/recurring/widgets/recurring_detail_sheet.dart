@@ -51,7 +51,8 @@ class RecurringDetailSheet extends ConsumerWidget {
       },
     );
 
-    final accountName = accountsAsync.whenOrNull(
+    final accountName =
+        accountsAsync.whenOrNull(
           data: (accs) {
             try {
               return accs
@@ -67,12 +68,12 @@ class RecurringDetailSheet extends ConsumerWidget {
     final iconData = cat != null
         ? IconMapper.fromString(cat.icon)
         : Icons.category_outlined;
-    final iconColor = cat != null
-        ? Color(cat.colorValue)
-        : cs.onSurfaceVariant;
+    final iconColor = cat != null ? Color(cat.colorValue) : cs.onSurfaceVariant;
 
     final isIncome = rule.type == 'income';
-    final amountColor = isIncome ? cs.tertiary : cs.error;
+    final amountColor = isIncome
+        ? context.kuberMoney.income
+        : context.kuberMoney.expense;
 
     final isPaused = rule.isPaused;
     final isExpired = RecurringRepository.isExpired(rule);
@@ -80,22 +81,23 @@ class RecurringDetailSheet extends ConsumerWidget {
     final statusLabel = isPaused
         ? context.l10n.pausedUpper
         : isExpired
-            ? context.l10n.expiredUpper
-            : rule.frequency == 'custom'
-                ? context.l10n.activeCustomUpper
-                : context.l10n.activeUpper;
+        ? context.l10n.expiredUpper
+        : rule.frequency == 'custom'
+        ? context.l10n.activeCustomUpper
+        : context.l10n.activeUpper;
     final statusColor = isPaused
         ? cs.onSurfaceVariant
         : isExpired
-            ? cs.error
-            : cs.tertiary;
+        ? context.kuberMoney.expense
+        : context.kuberMoney.income;
 
     final frequencyLabel = rule.frequency == 'custom'
         ? context.l10n.freqEveryNDays('${rule.customDays ?? 1}')
         : _freqTitle(context, rule.frequency);
 
-    final createdDateStr =
-        DateFormat('MMM d, yyyy').format(rule.createdAt).toUpperCase();
+    final createdDateStr = DateFormat(
+      'MMM d, yyyy',
+    ).format(rule.createdAt).toUpperCase();
 
     return KuberBottomSheet(
       title: rule.name,
@@ -107,27 +109,8 @@ class RecurringDetailSheet extends ConsumerWidget {
       ),
       actions: SheetButtonSection(
         padding: EdgeInsets.zero,
-        // Primary = History; row shows Edit + Pause/Resume; Delete goes to the
-        // overflow (⋯) menu — matching the account detail sheet.
-        primary: SheetAction(
-          label: context.l10n.historyLabel,
-          icon: Icons.history_rounded,
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              useSafeArea: true,
-              useRootNavigator: true,
-              backgroundColor: cs.surfaceContainer,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(KuberRadius.lg),
-                ),
-              ),
-              builder: (_) => RecurringHistorySheet(rule: rule),
-            );
-          },
-        ),
+        // Row shows Edit + Pause / Resume; History and Delete fall into the
+        // overflow (⋯) menu, matching the account detail sheet.
         actions: [
           SheetAction(
             label: context.l10n.editLabel,
@@ -138,12 +121,32 @@ class RecurringDetailSheet extends ConsumerWidget {
             },
           ),
           SheetAction(
-            label:
-                isPaused ? context.l10n.resumeLabel : context.l10n.pauseLabel,
+            label: isPaused
+                ? context.l10n.resumeLabel
+                : context.l10n.pauseLabel,
             icon: isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
             onPressed: () {
               ref.read(recurringListProvider.notifier).togglePause(rule);
               Navigator.of(context).pop();
+            },
+          ),
+          SheetAction(
+            label: context.l10n.historyLabel,
+            icon: Icons.history_rounded,
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useSafeArea: true,
+                useRootNavigator: true,
+                backgroundColor: cs.surfaceContainer,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(KuberShape.extraLarge),
+                  ),
+                ),
+                builder: (_) => RecurringHistorySheet(rule: rule),
+              );
             },
           ),
           SheetAction(
@@ -160,26 +163,29 @@ class RecurringDetailSheet extends ConsumerWidget {
           // ── Recurring amount label ────────────────────────────────────
           Text(
             context.l10n.recurringAmountLabel(
-                (rule.type == 'income' ? context.l10n.incomeLabel : context.l10n.expenseLabel)
-                    .toUpperCase()),
+              (rule.type == 'income'
+                      ? context.l10n.incomeLabel
+                      : context.l10n.expenseLabel)
+                  .toUpperCase(),
+            ),
             style: localeFont(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xs),
+          const SizedBox(height: KuberSpace.xs),
           Text(
             '${isIncome ? '+' : '−'}₹${rule.amount.toStringAsFixed(0)}',
             style: localeFont(
               fontSize: 32,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: amountColor,
               letterSpacing: -1,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
 
           // ── Details Grid ─────────────────────────────────────────────
           Row(
@@ -190,7 +196,7 @@ class RecurringDetailSheet extends ConsumerWidget {
                   value: frequencyLabel.toUpperCase(),
                 ),
               ),
-              const SizedBox(width: KuberSpacing.sm),
+              const SizedBox(width: KuberSpace.sm),
               Expanded(
                 child: _DetailCell(
                   label: context.l10n.statusUpper,
@@ -200,7 +206,7 @@ class RecurringDetailSheet extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Row(
             children: [
               Expanded(
@@ -209,37 +215,41 @@ class RecurringDetailSheet extends ConsumerWidget {
                   value: accountName.toUpperCase(),
                 ),
               ),
-              const SizedBox(width: KuberSpacing.sm),
+              const SizedBox(width: KuberSpace.sm),
               Expanded(
                 child: _DetailCell(
                   label: context.l10n.nextDue.toUpperCase(),
-                  value: DateFormat('MMM d').format(rule.nextDueAt).toUpperCase(),
+                  value: DateFormat(
+                    'MMM d',
+                  ).format(rule.nextDueAt).toUpperCase(),
                 ),
               ),
             ],
           ),
           if ((rule.notes ?? '').trim().isNotEmpty) ...[
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             Text(
               context.l10n.notesLabel.toUpperCase(),
               style: localeFont(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 1.0,
               ),
             ),
-            const SizedBox(height: KuberSpacing.xs),
+            const SizedBox(height: KuberSpace.xs),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(
-                horizontal: KuberSpacing.lg,
-                vertical: KuberSpacing.md,
+                horizontal: KuberSpace.lg,
+                vertical: KuberSpace.md,
               ),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.1),
+                ),
               ),
               child: Text(
                 rule.notes!.trim(),
@@ -251,7 +261,7 @@ class RecurringDetailSheet extends ConsumerWidget {
               ),
             ),
           ],
-          const SizedBox(height: KuberSpacing.xs),
+          const SizedBox(height: KuberSpace.xs),
         ],
       ),
     );
@@ -262,17 +272,13 @@ class RecurringDetailSheet extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
-          side: BorderSide(color: cs.outline, width: 1),
+          borderRadius: BorderRadius.circular(KuberShape.full),
+          side: BorderSide(color: cs.outlineVariant, width: 1),
         ),
         title: Text(
           context.l10n.deleteAutomationConfirm,
-          style: localeFont(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: localeFont(fontWeight: FontWeight.w600, fontSize: 16),
         ),
         content: Text(
           context.l10n.deleteAutomationBody(rule.name),
@@ -287,7 +293,7 @@ class RecurringDetailSheet extends ConsumerWidget {
             style: FilledButton.styleFrom(
               backgroundColor: cs.error,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                borderRadius: BorderRadius.circular(KuberShape.small),
               ),
             ),
             onPressed: () {
@@ -321,20 +327,24 @@ class _DetailCell extends StatelessWidget {
   final String value;
   final Color? valueColor;
 
-  const _DetailCell({required this.label, required this.value, this.valueColor});
+  const _DetailCell({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: KuberSpacing.md,
+        horizontal: KuberSpace.lg,
+        vertical: KuberSpace.md,
       ),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,13 +352,13 @@ class _DetailCell extends StatelessWidget {
           Text(
             label,
             style: localeFont(
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 1.0,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xs),
+          const SizedBox(height: KuberSpace.xs),
           Text(
             value,
             style: localeFont(

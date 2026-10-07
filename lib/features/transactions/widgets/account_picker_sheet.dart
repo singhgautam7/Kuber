@@ -4,10 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/account_helpers.dart';
+import '../../../core/utils/color_harmonizer.dart';
 import '../../../shared/widgets/add_new_button.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../accounts/widgets/account_form.dart';
-import '../../settings/providers/settings_provider.dart' show currencyProvider, formatterProvider;
+import '../../settings/providers/settings_provider.dart'
+    show currencyProvider, formatterProvider;
 
 class AccountPickerSheet extends ConsumerStatefulWidget {
   final int? selectedAccountId;
@@ -49,9 +53,9 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.lg,
-            KuberSpacing.sm,
-            KuberSpacing.lg,
+            KuberSpace.screenMargin,
+            KuberSpace.sm,
+            KuberSpace.sm,
             0,
           ),
           child: Column(
@@ -63,67 +67,85 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
                   width: 32,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant,
-                    borderRadius: BorderRadius.circular(2),
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                    borderRadius: KuberShape.fullR,
                   ),
                 ),
               ),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
 
               // Title + subtitle
               Row(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.selectAccountTitle,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: cs.onSurface,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.selectAccountTitle,
+                          style: textTheme.titleLarge?.copyWith(
+                            color: cs.onSurface,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        context.l10n.chooseAccountSubtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
+                        const SizedBox(height: 2),
+                        Text(
+                          context.l10n.chooseAccountSubtitle,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20),
+                  AppIconButton(
+                    icon: Icons.close_rounded,
+                    semanticLabel: MaterialLocalizations.of(
+                      context,
+                    ).closeButtonTooltip,
                     onPressed: () => Navigator.pop(context),
-                    color: cs.onSurfaceVariant,
                   ),
                 ],
               ),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
 
               // Search field. Not autofocused (matches the category picker) so
               // the keyboard doesn't pop up with the sheet. List is small, so
               // no debounce is needed once the user does type.
-              TextField(
-                controller: _searchController,
-                autofocus: false,
-                onTapOutside: (_) =>
-                    FocusManager.instance.primaryFocus?.unfocus(),
-                style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
-                decoration: InputDecoration(
-                  hintText: context.l10n.searchAccountsHint,
-                  hintStyle: textTheme.bodyMedium?.copyWith(
-                    color: cs.onSurfaceVariant,
+              Padding(
+                padding: const EdgeInsets.only(right: KuberSpace.md),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: false,
+                  onTapOutside: (_) =>
+                      FocusManager.instance.primaryFocus?.unfocus(),
+                  style: textTheme.bodyMedium?.copyWith(color: cs.onSurface),
+                  decoration: InputDecoration(
+                    hintText: context.l10n.searchAccountsHint,
+                    hintStyle: textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                    prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
+                    filled: true,
+                    fillColor: cs.surfaceContainerHigh,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    border: const OutlineInputBorder(
+                      borderRadius: KuberShape.fullR,
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderRadius: KuberShape.fullR,
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: KuberShape.fullR,
+                      borderSide: BorderSide(color: cs.primary, width: 2),
+                    ),
                   ),
-                  prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
-                  filled: true,
-                  fillColor: cs.surfaceContainerHigh,
+                  onChanged: (v) =>
+                      setState(() => _query = v.trim().toLowerCase()),
                 ),
-                onChanged: (v) =>
-                    setState(() => _query = v.trim().toLowerCase()),
               ),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
             ],
           ),
         ),
@@ -131,12 +153,9 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
         // Account list
         Flexible(
           child: accounts.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (e, _) => Center(
-              child: Text('${context.l10n.errorLabel}: $e'),
-            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) =>
+                Center(child: Text('${context.l10n.errorLabel}: $e')),
             data: (allAccs) {
               var accs = widget.excludeAccountId != null
                   ? allAccs
@@ -163,7 +182,7 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
               if (accs.isEmpty) {
                 return Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(KuberSpacing.lg),
+                    padding: const EdgeInsets.all(KuberSpace.lg),
                     child: Text(
                       context.l10n.noAccountsMatch(_searchController.text),
                       textAlign: TextAlign.center,
@@ -175,40 +194,42 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
                 );
               }
 
-              return ListView.separated(
+              return ListView(
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: KuberSpacing.lg,
+                  horizontal: KuberSpace.screenMargin,
                 ),
-                itemCount: accs.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(height: KuberSpacing.sm),
-                itemBuilder: (context, index) {
-                  final acc = accs[index];
-                  final selected = acc.id == widget.selectedAccountId;
-                  final color = resolveAccountColor(acc);
+                children: [
+                  KuberGroup(
+                    children: [
+                      for (final acc in accs)
+                        () {
+                          final selected = acc.id == widget.selectedAccountId;
+                          final color = resolveAccountColor(acc);
 
-                  return _AccountTile(
-                    name: acc.name,
-                    type: (acc.isCreditCard
-                            ? context.l10n.creditCardLabel
-                            : switch (acc.type.toLowerCase()) {
-                                'bank' => context.l10n.bankLabel,
-                                'wallet' => context.l10n.walletLabel,
-                                'cash' => context.l10n.cashLabel,
-                                _ => acc.type,
-                              })
-                        .toUpperCase(),
-                    icon: resolveAccountIcon(acc),
-                    color: color,
-                    selected: selected,
-                    balance: ref.watch(accountBalanceProvider(acc.id)),
-                    isCreditCard: acc.isCreditCard,
-                    creditLimit: acc.creditLimit,
-                    currencySymbol: ref.watch(currencyProvider).symbol,
-                    onTap: () => widget.onSelected(acc.id),
-                  );
-                },
+                          return _AccountTile(
+                            name: acc.name,
+                            type: (acc.isCreditCard
+                                ? context.l10n.creditCardLabel
+                                : switch (acc.type.toLowerCase()) {
+                                    'bank' => context.l10n.bankLabel,
+                                    'wallet' => context.l10n.walletLabel,
+                                    'cash' => context.l10n.cashLabel,
+                                    _ => acc.type,
+                                  }),
+                            icon: resolveAccountIcon(acc),
+                            color: color,
+                            selected: selected,
+                            balance: ref.watch(accountBalanceProvider(acc.id)),
+                            isCreditCard: acc.isCreditCard,
+                            creditLimit: acc.creditLimit,
+                            currencySymbol: ref.watch(currencyProvider).symbol,
+                            onTap: () => widget.onSelected(acc.id),
+                          );
+                        }(),
+                    ],
+                  ),
+                ],
               );
             },
           ),
@@ -225,23 +246,19 @@ class _AccountPickerSheetState extends ConsumerState<AccountPickerSheet> {
               backgroundColor: Colors.transparent,
               builder: (context) => Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(KuberRadius.lg),
-                  ),
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  borderRadius: KuberShape.sheetR,
                 ),
                 padding: EdgeInsets.fromLTRB(
-                  KuberSpacing.lg,
-                  KuberSpacing.lg,
-                  KuberSpacing.lg,
-                  MediaQuery.of(context).viewInsets.bottom + KuberSpacing.xl,
+                  KuberSpace.lg,
+                  KuberSpace.lg,
+                  KuberSpace.lg,
+                  MediaQuery.of(context).viewInsets.bottom + KuberSpace.xl,
                 ),
                 child: const SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AccountForm(),
-                    ],
+                    children: [AccountForm()],
                   ),
                 ),
               ),
@@ -284,84 +301,84 @@ class _AccountTile extends ConsumerWidget {
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: selected
-              ? color.withValues(alpha: 0.1)
-              : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: selected ? color : cs.outline,
-            width: selected ? 1.5 : 1,
+    final tones = categoryTones(context, color);
+    return Material(
+      color: selected ? cs.secondaryContainer : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 72),
+          padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpace.lg,
+            vertical: KuberSpace.sm,
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: tones.container,
+                  borderRadius: KuberShape.mediumR,
+                ),
+                child: Icon(icon, size: 20, color: tones.fg),
               ),
-              child: Icon(icon, size: 22, color: color),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface,
-                      fontWeight: FontWeight.w500,
+              const SizedBox(width: KuberSpace.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: selected
+                            ? cs.onSecondaryContainer
+                            : cs.onSurface,
+                      ),
                     ),
-                  ),
-                  Text(
-                    type,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      letterSpacing: 0.8,
+                    Text(
+                      type,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            balance.when(
-              loading: () => SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: cs.onSurfaceVariant,
+                  ],
                 ),
               ),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (bal) {
-                final formatter = ref.watch(formatterProvider);
-                final isNegative = bal < 0;
-                final display = isCreditCard && creditLimit != null
-                    ? '${formatter.formatCurrency(bal)} / ${formatter.formatCurrency(creditLimit!)}'
-                    : formatter.formatCurrency(bal);
-                return Text(
-                  display,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: isNegative ? cs.error : cs.onSurfaceVariant,
-                    fontWeight: isNegative ? FontWeight.w600 : null,
+              balance.when(
+                loading: () => SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: cs.onSurfaceVariant,
                   ),
-                );
-              },
-            ),
-            if (selected) ...[
-              const SizedBox(width: KuberSpacing.sm),
-              Icon(Icons.check_circle, size: 20, color: color),
+                ),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (bal) {
+                  final formatter = ref.watch(formatterProvider);
+                  final isNegative = bal < 0;
+                  final display = isCreditCard && creditLimit != null
+                      ? '${formatter.formatCurrency(bal)} / ${formatter.formatCurrency(creditLimit!)}'
+                      : formatter.formatCurrency(bal);
+                  return Text(
+                    display,
+                    style: textTheme.titleSmall?.copyWith(
+                      color: isNegative
+                          ? context.kuberMoney.expense
+                          : cs.onSurfaceVariant,
+                    ),
+                  );
+                },
+              ),
+              if (selected) ...[
+                const SizedBox(width: KuberSpace.sm),
+                Icon(Icons.check_rounded, size: 20, color: cs.primary),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

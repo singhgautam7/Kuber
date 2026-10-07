@@ -1,4 +1,3 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'dart:math';
 
@@ -39,6 +38,7 @@ import '../widgets/quick_add_widget.dart';
 import '../../sms_import/widgets/sms_import_home_widget.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 import '../../../shared/widgets/kuber_skeleton.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/skeleton_loader.dart';
 
 List<String> _homeSubtitles(AppLocalizations l10n) => [
@@ -164,36 +164,40 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   /// Map a widget id from the catalog to its actual implementation. Hidden
   /// widgets are simply not constructed — their providers never run. Every
-  /// widget carries a uniform [KuberSpacing.xl] bottom gap: self-spacing
+  /// widget carries a uniform [KuberSpace.xl] bottom gap: self-spacing
   /// widgets add it internally (and drop it when empty); the rest get it here.
   Widget _buildHomeWidget(String id) {
     final Widget? child = switch (id) {
       'balance_hero' => RepaintBoundary(
-          key: TutorialStepKeys.dashboardBalanceCard,
-          child: const _BalanceHeroSection(),
-        ),
+        key: TutorialStepKeys.dashboardBalanceCard,
+        child: const _BalanceHeroSection(),
+      ),
       'quick_add' => QuickAddWidget(key: TutorialStepKeys.quickAddFab),
       'spending_stats' => const RepaintBoundary(child: SpendingStatsCard()),
       'home_accounts' => const RepaintBoundary(child: HomeAccountsCard()),
-      'seven_day_chart' =>
-        const RepaintBoundary(child: _SevenDayChartSection()),
+      'seven_day_chart' => const RepaintBoundary(
+        child: _SevenDayChartSection(),
+      ),
       'insight_stories' => const RepaintBoundary(child: StoryRingSection()),
       'smart_insights' => const RepaintBoundary(child: HomeSmartInsights()),
       'budget_snapshot' => const RepaintBoundary(child: BudgetSnapshotCard()),
-      'upcoming_events_widget' =>
-        const RepaintBoundary(child: UpcomingEventsWidget()),
+      'upcoming_events_widget' => const RepaintBoundary(
+        child: UpcomingEventsWidget(),
+      ),
       'kuber_notes_widget' => const RepaintBoundary(child: NotesHomeWidget()),
       'ask_kuber_widget' => const RepaintBoundary(child: AskKuberHomeWidget()),
-      'recent_transactions' =>
-        const RepaintBoundary(child: HomeRecentTransactionsCard()),
-      'sms_import_widget' =>
-        const RepaintBoundary(child: SmsImportHomeWidget()),
+      'recent_transactions' => const RepaintBoundary(
+        child: HomeRecentTransactionsCard(),
+      ),
+      'sms_import_widget' => const RepaintBoundary(
+        child: SmsImportHomeWidget(),
+      ),
       _ => null,
     };
     if (child == null) return const SizedBox.shrink();
     if (_selfSpacedWidgets.contains(id)) return child;
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
       child: child,
     );
   }
@@ -221,8 +225,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         unreadCount: ref.watch(unreadCountProvider).valueOrNull ?? 0,
         onTapNotifications: _openNotificationsSheet,
       ),
-      const SizedBox(height: KuberSpacing.lg),
-      // Greeting — fixed, not part of the editor
+      // Greeting (headlineSmall) + rotating subtitle open the body, 16 above
+      // the balance card (board 3.2b). Fixed, not part of the editor.
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -230,24 +234,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             userName.isNotEmpty
                 ? '${_timeGreeting(l10n)}, ${userName.toTitleCase()}'
                 : _timeGreeting(l10n),
-            style: textTheme.displaySmall?.copyWith(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-              height: 1.15,
-              letterSpacing: -0.5,
-            ),
+            style: textTheme.headlineSmall?.copyWith(color: cs.onSurface),
           ),
-          const SizedBox(height: KuberSpacing.xs),
+          const SizedBox(height: 2),
           Text(
             _homeSubtitles(l10n)[_subtitleIndex],
-            style: textTheme.bodyMedium?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
+            style: textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
-      const SizedBox(height: KuberSpacing.lg),
+      const SizedBox(height: KuberSpace.lg),
       // Promo campaign banner — self-hides when no promo, dismissed, or Pro.
       const HomePromoBanner(),
     ];
@@ -259,8 +255,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       loading: () => <Widget>[
         for (final h in const <double>[148, 88, 120, 88])
           Padding(
-            padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
-            child: KuberSkeleton(height: h),
+            padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
+            child: KuberSkeleton(
+              height: h,
+              borderRadius: KuberShape.largeIncreased,
+            ),
           ),
       ],
       error: (_, __) => const <Widget>[],
@@ -280,15 +279,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (_revealCount < items.length) _growReveal();
     final revealed = _revealCount.clamp(0, items.length);
 
+    // The header scrolls with the content (not pinned); it carries its own
+    // edge padding, every other item gets the 20 screen margin.
     return Scaffold(
       body: ListView.builder(
-        padding: EdgeInsets.only(
-          left: KuberSpacing.lg,
-          right: KuberSpacing.lg,
-          bottom: navBarBottomPadding(context),
-        ),
+        padding: EdgeInsets.only(bottom: navBarBottomPadding(context)),
         itemCount: revealed,
-        itemBuilder: (context, index) => items[index],
+        itemBuilder: (context, index) => index == 0
+            ? items[0]
+            : Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.screenMargin,
+                ),
+                child: items[index],
+              ),
       ),
     );
   }
@@ -338,9 +342,9 @@ class _SevenDayChartSection extends ConsumerWidget {
             showTitle: false,
             points: points,
             rangeTabs: const [
-              ChartRangeTab('days7', '7D'),
-              ChartRangeTab('weeks4', '4W'),
-              ChartRangeTab('months6', '6M'),
+              ChartRangeTab('days7', '7D', 'Last 7 days'),
+              ChartRangeTab('weeks4', '4W', 'Last 4 weeks'),
+              ChartRangeTab('months6', '6M', 'Last 6 months'),
             ],
             selectedRangeId: switch (range) {
               HomeChartRange.days7 => 'days7',
@@ -349,10 +353,10 @@ class _SevenDayChartSection extends ConsumerWidget {
             },
             onRangeSelected: (id) =>
                 ref.read(homeChartRangeProvider.notifier).state = switch (id) {
-              'days7' => HomeChartRange.days7,
-              'weeks4' => HomeChartRange.weeks4,
-              _ => HomeChartRange.months6,
-            },
+                  'days7' => HomeChartRange.days7,
+                  'weeks4' => HomeChartRange.weeks4,
+                  _ => HomeChartRange.months6,
+                },
           ),
         ),
       ],
@@ -367,36 +371,22 @@ class _BalanceHeroSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: KuberSpacing.md + 2,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-      ),
+    return const KuberCard(
+      hero: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SkeletonBlock(width: 120, height: 12, borderRadius: 999),
+          SizedBox(height: 10),
+          SkeletonBlock(width: 160, height: 28, borderRadius: 999),
+          SizedBox(height: KuberSpace.lg),
+          SkeletonBlock(width: double.infinity, height: 8, borderRadius: 999),
+          SizedBox(height: KuberSpace.md),
           Row(
-            children: const [
-              SkeletonBlock(width: 120, height: 12, borderRadius: 4),
+            children: [
+              SkeletonBlock(width: 72, height: 12, borderRadius: 999),
               Spacer(),
-              SkeletonBlock(width: 90, height: 22, borderRadius: 4),
-            ],
-          ),
-          const SizedBox(height: KuberSpacing.md),
-          const SkeletonBlock(
-              width: double.infinity, height: 8, borderRadius: 3),
-          const SizedBox(height: KuberSpacing.sm + 2),
-          Row(
-            children: const [
-              SkeletonBlock(width: 70, height: 13, borderRadius: 4),
-              Spacer(),
-              SkeletonBlock(width: 70, height: 13, borderRadius: 4),
+              SkeletonBlock(width: 72, height: 12, borderRadius: 999),
             ],
           ),
         ],
@@ -417,84 +407,71 @@ class _BalanceHeroCard extends ConsumerWidget {
     final isPrivate = ref.watch(privacyModeProvider);
     final symbol = ref.watch(currencyProvider).symbol;
     final isPositive = summary.net >= 0;
-    final netColor = isPositive ? cs.tertiary : cs.error;
     final prefix = isPositive ? '+' : '-';
     final formattedNet = formatter
         .formatCurrency(summary.net.abs(), symbol: symbol)
         .trim();
-    final formattedIncome = maskAmount(
-      formatter.formatCurrency(summary.totalIncome, symbol: symbol),
-      isPrivate,
-    );
-    final formattedExpense = maskAmount(
-      formatter.formatCurrency(summary.totalExpense, symbol: symbol),
-      isPrivate,
-    );
+    final formattedIncome = isPrivate
+        ? maskAmount('', true)
+        : '+${formatter.formatCurrency(summary.totalIncome, symbol: symbol).trim()}';
+    final formattedExpense = isPrivate
+        ? maskAmount('', true)
+        : '-${formatter.formatCurrency(summary.totalExpense, symbol: symbol).trim()}';
 
     final total = summary.totalIncome + summary.totalExpense;
     final incPct = total > 0 ? summary.totalIncome / total : 0.5;
 
     final monthLabel = DateFormat('MMMM').format(DateTime.now()).toUpperCase();
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: KuberSpacing.lg,
-        vertical: KuberSpacing.md + 2,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-      ),
+    final theme = Theme.of(context);
+    // Income in primary, expense in a 40% primary tint (user review round 2);
+    // the signs on the legend carry the direction instead of green / red.
+    final incomeColor = cs.primary;
+    final expenseColor = Color.alphaBlend(
+      cs.primary.withValues(alpha: 0.4),
+      cs.surfaceContainer,
+    );
+    final legendStyle = theme.textTheme.titleSmall!.copyWith(
+      color: cs.onSurface,
+    );
+    Widget dot(Color c) => Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+    );
+
+    // Hero card (stat-cards 2l / board 3.2a): caps label, headlineMedium net,
+    // 8 split bar with a 4 gap, titleSmall legend.
+    return KuberCard(
+      hero: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row: month label + net amount
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                '$monthLabel · ${context.l10n.netLabel}',
-                style: localeFont(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const Spacer(),
-              isPrivate
-                  ? Text(
-                      '****',
-                      style: localeFont(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                        letterSpacing: -0.6,
-                      ),
-                    )
-                  : Text(
-                      '$prefix$formattedNet',
-                      style: localeFont(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: netColor,
-                        letterSpacing: -0.6,
-                      ),
-                    ),
-            ],
+          Text(
+            '$monthLabel · ${context.l10n.netLabel}',
+            style: theme.textTheme.labelMedium!.copyWith(
+              letterSpacing: 0.8,
+              color: cs.onSurfaceVariant,
+            ),
           ),
-
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.xs),
+          Text(
+            isPrivate ? '****' : '$prefix$formattedNet',
+            style: theme.textTheme.headlineMedium!.copyWith(
+              color: isPrivate
+                  ? cs.onSurface
+                  : (total == 0 ? cs.onSurfaceVariant : cs.onSurface),
+            ),
+          ),
+          const SizedBox(height: KuberSpace.lg),
 
           // Proportional income/expense ratio bar
           if (total == 0)
             Container(
               height: 8,
               decoration: BoxDecoration(
-                color: cs.outlineVariant,
-                borderRadius: BorderRadius.circular(3),
+                color: cs.surfaceContainerHighest,
+                borderRadius: KuberShape.fullR,
               ),
             )
           else
@@ -505,69 +482,37 @@ class _BalanceHeroCard extends ConsumerWidget {
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: cs.tertiary,
-                      borderRadius: BorderRadius.circular(3),
+                      color: incomeColor,
+                      borderRadius: KuberShape.fullR,
                     ),
                   ),
                 ),
-                const SizedBox(width: 3),
+                const SizedBox(width: 4),
                 Expanded(
                   flex: ((1 - incPct) * 1000).round().clamp(1, 1000),
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: cs.error,
-                      borderRadius: BorderRadius.circular(3),
+                      color: expenseColor,
+                      borderRadius: KuberShape.fullR,
                     ),
                   ),
                 ),
               ],
             ),
 
-          const SizedBox(height: KuberSpacing.sm + 2),
+          const SizedBox(height: KuberSpace.md),
 
           // Income / Expense legend
           Row(
             children: [
-              // Income: dot + amount
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: cs.tertiary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Text(
-                formattedIncome,
-                style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
+              dot(incomeColor),
+              const SizedBox(width: KuberSpace.sm),
+              Text(formattedIncome, style: legendStyle),
               const Spacer(),
-              // Expense: amount + dot
-              Text(
-                formattedExpense,
-                style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: cs.error,
-                  shape: BoxShape.circle,
-                ),
-              ),
+              Text(formattedExpense, style: legendStyle),
+              const SizedBox(width: KuberSpace.sm),
+              dot(expenseColor),
             ],
           ),
         ],
@@ -583,35 +528,24 @@ class _SpendingAnalysisEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.5), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const KuberHomeWidgetTitle(title: 'Income & Expense'),
-          const SizedBox(height: 24),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
-              child: Text(
-                context.l10n.spendingAnalysisEmpty,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const KuberHomeWidgetTitle(title: 'Income & Expense'),
+        KuberCard(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: KuberSpace.lg),
+            child: Text(
+              context.l10n.spendingAnalysisEmpty,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: cs.onSurfaceVariant,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(height: 24),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

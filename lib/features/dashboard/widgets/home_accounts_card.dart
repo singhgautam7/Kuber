@@ -24,6 +24,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../core/utils/color_harmonizer.dart';
+
 import '../../../core/utils/account_helpers.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../accounts/data/account.dart';
@@ -39,10 +43,6 @@ class HomeAccountsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountsAsync = ref.watch(accountListProvider);
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
     return accountsAsync.when(
       loading: () => const SizedBox.shrink(),
       error: (_, __) => const SizedBox.shrink(),
@@ -50,57 +50,53 @@ class HomeAccountsCard extends ConsumerWidget {
         if (accounts.isEmpty) return const SizedBox.shrink();
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+          padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            KuberHomeWidgetTitle(
-              title: context.l10n.accountsLabel,
-              trailing: GestureDetector(
-                onTap: () => context.push('/more/accounts'),
-                child: Text(
-                  context.l10n.viewAll,
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    color: cs.primary,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              KuberHomeWidgetTitle(
+                title: context.l10n.accountsLabel,
+                trailing: KuberSectionAction(
+                  label: sentenceCase(context.l10n.viewAll),
+                  onTap: () => context.push('/more/accounts'),
+                ),
+              ),
+              // Sized by its tallest tile (all tiles stretch to match), so
+              // there is no reserved gap under shorter tiles (review round 2).
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < accounts.length; i++) ...[
+                        if (i > 0) const SizedBox(width: KuberSpace.cardGap),
+                        _HomeAccountTile(
+                          account: accounts[i],
+                          balance:
+                              ref
+                                  .watch(accountBalanceProvider(accounts[i].id))
+                                  .valueOrNull ??
+                              accounts[i].initialBalance,
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              useRootNavigator: true,
+                              isScrollControlled: true,
+                              useSafeArea: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) =>
+                                  AccountDetailSheet(account: accounts[i]),
+                            );
+                          },
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 152,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemCount: accounts.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 10),
-                itemBuilder: (context, i) {
-                  final account = accounts[i];
-                  final balance =
-                      ref
-                          .watch(accountBalanceProvider(account.id))
-                          .valueOrNull ??
-                      account.initialBalance;
-                  return _HomeAccountTile(
-                    account: account,
-                    balance: balance,
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        useRootNavigator: true,
-                        isScrollControlled: true,
-                        useSafeArea: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => AccountDetailSheet(account: account),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+            ],
           ),
         );
       },
@@ -136,119 +132,123 @@ class _HomeAccountTile extends ConsumerWidget {
             masked,
           );
 
+    final theme = Theme.of(context);
+    final tones = categoryTones(context, accentColor);
+    final hasUtil = isCC && account.creditLimit != null;
+    final utilPct = hasUtil && account.creditLimit! > 0
+        ? balance.abs() / account.creditLimit!
+        : 0.0;
+    // Existing thresholds: <30% normal, <100% near limit, 100%+ over.
+    final utilState = utilPct >= 1.0
+        ? KuberProgressState.overLimit
+        : utilPct < 0.30
+        ? KuberProgressState.normal
+        : KuberProgressState.nearLimit;
+    final typeLine = account.last4Digits != null
+        ? '${_typeLabel(context, account)} · **** ${account.last4Digits}'
+        : _typeLabel(context, account);
+
+    // Board 3.2a: 200 wide, radius 20, 36 tile in the account colour
+    // re-toned, titleLarge balance.
     return SizedBox(
-      width: 220,
-      child: InkWell(
+      width: 200,
+      child: KuberCard(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            border: Border.all(color: cs.outline),
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-          ),
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.12),
-                      border: Border.all(
-                        color: accentColor.withValues(alpha: 0.30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: tones.container,
+                    borderRadius: KuberShape.mediumR,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    resolveAccountIcon(account),
+                    size: 20,
+                    color: tones.fg,
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        account.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall!.copyWith(
+                          color: cs.onSurface,
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      resolveAccountIcon(account),
-                      size: 18,
-                      color: accentColor,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          account.name,
-                          overflow: TextOverflow.ellipsis,
-                          style: localeFont(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                            letterSpacing: -0.1,
-                          ),
+                      Text(
+                        typeLine,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          color: cs.onSurfaceVariant,
                         ),
-                        const SizedBox(height: 1),
-                        Row(
-                          children: [
-                            Text(
-                              _typeLabel(context, account).toUpperCase(),
-                              style: localeFont(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: cs.onSurfaceVariant,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            if (account.last4Digits != null) ...[
-                              const SizedBox(width: 4),
-                              Text(
-                                '· **** ${account.last4Digits}',
-                                style: localeFont(
-                                  fontSize: 10,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                isCC ? context.l10n.outstandingLabel : context.l10n.availableLabel,
-                style: localeFont(
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w700,
-                  color: isCC && balance < 0 ? cs.error : cs.onSurfaceVariant,
-                  letterSpacing: 0.7,
-                ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                amountText,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: localeFont(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              if (isCC && account.creditLimit != null) ...[
-                const SizedBox(height: 8),
-                _MiniUtilization(
-                  outstanding: balance.abs(),
-                  limit: account.creditLimit!,
-                  fmt: fmt,
-                  masked: masked,
                 ),
               ],
-            ],
-          ),
+            ),
+            // Every tile is the same height (review round 2): a credit card's
+            // utilisation bar sits in the 16 gap the other tiles leave, and
+            // "18% used" shares the label line.
+            if (hasUtil)
+              // Wavy M3 bar is 12 tall: 2 + 12 + 2 = the 16 gap.
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: KuberLinearProgress(
+                  value: utilPct.clamp(0.0, 1.0),
+                  state: utilState,
+                ),
+              )
+            else
+              const SizedBox(height: KuberSpace.lg),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    sentenceCase(
+                      isCC
+                          ? context.l10n.outstandingLabel
+                          : context.l10n.availableLabel,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall!.copyWith(
+                      color: isCC && balance < 0
+                          ? context.kuberMoney.expense
+                          : cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                if (hasUtil)
+                  Text(
+                    '${(utilPct.clamp(0.0, 1.0) * 100).toStringAsFixed(0)}% ${context.l10n.usedLabel}',
+                    style: theme.textTheme.bodySmall!.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+            Text(
+              amountText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge!.copyWith(color: cs.onSurface),
+            ),
+          ],
         ),
       ),
     );
@@ -262,90 +262,5 @@ class _HomeAccountTile extends ConsumerWidget {
       'cash' => context.l10n.cashLabel,
       _ => a.type,
     };
-  }
-}
-
-class _MiniUtilization extends StatelessWidget {
-  final double outstanding;
-  final double limit;
-  final dynamic fmt;
-  final bool masked;
-  const _MiniUtilization({
-    required this.outstanding,
-    required this.limit,
-    required this.fmt,
-    required this.masked,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final rawPct = limit <= 0 ? 0.0 : outstanding / limit;
-    final pct = rawPct.clamp(0.0, 1.0);
-    final fillColor = rawPct >= 1.0
-        ? cs.error
-        : rawPct < 0.30
-        ? cs.tertiary
-        : context.kuberColors.warning;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(2),
-          child: SizedBox(
-            height: 4,
-            child: Stack(
-              children: [
-                Container(color: cs.surfaceContainerHigh),
-                FractionallySizedBox(
-                  widthFactor: pct,
-                  child: Container(color: fillColor),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Text.rich(
-              TextSpan(
-                style: localeFont(
-                  fontSize: 10,
-                  color: cs.onSurfaceVariant,
-                ),
-                children: [
-                  TextSpan(
-                    text: '${(pct * 100).toStringAsFixed(0)}%',
-                    style: localeFont(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
-                    ),
-                  ),
-                  TextSpan(text: ' ${context.l10n.usedLabel}'),
-                ],
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                '${maskAmount(fmt.formatCurrency(limit), masked)} ${context.l10n.limitLabel}',
-                textAlign: TextAlign.end,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: localeFont(
-                  fontSize: 10,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 }

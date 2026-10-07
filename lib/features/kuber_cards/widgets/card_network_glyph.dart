@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:kuber/core/theme/app_theme.dart';
 
 import 'package:flutter/material.dart';
 
@@ -73,9 +74,15 @@ class _MastercardPainter extends CustomPainter {
     // combined viewBox is 31 × 20.
     _fit(canvas, size, 31, 20, (c) {
       c.drawCircle(
-          const Offset(10, 10), 10, Paint()..color = color.withValues(alpha: 0.85));
+        const Offset(10, 10),
+        10,
+        Paint()..color = color.withValues(alpha: 0.85),
+      );
       c.drawCircle(
-          const Offset(21, 10), 10, Paint()..color = color.withValues(alpha: 0.50));
+        const Offset(21, 10),
+        10,
+        Paint()..color = color.withValues(alpha: 0.50),
+      );
     });
   }
 
@@ -170,7 +177,7 @@ class _AmexPainter extends CustomPainter {
     _fit(canvas, size, 25, 20, (c) {
       final r = RRect.fromRectAndRadius(
         const Rect.fromLTWH(0.75, 0.75, 23.5, 18.5),
-        const Radius.circular(3),
+        const Radius.circular(KuberShape.small),
       );
       c.drawRRect(r, Paint()..color = color.withValues(alpha: 0.16));
       c.drawRRect(
@@ -200,7 +207,10 @@ class _DiscoverPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _fit(canvas, size, 20, 20, (c) {
       c.drawCircle(
-          const Offset(10, 10), 9, Paint()..color = color.withValues(alpha: 0.85));
+        const Offset(10, 10),
+        9,
+        Paint()..color = color.withValues(alpha: 0.85),
+      );
       // Bright top-edge arc.
       c.drawArc(
         Rect.fromCircle(center: const Offset(10, 10), radius: 9),

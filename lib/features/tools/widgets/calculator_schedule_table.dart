@@ -112,22 +112,22 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
     return Container(
       height: header ? _headerHeight : _rowHeight,
       alignment: numeric ? Alignment.centerRight : Alignment.centerLeft,
-      padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.md),
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.md),
       child: Text(
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: header
             ? localeFont(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 0.4,
               )
             : localeFont(
                 fontSize: 12,
                 fontWeight: isTotal
-                    ? FontWeight.w700
+                    ? FontWeight.w600
                     : (numeric ? FontWeight.w500 : FontWeight.w600),
                 color: numeric && !isTotal ? cs.onSurfaceVariant : cs.onSurface,
               ),
@@ -138,33 +138,36 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
   bool _isTotal(int ri) => widget.totalRow && ri == widget.rows.length - 1;
 
   Widget _frozenCellFor(ColorScheme cs, int ri) => Container(
-        color: ri.isOdd
-            ? cs.surfaceContainerHigh.withValues(alpha: 0.6)
-            : cs.surfaceContainer,
-        child: _cell(cs, widget.rows[ri].first,
-            numeric: widget.columns.first.numeric,
-            header: false,
-            isTotal: _isTotal(ri)),
-      );
+    color: ri.isOdd
+        ? cs.surfaceContainerHigh.withValues(alpha: 0.6)
+        : cs.surfaceContainer,
+    child: _cell(
+      cs,
+      widget.rows[ri].first,
+      numeric: widget.columns.first.numeric,
+      header: false,
+      isTotal: _isTotal(ri),
+    ),
+  );
 
   Widget _dataRowFor(ColorScheme cs, int ri) => Container(
-        color: _rowBg(cs, ri, _isTotal(ri)),
-        child: Row(
-          children: [
-            for (var ci = 1; ci < widget.columns.length; ci++)
-              SizedBox(
-                width: widget.dataColumnWidth,
-                child: _cell(
-                  cs,
-                  ci < widget.rows[ri].length ? widget.rows[ri][ci] : '',
-                  numeric: widget.columns[ci].numeric,
-                  header: false,
-                  isTotal: _isTotal(ri),
-                ),
-              ),
-          ],
-        ),
-      );
+    color: _rowBg(cs, ri, _isTotal(ri)),
+    child: Row(
+      children: [
+        for (var ci = 1; ci < widget.columns.length; ci++)
+          SizedBox(
+            width: widget.dataColumnWidth,
+            child: _cell(
+              cs,
+              ci < widget.rows[ri].length ? widget.rows[ri][ci] : '',
+              numeric: widget.columns[ci].numeric,
+              header: false,
+              isTotal: _isTotal(ri),
+            ),
+          ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -183,20 +186,20 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
               onChanged: widget.onToggle!,
             ),
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
         ],
         DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            borderRadius: BorderRadius.circular(KuberShape.medium),
             child: lazy ? _buildVirtualized(cs) : _buildEager(cs),
           ),
         ),
         if (widget.note != null) ...[
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Text(
             widget.note!,
             style: localeFont(
@@ -211,20 +214,23 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
   }
 
   Widget _dataHeader(ColorScheme cs) => Container(
-        color: cs.surfaceContainerHigh,
-        child: Row(
-          children: [
-            for (var ci = 1; ci < widget.columns.length; ci++)
-              SizedBox(
-                width: widget.dataColumnWidth,
-                child: _cell(cs, widget.columns[ci].label,
-                    numeric: widget.columns[ci].numeric,
-                    header: true,
-                    isTotal: false),
-              ),
-          ],
-        ),
-      );
+    color: cs.surfaceContainerHigh,
+    child: Row(
+      children: [
+        for (var ci = 1; ci < widget.columns.length; ci++)
+          SizedBox(
+            width: widget.dataColumnWidth,
+            child: _cell(
+              cs,
+              widget.columns[ci].label,
+              numeric: widget.columns[ci].numeric,
+              header: true,
+              isTotal: false,
+            ),
+          ),
+      ],
+    ),
+  );
 
   // Short tables: a plain Column that grows with the page (no nested scroll).
   Widget _buildEager(ColorScheme cs) {
@@ -238,10 +244,13 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
             children: [
               Container(
                 color: cs.surfaceContainerHigh,
-                child: _cell(cs, widget.columns.first.label,
-                    numeric: widget.columns.first.numeric,
-                    header: true,
-                    isTotal: false),
+                child: _cell(
+                  cs,
+                  widget.columns.first.label,
+                  numeric: widget.columns.first.numeric,
+                  header: true,
+                  isTotal: false,
+                ),
               ),
               for (var ri = 0; ri < widget.rows.length; ri++)
                 _frozenCellFor(cs, ri),
@@ -250,7 +259,7 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
         ),
         Container(
           width: 1,
-          color: cs.outline,
+          color: cs.outlineVariant,
           height: _headerHeight + _rowHeight * widget.rows.length,
         ),
         Expanded(
@@ -289,10 +298,13 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
             children: [
               Container(
                 color: cs.surfaceContainerHigh,
-                child: _cell(cs, widget.columns.first.label,
-                    numeric: widget.columns.first.numeric,
-                    header: true,
-                    isTotal: false),
+                child: _cell(
+                  cs,
+                  widget.columns.first.label,
+                  numeric: widget.columns.first.numeric,
+                  header: true,
+                  isTotal: false,
+                ),
               ),
               SizedBox(
                 height: bodyHeight,
@@ -308,7 +320,11 @@ class _ToolScheduleTableState extends State<ToolScheduleTable> {
             ],
           ),
         ),
-        Container(width: 1, color: cs.outline, height: _headerHeight + bodyHeight),
+        Container(
+          width: 1,
+          color: cs.outlineVariant,
+          height: _headerHeight + bodyHeight,
+        ),
         Expanded(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,

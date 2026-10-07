@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../core/utils/locale_font.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../tags/data/tag.dart';
 
@@ -9,110 +11,31 @@ class TagsTile extends StatelessWidget {
   final List<Tag> selectedTags;
   final VoidCallback onTap;
 
-  const TagsTile({
-    super.key,
-    required this.selectedTags,
-    required this.onTap,
-  });
+  const TagsTile({super.key, required this.selectedTags, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+    return KuberListRow(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.sell_outlined,
-                    size: 18,
-                    color: cs.primary,
-                  ),
-                ),
-                const SizedBox(width: KuberSpacing.md),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.tagsUpper,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      selectedTags.isEmpty
-                          ? context.l10n.noTagsSelected
-                          : context.l10n.tagsSelectedCount('${selectedTags.length}'),
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: selectedTags.isEmpty
-                            ? cs.onSurfaceVariant
-                            : cs.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.chevron_right,
-                  color: cs.onSurfaceVariant,
-                ),
-              ],
-            ),
-            if (selectedTags.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: selectedTags.map((tag) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: cs.primary.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Text(
-                      '#${tag.name}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: cs.primary,
-                      ),
-                    ),
-                  );
-                }).toList(),
+      leading: const KuberIconTile(icon: Icons.sell_outlined),
+      title: selectedTags.isEmpty
+          ? context.l10n.noTagsSelected
+          : context.l10n.tagsSelectedCount('${selectedTags.length}'),
+      subtitle: sentenceCase(context.l10n.tagsUpper),
+      below: selectedTags.isEmpty
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final tag in selectedTags)
+                    KuberChip(label: '#${tag.name}'),
+                ],
               ),
-            ],
-          ],
-        ),
-      ),
+            ),
+      trailing: const KuberChevron(),
     );
   }
 }

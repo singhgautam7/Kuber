@@ -7,7 +7,12 @@ class PrefsKeys {
   static const userName = 'kuber_user_name';
   static const currency = 'currency';
   static const themeMode = 'theme_mode';
-  static const themeVariant = 'theme_variant';
+  // Index into ThemeVariant. A new key since the M3 redesign replaced the
+  // seven Vault families with Signature + Mull's families: an old index would
+  // point at the wrong family, so pre-redesign installs start on Signature.
+  static const themeVariant = 'theme_family_v2';
+  static const themeAmoled = 'theme_amoled';
+  static const themeDynamicColor = 'theme_dynamic_color';
   static const swipeMode = 'swipe_mode';
   static const biometricsEnabled = 'biometrics_enabled';
   static const numberSystem = 'number_system';
@@ -29,6 +34,8 @@ class PrefsKeys {
       'kuber_migrated_suggestion_backfill_v1';
   static const migratedStoriesPositionV2 = 'kuber_migrated_stories_position_v2';
   static const migratedStoryResetV1 = 'kuber_migrated_story_reset_v1';
+  static const migratedMoreLayoutClassicV1 =
+      'kuber_migrated_more_layout_classic_v1';
 
   // Info Seen Keys
   static const seenInfoAccounts = 'seen_info_accounts';

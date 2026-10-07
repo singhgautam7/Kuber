@@ -28,7 +28,7 @@ class DonutCenterTotal extends ConsumerWidget {
     final noun = groupMode ? 'groups' : 'categories';
 
     return SizedBox(
-      width: 96,
+      width: 120,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -36,18 +36,17 @@ class DonutCenterTotal extends ConsumerWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               maskAmount(fmt.formatCurrency(total.round()), isPrivate),
-              style: localeFont(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
-                letterSpacing: -0.5,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge!.copyWith(color: cs.onSurface),
             ),
           ),
           const SizedBox(height: 2),
           Text(
             '${slices.length} ${slices.length == 1 ? (groupMode ? 'group' : 'category') : noun}',
-            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -72,7 +71,7 @@ class DonutCenterSelected extends ConsumerWidget {
     final isPrivate = ref.watch(privacyModeProvider);
 
     return SizedBox(
-      width: 96,
+      width: 120,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -82,7 +81,7 @@ class DonutCenterSelected extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: localeFont(
               fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: slice.color,
             ),
           ),
@@ -91,21 +90,23 @@ class DonutCenterSelected extends ConsumerWidget {
             fit: BoxFit.scaleDown,
             child: Text(
               maskAmount(fmt.formatCurrency(slice.amount.round()), isPrivate),
-              style: localeFont(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
-                letterSpacing: -0.5,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge!.copyWith(color: cs.onSurface),
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            '${fmt.formatPercentage(slice.percentage)} of '
-            '${maskAmount(fmt.formatCurrency(total.round()), isPrivate)}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: localeFont(fontSize: 10, color: cs.onSurfaceVariant),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '${fmt.formatPercentage(slice.percentage)} of '
+              '${maskAmount(fmt.formatCurrency(total.round()), isPrivate)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+            ),
           ),
         ],
       ),
@@ -133,20 +134,17 @@ class DonutTopRow extends ConsumerWidget {
     final fmt = ref.watch(formatterProvider);
     final isPrivate = ref.watch(privacyModeProvider);
 
-    return GestureDetector(
+    final tt = Theme.of(context).textTheme;
+    return InkWell(
       onTap: onTap,
       child: Opacity(
-        opacity: dimmed ? 0.55 : 1,
+        opacity: dimmed ? KuberChartTheme.unselectedAlpha : 1,
         child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
-          margin: const EdgeInsets.only(bottom: 2),
-          decoration: BoxDecoration(
-            color: highlighted
-                ? slice.color.withValues(alpha: 0.06)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.symmetric(horizontal: KuberSpace.sm),
+          color: highlighted
+              ? cs.onSurface.withValues(alpha: 0.05)
+              : Colors.transparent,
           child: Row(
             children: [
               Container(
@@ -154,41 +152,35 @@ class DonutTopRow extends ConsumerWidget {
                 height: 10,
                 decoration: BoxDecoration(
                   color: slice.color,
-                  borderRadius: BorderRadius.circular(3),
+                  shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 11),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: Text(
                   slice.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight:
-                        highlighted ? FontWeight.w700 : FontWeight.w600,
-                    color: highlighted && dimmed == false
-                        ? cs.onSurface
-                        : cs.onSurface,
+                  style: tt.bodyMedium!.copyWith(
+                    color: cs.onSurface,
+                    fontWeight: highlighted ? FontWeight.w600 : null,
                   ),
                 ),
               ),
               Text(
                 fmt.formatPercentage(slice.percentage),
-                style: localeFont(
-                    fontSize: 12, color: cs.onSurfaceVariant),
+                style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: KuberSpace.md),
               ConstrainedBox(
                 constraints: const BoxConstraints(minWidth: 70),
                 child: Text(
-                  maskAmount(fmt.formatCurrency(slice.amount.round()), isPrivate),
-                  textAlign: TextAlign.right,
-                  style: localeFont(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
+                  maskAmount(
+                    fmt.formatCurrency(slice.amount.round()),
+                    isPrivate,
                   ),
+                  textAlign: TextAlign.right,
+                  style: tt.titleSmall!.copyWith(color: cs.onSurface),
                 ),
               ),
             ],
@@ -222,7 +214,7 @@ class DonutEmptyState extends StatelessWidget {
             Text(
               'No spending yet',
               style: localeFont(
-                fontSize: 13.5,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),

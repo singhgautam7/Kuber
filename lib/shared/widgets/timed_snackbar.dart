@@ -214,14 +214,20 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final barColor = widget.isError ? cs.error : cs.tertiary;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // Follows the app theme (round 3): success sits on surfaceContainerHigh
+    // with a primary accent, error on errorContainer. A 1dp outlineVariant
+    // edge lifts it off the page (no shadows).
+    final bg = widget.isError ? cs.errorContainer : cs.surfaceContainerHigh;
+    final fg = widget.isError ? cs.onErrorContainer : cs.onSurface;
+    final accent = widget.isError ? cs.error : cs.primary;
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Positioned(
       top: topPadding + 8,
-      left: 16,
-      right: 16,
+      left: 20,
+      right: 20,
       child: AnimatedBuilder(
         animation: _slideAnim,
         builder: (context, child) {
@@ -252,108 +258,135 @@ class _KuberSnackBarWidgetState extends State<_KuberSnackBarWidget>
           onVerticalDragUpdate: _onDragUpdate,
           onVerticalDragEnd: _onDragEnd,
           child: Material(
-            color: Colors.transparent,
-            child: Container(
-              decoration: BoxDecoration(
-                color: cs.surfaceContainer,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(
-                  color: widget.isError ? cs.error : cs.outline,
+            color: bg,
+            shape: RoundedRectangleBorder(
+              borderRadius: KuberShape.largeR,
+              side: BorderSide(color: cs.outlineVariant),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 56),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          widget.isError
+                              ? Icons.error_rounded
+                              : Icons.check_circle_rounded,
+                          color: accent,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              widget.message,
+                              style: theme.textTheme.bodyMedium!
+                                  .copyWith(color: fg),
+                            ),
+                          ),
+                        ),
+                        if (widget.secondaryActionLabel != null)
+                          TextButton(
+                            onPressed: () =>
+                                _handleAction(widget.onSecondaryAction),
+                            style: TextButton.styleFrom(
+                              foregroundColor: fg.withValues(alpha: 0.8),
+                              minimumSize: const Size(48, 40),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            child: Text(widget.secondaryActionLabel!),
+                          ),
+                        if (widget.actionLabel != null)
+                          TextButton(
+                            onPressed: () => _handleAction(widget.onAction),
+                            style: TextButton.styleFrom(
+                              foregroundColor: accent,
+                              minimumSize: const Size(48, 40),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                            ),
+                            child: Text(widget.actionLabel!),
+                          ),
+                        SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 20),
+                            color: fg,
+                            onPressed: widget.onRequestClose,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Left bar indicator
-                  Container(
-                    width: 4,
-                    height: 48,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: barColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Icon(
-                    widget.isError
-                        ? Icons.error_outline_rounded
-                        : Icons.check_circle_outline_rounded,
-                    color: barColor,
-                    size: 22,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.message,
-                            style: TextStyle(color: cs.onSurface, fontSize: 14),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                  child: AnimatedBuilder(
+                    animation: _progressCtrl,
+                    builder: (context, _) {
+                      return SizedBox(
+                        height: 4,
+                        width: double.infinity,
+                        child: CustomPaint(
+                          painter: _TimerPainter(
+                            value: 1.0 - _progressCtrl.value,
+                            indicator: accent,
+                            track: fg.withValues(alpha: 0.16),
                           ),
-                          const SizedBox(height: 8),
-                          AnimatedBuilder(
-                            animation: _progressCtrl,
-                            builder: (context, _) {
-                              return LinearProgressIndicator(
-                                value: 1.0 - _progressCtrl.value,
-                                minHeight: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  cs.primary,
-                                ),
-                                backgroundColor: cs.outline,
-                                borderRadius: BorderRadius.circular(1),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  if (widget.secondaryActionLabel != null)
-                    TextButton(
-                      onPressed: () => _handleAction(widget.onSecondaryAction),
-                      child: Text(
-                        widget.secondaryActionLabel!,
-                        style: TextStyle(
-                          color: cs.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                    ),
-                  if (widget.actionLabel != null)
-                    TextButton(
-                      onPressed: () => _handleAction(widget.onAction),
-                      child: Text(
-                        widget.actionLabel!,
-                        style: TextStyle(
-                          color: cs.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 18),
-                    color: cs.onSurfaceVariant,
-                    onPressed: widget.onRequestClose,
+                      );
+                    },
                   ),
-                  const SizedBox(width: 4),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+/// The snackbar timer: flat 4dp indicator and track with a 4dp gap and round
+/// ends (M3 2024 linear, without the stop dot).
+class _TimerPainter extends CustomPainter {
+  final double value;
+  final Color indicator;
+  final Color track;
+
+  _TimerPainter({
+    required this.value,
+    required this.indicator,
+    required this.track,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final h = size.height;
+    final r = Radius.circular(h / 2);
+    final v = value.clamp(0.0, 1.0);
+    final indW = v * size.width - (v < 1 ? 2 : 0);
+    if (indW > 0) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, indW, h), r),
+          Paint()..color = indicator);
+    }
+    final trackX = indW > 0 ? indW + 4 : 0.0;
+    if (trackX < size.width) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(trackX, 0, size.width - trackX, h), r),
+          Paint()..color = track);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_TimerPainter o) =>
+      o.value != value || o.indicator != indicator || o.track != track;
 }

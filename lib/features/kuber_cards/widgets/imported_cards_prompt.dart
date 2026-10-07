@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
@@ -147,8 +146,11 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
     if (!mounted) return;
     navigator.pop();
     if (rootContext.mounted) {
-      showKuberSnackBar(rootContext, 'Imported cards discarded.',
-          overlay: overlay);
+      showKuberSnackBar(
+        rootContext,
+        'Imported cards discarded.',
+        overlay: overlay,
+      );
     }
   }
 
@@ -161,10 +163,14 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          color: cs.secondaryContainer,
+          borderRadius: KuberShape.mediumR,
         ),
-        child: Icon(Icons.credit_card_rounded, size: 22, color: cs.primary),
+        child: Icon(
+          Icons.credit_card_rounded,
+          size: 22,
+          color: cs.onSecondaryContainer,
+        ),
       ),
       actions: Row(
         children: [
@@ -200,24 +206,20 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
                 Text(
                   'This backup has cards from another device. Enter the PIN '
                   'from that device to unlock and add them here.',
-                  style: localeFont(
-                    fontSize: 14,
-                    color: cs.onSurfaceVariant,
-                    height: 1.45,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 KuberCallout(
                   child: Text(
                     'This is the PIN from your old device, not this one.',
-                    style: localeFont(
-                      fontSize: 12.5,
-                      color: cs.onSurfaceVariant,
-                      height: 1.4,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
                 ValueListenableBuilder<String>(
                   valueListenable: _pin,
                   builder: (_, pin, __) => CardsPinDots(
@@ -231,10 +233,12 @@ class _ImportedCardsSheetState extends ConsumerState<_ImportedCardsSheet> {
                   Text(
                     'Wrong PIN. $_attemptsLeft attempts left.',
                     textAlign: TextAlign.center,
-                    style: localeFont(fontSize: 13, color: cs.error),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: cs.error),
                   ),
                 ],
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
                 KuberPinPad(
                   length: _pinLength,
                   value: _pin,

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
-import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_progress.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
 import '../../categories/providers/category_provider.dart';
 import '../engine/analytics_engine_adapter.dart';
@@ -22,9 +24,10 @@ enum MerchantSortOption {
   const MerchantSortOption(this.label, this.icon);
 }
 
-final merchantSortOptionProvider = StateProvider.autoDispose<MerchantSortOption>(
-  (ref) => MerchantSortOption.amountHighToLow,
-);
+final merchantSortOptionProvider =
+    StateProvider.autoDispose<MerchantSortOption>(
+      (ref) => MerchantSortOption.amountHighToLow,
+    );
 
 /// Sorted view of the merchant rows, derived in a provider (performance.md
 /// rule 2) so the pagination setState on scroll reuses the cached list
@@ -39,11 +42,9 @@ final _sortedMerchantsProvider = Provider.autoDispose<List<MerchantRow>>((ref) {
     case MerchantSortOption.amountLowToHigh:
       rows.sort((a, b) => a.total.compareTo(b.total));
     case MerchantSortOption.nameAtoZ:
-      rows.sort(
-          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      rows.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
     case MerchantSortOption.nameZtoA:
-      rows.sort(
-          (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+      rows.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
     case MerchantSortOption.txnsHighToLow:
       rows.sort((a, b) => b.count.compareTo(a.count));
   }
@@ -53,10 +54,7 @@ final _sortedMerchantsProvider = Provider.autoDispose<List<MerchantRow>>((ref) {
 class MerchantAnalysisSection extends ConsumerWidget {
   final int displayedCount;
 
-  const MerchantAnalysisSection({
-    super.key,
-    this.displayedCount = 10,
-  });
+  const MerchantAnalysisSection({super.key, this.displayedCount = 10});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -68,107 +66,114 @@ class MerchantAnalysisSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Expanded(
-              child: SectionDateRangePicker(
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            spacing: KuberSpace.sm,
+            children: [
+              const SectionDateRangePicker(
                 section: AdvancedAnalyticsSection.merchants,
               ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Expanded(
-              child: MerchantSortPicker(
+              MerchantSortPicker(
                 selected: sortOption,
                 onSelected: (opt) =>
                     ref.read(merchantSortOptionProvider.notifier).state = opt,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.lg),
         async.when(
-            loading: () => const AnalyticsSkeletonBlock(),
-            error: (error, _) => KuberEmptyState(
-              icon: Icons.error_outline_rounded,
-              title: 'Could not load merchants',
-              description: '$error',
-            ),
-            data: (data) {
-              if (data.merchantCount < 3) {
-                return const KuberEmptyState(
-                  icon: Icons.storefront_outlined,
-                  title: 'Not enough merchant history yet',
-                  description:
-                      'Kuber needs a few merchants in this range to compare behavior.',
-                );
-              }
+          loading: () => const AnalyticsSkeletonBlock(),
+          error: (error, _) => KuberEmptyState(
+            icon: Icons.error_outline_rounded,
+            title: 'Could not load merchants',
+            description: '$error',
+          ),
+          data: (data) {
+            if (data.merchantCount < 3) {
+              return const KuberEmptyState(
+                icon: Icons.storefront_outlined,
+                title: 'Not enough merchant history yet',
+                description:
+                    'Kuber needs a few merchants in this range to compare behavior.',
+              );
+            }
 
-              // O(1) category-name lookups instead of a where() scan per row.
-              final categoryNameById = {
-                for (final c in categories) c.id: c.name,
-              };
-              String? catName(MerchantRow m) {
-                if (m.categoryIds.isEmpty) return null;
-                return categoryNameById[int.tryParse(m.categoryIds.first)];
-              }
+            // O(1) category-name lookups instead of a where() scan per row.
+            final categoryNameById = {for (final c in categories) c.id: c.name};
+            String? catName(MerchantRow m) {
+              if (m.categoryIds.isEmpty) return null;
+              return categoryNameById[int.tryParse(m.categoryIds.first)];
+            }
 
-              final visibleMerchants = ref
-                  .watch(_sortedMerchantsProvider)
-                  .take(displayedCount)
-                  .toList();
+            final visibleMerchants = ref
+                .watch(_sortedMerchantsProvider)
+                .take(displayedCount)
+                .toList();
 
-              return Column(
+            final top = visibleMerchants.fold<double>(
+              0,
+              (mx, m) => m.total > mx ? m.total : mx,
+            );
+            final tt = Theme.of(context).textTheme;
+            Widget stat(String label, String value) => Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Text(
+                    label,
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                  Text(
+                    value,
+                    style: tt.titleMedium!.copyWith(color: cs.onSurface),
+                  ),
+                ],
+              ),
+            );
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Board "Merchant analysis": one stats card, then the list.
+                KuberCard(
+                  child: Row(
                     children: [
-                      Expanded(
-                        child: StatPill(
-                          label: 'Merchants',
-                          value: '${data.merchantCount}',
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      const SizedBox(width: KuberSpacing.sm),
-                      Expanded(
-                        child: StatPill(
-                          label: 'Total spend',
-                          value: aaMoney(data.totalSpend),
-                          color: cs.onSurface,
-                        ),
-                      ),
+                      stat('Merchants', '${data.merchantCount}'),
+                      stat('Total spend', aaMoney(data.totalSpend)),
                     ],
                   ),
-                  if (data.newMerchants.isNotEmpty) ...[
-                    const SizedBox(height: KuberSpacing.md),
-                    _NewMerchantsBanner(merchants: data.newMerchants),
-                  ],
-                  const SizedBox(height: KuberSpacing.lg),
-                  Text(
-                    'ALL MERCHANTS (${data.merchantCount})',
-                    style: localeFont(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.4,
-                      color: cs.onSurfaceVariant,
-                    ),
+                ),
+                if (data.newMerchants.isNotEmpty) ...[
+                  const SizedBox(height: KuberSpace.md),
+                  _NewMerchantsBanner(merchants: data.newMerchants),
+                ],
+                const SizedBox(height: KuberSpace.sectionGap - 4),
+                KuberSectionHeader(
+                  title: 'All merchants',
+                  trailing: Text(
+                    '${data.merchantCount}',
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
                   ),
-                  const SizedBox(height: KuberSpacing.sm),
-                  for (final m in visibleMerchants)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                      child: _MerchantRow(
+                ),
+                KuberGroup(
+                  children: [
+                    for (final m in visibleMerchants)
+                      _MerchantRow(
                         merchant: m,
                         category: catName(m),
                         share: data.totalSpend <= 0
                             ? 0
                             : (m.total / data.totalSpend) * 100,
+                        barValue: top <= 0 ? 0 : m.total / top,
                       ),
-                    ),
-                ],
-              );
-            },
-          ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
@@ -186,189 +191,75 @@ class MerchantSortPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: () => showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        useRootNavigator: true,
-        backgroundColor: Colors.transparent,
-        builder: (_) => _SortSheet(
-          selected: selected,
-          onSelected: onSelected,
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.swap_vert_rounded, size: 16, color: cs.primary),
-            const SizedBox(width: 7),
-            Expanded(
-              child: Text(
-                selected.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                softWrap: false,
-                style: localeFont(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: cs.onSurface,
-                ),
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(Icons.expand_more_rounded, size: 16, color: cs.onSurfaceVariant),
-          ],
-        ),
-      ),
+    return KuberDropdownChip<MerchantSortOption>(
+      value: selected,
+      icon: Icons.swap_vert_rounded,
+      options: [
+        for (final o in MerchantSortOption.values)
+          KuberDropdownOption(o, o.label, icon: o.icon),
+      ],
+      onChanged: onSelected,
     );
   }
 }
 
-class _SortSheet extends StatelessWidget {
-  final MerchantSortOption selected;
-  final ValueChanged<MerchantSortOption> onSelected;
-
-  const _SortSheet({
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return KuberBottomSheet(
-      title: 'Sort merchants',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (final opt in MerchantSortOption.values)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: opt == selected
-                      ? cs.primary.withValues(alpha: 0.12)
-                      : cs.surfaceContainerHighest,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  opt.icon,
-                  size: 20,
-                  color: opt == selected ? cs.primary : cs.onSurfaceVariant,
-                ),
-              ),
-              title: Text(
-                opt.label,
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: opt == selected ? FontWeight.w700 : FontWeight.w600,
-                  color: cs.onSurface,
-                ),
-              ),
-              trailing: opt == selected
-                  ? Icon(Icons.check_circle_rounded, color: cs.primary)
-                  : null,
-              onTap: () {
-                onSelected(opt);
-                Navigator.of(context).pop();
-              },
-            ),
-        ],
-      ),
-    );
-  }
-}
-
+/// Name + amount, "Category · N transactions" + share, and a bar scaled
+/// to the top merchant in view.
 class _MerchantRow extends StatelessWidget {
   final MerchantRow merchant;
   final String? category;
   final double share;
+  final double barValue;
 
   const _MerchantRow({
     required this.merchant,
     required this.category,
     required this.share,
+    required this.barValue,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
     final rising = merchant.trendPercent > 0;
-    return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
+    return KuberListRow(
+      title: merchant.name,
+      subtitle: [
+        ?category,
+        '${merchant.count} transaction${merchant.count == 1 ? '' : 's'}',
+      ].join(' · '),
+      trailing: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  merchant.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${merchant.count} transaction${merchant.count == 1 ? '' : 's'}'
-                  '${category != null ? ' · $category' : ''}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localeFont(
-                    fontSize: 10.5,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+          Text(
+            aaMoney(merchant.total),
+            style: tt.titleMedium!.copyWith(color: cs.onSurface),
           ),
-          const SizedBox(width: KuberSpacing.sm),
-          Icon(
-            rising ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-            size: 16,
-            color: rising ? cs.error : cs.tertiary,
-          ),
-          const SizedBox(width: KuberSpacing.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                aaMoney(merchant.total),
-                style: localeFont(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                ),
+              Icon(
+                rising
+                    ? Icons.trending_up_rounded
+                    : Icons.trending_down_rounded,
+                size: 14,
+                color: rising
+                    ? context.kuberMoney.expense
+                    : context.kuberMoney.income,
               ),
+              const SizedBox(width: 4),
               Text(
                 '${share.toStringAsFixed(1)}%',
-                style: localeFont(fontSize: 10, color: cs.onSurfaceVariant),
+                style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
               ),
             ],
           ),
         ],
+      ),
+      below: Padding(
+        padding: const EdgeInsets.only(top: KuberSpace.sm),
+        child: KuberLinearProgress(value: barValue.clamp(0.0, 1.0), flat: true),
       ),
     );
   }
@@ -383,28 +274,24 @@ class _NewMerchantsBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final names = merchants.take(2).map((m) => m.name).toList();
-    final including =
-        names.isEmpty ? '' : ', including ${names.join(' and ')}';
+    final including = names.isEmpty ? '' : ', including ${names.join(' and ')}';
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.largeR,
       ),
       child: Text.rich(
         TextSpan(
-          style: localeFont(
-            fontSize: 12,
-            height: 1.4,
-            color: cs.onSurface,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium!.copyWith(color: cs.onSecondaryContainer),
           children: [
             TextSpan(
               text:
                   '${merchants.length} new merchant${merchants.length == 1 ? '' : 's'}',
-              style: localeFont(fontWeight: FontWeight.w800),
+              style: localeFont(fontWeight: FontWeight.w700),
             ),
             TextSpan(text: ' this month$including.'),
           ],

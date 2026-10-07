@@ -38,6 +38,17 @@ void main() {
       expect(parser.parse('v2 build and 3rd item'), isEmpty);
     });
 
+    test('trailing punctuation is a boundary, not part of the number', () {
+      final tokens = parser.parse('Mom 2500, Riya 1200, office 3000.');
+      expect(tokens.map((t) => t.value), [2500, 1200, 3000]);
+      expect(tokens.first.endOffset, 8);
+    });
+
+    test('still rejects dotted and comma-glued runs', () {
+      expect(parser.parse('version 3.4.5'), isEmpty);
+      expect(parser.parse('pair 1,2'), isEmpty);
+    });
+
     test('respects excluded ranges', () {
       const text = 'total ₹385';
       final excluded = [const PlainTextRange(6, 10)];

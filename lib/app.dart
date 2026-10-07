@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_quill/flutter_quill.dart'
     show FlutterQuillLocalizations;
 
 import 'main.dart' show onOpenBatchReadyProvider;
+import 'features/settings/providers/theme_options_provider.dart';
 import 'features/kuber_cards/providers/kuber_cards_provider.dart';
 import 'core/database/isar_service.dart';
 import 'core/router/app_router.dart';
@@ -24,6 +24,7 @@ import 'features/transactions/providers/transaction_provider.dart';
 import 'features/ledger/data/ledger_reminder_processor.dart';
 import 'features/notifications/data/notification_repository.dart';
 import 'features/pro/debug/entitlement_override.dart';
+import 'shared/widgets/kuber_extended_fab.dart';
 import 'features/pro/paywall/billing_ui_state.dart';
 import 'features/pro/paywall/pro_state.dart';
 import 'features/pro/services/promo_config_service.dart';
@@ -32,7 +33,6 @@ import 'features/reminders/data/reminders_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/sms_import/providers/sms_import_provider.dart';
 import 'features/tutorial/widgets/tutorial_overlay.dart';
-import 'features/splash/widgets/cold_start_splash.dart';
 import 'shared/widgets/app_scaffold.dart';
 
 class KuberApp extends ConsumerStatefulWidget {
@@ -50,13 +50,17 @@ class _KuberAppState extends ConsumerState<KuberApp>
   // specs/plans/theme-personalization-cache-audit.md).
   Locale? _cachedLocale;
   ThemeVariant? _cachedVariant;
+  bool? _cachedAmoled;
+  Color? _cachedSeed;
   ThemeData? _lightTheme;
   ThemeData? _darkTheme;
 
-  /// Cold-start brand splash overlay. Shown once per launch, on top of the
-  /// already-built destination, then fades out (see ColdStartSplash). Removed
-  /// from the tree once its fade completes.
-  bool _showColdSplash = true;
+  /// The brand splash is native (flutter_native_splash, as in PostPurush) and
+  /// goes away on the first frame. The on-open batch still waits this long
+  /// after it, the length of the old in-app splash (400 + 900 + 320 ms), so
+  /// Home's first frames keep the UI isolate to themselves
+  /// (specs/performance.md startup order).
+  static const _onOpenSettleDelay = Duration(milliseconds: 1620);
 
   @override
   void initState() {
@@ -69,6 +73,8 @@ class _KuberAppState extends ConsumerState<KuberApp>
     // loader, not Home, and the loader flips `onOpenBatchReadyProvider` when
     // it hands off. Wait for that too; otherwise the splash alone gates the
     // batch (see _onSplashFinished).
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Future.delayed(_onOpenSettleDelay, _onSplashFinished));
     _loaderHandedOff =
         ref.read(initialLocationProvider) != '/recurring-loader';
     if (!_loaderHandedOff) {
@@ -98,7 +104,6 @@ class _KuberAppState extends ConsumerState<KuberApp>
 
   void _onSplashFinished() {
     if (!mounted) return;
-    setState(() => _showColdSplash = false);
     _splashFinished = true;
     _maybeRunOnOpenBatch();
   }
@@ -151,8 +156,13 @@ class _KuberAppState extends ConsumerState<KuberApp>
       await ref.read(cachedProductPricesProvider.notifier).hydrate();
       // DEBUG-ONLY: load any forced entitlement override before the first
       // entitlement read so the notifier hydrates from it. No-op in release.
-      if (kDebugMode) {
+      if (kEntitlementOverrideEnabled) {
         await DebugEntitlementOverride.hydrate();
+        // Something may already have read the entitlement before the
+        // persisted override loaded; re-derive so it survives restarts.
+        if (DebugEntitlementOverride.state != null) {
+          ref.invalidate(kuberProStateProvider);
+        }
       }
       // The entitlement row was created in main()'s bootstrap; force a read so
       // the notifier hydrates from Isar (synchronous), then clear the
@@ -449,14 +459,26 @@ class _KuberAppState extends ConsumerState<KuberApp>
     final router = ref.watch(routerProvider);
     final locale = ref.watch(localeProvider);
 
+    final themeOptions = ref.watch(themeOptionsProvider);
+    // Wallpaper colour is a Pro theme like the non-Signature families.
+    final seed = themeOptions.dynamicColor &&
+            ref.watch(kuberProStateProvider.select((s) => s.hasProAccess))
+        ? ref.watch(wallpaperSeedProvider).valueOrNull
+        : null;
+
     if (_cachedLocale != locale ||
         _cachedVariant != themeVariant ||
+        _cachedAmoled != themeOptions.amoled ||
+        _cachedSeed != seed ||
         _lightTheme == null ||
         _darkTheme == null) {
       _cachedLocale = locale;
       _cachedVariant = themeVariant;
-      _lightTheme = AppTheme.light(locale, themeVariant);
-      _darkTheme = AppTheme.dark(locale, themeVariant);
+      _cachedAmoled = themeOptions.amoled;
+      _cachedSeed = seed;
+      _lightTheme = AppTheme.light(locale, themeVariant, seed);
+      _darkTheme =
+          AppTheme.dark(locale, themeVariant, themeOptions.amoled, seed);
     }
 
     // PRO-GATE: when Pro access drops mid-session (trial end, debug Force-Free),
@@ -525,20 +547,9 @@ class _KuberAppState extends ConsumerState<KuberApp>
                   bottom: false,
                   left: false,
                   right: false,
-                  // The destination builds underneath from the first frame; the
-                  // cold-start splash sits on top and fades out to reveal it
-                  // already painted — no route transition over a mid-build
-                  // screen (the splash→home "stuck frame" fix).
-                  child: Stack(
-                    children: [
-                      LockScreen(child: child!),
-                      if (_showColdSplash)
-                        Positioned.fill(
-                          child: ColdStartSplash(
-                            onFinished: _onSplashFinished,
-                          ),
-                        ),
-                    ],
+                  // Drives the extended FAB's hide-on-scroll everywhere.
+                  child: KuberFabScrollWatcher(
+                    child: LockScreen(child: child!),
                   ),
                 ),
               ),

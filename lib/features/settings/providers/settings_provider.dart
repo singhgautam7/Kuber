@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/services/widget_sync_service.dart';
 import '../../../core/theme/kuber_tokens.dart';
+import '../../../core/theme/theme_families.dart' show resolveVariant;
 import '../../../core/utils/currency_data.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/prefs_keys.dart';
@@ -76,7 +77,7 @@ final navBarStyleProvider = Provider<NavBarStyle>((ref) {
 
 final moreTabLayoutProvider = Provider<MoreTabLayout>((ref) {
   return ref.watch(settingsProvider
-      .select((s) => s.valueOrNull?.moreTabLayout ?? MoreTabLayout.modern));
+      .select((s) => s.valueOrNull?.moreTabLayout ?? MoreTabLayout.simple));
 });
 
 final thresholdFloorProvider = Provider<double>((ref) {
@@ -169,7 +170,7 @@ class SettingsState {
     this.thresholdFloor = 500,
     this.thresholdCeiling = 2000,
     this.navBarStyle = NavBarStyle.classic,
-    this.moreTabLayout = MoreTabLayout.modern,
+    this.moreTabLayout = MoreTabLayout.simple,
     this.locale = const Locale('en'),
     this.quickActionShortcuts = kDefaultQuickActionShortcuts,
     this.addMenuActions = kDefaultAddMenuActions,
@@ -237,7 +238,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     final navBarStyleIndex =
         prefs.getInt(PrefsKeys.navBarStyle) ?? NavBarStyle.modern.index;
     final moreTabLayoutIndex =
-        prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.modern.index;
+        prefs.getInt(PrefsKeys.moreTabLayout) ?? MoreTabLayout.simple.index;
     final languageCode = prefs.getString(PrefsKeys.language) ?? 'en';
     final locale = Locale(languageCode);
     AppLocale.current = locale;
@@ -249,8 +250,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
-      themeVariant: ThemeVariant
-          .values[themeVariantIndex.clamp(0, ThemeVariant.values.length - 1)],
+      themeVariant: resolveVariant(ThemeVariant
+          .values[themeVariantIndex.clamp(0, ThemeVariant.values.length - 1)]),
       currency: currency,
       dateFormat: dateFormat,
       userName: userName,

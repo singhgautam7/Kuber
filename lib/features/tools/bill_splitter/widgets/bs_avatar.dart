@@ -60,10 +60,7 @@ class BsAvatar extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: ShapeDecoration(
-        color: palette.bg,
-        shape: bsSquircle(r),
-      ),
+      decoration: ShapeDecoration(color: palette.bg, shape: bsSquircle(r)),
       alignment: Alignment.center,
       child: Text(
         _initials,
@@ -99,7 +96,10 @@ class BsIconTile extends StatelessWidget {
       height: size,
       decoration: ShapeDecoration(
         color: cs.surfaceContainerHigh,
-        shape: bsSquircle(cornerRadius, side: BorderSide(color: cs.outline)),
+        shape: bsSquircle(
+          cornerRadius,
+          side: BorderSide(color: cs.outlineVariant),
+        ),
       ),
       alignment: Alignment.center,
       child: Icon(icon, color: cs.primary, size: size * 0.43),
@@ -130,7 +130,7 @@ class BsSquircleButton extends StatelessWidget {
         height: size,
         decoration: ShapeDecoration(
           color: cs.surfaceContainerHigh,
-          shape: bsSquircle(10, side: BorderSide(color: cs.outline)),
+          shape: bsSquircle(10, side: BorderSide(color: cs.outlineVariant)),
         ),
         alignment: Alignment.center,
         child: Icon(icon, color: cs.onSurfaceVariant, size: size * 0.44),
@@ -158,7 +158,7 @@ class BsSectionLabel extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
               color: cs.onSurfaceVariant,
             ),

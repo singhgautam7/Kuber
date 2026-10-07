@@ -19,6 +19,8 @@ import '../../../core/models/info_config.dart';
 import '../../quick_add/services/quick_add_parser.dart';
 import '../../../core/utils/fuzzy_category_matcher.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 
 class QuickAddWidget extends ConsumerStatefulWidget {
   const QuickAddWidget({super.key});
@@ -62,8 +64,9 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     String? resolvedAccountId;
     if (parsed.accountHint != null) {
       final hint = parsed.accountHint!.toLowerCase();
-      final match =
-          accounts.where((a) => a.name.toLowerCase().contains(hint)).firstOrNull;
+      final match = accounts
+          .where((a) => a.name.toLowerCase().contains(hint))
+          .firstOrNull;
       if (match != null) {
         resolvedAccountId = match.id.toString();
       } else {
@@ -94,9 +97,11 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
       resolvedCategory = matchCategory(catHint, categories, type: parsed.type);
     }
     resolvedCategory ??= categories
-        .where((c) =>
-            c.name.toLowerCase() == 'general' ||
-            c.name.toLowerCase() == 'other')
+        .where(
+          (c) =>
+              c.name.toLowerCase() == 'general' ||
+              c.name.toLowerCase() == 'other',
+        )
         .firstOrNull;
 
     if (resolvedCategory == null && catHint.isNotEmpty) {
@@ -107,7 +112,8 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
         ..type = parsed.type == 'income' ? 'income' : 'expense';
       await ref.read(categoryListProvider.notifier).add(newCat);
       categories = await ref.read(categoryListProvider.future);
-      resolvedCategory = matchCategory(catHint, categories, type: parsed.type) ??
+      resolvedCategory =
+          matchCategory(catHint, categories, type: parsed.type) ??
           categories
               .where((c) => c.name.toLowerCase() == catHint.toLowerCase())
               .firstOrNull;
@@ -124,8 +130,8 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
     }
 
     // Save transaction
-    final name = (parsed.categoryHint != null &&
-            parsed.categoryHint!.trim().isNotEmpty)
+    final name =
+        (parsed.categoryHint != null && parsed.categoryHint!.trim().isNotEmpty)
         ? parsed.categoryHint!.toTitleCase()
         : 'Quick Add';
     final txn = Transaction()
@@ -157,14 +163,14 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
   }
 
   void _showNoAccountDialog(String? hint) {
-    final cs = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text(l10n.noAccountFoundTitle,
-            style: localeFont(fontWeight: FontWeight.w700)),
+        title: Text(
+          l10n.noAccountFoundTitle,
+          style: localeFont(fontWeight: FontWeight.w700),
+        ),
         content: Text(
           hint != null
               ? l10n.noAccountMatchedBody(hint)
@@ -191,25 +197,18 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final hasError = _error != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         KuberHomeWidgetTitle(
           title: context.l10n.quickAddTitle,
-          // "FULL SCREEN" text link, styled like the "VIEW ALL" action.
-          trailing: GestureDetector(
-            behavior: HitTestBehavior.opaque,
+          trailing: KuberSectionAction(
+            label: sentenceCase('FULL SCREEN'),
             onTap: () => context.push('/quick-add'),
-            child: Text(
-              'FULL SCREEN',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.0,
-                    color: cs.primary,
-                  ),
-            ),
           ),
           infoConfig: KuberInfoConfig(
             title: context.l10n.quickAddInfoTitle,
@@ -243,108 +242,118 @@ class _QuickAddWidgetState extends ConsumerState<QuickAddWidget> {
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _controller,
-                  enabled: !_isLoading,
-                  style: localeFont(fontSize: 15, color: cs.onSurface),
-                  onTapOutside: (_) {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  },
-                  decoration: InputDecoration(
-                    hintText: context.l10n.quickAddHint,
-                    hintStyle: localeFont(
-                        fontSize: 15,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.6)),
-                  ),
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) {
-                    if (_controller.text.trim().isNotEmpty) _submit();
-                  },
+        // Board 3.2a: pill field (56, surfaceContainerHigh) with the mic
+        // inside; send is a 56 circle that turns primary once there is text.
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 56,
+                padding: const EdgeInsets.only(left: 20, right: 4),
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHigh,
+                  borderRadius: KuberShape.fullR,
+                  border: hasError
+                      ? Border.all(color: cs.error, width: 2)
+                      : null,
                 ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              // Mic — to the left of send; opens the full page with voice on.
-              // Same solid-accent styling as the send button, minus the
-              // disabled state: the mic is always enabled, so it always renders
-              // in the active (primary-filled) look.
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => context.push('/quick-add?voice=1'),
-                child: Container(
-                  width: 52,
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.mic_none_rounded,
-                        size: 22, color: cs.onPrimary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.sm),
-              ValueListenableBuilder<TextEditingValue>(
-                valueListenable: _controller,
-                builder: (context, value, child) {
-                  final isEmpty = value.text.trim().isEmpty;
-                  final isActive = !isEmpty || _isLoading;
-
-                  return GestureDetector(
-                    onTap: (_isLoading || isEmpty) ? null : _submit,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 52,
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? cs.primary
-                            : cs.onSurfaceVariant.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Center(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: _isLoading
-                              ? SizedBox(
-                                  key: const ValueKey('spinner'),
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: cs.onPrimary,
-                                  ),
-                                )
-                              : Icon(
-                                  key: const ValueKey('icon'),
-                                  Icons.send_rounded,
-                                  size: 22,
-                                  color: isActive
-                                      ? cs.onPrimary
-                                      : cs.onSurfaceVariant.withValues(alpha: 0.5),
-                                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        enabled: !_isLoading,
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          color: cs.onSurface,
                         ),
+                        onTapOutside: (_) {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        },
+                        decoration: InputDecoration(
+                          hintText: context.l10n.quickAddHint,
+                          hintStyle: theme.textTheme.bodyLarge!.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                          filled: false,
+                          isCollapsed: true,
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                        ),
+                        maxLines: 1,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) {
+                          if (_controller.text.trim().isNotEmpty) _submit();
+                        },
                       ),
                     ),
-                  );
-                },
+                    // Mic opens the full page with voice on.
+                    AppIconButton(
+                      icon: Icons.mic_none_rounded,
+                      kind: AppIconButtonKind.plain,
+                      semanticLabel: 'Voice',
+                      onPressed: () => context.push('/quick-add?voice=1'),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: KuberSpace.sm),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _controller,
+              builder: (context, value, child) {
+                final isEmpty = value.text.trim().isEmpty;
+                final isActive = !isEmpty || _isLoading;
+
+                return GestureDetector(
+                  onTap: (_isLoading || isEmpty) ? null : _submit,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: isActive ? cs.primary : cs.surfaceContainerHigh,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: _isLoading
+                            ? SizedBox(
+                                key: const ValueKey('spinner'),
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: cs.onPrimary,
+                                ),
+                              )
+                            : Icon(
+                                key: const ValueKey('icon'),
+                                Icons.send_rounded,
+                                size: 22,
+                                color: isActive
+                                    ? cs.onPrimary
+                                    : cs.onSurfaceVariant,
+                              ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-        if (_error != null) ...[
-          const SizedBox(height: KuberSpacing.sm),
-          Text(
-            _error!,
-            style: localeFont(fontSize: 12, color: cs.error),
+        if (hasError)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+            child: Text(
+              _error!,
+              style: theme.textTheme.bodySmall!.copyWith(color: cs.error),
+            ),
           ),
-        ],
       ],
     );
   }
 }
-

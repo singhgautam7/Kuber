@@ -5,7 +5,7 @@ import '../../core/utils/locale_font.dart';
 
 /// A static, non-clickable 3-column Free vs Pro comparison table with a leading
 /// icon column. A shared sibling of [InfoTable] (same `surfaceContainer` fill,
-/// `cs.outline` border, `KuberRadius.md`, row rhythm and `localeFont`), not a
+/// `cs.outlineVariant` border, `KuberShape.medium`, row rhythm and `localeFont`), not a
 /// fork of it. Used on the Kuber Pro page to state the real free-tier limit for
 /// every gated feature and name what stays free.
 ///
@@ -23,7 +23,7 @@ class KuberComparisonTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dividerColor = cs.outline.withValues(alpha: 0.6);
+    final dividerColor = cs.outlineVariant.withValues(alpha: 0.6);
 
     // Derive density from the available width so the three columns stay legible
     // on small phones (the feature name must not break mid-word). Callers can
@@ -43,8 +43,8 @@ class KuberComparisonTable extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(color: cs.outlineVariant),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -106,8 +106,8 @@ class _HeaderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     TextStyle label(Color c) => localeFont(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
           letterSpacing: 0.8,
           color: c,
         );
@@ -153,8 +153,8 @@ class _GroupRow extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: localeFont(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
           letterSpacing: 0.8,
           color: cs.onSurfaceVariant,
         ),
@@ -186,7 +186,7 @@ class _FeatureRow extends StatelessWidget {
                   height: iconSize,
                   decoration: BoxDecoration(
                     color: cs.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    borderRadius: BorderRadius.circular(KuberShape.small),
                   ),
                   child: Icon(row.icon,
                       size: dense ? 13 : 17, color: cs.primary),
@@ -251,7 +251,7 @@ class _ValueCell extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (checked) ...[
-          Icon(Icons.check_rounded, size: dense ? 12 : 14, color: cs.tertiary),
+          Icon(Icons.check_rounded, size: dense ? 12 : 14, color: context.kuberMoney.income),
           const SizedBox(width: 4),
         ],
         Flexible(

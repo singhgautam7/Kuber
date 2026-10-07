@@ -5,7 +5,10 @@ import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../data/widget_catalog.dart';
 
 /// Opens the widget detail sheet for [entry].
-Future<void> showWidgetDetailSheet(BuildContext context, WidgetCatalogEntry entry) {
+Future<void> showWidgetDetailSheet(
+  BuildContext context,
+  WidgetCatalogEntry entry,
+) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -34,30 +37,49 @@ class _WidgetDetailSheet extends StatelessWidget {
           // Preview
           Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: isSmall ? 200 : double.infinity),
+              constraints: BoxConstraints(
+                maxWidth: isSmall ? 200 : double.infinity,
+              ),
               child: entry.preview(context),
             ),
           ),
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.xl),
           Row(
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
-                  border: Border.all(color: cs.outlineVariant),
+                  borderRadius: BorderRadius.circular(KuberShape.small),
+                  border: Border.all(color: cs.outline),
                 ),
-                child: Text(entry.sizeLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                child: Text(
+                  entry.sizeLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
               ),
               if (entry.needsConfig) ...[
                 const SizedBox(width: 8),
-                Text('Setup on placement', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                Text(
+                  'Setup on placement',
+                  style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                ),
               ],
             ],
           ),
-          const SizedBox(height: KuberSpacing.md),
-          Text(entry.info, style: TextStyle(fontSize: 13.5, height: 1.5, color: cs.onSurfaceVariant)),
+          const SizedBox(height: KuberSpace.md),
+          Text(
+            entry.info,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
         ],
       ),
       actions: Column(
@@ -71,7 +93,7 @@ class _WidgetDetailSheet extends StatelessWidget {
               label: const Text('Add to Home'),
             ),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           SizedBox(
             width: double.infinity,
             child: TextButton(
@@ -110,7 +132,10 @@ class _WidgetDetailSheet extends StatelessWidget {
           "empty spot on your home screen, tap Widgets, and find Kuber in the list.",
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Got it')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Got it'),
+          ),
         ],
       ),
     );

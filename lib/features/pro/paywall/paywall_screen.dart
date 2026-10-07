@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_chips.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -8,7 +10,6 @@ import '../../../../core/utils/locale_font.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/kuber_app_bar.dart';
 import '../../../../shared/widgets/kuber_comparison_table.dart';
-import '../../../../shared/widgets/kuber_page_header.dart';
 import '../../../../shared/widgets/timed_snackbar.dart';
 import '../settings/redeem_promo_code_sheet.dart';
 import '../support/buy_me_coffee_section.dart' show BuyMeCoffeeButton;
@@ -86,39 +87,33 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
       backgroundColor: cs.surface,
       body: Stack(
         children: [
-          const Positioned.fill(child: _AmbientGlow()),
           SafeArea(
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: KuberAppBar(
+                    title: 'Kuber Pro',
+                    subtitle: _headerSubtitle(proState),
                     showBack: true,
-                    showHome: true,
-                    showBrand: false,
                     infoConfig: kAboutProInfoConfig,
                     overflowConfig: KuberOverflowConfig(items: overflowItems),
                   ),
                 ),
-                SliverToBoxAdapter(
-                  child: KuberPageHeader(
-                    title: 'Kuber Pro',
-                    description: _headerSubtitle(proState),
-                  ),
-                ),
+
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.lg,
+                    KuberSpace.lg,
                     0,
-                    KuberSpacing.lg,
-                    KuberSpacing.xxl,
+                    KuberSpace.lg,
+                    KuberSpace.xxl,
                   ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate(
                       isManage
                           ? _manageBody(proState)
                           : isGrandfathered
-                              ? _grandfatheredBody(proState)
-                              : _sellBody(proState, yearlyOffer),
+                          ? _grandfatheredBody(proState)
+                          : _sellBody(proState, yearlyOffer),
                     ),
                   ),
                 ),
@@ -127,8 +122,9 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
           ),
         ],
       ),
-      bottomNavigationBar:
-          (!isManage) ? _StickyContinue(child: _continueButton(yearlyOffer)) : null,
+      bottomNavigationBar: (!isManage)
+          ? _StickyContinue(child: _continueButton(yearlyOffer))
+          : null,
     );
   }
 
@@ -146,24 +142,24 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
     return [
       if (hadPrior) ...[
         const _WelcomeBackCard(),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
       ],
       const _SellHero(),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.xl),
       if (offer != null && offer.hasIntroBenefit) ...[
         _OfferBadge(offer: offer),
-        const SizedBox(height: KuberSpacing.xl),
+        const SizedBox(height: KuberSpace.xl),
       ],
       _sectionLabel('CHOOSE A PLAN'),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       ..._planCards(offer),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.xl),
       _sectionTitle('What you get with Pro'),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       const KuberComparisonTable(rows: kProComparisonRows),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.xl),
       const _TipJarSection(),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.xl),
       const _TrustFooter(),
     ];
   }
@@ -172,9 +168,9 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
   List<Widget> _manageBody(KuberProState proState) {
     return [
       PaywallManageSection(proState: proState),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.xl),
       _sectionTitle('What Pro includes'),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       const KuberComparisonTable(rows: kProComparisonRows),
     ];
   }
@@ -183,13 +179,13 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
   List<Widget> _grandfatheredBody(KuberProState proState) {
     return [
       _LegacyTrialCard(proState: proState),
-      const SizedBox(height: KuberSpacing.lg),
+      const SizedBox(height: KuberSpace.lg),
       _sectionLabel('SUBSCRIBE TO KEEP PRO'),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       ..._planCards(ref.watch(subscriptionOffersProvider)[kProYearlyId]),
-      const SizedBox(height: KuberSpacing.xl),
+      const SizedBox(height: KuberSpace.xl),
       _sectionTitle('What you get with Pro'),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       const KuberComparisonTable(rows: kProComparisonRows),
     ];
   }
@@ -224,7 +220,7 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
         selected: _selected == ProPlan.monthly,
         onTap: () => setState(() => _selected = ProPlan.monthly),
       ),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       _PlanCard(
         plan: ProPlan.yearly,
         title: 'Yearly',
@@ -236,7 +232,7 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
         selected: _selected == ProPlan.yearly,
         onTap: () => setState(() => _selected = ProPlan.yearly),
       ),
-      const SizedBox(height: KuberSpacing.sm),
+      const SizedBox(height: KuberSpace.sm),
       _PlanCard(
         plan: ProPlan.lifetime,
         title: 'Lifetime',
@@ -255,9 +251,10 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
     final price = _price(_selected, prices);
     final label = switch (_selected) {
       ProPlan.monthly => 'Continue with Monthly · $price/mo',
-      ProPlan.yearly => (yearlyOffer?.hasIntroBenefit ?? false)
-          ? 'Start free year · then $price/yr'
-          : 'Continue with Yearly · $price/yr',
+      ProPlan.yearly =>
+        (yearlyOffer?.hasIntroBenefit ?? false)
+            ? 'Start free year · then $price/yr'
+            : 'Continue with Yearly · $price/yr',
       ProPlan.lifetime => 'Continue with Lifetime · $price',
     };
     return AppButton(
@@ -272,26 +269,27 @@ class _KuberProPaywallScreenState extends ConsumerState<KuberProPaywallScreen> {
   }
 
   String _price(ProPlan p, Map<String, String> cached) => switch (p) {
-        ProPlan.monthly => cached[kProMonthlyId] ?? '₹119',
-        ProPlan.yearly => cached[kProYearlyId] ?? '₹1,099',
-        ProPlan.lifetime => cached[kProLifetimeId] ?? '₹2,199',
-      };
+    ProPlan.monthly => cached[kProMonthlyId] ?? '₹119',
+    ProPlan.yearly => cached[kProYearlyId] ?? '₹1,099',
+    ProPlan.lifetime => cached[kProLifetimeId] ?? '₹2,199',
+  };
 
   void _openPlaySubscriptions() {
     final sku = ref.read(kuberProStateProvider).plan;
     final skuId = sku != null ? productIdForPlan(sku) : null;
     final uri = skuId != null
         ? 'https://play.google.com/store/account/subscriptions'
-            '?sku=$skuId&package=$_kAndroidPackage'
+              '?sku=$skuId&package=$_kAndroidPackage'
         : 'https://play.google.com/store/account/subscriptions';
     launchUrl(Uri.parse(uri), mode: LaunchMode.externalApplication);
   }
 
   Future<void> _reportBillingIssue(BuildContext context) async {
-    final report =
-        await BillingDiagnostics.instance.generateDiagnosticsReport();
+    final report = await BillingDiagnostics.instance
+        .generateDiagnosticsReport();
     const subject = '[Kuber Billing Issue] Restore Failed';
-    final body = '''
+    final body =
+        '''
 Please describe the issue you encountered:
 (e.g., I purchased Lifetime on another device, but tapping Restore purchases says "No purchase found")
 
@@ -335,7 +333,7 @@ $report
       text,
       style: localeFont(
         fontSize: 16,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: cs.onSurface,
       ),
     );
@@ -345,99 +343,57 @@ $report
 /// Contained primary radial glow blended into the page background near the top,
 /// echoing the Ask Kuber welcome view. A static gradient fill (no ticker, no
 /// `BoxShadow`), so every card on top stays flat and legible.
-class _AmbientGlow extends StatelessWidget {
-  const _AmbientGlow();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final peak = dark ? 0.30 : 0.17;
-    final mid = dark ? 0.07 : 0.045;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.92),
-          radius: 0.9,
-          colors: [
-            cs.primary.withValues(alpha: peak),
-            cs.primary.withValues(alpha: mid),
-            cs.primary.withValues(alpha: 0.0),
-          ],
-          stops: const [0.0, 0.42, 0.66],
-        ),
-      ),
-    );
-  }
-}
-
 // ── Sell-mode pieces ────────────────────────────────────────────────────────
 
+/// Sell hero (board 3.14): centred 56 primary tile, headlineMedium title,
+/// body copy and outlined trust chips. No card, no glow.
 class _SellHero extends StatelessWidget {
   const _SellHero();
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
-                ),
-                child: Icon(Icons.workspace_premium_rounded,
-                    color: cs.primary, size: 19),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-              Expanded(
-                child: Text(
-                  'Everything Kuber, unlocked.',
-                  style: localeFont(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-            ],
+    final tt = Theme.of(context).textTheme;
+    return Column(
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: cs.primary,
+            borderRadius: KuberShape.largeR,
           ),
-          const SizedBox(height: KuberSpacing.md),
-          Text(
-            'Support development. Get every feature. No accounts, no cloud, '
-            'still fully offline.',
-            style: localeFont(
-              fontSize: 12.5,
-              color: cs.onSurfaceVariant,
-              height: 1.45,
-            ),
+          child: Icon(
+            Icons.workspace_premium_rounded,
+            color: cs.onPrimary,
+            size: 28,
           ),
-          const SizedBox(height: KuberSpacing.md),
-          Row(
-            children: const [
-              _TrustChip(icon: Icons.wifi_off_rounded, label: 'Offline'),
-              SizedBox(width: KuberSpacing.lg),
-              _TrustChip(icon: Icons.lock_outline_rounded, label: 'Private'),
-              SizedBox(width: KuberSpacing.lg),
-              _TrustChip(
-                  icon: Icons.person_off_outlined, label: 'No accounts'),
-            ],
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: KuberSpace.lg),
+        Text(
+          'Everything Kuber, unlocked.',
+          textAlign: TextAlign.center,
+          style: tt.headlineMedium!.copyWith(color: cs.onSurface),
+        ),
+        const SizedBox(height: KuberSpace.sm),
+        Text(
+          'Support development. Get every feature. No accounts, no cloud, '
+          'still fully offline.',
+          textAlign: TextAlign.center,
+          style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+        ),
+        const SizedBox(height: KuberSpace.md),
+        const Wrap(
+          alignment: WrapAlignment.center,
+          spacing: KuberSpace.sm,
+          runSpacing: KuberSpace.sm,
+          children: [
+            _TrustChip(icon: Icons.wifi_off_rounded, label: 'Offline'),
+            _TrustChip(icon: Icons.lock_outline_rounded, label: 'Private'),
+            _TrustChip(icon: Icons.person_off_outlined, label: 'No accounts'),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -448,24 +404,8 @@ class _TrustChip extends StatelessWidget {
   const _TrustChip({required this.icon, required this.label});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 15, color: cs.onSurfaceVariant),
-        const SizedBox(width: 6),
-        Text(
-          label,
-          style: localeFont(
-            fontSize: 11.5,
-            fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) =>
+      KuberChip(label: label, icon: icon, showCheck: false);
 }
 
 class _WelcomeBackCard extends StatelessWidget {
@@ -476,17 +416,21 @@ class _WelcomeBackCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
-        color: cs.tertiary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.tertiary),
+        color: context.kuberMoney.income.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: context.kuberMoney.income),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.waving_hand_rounded, size: 20, color: cs.tertiary),
-          const SizedBox(width: KuberSpacing.md),
+          Icon(
+            Icons.waving_hand_rounded,
+            size: 20,
+            color: context.kuberMoney.income,
+          ),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -494,8 +438,8 @@ class _WelcomeBackCard extends StatelessWidget {
                 Text(
                   'Welcome back',
                   style: localeFont(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
@@ -504,7 +448,7 @@ class _WelcomeBackCard extends StatelessWidget {
                   'Resubscribe to continue where you left off. Your data is '
                   'still safe on this device.',
                   style: localeFont(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     color: cs.onSurfaceVariant,
                     height: 1.4,
                   ),
@@ -525,7 +469,7 @@ class _LegacyTrialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final warning = context.kuberColors.warning;
+    final warning = context.kuberMoney.warning;
     final endsLabel = proState.trialEndsAt != null
         ? 'Access ends on ${_shortDate(proState.trialEndsAt!)}'
         : 'Your legacy trial is ending soon';
@@ -534,10 +478,12 @@ class _LegacyTrialCard extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.symmetric(
-              vertical: KuberSpacing.xl, horizontal: KuberSpacing.lg),
+            vertical: KuberSpace.xl,
+            horizontal: KuberSpace.lg,
+          ),
           decoration: BoxDecoration(
             color: warning.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
             border: Border.all(color: warning),
           ),
           child: Column(
@@ -551,30 +497,33 @@ class _LegacyTrialCard extends StatelessWidget {
                 ),
                 child: Icon(Icons.schedule_rounded, color: warning, size: 26),
               ),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
               Text(
                 'You\'re on a legacy trial',
                 style: localeFont(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 endsLabel,
-                style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+                style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
               ),
             ],
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.info_outline_rounded,
-                size: 16, color: cs.onSurfaceVariant),
-            const SizedBox(width: KuberSpacing.sm),
+            Icon(
+              Icons.info_outline_rounded,
+              size: 16,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: KuberSpace.sm),
             Expanded(
               child: Text(
                 'Legacy trial from an earlier version. No card required.',
@@ -620,117 +569,68 @@ class _PlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: selected
-              ? cs.primary.withValues(alpha: 0.09)
-              : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: selected ? cs.primary : cs.outline),
-        ),
-        child: Row(
-          children: [
-            _Radio(selected: selected),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    spacing: KuberSpacing.sm,
-                    runSpacing: 4,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        style: localeFont(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: cs.onSurface,
-                        ),
+    final tt = Theme.of(context).textTheme;
+    final fg = selected ? cs.onSecondaryContainer : cs.onSurface;
+    final sub = selected ? cs.onSecondaryContainer : cs.onSurfaceVariant;
+    // Board 3.14: radio card; selected = secondaryContainer + 2dp primary.
+    return Material(
+      color: selected ? cs.secondaryContainer : cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.cardR,
+        side: selected
+            ? BorderSide(color: cs.primary, width: 2)
+            : BorderSide(color: cs.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(KuberSpace.lg),
+          child: Row(
+            children: [
+              _Radio(selected: selected),
+              const SizedBox(width: KuberSpace.lg),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: KuberSpace.sm,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(title, style: tt.titleMedium!.copyWith(color: fg)),
+                        if (tag != _PlanTag.none)
+                          KuberPill(
+                            label: tag == _PlanTag.bestValue
+                                ? 'BEST VALUE'
+                                : 'PAY ONCE',
+                            tone: tag == _PlanTag.bestValue
+                                ? KuberTone.income
+                                : KuberTone.secondary,
+                          ),
+                      ],
+                    ),
+                    Text(
+                      benefit,
+                      style: tt.bodyMedium!.copyWith(
+                        color: benefitAccent ? cs.primary : sub,
                       ),
-                      if (tag != _PlanTag.none) _tagChip(cs),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    benefit,
-                    style: localeFont(
-                      fontSize: 12,
-                      fontWeight: benefitAccent ? FontWeight.w600 : FontWeight.w400,
-                      color: benefitAccent ? cs.primary : cs.onSurfaceVariant,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            RichText(
-              text: TextSpan(
+              const SizedBox(width: KuberSpace.sm),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  TextSpan(
-                    text: price,
-                    style: localeFont(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                    ),
-                  ),
+                  Text(price, style: tt.titleMedium!.copyWith(color: fg)),
                   if (suffix.isNotEmpty)
-                    TextSpan(
-                      text: suffix,
-                      style: localeFont(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
+                    Text(suffix, style: tt.bodySmall!.copyWith(color: sub)),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _tagChip(ColorScheme cs) {
-    if (tag == _PlanTag.bestValue) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: cs.primary,
-          borderRadius: BorderRadius.circular(KuberRadius.sm),
-        ),
-        child: Text(
-          'BEST VALUE',
-          style: localeFont(
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.4,
-            color: Colors.white,
+            ],
           ),
-        ),
-      );
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.sm),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Text(
-        'PAY ONCE',
-        style: localeFont(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.4,
-          color: cs.onSurfaceVariant,
         ),
       ),
     );
@@ -745,20 +645,20 @@ class _Radio extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      width: 18,
-      height: 18,
+      width: 20,
+      height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: selected ? cs.primary : cs.outlineVariant,
+          color: selected ? cs.primary : cs.onSurfaceVariant,
           width: 2,
         ),
       ),
       child: selected
           ? Center(
               child: Container(
-                width: 8,
-                height: 8,
+                width: 10,
+                height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: cs.primary,
@@ -783,7 +683,7 @@ class _TipJarSection extends StatelessWidget {
           'Not ready for Pro? Support Kuber.',
           style: localeFont(
             fontSize: 16,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
         ),
@@ -792,12 +692,12 @@ class _TipJarSection extends StatelessWidget {
           'One-time thanks. No subscription, no unlocks. Just fuel for '
           'development.',
           style: localeFont(
-            fontSize: 12.5,
+            fontSize: 12,
             color: cs.onSurfaceVariant,
             height: 1.4,
           ),
         ),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         const BuyMeCoffeeButton(),
       ],
     );
@@ -817,12 +717,12 @@ class _TrustFooter extends StatelessWidget {
           'across your devices.',
           textAlign: TextAlign.center,
           style: localeFont(
-            fontSize: 11.5,
+            fontSize: 11,
             color: cs.onSurfaceVariant,
             height: 1.4,
           ),
         ),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
         Consumer(
           builder: (context, ref, _) => Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -832,7 +732,7 @@ class _TrustFooter extends StatelessWidget {
                 child: Text(
                   'Restore purchases',
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.primary,
                   ),
@@ -844,7 +744,7 @@ class _TrustFooter extends StatelessWidget {
                 child: Text(
                   'Redeem promo code',
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.primary,
                   ),
@@ -869,16 +769,16 @@ class _StickyContinue extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outline)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            KuberSpacing.lg,
-            KuberSpacing.md,
-            KuberSpacing.lg,
-            KuberSpacing.md,
+            KuberSpace.lg,
+            KuberSpace.md,
+            KuberSpace.lg,
+            KuberSpace.md,
           ),
           child: child,
         ),
@@ -908,16 +808,16 @@ class _OfferBadge extends StatelessWidget {
         'checkout.';
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.primary),
       ),
       child: Row(
         children: [
           Icon(Icons.local_offer_rounded, size: 18, color: cs.primary),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -925,8 +825,8 @@ class _OfferBadge extends StatelessWidget {
                 Text(
                   'LAUNCH OFFER',
                   style: localeFont(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
                     letterSpacing: 0.6,
                     color: cs.primary,
                   ),
@@ -936,7 +836,7 @@ class _OfferBadge extends StatelessWidget {
                   main,
                   style: localeFont(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
@@ -959,8 +859,18 @@ class _OfferBadge extends StatelessWidget {
 
 String _shortDate(DateTime d) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${d.day} ${months[d.month - 1]} ${d.year}';
 }

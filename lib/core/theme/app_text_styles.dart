@@ -32,10 +32,6 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
   );
 
-  static final TextStyle extraBold = localeFont(
-    fontWeight: FontWeight.w800,
-  );
-
   /// Returns the default TextTheme for the app based on Inter.
   /// Used in [AppTheme] to ensure consistency.
   static TextTheme getTextTheme(TextTheme base) {

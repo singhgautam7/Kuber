@@ -1,4 +1,5 @@
 import 'package:kuber/core/utils/locale_font.dart';
+import 'package:kuber/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class AnalyticsCardSmallTabs extends StatelessWidget {
@@ -21,7 +22,7 @@ class AnalyticsCardSmallTabs extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(KuberShape.medium),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -34,16 +35,7 @@ class AnalyticsCardSmallTabs extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
                 color: isSelected ? cs.surface : Colors.transparent,
-                borderRadius: BorderRadius.circular(6),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        )
-                      ]
-                    : null,
+                borderRadius: BorderRadius.circular(KuberShape.medium),
               ),
               alignment: Alignment.center,
               child: Text(

@@ -29,8 +29,6 @@ class MessageBubble extends StatelessWidget {
   }
 }
 
-
-
 class _UserBubble extends StatelessWidget {
   final ChatMessage message;
   const _UserBubble({required this.message});
@@ -41,28 +39,37 @@ class _UserBubble extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.78),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+        ),
         child: Container(
-          margin: const EdgeInsets.only(bottom: KuberSpacing.md),
-          padding: const EdgeInsets.fromLTRB(14, 10, 14, 7),
+          margin: const EdgeInsets.only(bottom: KuberSpace.md),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+          // Board 3.8b: primaryContainer, radius 20 with a 4 tail corner.
           decoration: BoxDecoration(
-            // Primary-tinted fill with a subtle primary border (per design CSS).
-            color: cs.primary.withValues(alpha: 0.10),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.22)),
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
+            color: cs.primaryContainer,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(4),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(message.text,
-                  style: localeFont(
-                      fontSize: 14, color: cs.onSurface, height: 1.45)),
-              const SizedBox(height: 3),
+              Text(
+                message.text,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge!.copyWith(color: cs.onPrimaryContainer),
+              ),
+              const SizedBox(height: 2),
               Text(
                 DateFormat('h:mm a').format(message.time),
-                style: localeFont(
-                    fontSize: 10, color: cs.onSurfaceVariant.withValues(alpha: 0.85)),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall!.copyWith(color: cs.onPrimaryContainer),
               ),
             ],
           ),
@@ -83,9 +90,12 @@ List<InlineSpan> buildRichSpans(String text, TextStyle base, Color highlight) {
     if (m.start > last) {
       spans.add(TextSpan(text: text.substring(last, m.start), style: base));
     }
-    spans.add(TextSpan(
+    spans.add(
+      TextSpan(
         text: matched,
-        style: base.copyWith(fontWeight: FontWeight.w600, color: highlight)));
+        style: base.copyWith(fontWeight: FontWeight.w600, color: highlight),
+      ),
+    );
     last = m.end;
   }
   if (last < text.length) {
@@ -114,7 +124,9 @@ class _KuberMessageState extends State<_KuberMessage>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
     _sizeAnim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
   }
 
@@ -129,8 +141,11 @@ class _KuberMessageState extends State<_KuberMessage>
     _expanded ? _ctrl.forward() : _ctrl.reverse();
   }
 
-  TextStyle get _textStyle =>
-      localeFont(fontSize: 15, color: Theme.of(context).colorScheme.onSurface, height: 1.5);
+  TextStyle get _textStyle => localeFont(
+    fontSize: 16,
+    color: Theme.of(context).colorScheme.onSurface,
+    height: 1.5,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -145,17 +160,21 @@ class _KuberMessageState extends State<_KuberMessage>
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxW),
           child: Padding(
-            padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+            padding: const EdgeInsets.only(bottom: KuberSpace.md),
             child: ValueListenableBuilder<String>(
               valueListenable: widget.stream!,
               builder: (context, text, _) => Text.rich(
-                TextSpan(children: [
-                  ...buildRichSpans(text, _textStyle, cs.primary),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: RepaintBoundary(child: BlinkingCaret(color: cs.primary)),
-                  ),
-                ]),
+                TextSpan(
+                  children: [
+                    ...buildRichSpans(text, _textStyle, cs.primary),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: RepaintBoundary(
+                        child: BlinkingCaret(color: cs.primary),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -171,14 +190,17 @@ class _KuberMessageState extends State<_KuberMessage>
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxW),
         child: Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+          padding: const EdgeInsets.only(bottom: KuberSpace.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(TextSpan(
-                  children: buildRichSpans(msg.text, _textStyle, cs.primary))),
+              Text.rich(
+                TextSpan(
+                  children: buildRichSpans(msg.text, _textStyle, cs.primary),
+                ),
+              ),
               if (viz != null) ...[
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
                 _buildViz(viz, msg),
               ],
               if (thinking != null)
@@ -190,9 +212,12 @@ class _KuberMessageState extends State<_KuberMessage>
               if (thinking == null)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
-                  child: Text(DateFormat('h:mm a').format(msg.time),
-                      style:
-                          localeFont(fontSize: 11, color: cs.onSurfaceVariant)),
+                  child: Text(
+                    DateFormat('h:mm a').format(msg.time),
+                    style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               if (thinking != null)
                 SizeTransition(
@@ -208,9 +233,11 @@ class _KuberMessageState extends State<_KuberMessage>
   }
 
   Widget _buildViz(VizPayload viz, ChatMessage msg) => switch (viz) {
-        TopCategoriesViz() => TopCategoriesVizView(data: viz),
-        BudgetStatusViz() => BudgetStatusVizView(data: viz),
-        TransactionPreviewViz() =>
-          TransactionPreviewVizView(message: msg, viz: viz),
-      };
+    TopCategoriesViz() => TopCategoriesVizView(data: viz),
+    BudgetStatusViz() => BudgetStatusVizView(data: viz),
+    TransactionPreviewViz() => TransactionPreviewVizView(
+      message: msg,
+      viz: viz,
+    ),
+  };
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_skeleton.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../settings/providers/settings_provider.dart';
-import '../../../core/utils/color_harmonizer.dart';
 import '../../budgets/data/budget.dart';
 import '../../budgets/providers/budget_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -19,7 +21,6 @@ class BudgetSnapshotCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final snapshotAsync = ref.watch(budgetSnapshotProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return snapshotAsync.when(
       loading: () => _buildLoading(context),
@@ -28,22 +29,14 @@ class BudgetSnapshotCard extends ConsumerWidget {
         if (snapshots.isEmpty) return const SizedBox.shrink();
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+          padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               KuberHomeWidgetTitle(title: context.l10n.budgetSnapshot),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(KuberSpacing.md),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-                ),
-                child: Column(
-                  children: snapshots.map((s) => _BudgetRow(snapshot: s)).toList(),
-                ),
+              // Budgets as a grouped list (board 3.2a).
+              KuberGroup(
+                children: [for (final s in snapshots) _BudgetRow(snapshot: s)],
               ),
             ],
           ),
@@ -53,23 +46,15 @@ class BudgetSnapshotCard extends ConsumerWidget {
   }
 
   Widget _buildLoading(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: KuberSpacing.xl),
+      padding: const EdgeInsets.only(bottom: KuberSpace.sectionGap),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           KuberHomeWidgetTitle(title: context.l10n.budgetSnapshot),
-          Shimmer.fromColors(
-            baseColor: cs.surfaceContainerHigh,
-            highlightColor: cs.surfaceContainerLowest,
-            child: Container(
-              height: 180,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-              ),
-            ),
+          const KuberSkeleton(
+            height: 180,
+            borderRadius: KuberShape.largeIncreased,
           ),
         ],
       ),
@@ -95,154 +80,110 @@ class _BudgetRow extends ConsumerWidget {
     final categoryMap = ref.watch(categoryMapProvider).valueOrNull ?? {};
     final category = categoryMap[int.tryParse(budget.categoryId)];
 
-    final Color catColor = category != null
-        ? harmonizeCategory(context, Color(category.colorValue))
-        : cs.primary;
-
-    Color badgeColor;
+    // Thresholds and labels unchanged; colours from the progress tokens.
+    // High usage (80-99) moves from red to the near-limit style (open
+    // decision 7); only 100%+ uses the over-limit style.
+    final KuberProgressState state;
     String statusLabel;
     if (progress.percentage >= 100) {
-      badgeColor = cs.error;
+      state = KuberProgressState.overLimit;
       statusLabel = context.l10n.budgetExceeded;
     } else if (progress.percentage >= 80) {
-      badgeColor = cs.error;
+      state = KuberProgressState.nearLimit;
       statusLabel = context.l10n.budgetHighUsage;
     } else if (progress.percentage >= 50) {
-      badgeColor = Colors.orange.shade600;
+      state = KuberProgressState.nearLimit;
       statusLabel = context.l10n.budgetNearLimit;
     } else {
-      badgeColor = Colors.green.shade600;
+      state = KuberProgressState.normal;
       statusLabel = context.l10n.budgetOnTrack;
     }
+    final (pillBg, pillFg) = kuberProgressChipColors(context, state);
 
-    final remaining = (progress.limit - progress.spent).clamp(0.0, double.infinity);
+    final remaining = (progress.limit - progress.spent).clamp(
+      0.0,
+      double.infinity,
+    );
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: category == null ? null : () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useRootNavigator: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => BudgetDetailsSheet(
-            budgetId: budget.id,
-            category: category,
-          ),
-        );
-      },
+    return InkWell(
+      onTap: category == null
+          ? null
+          : () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useRootNavigator: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) =>
+                    BudgetDetailsSheet(budgetId: budget.id, category: category),
+              );
+            },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
             Row(
-            children: [
-              // Category Icon
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: catColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(KuberRadius.sm),
-                ),
-                child: Icon(
-                  category != null ? IconMapper.fromString(category.icon) : Icons.category_outlined,
-                  color: catColor,
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: KuberSpacing.md),
-
-              // Main Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category?.name ?? context.l10n.categoryLabel,
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+              children: [
+                category != null
+                    ? CategoryIcon.square(
+                        icon: IconMapper.fromString(category.icon),
+                        rawColor: Color(category.colorValue),
+                      )
+                    : const KuberIconTile(
+                        icon: Icons.category_outlined,
+                        tone: KuberTone.neutral,
                       ),
-                    ),
-                    const SizedBox(height: 1),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '${maskAmount(fmt.formatCurrency(progress.spent), isPrivate)} ',
-                            style: textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurface,
-                              fontSize: 11,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '/ ${maskAmount(fmt.formatCurrency(progress.limit), isPrivate)}',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
+                const SizedBox(width: KuberSpace.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category?.name ?? context.l10n.categoryLabel,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: cs.onSurface,
+                        ),
                       ),
-                    ),
-                    Text(
-                      context.l10n.budgetRemaining(
-                          maskAmount(fmt.formatCurrency(remaining), isPrivate)),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
+                      Text(
+                        '${maskAmount(fmt.formatCurrency(progress.spent), isPrivate)} / '
+                        '${maskAmount(fmt.formatCurrency(progress.limit), isPrivate)} · '
+                        '${context.l10n.budgetRemaining(maskAmount(fmt.formatCurrency(remaining), isPrivate))}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Percentage Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: badgeColor.withValues(alpha: 0.2)),
-                ),
-                child: Text(
-                  '${progress.percentage.toInt()}%',
-                  style: textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: badgeColor,
-                    fontSize: 10,
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: LinearProgressIndicator(
+                const SizedBox(width: KuberSpace.sm),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: pillBg,
+                    borderRadius: KuberShape.fullR,
+                  ),
+                  child: Text(
+                    '${progress.percentage.toInt()}% · $statusLabel',
+                    style: textTheme.labelMedium?.copyWith(color: pillFg),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            KuberLinearProgress(
               value: (progress.percentage / 100).clamp(0.0, 1.0),
-              backgroundColor: cs.outline.withValues(alpha: 0.2),
-              color: cs.primary, 
-              minHeight: 6,
+              state: state,
             ),
-          ),
-          const SizedBox(height: 2),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              statusLabel,
-              style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-                fontSize: 9,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

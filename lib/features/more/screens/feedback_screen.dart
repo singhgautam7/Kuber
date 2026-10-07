@@ -9,8 +9,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_chips.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/settings_provider.dart';
 
@@ -84,8 +86,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     final prefill = widget.prefill;
     if (prefill != null && prefill.isNotEmpty) {
       _feedbackCtrl.text = prefill;
-      _feedbackCtrl.selection =
-          TextSelection.collapsed(offset: prefill.length);
+      _feedbackCtrl.selection = TextSelection.collapsed(offset: prefill.length);
     }
   }
 
@@ -98,7 +99,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
   Future<void> _submit() async {
     final feedbackText = _feedbackCtrl.text.trim();
     if (feedbackText.isEmpty) {
-      showKuberSnackBar(context, context.l10n.feedbackMessageRequired, isError: true);
+      showKuberSnackBar(
+        context,
+        context.l10n.feedbackMessageRequired,
+        isError: true,
+      );
       return;
     }
 
@@ -120,7 +125,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       if (Platform.isAndroid) {
         final android = await deviceInfo.androidInfo;
         deviceModel = '${android.manufacturer} ${android.model}';
-        osVersion = 'Android ${android.version.release} (SDK ${android.version.sdkInt})';
+        osVersion =
+            'Android ${android.version.release} (SDK ${android.version.sdkInt})';
       } else if (Platform.isIOS) {
         final ios = await deviceInfo.iosInfo;
         deviceModel = ios.model;
@@ -128,7 +134,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
       }
 
       final subject = '[Kuber Feedback] $_selectedType';
-      final body = '''
+      final body =
+          '''
 Type: $_selectedType
 
 Feedback:
@@ -171,181 +178,107 @@ Currency    : ${currency.name} (${currency.code})
     final tt = theme.textTheme;
     final lang = AppLocale.current.languageCode;
 
+    String typeLabel(String t) => switch (t) {
+      'Bug' => context.l10n.feedbackTypeBug,
+      'New Feature Request' => context.l10n.feedbackTypeFeature,
+      'General Feedback' => context.l10n.feedbackTypeOther,
+      _ => t,
+    };
+
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, showHome: true, title: ''),
-          ),
-          SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: context.l10n.feedbackTitle,
-              description: context.l10n.feedbackDesc,
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
-            ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Type label
-                Text(
-                  context.l10n.feedbackType,
-                  style: localeFont(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(showBack: true, title: context.l10n.feedbackTitle),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  KuberSpace.screenMargin,
+                  0,
+                  KuberSpace.screenMargin,
+                  KuberSpace.xl,
                 ),
-                const SizedBox(height: KuberSpacing.sm),
-
-                // Type dropdown
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline),
-                  ),
-                  child: DropdownButton<String>(
-                    value: _selectedType,
-                    isExpanded: true,
-                    underline: const SizedBox.shrink(),
-                    dropdownColor: cs.surfaceContainerHigh,
-                    style: tt.bodyLarge?.copyWith(color: cs.onSurface),
-                    items: _feedbackTypes.map((t) {
-                      String label = t;
-                      if (t == 'Bug') {
-                        label = context.l10n.feedbackTypeBug;
-                      } else if (t == 'New Feature Request') {
-                        label = context.l10n.feedbackTypeFeature;
-                      } else if (t == 'General Feedback') {
-                        label = context.l10n.feedbackTypeOther;
-                      }
-                      return DropdownMenuItem(value: t, child: Text(label));
-                    }).toList(),
-                    onChanged: (v) {
-                      if (v != null) setState(() => _selectedType = v);
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // Feedback label
-                Text(
-                  context.l10n.feedbackMessage,
-                  style: localeFont(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-
-                // Feedback text area
-                TextField(
-                  controller: _feedbackCtrl,
-                  minLines: 4,
-                  maxLines: 8,
-                  style: tt.bodyLarge?.copyWith(color: cs.onSurface),
-                  decoration: InputDecoration(
-                    hintText: context.l10n.feedbackMessageHint,
-                    hintStyle: tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-                    filled: true,
-                    fillColor: cs.surfaceContainer,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.outline),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.outline),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.primary, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.all(KuberSpacing.lg),
-                  ),
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // Privacy note
-                Container(
-                  padding: const EdgeInsets.all(KuberSpacing.md),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outlineVariant),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  KuberSectionHeader(title: context.l10n.feedbackType),
+                  Wrap(
+                    spacing: KuberSpace.sm,
+                    runSpacing: KuberSpace.sm,
                     children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 16,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: KuberSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          _getDeviceDetailsNote(lang),
-                          style: localeFont(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
-                            height: 1.5,
-                          ),
+                      for (final t in _feedbackTypes)
+                        KuberChip(
+                          label: typeLabel(t),
+                          selected: _selectedType == t,
+                          onTap: () => setState(() => _selectedType = t),
                         ),
-                      ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: KuberSpacing.lg),
-
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: FilledButton(
-                    onPressed: _isSubmitting ? null : _submit,
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
-                      ),
+                  const SizedBox(height: KuberSpace.sectionGap - 4),
+                  KuberSectionHeader(title: context.l10n.feedbackMessage),
+                  TextField(
+                    controller: _feedbackCtrl,
+                    minLines: 5,
+                    maxLines: 8,
+                    style: tt.bodyLarge?.copyWith(color: cs.onSurface),
+                    decoration: InputDecoration(
+                      hintText: context.l10n.feedbackMessageHint,
+                      alignLabelWithHint: true,
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            context.l10n.submitFeedback.toUpperCase(),
-                            style: localeFont(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1,
+                  ),
+                  const SizedBox(height: KuberSpace.lg),
+                  Container(
+                    padding: const EdgeInsets.all(KuberSpace.md),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainer,
+                      borderRadius: KuberShape.cardR,
+                      border: Border.all(color: cs.outlineVariant),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.info_outline_rounded,
+                          size: 16,
+                          color: cs.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: KuberSpace.sm),
+                        Expanded(
+                          child: Text(
+                            _getDeviceDetailsNote(lang),
+                            style: tt.bodySmall!.copyWith(
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ),
-          ),
-        ],
+            // Pinned submit, sentence case (board 3.31).
+            Divider(height: 1, thickness: 1, color: cs.outlineVariant),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  KuberSpace.screenMargin,
+                  KuberSpace.md,
+                  KuberSpace.screenMargin,
+                  KuberSpace.lg,
+                ),
+                child: AppButton(
+                  label: context.l10n.submitFeedback,
+                  icon: Icons.send_outlined,
+                  type: AppButtonType.primary,
+                  fullWidth: true,
+                  isLoading: _isSubmitting,
+                  onPressed: _isSubmitting ? null : _submit,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

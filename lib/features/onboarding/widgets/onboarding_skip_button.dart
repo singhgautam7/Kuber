@@ -15,20 +15,21 @@ class OnboardingSkipButton extends StatelessWidget {
     return Align(
       alignment: Alignment.centerRight,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.xl,
-          KuberSpacing.sm,
-          KuberSpacing.xl,
-          0,
-        ),
-        child: TextButton(
-          onPressed: onSkip,
-          child: Text(
-            'Skip',
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurfaceVariant,
+        padding: const EdgeInsets.symmetric(horizontal: KuberSpace.sm),
+        child: SizedBox(
+          height: 56,
+          child: Center(
+            child: TextButton(
+              onPressed: onSkip,
+              child: Text(
+                'Skip',
+                style: localeFont(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.1,
+                  color: cs.primary,
+                ),
+              ),
             ),
           ),
         ),

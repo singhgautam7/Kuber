@@ -27,8 +27,8 @@ void showProPurchaseSuccessSheet(
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: cs.primaryContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+            color: cs.secondaryContainer,
+            borderRadius: BorderRadius.circular(KuberShape.medium),
           ),
           child: Icon(
             Icons.workspace_premium_rounded,
@@ -59,28 +59,28 @@ void showProPurchaseSuccessSheet(
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline),
+                borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: Column(
                 children: [
                   for (var i = 0; i < newlyUnlocked.length; i++) ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: KuberSpacing.lg,
-                        vertical: KuberSpacing.md,
+                        horizontal: KuberSpace.lg,
+                        vertical: KuberSpace.md,
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.check_circle_rounded,
                             size: 18,
-                            color: cs.tertiary,
+                            color: context.kuberMoney.income,
                           ),
-                          const SizedBox(width: KuberSpacing.sm),
+                          const SizedBox(width: KuberSpace.sm),
                           Expanded(
                             child: Text(
                               newlyUnlocked[i],
@@ -95,7 +95,7 @@ void showProPurchaseSuccessSheet(
                       ),
                     ),
                     if (i != newlyUnlocked.length - 1)
-                      Divider(height: 1, color: cs.outline),
+                      Divider(height: 1, color: cs.outlineVariant),
                   ],
                 ],
               ),

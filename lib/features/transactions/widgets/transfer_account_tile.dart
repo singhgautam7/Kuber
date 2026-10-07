@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/category_icon.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../core/utils/locale_font.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/account_helpers.dart';
 import '../../accounts/data/account.dart';
@@ -21,7 +23,6 @@ class TransferAccountTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final textTheme = theme.textTheme;
     final color = account != null
         ? resolveAccountColor(account!)
         : cs.onSurfaceVariant;
@@ -29,58 +30,18 @@ class TransferAccountTile extends StatelessWidget {
         ? resolveAccountIcon(account!)
         : Icons.account_balance_wallet_outlined;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
+    // From / To row inside one grouped list (board 3.4).
+    return KuberListRow(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, size: 22, color: color),
-            ),
-            const SizedBox(width: KuberSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: textTheme.labelSmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    account?.name ?? context.l10n.selectAccountTitle,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: account != null
-                          ? cs.onSurface
-                          : cs.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: cs.onSurfaceVariant,
-            ),
-          ],
-        ),
+      leading: account != null
+          ? CategoryIcon.square(icon: icon, rawColor: color)
+          : KuberIconTile(icon: icon, tone: KuberTone.neutral),
+      title: account?.name ?? context.l10n.selectAccountTitle,
+      subtitle: sentenceCase(label),
+      trailing: Icon(
+        Icons.expand_more_rounded,
+        size: 24,
+        color: cs.onSurfaceVariant,
       ),
     );
   }

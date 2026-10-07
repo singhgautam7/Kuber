@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/biometric_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
-import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../data/card_keystore.dart';
@@ -212,24 +211,22 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
             children: [
               const Spacer(flex: 2),
               Container(
-                width: 72,
-                height: 72,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  color: cs.primary,
+                  borderRadius: KuberShape.largeR,
                 ),
-                child: Icon(Icons.lock_rounded, size: 34, color: cs.primary),
+                child: Icon(Icons.lock_rounded, size: 28, color: cs.onPrimary),
               ),
-              const SizedBox(height: KuberSpacing.lg),
+              const SizedBox(height: KuberSpace.lg),
               Text(
                 'Kuber Cards',
-                style: localeFont(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: cs.primary,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall!.copyWith(color: cs.onSurface),
               ),
-              const SizedBox(height: KuberSpacing.sm),
+              const SizedBox(height: KuberSpace.sm),
               if (locked)
                 _lockBlock(cs)
               else ...[
@@ -237,25 +234,27 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
                   _importContext
                       ? 'Enter the PIN from your previous device'
                       : (_biometricEnabled
-                          ? 'Unlock with biometrics or enter your PIN'
-                          : 'Enter your PIN'),
+                            ? 'Unlock with biometrics or enter your PIN'
+                            : 'Enter your PIN'),
                   textAlign: TextAlign.center,
-                  style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
                 ),
                 if (_importContext) ...[
-                  const SizedBox(height: KuberSpacing.md),
+                  const SizedBox(height: KuberSpace.md),
                   KuberCallout(
                     child: Text(
                       'This is the PIN from your old device, not this one.',
                       style: localeFont(
-                        fontSize: 12.5,
+                        fontSize: 12,
                         color: cs.onSurfaceVariant,
                         height: 1.4,
                       ),
                     ),
                   ),
                 ],
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
                 ValueListenableBuilder<String>(
                   valueListenable: _pin,
                   builder: (_, pin, __) => CardsPinDots(
@@ -268,30 +267,26 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
                   const SizedBox(height: 10),
                   Text(
                     'Wrong PIN. $_attemptsLeft attempts left.',
-                    style: localeFont(fontSize: 13, color: cs.error),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: cs.error),
                   ),
                 ],
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
                 KuberPinPad(
                   length: _pinLength,
                   value: _pin,
                   onChanged: _onChanged,
                   onSubmit: _submit,
+                  onBiometric: _biometricEnabled
+                      ? () {
+                          _biometricTried = false;
+                          _tryBiometric();
+                        }
+                      : null,
                 ),
               ],
               const Spacer(flex: 3),
-              if (!locked && _biometricEnabled)
-                AppButton(
-                  label: 'Unlock with biometrics',
-                  type: AppButtonType.outline,
-                  icon: Icons.fingerprint_rounded,
-                  fullWidth: true,
-                  onPressed: () {
-                    _biometricTried = false;
-                    _tryBiometric();
-                  },
-                ),
-              const SizedBox(height: KuberSpacing.lg),
             ],
           ),
         ),
@@ -303,20 +298,20 @@ class _CardsUnlockScreenState extends ConsumerState<CardsUnlockScreen> {
     final mm = _remaining.inMinutes.remainder(60).toString();
     final ss = _remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
     return Padding(
-      padding: const EdgeInsets.only(top: KuberSpacing.xl),
+      padding: const EdgeInsets.only(top: KuberSpace.xl),
       child: Column(
         children: [
           Icon(Icons.lock_clock_rounded, size: 30, color: cs.onSurfaceVariant),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           Text(
             _isDayLock ? 'Locked for today' : 'Too many attempts',
             style: localeFont(
               fontSize: 16,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
-          const SizedBox(height: KuberSpacing.xs),
+          const SizedBox(height: KuberSpace.xs),
           Text(
             _isDayLock
                 ? 'Your cards are safe. Try again later.'

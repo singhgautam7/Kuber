@@ -1,10 +1,10 @@
-import 'package:kuber/core/utils/locale_font.dart';
 import 'package:kuber/core/utils/l10n_ext.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../settings/providers/data_provider.dart';
 import '../../settings/widgets/data_action_widgets.dart';
@@ -34,56 +34,37 @@ class TroubleshootScreen extends ConsumerWidget {
         children: [
           CustomScrollView(
             slivers: [
-              const SliverToBoxAdapter(
-                child: KuberAppBar(showBack: true, showHome: true, title: ''),
-              ),
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.troubleshootTitle,
-                        style: localeFont(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          height: 1.15,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        context.l10n.troubleshootDesc,
-                        style: localeFont(
-                          fontSize: 13,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: KuberAppBar(
+                  showBack: true,
+                  title: context.l10n.troubleshootTitle,
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: KuberSpace.screenMargin,
+                ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    DataActionRow(
-                      icon: Icons.manage_search_rounded,
-                      title: context.l10n.rebuildSuggestions,
-                      description: context.l10n.rebuildSuggestionsDesc,
-                      onPressed: () => _confirmRebuild(context, ref),
+                    KuberGroup(
+                      children: [
+                        DataActionRow(
+                          icon: Icons.manage_search_rounded,
+                          title: context.l10n.rebuildSuggestions,
+                          description: context.l10n.rebuildSuggestionsDesc,
+                          onPressed: () => _confirmRebuild(context, ref),
+                        ),
+                        DataActionRow(
+                          icon: Icons.delete_outline_rounded,
+                          title: 'Reset SMS Imports',
+                          description:
+                              'Clears all currently tracked SMS records and runs a full re-scan of the SMS inbox.',
+                          destructive: true,
+                          onPressed: () => _confirmResetSms(context, ref),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
-                    DataActionRow(
-                      icon: Icons.delete_outline_rounded,
-                      title: 'Reset SMS Imports',
-                      description: 'Clears all currently tracked SMS records and runs a full re-scan of the SMS inbox.',
-                      destructive: true,
-                      onPressed: () => _confirmResetSms(context, ref),
-                    ),
-                    const SizedBox(height: KuberSpacing.xxl),
+                    const SizedBox(height: KuberSpace.xxl),
                   ]),
                 ),
               ),
@@ -107,7 +88,8 @@ class TroubleshootScreen extends ConsumerWidget {
         title: '${context.l10n.rebuildSuggestions}?',
         description: context.l10n.rebuildSuggestionsDesc,
         confirmLabel: context.l10n.rebuildSuggestions,
-        onConfirm: () => ref.read(dataControllerProvider.notifier).rebuildSuggestions(),
+        onConfirm: () =>
+            ref.read(dataControllerProvider.notifier).rebuildSuggestions(),
       ),
     );
   }
@@ -121,7 +103,8 @@ class TroubleshootScreen extends ConsumerWidget {
       builder: (_) => ConfirmActionSheet(
         icon: Icons.delete_outline_rounded,
         title: 'Reset SMS imports?',
-        description: 'This will clear all the SMS imports we have right now and re-read all the SMS again with the parser. Are you sure you want to proceed?',
+        description:
+            'This will clear all the SMS imports we have right now and re-read all the SMS again with the parser. Are you sure you want to proceed?',
         confirmLabel: 'Reset',
         destructive: true,
         onConfirm: () => ref.read(smsImportProvider.notifier).resetSmsImports(),

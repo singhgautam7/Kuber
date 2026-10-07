@@ -16,8 +16,7 @@ class NotesBiometricGate extends ConsumerStatefulWidget {
   const NotesBiometricGate({super.key, required this.child});
 
   @override
-  ConsumerState<NotesBiometricGate> createState() =>
-      _NotesBiometricGateState();
+  ConsumerState<NotesBiometricGate> createState() => _NotesBiometricGateState();
 }
 
 class _NotesBiometricGateState extends ConsumerState<NotesBiometricGate> {
@@ -56,8 +55,9 @@ class _NotesBiometricGateState extends ConsumerState<NotesBiometricGate> {
   @override
   Widget build(BuildContext context) {
     final requireNotes = ref.watch(notesBiometricRequiredProvider);
-    final appWide = ref.watch(settingsProvider
-        .select((s) => s.valueOrNull?.biometricsEnabled ?? false));
+    final appWide = ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.biometricsEnabled ?? false),
+    );
     final unlocked = ref.watch(notesUnlockedThisSessionProvider);
 
     if (!requireNotes || !appWide || unlocked) return widget.child;
@@ -74,9 +74,10 @@ class _NotesBiometricGateState extends ConsumerState<NotesBiometricGate> {
               padding: const EdgeInsets.fromLTRB(24, 26, 24, 30),
               decoration: BoxDecoration(
                 color: cs.surfaceContainer,
-                border: Border(top: BorderSide(color: cs.outline)),
+                border: Border(top: BorderSide(color: cs.outlineVariant)),
                 borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(KuberRadius.lg)),
+                  top: Radius.circular(KuberShape.extraLarge),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -88,17 +89,21 @@ class _NotesBiometricGateState extends ConsumerState<NotesBiometricGate> {
                       color: cs.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: cs.primary.withValues(alpha: 0.3)),
+                        color: cs.primary.withValues(alpha: 0.3),
+                      ),
                     ),
-                    child: Icon(Icons.fingerprint_rounded,
-                        size: 30, color: cs.primary),
+                    child: Icon(
+                      Icons.fingerprint_rounded,
+                      size: 30,
+                      color: cs.primary,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Unlock Kuber Notes',
                     style: localeFont(
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                       color: cs.onSurface,
                     ),
                   ),
@@ -107,7 +112,7 @@ class _NotesBiometricGateState extends ConsumerState<NotesBiometricGate> {
                     'Confirm your identity to view your notes',
                     textAlign: TextAlign.center,
                     style: localeFont(
-                      fontSize: 12.5,
+                      fontSize: 12,
                       color: cs.onSurfaceVariant,
                       height: 1.5,
                     ),
@@ -119,13 +124,13 @@ class _NotesBiometricGateState extends ConsumerState<NotesBiometricGate> {
                       height: 44,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        border: Border.all(color: cs.outline),
-                        borderRadius: BorderRadius.circular(KuberRadius.md),
+                        border: Border.all(color: cs.outlineVariant),
+                        borderRadius: BorderRadius.circular(KuberShape.medium),
                       ),
                       child: Text(
                         'Use PIN instead',
                         style: localeFont(
-                          fontSize: 13.5,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
                         ),

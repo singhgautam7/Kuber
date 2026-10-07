@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 
 /// The numeric PIN pad used across setup, unlock, change-PIN, and import. A
 /// feature widget assembled entirely from Vault tokens (like
@@ -24,6 +23,9 @@ class KuberPinPad extends StatelessWidget {
   final ValueChanged<String> onSubmit;
   final bool enabled;
 
+  /// When set, the bottom-left key is the fingerprint (board 3.24).
+  final VoidCallback? onBiometric;
+
   const KuberPinPad({
     super.key,
     required this.length,
@@ -31,6 +33,7 @@ class KuberPinPad extends StatelessWidget {
     required this.onChanged,
     required this.onSubmit,
     this.enabled = true,
+    this.onBiometric,
   });
 
   void _press(String digit) {
@@ -52,10 +55,19 @@ class KuberPinPad extends StatelessWidget {
     final keys = <Widget>[
       for (var d = 1; d <= 9; d++)
         _PadKey(label: '$d', onTap: () => _press('$d')),
-      const SizedBox.shrink(), // empty bottom-left
+      if (onBiometric != null)
+        _PadKey(
+          icon: Icons.fingerprint_rounded,
+          plain: true,
+          accent: true,
+          onTap: onBiometric!,
+        )
+      else
+        const SizedBox(width: _PadKey.size, height: _PadKey.size),
       _PadKey(label: '0', onTap: () => _press('0')),
       _PadKey(
         icon: Icons.backspace_outlined,
+        plain: true,
         onTap: _backspace,
         onLongPress: () {
           HapticFeedback.selectionClick();
@@ -64,21 +76,27 @@ class KuberPinPad extends StatelessWidget {
       ),
     ];
 
+    // 72 circles on surfaceContainerHigh, 4 x 3 (board 3.24).
     return Opacity(
       opacity: enabled ? 1 : 0.5,
       child: IgnorePointer(
         ignoring: !enabled,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 320),
-          child: GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 3,
-            childAspectRatio: 1.3,
-            mainAxisSpacing: KuberSpacing.md,
-            crossAxisSpacing: KuberSpacing.md,
-            children: keys,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var r = 0; r < 4; r++) ...[
+              if (r > 0) const SizedBox(height: KuberSpace.lg),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var c = 0; c < 3; c++) ...[
+                    if (c > 0) const SizedBox(width: KuberSpace.xl),
+                    keys[r * 3 + c],
+                  ],
+                ],
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -91,11 +109,19 @@ class _PadKey extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
+  /// Icon keys (fingerprint, backspace) have no fill.
+  final bool plain;
+  final bool accent;
+
+  static const double size = 72;
+
   const _PadKey({
     this.label,
     this.icon,
     required this.onTap,
     this.onLongPress,
+    this.plain = false,
+    this.accent = false,
   });
 
   @override
@@ -123,21 +149,26 @@ class _PadKeyState extends State<_PadKey> {
       onLongPress: widget.onLongPress,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 120),
+        width: _PadKey.size,
+        height: _PadKey.size,
         decoration: BoxDecoration(
           color: _pressed
-              ? cs.primary.withValues(alpha: 0.10)
-              : cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: _pressed ? cs.primary : cs.outline),
+              ? cs.secondaryContainer
+              : widget.plain
+              ? Colors.transparent
+              : cs.surfaceContainerHigh,
+          shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
         child: widget.icon != null
-            ? Icon(widget.icon, size: 22, color: cs.onSurfaceVariant)
+            ? Icon(
+                widget.icon,
+                size: widget.accent ? 32 : 24,
+                color: widget.accent ? cs.primary : cs.onSurfaceVariant,
+              )
             : Text(
                 widget.label!,
-                style: localeFont(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   color: cs.onSurface,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -147,7 +178,7 @@ class _PadKeyState extends State<_PadKey> {
   }
 }
 
-/// A row of 4 or 6 hollow PIN dots. Filled = `cs.primary`, empty = `cs.outline`
+/// A row of 4 or 6 hollow PIN dots. Filled = `cs.primary`, empty = `cs.outlineVariant`
 /// ring. Digits are never shown. Plays a horizontal shake + error flash when
 /// [error] flips true (wrong-PIN state).
 class CardsPinDots extends StatefulWidget {
@@ -176,11 +207,7 @@ class _CardsPinDotsState extends State<CardsPinDots> {
         for (var i = 0; i < widget.length; i++)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 7),
-            child: _Dot(
-              filled: i < widget.filled,
-              error: widget.error,
-              cs: cs,
-            ),
+            child: _Dot(filled: i < widget.filled, error: widget.error, cs: cs),
           ),
       ],
     );
@@ -218,7 +245,7 @@ class _Dot extends StatelessWidget {
         shape: BoxShape.circle,
         color: filled ? color : Colors.transparent,
         border: Border.all(
-          color: filled ? color : cs.outline,
+          color: filled ? color : cs.outlineVariant,
           width: 1.5,
         ),
       ),

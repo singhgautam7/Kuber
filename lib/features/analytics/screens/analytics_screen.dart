@@ -5,11 +5,11 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/l10n_ext.dart';
 import '../../../core/utils/breakpoints.dart';
-import '../../../core/utils/color_harmonizer.dart';
 import '../../../core/utils/icon_mapper.dart';
 import '../../../shared/widgets/category_icon.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/utils/chart_bucket.dart';
 import '../../../shared/widgets/edit_widgets_button.dart';
 import '../../../shared/widgets/kuber_bar_chart.dart';
@@ -66,7 +66,6 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 final _biggestTabProvider = StateProvider<int>((_) => 0);
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-
   // ---- bucket helpers -----------------------------------------------------
 
   List<KuberBarBucket> _buildPeriodBuckets(
@@ -97,23 +96,40 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   List<KuberBarBucket> _buildTimeOfDayBuckets(
-      List<Transaction> txns, AnalyticsFilter filter) {
+    List<Transaction> txns,
+    AnalyticsFilter filter,
+  ) {
     final buckets = [
-      _MutableBucket(context.l10n.bucketDawn, '',
-          date: filter.from,
-          endDate: filter.from.add(const Duration(hours: 5, minutes: 59))),
-      _MutableBucket(context.l10n.bucketMorning, '',
-          date: filter.from.add(const Duration(hours: 6)),
-          endDate: filter.from.add(const Duration(hours: 10, minutes: 59))),
-      _MutableBucket(context.l10n.bucketNoon, '',
-          date: filter.from.add(const Duration(hours: 11)),
-          endDate: filter.from.add(const Duration(hours: 13, minutes: 59))),
-      _MutableBucket(context.l10n.bucketEvening, '',
-          date: filter.from.add(const Duration(hours: 14)),
-          endDate: filter.from.add(const Duration(hours: 18, minutes: 59))),
-      _MutableBucket(context.l10n.bucketNight, '',
-          date: filter.from.add(const Duration(hours: 19)),
-          endDate: filter.to),
+      _MutableBucket(
+        context.l10n.bucketDawn,
+        '',
+        date: filter.from,
+        endDate: filter.from.add(const Duration(hours: 5, minutes: 59)),
+      ),
+      _MutableBucket(
+        context.l10n.bucketMorning,
+        '',
+        date: filter.from.add(const Duration(hours: 6)),
+        endDate: filter.from.add(const Duration(hours: 10, minutes: 59)),
+      ),
+      _MutableBucket(
+        context.l10n.bucketNoon,
+        '',
+        date: filter.from.add(const Duration(hours: 11)),
+        endDate: filter.from.add(const Duration(hours: 13, minutes: 59)),
+      ),
+      _MutableBucket(
+        context.l10n.bucketEvening,
+        '',
+        date: filter.from.add(const Duration(hours: 14)),
+        endDate: filter.from.add(const Duration(hours: 18, minutes: 59)),
+      ),
+      _MutableBucket(
+        context.l10n.bucketNight,
+        '',
+        date: filter.from.add(const Duration(hours: 19)),
+        endDate: filter.to,
+      ),
     ];
     for (final t in txns) {
       final h = t.createdAt.hour;
@@ -139,12 +155,13 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   List<KuberBarBucket> _buildDayBuckets(
-      List<Transaction> txns, DateTime from, DateTime to) {
+    List<Transaction> txns,
+    DateTime from,
+    DateTime to,
+  ) {
     final fromDay = DateTime(from.year, from.month, from.day);
-    final daysCount = DateTime(to.year, to.month, to.day)
-            .difference(fromDay)
-            .inDays +
-        1;
+    final daysCount =
+        DateTime(to.year, to.month, to.day).difference(fromDay).inDays + 1;
     final buckets = List.generate(daysCount, (i) {
       final d = fromDay.add(Duration(days: i));
       return _MutableBucket(
@@ -155,7 +172,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     });
     for (final t in txns) {
       final txDay = DateTime(
-          t.createdAt.year, t.createdAt.month, t.createdAt.day);
+        t.createdAt.year,
+        t.createdAt.month,
+        t.createdAt.day,
+      );
       final diff = txDay.difference(fromDay).inDays;
       if (diff < 0 || diff >= daysCount) continue;
       if (t.type == 'income') {
@@ -168,18 +188,23 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   List<KuberBarBucket> _buildWeekBuckets(
-      List<Transaction> txns, DateTime from, DateTime to) {
+    List<Transaction> txns,
+    DateTime from,
+    DateTime to,
+  ) {
     final fromDay = DateTime(from.year, from.month, from.day);
-    final days = DateTime(to.year, to.month, to.day)
-            .difference(fromDay)
-            .inDays +
-        1;
+    final days =
+        DateTime(to.year, to.month, to.day).difference(fromDay).inDays + 1;
     final weeks = (days / 7).ceil().clamp(1, 1000);
     final buckets = List.generate(weeks, (i) {
       final start = fromDay.add(Duration(days: i * 7));
-      final end =
-          i == weeks - 1 ? to : start.add(const Duration(days: 6));
-      return _MutableBucket(context.l10n.weekLabel, '${i + 1}', date: start, endDate: end);
+      final end = i == weeks - 1 ? to : start.add(const Duration(days: 6));
+      return _MutableBucket(
+        context.l10n.weekLabel,
+        '${i + 1}',
+        date: start,
+        endDate: end,
+      );
     });
     for (final t in txns) {
       final dayDiff = t.createdAt.difference(fromDay).inDays;
@@ -194,9 +219,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   List<KuberBarBucket> _buildMonthBuckets(
-      List<Transaction> txns, DateTime from, DateTime to) {
-    final monthsDiff =
-        (to.year - from.year) * 12 + to.month - from.month;
+    List<Transaction> txns,
+    DateTime from,
+    DateTime to,
+  ) {
+    final monthsDiff = (to.year - from.year) * 12 + to.month - from.month;
     final count = (monthsDiff + 1).clamp(1, 240);
     final buckets = List.generate(count, (i) {
       final m = DateTime(from.year, from.month + i, 1);
@@ -209,9 +236,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       );
     });
     for (final t in txns) {
-      final idx = (t.createdAt.year - from.year) * 12 +
-          t.createdAt.month -
-          from.month;
+      final idx =
+          (t.createdAt.year - from.year) * 12 + t.createdAt.month - from.month;
       if (idx < 0 || idx >= count) continue;
       if (t.type == 'income') {
         buckets[idx].income += t.amount;
@@ -223,7 +249,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   List<KuberBarBucket> _buildQuarterBuckets(
-      List<Transaction> txns, DateTime from, DateTime to) {
+    List<Transaction> txns,
+    DateTime from,
+    DateTime to,
+  ) {
     final fromQStartMonth = ((from.month - 1) ~/ 3) * 3 + 1;
     final fromQ = DateTime(from.year, fromQStartMonth, 1);
     final toQStartMonth = ((to.month - 1) ~/ 3) * 3 + 1;
@@ -256,7 +285,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   List<KuberBarBucket> _buildYearBuckets(
-      List<Transaction> txns, DateTime from, DateTime to) {
+    List<Transaction> txns,
+    DateTime from,
+    DateTime to,
+  ) {
     final years = (to.year - from.year + 1).clamp(1, 50);
     final buckets = List.generate(years, (i) {
       final yStart = DateTime(from.year + i, 1, 1);
@@ -326,34 +358,26 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         key: TutorialStepKeys.analyticsPage,
         slivers: [
           // ── Header (always eager) ─────────────────────────────────
-          const SliverToBoxAdapter(
-            child: SizedBox(height: KuberSpacing.xl),
-          ),
-          // Same structure as History: KuberPageHeader supplies its own
-          // horizontal padding, so it must not sit inside the body's
-          // SliverPadding or the title drifts right of the content edge.
+          // Header (feedback round 1): "Analytics", no description.
           SliverToBoxAdapter(
-            child: KuberPageHeader(
-              title: context.l10n.analyticsTitle,
-              description: context.l10n.analyticsDescription,
-            ),
+            child: KuberAppBar(title: context.l10n.navAnalytics),
           ),
           const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            padding: EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
             sliver: SliverToBoxAdapter(child: TopFilterRow()),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: KuberSpacing.lg),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: KuberSpace.md)),
 
           // ── Analytics widgets (dynamic order + visibility from editor) ─
           if (isEmpty)
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpace.screenMargin,
+              ),
               sliver: SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    const SizedBox(height: KuberSpacing.xl),
+                    const SizedBox(height: KuberSpace.xl),
                     KuberEmptyState(
                       icon: Icons.bar_chart,
                       title: context.l10n.noData,
@@ -365,7 +389,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+              padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpace.screenMargin,
+              ),
               sliver: _AnalyticsWidgetList(
                 filter: filter,
                 buckets: buckets,
@@ -401,13 +427,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     double expense,
     double net,
   ) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-      ),
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+    final fmt = ref.watch(formatterProvider);
+    final isPrivate = ref.watch(privacyModeProvider);
+    // Summary (board 3.6b): two tiles + a net row, all surfaceContainerHigh r12.
+    return KuberCard(
       child: Column(
         children: [
           Row(
@@ -416,56 +439,54 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 child: _SummaryTile(
                   label: context.l10n.incomeLabel,
                   amount: maskAmount(
-                    ref.watch(formatterProvider).formatCurrency(income.round()),
-                    ref.watch(privacyModeProvider),
+                    fmt.formatCurrency(income.round()),
+                    isPrivate,
                   ),
-                  color: cs.tertiary,
-                  icon: Icons.arrow_downward,
+                  color: context.kuberMoney.income,
+                  icon: Icons.south_rounded,
                 ),
               ),
-              const SizedBox(width: KuberSpacing.md),
+              const SizedBox(width: KuberSpace.md),
               Expanded(
                 child: _SummaryTile(
                   label: context.l10n.expenseLabel,
                   amount: maskAmount(
-                    ref.watch(formatterProvider).formatCurrency(expense.round()),
-                    ref.watch(privacyModeProvider),
+                    fmt.formatCurrency(expense.round()),
+                    isPrivate,
                   ),
-                  color: cs.error,
-                  icon: Icons.arrow_upward,
+                  color: context.kuberMoney.expense,
+                  icon: Icons.north_rounded,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              vertical: KuberSpacing.sm,
-              horizontal: KuberSpacing.md,
-            ),
+            padding: const EdgeInsets.all(KuberSpace.md),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: KuberShape.mediumR,
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Net: ',
+                  'Net',
                   style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                 ),
+                const Spacer(),
                 Flexible(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       maskAmount(
-                        '${net >= 0 ? '+' : ''}${ref.watch(formatterProvider).formatCurrency(net.round())}',
-                        ref.watch(privacyModeProvider),
+                        '${net >= 0 ? '+' : ''}${fmt.formatCurrency(net.round())}',
+                        isPrivate,
                       ),
-                      style: tt.titleMedium?.copyWith(
-                        color: net >= 0 ? cs.tertiary : cs.error,
-                        fontWeight: FontWeight.w700,
+                      style: tt.titleLarge?.copyWith(
+                        color: net >= 0
+                            ? context.kuberMoney.income
+                            : context.kuberMoney.expense,
                       ),
                     ),
                   ),
@@ -492,32 +513,24 @@ class _AnalyticsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final tt = theme.textTheme;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
-      ),
+    final tt = Theme.of(context).textTheme;
+    // Chart-card header pattern (screens/analytics.md): titleMedium, tabs
+    // under it, 16 above the content.
+    return KuberCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: tt.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            style: tt.titleMedium,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          // Tabs sit below the title (left-aligned), matching the chart cards.
           if (trailing != null) ...[
-            const SizedBox(height: KuberSpacing.md),
+            const SizedBox(height: KuberSpace.lg),
             Align(alignment: Alignment.centerLeft, child: trailing!),
           ],
-          const SizedBox(height: KuberSpacing.xl),
+          const SizedBox(height: KuberSpace.lg),
           child,
         ],
       ),
@@ -544,35 +557,30 @@ class _SummaryTile extends StatelessWidget {
     final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.md),
+      padding: const EdgeInsets.all(KuberSpace.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: KuberShape.mediumR,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 14),
-              const SizedBox(width: KuberSpacing.xs),
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: KuberSpace.xs),
               Text(
                 label,
-                style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+                style: textTheme.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: KuberSpacing.xs),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(
-              amount,
-              style: textTheme.titleMedium?.copyWith(
-                color: cs.onSurface,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+            child: Text(amount, style: textTheme.titleLarge),
           ),
         ],
       ),
@@ -595,8 +603,14 @@ class _AnalyticsWidgetList extends ConsumerStatefulWidget {
   final ColorScheme colorScheme;
   final TextTheme textTheme;
 
-  final Widget Function(ColorScheme cs, TextTheme tt, double inc, double exp,
-      double net) buildSummary;
+  final Widget Function(
+    ColorScheme cs,
+    TextTheme tt,
+    double inc,
+    double exp,
+    double net,
+  )
+  buildSummary;
 
   const _AnalyticsWidgetList({
     required this.filter,
@@ -642,13 +656,18 @@ class _AnalyticsWidgetListState extends ConsumerState<_AnalyticsWidgetList> {
   }
 
   Widget _buildWidget(BuildContext ctx, WidgetRef ref, String id) {
-    final bottom = const EdgeInsets.only(bottom: KuberSpacing.lg);
+    final bottom = const EdgeInsets.only(bottom: KuberSpace.cardGap);
     switch (id) {
       case 'summary_card':
         return Padding(
           padding: bottom,
-          child: widget.buildSummary(widget.colorScheme, widget.textTheme,
-              widget.totalIncome, widget.totalExpense, widget.netAmount),
+          child: widget.buildSummary(
+            widget.colorScheme,
+            widget.textTheme,
+            widget.totalIncome,
+            widget.totalExpense,
+            widget.netAmount,
+          ),
         );
       case 'spending_trend':
         return Padding(
@@ -671,7 +690,9 @@ class _AnalyticsWidgetListState extends ConsumerState<_AnalyticsWidgetList> {
                   ? null
                   : widget.filter.effectiveBucket,
               availableBuckets: availableBucketsForRange(
-                  widget.filter.from, widget.filter.to),
+                widget.filter.from,
+                widget.filter.to,
+              ),
               onBucketChanged: (b) =>
                   ref.read(analyticsFilterProvider.notifier).setBucket(b),
             ),
@@ -717,11 +738,14 @@ class _AnalyticsWidgetListState extends ConsumerState<_AnalyticsWidgetList> {
         // Scoped widget: watches _biggestTabProvider internally so a tab switch
         // rebuilds only this section, not the whole analytics screen (which
         // would otherwise re-run bucket computation for every tab tap).
-        return _BiggestTransactionsSection(
-          periodTxns: widget.periodTxns,
-          categoryMap: widget.categoryMap,
-          colorScheme: widget.colorScheme,
-          textTheme: widget.textTheme,
+        return Padding(
+          padding: bottom,
+          child: _BiggestTransactionsSection(
+            periodTxns: widget.periodTxns,
+            categoryMap: widget.categoryMap,
+            colorScheme: widget.colorScheme,
+            textTheme: widget.textTheme,
+          ),
         );
       default:
         return const SizedBox.shrink();
@@ -745,13 +769,14 @@ class _AnalyticsWidgetListState extends ConsumerState<_AnalyticsWidgetList> {
           itemBuilder: (ctx, i) {
             if (i == visible.length) {
               return const Padding(
-                padding: EdgeInsets.only(top: KuberSpacing.lg),
+                padding: EdgeInsets.only(bottom: KuberSpace.cardGap),
                 child: DeeperInsightsTeaser(),
               );
             }
             if (i == visible.length + 1) {
               return const EditWidgetsButton(
-                  scope: WidgetEditorScope.analytics);
+                scope: WidgetEditorScope.analytics,
+              );
             }
             if (i == visible.length + 2) {
               return SizedBox(height: navBarBottomPadding(ctx));
@@ -786,22 +811,22 @@ class _BiggestTransactionsSection extends ConsumerWidget {
     final tt = textTheme;
     final biggestTab = ref.watch(_biggestTabProvider);
     final biggestType = biggestTab == 0 ? 'expense' : 'income';
-    final top5 = (periodTxns.where((t) => t.type == biggestType).toList()
-          ..sort((a, b) => b.amount.compareTo(a.amount)))
-        .take(5)
-        .toList();
+    final top5 =
+        (periodTxns.where((t) => t.type == biggestType).toList()
+              ..sort((a, b) => b.amount.compareTo(a.amount)))
+            .take(5)
+            .toList();
 
     return _AnalyticsCard(
       title: context.l10n.biggestTransactions,
       trailing: KuberSegmentedTabs(
         labels: [context.l10n.expenseLabel, context.l10n.incomeLabel],
         selectedIndex: biggestTab,
-        onChanged: (i) =>
-            ref.read(_biggestTabProvider.notifier).state = i,
+        onChanged: (i) => ref.read(_biggestTabProvider.notifier).state = i,
       ),
       child: top5.isEmpty
           ? Padding(
-              padding: const EdgeInsets.symmetric(vertical: KuberSpacing.xl),
+              padding: const EdgeInsets.symmetric(vertical: KuberSpace.xl),
               child: Center(
                 child: Text(
                   'No $biggestType transactions',
@@ -809,82 +834,44 @@ class _BiggestTransactionsSection extends ConsumerWidget {
                 ),
               ),
             )
-          : Column(
+          : KuberGroup(
               children: List.generate(top5.length, (i) {
                 final t = top5[i];
                 final cat = categoryMap[int.tryParse(t.categoryId)];
                 final isExpense = t.type == 'expense';
-                final rankColor = i == 0 ? cs.primary : cs.onSurfaceVariant;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-                  child: InkWell(
-                    onTap: () => showTransactionDetailSheet(context, ref, t),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: KuberSpacing.xs,
+                return KuberListRow(
+                  onTap: () => showTransactionDetailSheet(context, ref, t),
+                  leading: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        child: Text(
+                          '#${i + 1}',
+                          style: tt.labelLarge?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: rankColor.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              '#${i + 1}',
-                              style: tt.labelSmall?.copyWith(
-                                color: rankColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: KuberSpacing.md),
-                          if (cat != null)
-                            CategoryIcon.square(
-                              icon: IconMapper.fromString(cat.icon),
-                              rawColor: harmonizeCategory(
-                                context,
-                                Color(cat.colorValue),
-                              ),
-                              size: 36,
-                            ),
-                          const SizedBox(width: KuberSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  t.name,
-                                  style: tt.bodyMedium,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (cat != null)
-                                  Text(
-                                    cat.name,
-                                    style: tt.bodySmall?.copyWith(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            maskAmount(
-                              '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
-                              ref.watch(privacyModeProvider),
-                            ),
-                            style: tt.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: isExpense ? cs.error : cs.tertiary,
-                            ),
-                          ),
-                        ],
-                      ),
+                      const SizedBox(width: KuberSpace.sm),
+                      if (cat != null)
+                        CategoryIcon.square(
+                          icon: IconMapper.fromString(cat.icon),
+                          rawColor: Color(cat.colorValue),
+                        ),
+                    ],
+                  ),
+                  title: t.name,
+                  subtitle: cat?.name,
+                  trailing: Text(
+                    maskAmount(
+                      '${isExpense ? '-' : '+'}${ref.watch(formatterProvider).formatCurrency(t.amount)}',
+                      ref.watch(privacyModeProvider),
+                    ),
+                    style: tt.titleMedium?.copyWith(
+                      color: isExpense
+                          ? context.kuberMoney.expense
+                          : context.kuberMoney.income,
                     ),
                   ),
                 );

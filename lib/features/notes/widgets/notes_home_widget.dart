@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_home_widget_title.dart';
 import '../../pro/feature_gates/gate_sheet_notes_limit.dart';
@@ -40,8 +42,10 @@ class NotesHomeWidget extends ConsumerWidget {
       ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     final latest = sorted.firstOrNull;
 
+    final theme = Theme.of(context);
+    // Board 3.2a: latest note + View all (outlined) and New note (tonal).
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         KuberHomeWidgetTitle(
           title: 'Kuber Notes',
@@ -49,23 +53,16 @@ class NotesHomeWidget extends ConsumerWidget {
               ? null
               : Text(
                   notes.length == 1 ? '1 note' : '${notes.length} notes',
-                  style: localeFont(
-                    fontSize: 11,
+                  style: theme.textTheme.bodySmall!.copyWith(
                     color: cs.onSurfaceVariant,
                   ),
                 ),
         ),
-        Container(
-          padding: EdgeInsets.all(latest == null ? 20 : 14),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-            border: Border.all(color: cs.outline),
-          ),
+        KuberCard(
           child: latest == null
               ? _EmptyBody(onAdd: () => _addNote(context, ref))
               : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
@@ -74,56 +71,37 @@ class NotesHomeWidget extends ConsumerWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 34,
-                            height: 34,
-                            decoration: BoxDecoration(
-                              color: cs.primary.withValues(alpha: 0.12),
-                              borderRadius:
-                                  BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(
-                                  color:
-                                      cs.primary.withValues(alpha: 0.28)),
-                            ),
-                            child: Icon(Icons.sticky_note_2_outlined,
-                                size: 17, color: cs.primary),
+                          const KuberIconTile(
+                            icon: Icons.sticky_note_2_outlined,
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: KuberSpace.lg),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'LATEST',
-                                  style: localeFont(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.6,
+                                  sentenceCase('LATEST'),
+                                  style: theme.textTheme.bodySmall!.copyWith(
                                     color: cs.onSurfaceVariant,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
                                 Text(
                                   latest.title.isEmpty
                                       ? 'Untitled note'
                                       : latest.title,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: localeFont(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
+                                  style: theme.textTheme.titleMedium!.copyWith(
                                     color: cs.onSurface,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
                                 Text(
-                                  notePlainText(latest)
-                                      .replaceAll('\n', ' · ')
-                                      .trim(),
+                                  notePlainText(
+                                    latest,
+                                  ).replaceAll('\n', ' · ').trim(),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: localeFont(
-                                    fontSize: 11.5,
+                                  style: theme.textTheme.bodyMedium!.copyWith(
                                     color: cs.onSurfaceVariant,
                                   ),
                                 ),
@@ -133,24 +111,27 @@ class NotesHomeWidget extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: KuberSpace.lg),
                     Row(
                       children: [
                         Expanded(
-                          child: _WidgetButton(
+                          child: AppButton(
                             label: 'View notes',
                             icon: Icons.visibility_outlined,
-                            filled: false,
-                            onTap: () => context.push('/more/notes'),
+                            type: AppButtonType.outline,
+                            height: 40,
+                            fullWidth: true,
+                            onPressed: () => context.push('/more/notes'),
                           ),
                         ),
-                        const SizedBox(width: 9),
+                        const SizedBox(width: KuberSpace.sm),
                         Expanded(
-                          child: _WidgetButton(
+                          child: AppButton(
                             label: 'Add a note',
                             icon: Icons.add_rounded,
-                            filled: true,
-                            onTap: () => _addNote(context, ref),
+                            height: 40,
+                            fullWidth: true,
+                            onPressed: () => _addNote(context, ref),
                           ),
                         ),
                       ],
@@ -170,44 +151,29 @@ class _EmptyBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-                border:
-                    Border.all(color: cs.primary.withValues(alpha: 0.24)),
-              ),
-              child: Icon(Icons.sticky_note_2_outlined,
-                  size: 20, color: cs.primary),
-            ),
-            const SizedBox(width: 12),
+            const KuberIconTile(icon: Icons.sticky_note_2_outlined),
+            const SizedBox(width: KuberSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'No notes yet',
-                    style: localeFont(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+                    style: theme.textTheme.titleMedium!.copyWith(
                       color: cs.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 2),
                   Text(
                     'Jot your first expense, list or quick calculation.',
-                    style: localeFont(
-                      fontSize: 11.5,
+                    style: theme.textTheme.bodyMedium!.copyWith(
                       color: cs.onSurfaceVariant,
-                      height: 1.4,
                     ),
                   ),
                 ],
@@ -215,64 +181,15 @@ class _EmptyBody extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 14),
-        _WidgetButton(
+        const SizedBox(height: KuberSpace.lg),
+        AppButton(
           label: 'Add a note',
           icon: Icons.add_rounded,
-          filled: true,
-          height: 44,
-          onTap: onAdd,
+          height: 40,
+          fullWidth: true,
+          onPressed: onAdd,
         ),
       ],
-    );
-  }
-}
-
-class _WidgetButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool filled;
-  final double height;
-  final VoidCallback onTap;
-
-  const _WidgetButton({
-    required this.label,
-    required this.icon,
-    required this.filled,
-    required this.onTap,
-    this.height = 40,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: filled ? cs.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: filled ? null : Border.all(color: cs.outline),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon,
-                size: 15,
-                color: filled ? Colors.white : cs.onSurfaceVariant),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: localeFont(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: filled ? Colors.white : cs.onSurface,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

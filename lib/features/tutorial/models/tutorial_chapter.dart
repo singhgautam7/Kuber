@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import 'tutorial_step_keys.dart';
 
@@ -17,14 +17,15 @@ class TutorialStep {
 }
 
 class TutorialChapter {
-  final String emoji;
+  /// Outlined glyph matching the nav bar's icon for the same area.
+  final IconData icon;
   final String title;
   final String description;
   final String route;
   final List<TutorialStep> steps;
 
   const TutorialChapter({
-    required this.emoji,
+    required this.icon,
     required this.title,
     required this.description,
     required this.route,
@@ -36,7 +37,7 @@ class TutorialChapter {
 
 final tutorialChapters = <TutorialChapter>[
   TutorialChapter(
-    emoji: '💸',
+    icon: Icons.add_circle_outline_rounded,
     title: 'Transactions',
     description: 'Add income, expenses, transfers, notes, receipts and tags.',
     route: '/add-transaction',
@@ -90,7 +91,7 @@ final tutorialChapters = <TutorialChapter>[
     ],
   ),
   TutorialChapter(
-    emoji: '🏠',
+    icon: Icons.home_outlined,
     title: 'Home',
     description: 'Read your monthly snapshot and use quick actions.',
     route: '/',
@@ -128,7 +129,7 @@ final tutorialChapters = <TutorialChapter>[
     ],
   ),
   TutorialChapter(
-    emoji: '📋',
+    icon: Icons.receipt_outlined,
     title: 'History',
     description: 'Find, filter, inspect and edit past transactions.',
     route: '/history',
@@ -160,7 +161,7 @@ final tutorialChapters = <TutorialChapter>[
     ],
   ),
   TutorialChapter(
-    emoji: '📊',
+    icon: Icons.insert_chart_outlined,
     title: 'Analytics',
     description: 'Spot trends and understand where your money goes.',
     route: '/analytics',
@@ -197,7 +198,7 @@ final tutorialChapters = <TutorialChapter>[
     ],
   ),
   TutorialChapter(
-    emoji: '⚙️',
+    icon: Icons.grid_view_outlined,
     title: 'More & Settings',
     description: 'Customize Kuber, manage data and explore deeper tools.',
     route: '/more',

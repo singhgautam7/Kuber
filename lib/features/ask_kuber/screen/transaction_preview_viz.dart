@@ -54,8 +54,7 @@ class _TransactionPreviewVizViewState
     // Watch so a default-account change (returning from settings) re-resolves.
     final categories = ref.watch(categoryListProvider).valueOrNull ?? const [];
     final accounts = ref.watch(allAccountsProvider).valueOrNull ?? const [];
-    final defaultId =
-        ref.watch(settingsProvider).valueOrNull?.defaultAccountId;
+    final defaultId = ref.watch(settingsProvider).valueOrNull?.defaultAccountId;
     final parsed = parseQuickAddMulti(viz.originalMessage);
     final drafts = resolveDrafts(
       parsed,
@@ -90,7 +89,9 @@ class _TransactionPreviewVizViewState
       useRootNavigator: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: draft.categoryId,
@@ -180,15 +181,16 @@ class _TransactionPreviewVizViewState
 
   Widget _previewView() {
     final drafts = _resolveNow();
-    final hasMissingAccount =
-        drafts.any((d) => d.status == QuickAddDraftStatus.missingAccount);
+    final hasMissingAccount = drafts.any(
+      (d) => d.status == QuickAddDraftStatus.missingAccount,
+    );
     final readyCount = drafts.where((d) => d.counts).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _cards(drafts, interactive: true),
-        const SizedBox(height: KuberSpacing.md),
+        const SizedBox(height: KuberSpace.md),
         if (hasMissingAccount)
           _missingAccountError()
         else
@@ -227,13 +229,13 @@ class _TransactionPreviewVizViewState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _cards(viz.drafts, onUndo: _undo),
-        const SizedBox(height: KuberSpacing.sm),
+        const SizedBox(height: KuberSpace.sm),
         Text(
           n <= 1
               ? 'Done. Saved${account != null ? ' to $account' : ''}.'
               : 'Added $n transactions${account != null ? ' to $account' : ''}.',
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -247,9 +249,11 @@ class _TransactionPreviewVizViewState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _cards(viz.drafts),
-        const SizedBox(height: KuberSpacing.sm),
-        Text('Not added.',
-            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+        const SizedBox(height: KuberSpace.sm),
+        Text(
+          'Not added.',
+          style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
+        ),
       ],
     );
   }
@@ -268,8 +272,9 @@ class _TransactionPreviewVizViewState
             compact: true,
             onUndo: onUndo,
             onSetDefaultAccount: _openAccountSettings,
-            onPickCategory:
-                interactive ? () => _pickCategory(i, drafts[i]) : null,
+            onPickCategory: interactive
+                ? () => _pickCategory(i, drafts[i])
+                : null,
           ),
         ],
       ],
@@ -283,7 +288,7 @@ class _TransactionPreviewVizViewState
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cs.error.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: cs.error.withValues(alpha: 0.35)),
       ),
       child: Column(
@@ -292,14 +297,15 @@ class _TransactionPreviewVizViewState
           Row(
             children: [
               Icon(Icons.error_outline_rounded, size: 18, color: cs.error),
-              const SizedBox(width: KuberSpacing.sm),
+              const SizedBox(width: KuberSpace.sm),
               Expanded(
                 child: Text(
                   'No default account selected',
                   style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                      color: cs.onSurface),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
                 ),
               ),
             ],
@@ -307,9 +313,9 @@ class _TransactionPreviewVizViewState
           const SizedBox(height: 6),
           Text(
             'Set one to add transactions from Ask Kuber.',
-            style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant),
+            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
           ),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           GestureDetector(
             onTap: _openAccountSettings,
             child: Row(
@@ -318,9 +324,10 @@ class _TransactionPreviewVizViewState
                 Text(
                   'Open Account Settings',
                   style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: cs.primary),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: cs.primary,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 Icon(Icons.arrow_forward_rounded, size: 15, color: cs.primary),

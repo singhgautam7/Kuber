@@ -6,8 +6,9 @@ import '../../../core/models/overflow_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/breakpoints.dart';
 import '../../../core/utils/locale_font.dart';
+import '../../../shared/widgets/app_button.dart';
+import 'calculator_widgets.dart' show ToolSection;
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 
 /// Standard template every calculator screen builds on: app bar (back + home +
 /// Save bookmark action + overflow), page header, an optional saved-indicator
@@ -54,15 +55,17 @@ class ToolScreenScaffold extends ConsumerWidget {
     // Save lives at the top of the overflow menu (the AppBar keeps just the
     // info button + overflow). The Save item only appears for a fresh, valid
     // calculation; "View saved …" is always available.
-    final mergedOverflow = KuberOverflowConfig(items: [
-      if (canSave && !isSavedView)
-        KuberOverflowItem(
-          icon: Icons.bookmark_outline_rounded,
-          label: 'Save this calculation',
-          onTap: onSave,
-        ),
-      ...?overflowConfig?.items,
-    ]);
+    final mergedOverflow = KuberOverflowConfig(
+      items: [
+        if (canSave && !isSavedView)
+          KuberOverflowItem(
+            icon: Icons.bookmark_outline_rounded,
+            label: 'Save this calculation',
+            onTap: onSave,
+          ),
+        ...?overflowConfig?.items,
+      ],
+    );
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -72,64 +75,127 @@ class ToolScreenScaffold extends ConsumerWidget {
         // Disable the Android stretch-overscroll indicator: its shader can
         // blank out complex chart/table content when scrolling back to the top.
         child: ScrollConfiguration(
-          behavior:
-              ScrollConfiguration.of(context).copyWith(overscroll: false),
+          behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
           child: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               SliverToBoxAdapter(
                 child: KuberAppBar(
-                  title: '',
+                  title: title,
                   showBack: true,
-                  showHome: true,
                   infoConfig: infoConfig,
                   overflowConfig: mergedOverflow,
                 ),
               ),
-            SliverToBoxAdapter(
-              child: KuberPageHeader(title: title, description: subtitle),
-            ),
-            if (banner != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.md),
-                  child: banner!,
+
+              if (banner != null)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      KuberSpace.screenMargin,
+                      0,
+                      KuberSpace.screenMargin,
+                      KuberSpace.md,
+                    ),
+                    child: banner!,
+                  ),
+                ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  KuberSpace.screenMargin,
+                  0,
+                  KuberSpace.screenMargin,
+                  KuberSpace.lg,
+                ),
+                // Inputs first, results below them (review round 3). Each
+                // section fades / slides in once when it first appears (e.g.
+                // the breakdown cards after the inputs become valid), and the
+                // column eases to its new height instead of jumping.
+                sliver: SliverToBoxAdapter(
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, section) in sections.indexed) ...[
+                          if (i > 0) const SizedBox(height: KuberSpace.lg),
+                          _AppearOnce(
+                            key: section.key ??
+                                (section is ToolSection
+                                    ? ValueKey('tool-section-${section.title}')
+                                    : ValueKey('tool-section-$i')),
+                            child: section,
+                          ),
+                        ],
+                        const SizedBox(height: KuberSpace.lg),
+                        if (isSavedView)
+                          _SaveBar(
+                            onTap: onUpdate ?? () {},
+                            enabled: isModified,
+                            label: 'Update this calculation',
+                            disabledLabel: 'No changes to update',
+                          )
+                        else
+                          _SaveBar(
+                            onTap: onSave,
+                            enabled: canSave,
+                            label: 'Save this calculation',
+                            disabledLabel: 'Enter values to save',
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                  KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.lg),
-              sliver: SliverList.separated(
-                itemCount: sections.length + 1,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: KuberSpacing.lg),
-                itemBuilder: (context, i) {
-                  if (i < sections.length) return sections[i];
-                  if (isSavedView) {
-                    return _SaveBar(
-                      onTap: onUpdate ?? () {},
-                      enabled: isModified,
-                      label: 'Update this calculation',
-                      disabledLabel: 'No changes to update',
-                    );
-                  }
-                  return _SaveBar(
-                    onTap: onSave,
-                    enabled: canSave,
-                    label: 'Save this calculation',
-                    disabledLabel: 'Enter values to save',
-                  );
-                },
-              ),
-            ),
               SliverToBoxAdapter(
                 child: SizedBox(
-                    height: KuberSpacing.xl + systemNavBarInset(context)),
+                  height: KuberSpace.xl + systemNavBarInset(context),
+                ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Fades and slides its child in once, on first mount. State survives later
+/// rebuilds (the sections live in a plain Column), so it never re-runs while
+/// the user keeps typing.
+class _AppearOnce extends StatefulWidget {
+  final Widget child;
+  const _AppearOnce({super.key, required this.child});
+
+  @override
+  State<_AppearOnce> createState() => _AppearOnceState();
+}
+
+class _AppearOnceState extends State<_AppearOnce>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 280),
+  )..forward();
+  late final Animation<double> _t =
+      CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _t,
+      child: SlideTransition(
+        position: Tween(begin: const Offset(0, 0.04), end: Offset.zero)
+            .animate(_t),
+        child: widget.child,
       ),
     );
   }
@@ -149,36 +215,12 @@ class _SaveBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final color = enabled
-        ? cs.primary
-        : cs.onSurfaceVariant.withValues(alpha: 0.4);
-    return InkWell(
-      onTap: enabled ? onTap : null,
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 13),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: color),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.bookmark_outline_rounded, color: color, size: 18),
-            const SizedBox(width: 9),
-            Text(
-              enabled ? label : disabledLabel,
-              style: localeFont(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return AppButton(
+      label: enabled ? label : disabledLabel,
+      icon: Icons.bookmark_outline_rounded,
+      type: AppButtonType.normal,
+      fullWidth: true,
+      onPressed: enabled ? onTap : null,
     );
   }
 }
@@ -199,13 +241,15 @@ class SavedIndicatorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final accent = isModified ? cs.tertiary : cs.primary;
+    final accent = isModified ? context.kuberMoney.income : cs.primary;
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.md, vertical: 10),
+        horizontal: KuberSpace.md,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         border: Border.all(color: accent.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -216,8 +260,8 @@ class SavedIndicatorBanner extends StatelessWidget {
             child: Text(
               'Viewing: $name',
               style: localeFont(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
                 color: accent,
               ),
               maxLines: 1,

@@ -275,6 +275,12 @@ class DataController extends StateNotifier<DataState> {
     );
     try {
       await _service.generateMockData();
+      // The mock data brings a new card vault (PIN 0000): drop the old
+      // session key, Keystore key and cached card list, as Clear all does.
+      await CardKeystore.clear();
+      _ref.read(cardSessionProvider.notifier).lock();
+      _ref.invalidate(cardVaultMetaProvider);
+      _ref.invalidate(storedCardsProvider);
       await _refreshData();
       state = state.copyWith(
         status: DataOpStatus.success,

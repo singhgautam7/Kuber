@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../widgets/calculator_widgets.dart';
 
@@ -35,14 +34,14 @@ class _BreakevenCalculatorScreenState
     double savings1yr,
     double savings3yr,
     double savings5yr,
-  })? _compute() {
+  })?
+  _compute() {
     final cost = double.tryParse(_costCtrl.text.replaceAll(',', ''));
     final saving = double.tryParse(_savingCtrl.text.replaceAll(',', ''));
     if (cost == null || saving == null) return null;
     if (cost <= 0 || saving <= 0) return null;
 
-    final altCost =
-        double.tryParse(_altCostCtrl.text.replaceAll(',', '')) ?? 0;
+    final altCost = double.tryParse(_altCostCtrl.text.replaceAll(',', '')) ?? 0;
     final effectiveSaving = saving + altCost;
     if (effectiveSaving <= 0) return null;
 
@@ -76,24 +75,17 @@ class _BreakevenCalculatorScreenState
         slivers: [
           const SliverToBoxAdapter(
             child: KuberAppBar(
-              title: '',
-              showBack: true,
-              showHome: true,
-              infoConfig: InfoConstants.breakevenCalculator,
-            ),
-          ),
-          const SliverToBoxAdapter(
-            child: KuberPageHeader(
               title: 'Break-even Calculator',
-              description: 'How long to recover a purchase',
+              showBack: true,
+              infoConfig: InfoConstants.breakevenCalculator,
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
+              KuberSpace.lg,
               0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+              KuberSpace.lg,
+              KuberSpace.xl,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
@@ -106,7 +98,7 @@ class _BreakevenCalculatorScreenState
                       onChanged: (_) => setState(() {}),
                       formatAsAmount: true,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     ToolTextField(
                       label: 'MONTHLY SAVING / BENEFIT',
                       controller: _savingCtrl,
@@ -114,7 +106,7 @@ class _BreakevenCalculatorScreenState
                       onChanged: (_) => setState(() {}),
                       formatAsAmount: true,
                     ),
-                    const SizedBox(height: KuberSpacing.lg),
+                    const SizedBox(height: KuberSpace.lg),
                     ToolTextField(
                       label: 'ALTERNATIVE MONTHLY COST (OPTIONAL)',
                       controller: _altCostCtrl,
@@ -124,7 +116,7 @@ class _BreakevenCalculatorScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 ToolResultCard(
                   children: result == null
                       ? [const ToolEmptyResult()]
@@ -134,27 +126,34 @@ class _BreakevenCalculatorScreenState
                             value: _formatBreakEven(result.breakEvenMonths),
                             color: cs.primary,
                           ),
-                          const SizedBox(height: KuberSpacing.lg),
+                          const SizedBox(height: KuberSpace.lg),
                           ToolStatRow(
                             label: 'Total Savings after 1 Year',
-                            value: formatter.formatCurrency(result.savings1yr,
-                                symbol: currency.symbol),
-                            valueColor:
-                                result.savings1yr >= 0 ? cs.tertiary : cs.error,
+                            value: formatter.formatCurrency(
+                              result.savings1yr,
+                              symbol: currency.symbol,
+                            ),
+                            valueColor: result.savings1yr >= 0
+                                ? context.kuberMoney.income
+                                : context.kuberMoney.expense,
                           ),
-                          const SizedBox(height: KuberSpacing.sm),
+                          const SizedBox(height: KuberSpace.sm),
                           ToolStatRow(
                             label: 'Total Savings after 3 Years',
-                            value: formatter.formatCurrency(result.savings3yr,
-                                symbol: currency.symbol),
-                            valueColor: cs.tertiary,
+                            value: formatter.formatCurrency(
+                              result.savings3yr,
+                              symbol: currency.symbol,
+                            ),
+                            valueColor: context.kuberMoney.income,
                           ),
-                          const SizedBox(height: KuberSpacing.sm),
+                          const SizedBox(height: KuberSpace.sm),
                           ToolStatRow(
                             label: 'Total Savings after 5 Years',
-                            value: formatter.formatCurrency(result.savings5yr,
-                                symbol: currency.symbol),
-                            valueColor: cs.tertiary,
+                            value: formatter.formatCurrency(
+                              result.savings5yr,
+                              symbol: currency.symbol,
+                            ),
+                            valueColor: context.kuberMoney.income,
                           ),
                         ],
                 ),

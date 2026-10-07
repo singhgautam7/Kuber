@@ -7,6 +7,8 @@ import '../../../core/utils/l10n_ext.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../core/constants/info_constants.dart';
 import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../core/utils/color_harmonizer.dart';
 import '../models/story_icons.dart';
 import '../models/story_models.dart';
 import '../providers/story_providers.dart';
@@ -61,14 +63,18 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
           bubbles: bubbles,
           initialBubbleIndex: index < 0 ? 0 : index,
           onSeen: (id, slideIndex) {
-            ref.read(archiveStoriesProvider.notifier).markSeen(int.parse(id), slideIndex);
+            ref
+                .read(archiveStoriesProvider.notifier)
+                .markSeen(int.parse(id), slideIndex);
           },
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(0.0, 1.0);
           const end = Offset.zero;
-          final tween = Tween(begin: begin, end: end)
-              .chain(CurveTween(curve: Curves.easeOutCubic));
+          final tween = Tween(
+            begin: begin,
+            end: end,
+          ).chain(CurveTween(curve: Curves.easeOutCubic));
           return SlideTransition(
             position: animation.drive(tween),
             child: child,
@@ -93,39 +99,11 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
           return CustomScrollView(
             controller: _scroll,
             slivers: [
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: KuberAppBar(
                   showBack: true,
-                  showHome: true,
-                  title: '',
+                  title: context.l10n.storiesArchiveTitle,
                   infoConfig: InfoConstants.storiesArchive,
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.storiesArchiveTitle,
-                        style: AppTextStyles.inter.copyWith(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: cs.onSurface,
-                          height: 1.15,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        context.l10n.storiesArchiveDesc,
-                        style: AppTextStyles.inter.copyWith(
-                          fontSize: 13,
-                          color: cs.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               if (state.stories.isEmpty)
@@ -144,37 +122,47 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
                 )
               else ...[
                 for (final entry in groups.entries) ...[
-                  SliverToBoxAdapter(child: _DateHeader(label: entry.key)),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                          childAspectRatio: 3 / 4.4,
-                        ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _ArchiveCard(
-                        story: entry.value[index],
-                        onTap: () => _open(state.stories, entry.value[index]),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin,
+                        KuberSpace.md,
+                        KuberSpace.screenMargin,
+                        0,
                       ),
-                      childCount: entry.value.length,
+                      child: KuberSectionHeader(title: entry.key),
                     ),
                   ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: KuberSpace.screenMargin,
+                    ),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: KuberSpace.sm,
+                            crossAxisSpacing: KuberSpace.sm,
+                            mainAxisExtent: 136,
+                          ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _ArchiveCard(
+                          story: entry.value[index],
+                          onTap: () => _open(state.stories, entry.value[index]),
+                        ),
+                        childCount: entry.value.length,
+                      ),
+                    ),
+                  ),
+                ],
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+                    child: state.hasMore
+                        ? _LoadingFooter(cs: cs)
+                        : const SizedBox(height: 8),
+                  ),
                 ),
-              ],
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-                  child: state.hasMore
-                      ? _LoadingFooter(cs: cs)
-                      : const SizedBox(height: 8),
-                ),
-              ),
               ],
             ],
           );
@@ -183,7 +171,10 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
     );
   }
 
-  Map<String, List<StoryViewData>> _grouped(BuildContext context, List<StoryViewData> stories) {
+  Map<String, List<StoryViewData>> _grouped(
+    BuildContext context,
+    List<StoryViewData> stories,
+  ) {
     final out = <String, List<StoryViewData>>{};
     for (final story in stories) {
       (out[_bucketLabel(context, story.generatedAt)] ??= []).add(story);
@@ -204,159 +195,102 @@ class _StoryArchiveScreenState extends ConsumerState<StoryArchiveScreen> {
   }
 }
 
-class _DateHeader extends StatelessWidget {
-  final String label;
-  const _DateHeader({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 12),
-      child: Row(
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: AppTextStyles.inter.copyWith(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: Divider(height: 1, color: cs.outline)),
-        ],
-      ),
-    );
-  }
-}
-
+/// Story card (board 3.27): tinted cover with the story glyph, then kind
+/// (caps), title and date. Unseen stories carry the primary dot.
 class _ArchiveCard extends StatelessWidget {
   final StoryViewData story;
   final VoidCallback onTap;
 
   const _ArchiveCard({required this.story, required this.onTap});
 
+  static String _kind(String type) => switch (type) {
+    'recap_day' => 'DAILY',
+    'recap_week' => 'WEEKLY',
+    'recap_month' => 'MONTHLY',
+    'recap_year' => 'YEARLY',
+    _ => type.replaceAll('_', ' ').toUpperCase(),
+  };
+
   @override
   Widget build(BuildContext context) {
-    final bg = StoryPalette.background[story.color]!;
-    return GestureDetector(
-      onTap: onTap,
-      child: Opacity(
-        opacity: story.seen ? 0.82 : 1,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          child: Container(
-            color: bg,
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: 0.28),
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.45),
-                        ],
-                        stops: const [0, 0.38, 1],
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final tones = categoryTones(context, StoryPalette.ring[story.color]!);
+    return Material(
+      color: cs.surfaceContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: KuberShape.cardR,
+        side: BorderSide(color: cs.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ColoredBox(
+                color: tones.container,
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Icon(
+                        storyIcon(story.icon),
+                        size: 28,
+                        color: tones.fg,
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(9),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        width: 26,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.20),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          storyIcon(story.icon),
-                          size: 15,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            story.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.inter.copyWith(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                    if (!story.seen)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: cs.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: tones.container,
+                              width: 2,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            story.timeLabel,
-                            style: AppTextStyles.inter.copyWith(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withValues(alpha: 0.75),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-                Positioned(
-                  top: 11,
-                  right: 11,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: story.seen ? Colors.transparent : Colors.white,
-                      border: story.seen
-                          ? Border.all(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              width: 1.5,
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 9,
-                  right: 9,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.32),
-                      borderRadius: BorderRadius.circular(KuberRadius.full),
-                    ),
-                    child: Text(
-                      '${story.slides.length}',
-                      style: AppTextStyles.inter.copyWith(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _kind(story.type),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.labelSmall!.copyWith(
+                      letterSpacing: 0.8,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    story.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.titleSmall!.copyWith(color: cs.onSurface),
+                  ),
+                  Text(
+                    story.timeLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: tt.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -380,7 +314,10 @@ class _LoadingFooter extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           context.l10n.loadingOlderStories,
-          style: AppTextStyles.inter.copyWith(fontSize: 12, color: cs.onSurfaceVariant),
+          style: AppTextStyles.inter.copyWith(
+            fontSize: 12,
+            color: cs.onSurfaceVariant,
+          ),
         ),
       ],
     );

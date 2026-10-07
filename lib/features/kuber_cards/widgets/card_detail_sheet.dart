@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/app_button.dart';
-import '../../../shared/widgets/info_table.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../../shared/widgets/kuber_bottom_sheet.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
@@ -68,7 +69,7 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
     final typeLabel = (card.cardType ?? '').isEmpty
         ? 'CARD'
         : '${card.cardType![0].toUpperCase()}${card.cardType!.substring(1)} card'
-            .toUpperCase();
+              .toUpperCase();
 
     return KuberBottomSheet(
       title: card.nickname,
@@ -78,26 +79,24 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
         children: [
           Expanded(
             child: AppButton(
-              label: 'Edit',
-              icon: Icons.edit_rounded,
-              type: AppButtonType.primary,
-              fullWidth: true,
-              height: 46,
-              onPressed: () {
-                Navigator.pop(context);
-                context.push('/cards/edit', extra: card);
-              },
-            ),
-          ),
-          const SizedBox(width: 11),
-          Expanded(
-            child: AppButton(
               label: 'Delete',
               icon: Icons.delete_outline_rounded,
               type: AppButtonType.danger,
               fullWidth: true,
-              height: 46,
               onPressed: () => _confirmDelete(context),
+            ),
+          ),
+          const SizedBox(width: KuberSpace.md),
+          Expanded(
+            child: AppButton(
+              label: 'Edit',
+              icon: Icons.edit_outlined,
+              type: AppButtonType.normal,
+              fullWidth: true,
+              onPressed: () {
+                Navigator.pop(context);
+                context.push('/cards/edit', extra: card);
+              },
             ),
           ),
         ],
@@ -115,39 +114,42 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
     final hasNumber = (dec.number ?? '').isNotEmpty;
     // The reveal toggle governs number, expiry AND custom values, so show it
     // whenever any of those exist.
-    final hasRevealable = hasNumber ||
+    final hasRevealable =
+        hasNumber ||
         (dec.expiry ?? '').isNotEmpty ||
         dec.customFields.isNotEmpty;
 
     // The card face is the hero; below it a field table lists number, holder,
     // expiry and network (number + expiry stay masked until "Show details").
     // Long-press any row (or the card) copies that field's underlying value.
-    final rows = <InfoTableRow>[
-      InfoTableDataRow(
-        label: 'Card number',
-        value: hasNumber
-            ? (_revealed ? _group(dec.number!) : '•••• ${dec.last4 ?? '••••'}')
+    final rows = <Widget>[
+      _fieldRow(
+        hasNumber
+            ? (_revealed
+                  ? _group(dec.number!)
+                  : '•••• •••• •••• ${dec.last4 ?? '••••'}')
             : (dec.last4 != null ? '•••• ${dec.last4}' : '••••'),
-        onLongPress:
-            hasNumber ? () => _copy(dec.number!, 'card number') : null,
+        'Card number',
+        hasNumber ? () => _copy(dec.number!, 'card number') : null,
+        mono: true,
       ),
-      if ((dec.cardholder ?? '').isNotEmpty)
-        InfoTableDataRow(
-          label: 'Cardholder',
-          value: dec.cardholder!,
-          onLongPress: () => _copy(dec.cardholder!, 'cardholder'),
-        ),
       if ((dec.expiry ?? '').isNotEmpty)
-        InfoTableDataRow(
-          label: 'Expiry',
-          value: _revealed ? dec.expiry! : '••/••',
-          onLongPress: () => _copy(dec.expiry!, 'Expiry'),
+        _fieldRow(
+          _revealed ? dec.expiry! : '••/••',
+          'Expiry',
+          () => _copy(dec.expiry!, 'Expiry'),
+        ),
+      if ((dec.cardholder ?? '').isNotEmpty)
+        _fieldRow(
+          dec.cardholder!,
+          'Name on card',
+          () => _copy(dec.cardholder!, 'cardholder'),
         ),
       if ((dec.network ?? '').isNotEmpty)
-        InfoTableDataRow(
-          label: 'Network',
-          value: _titleCase(dec.network!),
-          onLongPress: () => _copy(_titleCase(dec.network!), 'network'),
+        _fieldRow(
+          _titleCase(dec.network!),
+          'Network',
+          () => _copy(_titleCase(dec.network!), 'network'),
         ),
     ];
 
@@ -155,8 +157,9 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         GestureDetector(
-          onLongPress:
-              hasNumber ? () => _copy(dec.number!, 'card number') : null,
+          onLongPress: hasNumber
+              ? () => _copy(dec.number!, 'card number')
+              : null,
           child: StoredCardVisual(
             nickname: dec.nickname,
             last4: dec.last4,
@@ -172,78 +175,107 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
             revealedNumber: _revealed ? dec.number : null,
           ),
         ),
-        const SizedBox(height: KuberSpacing.lg),
+        const SizedBox(height: KuberSpace.lg),
         if (hasRevealable) ...[
           _revealButton(cs),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
         ],
-        InfoTable(rows: rows),
+        KuberGroup(children: rows),
         if (dec.customFields.isNotEmpty) ...[
-          const SizedBox(height: KuberSpacing.lg),
-          _miniLabel(cs, 'CUSTOM FIELDS'),
-          const SizedBox(height: KuberSpacing.sm),
-          InfoTable(rows: _customRows(dec)),
+          const SizedBox(height: KuberSpace.lg),
+          const KuberSectionHeader(title: 'Custom fields'),
+          KuberGroup(children: _customRows(dec)),
         ],
         _linkedAccount(cs, dec),
+        const SizedBox(height: KuberSpace.md),
+        Row(
+          children: [
+            Icon(
+              Icons.credit_card_off_outlined,
+              size: 16,
+              color: cs.onSurfaceVariant,
+            ),
+            const SizedBox(width: KuberSpace.sm),
+            Text(
+              'CVV is never stored',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ],
+        ),
       ],
     );
   }
 
-  /// Reveal toggle. Both states use accent content: hidden reads as a bordered
-  /// surface button, shown reads as a primary-tinted button (per the design).
+  /// Reveal toggle: full-width tonal button under the card face.
   Widget _revealButton(ColorScheme cs) {
     final shown = _revealed;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => setState(() => _revealed = !_revealed),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        child: Ink(
-          height: 48,
-          decoration: BoxDecoration(
-            color: shown
-                ? cs.primary.withValues(alpha: 0.10)
-                : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(
-              color: shown ? cs.primary.withValues(alpha: 0.40) : cs.outline,
+    return AppButton(
+      label: shown ? 'Hide details' : 'Show details',
+      icon: shown ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+      type: AppButtonType.normal,
+      fullWidth: true,
+      onPressed: () => setState(() => _revealed = !_revealed),
+    );
+  }
+
+  /// Value over its label, copy button on the right (board 3.24). Long-press
+  /// still copies too.
+  Widget _fieldRow(
+    String value,
+    String label,
+    VoidCallback? onCopy, {
+    bool mono = false,
+  }) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    return InkWell(
+      onLongPress: onCopy,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: (mono ? monoFont(fontSize: 16) : tt.titleMedium!)
+                        .copyWith(color: cs.onSurface),
+                  ),
+                  Text(
+                    label,
+                    style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                ],
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                shown ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                size: 18,
-                color: cs.primary,
+            if (onCopy != null)
+              AppIconButton(
+                icon: Icons.copy_outlined,
+                kind: AppIconButtonKind.plain,
+                semanticLabel: 'Copy $label',
+                onPressed: onCopy,
               ),
-              const SizedBox(width: 8),
-              Text(
-                shown ? 'Hide details' : 'Show details',
-                style: localeFont(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: cs.primary,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
   }
 
-  List<InfoTableRow> _customRows(DecryptedCard dec) {
+  List<Widget> _customRows(DecryptedCard dec) {
     // Values follow the single "Show details" toggle — no separate per-field
-    // eye. Masked until revealed; long-press always copies the real value.
+    // eye. Masked until revealed; copy always uses the real value.
     return [
       for (final f in dec.customFields)
-        InfoTableDataRow(
-          label: f.label,
-          value: _revealed
+        _fieldRow(
+          _revealed
               ? f.value
               : '•' * (f.value.isEmpty ? 4 : f.value.length.clamp(4, 12)),
-          onLongPress: () => _copy(f.value, f.label),
+          f.label,
+          () => _copy(f.value, f.label),
         ),
     ];
   }
@@ -256,69 +288,37 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
     if (account == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(top: KuberSpacing.lg),
+      padding: const EdgeInsets.only(top: KuberSpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _miniLabel(cs, 'LINKED ACCOUNT'),
-          const SizedBox(height: KuberSpacing.sm),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-                showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  useRootNavigator: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => AccountDetailSheet(account: account),
-                );
-              },
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              child: Ink(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainer,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
+          const KuberSectionHeader(title: 'Linked account'),
+          KuberGroup(
+            children: [
+              KuberListRow(
+                leading: const KuberIconTile(
+                  icon: Icons.account_balance_wallet_outlined,
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.account_balance_wallet_outlined,
-                        size: 20, color: cs.primary),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        account.name,
-                        style: localeFont(
-                            fontSize: 14.5,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface),
-                      ),
-                    ),
-                    Icon(Icons.chevron_right_rounded,
-                        size: 20, color: cs.onSurfaceVariant),
-                  ],
-                ),
+                title: account.name,
+                trailing: const KuberChevron(),
+                onTap: () {
+                  Navigator.pop(context);
+                  showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    useRootNavigator: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => AccountDetailSheet(account: account),
+                  );
+                },
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
-
-  Widget _miniLabel(ColorScheme cs, String text) => Text(
-        text,
-        style: localeFont(
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 1.6,
-          color: cs.onSurfaceVariant,
-        ),
-      );
 
   String _group(String raw) {
     final digits = raw.replaceAll(RegExp(r'\s'), '');
@@ -346,9 +346,10 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
           builder: (dialogCtx, setDialog) {
             final canDelete = controller.text.trim() == nickname;
             return AlertDialog(
-              backgroundColor: cs.surface,
-              title: Text('Delete this card?',
-                  style: localeFont(fontWeight: FontWeight.w700)),
+              title: Text(
+                'Delete this card?',
+                style: localeFont(fontWeight: FontWeight.w700),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,11 +359,12 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
                     'cannot be undone.',
                     style: localeFont(color: cs.onSurfaceVariant, height: 1.45),
                   ),
-                  const SizedBox(height: KuberSpacing.md),
-                  Text('Type "$nickname" to confirm:',
-                      style: localeFont(
-                          fontSize: 12.5, color: cs.onSurfaceVariant)),
-                  const SizedBox(height: KuberSpacing.sm),
+                  const SizedBox(height: KuberSpace.md),
+                  Text(
+                    'Type "$nickname" to confirm:',
+                    style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: KuberSpace.sm),
                   TextField(
                     controller: controller,
                     autofocus: true,
@@ -386,8 +388,9 @@ class _CardDetailSheetState extends ConsumerState<CardDetailSheet> {
                           // Fire the local delete + list reload, then pop and
                           // snackbar synchronously (no async gap on contexts;
                           // matches the account sheet's disable pattern).
-                          final listNotifier =
-                              ref.read(storedCardsProvider.notifier);
+                          final listNotifier = ref.read(
+                            storedCardsProvider.notifier,
+                          );
                           ref
                               .read(cardVaultServiceProvider)
                               .deleteCard(widget.card.id)

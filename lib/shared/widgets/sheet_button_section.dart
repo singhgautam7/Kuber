@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/locale_font.dart';
 import 'app_button.dart';
+import 'kuber_menu.dart';
 
 /// A single action in a [SheetButtonSection].
 class SheetAction {
@@ -23,7 +23,9 @@ class SheetAction {
   });
 }
 
-/// The unified button area for the redesigned view sheets:
+/// The unified button area for the view sheets (board 2f): 56 pill buttons,
+/// 12 apart; Edit tonal, Delete danger tonal.
+///
 ///
 ///  1. An optional full-width filled [primary] [AppButton].
 ///  2. An [actions] row of up to three compact [AppButton]s. When there are
@@ -55,7 +57,7 @@ class SheetButtonSection extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final navInset = MediaQuery.of(context).viewPadding.bottom;
     final pad = padding ??
-        EdgeInsets.only(top: KuberSpacing.xl, bottom: KuberSpacing.lg + navInset);
+        EdgeInsets.only(top: KuberSpace.xl, bottom: KuberSpace.lg + navInset);
 
     // Decide visible vs. overflow actions.
     final List<SheetAction> visible;
@@ -83,16 +85,16 @@ class SheetButtonSection extends StatelessWidget {
               onPressed: primary!.onPressed,
             ),
           if (primary != null && (visible.isNotEmpty || overflow.isNotEmpty))
-            const SizedBox(height: 11),
+            const SizedBox(height: KuberSpace.md),
           if (visible.isNotEmpty || overflow.isNotEmpty)
             Row(
               children: [
                 for (var i = 0; i < visible.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 11),
+                  if (i > 0) const SizedBox(width: KuberSpace.md),
                   Expanded(child: _CompactButton(action: visible[i])),
                 ],
                 if (overflow.isNotEmpty) ...[
-                  const SizedBox(width: 11),
+                  const SizedBox(width: KuberSpace.md),
                   _OverflowButton(actions: overflow, cs: cs),
                 ],
               ],
@@ -109,13 +111,34 @@ class _CompactButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppButton(
-      label: action.label,
-      icon: action.icon,
-      type: action.destructive ? AppButtonType.danger : AppButtonType.normal,
-      height: 46,
-      fullWidth: true,
-      onPressed: action.onPressed,
+    // Two buttons beside the overflow are ~150 wide: a long label ("Add
+    // payment", "Mark settled") drops its icon and tightens the side
+    // padding to 16 instead of truncating.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final label = TextPainter(
+          text: TextSpan(
+            text: action.label,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          maxLines: 1,
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout();
+        // 24 + 24 side padding, 20 icon + 8 gap.
+        final fitsIcon = label.width + 48 + 28 <= constraints.maxWidth;
+        label.dispose();
+        return AppButton(
+          label: action.label,
+          icon: fitsIcon ? action.icon : null,
+          horizontalPadding: fitsIcon ? null : 16,
+          type: action.destructive
+              ? AppButtonType.danger
+              : AppButtonType.normal,
+          fullWidth: true,
+          onPressed: action.onPressed,
+        );
+      },
     );
   }
 }
@@ -127,49 +150,33 @@ class _OverflowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 54,
-      height: 46,
-      child: PopupMenuButton<int>(
-        tooltip: '',
-        position: PopupMenuPosition.over,
-        color: cs.surfaceContainerHigh,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: BorderSide(color: cs.outline),
-        ),
-        onSelected: (i) => actions[i].onPressed?.call(),
-        itemBuilder: (context) => [
-          for (var i = 0; i < actions.length; i++)
-            PopupMenuItem<int>(
-              value: i,
-              child: Row(
-                children: [
-                  Icon(
-                    actions[i].icon,
-                    size: 16,
-                    color: actions[i].destructive ? cs.error : cs.onSurface,
-                  ),
-                  const SizedBox(width: 11),
-                  Text(
-                    actions[i].label,
-                    style: localeFont(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      color: actions[i].destructive ? cs.error : cs.onSurface,
+    return Builder(
+      builder: (anchor) => SizedBox(
+        width: 56,
+        height: 56,
+        child: Material(
+          color: cs.surfaceContainerHigh,
+          shape: const CircleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () async {
+              final i = await showKuberMenu<int>(
+                context: anchor,
+                entries: [
+                  for (var i = 0; i < actions.length; i++)
+                    KuberMenuEntry(
+                      value: i,
+                      label: actions[i].label,
+                      icon: actions[i].icon,
+                      destructive: actions[i].destructive,
                     ),
-                  ),
                 ],
-              ),
-            ),
-        ],
-        child: Container(
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.md),
+              );
+              if (i != null) actions[i].onPressed?.call();
+            },
+            child: Icon(Icons.more_horiz_rounded,
+                size: 24, color: cs.onSurfaceVariant),
           ),
-          alignment: Alignment.center,
-          child: Icon(Icons.more_horiz_rounded, color: cs.onSurfaceVariant),
         ),
       ),
     );

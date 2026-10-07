@@ -27,23 +27,21 @@ class InvestmentDetailSheet extends ConsumerStatefulWidget {
       _InvestmentDetailSheetState();
 }
 
-class _InvestmentDetailSheetState
-    extends ConsumerState<InvestmentDetailSheet> {
+class _InvestmentDetailSheetState extends ConsumerState<InvestmentDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final fmt = ref.watch(formatterProvider);
 
-
     // Watch the live list so the sheet updates when currentValue changes
     final liveList = ref.watch(investmentListProvider).valueOrNull ?? [];
-    final investment = liveList
-            .where((i) => i.uid == widget.investment.uid)
-            .firstOrNull ??
+    final investment =
+        liveList.where((i) => i.uid == widget.investment.uid).firstOrNull ??
         widget.investment;
 
-    final contributionsAsync =
-        ref.watch(investmentTransactionsProvider(investment.uid));
+    final contributionsAsync = ref.watch(
+      investmentTransactionsProvider(investment.uid),
+    );
 
     final totalInvested = calc.computeTotalInvested(investment);
     final gainLoss = calc.computeGainLoss(investment);
@@ -59,7 +57,7 @@ class _InvestmentDetailSheetState
         height: 48,
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.medium),
         ),
         alignment: Alignment.center,
         child: Icon(
@@ -89,8 +87,7 @@ class _InvestmentDetailSheetState
                   label: context.l10n.updateValue,
                   icon: Icons.edit_outlined,
                   type: AppButtonType.normal,
-                  onPressed: () =>
-                      _showUpdateValueDialog(context, ref),
+                  onPressed: () => _showUpdateValueDialog(context, ref),
                 ),
               ),
             ],
@@ -150,8 +147,8 @@ class _InvestmentDetailSheetState
                     Text(
                       context.l10n.gainLossUpper,
                       style: localeFont(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                         color: cs.onSurfaceVariant,
                         letterSpacing: 0.8,
                       ),
@@ -163,9 +160,11 @@ class _InvestmentDetailSheetState
                           : '—',
                       style: localeFont(
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                         color: hasCurrentValue
-                            ? (isGain ? cs.tertiary : cs.error)
+                            ? (isGain
+                                  ? context.kuberMoney.income
+                                  : context.kuberMoney.expense)
                             : cs.onSurfaceVariant,
                       ),
                     ),
@@ -175,7 +174,9 @@ class _InvestmentDetailSheetState
                         style: localeFont(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: isGain ? cs.tertiary : cs.error,
+                          color: isGain
+                              ? context.kuberMoney.income
+                              : context.kuberMoney.expense,
                         ),
                       ),
                   ],
@@ -191,7 +192,7 @@ class _InvestmentDetailSheetState
               context.l10n.sipConfiguration,
               style: localeFont(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 0.8,
               ),
@@ -202,8 +203,9 @@ class _InvestmentDetailSheetState
                 icon: Icons.savings_outlined,
                 label: context.l10n.monthlySip,
                 value: context.l10n.monthlySipValue(
-                    fmt.formatCurrency(investment.sipAmount!),
-                    '${investment.sipDate}'),
+                  fmt.formatCurrency(investment.sipAmount!),
+                  '${investment.sipDate}',
+                ),
               ),
             if (investment.accountId != null) ...[
               const SizedBox(height: 8),
@@ -231,7 +233,7 @@ class _InvestmentDetailSheetState
                         context.l10n.strategyNotes,
                         style: localeFont(
                           fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
                           letterSpacing: 0.8,
                         ),
@@ -240,7 +242,7 @@ class _InvestmentDetailSheetState
                       Text(
                         investment.notes!,
                         style: localeFont(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontStyle: FontStyle.italic,
                           color: cs.onSurfaceVariant,
                         ),
@@ -259,7 +261,7 @@ class _InvestmentDetailSheetState
             context.l10n.contributionHistory,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
@@ -273,10 +275,7 @@ class _InvestmentDetailSheetState
               if (contributions.isEmpty) {
                 return Text(
                   context.l10n.noContributions,
-                  style: localeFont(
-                    fontSize: 13,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                 );
               }
               final display = contributions.take(5).toList();
@@ -293,9 +292,12 @@ class _InvestmentDetailSheetState
           Center(
             child: Text(
               context.l10n.createdOnUpper(
-                  DateFormat('MMM d, yyyy').format(investment.createdAt).toUpperCase()),
+                DateFormat(
+                  'MMM d, yyyy',
+                ).format(investment.createdAt).toUpperCase(),
+              ),
               style: localeFont(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 0.8,
@@ -336,22 +338,25 @@ class _InvestmentDetailSheetState
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text(context.l10n.updateCurrentValue,
-            style: localeFont(fontWeight: FontWeight.bold)),
+        title: Text(
+          context.l10n.updateCurrentValue,
+          style: localeFont(fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: controller,
-          keyboardType:
-              const TextInputType.numberWithOptions(signed: true, decimal: true),
+          keyboardType: const TextInputType.numberWithOptions(
+            signed: true,
+            decimal: true,
+          ),
           autofocus: true,
           inputFormatters: [
             CurrencyInputFormatter(isIndian: fmt.system == NumberSystem.indian),
           ],
-          style: localeFont(fontSize: 18, color: cs.onSurface),
+          style: localeFont(fontSize: 16, color: cs.onSurface),
           decoration: InputDecoration(
             prefixText: '$symbol ',
             prefixStyle: localeFont(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
@@ -360,7 +365,7 @@ class _InvestmentDetailSheetState
             filled: true,
             fillColor: cs.surfaceContainerHighest,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.large),
               borderSide: BorderSide.none,
             ),
           ),
@@ -374,7 +379,9 @@ class _InvestmentDetailSheetState
             label: context.l10n.updateLabel,
             type: AppButtonType.primary,
             onPressed: () {
-              final value = double.tryParse(controller.text.trim().replaceAll(',', ''));
+              final value = double.tryParse(
+                controller.text.trim().replaceAll(',', ''),
+              );
               ref
                   .read(investmentListProvider.notifier)
                   .updateCurrentValue(widget.investment, value);
@@ -387,17 +394,14 @@ class _InvestmentDetailSheetState
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text(context.l10n.deleteInvestmentConfirm,
-            style: localeFont(fontWeight: FontWeight.bold)),
-        content: Text(
-          context.l10n.deleteInvestmentBody,
-          style: localeFont(),
+        title: Text(
+          context.l10n.deleteInvestmentConfirm,
+          style: localeFont(fontWeight: FontWeight.bold),
         ),
+        content: Text(context.l10n.deleteInvestmentBody, style: localeFont()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -490,8 +494,8 @@ class _StatColumn extends StatelessWidget {
         Text(
           label,
           style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
             letterSpacing: 0.8,
           ),
@@ -501,7 +505,7 @@ class _StatColumn extends StatelessWidget {
           value,
           style: localeFont(
             fontSize: 16,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
@@ -530,10 +534,7 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           label,
-          style: localeFont(
-            fontSize: 12,
-            color: cs.onSurfaceVariant,
-          ),
+          style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
         ),
         const Spacer(),
         Text(
@@ -563,7 +564,11 @@ class _ContributionRow extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(Icons.check_circle_outline, size: 16, color: cs.tertiary),
+          Icon(
+            Icons.check_circle_outline,
+            size: 16,
+            color: context.kuberMoney.income,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -572,17 +577,14 @@ class _ContributionRow extends ConsumerWidget {
                 Text(
                   context.l10n.contributionLabel,
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
                 Text(
                   DateFormat('MMM d, yyyy').format(transaction.createdAt),
-                  style: localeFont(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -591,7 +593,7 @@ class _ContributionRow extends ConsumerWidget {
             fmt.formatCurrency(transaction.amount),
             style: localeFont(
               fontSize: 14,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),

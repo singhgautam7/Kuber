@@ -13,7 +13,8 @@ class TrendsWidgetConfigScreen extends StatefulWidget {
   const TrendsWidgetConfigScreen({super.key, required this.widgetId});
 
   @override
-  State<TrendsWidgetConfigScreen> createState() => _TrendsWidgetConfigScreenState();
+  State<TrendsWidgetConfigScreen> createState() =>
+      _TrendsWidgetConfigScreenState();
 }
 
 class _TrendsWidgetConfigScreenState extends State<TrendsWidgetConfigScreen> {
@@ -24,7 +25,8 @@ class _TrendsWidgetConfigScreenState extends State<TrendsWidgetConfigScreen> {
   ];
   String _selected = '7D';
 
-  Future<void> _confirm() => _configChannel.invokeMethod('confirm', {'value': _selected});
+  Future<void> _confirm() =>
+      _configChannel.invokeMethod('confirm', {'value': _selected});
   Future<void> _cancel() => _configChannel.invokeMethod('cancel');
 
   @override
@@ -47,25 +49,41 @@ class _TrendsWidgetConfigScreenState extends State<TrendsWidgetConfigScreen> {
               ),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.lg),
+                  padding: const EdgeInsets.fromLTRB(
+                    KuberSpace.lg,
+                    KuberSpace.sm,
+                    KuberSpace.lg,
+                    KuberSpace.lg,
+                  ),
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: KuberSpacing.sm),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 2,
+                        vertical: KuberSpace.sm,
+                      ),
                       child: Text(
                         'Pick the default range this widget shows. You can still switch it with the chips on the widget itself.',
-                        style: TextStyle(fontSize: 12.5, height: 1.5, color: cs.onSurfaceVariant),
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.5,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                    for (final (code, label) in _ranges) _rangeRow(context, code, label),
+                    for (final (code, label) in _ranges)
+                      _rangeRow(context, code, label),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(KuberSpacing.lg),
+                padding: const EdgeInsets.all(KuberSpace.lg),
                 child: SizedBox(
                   width: double.infinity,
                   height: 48,
-                  child: FilledButton(onPressed: _confirm, child: const Text('Confirm')),
+                  child: FilledButton(
+                    onPressed: _confirm,
+                    child: const Text('Confirm'),
+                  ),
                 ),
               ),
             ],
@@ -81,21 +99,44 @@ class _TrendsWidgetConfigScreenState extends State<TrendsWidgetConfigScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
-        borderRadius: BorderRadius.circular(KuberRadius.lg),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
         onTap: () => setState(() => _selected = code),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: selected ? cs.primary.withValues(alpha: 0.08) : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(KuberRadius.lg),
-            border: Border.all(color: selected ? cs.primary : cs.outlineVariant, width: selected ? 1.5 : 1),
+            color: selected
+                ? cs.primary.withValues(alpha: 0.08)
+                : cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+            border: Border.all(
+              color: selected ? cs.primary : cs.outline,
+              width: selected ? 1.5 : 1,
+            ),
           ),
           child: Row(
             children: [
-              Text(code, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: selected ? cs.primary : cs.onSurface)),
+              Text(
+                code,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? cs.primary : cs.onSurface,
+                ),
+              ),
               const SizedBox(width: 12),
-              Expanded(child: Text(label, style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant))),
-              Icon(selected ? Icons.check_circle : Icons.circle_outlined, size: 20, color: selected ? cs.primary : cs.onSurfaceVariant.withValues(alpha: 0.4)),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
+                ),
+              ),
+              Icon(
+                selected ? Icons.check_circle : Icons.circle_outlined,
+                size: 20,
+                color: selected
+                    ? cs.primary
+                    : cs.onSurfaceVariant.withValues(alpha: 0.4),
+              ),
             ],
           ),
         ),

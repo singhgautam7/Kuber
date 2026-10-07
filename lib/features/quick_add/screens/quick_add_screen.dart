@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:kuber/shared/widgets/kuber_list.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,7 +10,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../core/services/shortcut_pin_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
 import '../../accounts/providers/account_provider.dart';
 import '../../categories/providers/category_provider.dart';
@@ -71,8 +71,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   void _recompute() {
     final categories = ref.read(categoryListProvider).valueOrNull ?? const [];
     final accounts = ref.read(accountListProvider).valueOrNull ?? const [];
-    final defaultId =
-        ref.read(settingsProvider).valueOrNull?.defaultAccountId;
+    final defaultId = ref.read(settingsProvider).valueOrNull?.defaultAccountId;
     final parsed = parseQuickAddMulti(_controller.text);
     setState(() {
       _drafts = resolveDrafts(
@@ -104,12 +103,14 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     }
     _focusNode.unfocus();
     _preVoiceText = _controller.text;
-    await _voice.start(onTranscript: (text) {
-      _controller.value = TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length),
-      );
-    });
+    await _voice.start(
+      onTranscript: (text) {
+        _controller.value = TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      },
+    );
   }
 
   void _showMicDeniedDialog() {
@@ -117,22 +118,32 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.extraLarge),
         ),
-        title: Text('Microphone access off',
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700, color: cs.onSurface)),
+        title: Text(
+          'Microphone access off',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: cs.onSurface,
+          ),
+        ),
         content: Text(
           'Voice input needs the microphone. Turn it on in system settings, or type your transaction instead.',
-          style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant, height: 1.4),
+          style: TextStyle(
+            fontSize: 14,
+            color: cs.onSurfaceVariant,
+            height: 1.4,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Not now',
-                style: TextStyle(color: cs.onSurfaceVariant)),
+            child: Text(
+              'Not now',
+              style: TextStyle(color: cs.onSurfaceVariant),
+            ),
           ),
           AppButton(
             label: 'Open settings',
@@ -161,7 +172,9 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       useSafeArea: true,
       backgroundColor: cs.surfaceContainer,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(KuberRadius.lg)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(KuberShape.extraLarge),
+        ),
       ),
       builder: (_) => CategoryPickerSheet(
         selectedCategoryId: draft.categoryId,
@@ -183,7 +196,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
         ? QuickAddDraftStatus.missingAccount
         : QuickAddDraftStatus.ready;
     setState(() {
-      _drafts = [..._drafts]..[index] = d.copyWith(
+      _drafts = [..._drafts]
+        ..[index] = d.copyWith(
           status: status,
           categoryId: cat.id,
           categoryName: cat.name,
@@ -238,8 +252,8 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
           Column(
             children: [
               KuberAppBar(
+                title: 'Quick Add',
                 showBack: true,
-                showBrand: false,
                 pinShortcut: const PinShortcutSpec(
                   shortcutId: 'quick_add',
                   shortLabel: 'Quick Add',
@@ -254,22 +268,19 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   slivers: [
-                    SliverToBoxAdapter(
-                      child: KuberPageHeader(
-                        title: 'Quick Add',
-                        description: 'Type or speak to log transactions',
-                        onAction: null,
-                      ),
-                    ),
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(
-                          KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.lg),
+                        KuberSpace.screenMargin,
+                        0,
+                        KuberSpace.screenMargin,
+                        KuberSpace.lg,
+                      ),
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           _inputSurface(cs),
-                          const SizedBox(height: KuberSpacing.md),
+                          const SizedBox(height: KuberSpace.md),
                           _voicePill(cs),
-                          const SizedBox(height: KuberSpacing.lg),
+                          const SizedBox(height: KuberSpace.lg),
                           if (hasInput)
                             _previewSection(cs)
                           else
@@ -310,28 +321,31 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
       focusNode: _focusNode,
       minLines: 3,
       maxLines: 6,
-      style: TextStyle(fontSize: 15, height: 1.5, color: cs.onSurface),
+      style: Theme.of(
+        context,
+      ).textTheme.bodyLarge!.copyWith(color: cs.onSurface, height: 1.5),
       textInputAction: TextInputAction.newline,
+      // Board 3.10: filled field, radius 16, no outline until focused.
       decoration: InputDecoration(
-        hintText: '250 in groceries\n250 groceries and 300 movies\n1200 salary income',
-        hintStyle: TextStyle(
-          fontSize: 15,
+        hintText:
+            '250 in groceries\n250 groceries and 300 movies\n1200 salary income',
+        hintStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
+          color: cs.onSurfaceVariant,
           height: 1.5,
-          color: cs.onSurfaceVariant.withValues(alpha: 0.55),
         ),
         filled: true,
         fillColor: cs.surfaceContainerHigh,
-        contentPadding: const EdgeInsets.all(KuberSpacing.md),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          borderSide: BorderSide(color: cs.outline),
+        contentPadding: const EdgeInsets.all(KuberSpace.md),
+        border: const OutlineInputBorder(
+          borderRadius: KuberShape.cardR,
+          borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
-          borderSide: BorderSide(color: cs.outline),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: KuberShape.cardR,
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.lg),
+          borderRadius: KuberShape.cardR,
           borderSide: BorderSide(color: cs.primary, width: 2),
         ),
       ),
@@ -340,41 +354,14 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
 
   Widget _voicePill(ColorScheme cs) {
     final denied = _micPermission == MicPermission.permanentlyDenied;
-    return GestureDetector(
-      onTap: denied ? openAppSettings : _startVoice,
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: denied
-              ? cs.surfaceContainerHigh
-              : cs.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(
-            color: denied
-                ? cs.outline
-                : cs.primary.withValues(alpha: 0.40),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              denied ? Icons.mic_off_rounded : Icons.mic_rounded,
-              size: 18,
-              color: denied ? cs.onSurfaceVariant : cs.primary,
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Text(
-              denied ? 'Mic access off' : 'Tap to speak',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: denied ? cs.onSurfaceVariant : cs.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
+    // Board 3.10: a 56 tonal button.
+    return AppButton(
+      label: denied ? 'Mic access off' : 'Tap to speak',
+      icon: denied ? Icons.mic_off_rounded : Icons.mic_rounded,
+      type: denied ? AppButtonType.outline : AppButtonType.normal,
+      fullWidth: true,
+      height: 56,
+      onPressed: denied ? openAppSettings : _startVoice,
     );
   }
 
@@ -389,36 +376,28 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        KuberSectionHeader(title: label),
+        KuberGroup(
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.0,
-                color: cs.onSurfaceVariant,
+            for (var i = 0; i < _drafts.length; i++)
+              TransactionPreviewCard(
+                draft: _drafts[i],
+                grouped: true,
+                onEdit: _drafts[i].amount != null
+                    ? () => _editCategory(i)
+                    : null,
+                onPickCategory: () => _editCategory(i),
+                onSetDefaultAccount: _setDefaultAccount,
               ),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Expanded(child: Divider(color: cs.outline.withValues(alpha: 0.4))),
           ],
         ),
-        const SizedBox(height: KuberSpacing.md),
-        for (var i = 0; i < _drafts.length; i++) ...[
-          if (i > 0) const SizedBox(height: 9),
-          TransactionPreviewCard(
-            draft: _drafts[i],
-            onEdit: _drafts[i].amount != null ? () => _editCategory(i) : null,
-            onPickCategory: () => _editCategory(i),
-            onSetDefaultAccount: _setDefaultAccount,
-          ),
-        ],
         if (skipped > 0) ...[
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
           Text(
             '$skipped line${skipped == 1 ? '' : 's'} skipped',
-            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ],
@@ -426,43 +405,45 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
   }
 
   Widget _referenceBlock(ColorScheme cs) {
+    final tt = Theme.of(context).textTheme;
     Widget row(String text, String hint, {bool income = false}) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpace.lg,
+          vertical: KuberSpace.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               text,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: income ? cs.tertiary : cs.onSurface,
+              style: tt.titleMedium!.copyWith(
+                color: income ? context.kuberMoney.income : cs.onSurface,
               ),
             ),
-            const SizedBox(height: 2),
-            Text(hint, style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+            Text(
+              hint,
+              style: tt.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+            ),
           ],
         ),
       );
     }
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'WHAT YOU CAN TYPE',
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
-            color: cs.onSurfaceVariant,
-          ),
+        const KuberSectionHeader(title: 'What you can type'),
+        KuberGroup(
+          children: [
+            row('250 in groceries', 'Amount and category'),
+            row(
+              '250 groceries and 300 movies',
+              'Two at once, split with "and"',
+            ),
+            row('1200 salary income', 'Income, tinted green', income: true),
+          ],
         ),
-        const SizedBox(height: KuberSpacing.md),
-        row('250 in groceries', 'Amount and category'),
-        row('250 groceries and 300 movies', 'Two at once, split with "and"'),
-        row('1200 salary income', 'Income, tinted green', income: true),
       ],
     );
   }
@@ -473,13 +454,13 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outline)),
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
       padding: EdgeInsets.fromLTRB(
-        KuberSpacing.lg,
-        KuberSpacing.md,
-        KuberSpacing.lg,
-        MediaQuery.of(context).viewPadding.bottom + KuberSpacing.md,
+        KuberSpace.screenMargin,
+        KuberSpace.md,
+        KuberSpace.screenMargin,
+        MediaQuery.of(context).viewPadding.bottom + KuberSpace.md,
       ),
       child: Row(
         children: [
@@ -489,7 +470,7 @@ class _QuickAddScreenState extends ConsumerState<QuickAddScreen> {
             width: 100,
             onPressed: () => context.pop(),
           ),
-          const SizedBox(width: KuberSpacing.md),
+          const SizedBox(width: KuberSpace.md),
           Expanded(
             child: AppButton(
               label: _confirmLabel(),

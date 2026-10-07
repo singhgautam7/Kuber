@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/locale_font.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_form_widgets.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -66,8 +65,9 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
   Future<void> _submit(String pin) async {
     switch (_step) {
       case _Step.current:
-        final outcome =
-            await ref.read(cardVaultServiceProvider).attemptUnlock(pin);
+        final outcome = await ref
+            .read(cardVaultServiceProvider)
+            .attemptUnlock(pin);
         if (!mounted) return;
         switch (outcome.status) {
           case UnlockStatus.success:
@@ -119,7 +119,9 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
 
   Future<void> _commit() async {
     setState(() => _busy = true);
-    final newKey = await ref.read(cardVaultServiceProvider).changePin(
+    final newKey = await ref
+        .read(cardVaultServiceProvider)
+        .changePin(
           currentPin: _currentPin,
           newPin: _newPin,
           newPinLength: _newLength,
@@ -148,10 +150,10 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
   }
 
   String get _title => switch (_step) {
-        _Step.current => 'Enter current PIN',
-        _Step.newPin => 'Enter new PIN',
-        _Step.confirm => 'Confirm new PIN',
-      };
+    _Step.current => 'Enter current PIN',
+    _Step.newPin => 'Enter new PIN',
+    _Step.confirm => 'Confirm new PIN',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -169,13 +171,11 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                 const Spacer(),
                 Text(
                   _title,
-                  style: localeFont(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineSmall!.copyWith(color: cs.onSurface),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
                 if (_step == _Step.newPin) ...[
                   KuberSegmented<int>(
                     groupValue: _newLength,
@@ -188,24 +188,35 @@ class _ChangePinScreenState extends ConsumerState<ChangePinScreen> {
                       KuberSegment(value: 6, label: '6 digits'),
                     ],
                   ),
-                  const SizedBox(height: KuberSpacing.lg),
+                  const SizedBox(height: KuberSpace.lg),
                 ],
                 ValueListenableBuilder<String>(
                   valueListenable: _entry,
                   builder: (_, entry, __) => CardsPinDots(
-                      length: _length, filled: entry.length, error: _error),
+                    length: _length,
+                    filled: entry.length,
+                    error: _error,
+                  ),
                 ),
                 if (_error && _step == _Step.current) ...[
                   const SizedBox(height: 10),
-                  Text('Wrong PIN. $_attemptsLeft attempts left.',
-                      style: localeFont(fontSize: 13, color: cs.error)),
+                  Text(
+                    'Wrong PIN. $_attemptsLeft attempts left.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: cs.error),
+                  ),
                 ],
                 if (_error && _step == _Step.confirm) ...[
                   const SizedBox(height: 10),
-                  Text('That did not match. Try again.',
-                      style: localeFont(fontSize: 13, color: cs.error)),
+                  Text(
+                    'That did not match. Try again.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall!.copyWith(color: cs.error),
+                  ),
                 ],
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
                 if (_busy)
                   const CircularProgressIndicator()
                 else

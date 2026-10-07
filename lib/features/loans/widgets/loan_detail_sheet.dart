@@ -50,7 +50,7 @@ class LoanDetailSheet extends ConsumerWidget {
         height: 48,
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: BorderRadius.circular(KuberShape.medium),
         ),
         alignment: Alignment.center,
         child: Icon(
@@ -122,7 +122,7 @@ class LoanDetailSheet extends ConsumerWidget {
                 context.l10n.progressUpper,
                 style: localeFont(
                   fontSize: 11,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,
                   letterSpacing: 0.8,
                 ),
@@ -130,8 +130,8 @@ class LoanDetailSheet extends ConsumerWidget {
               Text(
                 context.l10n.percentPaid('${(progress * 100).toInt()}'),
                 style: localeFont(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                   color: cs.primary,
                 ),
               ),
@@ -139,13 +139,13 @@ class LoanDetailSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(KuberShape.full),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
               backgroundColor: cs.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation(
-                loan.isCompleted ? cs.tertiary : cs.primary,
+                loan.isCompleted ? context.kuberMoney.income : cs.primary,
               ),
             ),
           ),
@@ -172,8 +172,12 @@ class LoanDetailSheet extends ConsumerWidget {
               Expanded(
                 child: _StatColumn(
                   label: context.l10n.remainingUpper,
-                  value: fmt.formatCurrency(remaining.clamp(0, double.infinity)),
-                  color: remaining > 0 ? cs.error : cs.tertiary,
+                  value: fmt.formatCurrency(
+                    remaining.clamp(0, double.infinity),
+                  ),
+                  color: remaining > 0
+                      ? context.kuberMoney.expense
+                      : context.kuberMoney.income,
                 ),
               ),
             ],
@@ -187,7 +191,7 @@ class LoanDetailSheet extends ConsumerWidget {
               context.l10n.nextEmiDue,
               style: localeFont(
                 fontSize: 11,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 0.8,
               ),
@@ -199,8 +203,8 @@ class LoanDetailSheet extends ConsumerWidget {
                 Text(
                   fmt.formatCurrency(loan.emiAmount),
                   style: localeFont(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
@@ -208,7 +212,7 @@ class LoanDetailSheet extends ConsumerWidget {
                   Text(
                     DateFormat('MMM d, yyyy').format(nextDue),
                     style: localeFont(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: isOverdue ? cs.error : cs.primary,
                     ),
@@ -219,14 +223,11 @@ class LoanDetailSheet extends ConsumerWidget {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  Icon(Icons.circle, size: 6, color: cs.tertiary),
+                  Icon(Icons.circle, size: 6, color: context.kuberMoney.income),
                   const SizedBox(width: 6),
                   Text(
                     'Auto-pay via $accountName',
-                    style: localeFont(
-                      fontSize: 11,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -244,7 +245,7 @@ class LoanDetailSheet extends ConsumerWidget {
                   context.l10n.interestRateUpper,
                   style: localeFont(
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurfaceVariant,
                     letterSpacing: 0.8,
                   ),
@@ -253,7 +254,7 @@ class LoanDetailSheet extends ConsumerWidget {
                 Text(
                   '${loan.interestRate!.toStringAsFixed(2)}% p.a.${loan.rateType != null ? ' (${loan.rateType})' : ''}',
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
@@ -278,7 +279,7 @@ class LoanDetailSheet extends ConsumerWidget {
                         context.l10n.notesUpper,
                         style: localeFont(
                           fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: cs.onSurfaceVariant,
                           letterSpacing: 0.8,
                         ),
@@ -286,10 +287,7 @@ class LoanDetailSheet extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Text(
                         loan.notes!,
-                        style: localeFont(
-                          fontSize: 13,
-                          color: cs.onSurface,
-                        ),
+                        style: localeFont(fontSize: 14, color: cs.onSurface),
                       ),
                     ],
                   ),
@@ -304,7 +302,7 @@ class LoanDetailSheet extends ConsumerWidget {
             context.l10n.paymentHistory,
             style: localeFont(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.8,
             ),
@@ -318,15 +316,14 @@ class LoanDetailSheet extends ConsumerWidget {
               if (payments.isEmpty) {
                 return Text(
                   context.l10n.noPaymentsRecorded,
-                  style: localeFont(
-                    fontSize: 13,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
                 );
               }
               final display = payments.take(5).toList();
               return Column(
-                children: display.map((t) => _PaymentRow(transaction: t)).toList(),
+                children: display
+                    .map((t) => _PaymentRow(transaction: t))
+                    .toList(),
               );
             },
           ),
@@ -337,7 +334,7 @@ class LoanDetailSheet extends ConsumerWidget {
             child: Text(
               'CREATED ${DateFormat('MMM d, yyyy').format(loan.createdAt).toUpperCase()}',
               style: localeFont(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurfaceVariant,
                 letterSpacing: 0.8,
@@ -349,8 +346,11 @@ class LoanDetailSheet extends ConsumerWidget {
     );
   }
 
-  void _openPaymentSheet(BuildContext context, Loan loan,
-      {required bool isEmi}) {
+  void _openPaymentSheet(
+    BuildContext context,
+    Loan loan, {
+    required bool isEmi,
+  }) {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (!context.mounted) return;
       showModalBottomSheet(
@@ -380,17 +380,14 @@ class LoanDetailSheet extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text(context.l10n.deleteLoanConfirm,
-            style: localeFont(fontWeight: FontWeight.bold)),
-        content: Text(
-          context.l10n.deleteLoanBody,
-          style: localeFont(),
+        title: Text(
+          context.l10n.deleteLoanConfirm,
+          style: localeFont(fontWeight: FontWeight.bold),
         ),
+        content: Text(context.l10n.deleteLoanBody, style: localeFont()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -445,8 +442,8 @@ class _StatColumn extends StatelessWidget {
         Text(
           label,
           style: localeFont(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
             letterSpacing: 0.8,
           ),
@@ -456,7 +453,7 @@ class _StatColumn extends StatelessWidget {
           value,
           style: localeFont(
             fontSize: 16,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
@@ -478,14 +475,18 @@ class _PaymentRow extends ConsumerWidget {
     final label = transaction.name.startsWith('EMI')
         ? context.l10n.emiPaid
         : transaction.name.startsWith('Extra')
-            ? context.l10n.extraPayment
-            : context.l10n.loanClosure;
+        ? context.l10n.extraPayment
+        : context.l10n.loanClosure;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(Icons.check_circle_outline, size: 16, color: cs.tertiary),
+          Icon(
+            Icons.check_circle_outline,
+            size: 16,
+            color: context.kuberMoney.income,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -494,17 +495,14 @@ class _PaymentRow extends ConsumerWidget {
                 Text(
                   label,
                   style: localeFont(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                   ),
                 ),
                 Text(
                   DateFormat('MMM d, yyyy').format(transaction.createdAt),
-                  style: localeFont(
-                    fontSize: 11,
-                    color: cs.onSurfaceVariant,
-                  ),
+                  style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -513,7 +511,7 @@ class _PaymentRow extends ConsumerWidget {
             fmt.formatCurrency(transaction.amount),
             style: localeFont(
               fontSize: 14,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),

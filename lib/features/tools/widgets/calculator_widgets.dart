@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/kuber_segmented_control.dart';
 import '../../../core/utils/formatters.dart';
-import '../../settings/providers/settings_provider.dart' show formatterProvider, NumberSystem;
+import '../../settings/providers/settings_provider.dart'
+    show formatterProvider, NumberSystem;
 
 class ToolInputCard extends StatelessWidget {
   final List<Widget> children;
@@ -15,11 +17,11 @@ class ToolInputCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,11 +40,11 @@ class ToolResultCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,13 +62,10 @@ class ToolInputLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Text(
-      text,
-      style: localeFont(
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        color: cs.onSurfaceVariant,
-        letterSpacing: 1.2,
-      ),
+      sentenceCase(text),
+      style: Theme.of(
+        context,
+      ).textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
     );
   }
 }
@@ -92,13 +91,15 @@ class ToolTextField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final isIndian = formatAsAmount ? ref.watch(formatterProvider).system == NumberSystem.indian : false;
+    final isIndian = formatAsAmount
+        ? ref.watch(formatterProvider).system == NumberSystem.indian
+        : false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
           ToolInputLabel(label!),
-          const SizedBox(height: KuberSpacing.sm),
+          const SizedBox(height: KuberSpace.sm),
         ],
         TextField(
           controller: controller,
@@ -108,38 +109,35 @@ class ToolTextField extends ConsumerWidget {
               : null,
           onChanged: onChanged,
           style: localeFont(
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
           decoration: InputDecoration(
             prefixText: prefix != null ? '$prefix ' : null,
             prefixStyle: localeFont(
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: FontWeight.w500,
               color: cs.onSurfaceVariant,
             ),
             suffixText: suffix,
-            suffixStyle: localeFont(
-              fontSize: 14,
-              color: cs.onSurfaceVariant,
-            ),
+            suffixStyle: localeFont(fontSize: 14, color: cs.onSurfaceVariant),
             filled: true,
             fillColor: cs.surfaceContainerHigh,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: KuberSpacing.md,
-              vertical: KuberSpacing.md,
+              horizontal: KuberSpace.md,
+              vertical: KuberSpace.md,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              borderSide: BorderSide(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberShape.large),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              borderSide: BorderSide(color: cs.outline),
+              borderRadius: BorderRadius.circular(KuberShape.large),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(KuberRadius.md),
+              borderRadius: BorderRadius.circular(KuberShape.large),
               borderSide: BorderSide(color: cs.primary),
             ),
           ),
@@ -163,41 +161,13 @@ class ToolSegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
+    // The shared M3 segmented button (board 3.32).
+    return KuberSegmentedControl<int>(
+      values: [for (var i = 0; i < labels.length; i++) i],
+      labels: labels,
+      selected: selectedIndex,
+      onSelected: onChanged,
       height: 40,
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: Row(
-        children: List.generate(labels.length, (i) {
-          final selected = i == selectedIndex;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onChanged(i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                margin: const EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: selected ? cs.surfaceContainerHigh : Colors.transparent,
-                  borderRadius: BorderRadius.circular(KuberRadius.md - 2),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  labels[i].toUpperCase(),
-                  style: localeFont(
-                    fontSize: 12,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                    color: selected ? cs.primary : cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
     );
   }
 }
@@ -224,7 +194,7 @@ class ToolHeroResult extends StatelessWidget {
           label.toUpperCase(),
           style: localeFont(
             fontSize: 11,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: cs.onSurfaceVariant,
             letterSpacing: 1.2,
           ),
@@ -234,7 +204,7 @@ class ToolHeroResult extends StatelessWidget {
           value,
           style: localeFont(
             fontSize: 32,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: color,
             letterSpacing: -0.5,
           ),
@@ -281,81 +251,99 @@ class ToolStatRow extends StatelessWidget {
 
 class ToolEmptyResult extends StatelessWidget {
   final String message;
-  const ToolEmptyResult({super.key, this.message = 'Enter values to calculate'});
+  const ToolEmptyResult({
+    super.key,
+    this.message = 'Enter values to calculate',
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Placeholder in the hero slot until inputs are complete: the hero's
+    // radius-28 shape on a neutral fill.
     final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: KuberSpacing.md),
-        child: Column(
-          children: [
-            Text(
-              '—',
-              style: localeFont(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpace.screenMargin),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.calculate_outlined, color: cs.onSurfaceVariant),
+          const SizedBox(width: KuberSpace.md),
+          Expanded(
+            child: Text(
               message,
-              style: localeFont(fontSize: 13, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// A titled card section matching the mockup `section()` primitive: bordered,
-/// zero-elevation, with a title + optional subtitle above the [child].
 class ToolSection extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget child;
+
+  /// False for the result hero section: no card and no title; it sits right
+  /// below the inputs.
+  final bool framed;
 
   const ToolSection({
     super.key,
     required this.title,
     this.subtitle,
     required this.child,
+    this.framed = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    // The result slot cross-fades between the "enter values" placeholder and
+    // the hero when the inputs become valid (review round 3).
+    if (!framed) {
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 250),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        child: KeyedSubtree(
+          key: ValueKey(child is ToolEmptyResult),
+          child: child,
+        ),
+      );
+    }
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: localeFont(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
-              letterSpacing: -0.2,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium!.copyWith(color: cs.onSurface),
           ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 2),
+          if (subtitle != null)
             Text(
               subtitle!,
-              style: localeFont(fontSize: 12, color: cs.onSurfaceVariant),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: cs.onSurfaceVariant),
             ),
-          ],
-          const SizedBox(height: KuberSpacing.md),
+          const SizedBox(height: KuberSpace.md),
           child,
         ],
       ),
@@ -408,8 +396,8 @@ class _ToolSliderFieldState extends ConsumerState<ToolSliderField> {
     final showSlider = widget.min != null && widget.max != null;
     final raw =
         double.tryParse(widget.controller.text.replaceAll(',', '')) ??
-            widget.min ??
-            0;
+        widget.min ??
+        0;
     final sliderValue = showSlider
         ? (_dragValue ?? raw).clamp(widget.min!, widget.max!).toDouble()
         : 0.0;
@@ -427,23 +415,26 @@ class _ToolSliderFieldState extends ConsumerState<ToolSliderField> {
         ),
         if (widget.helper != null) ...[
           const SizedBox(height: 5),
-          Text(widget.helper!,
-              style: localeFont(fontSize: 11.5, color: cs.onSurfaceVariant)),
+          Text(
+            widget.helper!,
+            style: localeFont(fontSize: 11, color: cs.onSurfaceVariant),
+          ),
         ],
         if (showSlider)
           Padding(
-            padding: const EdgeInsets.only(top: KuberSpacing.sm),
+            padding: const EdgeInsets.only(top: KuberSpace.sm),
+            // M3 Expressive slider (board 3.32): 2024 shape (handle bar,
+            // gapped track, stop indicator).
             child: SliderTheme(
               data: SliderThemeData(
-                trackHeight: 4,
-                overlayShape: SliderComponentShape.noOverlay,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
                 activeTrackColor: cs.primary,
-                inactiveTrackColor: cs.surfaceContainerHigh,
+                inactiveTrackColor: cs.secondaryContainer,
                 thumbColor: cs.primary,
                 padding: EdgeInsets.zero,
               ),
               child: Slider(
+                // ignore: deprecated_member_use
+                year2023: false,
                 value: sliderValue,
                 min: widget.min!,
                 max: widget.max!,
@@ -452,8 +443,8 @@ class _ToolSliderFieldState extends ConsumerState<ToolSliderField> {
                   final text = widget.formatAsAmount
                       ? v.round().toString()
                       : (v == v.roundToDouble()
-                          ? v.round().toString()
-                          : v.toStringAsFixed(1));
+                            ? v.round().toString()
+                            : v.toStringAsFixed(1));
                   widget.controller.text = text;
                   widget.controller.selection = TextSelection.collapsed(
                     offset: widget.controller.text.length,

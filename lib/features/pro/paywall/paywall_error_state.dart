@@ -25,11 +25,11 @@ class PaywallProductsErrorState extends ConsumerWidget {
       // have access to that private widget; wire the real cached values
       // into `_PricingCard` directly when integrating.
       return Container(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.all(KuberSpace.lg),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +42,7 @@ class PaywallProductsErrorState extends ConsumerWidget {
                 color: cs.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: KuberSpacing.sm),
+            const SizedBox(height: KuberSpace.sm),
             // Render the real pricing cards here using `cached` values —
             // integration note: pass `cached[productId]` as the price string
             // to each `_PricingCard` instead of the live `ProductDetails`.
@@ -52,46 +52,42 @@ class PaywallProductsErrorState extends ConsumerWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(KuberSpacing.xl),
+      padding: const EdgeInsets.all(KuberSpace.xl),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.cloud_off_rounded,
-            size: 28,
-            color: cs.onSurfaceVariant,
-          ),
-          const SizedBox(height: KuberSpacing.md),
+          Icon(Icons.cloud_off_rounded, size: 28, color: cs.onSurfaceVariant),
+          const SizedBox(height: KuberSpace.md),
           Text(
             'Prices unavailable. Check your connection.',
             textAlign: TextAlign.center,
             style: localeFont(
-              fontSize: 13.5,
+              fontSize: 14,
               color: cs.onSurfaceVariant,
               height: 1.4,
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
           SizedBox(
             width: double.infinity,
             height: 44,
             child: OutlinedButton(
               onPressed: onRetry,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: cs.outline),
+                side: BorderSide(color: cs.outlineVariant),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
+                  borderRadius: BorderRadius.circular(KuberShape.medium),
                 ),
               ),
               child: Text(
                 'Retry',
                 style: localeFont(
                   fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
               ),
