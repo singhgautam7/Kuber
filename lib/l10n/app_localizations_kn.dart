@@ -5055,4 +5055,35 @@ class AppLocalizationsKn extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'ಹೂಡಿಕೆಗಳನ್ನು ಹುಡುಕಿ';
+
+  @override
+  String get textSizeTitle => 'ಪಠ್ಯದ ಗಾತ್ರ';
+
+  @override
+  String get textSizeDesc => 'ಪಠ್ಯವನ್ನು ದೊಡ್ಡದು ಅಥವಾ ಚಿಕ್ಕದು ಮಾಡಿ';
+
+  @override
+  String get textSizeSmall => 'ಚಿಕ್ಕದು';
+
+  @override
+  String get textSizeCompact => 'ಕಾಂಪ್ಯಾಕ್ಟ್';
+
+  @override
+  String get textSizeDefault => 'ಡೀಫಾಲ್ಟ್';
+
+  @override
+  String get textSizeLarge => 'ದೊಡ್ಡದು';
+
+  @override
+  String get textSizeExtraLarge => 'ತುಂಬಾ ದೊಡ್ಡದು';
+
+  @override
+  String get textSizePreviewUpper => 'ಮುನ್ನೋಟ';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber ಜೊತೆ ದೈನಂದಿನ ಖರ್ಚುಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಬಜೆಟ್ ನಿರ್ವಹಿಸಿ ಮತ್ತು ಗುರಿಗಳನ್ನು ತಲುಪಿ.';
+
+  @override
+  String get textSizePreviewMeta => 'ದಿನಸಿ · ಇಂದು';
 }

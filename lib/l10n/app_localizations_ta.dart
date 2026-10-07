@@ -5087,4 +5087,35 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'முதலீடுகளைத் தேடு';
+
+  @override
+  String get textSizeTitle => 'எழுத்து அளவு';
+
+  @override
+  String get textSizeDesc => 'எழுத்தைப் பெரிதாக்கவும் அல்லது சிறிதாக்கவும்';
+
+  @override
+  String get textSizeSmall => 'சிறியது';
+
+  @override
+  String get textSizeCompact => 'கச்சிதமானது';
+
+  @override
+  String get textSizeDefault => 'இயல்புநிலை';
+
+  @override
+  String get textSizeLarge => 'பெரியது';
+
+  @override
+  String get textSizeExtraLarge => 'மிகப் பெரியது';
+
+  @override
+  String get textSizePreviewUpper => 'முன்னோட்டம்';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber மூலம் தினசரி செலவுகளைக் கண்காணித்து, பட்ஜெட்டை நிர்வகித்து, இலக்குகளை அடையுங்கள்.';
+
+  @override
+  String get textSizePreviewMeta => 'மளிகை · இன்று';
 }

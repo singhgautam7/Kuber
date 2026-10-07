@@ -20,6 +20,7 @@ import '../widgets/settings_section.dart';
 import '../widgets/settings_choice_sheet.dart';
 import '../widgets/currency_selector_sheet.dart';
 import '../widgets/settings_language_row.dart';
+import '../widgets/text_size_sheet.dart';
 import '../../more/widgets/more_tab_layout_picker.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/timed_snackbar.dart';
@@ -326,6 +327,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           '${themeFamilyName(settings?.themeVariant ?? ThemeVariant.signature)} • $themeStr',
                       onTap: () => context.push('/more/settings/theme'),
                       trailing: _trailingWidget(context),
+                    ),
+                    Divider(height: 1, color: cs.outlineVariant),
+                    _SettingsTile(
+                      icon: Icons.format_size_rounded,
+                      label: context.l10n.textSizeTitle,
+                      subtitle: context.l10n.textSizeDesc,
+                      onTap: () => TextSizeSheet.show(context),
+                      trailing: _trailingWidget(
+                        context,
+                        text: textSizeLabel(
+                          context,
+                          ref.watch(textSizeLevelProvider),
+                        ),
+                      ),
                     ),
                     Divider(height: 1, color: cs.outlineVariant),
                     _SettingsTile(

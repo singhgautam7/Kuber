@@ -101,6 +101,7 @@ class AmountInput extends ConsumerWidget {
           children: [50, 100, 500, 1000].map((amount) {
             return KuberChip(
               label: '+$amount',
+              pill: true,
               onTap: () {
                 final current =
                     double.tryParse(

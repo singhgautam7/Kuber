@@ -90,6 +90,24 @@ final thresholdCeilingProvider = Provider<double>((ref) {
       .select((s) => s.valueOrNull?.thresholdCeiling ?? 2000));
 });
 
+/// 5 discrete text scale multiplier levels.
+/// Level 3 is the default (1.0).
+const kTextSizeScales = [0.85, 0.925, 1.0, 1.15, 1.30];
+
+final bootTextSizeLevelProvider = Provider<int>((ref) => 3);
+
+final textSizeLevelProvider = Provider<int>((ref) {
+  final boot = ref.watch(bootTextSizeLevelProvider);
+  return ref.watch(
+    settingsProvider.select((s) => s.valueOrNull?.textSizeLevel ?? boot),
+  );
+});
+
+final textScaleProvider = Provider<double>((ref) {
+  final level = ref.watch(textSizeLevelProvider);
+  return kTextSizeScales[(level - 1).clamp(0, 4)];
+});
+
 enum NumberSystem { indian, international }
 
 enum SwipeMode { changeTabs, performActions }
@@ -155,6 +173,7 @@ class SettingsState {
   final Locale locale;
   final List<String> quickActionShortcuts;
   final List<String> addMenuActions;
+  final int textSizeLevel;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -174,6 +193,7 @@ class SettingsState {
     this.locale = const Locale('en'),
     this.quickActionShortcuts = kDefaultQuickActionShortcuts,
     this.addMenuActions = kDefaultAddMenuActions,
+    this.textSizeLevel = 3,
   });
 
   SettingsState copyWith({
@@ -193,6 +213,7 @@ class SettingsState {
     Locale? locale,
     List<String>? quickActionShortcuts,
     List<String>? addMenuActions,
+    int? textSizeLevel,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -212,6 +233,7 @@ class SettingsState {
       locale: locale ?? this.locale,
       quickActionShortcuts: quickActionShortcuts ?? this.quickActionShortcuts,
       addMenuActions: addMenuActions ?? this.addMenuActions,
+      textSizeLevel: textSizeLevel ?? this.textSizeLevel,
     );
   }
 }
@@ -247,6 +269,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
             kDefaultQuickActionShortcuts;
     final addMenuActions =
         prefs.getStringList(PrefsKeys.addMenuActions) ?? kDefaultAddMenuActions;
+    final textSizeLevel = prefs.getInt(PrefsKeys.textSizeLevel) ?? 3;
 
     return SettingsState(
       themeMode: ThemeMode.values[themeModeIndex],
@@ -268,7 +291,16 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       locale: locale,
       quickActionShortcuts: quickActionShortcuts,
       addMenuActions: addMenuActions,
+      textSizeLevel: textSizeLevel.clamp(1, 5),
     );
+  }
+
+  /// Persists the text size multiplier level (1 to 5).
+  Future<void> setTextSizeLevel(int level) async {
+    final clamped = level.clamp(1, 5);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(PrefsKeys.textSizeLevel, clamped);
+    state = AsyncData(state.requireValue.copyWith(textSizeLevel: clamped));
   }
 
   /// Persists the Quick Actions grid order/membership (nav-bar long-press).
@@ -308,6 +340,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         navBarStyle: cur.navBarStyle,
         moreTabLayout: cur.moreTabLayout,
         locale: cur.locale,
+        quickActionShortcuts: cur.quickActionShortcuts,
+        addMenuActions: cur.addMenuActions,
+        textSizeLevel: cur.textSizeLevel,
       ),
     );
   }

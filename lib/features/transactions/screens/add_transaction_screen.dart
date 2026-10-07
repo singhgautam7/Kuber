@@ -273,17 +273,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
+            Positioned.fill(
               child: SingleChildScrollView(
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   KuberSpace.screenMargin,
                   KuberSpace.xs,
                   KuberSpace.screenMargin,
-                  KuberSpace.xl,
+                  // Clears the floating save button and its fade.
+                  56 + 32 + _saveBottom(context),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -343,8 +344,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ),
             ),
 
-            // Pinned save button
-            _buildSaveButton(cs),
+            // Floating save button over the nav bar's surface fade (like
+            // the Add account FAB): always visible, no bar behind it.
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildSaveButton(cs),
+            ),
           ],
         ),
       ),
@@ -641,34 +648,61 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   // ── Save Button ──────────────────────────────────────────────────────────
 
+  /// The main nav bar's bottom offset: the system inset, at least 22.
+  static double _saveBottom(BuildContext context) {
+    final inset = MediaQuery.paddingOf(context).bottom;
+    return inset > 22 ? inset : 22.0;
+  }
+
   Widget _buildSaveButton(ColorScheme cs) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        KuberSpace.screenMargin,
-        KuberSpace.md,
-        KuberSpace.screenMargin,
-        MediaQuery.of(context).viewPadding.bottom + KuberSpace.xl,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outlineVariant)),
-      ),
-      child: AppButton(
-        label: _isEditing
-            ? (_type == 'expense'
-                  ? context.l10n.updateExpense
-                  : _type == 'income'
-                  ? context.l10n.updateIncome
-                  : context.l10n.updateTransferBtn)
-            : (_type == 'expense'
-                  ? context.l10n.saveExpense
-                  : _type == 'income'
-                  ? context.l10n.saveIncome
-                  : context.l10n.saveTransferBtn),
-        type: AppButtonType.primary,
-        fullWidth: true,
-        onPressed: _save,
-      ),
+    final bottom = _saveBottom(context);
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        // Same scrim as the nav bar / extended FAB: content fades out under
+        // the button. Taps pass through it.
+        IgnorePointer(
+          child: Container(
+            height: bottom + 56 + 32,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  cs.surface.withValues(alpha: 0),
+                  cs.surface.withValues(alpha: 0.92),
+                  cs.surface,
+                ],
+                stops: const [0.0, 0.55, 1.0],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            KuberSpace.screenMargin,
+            0,
+            KuberSpace.screenMargin,
+            bottom,
+          ),
+          child: AppButton(
+            label: _isEditing
+                ? (_type == 'expense'
+                      ? context.l10n.updateExpense
+                      : _type == 'income'
+                      ? context.l10n.updateIncome
+                      : context.l10n.updateTransferBtn)
+                : (_type == 'expense'
+                      ? context.l10n.saveExpense
+                      : _type == 'income'
+                      ? context.l10n.saveIncome
+                      : context.l10n.saveTransferBtn),
+            type: AppButtonType.primary,
+            fullWidth: true,
+            onPressed: _save,
+          ),
+        ),
+      ],
     );
   }
 

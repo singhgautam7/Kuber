@@ -5017,4 +5017,35 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'निवेश खोजें';
+
+  @override
+  String get textSizeTitle => 'टेक्स्ट का आकार';
+
+  @override
+  String get textSizeDesc => 'टेक्स्ट बड़ा या छोटा करें';
+
+  @override
+  String get textSizeSmall => 'छोटा';
+
+  @override
+  String get textSizeCompact => 'कॉम्पैक्ट';
+
+  @override
+  String get textSizeDefault => 'डिफ़ॉल्ट';
+
+  @override
+  String get textSizeLarge => 'बड़ा';
+
+  @override
+  String get textSizeExtraLarge => 'बहुत बड़ा';
+
+  @override
+  String get textSizePreviewUpper => 'पूर्वावलोकन';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber के साथ रोज़ के खर्च ट्रैक करें, बजट संभालें और अपने लक्ष्य पाएं।';
+
+  @override
+  String get textSizePreviewMeta => 'किराना · आज';
 }

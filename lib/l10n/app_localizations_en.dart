@@ -5004,4 +5004,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'Search investments';
+
+  @override
+  String get textSizeTitle => 'Text size';
+
+  @override
+  String get textSizeDesc => 'Make text bigger or smaller';
+
+  @override
+  String get textSizeSmall => 'Small';
+
+  @override
+  String get textSizeCompact => 'Compact';
+
+  @override
+  String get textSizeDefault => 'Default';
+
+  @override
+  String get textSizeLarge => 'Large';
+
+  @override
+  String get textSizeExtraLarge => 'Extra large';
+
+  @override
+  String get textSizePreviewUpper => 'PREVIEW';
+
+  @override
+  String get textSizePreviewBody =>
+      'Track your daily expenses, manage budgets, and reach your goals with Kuber.';
+
+  @override
+  String get textSizePreviewMeta => 'Groceries · Today';
 }

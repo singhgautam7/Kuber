@@ -5051,4 +5051,35 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'పెట్టుబడులను వెతకండి';
+
+  @override
+  String get textSizeTitle => 'టెక్స్ట్ పరిమాణం';
+
+  @override
+  String get textSizeDesc => 'టెక్స్ట్‌ను పెద్దదిగా లేదా చిన్నదిగా చేయండి';
+
+  @override
+  String get textSizeSmall => 'చిన్నది';
+
+  @override
+  String get textSizeCompact => 'కాంపాక్ట్';
+
+  @override
+  String get textSizeDefault => 'డిఫాల్ట్';
+
+  @override
+  String get textSizeLarge => 'పెద్దది';
+
+  @override
+  String get textSizeExtraLarge => 'చాలా పెద్దది';
+
+  @override
+  String get textSizePreviewUpper => 'ప్రివ్యూ';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber తో రోజువారీ ఖర్చులను ట్రాక్ చేయండి, బడ్జెట్‌లను నిర్వహించండి, లక్ష్యాలను చేరుకోండి.';
+
+  @override
+  String get textSizePreviewMeta => 'కిరాణా · ఈరోజు';
 }

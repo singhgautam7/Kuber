@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "தொடர்வனவற்றைத் தேடு",
   "searchLoansHint": "கடன்களைத் தேடு",
   "searchLedgerHint": "நபர்களைத் தேடு",
-  "searchInvestmentsHint": "முதலீடுகளைத் தேடு"
+  "searchInvestmentsHint": "முதலீடுகளைத் தேடு",
+  "textSizeTitle": "எழுத்து அளவு",
+  "textSizeDesc": "எழுத்தைப் பெரிதாக்கவும் அல்லது சிறிதாக்கவும்",
+  "textSizeSmall": "சிறியது",
+  "textSizeCompact": "கச்சிதமானது",
+  "textSizeDefault": "இயல்புநிலை",
+  "textSizeLarge": "பெரியது",
+  "textSizeExtraLarge": "மிகப் பெரியது",
+  "textSizePreviewUpper": "முன்னோட்டம்",
+  "textSizePreviewBody": "Kuber மூலம் தினசரி செலவுகளைக் கண்காணித்து, பட்ஜெட்டை நிர்வகித்து, இலக்குகளை அடையுங்கள்.",
+  "textSizePreviewMeta": "மளிகை · இன்று"
 }

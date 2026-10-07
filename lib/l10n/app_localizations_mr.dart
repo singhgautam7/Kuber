@@ -5025,4 +5025,35 @@ class AppLocalizationsMr extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'गुंतवणूक शोधा';
+
+  @override
+  String get textSizeTitle => 'मजकूराचा आकार';
+
+  @override
+  String get textSizeDesc => 'मजकूर मोठा किंवा लहान करा';
+
+  @override
+  String get textSizeSmall => 'लहान';
+
+  @override
+  String get textSizeCompact => 'कॉम्पॅक्ट';
+
+  @override
+  String get textSizeDefault => 'डीफॉल्ट';
+
+  @override
+  String get textSizeLarge => 'मोठा';
+
+  @override
+  String get textSizeExtraLarge => 'खूप मोठा';
+
+  @override
+  String get textSizePreviewUpper => 'पूर्वावलोकन';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber सोबत रोजचा खर्च ट्रॅक करा, बजेट सांभाळा आणि ध्येय गाठा.';
+
+  @override
+  String get textSizePreviewMeta => 'किराणा · आज';
 }

@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "आवर्ती खोजें",
   "searchLoansHint": "लोन खोजें",
   "searchLedgerHint": "लोग खोजें",
-  "searchInvestmentsHint": "निवेश खोजें"
+  "searchInvestmentsHint": "निवेश खोजें",
+  "textSizeTitle": "टेक्स्ट का आकार",
+  "textSizeDesc": "टेक्स्ट बड़ा या छोटा करें",
+  "textSizeSmall": "छोटा",
+  "textSizeCompact": "कॉम्पैक्ट",
+  "textSizeDefault": "डिफ़ॉल्ट",
+  "textSizeLarge": "बड़ा",
+  "textSizeExtraLarge": "बहुत बड़ा",
+  "textSizePreviewUpper": "पूर्वावलोकन",
+  "textSizePreviewBody": "Kuber के साथ रोज़ के खर्च ट्रैक करें, बजट संभालें और अपने लक्ष्य पाएं।",
+  "textSizePreviewMeta": "किराना · आज"
 }

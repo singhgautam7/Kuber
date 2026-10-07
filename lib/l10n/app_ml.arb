@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "ആവർത്തിക്കുന്നവ തിരയുക",
   "searchLoansHint": "വായ്പകൾ തിരയുക",
   "searchLedgerHint": "ആളുകളെ തിരയുക",
-  "searchInvestmentsHint": "നിക്ഷേപങ്ങൾ തിരയുക"
+  "searchInvestmentsHint": "നിക്ഷേപങ്ങൾ തിരയുക",
+  "textSizeTitle": "ടെക്സ്റ്റ് വലുപ്പം",
+  "textSizeDesc": "ടെക്സ്റ്റ് വലുതോ ചെറുതോ ആക്കുക",
+  "textSizeSmall": "ചെറുത്",
+  "textSizeCompact": "കോംപാക്റ്റ്",
+  "textSizeDefault": "ഡിഫോൾട്ട്",
+  "textSizeLarge": "വലുത്",
+  "textSizeExtraLarge": "വളരെ വലുത്",
+  "textSizePreviewUpper": "പ്രിവ്യൂ",
+  "textSizePreviewBody": "Kuber ഉപയോഗിച്ച് ദിവസേനയുള്ള ചെലവുകൾ ട്രാക്ക് ചെയ്യുക, ബജറ്റുകൾ കൈകാര്യം ചെയ്യുക, ലക്ഷ്യങ്ങളിലെത്തുക.",
+  "textSizePreviewMeta": "പലചരക്ക് · ഇന്ന്"
 }

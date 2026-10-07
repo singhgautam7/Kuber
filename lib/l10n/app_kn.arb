@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "ಪುನರಾವರ್ತಿತ ಹುಡುಕಿ",
   "searchLoansHint": "ಸಾಲಗಳನ್ನು ಹುಡುಕಿ",
   "searchLedgerHint": "ಜನರನ್ನು ಹುಡುಕಿ",
-  "searchInvestmentsHint": "ಹೂಡಿಕೆಗಳನ್ನು ಹುಡುಕಿ"
+  "searchInvestmentsHint": "ಹೂಡಿಕೆಗಳನ್ನು ಹುಡುಕಿ",
+  "textSizeTitle": "ಪಠ್ಯದ ಗಾತ್ರ",
+  "textSizeDesc": "ಪಠ್ಯವನ್ನು ದೊಡ್ಡದು ಅಥವಾ ಚಿಕ್ಕದು ಮಾಡಿ",
+  "textSizeSmall": "ಚಿಕ್ಕದು",
+  "textSizeCompact": "ಕಾಂಪ್ಯಾಕ್ಟ್",
+  "textSizeDefault": "ಡೀಫಾಲ್ಟ್",
+  "textSizeLarge": "ದೊಡ್ಡದು",
+  "textSizeExtraLarge": "ತುಂಬಾ ದೊಡ್ಡದು",
+  "textSizePreviewUpper": "ಮುನ್ನೋಟ",
+  "textSizePreviewBody": "Kuber ಜೊತೆ ದೈನಂದಿನ ಖರ್ಚುಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಬಜೆಟ್ ನಿರ್ವಹಿಸಿ ಮತ್ತು ಗುರಿಗಳನ್ನು ತಲುಪಿ.",
+  "textSizePreviewMeta": "ದಿನಸಿ · ಇಂದು"
 }

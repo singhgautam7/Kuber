@@ -9061,6 +9061,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search investments'**
   String get searchInvestmentsHint;
+
+  /// No description provided for @textSizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get textSizeTitle;
+
+  /// No description provided for @textSizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Make text bigger or smaller'**
+  String get textSizeDesc;
+
+  /// No description provided for @textSizeSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get textSizeSmall;
+
+  /// No description provided for @textSizeCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get textSizeCompact;
+
+  /// No description provided for @textSizeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get textSizeDefault;
+
+  /// No description provided for @textSizeLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get textSizeLarge;
+
+  /// No description provided for @textSizeExtraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra large'**
+  String get textSizeExtraLarge;
+
+  /// No description provided for @textSizePreviewUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'PREVIEW'**
+  String get textSizePreviewUpper;
+
+  /// No description provided for @textSizePreviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your daily expenses, manage budgets, and reach your goals with Kuber.'**
+  String get textSizePreviewBody;
+
+  /// No description provided for @textSizePreviewMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'Groceries · Today'**
+  String get textSizePreviewMeta;
 }
 
 class _AppLocalizationsDelegate

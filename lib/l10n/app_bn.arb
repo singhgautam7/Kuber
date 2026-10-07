@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "পুনরাবৃত্ত খুঁজুন",
   "searchLoansHint": "ঋণ খুঁজুন",
   "searchLedgerHint": "লোক খুঁজুন",
-  "searchInvestmentsHint": "বিনিয়োগ খুঁজুন"
+  "searchInvestmentsHint": "বিনিয়োগ খুঁজুন",
+  "textSizeTitle": "লেখার আকার",
+  "textSizeDesc": "লেখা বড় বা ছোট করুন",
+  "textSizeSmall": "ছোট",
+  "textSizeCompact": "কমপ্যাক্ট",
+  "textSizeDefault": "ডিফল্ট",
+  "textSizeLarge": "বড়",
+  "textSizeExtraLarge": "অনেক বড়",
+  "textSizePreviewUpper": "প্রিভিউ",
+  "textSizePreviewBody": "Kuber দিয়ে প্রতিদিনের খরচ ট্র্যাক করুন, বাজেট সামলান এবং লক্ষ্যে পৌঁছান।",
+  "textSizePreviewMeta": "মুদি · আজ"
 }

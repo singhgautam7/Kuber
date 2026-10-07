@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "आवर्ती शोधा",
   "searchLoansHint": "कर्जे शोधा",
   "searchLedgerHint": "लोक शोधा",
-  "searchInvestmentsHint": "गुंतवणूक शोधा"
+  "searchInvestmentsHint": "गुंतवणूक शोधा",
+  "textSizeTitle": "मजकूराचा आकार",
+  "textSizeDesc": "मजकूर मोठा किंवा लहान करा",
+  "textSizeSmall": "लहान",
+  "textSizeCompact": "कॉम्पॅक्ट",
+  "textSizeDefault": "डीफॉल्ट",
+  "textSizeLarge": "मोठा",
+  "textSizeExtraLarge": "खूप मोठा",
+  "textSizePreviewUpper": "पूर्वावलोकन",
+  "textSizePreviewBody": "Kuber सोबत रोजचा खर्च ट्रॅक करा, बजेट सांभाळा आणि ध्येय गाठा.",
+  "textSizePreviewMeta": "किराणा · आज"
 }

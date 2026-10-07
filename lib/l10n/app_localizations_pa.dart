@@ -5015,4 +5015,35 @@ class AppLocalizationsPa extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'ਨਿਵੇਸ਼ ਖੋਜੋ';
+
+  @override
+  String get textSizeTitle => 'ਟੈਕਸਟ ਦਾ ਆਕਾਰ';
+
+  @override
+  String get textSizeDesc => 'ਟੈਕਸਟ ਵੱਡਾ ਜਾਂ ਛੋਟਾ ਕਰੋ';
+
+  @override
+  String get textSizeSmall => 'ਛੋਟਾ';
+
+  @override
+  String get textSizeCompact => 'ਕੰਪੈਕਟ';
+
+  @override
+  String get textSizeDefault => 'ਡਿਫੌਲਟ';
+
+  @override
+  String get textSizeLarge => 'ਵੱਡਾ';
+
+  @override
+  String get textSizeExtraLarge => 'ਬਹੁਤ ਵੱਡਾ';
+
+  @override
+  String get textSizePreviewUpper => 'ਪ੍ਰੀਵਿਊ';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber ਨਾਲ ਰੋਜ਼ਾਨਾ ਖਰਚੇ ਟ੍ਰੈਕ ਕਰੋ, ਬਜਟ ਸੰਭਾਲੋ ਅਤੇ ਟੀਚੇ ਹਾਸਲ ਕਰੋ।';
+
+  @override
+  String get textSizePreviewMeta => 'ਕਰਿਆਨਾ · ਅੱਜ';
 }

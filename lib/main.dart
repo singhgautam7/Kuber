@@ -123,6 +123,7 @@ Future<void> _bootstrap() async {
   var bootTheme = (ThemeMode.system, ThemeVariant.signature);
   var onboarded = false;
   var bootThemeOptions = const ThemeOptions();
+  var bootTextSizeLevel = 3;
   try {
     final prefs = await SharedPreferences.getInstance();
     bootThemeOptions = ThemeOptions(
@@ -136,6 +137,7 @@ Future<void> _bootstrap() async {
       resolveVariant(ThemeVariant
           .values[variantIndex.clamp(0, ThemeVariant.values.length - 1)]),
     );
+    bootTextSizeLevel = prefs.getInt(PrefsKeys.textSizeLevel) ?? 3;
     onboarded = prefs.getBool(PrefsKeys.onboarded) ?? false;
   } catch (e) {
     debugPrint('Kuber: boot theme read failed (non-fatal): $e');
@@ -207,6 +209,7 @@ Future<void> _bootstrap() async {
           isarProvider.overrideWithValue(isar),
           bootThemeProvider.overrideWithValue(bootTheme),
           bootThemeOptionsProvider.overrideWithValue(bootThemeOptions),
+          bootTextSizeLevelProvider.overrideWithValue(bootTextSizeLevel),
           initialLocationProvider.overrideWithValue(initialLocation),
           recurringProcessResultProvider.overrideWith((ref) => missedCount),
           automaticBackupDueProvider.overrideWith((ref) => backupDue),

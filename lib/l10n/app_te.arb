@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "పునరావృతాలను వెతకండి",
   "searchLoansHint": "రుణాలను వెతకండి",
   "searchLedgerHint": "వ్యక్తులను వెతకండి",
-  "searchInvestmentsHint": "పెట్టుబడులను వెతకండి"
+  "searchInvestmentsHint": "పెట్టుబడులను వెతకండి",
+  "textSizeTitle": "టెక్స్ట్ పరిమాణం",
+  "textSizeDesc": "టెక్స్ట్‌ను పెద్దదిగా లేదా చిన్నదిగా చేయండి",
+  "textSizeSmall": "చిన్నది",
+  "textSizeCompact": "కాంపాక్ట్",
+  "textSizeDefault": "డిఫాల్ట్",
+  "textSizeLarge": "పెద్దది",
+  "textSizeExtraLarge": "చాలా పెద్దది",
+  "textSizePreviewUpper": "ప్రివ్యూ",
+  "textSizePreviewBody": "Kuber తో రోజువారీ ఖర్చులను ట్రాక్ చేయండి, బడ్జెట్‌లను నిర్వహించండి, లక్ష్యాలను చేరుకోండి.",
+  "textSizePreviewMeta": "కిరాణా · ఈరోజు"
 }

@@ -542,14 +542,16 @@ class _KuberAppState extends ConsumerState<KuberApp>
             ),
             child: ColoredBox(
               color: Theme.of(context).colorScheme.surface,
-              child: TutorialOverlay(
-                child: SafeArea(
-                  bottom: false,
-                  left: false,
-                  right: false,
-                  // Drives the extended FAB's hide-on-scroll everywhere.
-                  child: KuberFabScrollWatcher(
-                    child: LockScreen(child: child!),
+              child: _AppTextScale(
+                child: TutorialOverlay(
+                  child: SafeArea(
+                    bottom: false,
+                    left: false,
+                    right: false,
+                    // Drives the extended FAB's hide-on-scroll everywhere.
+                    child: KuberFabScrollWatcher(
+                      child: LockScreen(child: child!),
+                    ),
                   ),
                 ),
               ),
@@ -557,6 +559,28 @@ class _KuberAppState extends ConsumerState<KuberApp>
           ),
         );
       },
+    );
+  }
+}
+
+/// Applies the Text size setting on top of the system text scale. Its own
+/// widget so the app builder above it does not depend on MediaQuery (it
+/// would otherwise rebuild on every keyboard-animation frame); [child] is
+/// passed through untouched.
+class _AppTextScale extends ConsumerWidget {
+  final Widget child;
+  const _AppTextScale({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textScale = ref.watch(textScaleProvider);
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: TextScaler.linear(
+          MediaQuery.textScalerOf(context).scale(1) * textScale,
+        ),
+      ),
+      child: child,
     );
   }
 }

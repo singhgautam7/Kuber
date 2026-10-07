@@ -5070,4 +5070,35 @@ class AppLocalizationsMl extends AppLocalizations {
 
   @override
   String get searchInvestmentsHint => 'നിക്ഷേപങ്ങൾ തിരയുക';
+
+  @override
+  String get textSizeTitle => 'ടെക്സ്റ്റ് വലുപ്പം';
+
+  @override
+  String get textSizeDesc => 'ടെക്സ്റ്റ് വലുതോ ചെറുതോ ആക്കുക';
+
+  @override
+  String get textSizeSmall => 'ചെറുത്';
+
+  @override
+  String get textSizeCompact => 'കോംപാക്റ്റ്';
+
+  @override
+  String get textSizeDefault => 'ഡിഫോൾട്ട്';
+
+  @override
+  String get textSizeLarge => 'വലുത്';
+
+  @override
+  String get textSizeExtraLarge => 'വളരെ വലുത്';
+
+  @override
+  String get textSizePreviewUpper => 'പ്രിവ്യൂ';
+
+  @override
+  String get textSizePreviewBody =>
+      'Kuber ഉപയോഗിച്ച് ദിവസേനയുള്ള ചെലവുകൾ ട്രാക്ക് ചെയ്യുക, ബജറ്റുകൾ കൈകാര്യം ചെയ്യുക, ലക്ഷ്യങ്ങളിലെത്തുക.';
+
+  @override
+  String get textSizePreviewMeta => 'പലചരക്ക് · ഇന്ന്';
 }

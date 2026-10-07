@@ -1435,5 +1435,15 @@
   "searchRecurringHint": "ਦੁਹਰਾਉਣ ਵਾਲੇ ਖੋਜੋ",
   "searchLoansHint": "ਕਰਜ਼ੇ ਖੋਜੋ",
   "searchLedgerHint": "ਲੋਕ ਖੋਜੋ",
-  "searchInvestmentsHint": "ਨਿਵੇਸ਼ ਖੋਜੋ"
+  "searchInvestmentsHint": "ਨਿਵੇਸ਼ ਖੋਜੋ",
+  "textSizeTitle": "ਟੈਕਸਟ ਦਾ ਆਕਾਰ",
+  "textSizeDesc": "ਟੈਕਸਟ ਵੱਡਾ ਜਾਂ ਛੋਟਾ ਕਰੋ",
+  "textSizeSmall": "ਛੋਟਾ",
+  "textSizeCompact": "ਕੰਪੈਕਟ",
+  "textSizeDefault": "ਡਿਫੌਲਟ",
+  "textSizeLarge": "ਵੱਡਾ",
+  "textSizeExtraLarge": "ਬਹੁਤ ਵੱਡਾ",
+  "textSizePreviewUpper": "ਪ੍ਰੀਵਿਊ",
+  "textSizePreviewBody": "Kuber ਨਾਲ ਰੋਜ਼ਾਨਾ ਖਰਚੇ ਟ੍ਰੈਕ ਕਰੋ, ਬਜਟ ਸੰਭਾਲੋ ਅਤੇ ਟੀਚੇ ਹਾਸਲ ਕਰੋ।",
+  "textSizePreviewMeta": "ਕਰਿਆਨਾ · ਅੱਜ"
 }

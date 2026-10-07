@@ -13,6 +13,7 @@ class PrefsKeys {
   static const themeVariant = 'theme_family_v2';
   static const themeAmoled = 'theme_amoled';
   static const themeDynamicColor = 'theme_dynamic_color';
+  static const textSizeLevel = 'kuber_text_size_level';
   static const swipeMode = 'swipe_mode';
   static const biometricsEnabled = 'biometrics_enabled';
   static const numberSystem = 'number_system';

@@ -75,6 +75,22 @@ void main() {
       expect(currency.symbol, '₹');
     });
   });
+
+  group('textScaleProvider', () {
+    test('defaults to level 3 (1.0)', () {
+      final container = ProviderContainer(
+        overrides: [
+          settingsProvider.overrideWith(() => _FakeSettingsNotifier()),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final level = container.read(textSizeLevelProvider);
+      final scale = container.read(textScaleProvider);
+      expect(level, 3);
+      expect(scale, 1.0);
+    });
+  });
 }
 
 class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
@@ -88,6 +104,8 @@ class _FakeSettingsNotifier extends AsyncNotifier<SettingsState>
     return SettingsState(numberSystem: _system);
   }
 
+  @override
+  Future<void> setTextSizeLevel(int level) async {}
   @override
   Future<void> setBiometricsEnabled(bool enabled) async {}
   @override
